@@ -10,7 +10,8 @@
 #include "tokentype.hpp"
 #include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <iomanip>
 
 namespace xo {
@@ -45,7 +46,10 @@ namespace xo {
                   input_state_{input_state},
                   error_pos_{error_pos}
                 {
-                    scope log(XO_DEBUG(input_state.debug_flag()));
+                    using xo::pp::scope;
+                    using xo::pp::xtag;
+
+                    scope log(XO_DEBUG_(input_state.debug_flag()));
 
                     log && log(xtag("input_state.current_pos", input_state.current_pos()),
                                xtag("error_pos", error_pos));

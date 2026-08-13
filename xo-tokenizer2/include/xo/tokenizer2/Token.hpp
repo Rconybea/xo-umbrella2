@@ -6,7 +6,6 @@
 #pragma once
 
 #include "tokentype.hpp"
-#include <xo/indentlog/print/tag.hpp>
 #include <cstdint>
 #include <ostream>
 #include <stdexcept>
@@ -227,13 +226,6 @@ namespace xo {
             return os;
         }
     } /*namespace scm*/
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::scm::token<char>);
-    }
-#endif
-
 } /*namespace xo*/
 
 /* end Token.hpp */

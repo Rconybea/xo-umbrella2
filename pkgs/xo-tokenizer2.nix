@@ -4,7 +4,6 @@
 
   xo-stringtable2,
   xo-arena,
-  xo-indentlog,
   xo-cmake,
 
   buildExamples ? true,
@@ -31,6 +30,5 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-stringtable2
       xo-arena
-      xo-indentlog
     ];
   })

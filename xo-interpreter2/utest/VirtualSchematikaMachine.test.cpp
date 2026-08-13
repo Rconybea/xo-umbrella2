@@ -18,6 +18,10 @@
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/indentlog/print/hex.hpp>
+/* scope/xtag/XO_DEBUG -- were arriving via <xo/tokenizer2/Tokenizer.hpp>,
+ * which moved to xo::pp.  Explicit until this subsystem migrates too.
+ */
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

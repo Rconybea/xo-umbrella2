@@ -4,9 +4,17 @@
  **/
 
 #include "Token.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+/* print() below writes tags to a std::ostream; see the ostream-containment
+ * milestone for moving it onto a PpSink & instead.
+ */
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
+    using xo::pp::tostr;
+    using xo::pp::xtag;
+
     namespace scm {
 
         bool

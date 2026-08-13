@@ -10,8 +10,6 @@
 #include "scan_result.hpp"
 #include "span.hpp"
 #include <xo/arena/DCircularBuffer.hpp>
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <cassert>
 
 namespace xo {

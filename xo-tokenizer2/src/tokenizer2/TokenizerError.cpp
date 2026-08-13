@@ -5,8 +5,15 @@
 
 #include "TokenizerError.hpp"
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
+#include <xo/ppsink/tag.hpp>
+/* print() below writes tags to a std::ostream; see the ostream-containment
+ * milestone for moving it onto a PpSink & instead.
+ */
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+
     namespace scm {
 
         void

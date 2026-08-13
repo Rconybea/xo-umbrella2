@@ -5,8 +5,14 @@
 
 #include "Tokenizer.hpp"
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
     using xo::mm::MemorySizeInfo;
     using std::byte;
 
@@ -125,9 +131,9 @@ namespace xo {
                                   TkInputState * p_input_state) -> result_type
         {
             /* literal|pretty|streamlined */
-            log_config::style = function_style::streamlined;
+            xo::pp::scope_config::function_style = xo::FunctionStyle::streamlined;
 
-            scope log(XO_DEBUG(p_input_state->debug_flag()));
+            scope log(XO_DEBUG_(p_input_state->debug_flag()));
             log && log(xtag("token_text", token_text),
                        xtag("initial_whitespace", ws_span.size()),
                        xtag("input_state", *p_input_state));
@@ -642,7 +648,7 @@ namespace xo {
         Tokenizer::buffer_input_line(span_type input_ext,
                                      bool eof_flag) -> std::pair<input_error, span_type>
         {
-            scope log(XO_DEBUG(input_state_.debug_flag()));
+            scope log(XO_DEBUG_(input_state_.debug_flag()));
 
             log && log(xtag("input_ext", input_ext));
 
@@ -668,7 +674,7 @@ namespace xo {
         auto
         Tokenizer::scan(const span_type & input) -> result_type
         {
-            scope log(XO_DEBUG(input_state_.debug_flag()));
+            scope log(XO_DEBUG_(input_state_.debug_flag()));
             log && log(xtag("input", input));
 
             /* - Always at beginning of token when scan() invoked

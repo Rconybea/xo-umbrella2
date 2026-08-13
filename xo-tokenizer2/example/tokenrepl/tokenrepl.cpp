@@ -5,7 +5,8 @@
 #include <xo/tokenizer2/tokentype.hpp>
 #include <xo/arena/span.hpp>
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
-#include <xo/indentlog/log_config.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <replxx.hxx>
 #include <iostream>
 #include <unistd.h> // for isatty
@@ -52,15 +53,15 @@ main() {
     using xo::scm::operator<<;
     using xo::mm::CircularBufferConfig;
     using xo::mm::span;
-    using xo::scope;
-    using xo::xtag;
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using replxx::Replxx;
 
     using namespace std;
 
     using span_type = span<const char>;
 
-    xo::log_config::min_log_level = xo::log_level::severe;
+    xo::pp::scope_config::min_log_level = xo::pp::log_level::severe;
 
     bool interactive = isatty(STDIN_FILENO);
 
@@ -69,7 +70,7 @@ main() {
     rx.history_load("repl_history.txt");
 
     constexpr bool c_debug_flag = true;
-    scope log(XO_DEBUG(c_debug_flag));
+    scope log(XO_DEBUG_(c_debug_flag));
 
     Tokenizer tkz(CircularBufferConfig{.name_ = "tokenrepl-input",
                                        .max_capacity_ = 4*1024,

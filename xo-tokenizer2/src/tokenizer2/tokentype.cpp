@@ -4,6 +4,7 @@
  */
 
 #include "tokentype.hpp"
+#include <xo/ppsink/stringify.hpp>   /* STRINGIFY, for CASE() below */
 
 namespace xo {
     namespace scm {
