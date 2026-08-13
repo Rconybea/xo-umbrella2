@@ -7,6 +7,9 @@
 #include "Array.hpp"
 #include "String.hpp"
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/print/pretty.hpp>  /* pretty_deprecated body only; DELETE AT PHASE E.
+                                          * Was arriving transitively via
+                                          * ppdetail_Printable.hpp, which phase E removes. */
 #include <utility>
 
 namespace xo {

@@ -37,14 +37,13 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <cassert>
 
 namespace xo {
     using xo::scm::DDictionary;
     using xo::print::APrintable;
-    using xo::print::ppconfig;
-    using xo::print::ppstate_standalone;
     using xo::reflect::Reflect;
     using xo::mm::AGCObject;
     using xo::mm::MemorySizeInfo;
@@ -205,9 +204,36 @@ namespace xo {
                         obj<APrintable> error_pr
                             = FacetRegistry::instance().variant<APrintable,AGCObject>(error);
 
-                        ppconfig ppc;
-                        ppstate_standalone pps(&cout, 0, &ppc);
-                        pps.prettyn(error_pr);
+                        /* ppsink, not legacy ppstate_standalone.  This and its
+                         * sibling in run() below were the only two PRODUCTION
+                         * sites in the cluster rendering an obj<APrintable>
+                         * through the deprecated protocol.
+                         *
+                         * It would not have failed to COMPILE once
+                         * ppdetail_Printable.hpp goes -- ppdetail falls
+                         * through to a generic fallback -- it would just have
+                         * started printing garbage.  Measured 2026-08-12; see
+                         * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
+                         *
+                         * complete() is what prettyn()'s trailing newline
+                         * becomes: it terminates the record and drains it to
+                         * the attached streambuf.
+                         *
+                         * PpConfig::colored(), NOT PpConfig():
+                         *  - the default ctor leaves logbuf_config_ default-
+                         *    constructed, so LogBuffer::write_span asserts on
+                         *    the first real record (caught by
+                         *    VirtualSchematikaMachine-const1, 2026-08-12);
+                         *    the factories are what size the arena.
+                         *  - colored, because legacy tag_config::
+                         *    tag_color_enabled defaults TRUE
+                         *    (xo-indentlog/.../tag_config.hpp:29), so this
+                         *    site was already colouring its tags.
+                         */
+                        xo::pp::PrettySink pps(xo::pp::PpConfig::colored(), cout.rdbuf());
+
+                        pps.pp(error_pr);
+                        pps.complete();
                     }
 
                     return VsmResultExt(value_, remaining);
@@ -237,10 +263,14 @@ namespace xo {
                 obj<APrintable> value_pr
                     = FacetRegistry::instance().variant<APrintable,AGCObject>(value);
 
-                // pretty_toplevel(value_pr, &cout, ppconfig());
-                ppconfig ppc;
-                ppstate_standalone pps(&cout, 0, &ppc);
-                pps.prettyn(value_pr);
+                /* ppsink; see the sibling site in read_eval_print() above.
+                 * This is the one that prints every toplevel VALUE, so it is
+                 * the more visible of the two.
+                 */
+                xo::pp::PrettySink pps(xo::pp::PpConfig::colored(), cout.rdbuf());
+
+                pps.pp(value_pr);
+                pps.complete();
             }
 
             return VsmResultExt(evalresult, remaining);

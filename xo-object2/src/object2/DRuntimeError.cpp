@@ -4,6 +4,9 @@
  **/
 
 #include "RuntimeError.hpp"
+#include <xo/indentlog/print/pretty.hpp>  /* pretty_deprecated body only; DELETE AT PHASE E.
+                                          * Was arriving transitively via
+                                          * ppdetail_Printable.hpp, which phase E removes. */
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 
 namespace xo {

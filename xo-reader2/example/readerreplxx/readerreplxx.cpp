@@ -10,6 +10,9 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
+#include <xo/indentlog2/print/PrettySink.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/subsys/Subsystem.hpp>
 #include <replxx.hxx>
 #include <iostream>
@@ -64,12 +67,14 @@ namespace {
     using xo::scm::SchematikaReader;
     using xo::scm::AExpression;
     using xo::print::APrintable;
-    using xo::print::ppstate_standalone;
-    using xo::print::ppconfig;
     using xo::facet::FacetRegistry;
     using xo::facet::obj;
-    using xo::xtag;
-    using xo::scope;
+    /* ppsink, not legacy xo::xtag / xo::scope: log(xtag("expr", expr_pr))
+     * below renders an obj<APrintable>, so on the legacy tags it reached the
+     * printer through ppdetail_Printable.hpp -- the bridge phase E deletes.
+     */
+    using xo::pp::xtag;
+    using xo::pp::scope;
     using std::cout;
     using std::endl;
 
@@ -84,7 +89,7 @@ namespace {
                bool eof,
                bool debug_flag)
     {
-        scope log(XO_DEBUG(debug_flag));
+        scope log(XO_DEBUG2_(debug_flag, "reader_seq"));
 
         if (!p_input || p_input->empty())
             return true;
@@ -107,10 +112,13 @@ namespace {
         }
 
         if (expr) {
-            ppconfig ppc;
-            ppstate_standalone pps(&cout, 0, &ppc);
+            /* ppsink, not legacy ppstate_standalone.  complete() supplies
+             * the trailing newline that prettyn() used to.
+             */
+            xo::pp::PrettySink pps(xo::pp::PpConfig::colored(), cout.rdbuf());
 
-            pps.prettyn(expr_pr);
+            pps.pp(expr_pr);
+            pps.complete();
 
             p_reader->reset_result();
 
@@ -199,7 +207,7 @@ main()
     using xo::S_reader2_tag;
     using xo::InitSubsys;
     using xo::Subsystem;
-    using xo::scope;
+    using xo::pp::scope;
     using namespace std;
 
     bool interactive = isatty(STDIN_FILENO);
@@ -211,7 +219,7 @@ main()
     AppContext cx(cfg);
 
     constexpr bool c_debug_flag = false;
-    scope log(XO_DEBUG(c_debug_flag));
+    scope log(XO_DEBUG2_(c_debug_flag, "readerreplxx"));
 
     using span_type = SchematikaReader::span_type;
 
