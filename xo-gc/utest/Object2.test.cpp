@@ -31,8 +31,6 @@ namespace ut {
     using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::facet::typeseq;
-    using xo::print::ppstate_standalone;
-    using xo::print::ppconfig;
     using xo::pp::toppstr;
     using xo::pp::PpConfig;
     using xo::scope;
@@ -42,10 +40,9 @@ namespace ut {
     namespace {
         struct testcase_pp {
             explicit testcase_pp(size_t gc_z, size_t gc_threshold, int z,
-                                 const std::string & expected,
                                  const std::string & expect_pretty)
             : gc_gen_size_{gc_z}, gc_trigger_threshold_{gc_threshold},
-              expected_{expected}, expect_pretty_{expect_pretty} {
+              expect_pretty_{expect_pretty} {
                 for (int i = 0; i < z; ++i) {
                     list_.push_back(1000 + 197 * i);
                 }
@@ -54,18 +51,15 @@ namespace ut {
             size_t gc_gen_size_ = 0;
             size_t gc_trigger_threshold_ = 0;
             std::vector<int> list_;
-            /** OBSERVED rendering via pretty_deprecated.
-             *  Delete at phase E, with the deprecated protocol itself.
-             **/
-            std::string expected_;
-            /** OBSERVED rendering via pretty(PpSink&).  The expectation that
-             *  outlives phase E.
+            /** OBSERVED rendering via pretty(PpSink&).
              *
-             *  Case 5 differs from expected_ DELIBERATELY: pretty_deprecated
-             *  could only emit "(...)" when a list did not fit on one line --
-             *  the two-pass protocol's give-up path, not a rendering decision.
-             *  DList::pretty offers break points instead and the sink lays the
-             *  elements out.  Reviewed and accepted 2026-08-09; see
+             *  The last case (z=20) is where the deprecated protocol used to
+             *  differ: it could only emit "(...)" for a list that did not fit
+             *  on one line -- the two-pass protocol's give-up path, not a
+             *  rendering decision.  DList::pretty offers break points instead
+             *  and the sink lays the elements out.  Reviewed and accepted
+             *  2026-08-09; the deprecated expectation was deleted with the
+             *  protocol at phase E.  See
              *  .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
              **/
             std::string expect_pretty_;
@@ -73,16 +67,13 @@ namespace ut {
 
         std::vector<testcase_pp>
         s_testcase_v = {
-            testcase_pp(16384, 8192, 0, "()", "()"),
-            testcase_pp(16384, 8192, 1, "(01000)", "(01000)"),
-            testcase_pp(16384, 8192, 2, "(01000 1197)", "(01000 1197)"),
-            testcase_pp(16384, 8192, 5, "(01000 1197 01394 1591 01788)",
-                                        "(01000 1197 01394 1591 01788)"),
-            testcase_pp(16384, 8192, 10, "(01000 1197 01394 1591 01788 1985 02182 2379 02576 2773)",
-                                         "(01000 1197 01394 1591 01788 1985 02182 2379 02576 2773)"),
-            /* DELIBERATE divergence -- see expect_pretty_ above */
-            testcase_pp(16384, 8192, 20, "(...)",
-                                         R"xo((01000
+            testcase_pp(16384, 8192, 0, "()"),
+            testcase_pp(16384, 8192, 1, "(01000)"),
+            testcase_pp(16384, 8192, 2, "(01000 1197)"),
+            testcase_pp(16384, 8192, 5, "(01000 1197 01394 1591 01788)"),
+            testcase_pp(16384, 8192, 10, "(01000 1197 01394 1591 01788 1985 02182 2379 02576 2773)"),
+            /* the case that used to diverge -- see expect_pretty_ above */
+            testcase_pp(16384, 8192, 20, R"xo((01000
   1197
   01394
   1591
@@ -157,21 +148,16 @@ namespace ut {
                     l0_o  = ListOps::cons(gc_o, elt, l0_o);
                 }
 
-                // TODO: log_streambuf using DArena
-                std::stringstream ss;
-                ppconfig ppc;
-                ppstate_standalone pps(&ss, 0, &ppc);
-
                 obj<APrintable,DList> l0_po(static_cast<DList*>(l0_o.data()));
                 REQUIRE(l0_po._typeseq() == typeseq::id<DList>());
 
-                pps.pretty(l0_po);
-
-                CHECK(ss.str() == string(tc.expected_));
-
-                /* OBSERVE the new protocol at the same margin */
+                /* margin 80, matching the margin the expectations were
+                 * observed at.  Rendered while the COLLECTOR is live and the
+                 * list is a gc root -- which is what this test covers that
+                 * xo-object2's phase-C tables do not: they use a plain arena.
+                 */
                 std::string modern = toppstr(PpConfig::scratch_plain(80), l0_po);
-                INFO("i_tc=" << i_tc << " deprecated=[" << ss.str() << "] pretty=[" << modern << "]");
+                INFO("i_tc=" << i_tc << " pretty=[" << modern << "]");
                 CHECK(modern == tc.expect_pretty_);
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;

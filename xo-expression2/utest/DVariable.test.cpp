@@ -14,7 +14,6 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <cstring>
 #include <sstream>
@@ -34,15 +33,12 @@ namespace ut {
     using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::print::APrintable;
-    using xo::print::ppstate_standalone;
-    using xo::print::ppconfig;
     using xo::facet::FacetRegistry;
     using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::reflect::Reflect;
     using xo::InitEvidence;
     using xo::InitSubsys;
-    using xo::scope;
 
     static InitEvidence s_init = InitSubsys<S_expression2_tag>::require();
 
@@ -173,49 +169,6 @@ namespace ut {
         REQUIRE(std::strcmp(var->name()->chars(), "myvar") == 0);
     }
 
-    TEST_CASE("DVariable-pretty", "[expression2][DVariable][pp]")
-    {
-        scope log(XO_DEBUG(false));
-
-        REQUIRE(s_init.evidence());
-
-        X1CollectorConfig cfg{
-            .name_ = "dvariable_pretty_test",
-            .arena_config_ = ArenaConfig{
-                .size_ = 8192,
-                .store_header_flag_ = true},
-            .object_types_z_ = 16384,
-            .gc_trigger_v_{{4096, 4096}},
-            .debug_flag_ = false,
-        };
-
-        DX1Collector gc(cfg);
-        auto alloc = with_facet<AAllocator>::mkobj(&gc);
-        auto coll = with_facet<ACollector>::mkobj(&gc);
-
-        bool ok = CollectorTypeRegistry::instance().install_types(coll);
-        REQUIRE(ok);
-
-        StringTable table(1024);
-        const DUniqueString * name = table.intern("foo");
-        TypeRef typeref = TypeRef::resolved(Reflect::require<double>());
-
-        DVariable * var = DVariable::make(alloc, name, typeref);
-        REQUIRE(var != nullptr);
-
-        std::stringstream ss;
-        ppconfig ppc;
-        ppstate_standalone pps(&ss, 0, &ppc);
-
-        obj<APrintable,DVariable> var_pr(var);
-        pps.pretty(var_pr);
-
-        std::string output = ss.str();
-
-        log && log(output);
-
-        CHECK(output.find("DVariable") != std::string::npos);
-    }
 }
 
 /* end DVariable.test.cpp */

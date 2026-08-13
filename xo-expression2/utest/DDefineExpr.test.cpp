@@ -19,7 +19,6 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <cstring>
 #include <sstream>
@@ -41,15 +40,12 @@ namespace ut {
     using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::print::APrintable;
-    using xo::print::ppstate_standalone;
-    using xo::print::ppconfig;
     using xo::facet::FacetRegistry;
     using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::reflect::Reflect;
     using xo::InitEvidence;
     using xo::InitSubsys;
-    using xo::scope;
 
     static InitEvidence s_init = InitSubsys<S_expression2_tag>::require();
 
@@ -261,51 +257,6 @@ namespace ut {
         REQUIRE(def->valuetype() == Reflect::require<double>());
     }
 
-    TEST_CASE("DDefineExpr-pretty", "[expression2][DDefineExpr][pp]")
-    {
-        scope log(XO_DEBUG(true));
-
-        REQUIRE(s_init.evidence());
-
-        X1CollectorConfig cfg{
-            .name_ = "ddefineexpr_pretty_test",
-            .arena_config_ = ArenaConfig{
-                .size_ = 8192,
-                .store_header_flag_ = true},
-            .object_types_z_ = 16384,
-            .gc_trigger_v_{{4096, 4096}},
-            .debug_flag_ = false,
-        };
-
-        DX1Collector gc(cfg);
-        auto alloc = with_facet<AAllocator>::mkobj(&gc);
-        auto coll = with_facet<ACollector>::mkobj(&gc);
-
-        bool ok = CollectorTypeRegistry::instance().install_types(coll);
-        REQUIRE(ok);
-
-        StringTable table(1024);
-        const DUniqueString * name = table.intern("bar");
-
-        obj<AGCObject> fval = DFloat::box<AGCObject>(alloc, 123.456);
-        auto rhs_expr = DConstant::make(alloc, fval);
-
-        DDefineExpr * def = DDefineExpr::make(alloc, name, rhs_expr);
-        REQUIRE(def != nullptr);
-
-        std::stringstream ss;
-        ppconfig ppc;
-        ppstate_standalone pps(&ss, 0, &ppc);
-
-        obj<APrintable,DDefineExpr> def_pr(def);
-        pps.pretty(def_pr);
-
-        std::string output = ss.str();
-
-        log && log(output);
-
-        CHECK(output.find("DDefineExpr") != std::string::npos);
-    }
 }
 
 /* end DDefineExpr.test.cpp */

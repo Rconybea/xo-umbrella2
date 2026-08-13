@@ -32,8 +32,6 @@ namespace xo {
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
     using xo::print::APrintable;
-    using xo::print::ppstate_standalone;
-    using xo::print::ppconfig;
     using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::scope;
@@ -124,23 +122,6 @@ namespace xo {
             REQUIRE(result_float.data()->value() == 21.0);
         }
 
-        TEST_CASE("DPrimitive-pretty", "[procedure2][DPrimitive][pp]")
-        {
-            scope log(XO_DEBUG(false));
-
-            std::stringstream ss;
-            ppconfig ppc;
-            ppstate_standalone pps(&ss, 0, &ppc);
-
-            obj<APrintable,DPrimitive_gco_2_gco_gco> prim_pr(&Primitives::s_mul_gco_gco_pm);
-            pps.pretty(prim_pr);
-
-            std::string output = ss.str();
-
-            log && log(output);
-
-            CHECK(output.find("_mul") != std::string::npos);
-        }
 #endif
 
     } /*namespace ut*/

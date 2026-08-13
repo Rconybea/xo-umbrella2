@@ -21,7 +21,6 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 
@@ -40,15 +39,12 @@ namespace ut {
     using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::print::APrintable;
-    using xo::print::ppstate_standalone;
-    using xo::print::ppconfig;
     //using xo::facet::FacetRegistry;
     using xo::facet::with_facet;
     using xo::facet::obj;
     //using xo::reflect::Reflect;
     using xo::InitEvidence;
     using xo::InitSubsys;
-    using xo::scope;
 
     static InitEvidence s_init = InitSubsys<S_expression2_tag>::require();
 
@@ -285,56 +281,6 @@ namespace ut {
         ifexpr.data()->valuetype();
     }
 
-    TEST_CASE("DIfElseExpr-pretty", "[expression2][DIfElseExpr][pp]")
-    {
-        scope log(XO_DEBUG(true));
-
-        REQUIRE(s_init.evidence());
-
-        X1CollectorConfig cfg{
-            .name_ = "difelseexpr_pretty_test",
-            .arena_config_ = ArenaConfig{
-                .size_ = 8192,
-                .store_header_flag_ = true},
-            .object_types_z_ = 16384,
-            .gc_trigger_v_{{4096, 4096}},
-            .debug_flag_ = false,
-        };
-
-        DX1Collector gc(cfg);
-        auto alloc = with_facet<AAllocator>::mkobj(&gc);
-        auto coll = with_facet<ACollector>::mkobj(&gc);
-
-        bool ok = CollectorTypeRegistry::instance().install_types(coll);
-        REQUIRE(ok);
-
-        obj<AGCObject> bval = DBoolean::box<AGCObject>(alloc, true);
-        auto test_expr = DConstant::make(alloc, bval);
-
-        obj<AGCObject> fval1 = DFloat::box<AGCObject>(alloc, 1.0);
-        auto when_true_expr = DConstant::make(alloc, fval1);
-
-        obj<AGCObject> fval2 = DFloat::box<AGCObject>(alloc, 2.0);
-        auto when_false_expr = DConstant::make(alloc, fval2);
-
-        auto ifexpr = DIfElseExpr::make(alloc,
-                                        test_expr,
-                                        when_true_expr, when_false_expr);
-        REQUIRE(ifexpr.data() != nullptr);
-
-        std::stringstream ss;
-        ppconfig ppc;
-        ppstate_standalone pps(&ss, 0, &ppc);
-
-        obj<APrintable,DIfElseExpr> ifexpr_pr(ifexpr.data());
-        pps.pretty(ifexpr_pr);
-
-        std::string output = ss.str();
-
-        log && log(output);
-
-        CHECK(output.find("DIfElseExpr") != std::string::npos);
-    }
 }
 
 /* end DIfElseExpr.test.cpp */

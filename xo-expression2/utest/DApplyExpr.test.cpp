@@ -25,7 +25,6 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 
@@ -48,15 +47,12 @@ namespace ut {
     using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::print::APrintable;
-    using xo::print::ppstate_standalone;
-    using xo::print::ppconfig;
     using xo::facet::FacetRegistry;
     using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::reflect::Reflect;
     using xo::InitEvidence;
     using xo::InitSubsys;
-    using xo::scope;
 
     static InitEvidence s_init = InitSubsys<S_expression2_tag>::require();
 
@@ -265,55 +261,6 @@ namespace ut {
         REQUIRE(a1.extype() == xo::scm::exprtype::constant);
     }
 
-    TEST_CASE("DApplyExpr-pretty", "[expression2][DApplyExpr][pp]")
-    {
-        scope log(XO_DEBUG(false));
-
-        REQUIRE(s_init.evidence());
-
-        X1CollectorConfig cfg{
-            .name_ = "dapplyexpr_pretty_test",
-            .arena_config_ = ArenaConfig{
-                .size_ = 8192,
-                .store_header_flag_ = true},
-            .object_types_z_ = 16384,
-            .gc_trigger_v_{{4096, 4096}},
-            .debug_flag_ = false,
-        };
-
-        DX1Collector gc(cfg);
-        auto alloc = with_facet<AAllocator>::mkobj(&gc);
-        auto coll = with_facet<ACollector>::mkobj(&gc);
-        auto stbl = StringTable(1024 /*hint_max_capacity*/, false /*!debug_flag*/);
-
-        bool ok = CollectorTypeRegistry::instance().install_types(coll);
-        REQUIRE(ok);
-
-        obj<AGCObject> prim_gco
-            = with_facet<AGCObject>::mkobj(NumericPrimitives::make_multiply_pm(alloc, &stbl));
-        obj<AExpression,DConstant> fn_expr = DConstant::make(alloc, prim_gco);
-
-        obj<AGCObject> val1 = DFloat::box<AGCObject>(alloc, 3.0);
-        obj<AGCObject> val2 = DFloat::box<AGCObject>(alloc, 7.0);
-        obj<AExpression,DConstant> arg1 = DConstant::make(alloc, val1);
-        obj<AExpression,DConstant> arg2 = DConstant::make(alloc, val2);
-
-        TypeRef result_type = TypeRef::resolved(Reflect::require<double>());
-        auto apply_expr = DApplyExpr::make2(alloc, result_type, fn_expr, arg1, arg2);
-
-        std::stringstream ss;
-        ppconfig ppc;
-        ppstate_standalone pps(&ss, 0, &ppc);
-
-        obj<APrintable,DApplyExpr> expr_pr(apply_expr.data());
-        pps.pretty(expr_pr);
-
-        std::string output = ss.str();
-
-        log && log(output);
-
-        CHECK(output.find("ApplyExpr") != std::string::npos);
-    }
 }
 
 /* end DApplyExpr.test.cpp */
