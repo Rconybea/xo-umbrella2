@@ -9,7 +9,6 @@
 #include "Expression.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace scm {
@@ -23,7 +22,6 @@ namespace xo {
          **/
         class DDefineExpr {
         public:
-            using ppindentinfo = xo::print::ppindentinfo;
             using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
@@ -82,7 +80,6 @@ namespace xo {
             /** @defgroup scm-defineexpr-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this define-expr into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

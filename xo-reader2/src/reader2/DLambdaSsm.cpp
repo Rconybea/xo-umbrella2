@@ -449,29 +449,6 @@ namespace xo {
 
 #endif
 
-        bool
-        DLambdaSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            obj<APrintable> body
-                = FacetRegistry::instance().try_variant<APrintable,
-                                                        AExpression>(body_);
-
-            if (body) {
-                return ppii.pps()->pretty_struct
-                    (ppii,
-                     "DLambdaSsm",
-                     refrtag("lmstate", lmstate_),
-                     refrtag("expect", this->get_expect_str()),
-                     refrtag("body", body));
-            } else {
-                return ppii.pps()->pretty_struct
-                    (ppii,
-                     "DLambdaSsm",
-                     refrtag("lmstate", lmstate_),
-                     refrtag("expect", this->get_expect_str()));
-            }
-        }
-
         void
         DLambdaSsm::pretty(xo::pp::PpSink & sink) const
         {

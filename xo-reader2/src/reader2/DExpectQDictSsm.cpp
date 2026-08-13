@@ -253,20 +253,6 @@ namespace xo {
             Super::illegal_quoted_literal(lit, p_psm);
         }
 
-        bool
-        DExpectQDictSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            obj<AGCObject,DDictionary> dict(dict_);
-            obj<APrintable,DDictionary> dict_pr(dict_);
-
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DExpectQDictSsm",
-                                             refrtag("state", state_),
-                                             refrtag("expect", this->get_expect_str()),
-                                             refrtag("key", key_, key_),
-                                             refrtag("dict", dict_pr));
-        }
-
         void
         DExpectQDictSsm::pretty(xo::pp::PpSink & sink) const
         {

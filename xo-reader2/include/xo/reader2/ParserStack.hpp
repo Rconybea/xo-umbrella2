@@ -9,7 +9,6 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/arena/DArena.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/Prettifier.hpp>
 
 namespace xo {
@@ -27,7 +26,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using DArena = xo::mm::DArena;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             ParserStack(DArena::Checkpoint ckp,
@@ -55,8 +53,6 @@ namespace xo {
 
             /** regular printing **/
             void print(std::ostream & os) const;
-            /** pretty-printer support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
@@ -83,21 +79,6 @@ namespace xo {
         }
 
     } /*namespace scm*/
-
-    namespace print {
-        /** pretty printer in <xo/indentlog/print/pretty.hpp> relies on this specialization
-         *  to handle ParserResult instances
-         **/
-        template <>
-        struct ppdetail<xo::scm::ParserStack*> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::ParserStack * p) {
-                if (p)
-                    return p->pretty_deprecated(ppii);
-                else
-                    return ppii.pps()->print_upto("nullptr");
-            }
-        };
-    }
 
     namespace pp {
         /** ParserStack is not a facet type, so ppsink cannot reach it through

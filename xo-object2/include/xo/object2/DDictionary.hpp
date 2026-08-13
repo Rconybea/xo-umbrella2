@@ -11,7 +11,6 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <concepts>
 #include <cstdint>
 
@@ -40,7 +39,6 @@ namespace xo {
             /** color for gco visitor **/
             using VisitReason = xo::mm::VisitReason;
             /** pretty-printer state for APrintable **/
-            using ppindentinfo = xo::print::ppindentinfo;
             /** canonical type representing a key-value pair **/
             using pair_type = std::pair<const DString *, obj<AGCObject>>;
 
@@ -196,8 +194,6 @@ namespace xo {
             /** @defgroup ddictionary-printable-methods **/
             ///@{
 
-            /** pretty-printing support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this dictionary into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

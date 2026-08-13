@@ -23,7 +23,6 @@ namespace xo {
     using xo::reflect::TypeDescrBase;
     using xo::reflect::FunctionTdxInfo;
     using xo::reflect::typeseq;
-    using xo::print::quot;
 
     namespace scm {
 
@@ -163,30 +162,6 @@ namespace xo {
             // xxx captured_var_set
             // xxx layer_var_map
             // xxx nested_lambda_map
-        }
-
-        bool
-        DLambdaExpr::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            auto body
-                = FacetRegistry::instance().try_variant<APrintable,
-                                                        AExpression>(body_expr_);
-
-            if (name_ && body) {
-                auto local_symtab_pr
-                    = obj<APrintable,DLocalSymtab>(local_symtab_);
-
-                return ppii.pps()->pretty_struct(ppii,
-                                                 "LambdaExpr",
-                                                 refrtag("tref", typeref_),
-                                                 refrtag("name", quot(std::string_view(*name_))),
-                                                 refrtag("local_symtab", local_symtab_pr),
-                                                 //refrtag("argv", local_env_->argv()),
-                                                 refrtag("body", body));
-            } else {
-                return ppii.pps()->pretty_struct(ppii,
-                                                 "LambdaExpr");
-            }
         }
 
         void

@@ -50,15 +50,6 @@ namespace xo {
 
         // printable facet
 
-        bool
-        DVsmSeqContFrame::pretty_deprecated(const ppindentinfo & ppii) const noexcept
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DVsmSeqContFrame",
-                                             refrtag("cont", cont_),
-                                             refrtag("i_seq", i_seq_));
-        }
-
         void
         DVsmSeqContFrame::pretty(xo::pp::PpSink & sink) const
         {

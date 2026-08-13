@@ -81,22 +81,6 @@ namespace xo {
 
         // ----- printable facet -----
 
-        bool
-        DClosure::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            obj<APrintable,DLambdaExpr> lambda_pr(const_cast<DLambdaExpr *>(lambda_));
-            obj<APrintable,DLocalEnv> env_pr(const_cast<DLocalEnv *>(env_));
-
-            bool lambda_present = lambda_pr;
-            bool env_present = env_pr;
-
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DClosure",
-                 refrtag("lambda", lambda_pr, lambda_present),
-                 refrtag("env", env_pr, env_present));
-        }
-
         void
         DClosure::pretty(xo::pp::PpSink & sink) const
         {

@@ -26,7 +26,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AAllocator = xo::mm::AAllocator;
             using typeseq = xo::reflect::typeseq;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             explicit DConstant(obj<AGCObject> value) noexcept;
@@ -70,7 +69,6 @@ namespace xo {
             /** @defgroup scm-constant-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this constant into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

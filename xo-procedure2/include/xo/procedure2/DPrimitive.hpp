@@ -16,7 +16,6 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/TypeDescr_pp.hpp>   /* Prettifier<TypeDescr> for the :td field */
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
-#include <xo/indentlog/print/pretty.hpp> /* ppstate -- was arriving via xo/reflect */
 #include <string_view>
 #include <tuple>
 #include <type_traits>
@@ -84,7 +83,6 @@ namespace xo {
             using DArray = xo::scm::DArray;
             using Reflect = xo::reflect::Reflect;
             using TypeDescr = xo::reflect::TypeDescr;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** @defgroup scm-primitive-ctors constructors **/
@@ -131,7 +129,6 @@ namespace xo {
             /** @defgroup scm-primitive-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this primitive into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
@@ -182,18 +179,6 @@ namespace xo {
             /** function implementation **/
             Fn fn_;
         }; /*Primitive*/
-
-        template <typename Fn>
-        bool
-        Primitive<Fn>::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "Primitive<Fn>",
-                        refrtag("name", name_),
-                        refrtag("td", fn_td_),
-                        refrtag("fn", fn_));
-        }
 
         template <typename Fn>
         void

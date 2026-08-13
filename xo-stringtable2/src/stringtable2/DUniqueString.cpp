@@ -50,12 +50,6 @@ namespace xo {
             return (DString *)(((std::byte *)this) + offset);
         }
 
-        bool
-        DUniqueString::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return _text()->pretty_deprecated(ppii);
-        }
-
         void
         DUniqueString::pretty(xo::pp::PpSink & sink) const
         {

@@ -7,7 +7,6 @@
 
 #include <xo/expression2/Expression.hpp>
 #include <xo/stringtable2/DString.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <string_view>
 
 namespace xo {
@@ -34,7 +33,6 @@ namespace xo {
         public:
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             ParserResult() = default;
@@ -66,8 +64,6 @@ namespace xo {
 
             /** ordinary not-pretty printer **/
             void print(std::ostream & os) const;
-            /** pretty-printing support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
@@ -105,18 +101,6 @@ namespace xo {
         }
 
     } /*namespace scm*/
-
-    namespace print {
-        /** pretty printer in <xo/indentlog/print/pretty.hpp> relies on this specialization
-         *  to handle ParserResult instances
-         **/
-        template <>
-        struct ppdetail<xo::scm::ParserResult> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::ParserResult & x) {
-                return x.pretty_deprecated(ppii);
-            }
-        };
-    }
 
     namespace pp {
         /** ParserResult is NOT a facet type, so ppsink cannot reach it

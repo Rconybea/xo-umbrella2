@@ -51,7 +51,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using DArena = xo::mm::DArena;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** @defgroupo scm-expectfromalargssm-ctors constructors **/
@@ -119,8 +118,6 @@ namespace xo {
             /** @defgroup scm-expectformalargssm-printable-facet printable facet methods **/
             ///@{
 
-            /** pretty-printing support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

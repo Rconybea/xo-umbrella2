@@ -511,15 +511,6 @@ namespace xo {
             Super::on_parsed_expression_with_token(expr, tk, p_psm);
         }
 
-        bool
-        DToplevelSeqSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DToplevelSeqSsm",
-                 refrtag("seqtype", seqtype_));
-        }
-
         void
         DToplevelSeqSsm::pretty(xo::pp::PpSink & sink) const
         {

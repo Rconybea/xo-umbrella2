@@ -550,18 +550,6 @@ namespace xo {
         }
 #endif
 
-        bool
-        DExpectExprSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DExpectExprSsm",
-                 refrtag("allow_defs", allow_defs_),
-                 refrtag("cxl_on_rightbrace", cxl_on_rightbrace_),
-                 refrtag("cxl_on_rightparen", cxl_on_rightparen_),
-                 refrtag("expect", this->get_expect_str()));
-        }
-
         void
         DExpectExprSsm::pretty(xo::pp::PpSink & sink) const
         {

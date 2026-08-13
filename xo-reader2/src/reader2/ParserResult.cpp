@@ -9,8 +9,13 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
+    /* ppsink xtag for print(ostream&), via the tag_ostream bridge */
+    using xo::pp::xtag;
+
     using xo::pp::field;
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
@@ -70,41 +75,6 @@ namespace xo {
             if (error_description_)
                 os << xtag("error", error_description_);
             os << ">";
-        }
-
-        bool
-        ParserResult::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            switch (result_type_) {
-            case parser_result_type::none:
-                return ppii.pps()->pretty_struct
-                           (ppii,
-                            "ParserResult",
-                            refrtag("type", result_type_));
-            case parser_result_type::expression:
-                {
-                    auto expr = FacetRegistry::instance().variant<APrintable,AExpression>(result_expr_);
-
-                    return ppii.pps()->pretty_struct
-                           (ppii,
-                            "ParserResult",
-                            refrtag("type", result_type_),
-                            refrtag("expr", expr));
-                }
-                break;
-            case parser_result_type::error:
-                return ppii.pps()->pretty_struct
-                           (ppii,
-                            "ParserResult",
-                            refrtag("type", result_type_),
-                            refrtag("src_fn", error_src_fn_),
-                            refrtag("error", error_description_));
-            case parser_result_type::N:
-                assert(false);
-                break;
-            }
-
-            return false;
         }
 
         void

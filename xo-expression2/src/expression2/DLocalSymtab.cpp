@@ -17,7 +17,6 @@ namespace xo {
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
     using xo::print::APrintable;
-    using xo::print::ppstate;
 
     namespace scm {
 
@@ -130,78 +129,6 @@ namespace xo {
         }
 
         // ----- printable facet -----
-
-        bool
-        DLocalSymtab::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            ppstate * pps = ppii.pps();
-
-            (void)pps;
-
-            if (ppii.upto()) {
-                /* perhaps print on one line */
-                if (!pps->print_upto("<LocalSymtab"))
-                    return false;
-
-                if (!pps->print_upto(xrefrtag("nvars", vars_->size())))
-                    return false;
-
-                for (size_type i = 0, n = vars_->size(); i <n; ++i) {
-                    char buf[32];
-                    snprintf(buf, sizeof(buf), "[%u]", i);
-
-                    obj<APrintable> arg_pr = (*vars_)[i].to_facet<APrintable>();
-
-                    if (!pps->print_upto(xrefrtag(buf, arg_pr)))
-                        return false;
-                }
-
-                if (!pps->print_upto(xrefrtag("ntypes", types_->size())))
-                    return false;
-
-                for (size_type i = 0, n = types_->size(); i < n; ++i) {
-                    char buf[32];
-                    snprintf(buf, sizeof(buf), "[%u]", i);
-
-                    obj<APrintable> type_pr = (*types_)[i].to_facet<APrintable>();
-
-                    if (!pps->print_upto(xrefrtag(buf, type_pr)))
-                        return false;
-                }
-
-                pps->write(">");
-                return true;
-            } else {
-                /* with line breaks */
-
-                pps->write("<LocalSymtab");
-                pps->newline_pretty_tag(ppii.ci1(), "nvars", vars_->size());
-
-                for (size_type i = 0, n = vars_->size(); i < n; ++i) {
-                    char buf[32];
-                    snprintf(buf, sizeof(buf), "[%u]", i);
-
-                    obj<APrintable> arg_pr = (*vars_)[i].to_facet<APrintable>();
-
-                    pps->newline_pretty_tag(ppii.ci1(), buf, arg_pr);
-                }
-
-                pps->newline_pretty_tag(ppii.ci1(), "ntypes", types_->size());
-
-                for (size_type i = 0, n = types_->size(); i < n; ++i) {
-                    char buf[32];
-                    snprintf(buf, sizeof(buf), "[%u]", i);
-
-                    obj<APrintable> type_pr = (*types_)[i].to_facet<APrintable>();
-
-                    pps->newline_pretty_tag(ppii.ci1(), buf, type_pr);
-                }
-
-                pps->write(">");
-
-                return false;
-            }
-        }
 
         void
         DLocalSymtab::pretty(xo::pp::PpSink & sink) const

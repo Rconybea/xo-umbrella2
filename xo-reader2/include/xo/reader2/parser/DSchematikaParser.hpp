@@ -170,7 +170,6 @@ namespace xo {
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
-            using ppindentinfo = xo::print::ppindentinfo;
             using size_type = std::size_t;
 
         public:
@@ -288,8 +287,6 @@ namespace xo {
 
             /** print human-readable representation on stream @p os **/
             void print(std::ostream & os) const;
-            /** pretty-printer support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
@@ -329,21 +326,6 @@ namespace xo {
         }
 
     } /*namespace scm*/
-
-    namespace print {
-        /** pretty printer in <xo/indentlog/print/pretty.hpp> relies on this specialization
-         *  to handle ParserResult instances
-         **/
-        template <>
-        struct ppdetail<xo::scm::DSchematikaParser*> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::DSchematikaParser* p) {
-                if (p)
-                    return p->pretty_deprecated(ppii);
-                else
-                    return ppii.pps()->print_upto("nullptr");
-            }
-        };
-    }
 
     namespace pp {
         /** Specialized on the POINTER, matching the ppdetail<> above.

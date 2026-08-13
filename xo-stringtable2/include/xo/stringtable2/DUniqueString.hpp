@@ -30,7 +30,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using size_type = DString::size_type;
-            using ppindentinfo = xo::print::ppindentinfo;
 
             /* Memory model for a DUniqueString allocated via xo allocator
              *
@@ -84,7 +83,6 @@ namespace xo {
             /** @defgroup duniquestring-printable-methods printable facet methods **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             void pretty(xo::pp::PpSink & sink) const;
 

@@ -496,22 +496,6 @@ namespace xo {
             Super::on_parsed_expression_with_token(expr, tk, p_psm);
         }
 
-        bool
-        DIfElseSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            auto expr
-                = FacetRegistry::instance().variant<APrintable,
-                                                    AExpression>(if_expr_);
-            assert(expr.data());
-            (void)expr;
-
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DIfElseSsm",
-                        refrtag("ifstate", ifstate_),
-                        refrtag("if_expr", expr));
-        }
-
         void
         DIfElseSsm::pretty(xo::pp::PpSink & sink) const
         {

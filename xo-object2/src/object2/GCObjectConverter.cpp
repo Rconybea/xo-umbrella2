@@ -15,8 +15,14 @@
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/facet/obj.hpp>
 //#include "xo/alloc/Blob.hpp"
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    /* ppsink printing vocabulary for the exception messages below */
+    using xo::pp::tostr;
+    using xo::pp::xtag;
+
     using xo::mm::AGCObject;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;

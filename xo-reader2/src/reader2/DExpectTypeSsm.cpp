@@ -9,7 +9,6 @@
 #include <xo/type/AtomicType.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 #include <string_view>
@@ -190,14 +189,6 @@ namespace xo {
                 p_psm->pop_ssm();
                 p_psm->on_parsed_typedescr(td);
             }
-        }
-
-        bool
-        DExpectTypeSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DExpectTypeSsm");
         }
 
         void

@@ -53,23 +53,6 @@ namespace xo {
             typeref_.visit_gco_children(reason, gc);
         }
 
-        bool
-        DVariable::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            using xo::print::quot;
-
-            auto name = (name_
-                         ? std::string_view(*name_)
-                         : std::string_view(""));
-
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DVariable"
-                        , refrtag("name", quot(name))
-                        , refrtag("typeref", typeref_)
-                           );
-        }
-
         void
         DVariable::pretty(xo::pp::PpSink & sink) const
         {

@@ -23,7 +23,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             DVsmApplyClosureFrame(obj<AGCObject> stack,
@@ -45,8 +44,6 @@ namespace xo {
             DVsmApplyClosureFrame * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
-            /** pretty-printing support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

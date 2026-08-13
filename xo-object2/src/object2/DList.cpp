@@ -15,13 +15,17 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/facet_implementation.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    /* the ppsink logging/printing vocabulary, for use below */
+    using xo::pp::scope;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
+
     using xo::print::APrintable;
     using xo::mm::AGCObject;
     using xo::facet::FacetRegistry;
@@ -116,16 +120,10 @@ namespace xo {
             if (ix > 0) {
                 assert(l == nullptr);
 
-                /* QUALIFIED: legacy <xo/indentlog/print/pretty.hpp> is still
-                 * included above for the pretty_deprecated body, so xo::tostr
-                 * and xo::xtag are still visible here and a
-                 * using-declaration would be ambiguous.  Phase E removes that
-                 * include, after which these can be unqualified.
-                 */
                 throw std::runtime_error
-                    (xo::pp::tostr("DList::at: out-of-range index where [0..z) expected",
-                                   xo::pp::xtag("index", index),
-                                   xo::pp::xtag("z", this->size())));
+                    (tostr("DList::at: out-of-range index where [0..z) expected",
+                           xtag("index", index),
+                           xtag("z", this->size())));
             }
 
             assert(l);
@@ -136,7 +134,7 @@ namespace xo {
         void
         DList::assign_head(obj<AAllocator> mm, obj<AGCObject> rhs)
         {
-            xo::pp::scope log(XO_DEBUG_(true), xo::pp::xtag("mm.data", mm.data_));
+            scope log(XO_DEBUG_(true), xtag("mm.data", mm.data_));
 
             mm.barrier_assign(this, &head_, rhs);
 
@@ -149,7 +147,7 @@ namespace xo {
         void
         DList::assign_head_gc(obj<ACollector> gc, obj<AGCObject> rhs)
         {
-            xo::pp::scope log(XO_DEBUG_(true), xo::pp::xtag("gc.data", gc.data_));
+            scope log(XO_DEBUG_(true), xtag("gc.data", gc.data_));
 
             gc.assign_member(this, &head_, rhs);
         }
@@ -164,47 +162,6 @@ namespace xo {
                                   (void**)&(this->rest_),
                                   rest_gco.iface(),
                                   rest);
-        }
-
-        bool
-        DList::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            /* adapted from ppstate.pretty_struct(), see also */
-
-            using xo::print::ppstate;
-
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                /* perhaps print on one line */
-                pps->write("(");
-
-                /* TODO: probably use iterators here, when available */
-                const DList * l = this;
-
-                size_t i = 0;
-                while (!l->is_empty()) {
-                    if (i > 0)
-                        pps->write(" ");
-
-                    obj<APrintable> elt
-                        = FacetRegistry::instance().variant<APrintable, AGCObject>(l->head_);
-
-                    assert(elt.data());
-
-                    if (!pps->print_upto(elt))
-                        return false;
-
-                    l = l->rest_;
-                    ++i;
-                }
-
-                pps->write(")");
-                return true;
-            } else {
-                pps->write("(...)");
-                return false;
-            }
         }
 
         void

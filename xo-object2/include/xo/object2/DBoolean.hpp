@@ -8,7 +8,6 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <cstdint>
 
 namespace xo {
@@ -18,7 +17,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AGCObject = xo::mm::AGCObject;
             using VisitReason = xo::mm::VisitReason;
-            using ppindentinfo = xo::print::ppindentinfo;
             using value_type = long;
 
             explicit DBoolean(bool x) : value_{x} {}
@@ -32,7 +30,6 @@ namespace xo {
 
             bool value() const noexcept { return value_; }
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this boolean into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

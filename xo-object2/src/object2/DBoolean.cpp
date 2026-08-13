@@ -4,11 +4,9 @@
  **/
 
 #include "DBoolean.hpp"
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     using xo::facet::typeseq;
-    using xo::print::ppdetail_atomic;
 
     namespace scm {
         DBoolean *
@@ -20,18 +18,10 @@ namespace xo {
             return new (mem) DBoolean(x);
         }
 
-        bool
-        DBoolean::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppdetail_atomic<const char *>::print_pretty
-                       (ppii,
-                        (value_ ? "true" : "false"));
-        }
-
         void
         DBoolean::pretty(xo::pp::PpSink & sink) const
         {
-            /* leaf, as pretty_deprecated was: ppdetail_atomic is a bare
+            /* leaf, as the deprecated printer was: ppdetail_atomic was a bare
              * pps()->write(x) with no framing (pretty.hpp:363).
              */
             sink.pp(value_ ? "true" : "false");

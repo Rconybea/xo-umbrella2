@@ -197,14 +197,6 @@ namespace xo {
             Super::illegal_token(tk, p_psm);
         }
 
-        bool
-        DExpectListTypeSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DExpectListTypeSsm");
-        }
-
         void
         DExpectListTypeSsm::pretty(xo::pp::PpSink & sink) const
         {

@@ -204,15 +204,6 @@ namespace xo {
             Super::illegal_quoted_literal(literal, p_psm);
         }
 
-        bool
-        DQuoteSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DQuoteSsm",
-                                             refrtag("quote_xst", quote_xst_),
-                                             refrtag("expect", this->get_expect_str()));
-        }
-
         void
         DQuoteSsm::pretty(xo::pp::PpSink & sink) const
         {

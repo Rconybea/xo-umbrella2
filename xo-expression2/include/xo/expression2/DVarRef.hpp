@@ -20,7 +20,6 @@ namespace xo {
          **/
         class DVarRef {
         public:
-            using ppindentinfo = xo::print::ppindentinfo;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
@@ -63,7 +62,6 @@ namespace xo {
             /** @defgroup scm-variable-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this varref into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

@@ -48,16 +48,6 @@ namespace xo {
             gc.visit_child(reason, &local_env_);
         }
 
-        bool
-        DVsmApplyClosureFrame::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DVsmApplyClosureFrame",
-                 refrtag("cont", cont_),
-                 refrtag("env", local_env_));
-        }
-
         void
         DVsmApplyClosureFrame::pretty(xo::pp::PpSink & sink) const
         {

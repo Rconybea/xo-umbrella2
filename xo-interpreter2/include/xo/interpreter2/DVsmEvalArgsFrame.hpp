@@ -18,7 +18,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** see picture in VirtualSchematikaMachine._do_eval_apply_op()
@@ -46,7 +45,6 @@ namespace xo {
             DVsmEvalArgsFrame * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

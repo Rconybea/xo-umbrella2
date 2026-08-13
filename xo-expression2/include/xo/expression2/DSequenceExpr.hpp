@@ -28,7 +28,6 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
             using TypeDescr = xo::reflect::TypeDescr;
             using size_type = DArray::size_type;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             DSequenceExpr() ;
@@ -67,8 +66,6 @@ namespace xo {
             /** @defgroup scm-sequenceexpr-printable-facet printable facet methods **/
             ///@{
 
-            /** pretty-printing driver; combine layout+printing **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this sequence into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

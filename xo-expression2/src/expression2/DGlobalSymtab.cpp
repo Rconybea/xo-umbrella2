@@ -289,18 +289,6 @@ namespace xo {
 
         // ----- printable facet -----
 
-        bool
-        DGlobalSymtab::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DGlobalSymtab",
-                        refrtag("nvar", vars_->size()),
-                        refrtag("var_capacity", vars_->capacity()),
-                        refrtag("ntype", types_->size()),
-                        refrtag("type_capacity", types_->capacity()));
-        }
-
         void
         DGlobalSymtab::pretty(xo::pp::PpSink & sink) const
         {

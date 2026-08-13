@@ -9,8 +9,16 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/concat.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
+    /* ppsink xtag for print(ostream&), via the tag_ostream bridge.
+     * QUALIFIED at the call sites below: with const char[] arguments ADL
+     * still finds a legacy xtag overload, and a using-declaration cannot
+     * suppress ADL.
+     */
+
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::facet::typeseq;
@@ -52,43 +60,9 @@ namespace xo {
         ParserStack::print(std::ostream & os) const
         {
             os << "<ParserStack>";
-            os << xtag("ssm", "*placeholder*");
-            os << xtag("parent", "*placeholder*");
+            os << xo::pp::xtag("ssm", "*placeholder*");
+            os << xo::pp::xtag("parent", "*placeholder*");
             os << ">";
-        }
-
-        bool
-        ParserStack::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            auto * pps = ppii.pps();
-
-            /* always use multiple lines */
-
-            if (ppii.upto())
-                return false;
-
-            pps->write("<ParserStack");
-
-            const ParserStack * frame = this;
-            std::size_t i_frame = 0;
-
-            while (frame) {
-                char buf[32];
-                snprintf(buf, sizeof(buf), "[%lu]", i_frame);
-
-                auto ssm = (FacetRegistry::instance().variant
-                            <APrintable, ASyntaxStateMachine> (frame->top()));
-                assert(ssm.data());
-
-                pps->newline_pretty_tag(ppii.ci1(), buf, ssm);
-
-                ++i_frame;
-                frame = frame->parent_;
-            }
-
-            pps->write(">");
-
-            return false;
         }
 
         void

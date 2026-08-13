@@ -8,7 +8,6 @@
 #include <xo/object2/List.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
@@ -204,19 +203,6 @@ namespace xo {
             }
 
             Super::illegal_quoted_literal(lit, p_psm);
-        }
-
-        bool
-        DExpectQListSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            obj<AGCObject,DList> list(start_);
-            auto list_pr = FacetRegistry::instance().variant<APrintable,AGCObject>(list);
-
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DExpectQListSsm",
-                                             refrtag("state", state_),
-                                             refrtag("expect", this->get_expect_str()),
-                                             refrtag("list", list_pr));
         }
 
         void

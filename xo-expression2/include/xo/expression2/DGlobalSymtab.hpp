@@ -35,7 +35,6 @@ namespace xo {
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
-            using ppindentinfo = xo::print::ppindentinfo;
             using size_type = std::uint32_t;
 
         public:
@@ -122,8 +121,6 @@ namespace xo {
             /** @defgroup scm-globalsymtab-printable-facet printable facet **/
             ///@{
 
-            /** pretty-printing support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this symbol table into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

@@ -25,7 +25,6 @@
 #pragma once
 
 #include "TypeDescr.hpp"
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace print {

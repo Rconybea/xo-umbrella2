@@ -21,7 +21,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
-            using ppindentinfo = xo::print::ppindentinfo;
             using size_type = std::uint32_t;
 
         public:
@@ -63,7 +62,6 @@ namespace xo {
             /** @defgroup scm-localenv-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const noexcept;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const noexcept;

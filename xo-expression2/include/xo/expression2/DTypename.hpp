@@ -9,7 +9,6 @@
 #include <xo/type/Type.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/printable2/Printable.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace scm {
@@ -23,7 +22,6 @@ namespace xo {
          **/
         class DTypename {
         public:
-            using ppindentinfo = xo::print::ppindentinfo;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AGCObject = xo::mm::AGCObject;
@@ -62,7 +60,6 @@ namespace xo {
             /** @defgroup scm-typename-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this typename into @p sink.
              *

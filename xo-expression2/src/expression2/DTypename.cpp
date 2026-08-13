@@ -57,25 +57,6 @@ namespace xo {
             gc.visit_poly_child(reason, &type_);
         }
 
-        bool
-        DTypename::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            using xo::print::quot;
-
-            auto name = (name_
-                         ? std::string_view(*name_)
-                         : std::string_view(""));
-
-            auto type_pr = type_.to_facet<APrintable>();
-
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DTypename"
-                        , refrtag("name", quot(name))
-                        , refrtag("type", type_pr)
-                           );
-        }
-
         void
         DTypename::pretty(xo::pp::PpSink & sink) const
         {

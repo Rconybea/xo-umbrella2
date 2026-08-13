@@ -386,20 +386,6 @@ namespace xo {
         }
 #endif
 
-        bool
-        DApplySsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            // TODO: const-correct version of obj<> template
-            auto fn_expr = const_cast<DApplySsm*>(this)->fn_expr_.to_facet<APrintable>();
-            bool fn_expr_present(fn_expr);
-
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DApplySsm",
-                                             refrtag("applystate", applystate_),
-                                             refrtag("expect", this->get_expect_str()),
-                                             refrtag("fn_expr", fn_expr, fn_expr_present));
-        }
-
         void
         DApplySsm::pretty(xo::pp::PpSink & sink) const
         {

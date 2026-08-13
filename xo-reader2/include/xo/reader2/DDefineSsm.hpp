@@ -77,7 +77,6 @@ namespace xo {
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using DArena = xo::mm::DArena;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** @defgroup scm-definessm-ctors constructors **/
@@ -193,8 +192,6 @@ namespace xo {
             /** @defgroup scm-define-printable-facet printable facet methods **/
             ///@{
 
-            /** pretty-printer support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

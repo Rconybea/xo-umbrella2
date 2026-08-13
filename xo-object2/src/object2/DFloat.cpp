@@ -4,11 +4,9 @@
  **/
 
 #include "DFloat.hpp"
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     using xo::facet::typeseq;
-    using xo::print::ppdetail_atomic;
     using std::size_t;
 
     namespace scm {
@@ -21,16 +19,10 @@ namespace xo {
             return new (mem) DFloat(x);
         }
 
-        bool
-        DFloat::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppdetail_atomic<double>::print_pretty(ppii, value_);
-        }
-
         void
         DFloat::pretty(xo::pp::PpSink & sink) const
         {
-            /* leaf, as pretty_deprecated was: ppdetail_atomic is a bare
+            /* leaf, as the deprecated printer was: ppdetail_atomic was a bare
              * pps()->write(x) with no framing (pretty.hpp:363).
              *
              * NB double formatting is the thing to watch here, not structure --

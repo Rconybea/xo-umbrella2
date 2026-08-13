@@ -8,7 +8,6 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <concepts>
 #include <cstdint>
 
@@ -55,7 +54,6 @@ namespace xo {
             /** hint for object visitor **/
             using VisitReason = xo::mm::VisitReason;
             /** pretty-printer state for APrintable **/
-            using ppindentinfo = xo::print::ppindentinfo;
 
             ///@}
             /** @defgroup darray-ctors constructors **/
@@ -175,8 +173,6 @@ namespace xo {
             /** @defgroup darray-printable-methods **/
             ///@{
 
-            /** pretty-printing support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this array into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

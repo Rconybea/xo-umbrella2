@@ -16,7 +16,6 @@
 #pragma once
 
 #include "Refcounted.hpp"
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace print {

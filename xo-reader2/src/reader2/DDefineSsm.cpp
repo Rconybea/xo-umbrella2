@@ -685,21 +685,6 @@
 
         // ----- printable facet -----
 
-        bool
-        DDefineSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            auto expr
-                = FacetRegistry::instance().variant<APrintable,
-                                                    AExpression>(def_expr_);
-            assert(expr.data());
-
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DDefineSsm",
-                                             refrtag("defstate", defstate_),
-                                             refrtag("expect", this->get_expect_str()),
-                                             refrtag("def_expr", expr));
-        }
-
         void
         DDefineSsm::pretty(xo::pp::PpSink & sink) const
         {

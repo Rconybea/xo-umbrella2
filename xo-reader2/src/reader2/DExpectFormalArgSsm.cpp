@@ -247,25 +247,6 @@ namespace xo {
         }
 #endif
 
-        bool
-        DExpectFormalArgSsm::pretty_deprecated(const ppindentinfo & ppii) const {
-            if (name_) {
-                return ppii.pps()->pretty_struct
-                    (ppii,
-                     "DExpectFormalArgSsm",
-                     refrtag("fstate", fstate_),
-                     refrtag("expect", this->get_expect_str()),
-                     refrtag("name", std::string_view(*name_)));
-            } else {
-                return ppii.pps()->pretty_struct
-                    (ppii,
-                     "DExpectFormalArgSsm",
-                     refrtag("fstate", fstate_),
-                     refrtag("expect", this->get_expect_str())
-                     );
-            }
-        }
-
         void
         DExpectFormalArgSsm::pretty(xo::pp::PpSink & sink) const
         {

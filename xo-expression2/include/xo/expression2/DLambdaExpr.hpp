@@ -25,7 +25,6 @@ namespace xo {
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using TypeDescr = xo::reflect::TypeDescr;
-            using ppindentinfo = xo::print::ppindentinfo;
             using size_type = DLocalSymtab::size_type;
 
         public:
@@ -94,7 +93,6 @@ namespace xo {
             /** @defgroup scm-lambdaexpr-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this lambda into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

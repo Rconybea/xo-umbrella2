@@ -10,7 +10,6 @@
 #include <xo/gc/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <concepts>
 #include <cstdint>
 
@@ -38,7 +37,6 @@ namespace xo {
             /** gc-aware object facet **/
             using AGCObject = xo::mm::AGCObject;
             /** pretty-printer state for APrintable **/
-            using ppindentinfo = xo::print::ppindentinfo;
 
             ///@}
             /** @defgroup dstruct-ctors constructors **/
@@ -133,8 +131,6 @@ namespace xo {
             /** @defgroup dstruct-printable-methods **/
             ///@{
 
-            /** pretty-printing support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
              * rather than nothing, so an unconverted printer is VISIBLE in

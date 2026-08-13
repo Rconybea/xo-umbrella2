@@ -11,7 +11,6 @@
 #include "exprtype.hpp"
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace scm {
@@ -21,7 +20,6 @@ namespace xo {
          **/
         class DVariable {
         public:
-            using ppindentinfo = xo::print::ppindentinfo;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
@@ -71,7 +69,6 @@ namespace xo {
             /** @defgroup scm-variable-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this variable into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

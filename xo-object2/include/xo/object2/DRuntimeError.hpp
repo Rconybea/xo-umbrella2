@@ -21,7 +21,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** convenience shortcut.**/
@@ -45,7 +44,6 @@ namespace xo {
             /** @defgroup scm-runtimeerror-printable-facet printable facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             void pretty(xo::pp::PpSink & sink) const;
 

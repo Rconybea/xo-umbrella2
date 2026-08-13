@@ -1017,33 +1017,6 @@ namespace xo {
         }
 #endif
 
-        bool
-        DProgressSsm::pretty_deprecated(const xo::print::ppindentinfo & ppii) const
-        {
-            scope log(XO_DEBUG(false));
-            log && log(xtag("lhs_.tseq", lhs_._typeseq()));
-            log && log(xtag("rhs_.tseq", rhs_._typeseq()));
-
-            obj<APrintable> lhs
-                = FacetRegistry::instance().try_variant<APrintable,AExpression>(lhs_);
-
-            obj<APrintable> rhs
-                = FacetRegistry::instance().try_variant<APrintable,AExpression>(rhs_);
-
-            bool lhs_present = lhs;
-            bool rhs_present = rhs;
-            bool op_present = (op_type_ != optype::invalid);
-
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DProgressSsm",
-                        refrtag("lhs", lhs, lhs_present),
-                        refrtag("op", op_type_, op_present),
-                        refrtag("rhs", rhs, rhs_present),
-                        refrtag("expect", this->get_expect_str())
-                        );
-        }
-
         void
         DProgressSsm::pretty(xo::pp::PpSink & sink) const
         {

@@ -250,16 +250,6 @@ namespace xo {
         }
 #endif
 
-        bool
-        DSequenceSsm::pretty_deprecated(const xo::print::ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DSequenceSsm",
-                        refrtag("seq_expr.size", seq_expr_->size()),
-                        refrtag("expect", this->get_expect_str()));
-        }
-
         void
         DSequenceSsm::pretty(xo::pp::PpSink & sink) const
         {

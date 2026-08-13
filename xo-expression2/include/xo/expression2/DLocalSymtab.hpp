@@ -19,7 +19,6 @@ namespace xo {
         struct DLocalSymtab {
         public:
             using DArray = xo::scm::DArray;
-            using ppindentinfo = xo::print::ppindentinfo;
             using AGCObject = xo::mm::AGCObject;
             using VisitReason = xo::mm::VisitReason;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
@@ -106,7 +105,6 @@ namespace xo {
             /** @defgroup xo-localsymtab-printable-facet printable facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this symbol table into
              *  @p sink

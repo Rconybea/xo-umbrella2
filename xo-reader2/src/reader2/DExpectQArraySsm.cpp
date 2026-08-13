@@ -8,7 +8,6 @@
 #include <xo/object2/Array.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
@@ -208,19 +207,6 @@ namespace xo {
             }
 
             Super::illegal_quoted_literal(lit, p_psm);
-        }
-
-        bool
-        DExpectQArraySsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            obj<AGCObject,DArray> array(array_);
-            auto array_pr = FacetRegistry::instance().variant<APrintable,AGCObject>(array);
-
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DExpectQArraySsm",
-                                             refrtag("state", state_),
-                                             refrtag("expect", this->get_expect_str()),
-                                             refrtag("array", array_pr));
         }
 
         void

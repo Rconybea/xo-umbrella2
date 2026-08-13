@@ -92,7 +92,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using DArena = xo::mm::DArena;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             DProgressSsm(obj<AExpression> lhs, optype op);
@@ -195,7 +194,6 @@ namespace xo {
             /** @defgroup scm-progressssm-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

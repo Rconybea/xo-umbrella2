@@ -7,9 +7,6 @@
 #include "Array.hpp"
 #include "String.hpp"
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/pretty.hpp>  /* pretty_deprecated body only; DELETE AT PHASE E.
-                                          * Was arriving transitively via
-                                          * ppdetail_Printable.hpp, which phase E removes. */
 #include <utility>
 
 namespace xo {
@@ -236,66 +233,6 @@ namespace xo {
         }
 
         // ----- printable facet ----
-
-        bool
-        DDictionary::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            using xo::print::ppstate;
-
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                pps->write("{");
-
-                for (size_type i = 0, n = this->size(); i < n; ++i) {
-                    pps->write(" ");
-
-                    obj<APrintable> key
-                        = FacetRegistry::instance().variant<APrintable,AGCObject>((*keys_)[i]);
-                    obj<APrintable> value
-                        = FacetRegistry::instance().variant<APrintable,AGCObject>((*values_)[i]);
-
-                    assert(key.data());
-                    assert(value.data());
-
-                    if (!pps->print_upto(key))
-                        return false;
-                    pps->write(": ");
-
-                    if (!pps->print_upto(value))
-                        return false;
-                    pps->write(";");
-                }
-
-                pps->write(" }");
-                return true;
-            } else {
-                pps->write("{");
-
-                for (size_type i = 0, n = this->size(); i < n; ++i) {
-                    if (i == 0) {
-                        /* indent, but credit initial {. using same line for first (key,value) */
-                        pps->indent(std::max(pps->indent_width(), 1u) - 1);
-                    } else {
-                        /* indent after newline */
-                        pps->newline_indent(ppii.ci1());
-                    }
-
-                    obj<APrintable> key
-                        = FacetRegistry::instance().variant<APrintable,AGCObject>((*keys_)[i]);
-                    obj<APrintable> value
-                        = FacetRegistry::instance().variant<APrintable,AGCObject>((*values_)[i]);
-
-                    pps->pretty(key);
-                    pps->write(": ");
-                    pps->pretty(value);
-                    pps->write(";");
-                }
-
-                pps->write(" }");
-                return false;
-            }
-        }
 
         void
         DDictionary::pretty(xo::pp::PpSink & sink) const

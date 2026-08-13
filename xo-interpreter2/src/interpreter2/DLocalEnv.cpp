@@ -110,20 +110,6 @@ namespace xo {
 
         // ----- printable facet -----
 
-        bool
-        DLocalEnv::pretty_deprecated(const ppindentinfo & ppii) const noexcept
-        {
-            // print local bindings, perhaps
-            //   symtab_
-            //   args_
-
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DLocalEnv",
-                 refrtag("n_args", args_->size())
-                    );
-        }
-
         void
         DLocalEnv::pretty(xo::pp::PpSink & sink) const noexcept
         {
@@ -139,7 +125,7 @@ namespace xo {
              * behaviour.
              *
              * Legacy's comment "print local bindings, perhaps symtab_ args_"
-             * is left above with pretty_deprecated: it is a note about what
+             * came from the deprecated printer: it is a note about what
              * this printer could show, not about how it shows it.
              */
             const auto n_args = args_->size();

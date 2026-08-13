@@ -4,9 +4,6 @@
  **/
 
 #include "RuntimeError.hpp"
-#include <xo/indentlog/print/pretty.hpp>  /* pretty_deprecated body only; DELETE AT PHASE E.
-                                          * Was arriving transitively via
-                                          * ppdetail_Printable.hpp, which phase E removes. */
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
@@ -70,16 +67,6 @@ namespace xo {
         }
 
         // ----- Printable facet -----
-
-        bool
-        DRuntimeError::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DRuntimeError",
-                 refrtag("src", obj<APrintable,DString>(src_function_)),
-                 refrtag("err", obj<APrintable,DString>(error_descr_)));
-        }
 
         void
         DRuntimeError::pretty(xo::pp::PpSink & sink) const

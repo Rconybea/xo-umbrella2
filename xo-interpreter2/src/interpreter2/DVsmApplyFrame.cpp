@@ -5,7 +5,6 @@
 
 #include "DVsmApplyFrame.hpp"
 #include <xo/object2/Array.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
@@ -55,15 +54,6 @@ namespace xo {
             gc.visit_child(reason, &parent_);
             gc.visit_child(reason, &fn_);
             gc.visit_child(reason, &args_);
-        }
-
-        bool
-        DVsmApplyFrame::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DVsmApplyFrame",
-                                             refrtag("cont", cont_),
-                                             refrtag("n_args", args_->size()));
         }
 
         void

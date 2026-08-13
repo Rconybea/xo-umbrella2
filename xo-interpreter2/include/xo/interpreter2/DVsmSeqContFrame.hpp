@@ -19,7 +19,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** @defgroup scm-vsmevalsequenceframe-ctors constructors **/
@@ -63,7 +62,6 @@ namespace xo {
             /** @defgrouop scm-vsmseqcontframe-printable-facet printable facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const noexcept;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

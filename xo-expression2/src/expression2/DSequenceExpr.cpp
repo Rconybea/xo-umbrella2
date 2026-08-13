@@ -97,19 +97,6 @@ namespace xo {
             typeref_.resolve(td);
         }
 
-        bool
-        DSequenceExpr::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            using xo::print::ppstate;
-
-            auto expr_v_pr = obj<APrintable,DArray>(expr_v_);
-
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DSequenceExpr",
-                 refrtag("expr_v", expr_v_pr));
-        }
-
         void
         DSequenceExpr::pretty(xo::pp::PpSink & sink) const
         {

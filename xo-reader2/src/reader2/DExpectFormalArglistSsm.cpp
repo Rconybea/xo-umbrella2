@@ -17,8 +17,6 @@
 
 namespace xo {
     using xo::print::APrintable;
-    using xo::print::ppstate;
-    using xo::print::ppindentinfo;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
     using xo::mm::AAllocator;
@@ -295,69 +293,6 @@ namespace xo {
             }
 
             Super::on_token(tk, p_psm);
-        }
-
-        bool
-        DExpectFormalArglistSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                if (!pps->print_upto("<DExpectFormalArglistSsm"))
-                    return false;
-
-                if (!pps->print_upto(xrefrtag("fastate", fastate_)))
-                    return false;
-
-                if (!pps->print_upto(xrefrtag("expect", this->get_expect_str())))
-                    return false;
-
-                if (!pps->print_upto(xrefrtag("n_args", argl_->size())))
-                    return false;
-
-                for (size_type i_arg = 0; i_arg < argl_->size(); ++i_arg) {
-                    char buf[80];
-                    snprintf(buf, sizeof(buf), "arg[%u]", i_arg);
-
-                    auto arg_gco = argl_->at(i_arg);
-                    obj<APrintable> arg_pr
-                        = FacetRegistry::instance().try_variant<APrintable,AGCObject>(arg_gco);
-
-                    if (!pps->print_upto(xrefrtag(buf, arg_pr)))
-                        return false;
-                }
-
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<DExpectFormalArglistSsm");
-
-                pps->newline_indent(ppii.ci1());
-                pps->pretty(refrtag("fastate", fastate_));
-
-                pps->newline_indent(ppii.ci1());
-                pps->pretty(refrtag("expect", this->get_expect_str()));
-
-                pps->newline_indent(ppii.ci1());
-                pps->pretty(refrtag("n_args", argl_->size()));
-
-                for (size_type i_arg = 0, n_arg = argl_->size(); i_arg < n_arg; ++i_arg) {
-                    char buf[80];
-                    snprintf(buf, sizeof(buf), "arg[%u]", i_arg);
-
-                    auto arg_gco = argl_->at(i_arg);
-                    obj<APrintable> arg_pr
-                        = FacetRegistry::instance().try_variant<APrintable,AGCObject>(arg_gco);
-
-                    pps->newline_indent(ppii.ci1());
-                    pps->pretty(refrtag(buf, arg_pr));
-                }
-
-                pps->write(">");
-
-                return false;
-            }
         }
 
         void

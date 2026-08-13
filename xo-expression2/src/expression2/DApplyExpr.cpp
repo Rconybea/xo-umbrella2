@@ -10,8 +10,18 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/concat.hpp>         /* concat("arg", n) for generated names */
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.struct_open(..), struct_scope */
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    /* the ppsink printing vocabulary, for the exception messages below.
+     * Was reaching legacy xo::tostr/xo::xtag transitively through
+     * <xo/indentlog/print/pretty.hpp>, which phase E removed with the
+     * pretty_deprecated body that needed it.
+     */
+    using xo::pp::tostr;
+    using xo::pp::xtag;
+
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::reflect::typeseq;
@@ -141,58 +151,6 @@ namespace xo {
         }
 
         // ----- printable facet -----
-
-        bool
-        DApplyExpr::pretty_deprecated(const ppindentinfo & ppii) const {
-            using xo::print::ppstate;
-
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                /* perhaps print on one line */
-                if (!pps->print_upto("<ApplyExpr"))
-                    return false;
-
-                {
-                    obj<APrintable> fn
-                        = FacetRegistry::instance().variant<APrintable>(fn_);
-                    if (!pps->print_upto(refrtag("fn", fn)))
-                        return false;
-                }
-
-                for (size_t i_arg = 0; i_arg < n_args_; ++i_arg) {
-                    obj<APrintable> arg_i
-                        = FacetRegistry::instance().variant<APrintable>(args_[i_arg]);
-
-                    if (!pps->print_upto(refrtag(concat("arg", 1+i_arg), arg_i)))
-                        return false;
-                }
-
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<ApplyExpr");
-
-                obj<APrintable> fn
-                    = FacetRegistry::instance().variant<APrintable>(fn_);
-
-                pps->newline_indent(ppii.ci1());
-                pps->pretty(refrtag("fn", fn));
-
-                for (size_t i_arg = 0; i_arg < n_args_; ++i_arg) {
-                    obj<APrintable> arg_i
-                        = FacetRegistry::instance().variant<APrintable>(args_[i_arg]);
-
-                    pps->newline_indent(ppii.ci1());
-                    pps->pretty(refrtag(concat("arg", 1+i_arg), arg_i));
-                }
-
-                pps->write(">");
-
-                return false;
-            }
-        }
 
         void
         DApplyExpr::pretty(xo::pp::PpSink & sink) const

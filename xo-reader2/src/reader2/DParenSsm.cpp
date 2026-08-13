@@ -452,15 +452,6 @@ namespace xo {
         }
 #endif
 
-        bool
-        DParenSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DParenSsm",
-                                             refrtag("parenstate", parenstate_),
-                                             refrtag("expect", this->get_expect_str()));
-        }
-
         void
         DParenSsm::pretty(xo::pp::PpSink & sink) const
         {

@@ -128,15 +128,6 @@ namespace xo {
 
         // ----- APrintable facet -----
 
-        bool
-        DGlobalEnv::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DGlobalEnv",
-                        refrtag("n_vars", symtab_->n_vars()));
-        }
-
         void
         DGlobalEnv::pretty(xo::pp::PpSink & sink) const
         {

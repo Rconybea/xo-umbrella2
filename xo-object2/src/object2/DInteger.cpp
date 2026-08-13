@@ -4,11 +4,9 @@
  **/
 
 #include "DInteger.hpp"
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     using xo::facet::typeseq;
-    using xo::print::ppdetail_atomic;
 
     namespace scm {
         DInteger *
@@ -21,12 +19,6 @@ namespace xo {
                 return new (mem) DInteger(x);
 
             return nullptr;
-        }
-
-        bool
-        DInteger::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppdetail_atomic<long>::print_pretty(ppii, value_);
         }
 
         void

@@ -44,7 +44,6 @@ namespace xo {
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using DArena = xo::mm::DArena;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             explicit DToplevelSeqSsm(exprseqtype ty);
@@ -154,8 +153,6 @@ namespace xo {
             /** @defgroup scm-exprseq-printable-facet printable facet methods **/
             ///@{
 
-            /** pretty-printing driver; combine layout+printing **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

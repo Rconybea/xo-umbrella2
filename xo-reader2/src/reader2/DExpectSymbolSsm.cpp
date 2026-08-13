@@ -139,16 +139,6 @@ namespace xo {
             p_psm->on_parsed_symbol(std::string_view(tk.text()));
         }
 
-        bool
-        DExpectSymbolSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                (ppii,
-                 "DExpectSymbolSsm"
-                 //refrtag("member", member_)
-                    );
-        }
-
         void
         DExpectSymbolSsm::pretty(xo::pp::PpSink & sink) const
         {

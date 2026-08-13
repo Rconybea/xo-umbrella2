@@ -24,7 +24,6 @@ namespace xo {
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using TypeDescr = xo::reflect::TypeDescr;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** @defgroup scm-ifelseexpr-constructors **/
@@ -91,7 +90,6 @@ namespace xo {
             /** @defgroup scm-ifelseexpr-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this if/else into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

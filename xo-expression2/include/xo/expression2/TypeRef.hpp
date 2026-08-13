@@ -10,7 +10,6 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/flatstring/flatstring.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/Prettifier.hpp>   /* Prettifier<TypeRef>, below */
 
 namespace xo {
@@ -29,7 +28,6 @@ namespace xo {
             using prefix_type = flatstring<8>;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             TypeRef() = default;
@@ -72,8 +70,6 @@ namespace xo {
             /** resolve TypeRef by supplying final type-description **/
             void resolve(TypeDescr td) noexcept { td_ = td; }
 
-            /** pretty-printer support **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this typeref into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
@@ -98,18 +94,6 @@ namespace xo {
             TypeDescr td_ = nullptr;
         };
     } /*namespace scm*/
-
-    namespace print {
-        /** pretty printer in <xo/indentlog/print/pretty.hpp> relies on this specialization
-         *  to handle TypeRef instances
-         **/
-        template <>
-        struct ppdetail<xo::scm::TypeRef> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::TypeRef x) {
-                return x.pretty_deprecated(ppii);
-            }
-        };
-    }
 
     namespace pp {
         /** ppsink mirror of print::ppdetail<TypeRef> above.

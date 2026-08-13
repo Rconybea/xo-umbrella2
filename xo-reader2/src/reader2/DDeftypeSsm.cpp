@@ -265,15 +265,6 @@ namespace xo {
             Super::illegal_token(tk, p_psm);
         }
 
-        bool
-        DDeftypeSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DDeftypeSsm",
-                                             refrtag("deftypestate", deftype_xst_),
-                                             refrtag("expect", this->get_expect_str()));
-        }
-
         void
         DDeftypeSsm::pretty(xo::pp::PpSink & sink) const
         {

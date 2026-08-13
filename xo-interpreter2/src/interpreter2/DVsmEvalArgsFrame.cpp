@@ -5,13 +5,11 @@
 
 #include "DVsmEvalArgsFrame.hpp"
 #include <xo/expression2/ApplyExpr.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::pp::field;
     using xo::facet::typeseq;
-    using xo::print::ppindentinfo;
 
     namespace scm {
 
@@ -57,14 +55,6 @@ namespace xo {
             gc.visit_child(reason, &apply_expr_);
         }
 
-        bool
-        DVsmEvalArgsFrame::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DVsmEvalArgsFrame",
-                                             refrtag("cont", cont_),
-                                             refrtag("i_arg", i_arg_));
-        }
         void
         DVsmEvalArgsFrame::pretty(xo::pp::PpSink & sink) const
         {

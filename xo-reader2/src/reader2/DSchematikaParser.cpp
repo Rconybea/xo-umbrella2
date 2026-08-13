@@ -162,29 +162,6 @@ namespace xo {
                << ">" << std::endl;
         }
 
-        bool
-        DSchematikaParser::pretty_deprecated(const ppindentinfo & ppii) const {
-            auto * pps = ppii.pps();
-
-            if (ppii.upto())
-                return false;
-
-            // TODO: consider printing:
-            //   psm.stringtable_
-            //   psm.parser_alloc_
-            //   psm.parser_alloc_ckp_
-            //   psm.expr_alloc_
-            //   psm.result_
-            //   psm.debug_flag_
-            //
-
-            return pps->pretty_struct
-                       (ppii,
-                        "SchematikaParser",
-                        refrtag("stack", psm_.stack())
-                           );
-        }
-
         void
         DSchematikaParser::pretty(xo::pp::PpSink & sink) const
         {

@@ -59,7 +59,6 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
             using DArena = xo::mm::DArena;
             using TypeDescr = xo::reflect::TypeDescr;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** @defgroup scm-ifelsessm-expression-ctors constructors **/
@@ -159,7 +158,6 @@ namespace xo {
             /** @defgroup scm-ifelsessm-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

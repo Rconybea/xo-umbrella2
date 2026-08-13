@@ -9,7 +9,6 @@
 #include <xo/reflect/TypeDescr_pp.hpp>   /* Prettifier<TypeDescr> for the :td field */
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/cond.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/print/quoted.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.struct_open(..) */
 #include <xo/ppsink/quoted.hpp>          /* xo::pp::quot */
@@ -110,19 +109,6 @@ namespace xo {
                                     obj<AGCObjectVisitor> gc) noexcept
         {
             gc.visit_poly_child(reason, &type_);
-        }
-
-        bool
-        TypeRef::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            using xo::print::quot;
-
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "TypeRef"
-                        , refrtag("id", quot(id_))
-                        , refrtag("td", cond(td_, td_, "null"))
-                           );
         }
 
         void

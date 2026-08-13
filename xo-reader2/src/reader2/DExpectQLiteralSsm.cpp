@@ -16,8 +16,6 @@
 namespace xo {
     using xo::pp::field;
 //    using xo::print::APrintable;
-//    using xo::print::ppstate;
-//    using xo::print::ppindentinfo;
     using xo::mm::AGCObject;
 //    using xo::mm::AAllocator;
 //    using xo::facet::FacetRegistry;
@@ -248,14 +246,6 @@ namespace xo {
             p_psm->pop_ssm();
             DExpectQDictSsm::start(p_psm);
             p_psm->on_token(tk);
-        }
-
-        bool
-        DExpectQLiteralSsm::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DExpectQLiteralSsm",
-                                             refrtag("expect", this->get_expect_str()));
         }
 
         void

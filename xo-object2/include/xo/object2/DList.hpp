@@ -8,7 +8,6 @@
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
     namespace scm {
@@ -23,7 +22,6 @@ namespace xo {
             using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             DList(xo::obj<AGCObject> h,
@@ -69,8 +67,6 @@ namespace xo {
             /** assign rest-pointer. Caller responsible for preserving acyclic property! **/
             void _assign_rest(obj<AAllocator> mm, DList * r);
 
-            /** pretty-printing driver; combine layout+printing **/
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this list into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

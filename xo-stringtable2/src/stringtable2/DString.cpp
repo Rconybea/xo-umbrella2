@@ -5,13 +5,11 @@
 
 #include "DString.hpp"
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <algorithm>
 #include <cstring>
 
 namespace xo {
     using xo::reflect::typeseq;
-    using xo::print::ppdetail_atomic;
 
     namespace scm {
         DString *
@@ -177,12 +175,6 @@ namespace xo {
         DString::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept
         {
             // no-op.  no children!
-        }
-
-        bool
-        DString::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppdetail_atomic<const char *>::print_pretty(ppii, &(chars_[0]));
         }
 
         void

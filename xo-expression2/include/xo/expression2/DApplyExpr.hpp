@@ -11,7 +11,6 @@
 #include <xo/object2/DArray.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace scm {
@@ -25,7 +24,6 @@ namespace xo {
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using TypeDescr = xo::reflect::TypeDescr;
-            using ppindentinfo = xo::print::ppindentinfo;
             using size_type = std::uint32_t;
 
         public:
@@ -91,7 +89,6 @@ namespace xo {
             /** @defgroup scm-applyexpr-printable-facet **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this apply-expr into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

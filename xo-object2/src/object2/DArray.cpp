@@ -6,12 +6,15 @@
 #include "DArray.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/pretty.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tostr.hpp>
 #include <cstdint>
 
 namespace xo {
+    /* the ppsink printing vocabulary, for use below */
+    using xo::pp::tostr;
+    using xo::pp::xtag;
+
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::mm::AGCObject;
@@ -65,12 +68,9 @@ namespace xo {
             if (ix < size_) {
                 return elts_[ix];
             } else {
-                /* QUALIFIED, for the same reason as DList::at -- legacy
-                 * pretty.hpp is still included for pretty_deprecated.
-                 */
-                throw std::runtime_error(xo::pp::tostr("DArray::at: out-of-range index where [0..z) expected",
-                                                       xo::pp::xtag("index", ix),
-                                                       xo::pp::xtag("z", this->size())));
+                throw std::runtime_error(tostr("DArray::at: out-of-range index where [0..z) expected",
+                                               xtag("index", ix),
+                                               xtag("z", this->size())));
                 return obj<AGCObject>();
             }
         }
@@ -148,56 +148,6 @@ namespace xo {
         }
 
         // printing support
-
-        bool
-        DArray::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            using xo::print::ppstate;
-
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                /* perhaps print on one line */
-                pps->write("[");
-
-                for (size_t i = 0, n = this->size(); i < n; ++i ) {
-                    if (i > 0)
-                        pps->write(" ");
-
-                    obj<APrintable> elt
-                        = FacetRegistry::instance().variant<APrintable,AGCObject>(this->at(i));
-
-                    assert(elt.data());
-
-                    if (!pps->print_upto(elt))
-                        return false;
-                }
-
-                pps->write("]");
-                return true;
-            } else {
-                pps->write("[");
-
-                for (size_type i = 0, n = this->size(); i < n; ++i) {
-                    if (i == 0) {
-                        /* indent, but credit initial [ */
-                        pps->indent(std::max(pps->indent_width(), 1u) - 1);
-                    } else {
-                        /* indent after newline */
-                        pps->newline_indent(ppii.ci1());
-                    }
-
-                    obj<APrintable> elt = this->at(i).to_facet<APrintable>();
-
-                    assert(elt.data());
-
-                    pps->pretty(elt);
-                }
-
-                pps->write("]");
-                return false;
-            }
-        }
 
         void
         DArray::pretty(xo::pp::PpSink & sink) const

@@ -8,7 +8,6 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
     namespace scm {
@@ -16,7 +15,6 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
-            using ppindentinfo = xo::print::ppindentinfo;
             using value_type = double;
 
             explicit DFloat(double x) : value_{x} {}
@@ -32,7 +30,6 @@ namespace xo {
 
             operator double() const noexcept { return value_; }
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render this float into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

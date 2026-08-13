@@ -7,7 +7,6 @@
 
 #include "DSyntaxStateMachine.hpp"
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
     namespace scm {
@@ -31,7 +30,6 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using DArena = xo::mm::DArena;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             /** @defgroup scm-expecttype-ctors constructors **/
@@ -81,7 +79,6 @@ namespace xo {
             /** @defgroup scm-expecttype-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;

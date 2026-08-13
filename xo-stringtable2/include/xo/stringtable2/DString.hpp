@@ -8,7 +8,6 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <cstdint>
 #include <functional>
 #include <string_view>
@@ -48,7 +47,6 @@ namespace xo {
             /** visitor hint **/
             using VisitReason = xo::mm::VisitReason;
             /** ppindentinfo for APrintable **/
-            using ppindentinfo = xo::print::ppindentinfo;
             ///@}
             /** @defgroup dstring-ctors constructors **/
             ///@{
@@ -236,7 +234,6 @@ namespace xo {
             /** @defgroup dstring-printable-methods printable facet methods **/
             ///@{
 
-            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             void pretty(xo::pp::PpSink & sink) const;
 

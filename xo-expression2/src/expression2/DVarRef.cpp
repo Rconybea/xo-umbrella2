@@ -79,16 +79,6 @@ namespace xo {
 
         // printable facet
 
-        bool
-        DVarRef::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DVarRef",
-                        refrtag("name", std::string_view(*(this->name()))),
-                        refrtag("path", this->path_));
-        }
-
         void
         DVarRef::pretty(xo::pp::PpSink & sink) const
         {

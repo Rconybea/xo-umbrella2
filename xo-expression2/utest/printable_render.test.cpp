@@ -46,7 +46,6 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/reflect/TypeDescr_ppdetail.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
 #include <xo/arena/ArenaHashMapConfig.hpp>

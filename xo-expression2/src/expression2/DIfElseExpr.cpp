@@ -10,8 +10,15 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/reflectutil/typeseq.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    /* ppsink vocabulary: exception messages, and print(ostream&) via tag_ostream */
+    using xo::pp::tostr;
+    using xo::pp::xtag;
+
     using xo::mm::AGCObject;
     using xo::print::APrintable;
     using xo::reflect::typeseq;
@@ -102,32 +109,6 @@ namespace xo {
         }
 
         // ----- printable facet -----
-
-        bool
-        DIfElseExpr::pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            auto test
-                = FacetRegistry::instance().try_variant<APrintable,
-                                                        AExpression>(test_);
-            auto when_true
-                = FacetRegistry::instance().try_variant<APrintable,
-                                                        AExpression>(when_true_);
-            auto when_false
-                = FacetRegistry::instance().try_variant<APrintable,
-                                                        AExpression>(when_false_);
-
-            bool test_present = test;
-            bool when_true_present = when_true;
-            bool when_false_present = when_false;
-
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "DIfElseExpr",
-                        refrtag("typeref", typeref_),
-                        refrtag("test", test, test_present),
-                        refrtag("when_true", when_true, when_true_present),
-                        refrtag("when_false", when_false, when_false_present));
-        }
 
         void
         DIfElseExpr::pretty(xo::pp::PpSink & sink) const
