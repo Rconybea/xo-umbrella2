@@ -10,9 +10,18 @@
 #include "ListType.hpp"
 #include "TypeVarRef.hpp"
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Was reaching legacy
+     * xo::scope / xo::xtag through a TRANSITIVE xo-indentlog propagated by
+     * xo-object2, which dropped that dependency at phase E; xo-type never
+     * declared one itself (its find_dependency is commented out).
+     */
+    using xo::pp::scope;
+
     using xo::mm::AGCObject;
     using xo::facet::FacetRegistry;
     using xo::facet::impl_for;
@@ -23,7 +32,7 @@ namespace xo {
         bool
         SetupType::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             FacetRegistry::register_impl<AType, DAtomicType>();
             FacetRegistry::register_impl<AGCObject, DAtomicType>();
@@ -40,11 +49,11 @@ namespace xo {
             FacetRegistry::register_impl<AType, DTypeVarRef>();
             FacetRegistry::register_impl<AGCObject, DTypeVarRef>();
 
-            log && log(xtag("DAtomicType.tseq", typeseq::id<DAtomicType>()));
-            log && log(xtag("DListType.tseq", typeseq::id<DListType>()));
-            log && log(xtag("DArrayType.tseq", typeseq::id<DArrayType>()));
-            log && log(xtag("DFunctionType.tseq", typeseq::id<DFunctionType>()));
-            log && log(xtag("DTypeVarRef.tseq", typeseq::id<DTypeVarRef>()));
+            log && log(xo::pp::xtag("DAtomicType.tseq", typeseq::id<DAtomicType>()));
+            log && log(xo::pp::xtag("DListType.tseq", typeseq::id<DListType>()));
+            log && log(xo::pp::xtag("DArrayType.tseq", typeseq::id<DArrayType>()));
+            log && log(xo::pp::xtag("DFunctionType.tseq", typeseq::id<DFunctionType>()));
+            log && log(xo::pp::xtag("DTypeVarRef.tseq", typeseq::id<DTypeVarRef>()));
 
             return true;
         }
@@ -52,7 +61,7 @@ namespace xo {
         bool
         SetupType::register_types(obj<ACollector> gc)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bool ok = true;
 
