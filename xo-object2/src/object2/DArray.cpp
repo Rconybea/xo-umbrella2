@@ -7,8 +7,8 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/tostr.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <cstdint>
 
 namespace xo {
@@ -65,9 +65,12 @@ namespace xo {
             if (ix < size_) {
                 return elts_[ix];
             } else {
-                throw std::runtime_error(tostr("DArray::at: out-of-range index where [0..z) expected",
-                                               xtag("index", ix),
-                                               xtag("z", this->size())));
+                /* QUALIFIED, for the same reason as DList::at -- legacy
+                 * pretty.hpp is still included for pretty_deprecated.
+                 */
+                throw std::runtime_error(xo::pp::tostr("DArray::at: out-of-range index where [0..z) expected",
+                                                       xo::pp::xtag("index", ix),
+                                                       xo::pp::xtag("z", this->size())));
                 return obj<AGCObject>();
             }
         }

@@ -8,7 +8,6 @@
 #include "list/IPrintable_DList.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/indentlog/scope.hpp>
 
 // need Collector for mm_do_assign()
 #include <xo/alloc2/Collector.hpp>
@@ -17,7 +16,10 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/indentlog/print/pretty.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
     using xo::print::APrintable;
@@ -114,10 +116,16 @@ namespace xo {
             if (ix > 0) {
                 assert(l == nullptr);
 
+                /* QUALIFIED: legacy <xo/indentlog/print/pretty.hpp> is still
+                 * included above for the pretty_deprecated body, so xo::tostr
+                 * and xo::xtag are still visible here and a
+                 * using-declaration would be ambiguous.  Phase E removes that
+                 * include, after which these can be unqualified.
+                 */
                 throw std::runtime_error
-                    (tostr("DList::at: out-of-range index where [0..z) expected",
-                           xtag("index", index),
-                           xtag("z", this->size())));
+                    (xo::pp::tostr("DList::at: out-of-range index where [0..z) expected",
+                                   xo::pp::xtag("index", index),
+                                   xo::pp::xtag("z", this->size())));
             }
 
             assert(l);
@@ -128,7 +136,7 @@ namespace xo {
         void
         DList::assign_head(obj<AAllocator> mm, obj<AGCObject> rhs)
         {
-            scope log(XO_DEBUG(true), xtag("mm.data", mm.data_));
+            xo::pp::scope log(XO_DEBUG_(true), xo::pp::xtag("mm.data", mm.data_));
 
             mm.barrier_assign(this, &head_, rhs);
 
@@ -141,7 +149,7 @@ namespace xo {
         void
         DList::assign_head_gc(obj<ACollector> gc, obj<AGCObject> rhs)
         {
-            scope log(XO_DEBUG(true), xtag("gc.data", gc.data_));
+            xo::pp::scope log(XO_DEBUG_(true), xo::pp::xtag("gc.data", gc.data_));
 
             gc.assign_member(this, &head_, rhs);
         }

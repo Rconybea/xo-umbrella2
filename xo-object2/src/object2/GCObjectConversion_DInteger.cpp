@@ -4,9 +4,14 @@
  **/
 
 #include "number/GCObjectConversion_DInteger.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    /* the ppsink printing vocabulary, for use below */
+    using xo::pp::tostr;
+    using xo::pp::xtag;
+
     using xo::mm::AGCObject;
 
     namespace scm {

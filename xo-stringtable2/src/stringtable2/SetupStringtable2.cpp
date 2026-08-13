@@ -7,9 +7,15 @@
 #include <xo/stringtable2/String.hpp>
 #include <xo/stringtable2/UniqueString.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::print::APrintable;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
@@ -22,7 +28,7 @@ namespace xo {
         bool
         SetupStringtable2::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             FacetRegistry::register_impl<AGCObject, DUniqueString>();
             FacetRegistry::register_impl<APrintable, DUniqueString>();
@@ -30,12 +36,18 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DString>();
             FacetRegistry::register_impl<APrintable, DString>();
 
-            /* .seqno(), not the typeseq itself: this is LEGACY xtag, which
-             * renders via operator<<, and typeseq no longer has one -- its
-             * rendering is Prettifier<typeseq> (xo/reflectutil/typeseq_pp.hpp).
-             * Output is unchanged; the legacy inserter printed seqno() too.
+            /* the typeseq itself, not .seqno(): on ppsink xtag this renders
+             * through Prettifier<typeseq> (xo/reflectutil/typeseq_pp.hpp),
+             * which emits the bare seqno.  The .seqno() call was a workaround
+             * for LEGACY xtag, which renders via operator<< and typeseq has
+             * none.  Output unchanged either way.
+             *
+             * QUALIFIED xo::pp::xtag: typeseq's associated namespace still
+             * reaches a legacy xtag overload, and ADL cannot be suppressed by
+             * a using-declaration.  Same trap as the gp<Object> case recorded
+             * in .xo-backlog/xo-alloc/issues/01.
              */
-            log && log(xtag("DString.tseq", typeseq::id<DString>().seqno()));
+            log && log(xo::pp::xtag("DString.tseq", typeseq::id<DString>()));
 
             return true;
         }
@@ -43,7 +55,7 @@ namespace xo {
         bool
         SetupStringtable2::register_types(obj<ACollector> gc)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bool ok = true;
 

@@ -6,10 +6,16 @@
 #include "DUniqueString.hpp"
 #include "DString.hpp"
 #include <xo/arena/padding.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <cstring>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::mm::padding;
     using xo::facet::typeseq;
 
@@ -60,7 +66,7 @@ namespace xo {
         DUniqueString::from_view(obj<AAllocator> mm,
                                  std::string_view sv)
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             /** fine point: choosing to allocate DUniqueString ahead of DString,
              *  so it comes first in bump allocator

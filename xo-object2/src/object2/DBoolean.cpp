@@ -5,7 +5,6 @@
 
 #include "DBoolean.hpp"
 #include <xo/indentlog/print/pretty.hpp>
-#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::facet::typeseq;

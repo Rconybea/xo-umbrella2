@@ -6,6 +6,8 @@
 #include <xo/object2/DArray.hpp>
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/ListOps.hpp>
+#include <stdexcept>
+#include <string>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>
@@ -200,6 +202,55 @@ namespace xo {
             REQUIRE(arr->size() == 0);
             REQUIRE(arr->capacity() == 0);
             REQUIRE(arr->is_empty() == true);
+        }
+
+        /** DArray::at()'s out-of-range message.
+         *
+         *  Added when the message moved from legacy xo::tostr/xo::xtag to
+         *  xo::pp::tostr/xo::pp::xtag (2026-08-12,
+         *  .xo-backlog/xo-object2/issues/01-object2-free-of-indentlog.md).
+         *  It had NO coverage, so nothing would have caught a change in it.
+         *
+         *  The rendering is byte-identical across the two vocabularies,
+         *  ANSI colour codes included -- verified by building both and
+         *  diffing.  Colour is expected: legacy gated it on
+         *  tag_config::tag_color_enabled, which defaults true, and ppsink's
+         *  gate also defaults on.
+         *
+         *  Substring, not equality: the tag rendering carries colour escapes
+         *  whose exact bytes are a style decision, and pinning those here
+         *  would make this test fail for a deliberate palette change that has
+         *  nothing to do with DArray.
+         **/
+        TEST_CASE("DArray-at-out-of-range", "[object2][DArray]")
+        {
+            ArenaConfig cfg { .name_ = "atmsg", .size_ = 8*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DArray * arr = DArray::_empty(alloc, 4);
+            arr->push_back(alloc, DInteger::box(alloc, 7));
+
+            REQUIRE(arr->size() == 1);
+
+            bool threw = false;
+
+            try {
+                arr->at(9);
+            } catch (const std::runtime_error & ex) {
+                threw = true;
+
+                const std::string what = ex.what();
+
+                INFO("what=" << what);
+
+                CHECK(what.find("DArray::at: out-of-range index") != std::string::npos);
+                CHECK(what.find(":index") != std::string::npos);
+                CHECK(what.find("9") != std::string::npos);
+                CHECK(what.find(":z") != std::string::npos);
+            }
+
+            CHECK(threw);
         }
 
     } /*namespace ut*/

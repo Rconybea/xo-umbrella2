@@ -15,9 +15,14 @@
 #include <xo/alloc2/alloc/AAllocator.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below */
+    using xo::pp::scope;
+
     using xo::print::APrintable;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
@@ -36,7 +41,7 @@ namespace xo {
         bool
         SetupObject2::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             FacetRegistry::register_impl<AGCObject, DBoolean>();
             FacetRegistry::register_impl<APrintable, DBoolean>();
@@ -64,20 +69,20 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DRuntimeError>();
             FacetRegistry::register_impl<APrintable, DRuntimeError>();
 
-            log && log(xtag("DVariantPlaceholder.tseq", typeseq::id<DVariantPlaceholder>()));
+            log && log(xo::pp::xtag("DVariantPlaceholder.tseq", typeseq::id<DVariantPlaceholder>()));
 
-            log && log(xtag("DList.tseq", typeseq::id<DList>()));
-            log && log(xtag("DBoolean.tseq", typeseq::id<DBoolean>()));
-            log && log(xtag("DFloat.tseq", typeseq::id<DFloat>()));
-            log && log(xtag("DInteger.tseq", typeseq::id<DInteger>()));
-            log && log(xtag("DArray.tseq", typeseq::id<DArray>()));
-            log && log(xtag("DDictionary.tseq", typeseq::id<DDictionary>()));
-            log && log(xtag("DRuntimeError.tseq", typeseq::id<DRuntimeError>()));
+            log && log(xo::pp::xtag("DList.tseq", typeseq::id<DList>()));
+            log && log(xo::pp::xtag("DBoolean.tseq", typeseq::id<DBoolean>()));
+            log && log(xo::pp::xtag("DFloat.tseq", typeseq::id<DFloat>()));
+            log && log(xo::pp::xtag("DInteger.tseq", typeseq::id<DInteger>()));
+            log && log(xo::pp::xtag("DArray.tseq", typeseq::id<DArray>()));
+            log && log(xo::pp::xtag("DDictionary.tseq", typeseq::id<DDictionary>()));
+            log && log(xo::pp::xtag("DRuntimeError.tseq", typeseq::id<DRuntimeError>()));
 
-            log && log(xtag("AAllocator.tseq", typeseq::id<AAllocator>()));
-            log && log(xtag("APrintable.tseq", typeseq::id<APrintable>()));
-            log && log(xtag("AGCObject.tseq", typeseq::id<AGCObject>()));
-            log && log(xtag("ASequence.tseq", typeseq::id<ASequence>()));
+            log && log(xo::pp::xtag("AAllocator.tseq", typeseq::id<AAllocator>()));
+            log && log(xo::pp::xtag("APrintable.tseq", typeseq::id<APrintable>()));
+            log && log(xo::pp::xtag("AGCObject.tseq", typeseq::id<AGCObject>()));
+            log && log(xo::pp::xtag("ASequence.tseq", typeseq::id<ASequence>()));
 
             return true;
         }
@@ -85,7 +90,7 @@ namespace xo {
         bool
         SetupObject2::register_types(obj<ACollector> gc)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bool ok = true;
 
