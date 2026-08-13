@@ -38,8 +38,6 @@ xo-gc xo-reader2
 xo-indentlog xo-expression2
 xo-indentlog xo-gc
 xo-indentlog xo-object2
-xo-indentlog xo-printable2
-xo-indentlog xo-stringtable2
 xo-indentlog xo-tokenizer2
 xo-indentlog2 xo-alloc
 xo-indentlog2 xo-alloc2
@@ -52,6 +50,7 @@ xo-indentlog2 xo-object
 xo-indentlog2 xo-object2
 xo-indentlog2 xo-procedure2
 xo-indentlog2 xo-reader
+xo-indentlog2 xo-reader2
 xo-indentlog2 xo-stringtable2
 xo-jit xo-pyjit
 xo-kalmanfilter xo-pykalmanfilter
@@ -186,9 +185,11 @@ xo-testutil xo-expression
 xo-testutil xo-expression2
 xo-testutil xo-indentlog2
 xo-testutil xo-interpreter
+xo-testutil xo-interpreter2
 xo-testutil xo-object2
 xo-testutil xo-procedure2
 xo-testutil xo-ratio
+xo-testutil xo-reader2
 xo-testutil xo-reflect
 xo-testutil xo-stringtable2
 xo-testutil xo-webutil

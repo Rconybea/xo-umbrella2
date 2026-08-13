@@ -29,6 +29,5 @@ xo_install_include_tree3(include/xo/stringtable2)
 xo_dependency(${SELF_LIB} xo_alloc2)
 xo_dependency(${SELF_LIB} xo_printable2)
 xo_dependency(${SELF_LIB} subsys)
-xo_dependency(${SELF_LIB} indentlog)
 
 # end src/stringtable2/CMakeLists.txt

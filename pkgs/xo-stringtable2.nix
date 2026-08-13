@@ -8,7 +8,6 @@
   xo-printable2,
   xo-arena,
   xo-cmake,
-  xo-indentlog,
   xo-subsys,
 
   doCheck ? true,
@@ -31,7 +30,6 @@ stdenv.mkDerivation (finalattrs:
       cli11
     ];
     propagatedBuildInputs = [
-      xo-indentlog
       xo-subsys
       xo-alloc2
       xo-printable2
