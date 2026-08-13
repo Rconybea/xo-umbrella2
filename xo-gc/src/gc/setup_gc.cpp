@@ -8,9 +8,18 @@
 #include "X1Collector.hpp"
 #include "X1CollectorIterator.hpp"
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
     using xo::mm::DX1Collector;
@@ -22,7 +31,7 @@ namespace xo {
         bool
         SetupGc::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             FacetRegistry::register_impl<AAllocator, DX1Collector>();
             FacetRegistry::register_impl<ACollector, DX1Collector>();

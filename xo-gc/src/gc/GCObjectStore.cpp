@@ -14,11 +14,20 @@
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/DArenaIterator.hpp>
 #include <xo/arena/backtrace.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <cassert>
 #include <unistd.h> // for ::getpagesize()
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::scm::DDictionary;
     using xo::scm::DArray;
     using xo::scm::DString;
@@ -113,7 +122,7 @@ namespace xo {
         AGCObject *
         GCObjectStore::lookup_type(typeseq tseq) const noexcept
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             if (tseq.is_sentinel()
                 || (static_cast<ObjectTypeTable::size_type>(tseq.seqno())
@@ -292,7 +301,7 @@ namespace xo {
                                            obj<AAllocator> error_mm,
                                            obj<AGCObject> * p_output) const noexcept
         {
-            scope log(XO_DEBUG(this->config_.debug_flag_));
+            scope log(XO_DEBUG_(this->config_.debug_flag_));
 
             (void)error_mm;
 
@@ -405,7 +414,7 @@ namespace xo {
                                           obj<AAllocator> error_mm,
                                           obj<AGCObject> * p_output) const noexcept
         {
-            scope log(XO_DEBUG(this->config_.debug_flag_));
+            scope log(XO_DEBUG_(this->config_.debug_flag_));
 
             (void)error_mm;
 
@@ -521,7 +530,7 @@ namespace xo {
         {
             // upto == runstate_.gc_upto()
 
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("lhs_data", lhs_data),
                       xtag("*lhs_data", lhs_data ? *lhs_data : nullptr));
 
@@ -704,7 +713,7 @@ namespace xo {
         void
         GCObjectStore::_verify_aux(AGCObject * iface, void * data)
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             (void)iface;
 
@@ -794,7 +803,7 @@ namespace xo {
         bool
         GCObjectStore::install_type(const AGCObject & meta) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("tseq", meta._typeseq()),
                       xtag("tname", TypeRegistry::id2name(meta._typeseq())));
 
@@ -824,7 +833,7 @@ namespace xo {
         void
         GCObjectStore::swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("upto", upto));
 
             for (Generation g = Generation{0}; g < upto; ++g) {
@@ -838,7 +847,7 @@ namespace xo {
         GCObjectStore::cleanup_phase(Generation upto,
                                      bool sanitize_flag)
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("upto", upto));
 
             // everything live has been copied out of from-space
             // -> now set to empty
@@ -864,7 +873,7 @@ namespace xo {
             // This implements virtual root node feature,
             // intended to mitigate mutation log churn.
 
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             if (!root_data || !*root_data)
                 return nullptr;
@@ -906,7 +915,7 @@ namespace xo {
                                           void * from_src,
                                           Generation upto)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             if (!from_src)
                 return nullptr;
@@ -922,7 +931,7 @@ namespace xo {
         std::byte *
         GCObjectStore::alloc_copy(void * src) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             AllocInfo src_info = this->alloc_info((std::byte *)src);
             uint32_t age1p = std::min(src_info.age() + 1,
@@ -953,7 +962,7 @@ namespace xo {
                                            void * from_src,
                                            Generation upto)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             AllocInfo info = this->alloc_info((std::byte *)from_src);
             AllocHeader hdr = info.header();
@@ -1020,7 +1029,7 @@ namespace xo {
                                      AGCObject * iface,
                                      void * from_src)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("iface", iface),
                       xtag("from_src", from_src));
 
@@ -1065,7 +1074,7 @@ namespace xo {
                                                         Generation upto,
                                                         GCMoveCheckpoint gray_lo_v)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             /**
              *  To-space:

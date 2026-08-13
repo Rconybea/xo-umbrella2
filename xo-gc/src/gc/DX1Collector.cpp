@@ -16,13 +16,22 @@
 #include "object_age.hpp"
 #include <xo/alloc2/Arena.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <cassert>
 #include <cstdint>
 #include <sys/mman.h>
 #include <unistd.h> // for ::getpagesize()
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     // for report_statistics(), report_object_types()
     using xo::scm::DDictionary;
     using xo::scm::DArray;
@@ -475,7 +484,7 @@ namespace xo {
         void
         DX1Collector::execute_gc(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("upto", upto));
 
             assert(!runstate_.is_running());
 
@@ -555,7 +564,7 @@ namespace xo {
         void
         DX1Collector::_swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("upto", upto));
 
             gco_store_.swap_roles(upto);
             mlog_store_.swap_roles(upto);
@@ -564,7 +573,7 @@ namespace xo {
         void
         DX1Collector::_cleanup_phase(Generation upto)
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("upto", upto));
 
             this->gco_store_.cleanup_phase(upto, config_.sanitize_flag_);
             this->runstate_ = GCRunState::idle();
@@ -573,7 +582,7 @@ namespace xo {
         void
         DX1Collector::_copy_roots(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             for (RootSet::size_type i = 0, n = root_set_.size(); i < n; ++i) {
                 GCRoot & slot = root_set_[i];
@@ -636,7 +645,7 @@ namespace xo {
         DX1CollectorIterator
         DX1Collector::begin() const noexcept
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             const DArena * arena
                 = get_space(Role::to_space(),
@@ -651,7 +660,7 @@ namespace xo {
 
         DX1CollectorIterator
         DX1Collector::end() const noexcept {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             Generation gen_hi = Generation{config_.n_generation_};
 
@@ -684,7 +693,7 @@ namespace xo {
                                          AGCObject * lhs_iface, void ** lhs_data,
                                          AGCObject * rhs_iface, void * rhs_data)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("parent", parent),
                       xtag("lhs.iface", lhs_iface), xtag("&lhs.data", lhs_data),
                       xtag("rhs.iface", rhs_iface), xtag("rhs.data", rhs_data));

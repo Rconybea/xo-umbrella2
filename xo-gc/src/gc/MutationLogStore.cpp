@@ -5,9 +5,18 @@
 
 #include "MutationLogStore.hpp"
 #include "X1Collector.hpp" // temporary
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     namespace mm {
 
         MutationLogStore::MutationLogStore(const MutationLogConfig & config,
@@ -147,7 +156,7 @@ namespace xo {
                                             AGCObject * rhs_iface,
                                             void * rhs_data)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("parent", parent),
                       xtag("lhs.iface", lhs_iface),
                       xtag("&lhs.data", lhs_addr),
@@ -273,7 +282,7 @@ namespace xo {
         void
         MutationLogStore::swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("upto", upto));
 
             for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));
@@ -286,7 +295,7 @@ namespace xo {
         MutationLogStore::forward_mutation_log(obj<AGCObjectVisitor> gc,
                                                Generation upto)
         {
-            scope log0(XO_DEBUG(config_.debug_flag_));
+            scope log0(XO_DEBUG_(config_.debug_flag_));
 
             /** non-zero if at least one object was rescued (from any generation)
              *  by mutation log scan
@@ -297,7 +306,7 @@ namespace xo {
             std::size_t i_fixpoint_loop = 0;
 
             do {
-                scope log1(XO_DEBUG(log0), "fixpoint", xtag("i", i_fixpoint_loop));
+                scope log1(XO_DEBUG_(log0), "fixpoint", xtag("i", i_fixpoint_loop));
 
                 work = 0;
 
@@ -308,7 +317,7 @@ namespace xo {
                      child_gen + 1 < config_.n_generation_;
                      ++child_gen) {
 
-                    scope log2(XO_DEBUG(log1), xtag("gen", child_gen));
+                    scope log2(XO_DEBUG_(log1), xtag("gen", child_gen));
 
                     MutationLog * from_mlog
                         = this->mlog_[Role::from_space()][child_gen];
@@ -356,7 +365,7 @@ namespace xo {
                                                       MutationLog * keep_mlog,
                                                       MutationLog * triage_mlog)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("child_gen", child_gen),
                       xtag("mlog.size", from_mlog->size()));
 
@@ -511,7 +520,7 @@ namespace xo {
                                                          MutationLogEntry & from_entry,
                                                          MutationLog * keep_mlog)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             void * child_fr = *from_entry.p_data();
             AllocInfo child_info = gc.alloc_info((std::byte *)(child_fr));

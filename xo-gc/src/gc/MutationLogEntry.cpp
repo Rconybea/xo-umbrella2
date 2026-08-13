@@ -6,9 +6,18 @@
 #include "MutationLogEntry.hpp"
 #include "GCObjectStore.hpp"
 #include "MutationLogStatistics.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::mm::MutationLogStatistics;
     using xo::reflect::typeseq;
 
@@ -108,7 +117,7 @@ namespace xo {
         MutationLogEntry::refresh_snapshot(Generation parent_gen,
                                            GCObjectStore * gcos) noexcept
         {
-            scope log(XO_DEBUG(gcos->config().debug_flag_));
+            scope log(XO_DEBUG_(gcos->config().debug_flag_));
 
             void * child_data = *p_data_;
 

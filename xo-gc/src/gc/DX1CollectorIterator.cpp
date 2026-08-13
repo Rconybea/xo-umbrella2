@@ -6,10 +6,18 @@
 #include "xo/gc/DX1CollectorIterator.hpp"
 #include "Collector.hpp"
 #include "xo/gc/DX1Collector.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     namespace mm {
         DX1CollectorIterator::DX1CollectorIterator(const DX1Collector * gc,
                                                    Generation gen_ix,
@@ -27,7 +35,7 @@ namespace xo {
         void
         DX1CollectorIterator::normalize() noexcept
         {
-            scope log(XO_DEBUG(false),
+            scope log(XO_DEBUG_(false),
                       xtag("gen_ix", gen_ix_),
                       xtag("gen_hi", gen_hi_),
                       xtag("arena_ix.pos", arena_ix_.pos_),
@@ -72,7 +80,7 @@ namespace xo {
         cmpresult
         DX1CollectorIterator::compare(const DX1CollectorIterator & other_ix) const noexcept
         {
-            scope log(XO_DEBUG(false),
+            scope log(XO_DEBUG_(false),
                       xtag("is_valid", is_valid()),
                       xtag("other_ix.is_valid", other_ix.is_valid()) );
 
@@ -102,7 +110,7 @@ namespace xo {
         void
         DX1CollectorIterator::next() noexcept
         {
-            scope log(XO_DEBUG(false),
+            scope log(XO_DEBUG_(false),
                       xtag("arena_ix.arena", arena_ix_.arena_),
                       xtag("arena_ix.pos", arena_ix_.pos_),
                       xtag("arena_hi.arena", arena_hi_.arena_),
