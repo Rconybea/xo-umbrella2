@@ -9,11 +9,14 @@
 #include "ExpectTypeSsm.hpp"
 #include "syntaxstatetype.hpp"
 #include <xo/object2/Boolean.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <string_view>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     namespace scm {
 
@@ -105,7 +108,7 @@ namespace xo {
         DDeftypeSsm::on_token(const Token & tk,
                               ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
 

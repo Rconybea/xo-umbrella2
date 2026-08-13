@@ -112,7 +112,4 @@ xo_dependency(${SELF_LIB} xo_gc)
 xo_dependency(${SELF_LIB} xo_type)
 xo_dependency(${SELF_LIB} xo_tokenizer2)
 xo_dependency(${SELF_LIB} xo_expression2)
-# legacy xo-indentlog: scope logging in this subsystem's own sources.
-# Was arriving TRANSITIVELY until xo-object2 dropped it at phase E.
-xo_dependency(${SELF_LIB} indentlog)
 xo_dependency(${SELF_LIB} subsys)

@@ -10,7 +10,6 @@
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/stringtable2/String.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {

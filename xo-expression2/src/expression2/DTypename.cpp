@@ -7,7 +7,6 @@
 #include <xo/stringtable2/UniqueString.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/quoted.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 #include <xo/ppsink/quoted.hpp>         /* xo::pp::quot */
 #include <cstddef>

@@ -18,8 +18,9 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/cond.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
@@ -32,6 +33,9 @@
 #endif
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::pp::field;
 #ifdef NOT_YET
     using xo::scm::Expression;
@@ -225,7 +229,7 @@ namespace xo {
         DProgressSsm::on_token(const Token & tk,
                                ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_then:
@@ -331,7 +335,7 @@ namespace xo {
         DProgressSsm::on_completing_token(const Token & tk,
                                           ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             obj<AExpression> expr = this->assemble_expr(p_psm);
 
@@ -470,7 +474,7 @@ namespace xo {
         DProgressSsm::on_semicolon_token(const Token & tk,
                                          ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             /* note: implementation should parallel .on_rightparen_token() */
 
@@ -493,7 +497,7 @@ namespace xo {
         DProgressSsm::on_rightbrace_token(const Token & tk,
                                           ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             (void)tk;
 
@@ -520,7 +524,7 @@ namespace xo {
         {
             const bool c_debug_flag = p_psm->debug_flag();
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             if (!lhs_) {
                 log && log("accepting expr1");
@@ -552,7 +556,7 @@ namespace xo {
         {
             const bool c_debug_flag = p_psm->debug_flag();
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("expr", expr),
                       xtag("tk", tk));
 
@@ -612,7 +616,7 @@ namespace xo {
         progress_xs::on_expr(bp<Expression> expr,
                              parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("expr", expr));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("expr", expr));
 
             /* note: previous token probably an operator,
              *       handled from progress_xs::on_operator_token(),
@@ -655,7 +659,7 @@ namespace xo {
         progress_xs::on_expr_with_semicolon(bp<Expression> expr,
                                             parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("lhs", lhs_), xtag("op", op_type_), xtag("expr", expr));
 
@@ -689,7 +693,7 @@ namespace xo {
         {
             /* note: implementation parllels .on_semicolon_token(), .on_rightparen_token() */
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * self_name = "progress::xs::on_comma_token";
 
@@ -729,7 +733,7 @@ namespace xo {
         {
             /* note: implementation parallels .on_rightparen_token() */
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             rp<Expression> expr = this->assemble_expr(p_psm);
 
@@ -822,7 +826,7 @@ namespace xo {
         progress_xs::on_leftparen_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             /* input like:
              *   'foo(' -> expect function call.  might continue 'foo(a,b,c)'
@@ -867,7 +871,7 @@ namespace xo {
         {
             /* note: implementation parallels .on_semicolon_token() */
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             /* stack may be something like:
              *
@@ -899,7 +903,7 @@ namespace xo {
          {
              /* note: implementation parallels .on_semicolon_token() */
 
-             scope log(XO_DEBUG(p_psm->debug_flag()));
+             scope log(XO_DEBUG_(p_psm->debug_flag()));
 
              constexpr const char * self_name = "progress_xs::on_rightparen";
 
@@ -941,7 +945,7 @@ namespace xo {
         progress_xs::on_else_token(const token_type & tk,
                                    parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             rp<Expression> expr = this->assemble_expr(p_psm);
 
@@ -962,7 +966,7 @@ namespace xo {
         progress_xs::on_rightbrace_token(const token_type & tk,
                                          parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             rp<Expression> expr = this->assemble_expr(p_psm);
 
@@ -987,7 +991,7 @@ namespace xo {
         progress_xs::on_bool_token(const token_type & tk,
                                    parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "progress_xs::on_bool_token";
             const char * exp = get_expect_str();
@@ -1004,7 +1008,7 @@ namespace xo {
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "progress_xs::on_i64_token";
             const char * exp = get_expect_str();
@@ -1035,7 +1039,7 @@ namespace xo {
              * straight onto field()'s third argument -- the DExpectFormalArgSsm
              * pattern, not the DLambdaExpr one.
              *
-             * Legacy's `scope log(XO_DEBUG(false))` is deliberately not
+             * Legacy's `scope log(XO_DEBUG_(false))` is deliberately not
              * reproduced: it is disabled, so it emitted nothing, and this
              * subsystem is migrating off xo-indentlog.
              */

@@ -9,12 +9,15 @@
 #include <xo/type/AtomicType.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 #include <string_view>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     using xo::facet::with_facet;
     using xo::reflect::Reflect;
@@ -68,7 +71,7 @@ namespace xo {
         DExpectTypeSsm::on_token(const Token & tk,
                                  ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_symbol:
@@ -129,7 +132,7 @@ namespace xo {
         DExpectTypeSsm::on_symbol_token(const Token & tk,
                                         ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             if (corrected_) {
                 obj<AType> type;

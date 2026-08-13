@@ -16,12 +16,16 @@
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/tostr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <stdexcept>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
@@ -44,7 +48,7 @@ namespace xo {
                              DGlobalSymtab * global_symtab,
                              InstallFlags pm_install_flags)
             {
-                scope log(XO_DEBUG(false));
+                scope log(XO_DEBUG_(false));
 
                 DGlobalEnv * env = DGlobalEnv::_make(mm,
                                                      global_symtab);
@@ -186,7 +190,7 @@ namespace xo {
             obj<ACollector> gc = expr_alloc_.try_to_facet<ACollector>();
 
             if (gc) {
-                scope log(XO_DEBUG(true), "remove_gc_root not implemented");
+                scope log(XO_DEBUG_(true), "remove_gc_root not implemented");
 
                 gc.remove_gc_root(&global_symtab_);
                 gc.remove_gc_root(&local_symtab_);
@@ -320,7 +324,7 @@ namespace xo {
         bool
         ParserStateMachine::has_incomplete_expr() const noexcept
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             // don't count toplevel expression
 
@@ -355,7 +359,7 @@ namespace xo {
         void
         ParserStateMachine::establish_toplevel_ssm(obj<ASyntaxStateMachine> ssm)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             assert(stack_ == nullptr);
 
@@ -368,7 +372,7 @@ namespace xo {
         void
         ParserStateMachine::push_ssm(DArena::Checkpoint ckp, obj<ASyntaxStateMachine> ssm)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             // note: using parser_alloc_ for parser stack, since stacklike behavior
 
@@ -378,7 +382,7 @@ namespace xo {
         void
         ParserStateMachine::pop_ssm()
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             assert(this->stack_);
 
@@ -400,7 +404,7 @@ namespace xo {
         DVarRef *
         ParserStateMachine::lookup_varref(std::string_view symbolname)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             const DUniqueString * ustr = stringtable_.lookup(symbolname);
 
@@ -504,7 +508,7 @@ namespace xo {
         void
         ParserStateMachine::on_parsed_symbol(std::string_view sym)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("sym", sym));
+            scope log(XO_DEBUG_(debug_flag_), xtag("sym", sym));
 
             assert(stack_);
 
@@ -514,7 +518,7 @@ namespace xo {
         void
         ParserStateMachine::on_parsed_typedescr(TypeDescr td)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("td", td));
+            scope log(XO_DEBUG_(debug_flag_), xtag("td", td));
 
             assert(stack_);
 
@@ -524,7 +528,7 @@ namespace xo {
         void
         ParserStateMachine::on_parsed_type(obj<AType> type)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             assert(stack_);
 
@@ -535,7 +539,7 @@ namespace xo {
         ParserStateMachine::on_parsed_formal(const DUniqueString * sym,
                                              TypeDescr td)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("sym", std::string_view(*sym)), xtag("td", td));
+            scope log(XO_DEBUG_(debug_flag_), xtag("sym", std::string_view(*sym)), xtag("td", td));
 
             assert(stack_);
 
@@ -547,7 +551,7 @@ namespace xo {
                                                         TypeDescr td,
                                                         const Token & tk)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("sym", std::string_view(*sym)), xtag("td", td), xtag("tk", tk));
+            scope log(XO_DEBUG_(debug_flag_), xtag("sym", std::string_view(*sym)), xtag("td", td), xtag("tk", tk));
 
             assert(stack_);
 
@@ -557,7 +561,7 @@ namespace xo {
         void
         ParserStateMachine::on_parsed_formal_arglist(DArray * arglist)
         {
-            scope log(XO_DEBUG(debug_flag_),
+            scope log(XO_DEBUG_(debug_flag_),
                       xtag("arglist", obj<APrintable,DArray>(arglist)));
 
             assert(stack_);
@@ -568,7 +572,7 @@ namespace xo {
         void
         ParserStateMachine::on_parsed_expression(obj<AExpression> expr)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("expr", expr));
+            scope log(XO_DEBUG_(debug_flag_), xtag("expr", expr));
 
             assert(stack_);
 
@@ -579,7 +583,7 @@ namespace xo {
         ParserStateMachine::on_parsed_expression_with_token(obj<AExpression> expr,
                                                             const Token & tk)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("expr", expr), xtag("tk", tk));
+            scope log(XO_DEBUG_(debug_flag_), xtag("expr", expr), xtag("tk", tk));
 
             assert(stack_);
 
@@ -595,7 +599,7 @@ namespace xo {
         void
         ParserStateMachine::on_token(const Token & tk)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("tk", tk));
+            scope log(XO_DEBUG_(debug_flag_), xtag("tk", tk));
 
             if (!stack_) {
                 // parsing stack should always have toplevel expression sequence
@@ -910,7 +914,7 @@ namespace xo {
         ParserStateMachine::visit_gco_children(VisitReason reason,
                                                obj<AGCObjectVisitor> gc) noexcept
         {
-            //scope log(XO_DEBUG(true));
+            //scope log(XO_DEBUG_(true));
 
             assert(!stringtable_.is_gc_eligible());
             assert(!parser_alloc_.is_gc_eligible());

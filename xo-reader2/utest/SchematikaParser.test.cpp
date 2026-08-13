@@ -23,13 +23,15 @@
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/facet/TypeRegistry.hpp>
-/* scope/XO_DEBUG -- was arriving via <xo/procedure2/PrimitiveRegistry.hpp>,
- * which moved to xo::pp::scope.  Explicit until this subsystem migrates too.
- */
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::scm::ParserConfig;
     using xo::scm::DSchematikaParser;
 
@@ -207,7 +209,7 @@ namespace xo {
                              std::vector<Token> & tk_v,
                              bool debug_flag)
         {
-            scope log(XO_DEBUG(debug_flag));
+            scope log(XO_DEBUG_(debug_flag));
 
             obj<ACollector> expr_gc
                 = fixture->expr_mm_.try_to_facet<ACollector>();
@@ -255,7 +257,7 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
 
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag), xtag("test", testname));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
             ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
@@ -286,7 +288,7 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
 
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag), xtag("test", testname));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
             ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
@@ -305,7 +307,7 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
 
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag), xtag("test", testname));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
             ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
@@ -323,7 +325,7 @@ namespace xo {
             void
             test_batch_def(ParserFixture * fixture)
             {
-                scope log(XO_DEBUG(fixture->debug_flag_));
+                scope log(XO_DEBUG_(fixture->debug_flag_));
 
                 auto parser = fixture->parser_;
 
@@ -361,7 +363,7 @@ namespace xo {
                         std::function<void (ParserFixture *)> test_subject,
                         std::array<bool, 2> debug_flag_v)
             {
-                scope log(XO_DEBUG(debug_flag_v[0] || debug_flag_v[1]),
+                scope log(XO_DEBUG_(debug_flag_v[0] || debug_flag_v[1]),
                       xtag("test", testname));
 
                 /* phase=0 arena, no gc
@@ -394,7 +396,7 @@ namespace xo {
             void
             test_batch_deftype(ParserFixture * fixture)
             {
-                scope log(XO_DEBUG(fixture->debug_flag_));
+                scope log(XO_DEBUG_(fixture->debug_flag_));
 
                 auto parser = fixture->parser_;
 
@@ -444,7 +446,7 @@ namespace xo {
             void
             test_batch_deftype2(ParserFixture * fixture)
             {
-                scope log(XO_DEBUG(fixture->debug_flag_));
+                scope log(XO_DEBUG_(fixture->debug_flag_));
 
                 auto parser = fixture->parser_;
 
@@ -496,7 +498,7 @@ namespace xo {
         namespace {
             void test_interactive_def2(ParserFixture * fixture)
             {
-                scope log(XO_DEBUG(fixture->debug_flag_));
+                scope log(XO_DEBUG_(fixture->debug_flag_));
 
                 auto parser = fixture->parser_;
 
@@ -571,7 +573,7 @@ namespace xo {
 
         void test_interactive_integer(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -640,7 +642,7 @@ namespace xo {
 
         void test_interactive_float(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -709,7 +711,7 @@ namespace xo {
 
         void test_interactive_string(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -778,7 +780,7 @@ namespace xo {
 
         void test_interactive_nil(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -847,7 +849,7 @@ namespace xo {
 
         void test_interactive_arith(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -914,7 +916,7 @@ namespace xo {
 
         void test_interactive_arith2(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -981,7 +983,7 @@ namespace xo {
 
         void test_interactive_arith3(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1057,7 +1059,7 @@ namespace xo {
 
         void test_interactive_arith4(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1136,7 +1138,7 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
 
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag), xtag("test", testname));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
             ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
@@ -1206,7 +1208,7 @@ namespace xo {
 #ifdef NOPE
         void test_interactive_cmpne(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1274,7 +1276,7 @@ namespace xo {
 
         void test_interactive_cmpeq(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1342,7 +1344,7 @@ namespace xo {
 
         void test_interactive_if1(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1428,7 +1430,7 @@ namespace xo {
 
         void test_interactive_lambda(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1478,7 +1480,7 @@ namespace xo {
 
         void test_interactive_if2(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1519,7 +1521,7 @@ namespace xo {
 
         void test_interactive_lambda2(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1567,7 +1569,7 @@ namespace xo {
 
         void test_interactive_apply(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1620,7 +1622,7 @@ namespace xo {
 
         void test_interactive_apply2(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1685,7 +1687,7 @@ namespace xo {
 
         void test_batch_def2(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1750,7 +1752,7 @@ namespace xo {
 
         void test_batch_qliteral1(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1793,7 +1795,7 @@ namespace xo {
 
         void test_batch_qliteral2(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1844,7 +1846,7 @@ namespace xo {
 
         void test_batch_qlist(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1889,7 +1891,7 @@ namespace xo {
 
         void test_batch_qlist2(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1932,7 +1934,7 @@ namespace xo {
 
         void test_batch_qarray(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -1975,7 +1977,7 @@ namespace xo {
 
         void test_batch_qdict0(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 
@@ -2018,7 +2020,7 @@ namespace xo {
 
         void test_batch_qdict1(ParserFixture * fixture)
         {
-            scope log(XO_DEBUG(fixture->debug_flag_));
+            scope log(XO_DEBUG_(fixture->debug_flag_));
 
             auto parser = fixture->parser_;
 

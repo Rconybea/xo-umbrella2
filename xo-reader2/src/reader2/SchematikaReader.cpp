@@ -5,9 +5,12 @@
 
 #include "SchematikaReader.hpp"
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::mm::MemorySizeInfo;
 
     namespace scm {
@@ -92,7 +95,7 @@ namespace xo {
         const ReaderResult &
         SchematikaReader::read_expr(span_type input_ext, bool eof)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             if (log) {
                 log(xtag("input_ext", input_ext));

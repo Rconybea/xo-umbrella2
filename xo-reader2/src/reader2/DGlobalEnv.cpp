@@ -6,10 +6,13 @@
 #include "GlobalEnv.hpp"
 #include <xo/expression2/GlobalSymtab.hpp>
 #include <xo/object2/Array.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
@@ -51,7 +54,7 @@ namespace xo {
         void
         DGlobalEnv::assign_value(obj<AAllocator> mm, Binding ix, obj<AGCObject> x)
         {
-            scope log(XO_DEBUG(false),
+            scope log(XO_DEBUG_(false),
                       xtag("ix.j_slot", ix.j_slot()),
                       xtag("values.cap", values_->capacity()));
 

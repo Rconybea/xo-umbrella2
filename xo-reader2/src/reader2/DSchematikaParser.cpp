@@ -7,18 +7,23 @@
 #include "ParserStack.hpp"
 #include "ParserStateMachine.hpp"
 #include "SchematikaParser.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tostr.hpp>
+/* os << xtag(..); see the ostream-containment milestone */
+#include <xo/ppsink/tag_ostream.hpp>
 #include <cstddef>
 #include <stdexcept>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
     using xo::mm::MemorySizeInfo;
-    using xo::tostr;
-    using xo::xtag;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
 
     namespace scm {
         // ----- SchematikaParser -----
@@ -123,7 +128,7 @@ namespace xo {
         const ParserResult &
         DSchematikaParser::on_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("tk", tk));
+            scope log(XO_DEBUG_(debug_flag_), xtag("tk", tk));
 
             if (psm_.stack() == nullptr) {
                 throw std::runtime_error(tostr("DSchematikaParser::include_token",

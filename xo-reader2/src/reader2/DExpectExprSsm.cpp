@@ -22,7 +22,10 @@
 #include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/facet_implementation.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+/* os << xtag(..); see the ostream-containment milestone */
+#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 #ifdef NOT_YET
@@ -31,6 +34,8 @@
 #endif
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     using xo::scm::DFloat;
     using xo::mm::AGCObject;
@@ -116,7 +121,7 @@ namespace xo {
         DExpectExprSsm::on_token(const Token & tk,
                                  ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_leftparen:
@@ -252,7 +257,7 @@ namespace xo {
         DExpectExprSsm::on_symbol_token(const Token & tk,
                                         ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("tk", tk));
 
@@ -280,7 +285,7 @@ namespace xo {
         expect_expr_xs::on_symbol_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("tk", tk));
 
@@ -334,7 +339,7 @@ namespace xo {
         expect_expr_xs::on_def_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             if (allow_defs_) {
                 define_xs::start(p_psm);
@@ -575,7 +580,7 @@ namespace xo {
                                             parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             if (cxl_on_rightbrace_) {
                 auto self = p_psm->pop_exprstate();
@@ -592,7 +597,7 @@ namespace xo {
         expect_expr_xs::on_expr(bp<Expression> expr,
                                 parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));
@@ -607,7 +612,7 @@ namespace xo {
         expect_expr_xs::on_expr_with_semicolon(bp<Expression> expr,
                                                parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));

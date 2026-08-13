@@ -11,10 +11,15 @@
 #include <xo/expression2/DefineExpr.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+/* os << xtag(..); see the ostream-containment milestone */
+#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
  namespace xo {
+     using xo::pp::scope;
+     using xo::pp::xtag;
     using xo::pp::field;
  using xo::print::APrintable;
  using xo::facet::FacetRegistry;
@@ -75,7 +80,7 @@
         define_xs::on_expr(bp<Expression> expr,
                            parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("defxs_type", defxs_type_));
 
@@ -112,7 +117,7 @@
         define_xs::on_expr_with_semicolon(bp<Expression> expr,
                                           parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("defxs_type", defxs_type_));
 
@@ -125,7 +130,7 @@
         define_xs::on_symbol(const std::string & symbol_name,
                              parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("defxs_type", defxs_type_), xtag("env_stack_size", p_psm->env_stack_size()));
 
@@ -172,7 +177,7 @@
         define_xs::on_typedescr(TypeDescr td,
                                 parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("defxs_type", defxs_type_);
 
@@ -196,7 +201,7 @@
                                 parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log("defxs_type", defxs_type_);
 
@@ -218,7 +223,7 @@
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log("defxs_type", defxs_type_);
 
@@ -241,7 +246,7 @@
         {
             /* def expr consumes semicolon */
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("defxs_type", defxs_type_);
 
@@ -265,7 +270,7 @@
                                          parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log("defxs_type", defxs_type_);
 
@@ -288,7 +293,7 @@
                                        parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "define_xs::on_rightparen";
             const char * exp = get_expect_str();
@@ -301,7 +306,7 @@
                                 parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "define_xs::on_i64";
             const char * exp = get_expect_str();
@@ -314,7 +319,7 @@
                                 parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "define_xs::on_f64";
             const char * exp = get_expect_str();
@@ -366,7 +371,7 @@
                           obj<AAllocator> expr_mm,
                           ParserStateMachine * p_psm)
         {
-            //scope log(XO_DEBUG(p_psm->debug_flag()));
+            //scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             assert(p_psm->stack());
 
@@ -477,7 +482,7 @@
         DDefineSsm::on_parsed_typedescr(TypeDescr td,
                                         ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("td", td));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("td", td));
 
             if (defstate_ == defexprstatetype::def_3) {
                 this->defstate_ = defexprstatetype::def_4;
@@ -503,7 +508,7 @@
         DDefineSsm::on_token(const Token & tk,
                              ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_symbol:
@@ -616,7 +621,7 @@
         DDefineSsm::on_singleassign_token(const Token & tk,
                                           ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("defstate", defstate_));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("defstate", defstate_));
 
             if ((defstate_ == defexprstatetype::def_2)
                 || (defstate_ == defexprstatetype::def_4))

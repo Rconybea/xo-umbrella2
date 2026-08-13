@@ -15,7 +15,6 @@
   xo-printable2,
   xo-flatstring,
   xo-subsys,
-  xo-indentlog,
   xo-cmake,
 
   # config arguments
@@ -49,6 +48,5 @@ stdenv.mkDerivation (finalattrs :
       xo-printable2
       xo-flatstring
       xo-subsys
-      xo-indentlog
     ];
   })

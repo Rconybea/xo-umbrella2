@@ -7,11 +7,16 @@
 #include "ParenSsm.hpp"
 #include "syntaxstatetype.hpp"
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+/* os << xtag(..); see the ostream-containment milestone */
+#include <xo/ppsink/tag_ostream.hpp>
 #include <string_view>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
@@ -236,7 +241,7 @@ namespace xo {
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
@@ -313,7 +318,7 @@ namespace xo {
                                       parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "paren_xs::on_rightparen";
 
@@ -336,7 +341,7 @@ namespace xo {
                                parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "paren_xs::on_i64";
 
@@ -348,7 +353,7 @@ namespace xo {
                                parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "paren_xs::on_f64";
 
@@ -393,7 +398,7 @@ namespace xo {
                           parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));

@@ -9,7 +9,8 @@
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
@@ -17,6 +18,8 @@
 //#include "expect_expr_xs.hpp"
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
@@ -100,7 +103,7 @@ namespace xo {
         DApplySsm::start(obj<AExpression> fn_expr,
                          ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             DArena::Checkpoint ckp = p_psm->parser_alloc().checkpoint();
 
@@ -134,7 +137,7 @@ namespace xo {
         DApplySsm::on_token(const Token & tk,
                             ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_leftparen:
@@ -308,7 +311,7 @@ namespace xo {
         apply_xs::on_expr(bp<Expression> expr,
                           parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             switch (applyxs_type_) {
             case applyexprstatetype::invalid:
@@ -346,7 +349,7 @@ namespace xo {
         apply_xs::on_comma_token(const token_type & tk,
                                  parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             if (this->applyxs_type_ == applyexprstatetype::apply_3) {
                 this->applyxs_type_ = applyexprstatetype::apply_2;
@@ -363,7 +366,7 @@ namespace xo {
         apply_xs::on_rightparen_token(const token_type & tk,
                                       parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("applyxs_type", applyxs_type_);
 

@@ -12,10 +12,12 @@
 #include <xo/object2/Array.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
     using xo::map::DArenaHashMap;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
@@ -110,7 +112,7 @@ namespace xo {
         DGlobalSymtab::upsert_variable(obj<AAllocator> mm,
                                        DVariable * var)
         {
-            scope log(XO_DEBUG(false), std::string_view(*var->name()));
+            scope log(XO_DEBUG_(false), std::string_view(*var->name()));
 
             // It's possible there's already a global variable
             // with the same name.
@@ -193,7 +195,7 @@ namespace xo {
         DGlobalSymtab::upsert_typename(obj<AAllocator> mm,
                                        DTypename * tname)
         {
-            scope log(XO_DEBUG(true),
+            scope log(XO_DEBUG_(true),
                       std::string_view(*tname->name()));
 
             auto ix = type_map_->find(tname->name());
@@ -256,7 +258,7 @@ namespace xo {
         {
             assert(sym);
 
-            scope log(XO_DEBUG(false), std::string_view(*sym));
+            scope log(XO_DEBUG_(false), std::string_view(*sym));
 
             auto ix = var_map_->find(sym);
 

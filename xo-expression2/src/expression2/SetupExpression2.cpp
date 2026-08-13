@@ -20,9 +20,12 @@
 #include <xo/alloc2/gc/AGCObject.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::mm::AGCObject;
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
@@ -34,7 +37,7 @@ namespace xo {
         bool
         SetupExpression2::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             // Expression
             // +- Constant
@@ -123,7 +126,7 @@ namespace xo {
         bool
         SetupExpression2::register_types(obj<ACollector> gc)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bool ok = true;
 

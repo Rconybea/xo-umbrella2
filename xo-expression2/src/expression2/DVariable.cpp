@@ -5,7 +5,6 @@
 
 #include "DVariable.hpp"
 #include "exprtype.hpp"
-#include <xo/indentlog/print/quoted.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/ppsink/quoted.hpp>          /* xo::pp::quot */
 #include <cstddef>

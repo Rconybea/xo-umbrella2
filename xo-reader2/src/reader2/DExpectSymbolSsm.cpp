@@ -8,12 +8,15 @@
 #include "SyntaxStateMachine.hpp"
 #include "ssm/ISyntaxStateMachine_DExpectSymbolSsm.hpp"
 #include "syntaxstatetype.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <string_view>
 //#include <regex>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
@@ -63,7 +66,7 @@ namespace xo {
         DExpectSymbolSsm::on_token(const Token & tk,
                                    ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_symbol:
@@ -125,7 +128,7 @@ namespace xo {
         {
 #ifdef NOT_YET
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("tk", tk));
 

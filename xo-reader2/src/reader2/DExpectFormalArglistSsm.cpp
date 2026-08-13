@@ -11,7 +11,6 @@
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <xo/ppsink/concat.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 

@@ -21,10 +21,13 @@
 #include <xo/object2/List.hpp>
 #include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     //using xo::scm::DProgressSsm;
     using xo::scm::DConstant;
@@ -116,7 +119,7 @@ namespace xo {
         DToplevelSeqSsm::on_token(const Token & tk,
                                 ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_symbol:

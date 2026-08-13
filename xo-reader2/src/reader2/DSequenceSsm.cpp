@@ -5,7 +5,8 @@
 #include "ssm/ISyntaxStateMachine_DSequenceSsm.hpp"
 #include <xo/expression2/SequenceExpr.hpp>
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 #ifdef NOT_YET
@@ -16,6 +17,8 @@
 #endif
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
 #ifdef NOT_YET
     using xo::scm::DDefineExpr;
@@ -77,7 +80,7 @@ namespace xo {
         DSequenceSsm::on_token(const Token & tk,
                                ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_rightbrace:
@@ -154,7 +157,7 @@ namespace xo {
         DSequenceSsm::on_parsed_expression(obj<AExpression> expr,
                                            ParserStateMachine * p_psm)
         {
-             scope log(XO_DEBUG(p_psm->debug_flag()));
+             scope log(XO_DEBUG_(p_psm->debug_flag()));
 
              // TODO: switch to printable facet
 
@@ -221,7 +224,7 @@ namespace xo {
                                                       const Token & tk,
                                                       ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             if (tk.tk_type() == tokentype::tk_semicolon) {
                 // keep sequence on stack, consuming semicolon

@@ -6,7 +6,8 @@
 #include "ifelse/DIfElseSsm.hpp"
 #include "DefineSsm.hpp"
 #include "ifelse/ISyntaxStateMachine_DIfElseSsm.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 // #include "define/IPrintable_DDefineSsm.hpp"
 #include "DExpectExprSsm.hpp"
 #include <xo/expression2/detail/IPrintable_DIfElseExpr.hpp>
@@ -16,6 +17,8 @@
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::pp::field;
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
@@ -76,7 +79,7 @@ namespace xo {
                           obj<AAllocator> expr_mm,
                           ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             DArena::Checkpoint ckp = parser_mm.checkpoint();
 
@@ -143,7 +146,7 @@ namespace xo {
         DIfElseSsm::on_token(const Token & tk,
                              ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("tk", tk));
 
             switch (tk.tk_type()) {
             case tokentype::tk_symbol:
@@ -208,7 +211,7 @@ namespace xo {
         DIfElseSsm::on_if_token(const Token & tk,
                                 ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifstate", ifstate_);
 
@@ -226,7 +229,7 @@ namespace xo {
         DIfElseSsm::on_then_token(const Token & tk,
                                   ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifstate", ifstate_);
 
@@ -244,7 +247,7 @@ namespace xo {
         DIfElseSsm::on_else_token(const Token & tk,
                                   ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifstate", ifstate_);
 
@@ -290,7 +293,7 @@ namespace xo {
         if_else_xs::on_rightbrace_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             this->finish_and_continue(p_psm);
             p_psm->on_rightbrace_token(tk);
@@ -302,7 +305,7 @@ namespace xo {
         DIfElseSsm::on_semicolon_token(const Token & tk,
                                        ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifstate", ifstate_);
 
@@ -333,7 +336,7 @@ namespace xo {
         if_else_xs::on_expr(bp<Expression> expr,
                             parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("ifxs_type", ifxs_type_));
 
@@ -378,7 +381,7 @@ namespace xo {
         DIfElseSsm::on_parsed_expression(obj<AExpression> expr,
                                          ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
             log && log(xtag("ifstate", ifstate_));
 
             // if (ifstate_ == ...) { .... return; }
@@ -422,7 +425,7 @@ namespace xo {
                                                     const Token & tk,
                                                     ParserStateMachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             // TODO: may consider allowing if-else to terminate on other particular tokens
             //       e.g. ')'

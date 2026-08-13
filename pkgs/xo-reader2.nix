@@ -7,7 +7,6 @@
   xo-testutil,
 
   # xo dependencies
-  xo-indentlog,
   xo-numeric,
   xo-procedure2,
   xo-type,
@@ -39,7 +38,6 @@ stdenv.mkDerivation (finalattrs :
       xo-testutil
     ];
     propagatedBuildInputs = [
-      xo-indentlog
       xo-numeric
       xo-procedure2
       xo-type
