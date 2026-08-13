@@ -9,7 +9,6 @@
 
   # xo dependencies
   xo-facet,
-  xo-indentlog,
   xo-cmake,
 
 #  buildDocs ? false,
@@ -49,6 +48,5 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-facet
-      xo-indentlog
     ];
   })
