@@ -7,7 +7,6 @@
   xo-ppsink,
 #  xo-refcnt,
   xo-reflect,
-    #, xo-indentlog,
 
   doCheck ? true,
 } :
@@ -28,6 +27,5 @@ stdenv.mkDerivation (finalattrs:
 xo-ppsink
 #      xo-refcnt
       xo-reflect
-#      xo-indentlog
     ];
   })

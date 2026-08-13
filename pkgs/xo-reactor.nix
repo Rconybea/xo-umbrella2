@@ -10,7 +10,6 @@
   xo-webutil,
   xo-printjson,
   xo-ordinaltree,
-    #, xo-indentlog,
 
   # test-only xo dependencies
   xo-randomgen,
@@ -40,6 +39,5 @@ stdenv.mkDerivation (finalattrs:
       xo-webutil
       xo-printjson
       xo-ordinaltree
-#      xo-indentlog
     ];
   })

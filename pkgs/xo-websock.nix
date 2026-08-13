@@ -29,6 +29,5 @@ stdenv.mkDerivation (finalattrs:
       jsoncpp
 
       xo-reactor
-#      xo-indentlog
     ];
   })
