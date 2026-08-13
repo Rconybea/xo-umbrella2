@@ -12,13 +12,25 @@
 #include <xo/object2/Boolean.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/object2/List.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <unistd.h> // for ::getpagesize()
 
 namespace ut {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     using xo::scm::DList;
     using xo::scm::DBoolean;
     using xo::scm::DInteger;
@@ -37,8 +49,6 @@ namespace ut {
     using xo::rng::xoshiro256ss;
     using xo::rng::random_seed;
     using xo::reflect::typeseq;
-    using xo::xtag;
-    using xo::scope;
 
     namespace {
         struct Testcase {
@@ -413,7 +423,7 @@ namespace ut {
     TEST_CASE("MutationLogStore-1", "[MutationLogStore]")
     {
         constexpr bool c_debug_flag = true;
-        scope log0(XO_DEBUG(c_debug_flag), "MutationLogStore test");
+        scope log0(XO_DEBUG_(c_debug_flag), "MutationLogStore test");
 
         std::uint64_t seed = 7988747704879432247ul;
         //random_seed(&seed);
@@ -424,7 +434,7 @@ namespace ut {
 
             const Testcase & tc = s_testcase_v[i_tc];
 
-            scope log1(XO_DEBUG(tc.debug_flag_),
+            scope log1(XO_DEBUG_(tc.debug_flag_),
                        "testcase loop",
                        xtag("i_tc", i_tc));
 
@@ -512,7 +522,7 @@ namespace ut {
             std::vector<Recd> x2_v;
 
             for (uint32_t loop_index = 0; loop_index < tc.n_gc_loop_; ++loop_index) {
-                scope log2(XO_DEBUG(tc.debug_flag_), "gc loop", xtag("loop_index", loop_index));
+                scope log2(XO_DEBUG_(tc.debug_flag_), "gc loop", xtag("loop_index", loop_index));
 
                 INFO(xtag("loop_index", loop_index));
 

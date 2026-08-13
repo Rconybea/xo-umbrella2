@@ -10,11 +10,19 @@
 #include "padding.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/arena/ArenaConfig.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::mm::AAllocator;
     using xo::mm::AAllocIterator;
 //    using xo::mm::IAllocIterator_Any;
@@ -94,7 +102,7 @@ namespace xo {
 
         TEST_CASE("DX1CollectorIterator-2", "[alloc2][gc][DX1Collector]")
         {
-            scope log(XO_DEBUG(false),  "DX1CollectorIterator test");
+            scope log(XO_DEBUG_(false),  "DX1CollectorIterator test");
 
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,

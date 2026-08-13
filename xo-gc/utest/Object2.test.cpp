@@ -11,10 +11,20 @@
 #include <xo/object2/SetupObject2.hpp>
 #include <xo/stringtable2/String.hpp>
 #include <xo/indentlog2/print/toppstr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 
 namespace ut {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::scm::SetupObject2;
     using xo::scm::ListOps;
     using xo::scm::DList;
@@ -33,8 +43,6 @@ namespace ut {
     using xo::facet::typeseq;
     using xo::pp::toppstr;
     using xo::pp::PpConfig;
-    using xo::scope;
-    using xo::xtag;
     using std::string;
 
     namespace {
@@ -100,7 +108,7 @@ namespace ut {
     TEST_CASE("printable1", "[pp][x1][list]")
     {
         constexpr bool c_debug_flag = false;
-        scope log(XO_DEBUG(c_debug_flag), "Object2 printable1 test");
+        scope log(XO_DEBUG_(c_debug_flag), "Object2 printable1 test");
 
         bool ok = SetupObject2::register_facets();
         REQUIRE(ok);

@@ -17,13 +17,24 @@
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/arena/print.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 
 namespace ut {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DInteger;
@@ -50,9 +61,6 @@ namespace ut {
     using xo::facet::impl_for;
     using xo::rng::xoshiro256ss;
     using xo::rng::random_seed;
-    using xo::scope;
-    using xo::xtag;
-    using xo::tostr;
     using std::size_t;
     using std::uint32_t;
 
@@ -234,7 +242,7 @@ namespace ut {
     TEST_CASE("GCObjectStore-1", "[GCObjectStore]")
     {
         constexpr bool c_debug_flag = false;
-        scope log0(XO_DEBUG(c_debug_flag), "GCObjectStore test");
+        scope log0(XO_DEBUG_(c_debug_flag), "GCObjectStore test");
 
         std::uint64_t seed = 12168164826603821466ul;
         //random_seed(&seed);
@@ -252,7 +260,7 @@ namespace ut {
 
             const Testcase & tc = s_testcase_v[i_tc];
 
-            scope log1(XO_DEBUG(tc.debug_flag_), "testcase loop", xtag("i_tc", i_tc));
+            scope log1(XO_DEBUG_(tc.debug_flag_), "testcase loop", xtag("i_tc", i_tc));
 
             INFO(tostr(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
 
@@ -274,7 +282,7 @@ namespace ut {
             std::vector<Recd> x2_v;
 
             for(uint32_t loop_index = 0; loop_index < tc.n_gc_loop_; ++loop_index) {
-                scope log2(XO_DEBUG(tc.debug_flag_), "gc loop", xtag("loop_index", loop_index));
+                scope log2(XO_DEBUG_(tc.debug_flag_), "gc loop", xtag("loop_index", loop_index));
 
                 // construct, extend, and/or modify object graphs in {x1_v, x2_v}
 

@@ -19,12 +19,20 @@
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/arena/padding.hpp>
 #include <xo/subsys/Subsystem.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 #include <unistd.h> // for getpagesize() on osx
 
 namespace ut {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::S_gc_tag;
     using xo::scm::ListOps;
     using xo::scm::DList;
@@ -55,8 +63,6 @@ namespace ut {
     using xo::Subsystem;
     using xo::InitEvidence;
     using xo::InitSubsys;
-    using xo::scope;
-    using xo::xtag;
 
     namespace {
         struct testcase_x1 {
@@ -92,10 +98,10 @@ namespace ut {
         Subsystem::initialize_all();
 
         constexpr bool c_debug_flag = false;
-        scope log(XO_DEBUG(c_debug_flag), "x1-config test");
+        scope log(XO_DEBUG_(c_debug_flag), "x1-config test");
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
-            scope log(XO_DEBUG(false), xtag("i_tc", i_tc));
+            scope log(XO_DEBUG_(false), xtag("i_tc", i_tc));
 
             const testcase_x1 & tc = s_testcase_v[i_tc];
 
@@ -133,10 +139,10 @@ namespace ut {
          **/
 
         constexpr bool c_debug_flag = false;
-        scope log(XO_DEBUG(c_debug_flag), "X1Collector test");
+        scope log(XO_DEBUG_(c_debug_flag), "X1Collector test");
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
-            scope log(XO_DEBUG(false), xtag("i_tc", i_tc));
+            scope log(XO_DEBUG_(false), xtag("i_tc", i_tc));
 
             try {
                 const testcase_x1 & tc = s_testcase_v[i_tc];

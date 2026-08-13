@@ -12,13 +12,24 @@
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/facet/TypeRegistry.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <vector>
 
 namespace ut {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DBoolean;
@@ -41,8 +52,6 @@ namespace ut {
     using xo::facet::obj;
     using xo::facet::typeseq;
     using xo::facet::impl_for;
-    using xo::scope;
-    using xo::xtag;
 
     /** Create two isomorphic object graphs.
      *  Each graph comprises a single DList cell
@@ -98,7 +107,7 @@ namespace ut {
                                       std::vector<Recd> * p_v2,
                                       DArena * p_arena2)
     {
-        scope log(XO_DEBUG(debug_flag));
+        scope log(XO_DEBUG_(debug_flag));
 
         if (n_new_obj == 0 && n_assign == 0)
             return;
@@ -756,7 +765,7 @@ namespace ut {
                                              const std::vector<Recd> & x2_v,
                                              bool debug_flag)
     {
-        scope log(XO_DEBUG(debug_flag));
+        scope log(XO_DEBUG_(debug_flag));
 
         Generation g1{1};
 

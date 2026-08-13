@@ -20,14 +20,24 @@
 #include <xo/stringtable2/DUniqueString.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
-#include <xo/indentlog/print/array.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     using xo::scm::DRuntimeError;
     using xo::scm::DDictionary;
     using xo::scm::DList;
@@ -53,7 +63,6 @@ namespace xo {
     using xo::facet::DVariantPlaceholder;
     using xo::facet::with_facet;
     using xo::reflect::typeseq;
-    using xo::scope;
 
     namespace ut {
         // checklist
@@ -209,7 +218,7 @@ namespace xo {
 
         TEST_CASE("collector-x1-alloc", "[alloc2][gc]")
         {
-            scope log(XO_DEBUG(false), "DX1Collector alloc test");
+            scope log(XO_DEBUG_(false), "DX1Collector alloc test");
 
             constexpr uint32_t c_n_alloc = 25;
             constexpr uint32_t c_reserved_z = 4*1024*1024;
@@ -271,7 +280,7 @@ namespace xo {
         TEST_CASE("collector-x1-alloc2", "[alloc2][gc]")
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       "DX1Collector alloc test2");
 
             constexpr uint32_t c_n_alloc = 25;
@@ -429,7 +438,7 @@ namespace xo {
         {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
 
-            scope log(XO_DEBUG(true), xtag("test", testname));
+            scope log(XO_DEBUG_(true), xtag("test", testname));
 
             //std::uint64_t seed = 7988747704879432247ul;
             //random_seed(&seed);
@@ -439,7 +448,7 @@ namespace xo {
 
                 const Testcase & tc = s_testcase_v[i_tc];
 
-                scope log1(XO_DEBUG(tc.debug_flag_),
+                scope log1(XO_DEBUG_(tc.debug_flag_),
                            "testcase loop",
                            xtag("i_tc", i_tc));
 

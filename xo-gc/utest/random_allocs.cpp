@@ -6,20 +6,29 @@
 #include "random_allocs.hpp"
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/padding.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
 #include <map>
 
 namespace utest {
+    /* the ppsink logging vocabulary, for use below.  Converted from legacy
+     * xo::scope / xo::xtag 2026-08-13; see
+     * .xo-backlog/xo-gc/issues/01-gc-free-of-indentlog.md
+     */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     using xo::mm::AllocInfo;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
     using xo::mm::padding;
     using xo::rng::xoshiro256ss;
     using xo::facet::obj;
-    using xo::scope;
-    using xo::xtag;
     using std::uint32_t;
     using std::byte;
 
@@ -46,7 +55,7 @@ namespace utest {
     {
         using xo::facet::typeseq;
 
-        scope log(XO_DEBUG(catch_flag), xtag("n-alloc", n_alloc));
+        scope log(XO_DEBUG_(catch_flag), xtag("n-alloc", n_alloc));
 
         /* track allocs. verify:
          *  - allocs are non-overlapping
