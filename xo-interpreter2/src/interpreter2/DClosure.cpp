@@ -9,11 +9,14 @@
 #include "VsmRcx.hpp"
 #include <xo/object2/RuntimeError.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <cstddef>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::mm::AGCObject;
     using xo::print::APrintable;
     using xo::pp::field;
@@ -49,7 +52,7 @@ namespace xo {
 
             (void)args;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             auto vsm_rcx
                 = obj<ARuntimeContext,DVsmRcx>::from(rcx);

@@ -5,11 +5,13 @@
 
 #include "LocalEnv.hpp"
 #include <xo/object2/Array.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::scope;
     using xo::mm::AGCObject;
     using xo::reflect::typeseq;
     using xo::pp::field;
@@ -69,7 +71,7 @@ namespace xo {
                                 Binding ix,
                                 obj<AGCObject> x)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             assert(!ix.is_global());
 

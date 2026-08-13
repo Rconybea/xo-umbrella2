@@ -17,14 +17,13 @@
 #include <xo/alloc2/abox.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
-#include <xo/indentlog/print/hex.hpp>
-/* scope/xtag/XO_DEBUG -- were arriving via <xo/tokenizer2/Tokenizer.hpp>,
- * which moved to xo::pp.  Explicit until this subsystem migrates too.
- */
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::scm::DVirtualSchematikaMachine;
     using xo::scm::VsmConfig;
     using xo::scm::VsmResultExt;
@@ -105,7 +104,7 @@ namespace xo {
                                        bool must_exhaust,
                                        bool eof_flag)
             {
-                scope log(XO_DEBUG(debug_flag));
+                scope log(XO_DEBUG_(debug_flag));
 
                 // WARNING: res.value() is unstable - gc may move it
 
@@ -139,7 +138,7 @@ namespace xo {
                                    std::function<bool (const VsmResultExt & x)> verify_fn,
                                    const VsmConfig & cfg = VsmConfig())
         {
-            scope log(XO_DEBUG(debug_flag), xtag("test", testname), xtag("input", input));
+            scope log(XO_DEBUG_(debug_flag), xtag("test", testname), xtag("input", input));
             bool eof_flag = false;
             bool must_exhaust = true;
 
@@ -165,7 +164,7 @@ namespace xo {
                                      bool eof_flag = false,
                                      const VsmConfig & cfg = VsmConfig())
         {
-            scope log(XO_DEBUG(debug_flag), xtag("test", testname));
+            scope log(XO_DEBUG_(debug_flag), xtag("test", testname));
 
             VsmFixture vsm_fixture(testname, debug_flag, cfg);
             auto & vsm = vsm_fixture.vsm_;
@@ -194,7 +193,7 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
 
             bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag), xtag("test", testname));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
             VsmFixture vsm_fixture(testname, c_debug_flag);
 

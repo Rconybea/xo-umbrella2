@@ -35,7 +35,6 @@ xo-flatstring xo-unit
 xo-gc xo-expression2
 xo-gc xo-interpreter2
 xo-gc xo-reader2
-xo-indentlog xo-interpreter2
 xo-indentlog2 xo-alloc
 xo-indentlog2 xo-alloc2
 xo-indentlog2 xo-expression

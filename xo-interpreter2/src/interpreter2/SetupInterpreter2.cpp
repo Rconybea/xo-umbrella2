@@ -19,10 +19,12 @@
 #include "VsmSeqContFrame.hpp"
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
@@ -30,13 +32,13 @@ namespace xo {
     using xo::facet::FacetRegistry;
     using xo::facet::impl_for;
     using xo::reflect::typeseq;
-    using xo::xtag;
+    using xo::pp::xtag;
 
     namespace scm {
         bool
         SetupInterpreter2::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             // VsmStqackFrame
             // +- VsmApplyFrame
@@ -106,7 +108,7 @@ namespace xo {
         bool
         SetupInterpreter2::register_types(obj<ACollector> gc)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bool ok = true;
 
@@ -124,7 +126,7 @@ namespace xo {
                                                InstallSink sink,
                                                InstallFlags flags)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             obj<AAllocator> mm = rcx.allocator();
             StringTable * stbl = rcx.stringtable();

@@ -8,9 +8,12 @@
 #include <xo/type/AtomicType.hpp>
 #include <xo/type/FunctionType.hpp>
 #include <xo/object2/Boolean.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     //using xo::scm::NumericDispatch;
     using xo::mm::MemorySizeInfo;
     using xo::facet::FacetRegistry;
@@ -22,7 +25,7 @@ namespace xo {
         obj<AGCObject>
         xfer_report_memory_use(obj<ARuntimeContext> rcx)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             auto visitor = [&log](const MemorySizeInfo & info) {
                 log && log(xtag("resource", info.resource_name_),

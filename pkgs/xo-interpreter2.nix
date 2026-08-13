@@ -7,7 +7,6 @@
   xo-testutil,
 
   # xo dependencies
-  xo-indentlog,
   xo-reader2,
   xo-gc,
   xo-cmake,
@@ -35,7 +34,6 @@ stdenv.mkDerivation (finalattrs :
       xo-testutil
     ];
     propagatedBuildInputs = [
-      xo-indentlog
       xo-indentlog2
       xo-reader2
       xo-gc

@@ -8,9 +8,11 @@
 #include <xo/reader2/init_reader2.hpp>
 #include <xo/gc/init_gc.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using xo::scm::SetupInterpreter2;
     using xo::scm::PrimitiveRegistry;
     using xo::mm::CollectorTypeRegistry;
@@ -26,7 +28,7 @@ namespace xo {
     InitEvidence
     InitSubsys<S_interpreter2_tag>::require()
     {
-        scope log(XO_DEBUG(true));
+        scope log(XO_DEBUG_(true));
 
         InitEvidence retval;
 

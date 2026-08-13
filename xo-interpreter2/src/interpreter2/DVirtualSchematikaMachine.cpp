@@ -38,10 +38,13 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::scm::DDictionary;
     using xo::print::APrintable;
     using xo::reflect::Reflect;
@@ -299,7 +302,7 @@ namespace xo {
         bool
         DVirtualSchematikaMachine::execute_one()
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             log && log(xtag("pc", pc_),
                        xtag("cont", cont_));
@@ -401,7 +404,7 @@ namespace xo {
         void
         DVirtualSchematikaMachine::_do_eval_define_op()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             auto def_expr
                 = obj<AExpression,DDefineExpr>::from(expr_);
@@ -755,7 +758,7 @@ namespace xo {
         void
         DVirtualSchematikaMachine::_do_evalargs_op()
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             if (!value_.is_value()) {
                 // error while evaluating function arg

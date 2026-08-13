@@ -8,7 +8,8 @@
 #include <xo/alloc2/Arena.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <replxx.hxx>
 #include <iostream>
 #ifdef __APPLE__
@@ -16,6 +17,7 @@
 #endif
 
 namespace xo {
+    using xo::pp::scope;
     using xo::scm::DVirtualSchematikaMachine;
     using xo::scm::VsmResultExt;
     using xo::pp::ThreadPrettySink;
@@ -229,7 +231,7 @@ namespace xo {
     App::_read_eval_print(span_type * p_input,
                           bool eof)
     {
-        scope log(XO_DEBUG(repl_config_.debug_flag_));
+        scope log(XO_DEBUG_(repl_config_.debug_flag_));
 
         if (!p_input || p_input->empty())
             return true;
