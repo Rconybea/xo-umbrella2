@@ -14,11 +14,10 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include <xo/facet/facet_implementation.hpp>
-#include <xo/facet/obj.hpp>
-#include <xo/facet/typeseq.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <xo/ppsink/PpSink.hpp>
+#include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/typeseq.hpp>
 
 // {pretext} here
 
@@ -40,8 +39,6 @@ public:
     using typeseq = xo::facet::typeseq;
     using Copaque = const void *;
     using Opaque = void *;
-    /** dynamic pretty-printing state during layout **/
-    using ppindentinfo = xo::print::ppindentinfo;
     /** single-pass pretty-printing sink; see xo-ppsink **/
     using PpSink = xo::pp::PpSink;
     ///@}
@@ -58,12 +55,6 @@ public:
     virtual typeseq _typeseq() const noexcept = 0;
     /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
     virtual void _drop(Opaque d) const noexcept = 0;
-    /** Pretty-printing support for this object.  DEPRECATED:
-the legacy two-pass ppindentinfo protocol, being replaced by
-pretty(PpSink&).  See
-.xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-See [xo-indentlog/xo/indentlog/pretty.hpp] **/
-    virtual bool pretty_deprecated(Copaque data, const ppindentinfo & ppii)  const = 0;
     /** Pretty-printing support for this object.
 Single-pass: render into @p sink.  A nested object
 participates in the enclosing structure's line breaking,

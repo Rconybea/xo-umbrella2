@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DBoolean::pretty_deprecated(const DBoolean & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DBoolean::pretty(const DBoolean & self, PpSink & sink) -> void
         {
             self.pretty(sink);

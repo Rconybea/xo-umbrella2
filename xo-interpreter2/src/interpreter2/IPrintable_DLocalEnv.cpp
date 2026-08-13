@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DLocalEnv::pretty_deprecated(const DLocalEnv & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DLocalEnv::pretty(const DLocalEnv & self, PpSink & sink) -> void
         {
             self.pretty(sink);

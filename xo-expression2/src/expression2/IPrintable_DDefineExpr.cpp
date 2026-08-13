@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DDefineExpr::pretty_deprecated(const DDefineExpr & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DDefineExpr::pretty(const DDefineExpr & self, PpSink & sink) -> void
         {
             self.pretty(sink);

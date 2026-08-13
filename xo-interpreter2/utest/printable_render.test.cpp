@@ -45,7 +45,6 @@
 #include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -85,27 +84,6 @@ namespace xo {
         using xo::pp::xtag;
 
         namespace {
-            /** render @p x through the DEPRECATED two-pass protocol.
-             *  DELETE AT PHASE E, with expect_deprecated_ and its REHEARSE.
-             **/
-            template <typename T>
-            std::string
-            render_deprecated(const T & x, std::uint32_t margin) {
-                xo::print::ppconfig ppc;
-                ppc.right_margin_ = margin;
-
-                bool orig_color = xo::tag_config::tag_color_enabled;
-                xo::tag_config::tag_color_enabled = false;
-
-                xo::pp::default_style_guard plain(xo::pp::PpStyle::plain());
-
-                std::string retval = xo::toppstr2(ppc, x);
-
-                xo::tag_config::tag_color_enabled = orig_color;
-
-                return retval;
-            }
-
             /** render @p x through pretty(PpSink&) **/
             template <typename T>
             std::string
@@ -192,8 +170,7 @@ namespace xo {
 
                 auto check_env = [&rh, &log]
                     (const char * label, std::uint32_t n_args,
-                     std::uint32_t margin,
-                     const char * expect_deprecated, const char * expect_pretty)
+                     std::uint32_t margin, const char * expect_pretty)
                 {
                     ArenaFixture fx(std::string(label) + "."
                                     + std::to_string(margin));
@@ -210,32 +187,24 @@ namespace xo {
                     DLocalEnv * env = DLocalEnv::_make(mm, nullptr, symtab, args);
 
                     obj<APrintable,DLocalEnv> env_pr(env);
-
-                    std::string deprecated = render_deprecated(env_pr, margin);
                     std::string pretty = render_pretty(env_pr, margin);
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 check_env("empty", 0, 200,
-                          "<DLocalEnv :n_args 0>",
                           "<DLocalEnv :n_args 0>");
 
                 check_env("three", 3, 200,
-                          "<DLocalEnv :n_args 3>",
                           "<DLocalEnv :n_args 3>");
 
                 /* margin 16: the struct breaks, but the field's VALUE still
                  * fits beside its tag.  Both protocols indent the field by 2.
                  */
                 check_env("three", 3, 16,
-                          "<DLocalEnv\n"
-                          "  :n_args 3>",
                           "<DLocalEnv\n"
                           "  :n_args 3>");
 
@@ -248,9 +217,6 @@ namespace xo {
                  * smallest instance of it in the tree.
                  */
                 check_env("three", 3, 8,
-                          "<DLocalEnv\n"
-                          "  :n_args\n"
-                          "    3>",
                           "<DLocalEnv\n"
                           "  :n_args\n"
                           "   3>");
@@ -296,18 +262,14 @@ namespace xo {
                                      "interpreter2-vsmframe-render"));
 
                 auto check = [&rh, &log]
-                    (const char * label, auto pr, std::uint32_t margin,
-                     const char * expect_deprecated, const char * expect_pretty)
+                    (const char * label, auto pr, std::uint32_t margin, const char * expect_pretty)
                 {
-                    std::string deprecated = render_deprecated(pr, margin);
                     std::string pretty = render_pretty(pr, margin);
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 ArenaFixture fx("vsmframe");
@@ -341,19 +303,14 @@ namespace xo {
                 /* --- flat, margin 200 --- */
 
                 check("defcont", defcont, 200,
-                      "<DVsmDefContFrame :cont def_cont>",
                       "<DVsmDefContFrame :cont def_cont>");
                 check("ifelsecont", ifelsecont, 200,
-                      "<DVsmIfElseContFrame :cont ifelse_cont>",
                       "<DVsmIfElseContFrame :cont ifelse_cont>");
                 check("seqcont", seqcont, 200,
-                      "<DVsmSeqContFrame :cont seq_cont :i_seq 7>",
                       "<DVsmSeqContFrame :cont seq_cont :i_seq 7>");
                 check("apply", apply, 200,
-                      "<DVsmApplyFrame :cont apply :n_args 2>",
                       "<DVsmApplyFrame :cont apply :n_args 2>");
                 check("evalargs", evalargs, 200,
-                      "<DVsmEvalArgsFrame :cont evalargs :i_arg -1>",
                       "<DVsmEvalArgsFrame :cont evalargs :i_arg -1>");
 
                 /* --- margin 12: the :cont VALUE goes to its own line, which
@@ -364,22 +321,12 @@ namespace xo {
                 check("defcont", defcont, 12,
                       "<DVsmDefContFrame\n"
                       "  :cont\n"
-                      "    def_cont>",
-                      "<DVsmDefContFrame\n"
-                      "  :cont\n"
                       "   def_cont>");
                 check("ifelsecont", ifelsecont, 12,
                       "<DVsmIfElseContFrame\n"
                       "  :cont\n"
-                      "    ifelse_cont>",
-                      "<DVsmIfElseContFrame\n"
-                      "  :cont\n"
                       "   ifelse_cont>");
                 check("seqcont", seqcont, 12,
-                      "<DVsmSeqContFrame\n"
-                      "  :cont\n"
-                      "    seq_cont\n"
-                      "  :i_seq 7>",
                       "<DVsmSeqContFrame\n"
                       "  :cont\n"
                       "   seq_cont\n"
@@ -387,17 +334,9 @@ namespace xo {
                 check("apply", apply, 12,
                       "<DVsmApplyFrame\n"
                       "  :cont\n"
-                      "    apply\n"
-                      "  :n_args 2>",
-                      "<DVsmApplyFrame\n"
-                      "  :cont\n"
                       "   apply\n"
                       "  :n_args 2>");
                 check("evalargs", evalargs, 12,
-                      "<DVsmEvalArgsFrame\n"
-                      "  :cont\n"
-                      "    evalargs\n"
-                      "  :i_arg -1>",
                       "<DVsmEvalArgsFrame\n"
                       "  :cont\n"
                       "   evalargs\n"
@@ -411,20 +350,10 @@ namespace xo {
                 check("seqcont", seqcont, 8,
                       "<DVsmSeqContFrame\n"
                       "  :cont\n"
-                      "    seq_cont\n"
-                      "  :i_seq\n"
-                      "    7>",
-                      "<DVsmSeqContFrame\n"
-                      "  :cont\n"
                       "   seq_cont\n"
                       "  :i_seq\n"
                       "   7>");
                 check("evalargs", evalargs, 8,
-                      "<DVsmEvalArgsFrame\n"
-                      "  :cont\n"
-                      "    evalargs\n"
-                      "  :i_arg\n"
-                      "    -1>",
                       "<DVsmEvalArgsFrame\n"
                       "  :cont\n"
                       "   evalargs\n"
@@ -464,18 +393,14 @@ namespace xo {
                                      "interpreter2-closure-render"));
 
                 auto check = [&rh, &log]
-                    (const char * label, auto pr, std::uint32_t margin,
-                     const char * expect_deprecated, const char * expect_pretty)
+                    (const char * label, auto pr, std::uint32_t margin, const char * expect_pretty)
                 {
-                    std::string deprecated = render_deprecated(pr, margin);
                     std::string pretty = render_pretty(pr, margin);
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 ArenaFixture fx("closure");
@@ -501,16 +426,12 @@ namespace xo {
                 obj<APrintable,DClosure> neither(DClosure::make(mm, nullptr, nullptr));
 
                 check("both", both, 200,
-                      "<DClosure :lambda <LambdaExpr> :env <DLocalEnv :n_args 1>>",
                       "<DClosure :lambda <LambdaExpr> :env <DLocalEnv :n_args 1>>");
                 check("no-env", no_env, 200,
-                      "<DClosure :lambda <LambdaExpr>>",
                       "<DClosure :lambda <LambdaExpr>>");
                 check("no-lambda", no_lambda, 200,
-                      "<DClosure :env <DLocalEnv :n_args 1>>",
                       "<DClosure :env <DLocalEnv :n_args 1>>");
                 check("neither", neither, 200,
-                      "<DClosure>",
                       "<DClosure>");
 
                 /* margin 24: the nested DLocalEnv breaks too, so the indent
@@ -522,16 +443,9 @@ namespace xo {
                       "<DClosure\n"
                       "  :lambda <LambdaExpr>\n"
                       "  :env\n"
-                      "    <DLocalEnv\n"
-                      "      :n_args 1>>",
-                      "<DClosure\n"
-                      "  :lambda <LambdaExpr>\n"
-                      "  :env\n"
                       "   <DLocalEnv\n"
                       "    :n_args 1>>");
                 check("no-env", no_env, 24,
-                      "<DClosure\n"
-                      "  :lambda <LambdaExpr>>",
                       "<DClosure\n"
                       "  :lambda <LambdaExpr>>");
             }
@@ -574,18 +488,14 @@ namespace xo {
                                      "interpreter2-applyclosureframe-render"));
 
                 auto check = [&rh, &log]
-                    (const char * label, auto pr, std::uint32_t margin,
-                     const char * expect_deprecated, const char * expect_pretty)
+                    (const char * label, auto pr, std::uint32_t margin, const char * expect_pretty)
                 {
-                    std::string deprecated = scrub_addr(render_deprecated(pr, margin));
                     std::string pretty = scrub_addr(render_pretty(pr, margin));
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 ArenaFixture fx("applyclosure");
@@ -606,23 +516,15 @@ namespace xo {
                                                  VsmInstr::c_apply_cont, nullptr));
 
                 check("env", with_env, 200,
-                      "<DVsmApplyClosureFrame :cont apply_cont :env 0xADDR>",
                       "<DVsmApplyClosureFrame :cont apply_cont :env 0xADDR>");
                 check("null-env", null_env, 200,
-                      "<DVsmApplyClosureFrame :cont apply_cont :env 0>",
                       "<DVsmApplyClosureFrame :cont apply_cont :env 0>");
 
                 check("env", with_env, 24,
                       "<DVsmApplyClosureFrame\n"
                       "  :cont apply_cont\n"
-                      "  :env 0xADDR>",
-                      "<DVsmApplyClosureFrame\n"
-                      "  :cont apply_cont\n"
                       "  :env 0xADDR>");
                 check("null-env", null_env, 24,
-                      "<DVsmApplyClosureFrame\n"
-                      "  :cont apply_cont\n"
-                      "  :env 0>",
                       "<DVsmApplyClosureFrame\n"
                       "  :cont apply_cont\n"
                       "  :env 0>");

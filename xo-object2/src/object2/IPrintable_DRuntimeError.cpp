@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DRuntimeError::pretty_deprecated(const DRuntimeError & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DRuntimeError::pretty(const DRuntimeError & self, PpSink & sink) -> void
         {
             self.pretty(sink);

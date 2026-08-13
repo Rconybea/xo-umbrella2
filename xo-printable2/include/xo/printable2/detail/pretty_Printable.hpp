@@ -5,11 +5,12 @@
  *  Prettifier<obj<APrintable, DRepr>> -- render a printable object into a
  *  PpSink via its pretty() method.
  *
- *  The ppsink counterpart to ppdetail_Printable.hpp, which does the same for
- *  the deprecated two-pass protocol:
+ *    Prettifier<obj<APrintable, DRepr>>::print  -> x.pretty(sink)
  *
- *    ppdetail<obj<APrintable, DRepr>>::print_pretty  -> x.pretty_deprecated(ppii)
- *    Prettifier<obj<APrintable, DRepr>>::print       -> x.pretty(sink)
+ *  This had a counterpart, ppdetail_Printable.hpp, doing the same for the
+ *  deprecated two-pass protocol.  It was the ONLY entry point from legacy
+ *  xo-indentlog pretty-printing into this facet, and was deleted at phase E
+ *  along with pretty_deprecated itself.
  *
  *  Without this, handing a printable object to a sink (sink.pp(x), xtag("k", x),
  *  field("k", x)) falls through Prettifier's empty primary template to

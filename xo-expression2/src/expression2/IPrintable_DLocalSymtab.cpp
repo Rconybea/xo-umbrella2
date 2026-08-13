@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DLocalSymtab::pretty_deprecated(const DLocalSymtab & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DLocalSymtab::pretty(const DLocalSymtab & self, PpSink & sink) -> void
         {
             self.pretty(sink);

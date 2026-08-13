@@ -3,15 +3,13 @@
     output_cpp_dir: "src/printable2",
     output_hpp_dir: "include/xo/printable2",
     output_impl_subdir: "detail",
-    includes: ["<xo/indentlog/print/ppindentinfo.hpp>",
-               "<xo/ppsink/PpSink.hpp>"],
+    includes: ["<xo/ppsink/PpSink.hpp>"],
     // extra includes in Printable.hpp
     //
     // NB <xo/alloc2/Allocator.hpp> was hand-added to the GENERATED Printable.hpp
     // by b1add3bb ("move Collector facet gc/ -> alloc2/ for levelling") and so
     // was silently dropped by the next regeneration.  It belongs here instead.
-    user_hpp_includes: ["\"detail/ppdetail_Printable.hpp\"",
-                        "\"detail/pretty_Printable.hpp\"",
+    user_hpp_includes: ["\"detail/pretty_Printable.hpp\"",
                         "<xo/alloc2/Allocator.hpp>"],
     namespace1: "xo",
     namespace2: "print",
@@ -25,12 +23,6 @@
         "Trait for data types that support pretty-printing"
     ],
     types: [
-        // using ppindentinfo = xo::print::ppindentinfo
-        {
-            name: "ppindentinfo",
-            doc:  ["dynamic pretty-printing state during layout"],
-            definition: "xo::print::ppindentinfo",
-        },
         // using PpSink = xo::pp::PpSink
         {
             name: "PpSink",
@@ -39,22 +31,6 @@
         },
     ],
     const_methods: [
-        // bool pretty_deprecated(const ppindentinfo & ppii) const
-        {
-            name: "pretty_deprecated",
-            doc: [
-                "Pretty-printing support for this object.  DEPRECATED:",
-                "the legacy two-pass ppindentinfo protocol, being replaced by",
-                "pretty(PpSink&).  See",
-                ".xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md",
-                "See [xo-indentlog/xo/indentlog/pretty.hpp]",
-            ],
-            return_type: "bool",
-            args: [
-                {type: "const ppindentinfo &", name: "ppii"},
-            ],
-            const: true,
-        },
         // void pretty(PpSink & sink) const
         {
             name: "pretty",

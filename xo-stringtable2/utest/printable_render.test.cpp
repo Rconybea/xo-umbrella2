@@ -7,22 +7,19 @@
  * TEMPLATE for the remaining printers -- see
  * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
  *
- * Each printer is rendered through BOTH protocols at the same margin:
+ * Each printer is rendered through
  *
- *   deprecated  toppstr2(ppconfig, x)  -> ppdetail<obj<APrintable,D>>
- *                                      -> x.pretty_deprecated(ppii)
- *   new         toppstr(PpConfig, x)   -> Prettifier<obj<APrintable,D>>
- *                                      -> x.pretty(sink)
+ *   toppstr(PpConfig, x)  -> Prettifier<obj<APrintable,D>>  -> x.pretty(sink)
  *
- * and BOTH renderings are pinned.  Pinning both, rather than only asserting
- * they agree:
+ * and the rendering is PINNED, not merely smoke-tested.
  *
- *   - the agreement check is SCAFFOLDING.  It cannot survive phase E, which
- *     deletes pretty_deprecated and with it render_deprecated().
- *   - the pinned `pretty` expectation is the coverage that REMAINS.
- *   - where the two deliberately differ (a reviewed rendering change, as for
- *     DList's "(...)" fallback), pinning both STATES the difference rather
- *     than failing on it.
+ * Until phase E these tables carried a second expectation per case, observed
+ * through the deprecated two-pass protocol, so that a conversion could be
+ * checked against the rendering it replaced.  That scaffolding was deleted
+ * with pretty_deprecated itself; the pinned `pretty` expectations are what
+ * remain, and they are the coverage.  Where the two protocols deliberately
+ * differed (a reviewed rendering change, as for DList's "(...)" fallback),
+ * the surviving expectation is the NEW one.
  *
  * Margin is the case variable: it is what makes the protocols disagree if they
  * are going to.
@@ -41,7 +38,6 @@
 #include "init_stringtable2.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/indentlog2/print/toppstr.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
@@ -71,20 +67,14 @@ namespace xo {
             struct Testcase_Render {
                 Testcase_Render(std::uint32_t margin,
                                 const char * text,
-                                const char * expect_deprecated,
                                 const char * expect_pretty)
                     : margin_{margin}, text_{text},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 /** right margin, applied to BOTH protocols **/
                 std::uint32_t margin_;
                 /** string content to render **/
                 std::string text_;
-                /** OBSERVED rendering via pretty_deprecated.
-                 *  Delete at phase E along with render_deprecated().
-                 **/
-                std::string expect_deprecated_;
                 /** OBSERVED rendering via pretty.  The assertion that outlives
                  *  phase E.
                  **/
@@ -93,27 +83,14 @@ namespace xo {
 
             std::vector<Testcase_Render>
             s_testcase_v = {
-                /*              margin  text                 deprecated           pretty */
-                Testcase_Render(200,    "hello",             "hello",             "hello"),
-                Testcase_Render(20,     "hello",             "hello",             "hello"),
-                Testcase_Render(4,      "hello",             "hello",             "hello"),
-                Testcase_Render(200,    "",                  "",                  ""),
-                Testcase_Render(200,    "with spaces in it", "with spaces in it", "with spaces in it"),
-                Testcase_Render(8,      "with spaces in it", "with spaces in it", "with spaces in it"),
+                /*              margin  text                 pretty */
+                Testcase_Render(200,    "hello",             "hello"),
+                Testcase_Render(20,     "hello",             "hello"),
+                Testcase_Render(4,      "hello",             "hello"),
+                Testcase_Render(200,    "",                  ""),
+                Testcase_Render(200,    "with spaces in it", "with spaces in it"),
+                Testcase_Render(8,      "with spaces in it", "with spaces in it"),
             };
-
-            /** render @p x through the DEPRECATED two-pass protocol.
-             *
-             *  DELETE AT PHASE E, with expect_deprecated_ and its REHEARSE.
-             **/
-            template <typename T>
-            std::string
-            render_deprecated(const T & x, std::uint32_t margin) {
-                xo::print::ppconfig ppc = xo::print::ppconfig::ugly();
-                ppc.right_margin_ = margin;
-
-                return xo::toppstr2(ppc, x);
-            }
 
             /** render @p x through pretty(PpSink&) **/
             template <typename T>
@@ -140,18 +117,14 @@ namespace xo {
 
                     DString * s = DString::from_cstr(alloc, tc.text_.c_str());
                     auto p = with_facet<APrintable>::mkobj(s);
-
-                    std::string deprecated = render_deprecated(p, tc.margin_);
                     std::string pretty = render_pretty(p, tc.margin_);
 
                     log && log(xtag("i_tc", i_tc),
                                xtag("margin", tc.margin_),
                                xtag("text", tc.text_),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -169,18 +142,14 @@ namespace xo {
                     xo::scm::StringTable table(1024);
                     const DUniqueString * u = table.intern(tc.text_);
                     auto p = with_facet<APrintable>::mkobj(const_cast<DUniqueString *>(u));
-
-                    std::string deprecated = render_deprecated(p, tc.margin_);
                     std::string pretty = render_pretty(p, tc.margin_);
 
                     log && log(xtag("i_tc", i_tc),
                                xtag("margin", tc.margin_),
                                xtag("text", tc.text_),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }

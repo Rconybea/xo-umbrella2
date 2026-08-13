@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DPrimitive_gco_0::pretty_deprecated(const DPrimitive_gco_0 & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DPrimitive_gco_0::pretty(const DPrimitive_gco_0 & self, PpSink & sink) -> void
         {
             self.pretty(sink);

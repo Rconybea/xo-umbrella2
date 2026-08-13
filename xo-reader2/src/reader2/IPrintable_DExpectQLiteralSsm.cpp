@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DExpectQLiteralSsm::pretty_deprecated(const DExpectQLiteralSsm & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DExpectQLiteralSsm::pretty(const DExpectQLiteralSsm & self, PpSink & sink) -> void
         {
             self.pretty(sink);

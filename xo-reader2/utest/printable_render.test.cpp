@@ -71,7 +71,6 @@
 #include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -121,27 +120,6 @@ namespace xo {
         using xo::pp::xtag;
 
         namespace {
-            /** render @p x through the DEPRECATED two-pass protocol.
-             *  DELETE AT PHASE E, with expect_deprecated_ and its REHEARSE.
-             **/
-            template <typename T>
-            std::string
-            render_deprecated(const T & x, std::uint32_t margin) {
-                xo::print::ppconfig ppc;
-                ppc.right_margin_ = margin;
-
-                bool orig_color = xo::tag_config::tag_color_enabled;
-                xo::tag_config::tag_color_enabled = false;
-
-                xo::pp::default_style_guard plain(xo::pp::PpStyle::plain());
-
-                std::string retval = xo::toppstr2(ppc, x);
-
-                xo::tag_config::tag_color_enabled = orig_color;
-
-                return retval;
-            }
-
             /** render @p x through pretty(PpSink&) **/
             template <typename T>
             std::string
@@ -449,115 +427,81 @@ namespace xo {
 
                 auto check = [&rh, &log](const char * label, auto * p,
                                          std::uint32_t margin,
-                                         const char * expect_deprecated,
                                          const char * expect_pretty)
                 {
                     auto pr = with_facet<APrintable>::mkobj(p);
-
-                    std::string deprecated = render_deprecated(pr, margin);
                     std::string pretty = render_pretty(pr, margin);
 
-                    log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("label", label), xtag("margin", margin), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 check("DParenSsm", DParenSsm::_make(mm), 200,
-                      "<DParenSsm :parenstate lparen_0 :expect leftparen>",
                       "<DParenSsm :parenstate lparen_0 :expect leftparen>");
 
                 check("DParenSsm", DParenSsm::_make(mm), 30,
                       "<DParenSsm\n"
                       "  :parenstate lparen_0\n"
-                      "  :expect leftparen>",
-                      "<DParenSsm\n"
-                      "  :parenstate lparen_0\n"
                       "  :expect leftparen>");
 
                 check("DQuoteSsm", DQuoteSsm::_make(mm), 200,
-                      "<DQuoteSsm :quote_xst quote_0 :expect #q>",
                       "<DQuoteSsm :quote_xst quote_0 :expect #q>");
 
                 check("DQuoteSsm", DQuoteSsm::_make(mm), 30,
                       "<DQuoteSsm\n"
                       "  :quote_xst quote_0\n"
-                      "  :expect #q>",
-                      "<DQuoteSsm\n"
-                      "  :quote_xst quote_0\n"
                       "  :expect #q>");
 
                 check("DDeftypeSsm", DDeftypeSsm::_make(mm), 200,
-                      "<DDeftypeSsm :deftypestate def_0 :expect deftype>",
                       "<DDeftypeSsm :deftypestate def_0 :expect deftype>");
 
                 check("DDeftypeSsm", DDeftypeSsm::_make(mm), 30,
                       "<DDeftypeSsm\n"
                       "  :deftypestate def_0\n"
-                      "  :expect deftype>",
-                      "<DDeftypeSsm\n"
-                      "  :deftypestate def_0\n"
                       "  :expect deftype>");
 
                 check("DExpectSymbolSsm", DExpectSymbolSsm::_make(mm), 200,
-                      "<DExpectSymbolSsm>",
                       "<DExpectSymbolSsm>");
 
                 check("DExpectSymbolSsm", DExpectSymbolSsm::_make(mm), 30,
-                      "<DExpectSymbolSsm>",
                       "<DExpectSymbolSsm>");
 
                 check("DExpectListTypeSsm", DExpectListTypeSsm::_make(mm), 200,
-                      "<DExpectListTypeSsm>",
                       "<DExpectListTypeSsm>");
 
                 check("DExpectListTypeSsm", DExpectListTypeSsm::_make(mm), 30,
-                      "<DExpectListTypeSsm>",
                       "<DExpectListTypeSsm>");
 
                 check("DExpectFormalArgSsm", DExpectFormalArgSsm::_make(mm), 200,
-                      "<DExpectFormalArgSsm :fstate formal_0 :expect formal-name>",
                       "<DExpectFormalArgSsm :fstate formal_0 :expect formal-name>");
 
                 check("DExpectFormalArgSsm", DExpectFormalArgSsm::_make(mm), 30,
                       "<DExpectFormalArgSsm\n"
                       "  :fstate formal_0\n"
-                      "  :expect formal-name>",
-                      "<DExpectFormalArgSsm\n"
-                      "  :fstate formal_0\n"
                       "  :expect formal-name>");
 
                 check("DExpectTypeSsm.f", DExpectTypeSsm::_make(mm, false), 200,
-                      "<DExpectTypeSsm>",
                       "<DExpectTypeSsm>");
 
                 check("DExpectTypeSsm.f", DExpectTypeSsm::_make(mm, false), 30,
-                      "<DExpectTypeSsm>",
                       "<DExpectTypeSsm>");
 
                 check("DExpectTypeSsm.t", DExpectTypeSsm::_make(mm, true), 200,
-                      "<DExpectTypeSsm>",
                       "<DExpectTypeSsm>");
 
                 check("DExpectTypeSsm.t", DExpectTypeSsm::_make(mm, true), 30,
-                      "<DExpectTypeSsm>",
                       "<DExpectTypeSsm>");
 
                 check("DExpectQLiteralSsm", DExpectQLiteralSsm::_make(mm, false, false), 200,
-                      "<DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>",
                       "<DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>");
 
                 check("DExpectQLiteralSsm", DExpectQLiteralSsm::_make(mm, false, false), 30,
                       "<DExpectQLiteralSsm\n"
                       "  :expect\n"
-                      "    leftparen|leftbracket|leftbrace|string|f64|i64|bool>",
-                      "<DExpectQLiteralSsm\n"
-                      "  :expect\n"
                       "   leftparen|leftbracket|leftbrace|string|f64|i64|bool>");
 
                 check("DExpectExprSsm.fff", DExpectExprSsm::_make(mm, false, false, false), 200,
-                      "<DExpectExprSsm :allow_defs 0 :cxl_on_rightbrace 0 :cxl_on_rightparen 0 :expect if|lambda|lparen|lbrace|literal|var>",
                       "<DExpectExprSsm :allow_defs 0 :cxl_on_rightbrace 0 :cxl_on_rightparen 0 :expect if|lambda|lparen|lbrace|literal|var>");
 
                 check("DExpectExprSsm.fff", DExpectExprSsm::_make(mm, false, false, false), 30,
@@ -566,16 +510,9 @@ namespace xo {
                       "  :cxl_on_rightbrace 0\n"
                       "  :cxl_on_rightparen 0\n"
                       "  :expect\n"
-                      "    if|lambda|lparen|lbrace|literal|var>",
-                      "<DExpectExprSsm\n"
-                      "  :allow_defs 0\n"
-                      "  :cxl_on_rightbrace 0\n"
-                      "  :cxl_on_rightparen 0\n"
-                      "  :expect\n"
                       "   if|lambda|lparen|lbrace|literal|var>");
 
                 check("DExpectExprSsm.ttt", DExpectExprSsm::_make(mm, true, true, true), 200,
-                      "<DExpectExprSsm :allow_defs 1 :cxl_on_rightbrace 1 :cxl_on_rightparen 1 :expect def|if|lambda|lparen|lbrace|literal|var>",
                       "<DExpectExprSsm :allow_defs 1 :cxl_on_rightbrace 1 :cxl_on_rightparen 1 :expect def|if|lambda|lparen|lbrace|literal|var>");
 
                 check("DExpectExprSsm.ttt", DExpectExprSsm::_make(mm, true, true, true), 30,
@@ -584,56 +521,36 @@ namespace xo {
                       "  :cxl_on_rightbrace 1\n"
                       "  :cxl_on_rightparen 1\n"
                       "  :expect\n"
-                      "    def|if|lambda|lparen|lbrace|literal|var>",
-                      "<DExpectExprSsm\n"
-                      "  :allow_defs 1\n"
-                      "  :cxl_on_rightbrace 1\n"
-                      "  :cxl_on_rightparen 1\n"
-                      "  :expect\n"
                       "   def|if|lambda|lparen|lbrace|literal|var>");
 
                 check("DSequenceSsm", DSequenceSsm::_make(mm, fx.expr_mm()), 200,
-                      "<DSequenceSsm :seq_expr.size 0 :expect expr|semicolon|rightbrace>",
                       "<DSequenceSsm :seq_expr.size 0 :expect expr|semicolon|rightbrace>");
 
                 check("DSequenceSsm", DSequenceSsm::_make(mm, fx.expr_mm()), 30,
                       "<DSequenceSsm\n"
                       "  :seq_expr.size 0\n"
                       "  :expect\n"
-                      "    expr|semicolon|rightbrace>",
-                      "<DSequenceSsm\n"
-                      "  :seq_expr.size 0\n"
-                      "  :expect\n"
                       "   expr|semicolon|rightbrace>");
 
                 check("DToplevelSeqSsm.i", &tl_i, 200,
-                      "<DToplevelSeqSsm :seqtype toplevel-interactive>",
                       "<DToplevelSeqSsm :seqtype toplevel-interactive>");
 
                 check("DToplevelSeqSsm.i", &tl_i, 30,
                       "<DToplevelSeqSsm\n"
                       "  :seqtype\n"
-                      "    toplevel-interactive>",
-                      "<DToplevelSeqSsm\n"
-                      "  :seqtype\n"
                       "   toplevel-interactive>");
 
                 check("DToplevelSeqSsm.b", &tl_b, 200,
-                      "<DToplevelSeqSsm :seqtype toplevel-batch>",
                       "<DToplevelSeqSsm :seqtype toplevel-batch>");
 
                 check("DToplevelSeqSsm.b", &tl_b, 30,
                       "<DToplevelSeqSsm\n"
-                      "  :seqtype toplevel-batch>",
-                      "<DToplevelSeqSsm\n"
                       "  :seqtype toplevel-batch>");
 
                 check("DGlobalEnv", fx.make_global_env(), 200,
-                      "<DGlobalEnv :n_vars 0>",
                       "<DGlobalEnv :n_vars 0>");
 
                 check("DGlobalEnv", fx.make_global_env(), 30,
-                      "<DGlobalEnv :n_vars 0>",
                       "<DGlobalEnv :n_vars 0>");
             }
         }
@@ -730,46 +647,33 @@ namespace xo {
 
                 auto check = [&rh, &log](const char * label, auto * p,
                                          std::uint32_t margin,
-                                         const char * expect_deprecated,
                                          const char * expect_pretty)
                 {
                     auto pr = with_facet<APrintable>::mkobj(p);
-
-                    std::string deprecated
-                        = scrub_tseq(scrub_type_id(
-                              scrub_typevar(render_deprecated(pr, margin))));
                     std::string pretty
                         = scrub_tseq(scrub_type_id(
                               scrub_typevar(render_pretty(pr, margin))));
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 /** ParserResult is not a facet type: no with_facet<>. **/
                 auto check_pr = [&rh, &log](const char * label,
                                             const ParserResult & x,
                                             std::uint32_t margin,
-                                            const char * expect_deprecated,
                                             const char * expect_pretty)
                 {
-                    std::string deprecated
-                        = scrub_tseq(scrub_type_id(
-                              scrub_typevar(render_deprecated(x, margin))));
                     std::string pretty
                         = scrub_tseq(scrub_type_id(
                               scrub_typevar(render_pretty(x, margin))));
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 ParserResult r_none;
@@ -781,13 +685,9 @@ namespace xo {
 
                 /* :fn_expr absent -- the present-flag path. */
                 check("Apply.null", DApplySsm::_make(mm, obj<AExpression>()), 200,
-                      "<DApplySsm :applystate apply_0 :expect expr>",
                       "<DApplySsm :applystate apply_0 :expect expr>");
 
                 check("Apply.null", DApplySsm::_make(mm, obj<AExpression>()), 30,
-                      "<DApplySsm\n"
-                      "  :applystate apply_0\n"
-                      "  :expect expr>",
                       "<DApplySsm\n"
                       "  :applystate apply_0\n"
                       "  :expect expr>");
@@ -796,18 +696,9 @@ namespace xo {
                  * apply_1, so the two cases differ in the enum too.
                  */
                 check("Apply.fn", DApplySsm::_make(mm, konst(7)), 200,
-                      "<DApplySsm :applystate apply_1 :expect lparen :fn_expr <DConstant :value_.tseq N :value.tseq N :value 7>>",
                       "<DApplySsm :applystate apply_1 :expect lparen :fn_expr <DConstant :value_.tseq N :value.tseq N :value 7>>");
 
                 check("Apply.fn", DApplySsm::_make(mm, konst(7)), 30,
-                      "<DApplySsm\n"
-                      "  :applystate apply_1\n"
-                      "  :expect lparen\n"
-                      "  :fn_expr\n"
-                      "    <DConstant\n"
-                      "      :value_.tseq N\n"
-                      "      :value.tseq N\n"
-                      "      :value 7>>",
                       "<DApplySsm\n"
                       "  :applystate apply_1\n"
                       "  :expect lparen\n"
@@ -819,18 +710,9 @@ namespace xo {
 
                 /* the one batch-2 printer with NO :expect field. */
                 check("IfElse", DIfElseSsm::_make(mm, DIfElseExpr::_make_empty(emm)), 200,
-                      "<DIfElseSsm :ifstate if_0 :if_expr <DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null>>>",
                       "<DIfElseSsm :ifstate if_0 :if_expr <DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null>>>");
 
                 check("IfElse", DIfElseSsm::_make(mm, DIfElseExpr::_make_empty(emm)), 30,
-                      "<DIfElseSsm\n"
-                      "  :ifstate if_0\n"
-                      "  :if_expr\n"
-                      "    <DIfElseExpr\n"
-                      "      :typeref\n"
-                      "        <TypeRef\n"
-                      "          :id \"if:N\"\n"
-                      "          :td null>>>",
                       "<DIfElseSsm\n"
                       "  :ifstate if_0\n"
                       "  :if_expr\n"
@@ -847,25 +729,18 @@ namespace xo {
                  * null at every token boundary.
                  */
                 check("Lambda.bare", DLambdaSsm::_make(mm), 200,
-                      "<DLambdaSsm :lmstate lm_0 :expect lambda>",
                       "<DLambdaSsm :lmstate lm_0 :expect lambda>");
 
                 check("Lambda.bare", DLambdaSsm::_make(mm), 30,
-                      "<DLambdaSsm\n"
-                      "  :lmstate lm_0\n"
-                      "  :expect lambda>",
                       "<DLambdaSsm\n"
                       "  :lmstate lm_0\n"
                       "  :expect lambda>");
 
                 /* all three optionals absent: only :expect survives. */
                 check("Progress.bare", DProgressSsm::_make(mm, obj<AExpression>(), optype::invalid), 200,
-                      "<DProgressSsm :expect expr1|leftparen>",
                       "<DProgressSsm :expect expr1|leftparen>");
 
                 check("Progress.bare", DProgressSsm::_make(mm, obj<AExpression>(), optype::invalid), 30,
-                      "<DProgressSsm\n"
-                      "  :expect expr1|leftparen>",
                       "<DProgressSsm\n"
                       "  :expect expr1|leftparen>");
 
@@ -873,18 +748,9 @@ namespace xo {
                  * parsing and _make has no argument for it.
                  */
                 check("Progress.lhs", DProgressSsm::_make(mm, konst(3), optype::op_add), 200,
-                      "<DProgressSsm :lhs <DConstant :value_.tseq N :value.tseq N :value 3> :op op+ :expect expr2|leftparen>",
                       "<DProgressSsm :lhs <DConstant :value_.tseq N :value.tseq N :value 3> :op op+ :expect expr2|leftparen>");
 
                 check("Progress.lhs", DProgressSsm::_make(mm, konst(3), optype::op_add), 30,
-                      "<DProgressSsm\n"
-                      "  :lhs\n"
-                      "    <DConstant\n"
-                      "      :value_.tseq N\n"
-                      "      :value.tseq N\n"
-                      "      :value 3>\n"
-                      "  :op op+\n"
-                      "  :expect expr2|leftparen>",
                       "<DProgressSsm\n"
                       "  :lhs\n"
                       "   <DConstant\n"
@@ -896,26 +762,16 @@ namespace xo {
 
                 /* ParserResult arm 1 of 3: :type alone. */
                 check_pr("Result.none", r_none, 200,
-                      "<ParserResult :type none>",
                       "<ParserResult :type none>");
 
                 check_pr("Result.none", r_none, 30,
-                      "<ParserResult :type none>",
                       "<ParserResult :type none>");
 
                 /* arm 2: :type :expr. */
                 check_pr("Result.expr", r_expr, 200,
-                      "<ParserResult :type expression :expr <DConstant :value_.tseq N :value.tseq N :value 5>>",
                       "<ParserResult :type expression :expr <DConstant :value_.tseq N :value.tseq N :value 5>>");
 
                 check_pr("Result.expr", r_expr, 30,
-                      "<ParserResult\n"
-                         "  :type expression\n"
-                         "  :expr\n"
-                         "    <DConstant\n"
-                         "      :value_.tseq N\n"
-                         "      :value.tseq N\n"
-                         "      :value 5>>",
                       "<ParserResult\n"
                          "  :type expression\n"
                          "  :expr\n"
@@ -928,14 +784,9 @@ namespace xo {
                  * the switch could not collapse.
                  */
                 check_pr("Result.err", r_err, 200,
-                      "<ParserResult :type error :src_fn some_ssm :error bad juju>",
                       "<ParserResult :type error :src_fn some_ssm :error bad juju>");
 
                 check_pr("Result.err", r_err, 30,
-                      "<ParserResult\n"
-                         "  :type error\n"
-                         "  :src_fn some_ssm\n"
-                         "  :error bad juju>",
                       "<ParserResult\n"
                          "  :type error\n"
                          "  :src_fn some_ssm\n"
@@ -1024,7 +875,6 @@ namespace xo {
                                               const char * name,
                                               std::size_t i_tk,
                                               std::uint32_t margin,
-                                              const char * expect_deprecated,
                                               const char * expect_pretty)
                 {
                     ParseFixture fx(std::string(name) + "." + std::to_string(i_tk)
@@ -1040,37 +890,21 @@ namespace xo {
                     REQUIRE(bool(top));
 
                     auto pr = top.to_facet<APrintable>();
-
-                    std::string deprecated
-                        = scrub_tseq(scrub_type_id(
-                              scrub_typevar(render_deprecated(pr, margin))));
                     std::string pretty
                         = scrub_tseq(scrub_type_id(
                               scrub_typevar(render_pretty(pr, margin))));
 
                     log && log(xtag("name", name), xtag("i_tk", i_tk),
                                xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 check_step(define_v, "define", 1, 200,
-                           "<DDefineSsm :defstate def_2 :expect singleassign|colon :def_expr <DDefineExpr :lhs <DVariable :name \"foo\" :typeref <TypeRef :id \"\" :td null>>>>",
                            "<DDefineSsm :defstate def_2 :expect singleassign|colon :def_expr <DDefineExpr :lhs <DVariable :name \"foo\" :typeref <TypeRef :id \"\" :td null>>>>");
 
                 check_step(define_v, "define", 1, 60,
-                           "<DDefineSsm\n"
-                           "  :defstate def_2\n"
-                           "  :expect singleassign|colon\n"
-                           "  :def_expr\n"
-                           "    <DDefineExpr\n"
-                           "      :lhs\n"
-                           "        <DVariable\n"
-                           "          :name \"foo\"\n"
-                           "          :typeref <TypeRef :id \"\" :td null>>>>",
                            "<DDefineSsm\n"
                            "  :defstate def_2\n"
                            "  :expect singleassign|colon\n"
@@ -1085,26 +919,9 @@ namespace xo {
                            "<DDefineSsm\n"
                            "  :defstate def_4\n"
                            "  :expect singleassign\n"
-                           "  :def_expr <DDefineExpr :lhs <DVariable :name \"foo\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>>",
-                           "<DDefineSsm\n"
-                           "  :defstate def_4\n"
-                           "  :expect singleassign\n"
                            "  :def_expr <DDefineExpr :lhs <DVariable :name \"foo\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>>");
 
                 check_step(define_v, "define", 3, 60,
-                           "<DDefineSsm\n"
-                           "  :defstate def_4\n"
-                           "  :expect singleassign\n"
-                           "  :def_expr\n"
-                           "    <DDefineExpr\n"
-                           "      :lhs\n"
-                           "        <DVariable\n"
-                           "          :name \"foo\"\n"
-                           "          :typeref\n"
-                           "            <TypeRef\n"
-                           "              :id \"\"\n"
-                           "              :td\n"
-                           "                <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>>",
                            "<DDefineSsm\n"
                            "  :defstate def_4\n"
                            "  :expect singleassign\n"
@@ -1124,21 +941,15 @@ namespace xo {
                            "          :metatype atomic>>>>>");
 
                 check_step(qdict_v, "qdict", 2, 200,
-                           "<DExpectQDictSsm :state qdict_1a :expect symbol|rightbrace :dict { }>",
                            "<DExpectQDictSsm :state qdict_1a :expect symbol|rightbrace :dict {}>");
 
                 check_step(qdict_v, "qdict", 2, 60,
                            "<DExpectQDictSsm\n"
                            "  :state qdict_1a\n"
                            "  :expect symbol|rightbrace\n"
-                           "  :dict { }>",
-                           "<DExpectQDictSsm\n"
-                           "  :state qdict_1a\n"
-                           "  :expect symbol|rightbrace\n"
                            "  :dict {}>");
 
                 check_step(qdict_v, "qdict", 3, 200,
-                           "<DExpectQDictSsm :state qdict_1b :expect colon :key a :dict { }>",
                            "<DExpectQDictSsm :state qdict_1b :expect colon :key a :dict {}>");
 
                 check_step(qdict_v, "qdict", 3, 60,
@@ -1146,22 +957,12 @@ namespace xo {
                            "  :state qdict_1b\n"
                            "  :expect colon\n"
                            "  :key a\n"
-                           "  :dict { }>",
-                           "<DExpectQDictSsm\n"
-                           "  :state qdict_1b\n"
-                           "  :expect colon\n"
-                           "  :key a\n"
                            "  :dict {}>");
 
                 check_step(qdict_v, "qdict", 5, 200,
-                           "<DExpectQDictSsm :state qdict_1d :expect semicolon|rightbrace :dict { a: 1; }>",
                            "<DExpectQDictSsm :state qdict_1d :expect semicolon|rightbrace :dict {a: 1;}>");
 
                 check_step(qdict_v, "qdict", 5, 60,
-                           "<DExpectQDictSsm\n"
-                           "  :state qdict_1d\n"
-                           "  :expect semicolon|rightbrace\n"
-                           "  :dict { a: 1; }>",
                            "<DExpectQDictSsm\n"
                            "  :state qdict_1d\n"
                            "  :expect semicolon|rightbrace\n"
@@ -1175,14 +976,9 @@ namespace xo {
                  * converted earlier.
                  */
                 check_step(arg0_v, "arg0", 0, 200,
-                           "<DExpectFormalArglistSsm :fastate argl_0 :expect leftparen :n_args 0>",
                            "<DExpectFormalArglistSsm :fastate argl_0 :expect leftparen :n_args 0>");
 
                 check_step(arg0_v, "arg0", 0, 30,
-                           "<DExpectFormalArglistSsm\n"
-                           "  :fastate argl_0\n"
-                           "  :expect leftparen\n"
-                           "  :n_args 0>",
                            "<DExpectFormalArglistSsm\n"
                            "  :fastate argl_0\n"
                            "  :expect leftparen\n"
@@ -1193,26 +989,9 @@ namespace xo {
                            "  :fastate argl_1b\n"
                            "  :expect comma|rightparen\n"
                            "  :n_args 1\n"
-                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
-                           "<DExpectFormalArglistSsm\n"
-                           "  :fastate argl_1b\n"
-                           "  :expect comma|rightparen\n"
-                           "  :n_args 1\n"
                            "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>");
 
                 check_step(arg2_v, "arg2", 4, 60,
-                           "<DExpectFormalArglistSsm\n"
-                           "  :fastate argl_1b\n"
-                           "  :expect comma|rightparen\n"
-                           "  :n_args 1\n"
-                           "  :arg[0]\n"
-                           "    <DVariable\n"
-                           "      :name \"x\"\n"
-                           "      :typeref\n"
-                           "        <TypeRef\n"
-                           "          :id \"\"\n"
-                           "          :td\n"
-                           "            <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
                            "<DExpectFormalArglistSsm\n"
                            "  :fastate argl_1b\n"
                            "  :expect comma|rightparen\n"
@@ -1236,35 +1015,9 @@ namespace xo {
                            "  :expect comma|rightparen\n"
                            "  :n_args 2\n"
                            "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>\n"
-                           "  :arg[1] <DVariable :name \"y\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
-                           "<DExpectFormalArglistSsm\n"
-                           "  :fastate argl_1b\n"
-                           "  :expect comma|rightparen\n"
-                           "  :n_args 2\n"
-                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>\n"
                            "  :arg[1] <DVariable :name \"y\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>");
 
                 check_step(arg2_v, "arg2", 8, 60,
-                           "<DExpectFormalArglistSsm\n"
-                           "  :fastate argl_1b\n"
-                           "  :expect comma|rightparen\n"
-                           "  :n_args 2\n"
-                           "  :arg[0]\n"
-                           "    <DVariable\n"
-                           "      :name \"x\"\n"
-                           "      :typeref\n"
-                           "        <TypeRef\n"
-                           "          :id \"\"\n"
-                           "          :td\n"
-                           "            <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>\n"
-                           "  :arg[1]\n"
-                           "    <DVariable\n"
-                           "      :name \"y\"\n"
-                           "      :typeref\n"
-                           "        <TypeRef\n"
-                           "          :id \"\"\n"
-                           "          :td\n"
-                           "            <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
                            "<DExpectFormalArglistSsm\n"
                            "  :fastate argl_1b\n"
                            "  :expect comma|rightparen\n"
@@ -1352,8 +1105,7 @@ namespace xo {
                 scope log(XO_DEBUG2_(rh.enable_debug(), "reader2-stack-render"));
 
                 auto check_parser = [&rh, &log, &tk_v, &d2_tk_v]
-                    (const char * label, int upto, std::uint32_t margin,
-                     const char * expect_deprecated, const char * expect_pretty)
+                    (const char * label, int upto, std::uint32_t margin, const char * expect_pretty)
                 {
                     ParseFixture fx(std::string(label) + "."
                                     + std::to_string(margin));
@@ -1366,35 +1118,22 @@ namespace xo {
 
                     for (int i = 0; i <= upto; ++i)
                         fx.parser_->on_token(src[i]);
-
-                    std::string deprecated
-                        = scrub_tseq(scrub_type_id(
-                              scrub_typevar(render_deprecated(fx.parser_.data(),
-                                                              margin))));
                     std::string pretty
                         = scrub_tseq(scrub_type_id(
                               scrub_typevar(render_pretty(fx.parser_.data(),
                                                           margin))));
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 check_parser("fresh", fresh_upto, 200,
                              "<SchematikaParser\n"
-                             "  :stack nullptr>",
-                             "<SchematikaParser\n"
                              "  :stack nullptr>");
 
                 check_parser("rest", rest_upto, 200,
-                             "<SchematikaParser\n"
-                             "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
                              "<SchematikaParser\n"
                              "  :stack\n"
                              "   <ParserStack\n"
@@ -1403,29 +1142,11 @@ namespace xo {
                 check_parser("d2", d2_upto, 200,
                              "<SchematikaParser\n"
                              "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DProgressSsm :lhs <DConstant :value_.tseq N :value.tseq N :value 1> :expect oper|semicolon|leftparen|rightparen|rightbrace>\n"
-                             "      :[1] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
-                             "<SchematikaParser\n"
-                             "  :stack\n"
                              "   <ParserStack\n"
                              "    :[0] <DProgressSsm :lhs <DConstant :value_.tseq N :value.tseq N :value 1> :expect oper|semicolon|leftparen|rightparen|rightbrace>\n"
                              "    :[1] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
 
                 check_parser("d2", d2_upto, 60,
-                             "<SchematikaParser\n"
-                             "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0]\n"
-                             "        <DProgressSsm\n"
-                             "          :lhs\n"
-                             "            <DConstant\n"
-                             "              :value_.tseq N\n"
-                             "              :value.tseq N\n"
-                             "              :value 1>\n"
-                             "          :expect\n"
-                             "            oper|semicolon|leftparen|rightparen|rightbrace>\n"
-                             "      :[1] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
                              "<SchematikaParser\n"
                              "  :stack\n"
                              "   <ParserStack\n"
@@ -1440,14 +1161,6 @@ namespace xo {
                 check_parser("lam", lam_upto, 200,
                              "<SchematikaParser\n"
                              "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DExpectTypeSsm>\n"
-                             "      :[1] <DExpectFormalArgSsm :fstate formal_2 :expect typename :name x>\n"
-                             "      :[2] <DExpectFormalArglistSsm :fastate argl_1a :expect formal-name :n_args 0>\n"
-                             "      :[3] <DLambdaSsm :lmstate lm_1 :expect lambda-params>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
-                             "<SchematikaParser\n"
-                             "  :stack\n"
                              "   <ParserStack\n"
                              "    :[0] <DExpectTypeSsm>\n"
                              "    :[1] <DExpectFormalArgSsm :fstate formal_2 :expect typename :name x>\n"
@@ -1456,22 +1169,6 @@ namespace xo {
                              "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
 
                 check_parser("lam", lam_upto, 60,
-                             "<SchematikaParser\n"
-                             "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DExpectTypeSsm>\n"
-                             "      :[1]\n"
-                             "        <DExpectFormalArgSsm\n"
-                             "          :fstate formal_2\n"
-                             "          :expect typename\n"
-                             "          :name x>\n"
-                             "      :[2]\n"
-                             "        <DExpectFormalArglistSsm\n"
-                             "          :fastate argl_1a\n"
-                             "          :expect formal-name\n"
-                             "          :n_args 0>\n"
-                             "      :[3] <DLambdaSsm :lmstate lm_1 :expect lambda-params>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
                              "<SchematikaParser\n"
                              "  :stack\n"
                              "   <ParserStack\n"
@@ -1501,7 +1198,6 @@ namespace xo {
                     xo::scm::DSchematikaParser * null_parser = nullptr;
 
                     REHEARSE(rh, render_pretty(null_parser, 200) == "nullptr");
-                    REHEARSE(rh, render_deprecated(null_parser, 200) == "nullptr");
                 }
             }
         }
@@ -1523,7 +1219,7 @@ namespace xo {
          *  converting these two printers changed the STUB: lines and nothing
          *  else in the observed table.  Hence one expectation string per case
          *  below would have sufficed; two are kept anyway, since
-         *  expect_deprecated_ is scaffolding that phase E deletes.
+         *  the deprecated expectation was scaffolding, deleted at phase E.
          *
          *  State qlist_0 / qarray_0 is NOT pinned: start_/array_ are null
          *  there and the printer throws.  Pre-existing, and tracked as
@@ -1557,8 +1253,7 @@ namespace xo {
 
                 auto check_parser = [&rh, &log]
                     (const char * label, const std::vector<Token> & src,
-                     std::size_t upto, std::uint32_t margin,
-                     const char * expect_deprecated, const char * expect_pretty)
+                     std::size_t upto, std::uint32_t margin, const char * expect_pretty)
                 {
                     ParseFixture fx(std::string(label) + "."
                                     + std::to_string(margin));
@@ -1567,22 +1262,15 @@ namespace xo {
 
                     for (std::size_t i = 0; i < upto; ++i)
                         fx.parser_->on_token(src[i]);
-
-                    std::string deprecated
-                        = scrub_tseq(scrub_type_id(
-                              scrub_typevar(render_deprecated(fx.parser_.data(),
-                                                              margin))));
                     std::string pretty
                         = scrub_tseq(scrub_type_id(
                               scrub_typevar(render_pretty(fx.parser_.data(),
                                                           margin))));
 
                     log && log(xtag("label", label), xtag("margin", margin),
-                               xtag("deprecated", deprecated),
                                xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == std::string(expect_pretty));
-                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
                 };
 
                 /* the EMPTY list: `()`, not `( )`.  DList::_nil() is already
@@ -1590,14 +1278,6 @@ namespace xo {
                  * without touching the null-start_ throw.
                  */
                 check_parser("qlist-empty", qlist_tk_v, 3, 200,
-                             "<SchematikaParser\n"
-                             "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
-                             "      :[1] <DExpectQListSsm :state qlist_1a :expect qliteral|rightparen :list ()>\n"
-                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
-                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
                              "<SchematikaParser\n"
                              "  :stack\n"
                              "   <ParserStack\n"
@@ -1608,14 +1288,6 @@ namespace xo {
                              "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
 
                 check_parser("qlist", qlist_tk_v, 5, 200,
-                             "<SchematikaParser\n"
-                             "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
-                             "      :[1] <DExpectQListSsm :state qlist_1a :expect qliteral|rightparen :list (1 2)>\n"
-                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
-                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
                              "<SchematikaParser\n"
                              "  :stack\n"
                              "   <ParserStack\n"
@@ -1630,21 +1302,6 @@ namespace xo {
                  * tag_value_offset 1, compounding with nesting depth.
                  */
                 check_parser("qlist", qlist_tk_v, 5, 60,
-                             "<SchematikaParser\n"
-                             "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0]\n"
-                             "        <DExpectQLiteralSsm\n"
-                             "          :expect\n"
-                             "            leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
-                             "      :[1]\n"
-                             "        <DExpectQListSsm\n"
-                             "          :state qlist_1a\n"
-                             "          :expect qliteral|rightparen\n"
-                             "          :list (1 2)>\n"
-                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
-                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
                              "<SchematikaParser\n"
                              "  :stack\n"
                              "   <ParserStack\n"
@@ -1670,14 +1327,6 @@ namespace xo {
                 check_parser("qarray-empty", qarray_tk_v, 3, 200,
                              "<SchematikaParser\n"
                              "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
-                             "      :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array []>\n"
-                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
-                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
-                             "<SchematikaParser\n"
-                             "  :stack\n"
                              "   <ParserStack\n"
                              "    :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
                              "    :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array []>\n"
@@ -1688,14 +1337,6 @@ namespace xo {
                 check_parser("qarray", qarray_tk_v, 6, 200,
                              "<SchematikaParser\n"
                              "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
-                             "      :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array [1 2]>\n"
-                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
-                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
-                             "<SchematikaParser\n"
-                             "  :stack\n"
                              "   <ParserStack\n"
                              "    :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
                              "    :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array [1 2]>\n"
@@ -1704,21 +1345,6 @@ namespace xo {
                              "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
 
                 check_parser("qarray", qarray_tk_v, 6, 60,
-                             "<SchematikaParser\n"
-                             "  :stack\n"
-                             "    <ParserStack\n"
-                             "      :[0]\n"
-                             "        <DExpectQLiteralSsm\n"
-                             "          :expect\n"
-                             "            leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
-                             "      :[1]\n"
-                             "        <DExpectQArraySsm\n"
-                             "          :state qarray_1a\n"
-                             "          :expect qliteral|rightparen\n"
-                             "          :array [1 2]>\n"
-                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
-                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
-                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
                              "<SchematikaParser\n"
                              "  :stack\n"
                              "   <ParserStack\n"

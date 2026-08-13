@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DList::pretty_deprecated(const DList & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DList::pretty(const DList & self, PpSink & sink) -> void
         {
             self.pretty(sink);

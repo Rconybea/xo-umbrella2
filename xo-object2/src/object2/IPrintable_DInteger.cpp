@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DInteger::pretty_deprecated(const DInteger & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DInteger::pretty(const DInteger & self, PpSink & sink) -> void
         {
             self.pretty(sink);

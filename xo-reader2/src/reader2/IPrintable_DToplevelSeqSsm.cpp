@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DToplevelSeqSsm::pretty_deprecated(const DToplevelSeqSsm & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DToplevelSeqSsm::pretty(const DToplevelSeqSsm & self, PpSink & sink) -> void
         {
             self.pretty(sink);

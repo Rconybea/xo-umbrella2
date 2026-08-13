@@ -50,7 +50,6 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
 #include <xo/arena/ArenaHashMapConfig.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -112,32 +111,6 @@ namespace xo {
         static InitEvidence s_init = InitSubsys<S_expression2_tag>::require();
 
         namespace {
-            /** render @p x through the DEPRECATED two-pass protocol.
-             *  DELETE AT PHASE E, with expect_deprecated_ and its REHEARSE.
-             *
-             *  Two color gates, as in xo-procedure2's copy of this helper: the
-             *  :td field is a TypeDescr, whose legacy rendering reaches ppsink
-             *  (TypeDescrBase::display streams xo::pp::xtag through a FlatSink),
-             *  and ppsink reads its color from PpStyle rather than tag_config.
-             **/
-            template <typename T>
-            std::string
-            render_deprecated(const T & x, std::uint32_t margin) {
-                xo::print::ppconfig ppc;
-                ppc.right_margin_ = margin;
-
-                bool orig_color = xo::tag_config::tag_color_enabled;
-                xo::tag_config::tag_color_enabled = false;
-
-                xo::pp::default_style_guard plain(xo::pp::PpStyle::plain());
-
-                std::string retval = xo::toppstr2(ppc, x);
-
-                xo::tag_config::tag_color_enabled = orig_color;
-
-                return retval;
-            }
-
             /** render @p x through pretty(PpSink&) **/
             template <typename T>
             std::string
@@ -336,16 +309,12 @@ namespace xo {
             struct Testcase_TypeRef {
                 Testcase_TypeRef(Kind kind,
                                  std::uint32_t margin,
-                                 const char * expect_deprecated,
                                  const char * expect_pretty)
                     : kind_{kind}, margin_{margin},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 Kind kind_;
                 std::uint32_t margin_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -359,15 +328,11 @@ namespace xo {
                  * Identical to legacy, which is the point.
                  */
                 Testcase_TypeRef(Kind::unresolved, 200,
-                                 "<TypeRef :id \"t:1\" :td null>",
                                  "<TypeRef :id \"t:1\" :td null>"),
                 /* the struct breaks; fields still fit their own lines, and the
                  * struct-level indent agrees at 2.
                  */
                 Testcase_TypeRef(Kind::unresolved, 20,
-                                 "<TypeRef\n"
-                                 "  :id \"t:1\"\n"
-                                 "  :td null>",
                                  "<TypeRef\n"
                                  "  :id \"t:1\"\n"
                                  "  :td null>"),
@@ -381,17 +346,10 @@ namespace xo {
                 Testcase_TypeRef(Kind::resolved, 200,
                                  "<TypeRef :id \"\" :td <TypeDescr :id N"
                                  " :canonical_name double :complete 1"
-                                 " :metatype atomic>>",
-                                 "<TypeRef :id \"\" :td <TypeDescr :id N"
-                                 " :canonical_name double :complete 1"
                                  " :metatype atomic>>"),
 
                 /* resolved: :td's value fits on its own line.  identical. */
                 Testcase_TypeRef(Kind::both, 80,
-                                 "<TypeRef\n"
-                                 "  :id \"t:2\"\n"
-                                 "  :td <TypeDescr :id N :canonical_name double"
-                                 " :complete 1 :metatype atomic>>",
                                  "<TypeRef\n"
                                  "  :id \"t:2\"\n"
                                  "  :td <TypeDescr :id N :canonical_name double"
@@ -412,11 +370,6 @@ namespace xo {
                                  "<TypeRef\n"
                                  "  :id \"t:2\"\n"
                                  "  :td\n"
-                                 "    <TypeDescr :id N :canonical_name double"
-                                 " :complete 1 :metatype atomic>>",
-                                 "<TypeRef\n"
-                                 "  :id \"t:2\"\n"
-                                 "  :td\n"
                                  "   <TypeDescr\n"
                                  "    :id N\n"
                                  "    :canonical_name double\n"
@@ -428,11 +381,6 @@ namespace xo {
                  * nested fields' values onto their own lines.
                  */
                 Testcase_TypeRef(Kind::both, 20,
-                                 "<TypeRef\n"
-                                 "  :id \"t:2\"\n"
-                                 "  :td\n"
-                                 "    <TypeDescr :id N :canonical_name double"
-                                 " :complete 1 :metatype atomic>>",
                                  "<TypeRef\n"
                                  "  :id \"t:2\"\n"
                                  "  :td\n"
@@ -758,10 +706,8 @@ namespace xo {
                                    Kind kind,
                                    std::uint32_t margin,
                                    const char * label,
-                                   const char * expect_deprecated,
                                    const char * expect_pretty)
                     : name_{name}, kind_{kind}, margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 /** nullptr -> anonymous variable **/
@@ -770,8 +716,6 @@ namespace xo {
                 std::uint32_t margin_;
                 /** distinguishes this case's arena **/
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -785,10 +729,6 @@ namespace xo {
                                    "<DVariable :name \"myvar\" :typeref"
                                    " <TypeRef :id \"\" :td <TypeDescr :id N"
                                    " :canonical_name double :complete 1"
-                                   " :metatype atomic>>>",
-                                   "<DVariable :name \"myvar\" :typeref"
-                                   " <TypeRef :id \"\" :td <TypeDescr :id N"
-                                   " :canonical_name double :complete 1"
                                    " :metatype atomic>>>"),
 
                 /* REVIEWED DIVERGENCE, the same one TypeRef pinned, now visible
@@ -798,13 +738,6 @@ namespace xo {
                  * and its own fields at 6 vs 4.  Layout only; same tokens.
                  */
                 Testcase_DVariable("myvar", Kind::resolved, 80, "res80",
-                                   "<DVariable\n"
-                                   "  :name \"myvar\"\n"
-                                   "  :typeref\n"
-                                   "    <TypeRef\n"
-                                   "      :id \"\"\n"
-                                   "      :td <TypeDescr :id N :canonical_name"
-                                   " double :complete 1 :metatype atomic>>>",
                                    "<DVariable\n"
                                    "  :name \"myvar\"\n"
                                    "  :typeref\n"
@@ -821,14 +754,6 @@ namespace xo {
                                    "<DVariable\n"
                                    "  :name \"myvar\"\n"
                                    "  :typeref\n"
-                                   "    <TypeRef\n"
-                                   "      :id \"\"\n"
-                                   "      :td\n"
-                                   "        <TypeDescr :id N :canonical_name"
-                                   " double :complete 1 :metatype atomic>>>",
-                                   "<DVariable\n"
-                                   "  :name \"myvar\"\n"
-                                   "  :typeref\n"
                                    "   <TypeRef\n"
                                    "    :id \"\"\n"
                                    "    :td\n"
@@ -841,8 +766,6 @@ namespace xo {
                 /* unresolved typeref: short enough to stay flat at 200 ... */
                 Testcase_DVariable("myvar", Kind::unresolved, 200, "unres200",
                                    "<DVariable :name \"myvar\" :typeref"
-                                   " <TypeRef :id \"t:1\" :td null>>",
-                                   "<DVariable :name \"myvar\" :typeref"
                                    " <TypeRef :id \"t:1\" :td null>>"),
 
                 /* ... at 40 only the OUTER struct breaks, and the nested
@@ -852,21 +775,12 @@ namespace xo {
                 Testcase_DVariable("myvar", Kind::unresolved, 40, "unres40",
                                    "<DVariable\n"
                                    "  :name \"myvar\"\n"
-                                   "  :typeref <TypeRef :id \"t:1\" :td null>>",
-                                   "<DVariable\n"
-                                   "  :name \"myvar\"\n"
                                    "  :typeref <TypeRef :id \"t:1\" :td null>>"),
 
                 /* at 20 the nested TypeRef breaks too -- the indent divergence
                  * again, with no TypeDescr involved.
                  */
                 Testcase_DVariable("myvar", Kind::unresolved, 20, "unres20",
-                                   "<DVariable\n"
-                                   "  :name \"myvar\"\n"
-                                   "  :typeref\n"
-                                   "    <TypeRef\n"
-                                   "      :id \"t:1\"\n"
-                                   "      :td null>>",
                                    "<DVariable\n"
                                    "  :name \"myvar\"\n"
                                    "  :typeref\n"
@@ -881,8 +795,6 @@ namespace xo {
                  */
                 Testcase_DVariable(nullptr, Kind::unresolved, 200, "anon200",
                                    "<DVariable :name \"\" :typeref"
-                                   " <TypeRef :id \"t:1\" :td null>>",
-                                   "<DVariable :name \"\" :typeref"
                                    " <TypeRef :id \"t:1\" :td null>>"),
             };
 
@@ -896,11 +808,9 @@ namespace xo {
                                  std::int32_t link,
                                  std::uint32_t margin,
                                  const char * label,
-                                 const char * expect_deprecated,
                                  const char * expect_pretty)
                     : name_{name}, path_{path}, link_{link}, margin_{margin},
                       label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 const char * name_;
@@ -908,8 +818,6 @@ namespace xo {
                 std::int32_t link_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -931,14 +839,10 @@ namespace xo {
                  * failed loudly instead).
                  */
                 Testcase_DVarRef("myvar", Binding::local(3), 0, 200, "local0.200",
-                                 "<DVarRef :name myvar :path {path:0:3}>",
                                  "<DVarRef :name myvar :path {path:0:3}>"),
 
                 /* outer struct breaks; both values still fit their lines */
                 Testcase_DVarRef("myvar", Binding::local(3), 0, 30, "local0.30",
-                                 "<DVarRef\n"
-                                 "  :name myvar\n"
-                                 "  :path {path:0:3}>",
                                  "<DVarRef\n"
                                  "  :name myvar\n"
                                  "  :path {path:0:3}>"),
@@ -947,11 +851,6 @@ namespace xo {
                  * divergence (legacy 4, ppsink 3) shows up twice in one render.
                  */
                 Testcase_DVarRef("myvar", Binding::local(3), 0, 12, "local0.12",
-                                 "<DVarRef\n"
-                                 "  :name\n"
-                                 "    myvar\n"
-                                 "  :path\n"
-                                 "    {path:0:3}>",
                                  "<DVarRef\n"
                                  "  :name\n"
                                  "   myvar\n"
@@ -964,7 +863,6 @@ namespace xo {
                  * composition, not just the formatting.
                  */
                 Testcase_DVarRef("myvar", Binding::local(3), 2, 200, "local2.200",
-                                 "<DVarRef :name myvar :path {path:2:3}>",
                                  "<DVarRef :name myvar :path {path:2:3}>"),
 
                 /* a global binding prints its own way ("{path:global:7}",
@@ -972,17 +870,12 @@ namespace xo {
                  * returns the definition unchanged for globals.
                  */
                 Testcase_DVarRef("g", Binding::global(7), 0, 200, "global.200",
-                                 "<DVarRef :name g :path {path:global:7}>",
                                  "<DVarRef :name g :path {path:global:7}>"),
 
                 /* margin 20: :name fits, :path does not -- the divergence on
                  * one field with the other left alone.
                  */
                 Testcase_DVarRef("g", Binding::global(7), 0, 20, "global.20",
-                                 "<DVarRef\n"
-                                 "  :name g\n"
-                                 "  :path\n"
-                                 "    {path:global:7}>",
                                  "<DVarRef\n"
                                  "  :name g\n"
                                  "  :path\n"
@@ -1001,19 +894,15 @@ namespace xo {
                                        std::vector<const char *> name_v,
                                        std::uint32_t margin,
                                        const char * label,
-                                       const char * expect_deprecated,
                                        const char * expect_pretty)
                     : hint_capacity_{hint_capacity}, name_v_{std::move(name_v)},
                       margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 std::size_t hint_capacity_;
                 std::vector<const char *> name_v_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1025,8 +914,6 @@ namespace xo {
                  */
                 Testcase_DGlobalSymtab(8, {}, 200, "empty.200",
                                        "<DGlobalSymtab :nvar 0 :var_capacity 16"
-                                       " :ntype 0 :type_capacity 16>",
-                                       "<DGlobalSymtab :nvar 0 :var_capacity 16"
                                        " :ntype 0 :type_capacity 16>"),
 
                 /* struct breaks, every field fits its own line.  Identical --
@@ -1034,11 +921,6 @@ namespace xo {
                  * which is what makes this printer the safe one to do first.
                  */
                 Testcase_DGlobalSymtab(8, {}, 40, "empty.40",
-                                       "<DGlobalSymtab\n"
-                                       "  :nvar 0\n"
-                                       "  :var_capacity 16\n"
-                                       "  :ntype 0\n"
-                                       "  :type_capacity 16>",
                                        "<DGlobalSymtab\n"
                                        "  :nvar 0\n"
                                        "  :var_capacity 16\n"
@@ -1053,13 +935,6 @@ namespace xo {
                                        "<DGlobalSymtab\n"
                                        "  :nvar 0\n"
                                        "  :var_capacity\n"
-                                       "    16\n"
-                                       "  :ntype 0\n"
-                                       "  :type_capacity\n"
-                                       "    16>",
-                                       "<DGlobalSymtab\n"
-                                       "  :nvar 0\n"
-                                       "  :var_capacity\n"
                                        "   16\n"
                                        "  :ntype 0\n"
                                        "  :type_capacity\n"
@@ -1071,18 +946,9 @@ namespace xo {
                  */
                 Testcase_DGlobalSymtab(8, {"a", "b", "c"}, 200, "three.200",
                                        "<DGlobalSymtab :nvar 3 :var_capacity 16"
-                                       " :ntype 0 :type_capacity 16>",
-                                       "<DGlobalSymtab :nvar 3 :var_capacity 16"
                                        " :ntype 0 :type_capacity 16>"),
 
                 Testcase_DGlobalSymtab(8, {"a", "b", "c"}, 14, "three.14",
-                                       "<DGlobalSymtab\n"
-                                       "  :nvar 3\n"
-                                       "  :var_capacity\n"
-                                       "    16\n"
-                                       "  :ntype 0\n"
-                                       "  :type_capacity\n"
-                                       "    16>",
                                        "<DGlobalSymtab\n"
                                        "  :nvar 3\n"
                                        "  :var_capacity\n"
@@ -1095,8 +961,6 @@ namespace xo {
                  * maps rather than being a constant that happened to match.
                  */
                 Testcase_DGlobalSymtab(64, {"a"}, 200, "wide.200",
-                                       "<DGlobalSymtab :nvar 1 :var_capacity 64"
-                                       " :ntype 0 :type_capacity 64>",
                                        "<DGlobalSymtab :nvar 1 :var_capacity 64"
                                        " :ntype 0 :type_capacity 64>"),
             };
@@ -1112,17 +976,13 @@ namespace xo {
                 Testcase_DSequenceExpr(int n_elt,
                                        std::uint32_t margin,
                                        const char * label,
-                                       const char * expect_deprecated,
                                        const char * expect_pretty)
                     : n_elt_{n_elt}, margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 int n_elt_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1133,16 +993,13 @@ namespace xo {
                  * diverges however narrow.
                  */
                 Testcase_DSequenceExpr(0, 200, "seq0.200",
-                                       "<DSequenceExpr :expr_v []>",
                                        "<DSequenceExpr :expr_v []>"),
 
                 Testcase_DSequenceExpr(0, 30, "seq0.30",
-                                       "<DSequenceExpr :expr_v []>",
                                        "<DSequenceExpr :expr_v []>"),
 
                 /* one element, flat: identical */
                 Testcase_DSequenceExpr(1, 200, "seq1.200",
-                                       "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1>]>",
                                        "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1>]>"),
 
                 /* REVIEWED DIVERGENCE, and it is DArray's, not this printer's
@@ -1159,12 +1016,6 @@ namespace xo {
                 Testcase_DSequenceExpr(1, 30, "seq1.30",
                                        "<DSequenceExpr\n"
                                        "  :expr_v\n"
-                                       "    [ <DConstant\n"
-                                       "        :value_.tseq N\n"
-                                       "        :value.tseq N\n"
-                                       "        :value 1>]>",
-                                       "<DSequenceExpr\n"
-                                       "  :expr_v\n"
                                        "   [<DConstant\n"
                                        "     :value_.tseq N\n"
                                        "     :value.tseq N\n"
@@ -1178,11 +1029,6 @@ namespace xo {
                 Testcase_DSequenceExpr(3, 60, "seq3.60",
                                        "<DSequenceExpr\n"
                                        "  :expr_v\n"
-                                       "    [ <DConstant :value_.tseq N :value.tseq N :value 1>\n"
-                                       "      <DConstant :value_.tseq N :value.tseq N :value 2>\n"
-                                       "      <DConstant :value_.tseq N :value.tseq N :value 3>]>",
-                                       "<DSequenceExpr\n"
-                                       "  :expr_v\n"
                                        "   [<DConstant :value_.tseq N :value.tseq N :value 1>\n"
                                        "   <DConstant :value_.tseq N :value.tseq N :value 2>\n"
                                        "   <DConstant :value_.tseq N :value.tseq N :value 3>]>"),
@@ -1191,7 +1037,6 @@ namespace xo {
                  * about where breaks land, not about which tokens are emitted.
                  */
                 Testcase_DSequenceExpr(3, 200, "seq3.200",
-                                       "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1> <DConstant :value_.tseq N :value.tseq N :value 2> <DConstant :value_.tseq N :value.tseq N :value 3>]>",
                                        "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1> <DConstant :value_.tseq N :value.tseq N :value 2> <DConstant :value_.tseq N :value.tseq N :value 3>]>"),
             };
 
@@ -1207,11 +1052,9 @@ namespace xo {
                 Testcase_DIfElseExpr(bool with_test, bool with_true, bool with_false,
                                      std::uint32_t margin,
                                      const char * label,
-                                     const char * expect_deprecated,
                                      const char * expect_pretty)
                     : with_test_{with_test}, with_true_{with_true},
                       with_false_{with_false}, margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 bool with_test_;
@@ -1219,8 +1062,6 @@ namespace xo {
                 bool with_false_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1232,18 +1073,12 @@ namespace xo {
                  * value, no stray separator.
                  */
                 Testcase_DIfElseExpr(false, false, false, 200, "none.200",
-                                     "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null>>",
                                      "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null>>"),
 
                 /* the same, broken: the sole field still breaks normally, and
                  * the nested TypeRef shows the usual column divergence.
                  */
                 Testcase_DIfElseExpr(false, false, false, 30, "none.30",
-                                     "<DIfElseExpr\n"
-                                     "  :typeref\n"
-                                     "    <TypeRef\n"
-                                     "      :id \"if:N\"\n"
-                                     "      :td null>>",
                                      "<DIfElseExpr\n"
                                      "  :typeref\n"
                                      "   <TypeRef\n"
@@ -1255,7 +1090,6 @@ namespace xo {
                  * nothing.
                  */
                 Testcase_DIfElseExpr(true, false, false, 200, "test-only.200",
-                                     "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null> :test <DConstant :value_.tseq N :value.tseq N :value 1>>",
                                      "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null> :test <DConstant :value_.tseq N :value.tseq N :value 1>>"),
 
                 /* two present, and at margin 60 the second child's value is
@@ -1263,11 +1097,6 @@ namespace xo {
                  * an absent field still cleanly missing.
                  */
                 Testcase_DIfElseExpr(true, true, false, 60, "no-else.60",
-                                     "<DIfElseExpr\n"
-                                     "  :typeref <TypeRef :id \"if:N\" :td null>\n"
-                                     "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
-                                     "  :when_true\n"
-                                     "    <DConstant :value_.tseq N :value.tseq N :value 2>>",
                                      "<DIfElseExpr\n"
                                      "  :typeref <TypeRef :id \"if:N\" :td null>\n"
                                      "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
@@ -1283,11 +1112,6 @@ namespace xo {
                                      "  :typeref <TypeRef :id \"if:N\" :td null>\n"
                                      "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
                                      "  :when_true <DConstant :value_.tseq N :value.tseq N :value 2>\n"
-                                     "  :when_false <DConstant :value_.tseq N :value.tseq N :value 3>>",
-                                     "<DIfElseExpr\n"
-                                     "  :typeref <TypeRef :id \"if:N\" :td null>\n"
-                                     "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
-                                     "  :when_true <DConstant :value_.tseq N :value.tseq N :value 2>\n"
                                      "  :when_false <DConstant :value_.tseq N :value.tseq N :value 3>>"),
 
                 /* margin 30: every child breaks, so the field-value column
@@ -1295,26 +1119,6 @@ namespace xo {
                  * all four fields at once -- the widest instance so far.
                  */
                 Testcase_DIfElseExpr(true, true, true, 30, "all.30",
-                                     "<DIfElseExpr\n"
-                                     "  :typeref\n"
-                                     "    <TypeRef\n"
-                                     "      :id \"if:N\"\n"
-                                     "      :td null>\n"
-                                     "  :test\n"
-                                     "    <DConstant\n"
-                                     "      :value_.tseq N\n"
-                                     "      :value.tseq N\n"
-                                     "      :value 1>\n"
-                                     "  :when_true\n"
-                                     "    <DConstant\n"
-                                     "      :value_.tseq N\n"
-                                     "      :value.tseq N\n"
-                                     "      :value 2>\n"
-                                     "  :when_false\n"
-                                     "    <DConstant\n"
-                                     "      :value_.tseq N\n"
-                                     "      :value.tseq N\n"
-                                     "      :value 3>>",
                                      "<DIfElseExpr\n"
                                      "  :typeref\n"
                                      "   <TypeRef\n"
@@ -1349,17 +1153,13 @@ namespace xo {
                 Testcase_DConstant(bool is_int,
                                    std::uint32_t margin,
                                    const char * label,
-                                   const char * expect_deprecated,
                                    const char * expect_pretty)
                     : is_int_{is_int}, margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 bool is_int_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1370,15 +1170,10 @@ namespace xo {
                  * cross-subsystem nesting, not just DConstant's frame.
                  */
                 Testcase_DConstant(true, 200, "int.200",
-                                   "<DConstant :value_.tseq N :value.tseq N :value 42>",
                                    "<DConstant :value_.tseq N :value.tseq N :value 42>"),
 
                 /* struct breaks, all three values still fit their lines */
                 Testcase_DConstant(true, 44, "int.44",
-                                   "<DConstant\n"
-                                   "  :value_.tseq N\n"
-                                   "  :value.tseq N\n"
-                                   "  :value 42>",
                                    "<DConstant\n"
                                    "  :value_.tseq N\n"
                                    "  :value.tseq N\n"
@@ -1391,12 +1186,6 @@ namespace xo {
                 Testcase_DConstant(true, 14, "int.14",
                                    "<DConstant\n"
                                    "  :value_.tseq\n"
-                                   "    N\n"
-                                   "  :value.tseq\n"
-                                   "    N\n"
-                                   "  :value 42>",
-                                   "<DConstant\n"
-                                   "  :value_.tseq\n"
                                    "   N\n"
                                    "  :value.tseq\n"
                                    "   N\n"
@@ -1407,16 +1196,9 @@ namespace xo {
                  * DConstant-tseq-fields checks instead).
                  */
                 Testcase_DConstant(false, 200, "flt.200",
-                                   "<DConstant :value_.tseq N :value.tseq N :value 2.5>",
                                    "<DConstant :value_.tseq N :value.tseq N :value 2.5>"),
 
                 Testcase_DConstant(false, 14, "flt.14",
-                                   "<DConstant\n"
-                                   "  :value_.tseq\n"
-                                   "    N\n"
-                                   "  :value.tseq\n"
-                                   "    N\n"
-                                   "  :value 2.5>",
                                    "<DConstant\n"
                                    "  :value_.tseq\n"
                                    "   N\n"
@@ -1440,11 +1222,9 @@ namespace xo {
                 Testcase_DDefineExpr(const char * name, bool with_rhs,
                                      std::uint32_t margin,
                                      const char * label,
-                                     const char * expect_deprecated,
                                      const char * expect_pretty)
                     : name_{name}, with_rhs_{with_rhs}, margin_{margin},
                       label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 /** nullptr -> lhs variable is anonymous **/
@@ -1452,8 +1232,6 @@ namespace xo {
                 bool with_rhs_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1463,7 +1241,6 @@ namespace xo {
                  * Both stacks agree -- no ":rhs" with an empty value.
                  */
                 Testcase_DDefineExpr("x", false, 200, "noinit.200",
-                                     "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>>>",
                                      "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>>>"),
 
                 /* the same, fully broken.  Three levels of nesting, so the
@@ -1471,14 +1248,6 @@ namespace xo {
                  * indent+1) compounds: 4 vs 3 at :lhs, 8 vs 5 at :typeref.
                  */
                 Testcase_DDefineExpr("x", false, 30, "noinit.30",
-                                     "<DDefineExpr\n"
-                                     "  :lhs\n"
-                                     "    <DVariable\n"
-                                     "      :name \"x\"\n"
-                                     "      :typeref\n"
-                                     "        <TypeRef\n"
-                                     "          :id \"\"\n"
-                                     "          :td null>>>",
                                      "<DDefineExpr\n"
                                      "  :lhs\n"
                                      "   <DVariable\n"
@@ -1490,7 +1259,6 @@ namespace xo {
 
                 /* with an initializer: :rhs appears, flat, identical */
                 Testcase_DDefineExpr("x", true, 200, "init.200",
-                                     "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>",
                                      "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>"),
 
                 /* margin 60 -- THE case worth having.  Here the column
@@ -1504,30 +1272,11 @@ namespace xo {
                 Testcase_DDefineExpr("x", true, 60, "init.60",
                                      "<DDefineExpr\n"
                                      "  :lhs\n"
-                                     "    <DVariable\n"
-                                     "      :name \"x\"\n"
-                                     "      :typeref <TypeRef :id \"\" :td null>>\n"
-                                     "  :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>",
-                                     "<DDefineExpr\n"
-                                     "  :lhs\n"
                                      "   <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>>\n"
                                      "  :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>"),
 
                 /* margin 30, both fields present: every level breaks */
                 Testcase_DDefineExpr("x", true, 30, "init.30",
-                                     "<DDefineExpr\n"
-                                     "  :lhs\n"
-                                     "    <DVariable\n"
-                                     "      :name \"x\"\n"
-                                     "      :typeref\n"
-                                     "        <TypeRef\n"
-                                     "          :id \"\"\n"
-                                     "          :td null>>\n"
-                                     "  :rhs\n"
-                                     "    <DConstant\n"
-                                     "      :value_.tseq N\n"
-                                     "      :value.tseq N\n"
-                                     "      :value 7>>",
                                      "<DDefineExpr\n"
                                      "  :lhs\n"
                                      "   <DVariable\n"
@@ -1547,7 +1296,6 @@ namespace xo {
                  * The contrast with :rhs above is the point.
                  */
                 Testcase_DDefineExpr(nullptr, true, 200, "anon.200",
-                                     "<DDefineExpr :lhs <DVariable :name \"\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>",
                                      "<DDefineExpr :lhs <DVariable :name \"\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>"),
             };
 
@@ -1561,17 +1309,13 @@ namespace xo {
             struct Testcase_DApplyExpr {
                 Testcase_DApplyExpr(int n_arg, std::uint32_t margin,
                                     const char * label,
-                                    const char * expect_deprecated,
                                     const char * expect_pretty)
                     : n_arg_{n_arg}, margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 int n_arg_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1586,7 +1330,6 @@ namespace xo {
                  * ticket.
                  */
                 Testcase_DApplyExpr(0, 200, "a0.200",
-                                    "<ApplyExpr:fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>>",
                                     "<ApplyExpr :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>>"),
 
                 /* broken: the separator question disappears -- a field on its
@@ -1595,14 +1338,6 @@ namespace xo {
                  * compounding over three levels.
                  */
                 Testcase_DApplyExpr(0, 30, "a0.30",
-                                    "<ApplyExpr\n"
-                                    "  :fn\n"
-                                    "    <DVariable\n"
-                                    "      :name \"f\"\n"
-                                    "      :typeref\n"
-                                    "        <TypeRef\n"
-                                    "          :id \"t:N\"\n"
-                                    "          :td null>>>",
                                     "<ApplyExpr\n"
                                     "  :fn\n"
                                     "   <DVariable\n"
@@ -1616,21 +1351,9 @@ namespace xo {
                  * and before :arg1.  Pins that the defect is per field.
                  */
                 Testcase_DApplyExpr(1, 200, "a1.200",
-                                    "<ApplyExpr:fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>:arg1 <DConstant :value_.tseq N :value.tseq N :value 10>>",
                                     "<ApplyExpr :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>> :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>>"),
 
                 Testcase_DApplyExpr(1, 40, "a1.40",
-                                    "<ApplyExpr\n"
-                                    "  :fn\n"
-                                    "    <DVariable\n"
-                                    "      :name \"f\"\n"
-                                    "      :typeref\n"
-                                    "        <TypeRef :id \"t:N\" :td null>>\n"
-                                    "  :arg1\n"
-                                    "    <DConstant\n"
-                                    "      :value_.tseq N\n"
-                                    "      :value.tseq N\n"
-                                    "      :value 10>>",
                                     "<ApplyExpr\n"
                                     "  :fn\n"
                                     "   <DVariable\n"
@@ -1653,25 +1376,12 @@ namespace xo {
                                     "  :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>\n"
                                     "  :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>\n"
                                     "  :arg2 <DConstant :value_.tseq N :value.tseq N :value 11>\n"
-                                    "  :arg3 <DConstant :value_.tseq N :value.tseq N :value 12>>",
-                                    "<ApplyExpr\n"
-                                    "  :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>\n"
-                                    "  :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>\n"
-                                    "  :arg2 <DConstant :value_.tseq N :value.tseq N :value 11>\n"
                                     "  :arg3 <DConstant :value_.tseq N :value.tseq N :value 12>>"),
 
                 /* margin 60: :fn breaks, the args still fit -- so one field
                  * diverges and three do not, in one rendering.
                  */
                 Testcase_DApplyExpr(3, 60, "a3.60",
-                                    "<ApplyExpr\n"
-                                    "  :fn\n"
-                                    "    <DVariable\n"
-                                    "      :name \"f\"\n"
-                                    "      :typeref <TypeRef :id \"t:N\" :td null>>\n"
-                                    "  :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>\n"
-                                    "  :arg2 <DConstant :value_.tseq N :value.tseq N :value 11>\n"
-                                    "  :arg3 <DConstant :value_.tseq N :value.tseq N :value 12>>",
                                     "<ApplyExpr\n"
                                     "  :fn\n"
                                     "   <DVariable\n"
@@ -1683,29 +1393,6 @@ namespace xo {
 
                 /* margin 30: everything breaks, at every level */
                 Testcase_DApplyExpr(3, 30, "a3.30",
-                                    "<ApplyExpr\n"
-                                    "  :fn\n"
-                                    "    <DVariable\n"
-                                    "      :name \"f\"\n"
-                                    "      :typeref\n"
-                                    "        <TypeRef\n"
-                                    "          :id \"t:N\"\n"
-                                    "          :td null>>\n"
-                                    "  :arg1\n"
-                                    "    <DConstant\n"
-                                    "      :value_.tseq N\n"
-                                    "      :value.tseq N\n"
-                                    "      :value 10>\n"
-                                    "  :arg2\n"
-                                    "    <DConstant\n"
-                                    "      :value_.tseq N\n"
-                                    "      :value.tseq N\n"
-                                    "      :value 11>\n"
-                                    "  :arg3\n"
-                                    "    <DConstant\n"
-                                    "      :value_.tseq N\n"
-                                    "      :value.tseq N\n"
-                                    "      :value 12>>",
                                     "<ApplyExpr\n"
                                     "  :fn\n"
                                     "   <DVariable\n"
@@ -1750,17 +1437,13 @@ namespace xo {
             struct Testcase_DLocalSymtab {
                 Testcase_DLocalSymtab(int n_var, std::uint32_t margin,
                                       const char * label,
-                                      const char * expect_deprecated,
                                       const char * expect_pretty)
                     : n_var_{n_var}, margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 int n_var_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1771,13 +1454,9 @@ namespace xo {
                  * question arises.
                  */
                 Testcase_DLocalSymtab(0, 200, "s0.200",
-                                      "<LocalSymtab :nvars 0 :ntypes 0>",
                                       "<LocalSymtab :nvars 0 :ntypes 0>"),
 
                 Testcase_DLocalSymtab(0, 30, "s0.30",
-                                      "<LocalSymtab\n"
-                                      "  :nvars 0\n"
-                                      "  :ntypes 0>",
                                       "<LocalSymtab\n"
                                       "  :nvars 0\n"
                                       "  :ntypes 0>"),
@@ -1786,20 +1465,12 @@ namespace xo {
                  * an empty loop drops its fields but not the count.
                  */
                 Testcase_DLocalSymtab(1, 200, "s1.200",
-                                      "<LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>",
                                       "<LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>"),
 
                 /* margin 60: the symtab and the DVariable break, the TypeRef
                  * does not -- one level of divergence, not three.
                  */
                 Testcase_DLocalSymtab(1, 60, "s1.60",
-                                      "<LocalSymtab\n"
-                                      "  :nvars 1\n"
-                                      "  :[0]\n"
-                                      "    <DVariable\n"
-                                      "      :name \"v1\"\n"
-                                      "      :typeref <TypeRef :id \"t:N\" :td null>>\n"
-                                      "  :ntypes 0>",
                                       "<LocalSymtab\n"
                                       "  :nvars 1\n"
                                       "  :[0]\n"
@@ -1815,16 +1486,6 @@ namespace xo {
                                       "<LocalSymtab\n"
                                       "  :nvars 1\n"
                                       "  :[0]\n"
-                                      "    <DVariable\n"
-                                      "      :name \"v1\"\n"
-                                      "      :typeref\n"
-                                      "        <TypeRef\n"
-                                      "          :id \"t:N\"\n"
-                                      "          :td null>>\n"
-                                      "  :ntypes 0>",
-                                      "<LocalSymtab\n"
-                                      "  :nvars 1\n"
-                                      "  :[0]\n"
                                       "   <DVariable\n"
                                       "    :name \"v1\"\n"
                                       "    :typeref\n"
@@ -1837,27 +1498,9 @@ namespace xo {
                  * [1], in append order, with v1/v2 following them.
                  */
                 Testcase_DLocalSymtab(2, 200, "s2.200",
-                                      "<LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>",
                                       "<LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>"),
 
                 Testcase_DLocalSymtab(2, 30, "s2.30",
-                                      "<LocalSymtab\n"
-                                      "  :nvars 2\n"
-                                      "  :[0]\n"
-                                      "    <DVariable\n"
-                                      "      :name \"v1\"\n"
-                                      "      :typeref\n"
-                                      "        <TypeRef\n"
-                                      "          :id \"t:N\"\n"
-                                      "          :td null>>\n"
-                                      "  :[1]\n"
-                                      "    <DVariable\n"
-                                      "      :name \"v2\"\n"
-                                      "      :typeref\n"
-                                      "        <TypeRef\n"
-                                      "          :id \"t:N\"\n"
-                                      "          :td null>>\n"
-                                      "  :ntypes 0>",
                                       "<LocalSymtab\n"
                                       "  :nvars 2\n"
                                       "  :[0]\n"
@@ -1889,11 +1532,9 @@ namespace xo {
             struct Testcase_DLambdaExpr {
                 Testcase_DLambdaExpr(const char * name, bool with_body, int n_var,
                                      std::uint32_t margin, const char * label,
-                                     const char * expect_deprecated,
                                      const char * expect_pretty)
                     : name_{name}, with_body_{with_body}, n_var_{n_var},
                       margin_{margin}, label_{label},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 const char * name_;
@@ -1901,8 +1542,6 @@ namespace xo {
                 int n_var_;
                 std::uint32_t margin_;
                 const char * label_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -1912,7 +1551,6 @@ namespace xo {
                  * deeply enough for the field-value column to matter.
                  */
                 Testcase_DLambdaExpr("f", true, 0, 200, "L0.200",
-                                      "<LambdaExpr :tref <TypeRef :id \"t:N\" :td null> :name \"f\" :local_symtab <LocalSymtab :nvars 0 :ntypes 0> :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
                                       "<LambdaExpr :tref <TypeRef :id \"t:N\" :td null> :name \"f\" :local_symtab <LocalSymtab :nvars 0 :ntypes 0> :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
 
                 Testcase_DLambdaExpr("f", true, 0, 60, "L0.60",
@@ -1920,29 +1558,9 @@ namespace xo {
                                       "  :tref <TypeRef :id \"t:N\" :td null>\n"
                                       "  :name \"f\"\n"
                                       "  :local_symtab <LocalSymtab :nvars 0 :ntypes 0>\n"
-                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
-                                      "<LambdaExpr\n"
-                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
-                                      "  :name \"f\"\n"
-                                      "  :local_symtab <LocalSymtab :nvars 0 :ntypes 0>\n"
                                       "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
 
                 Testcase_DLambdaExpr("f", true, 0, 30, "L0.30",
-                                      "<LambdaExpr\n"
-                                      "  :tref\n"
-                                      "    <TypeRef\n"
-                                      "      :id \"t:N\"\n"
-                                      "      :td null>\n"
-                                      "  :name \"f\"\n"
-                                      "  :local_symtab\n"
-                                      "    <LocalSymtab\n"
-                                      "      :nvars 0\n"
-                                      "      :ntypes 0>\n"
-                                      "  :body\n"
-                                      "    <DConstant\n"
-                                      "      :value_.tseq N\n"
-                                      "      :value.tseq N\n"
-                                      "      :value 5>>",
                                       "<LambdaExpr\n"
                                       "  :tref\n"
                                       "   <TypeRef\n"
@@ -1969,26 +1587,12 @@ namespace xo {
                                       "  :tref <TypeRef :id \"t:N\" :td null>\n"
                                       "  :name \"f\"\n"
                                       "  :local_symtab <LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
-                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
-                                      "<LambdaExpr\n"
-                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
-                                      "  :name \"f\"\n"
-                                      "  :local_symtab <LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
                                       "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
 
                 /* the mixed case: the symtab breaks, its one variable does not.
                  * Exactly one level of the +2/+1 column gap is visible.
                  */
                 Testcase_DLambdaExpr("f", true, 1, 80, "L1.80",
-                                      "<LambdaExpr\n"
-                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
-                                      "  :name \"f\"\n"
-                                      "  :local_symtab\n"
-                                      "    <LocalSymtab\n"
-                                      "      :nvars 1\n"
-                                      "      :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>>\n"
-                                      "      :ntypes 0>\n"
-                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
                                       "<LambdaExpr\n"
                                       "  :tref <TypeRef :id \"t:N\" :td null>\n"
                                       "  :name \"f\"\n"
@@ -2003,28 +1607,6 @@ namespace xo {
                  * this fixture, and where the column gap compounds most.
                  */
                 Testcase_DLambdaExpr("f", true, 1, 30, "L1.30",
-                                      "<LambdaExpr\n"
-                                      "  :tref\n"
-                                      "    <TypeRef\n"
-                                      "      :id \"t:N\"\n"
-                                      "      :td null>\n"
-                                      "  :name \"f\"\n"
-                                      "  :local_symtab\n"
-                                      "    <LocalSymtab\n"
-                                      "      :nvars 1\n"
-                                      "      :[0]\n"
-                                      "        <DVariable\n"
-                                      "          :name \"v1\"\n"
-                                      "          :typeref\n"
-                                      "            <TypeRef\n"
-                                      "              :id \"t:N\"\n"
-                                      "              :td null>>\n"
-                                      "      :ntypes 0>\n"
-                                      "  :body\n"
-                                      "    <DConstant\n"
-                                      "      :value_.tseq N\n"
-                                      "      :value.tseq N\n"
-                                      "      :value 5>>",
                                       "<LambdaExpr\n"
                                       "  :tref\n"
                                       "   <TypeRef\n"
@@ -2053,11 +1635,6 @@ namespace xo {
                                       "  :tref <TypeRef :id \"t:N\" :td null>\n"
                                       "  :name \"f\"\n"
                                       "  :local_symtab <LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
-                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
-                                      "<LambdaExpr\n"
-                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
-                                      "  :name \"f\"\n"
-                                      "  :local_symtab <LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
                                       "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
 
                 /* name_ null: the WHOLE struct collapses to a bare <LambdaExpr>.
@@ -2065,26 +1642,22 @@ namespace xo {
                  * still render nothing.  That is legacy's branch, reproduced.
                  */
                 Testcase_DLambdaExpr(nullptr, true, 1, 200, "Lanon.200",
-                                      "<LambdaExpr>",
                                       "<LambdaExpr>"),
 
                 /* and it is margin-invariant, having no break points at all */
                 Testcase_DLambdaExpr(nullptr, true, 1, 30, "Lanon.30",
-                                      "<LambdaExpr>",
                                       "<LambdaExpr>"),
 
                 /* body absent, name present: the same collapse from the other
                  * half of the condition.
                  */
                 Testcase_DLambdaExpr("f", false, 1, 200, "Lnobody.200",
-                                      "<LambdaExpr>",
                                       "<LambdaExpr>"),
 
                 /* margin 8 against 13 characters: the degenerate form does not
                  * break even when it cannot fit, because it has nowhere to.
                  */
                 Testcase_DLambdaExpr("f", false, 1, 8, "Lnobody.8",
-                                      "<LambdaExpr>",
                                       "<LambdaExpr>"),
             };
         } /*namespace*/
@@ -2100,15 +1673,11 @@ namespace xo {
                     const auto & tc = s_typeref_v[i_tc];
 
                     TypeRef tr = make_typeref(tc.kind_);
-
-                    std::string deprecated = scrub_type_id(render_deprecated(tr, tc.margin_));
                     std::string pretty = scrub_type_id(render_pretty(tr, tc.margin_));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2135,15 +1704,11 @@ namespace xo {
                      * IPrintable::pretty(ppindentinfo) from.
                      */
                     auto p = with_facet<APrintable>::mkobj(var);
-
-                    std::string deprecated = scrub_type_id(render_deprecated(p, tc.margin_));
                     std::string pretty = scrub_type_id(render_pretty(p, tc.margin_));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2166,22 +1731,18 @@ namespace xo {
                     REQUIRE(vr != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(vr);
-
-                    std::string deprecated = render_deprecated(p, tc.margin_);
                     std::string pretty = render_pretty(p, tc.margin_);
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
 
         /** the one case that CANNOT be pinned against both protocols.
          *
-         *  DVarRef::pretty_deprecated does std::string_view(*(this->name()))
+         *  DVarRef::pretty (and pretty_deprecated before it) does std::string_view(*(this->name()))
          *  with no null check, and a DVariable's name_ has no non-null
          *  invariant -- DVariable's own printer guards for exactly this.  So
          *  legacy is undefined here rather than merely different, and there is
@@ -2219,15 +1780,11 @@ namespace xo {
                     auto symtab = fx.make_symtab(tc.hint_capacity_, tc.name_v_);
 
                     auto p = with_facet<APrintable>::mkobj(symtab.data());
-
-                    std::string deprecated = render_deprecated(p, tc.margin_);
                     std::string pretty = render_pretty(p, tc.margin_);
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2252,15 +1809,11 @@ namespace xo {
                     REQUIRE(k != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(k);
-
-                    std::string deprecated = scrub_tseq(render_deprecated(p, tc.margin_));
                     std::string pretty = scrub_tseq(render_pretty(p, tc.margin_));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2324,17 +1877,12 @@ namespace xo {
                     REQUIRE(e != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(e);
-
-                    std::string deprecated
-                        = scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_)));
                     std::string pretty
                         = scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_)));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2357,15 +1905,11 @@ namespace xo {
                     REQUIRE(e != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(e);
-
-                    std::string deprecated = scrub_tseq(render_deprecated(p, tc.margin_));
                     std::string pretty = scrub_tseq(render_pretty(p, tc.margin_));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2387,17 +1931,12 @@ namespace xo {
                     REQUIRE(e != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(e);
-
-                    std::string deprecated
-                        = scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_)));
                     std::string pretty
                         = scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_)));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2419,17 +1958,12 @@ namespace xo {
                     REQUIRE(e != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(e);
-
-                    std::string deprecated
-                        = scrub_type_id(scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_))));
                     std::string pretty
                         = scrub_type_id(scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_))));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2451,17 +1985,12 @@ namespace xo {
                     REQUIRE(e != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(e);
-
-                    std::string deprecated
-                        = scrub_type_id(scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_))));
                     std::string pretty
                         = scrub_type_id(scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_))));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2474,7 +2003,7 @@ namespace xo {
          *  corrects where the ticket placed the fault: DLocalSymtab's own
          *  `(*types_)[i].to_facet<APrintable>()` SUCCEEDS, because DTypename
          *  has an IPrintable facet.  What throws is one level down, in
-         *  DTypename::pretty_deprecated's `type_.to_facet<APrintable>()`,
+         *  DTypename::pretty's `type_.to_facet<APrintable>()`,
          *  since xo-type's D-types have none.
          *
          *  The two sides AGREED TO DISAGREE only briefly.  While DTypename was
@@ -2501,7 +2030,6 @@ namespace xo {
              * holds DTypenames, which HAVE the facet) and DTypename's does
              * not.  One level deeper than this ticket first claimed.
              */
-            REQUIRE_THROWS_AS(render_deprecated(p, 200), std::runtime_error);
             REQUIRE_THROWS_AS(render_pretty(p, 200), std::runtime_error);
         }
         TEST_CASE("DLambdaExpr-render", "[printable][DLambdaExpr]")
@@ -2522,17 +2050,12 @@ namespace xo {
                     REQUIRE(e != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(e);
-
-                    std::string deprecated
-                        = scrub_type_id(scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_))));
                     std::string pretty
                         = scrub_type_id(scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_))));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -2550,10 +2073,11 @@ namespace xo {
          *  failure is the signal, and the fix then is to replace this with a
          *  rendering test.
          *
-         *  Both halves survive phase E: unlike every other case in this file,
-         *  the deprecated assertion is not scaffolding for a pinned rendering,
-         *  because there is no rendering.  Delete the deprecated line with the
-         *  rest of phase E; keep the pretty one.
+         *  Phase E deleted the matching deprecated assertion, as everywhere
+         *  else in this file.  Here that assertion was NOT scaffolding for a
+         *  pinned rendering -- there is no rendering -- it recorded that both
+         *  protocols failed identically, which was the evidence that the
+         *  conversion changed nothing.
          **/
         TEST_CASE("DTypename-render", "[printable][DTypename]")
         {
@@ -2564,10 +2088,6 @@ namespace xo {
             auto tn = fx.make_typename("t1", true /*with_type*/);
             auto pr = tn.to_facet<APrintable>();
 
-            /* identical failure on both sides -- the conversion changed
-             * nothing, which is what makes it a pure refactor
-             */
-            REQUIRE_THROWS_AS(render_deprecated(pr, 200), std::runtime_error);
             REQUIRE_THROWS_AS(render_pretty(pr, 200), std::runtime_error);
         }
     } /*namespace ut*/

@@ -30,7 +30,6 @@
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/indentlog2/print/toppstr.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -58,35 +57,6 @@ namespace xo {
         using xo::pp::xtag;
 
         namespace {
-            /** render @p x through the DEPRECATED two-pass protocol.
-             *  DELETE AT PHASE E, with expect_deprecated_ and its REHEARSE.
-             *
-             *  Two color gates, not one.  xo-object2's copy of this helper
-             *  needed only tag_config::tag_color_enabled, because everything it
-             *  rendered stayed inside legacy indentlog.  Here the :td field is
-             *  a TypeDescr, whose legacy path reaches ppsink (see the file
-             *  comment), and ppsink reads its color from PpStyle -- so without
-             *  the style guard the "expected" strings would have to embed ANSI
-             *  escapes for the nested fields and not for the outer ones.
-             **/
-            template <typename T>
-            std::string
-            render_deprecated(const T & x, std::uint32_t margin) {
-                xo::print::ppconfig ppc;
-                ppc.right_margin_ = margin;
-
-                bool orig_color = xo::tag_config::tag_color_enabled;
-                xo::tag_config::tag_color_enabled = false;
-
-                xo::pp::default_style_guard plain(xo::pp::PpStyle::plain());
-
-                std::string retval = xo::toppstr2(ppc, x);
-
-                xo::tag_config::tag_color_enabled = orig_color;
-
-                return retval;
-            }
-
             /** render @p x through pretty(PpSink&) **/
             template <typename T>
             std::string
@@ -123,15 +93,11 @@ namespace xo {
             /** the primitive is fixed; MARGIN is the case variable **/
             struct Testcase_Primitive {
                 Testcase_Primitive(std::uint32_t margin,
-                                   const char * expect_deprecated,
                                    const char * expect_pretty)
                     : margin_{margin},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 std::uint32_t margin_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -153,11 +119,6 @@ namespace xo {
                                    " :td <TypeDescr :id N :canonical_name"
                                    " xo::facet::obj<xo::mm::AGCObject>"
                                    " (*)(xo::facet::obj<xo::scm::ARuntimeContext>)"
-                                   " :complete 1 :metatype function> :fn 1>",
-                                   "<Primitive<Fn> :name cwd"
-                                   " :td <TypeDescr :id N :canonical_name"
-                                   " xo::facet::obj<xo::mm::AGCObject>"
-                                   " (*)(xo::facet::obj<xo::scm::ARuntimeContext>)"
                                    " :complete 1 :metatype function> :fn 1>"),
 
                 /* REVIEWED DIVERGENCE, two of them, both deliberate:
@@ -170,14 +131,6 @@ namespace xo {
                  *    to offer; ppsink folds it.
                  */
                 Testcase_Primitive(80,
-                                   "<Primitive<Fn>\n"
-                                   "  :name cwd\n"
-                                   "  :td\n"
-                                   "    <TypeDescr :id N :canonical_name"
-                                   " xo::facet::obj<xo::mm::AGCObject>"
-                                   " (*)(xo::facet::obj<xo::scm::ARuntimeContext>)"
-                                   " :complete 1 :metatype function>\n"
-                                   "  :fn 1>",
 
                                    "<Primitive<Fn>\n"
                                    "  :name cwd\n"
@@ -198,14 +151,6 @@ namespace xo {
                  * atomic token, wider than any margin here.
                  */
                 Testcase_Primitive(20,
-                                   "<Primitive<Fn>\n"
-                                   "  :name cwd\n"
-                                   "  :td\n"
-                                   "    <TypeDescr :id N :canonical_name"
-                                   " xo::facet::obj<xo::mm::AGCObject>"
-                                   " (*)(xo::facet::obj<xo::scm::ARuntimeContext>)"
-                                   " :complete 1 :metatype function>\n"
-                                   "  :fn 1>",
 
                                    "<Primitive<Fn>\n"
                                    "  :name cwd\n"
@@ -249,15 +194,11 @@ namespace xo {
                     REQUIRE(pm != nullptr);
 
                     auto p = with_facet<APrintable>::mkobj(pm);
-
-                    std::string deprecated = scrub_type_id(render_deprecated(p, tc.margin_));
                     std::string pretty = scrub_type_id(render_pretty(p, tc.margin_));
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }

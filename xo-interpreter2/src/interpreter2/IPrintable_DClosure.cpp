@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DClosure::pretty_deprecated(const DClosure & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DClosure::pretty(const DClosure & self, PpSink & sink) -> void
         {
             self.pretty(sink);

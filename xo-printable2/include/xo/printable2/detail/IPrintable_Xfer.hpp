@@ -21,7 +21,6 @@
 #pragma once
 
 #include "APrintable.hpp"
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <xo/ppsink/PpSink.hpp>
 
 namespace xo {
@@ -37,7 +36,6 @@ namespace print {
         using Impl = IPrintable_DRepr;
         /** integer identifying a type **/
         using typeseq = APrintable::typeseq;
-        using ppindentinfo = APrintable::ppindentinfo;
         using PpSink = APrintable::PpSink;
         ///@}
 
@@ -54,9 +52,6 @@ namespace print {
         void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
 
         // const methods
-        bool pretty_deprecated(Copaque data, const ppindentinfo & ppii)  const override {
-            return I::pretty_deprecated(_dcast(data), ppii);
-        }
         void pretty(Copaque data, PpSink & sink)  const override {
             return I::pretty(_dcast(data), sink);
         }

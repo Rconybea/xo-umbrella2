@@ -17,7 +17,7 @@
 #include "detail/IPrintable_Any.hpp"
 #include "detail/IPrintable_Xfer.hpp"
 #include "detail/RPrintable.hpp"
-#include "detail/ppdetail_Printable.hpp"
+
 #include "detail/pretty_Printable.hpp"
 #include <xo/alloc2/Allocator.hpp>
 

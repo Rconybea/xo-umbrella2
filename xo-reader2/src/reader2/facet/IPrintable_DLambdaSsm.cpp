@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DLambdaSsm::pretty_deprecated(const DLambdaSsm & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DLambdaSsm::pretty(const DLambdaSsm & self, PpSink & sink) -> void
         {
             self.pretty(sink);

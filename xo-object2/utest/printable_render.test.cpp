@@ -39,7 +39,6 @@
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/indentlog2/print/toppstr.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -71,35 +70,6 @@ namespace xo {
         using xo::pp::xtag;
 
         namespace {
-            /** render @p x through the DEPRECATED two-pass protocol.
-             *  DELETE AT PHASE E, with expect_deprecated_ and its REHEARSE.
-             *
-             *  NOT ppconfig::ugly(), which the leaf tests inherited from the
-             *  xo-stringtable2 template: ugly() sets indent_width_ = 0, so a
-             *  broken struct's fields land in column 0 and the comparison
-             *  silently stops being about indent at all.  Default ppconfig has
-             *  indent_width_ = 2, matching xo::pp::PpConfig.
-             *
-             *  Color is a process-wide global in both stacks, not part of
-             *  either config object, and both now default ON.  Suppressed here
-             *  so the expectations pin LAYOUT rather than ANSI escapes.
-             **/
-            template <typename T>
-            std::string
-            render_deprecated(const T & x, std::uint32_t margin) {
-                xo::print::ppconfig ppc;
-                ppc.right_margin_ = margin;
-
-                bool orig_color = xo::tag_config::tag_color_enabled;
-                xo::tag_config::tag_color_enabled = false;
-
-                std::string retval = xo::toppstr2(ppc, x);
-
-                xo::tag_config::tag_color_enabled = orig_color;
-
-                return retval;
-            }
-
             /** render @p x through pretty(PpSink&) **/
             template <typename T>
             std::string
@@ -114,41 +84,38 @@ namespace xo {
 
             template <typename V>
             struct Testcase_Leaf {
-                Testcase_Leaf(V value, const char * expect_deprecated, const char * expect_pretty)
+                Testcase_Leaf(V value, const char * expect_pretty)
                     : value_{value},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 V value_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
 
             std::vector<Testcase_Leaf<long>>
             s_integer_v = {
-                Testcase_Leaf<long>(0,          "0",          "0"),
-                Testcase_Leaf<long>(1,          "1",          "1"),
-                Testcase_Leaf<long>(-1,         "-1",         "-1"),
-                Testcase_Leaf<long>(1234567890, "1234567890", "1234567890"),
+                Testcase_Leaf<long>(0,          "0"),
+                Testcase_Leaf<long>(1,          "1"),
+                Testcase_Leaf<long>(-1,         "-1"),
+                Testcase_Leaf<long>(1234567890, "1234567890"),
             };
 
             std::vector<Testcase_Leaf<bool>>
             s_boolean_v = {
-                Testcase_Leaf<bool>(true,  "true",  "true"),
-                Testcase_Leaf<bool>(false, "false", "false"),
+                Testcase_Leaf<bool>(true,  "true"),
+                Testcase_Leaf<bool>(false, "false"),
             };
 
             /* double formatting is where the two paths could diverge */
             std::vector<Testcase_Leaf<double>>
             s_float_v = {
-                Testcase_Leaf<double>(0.0, "0", "0"),
-                Testcase_Leaf<double>(1.5, "1.5", "1.5"),
-                Testcase_Leaf<double>(-2.25, "-2.25", "-2.25"),
-                Testcase_Leaf<double>(1.0/3.0, "0.333333", "0.333333"),
-                Testcase_Leaf<double>(1e20, "1e+20", "1e+20"),
-                Testcase_Leaf<double>(1e-20, "1e-20", "1e-20"),
+                Testcase_Leaf<double>(0.0, "0"),
+                Testcase_Leaf<double>(1.5, "1.5"),
+                Testcase_Leaf<double>(-2.25, "-2.25"),
+                Testcase_Leaf<double>(1.0/3.0, "0.333333"),
+                Testcase_Leaf<double>(1e20, "1e+20"),
+                Testcase_Leaf<double>(1e-20, "1e-20"),
             };
             /** DRuntimeError is the first STRUCTURED printer verified here:
              *  two DString fields inside a pretty_struct.  Unlike the leaves
@@ -158,17 +125,13 @@ namespace xo {
             struct Testcase_Error {
                 Testcase_Error(std::uint32_t margin,
                                const char * src, const char * err,
-                               const char * expect_deprecated,
                                const char * expect_pretty)
                     : margin_{margin}, src_{src}, err_{err},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 std::uint32_t margin_;
                 const char * src_;
                 const char * err_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -177,15 +140,11 @@ namespace xo {
             s_error_v = {
                 /* fits: one line.  identical. */
                 Testcase_Error(80, "DRuntimeError::make", "bad argument",
-                               "<DRuntimeError :src DRuntimeError::make :err bad argument>",
                                "<DRuntimeError :src DRuntimeError::make :err bad argument>"),
                 /* struct breaks, each field still fits its line.  identical --
                  * the struct-level indent agrees at 2.
                  */
                 Testcase_Error(40, "DRuntimeError::make", "bad argument",
-                               "<DRuntimeError\n"
-                               "  :src DRuntimeError::make\n"
-                               "  :err bad argument>",
                                "<DRuntimeError\n"
                                "  :src DRuntimeError::make\n"
                                "  :err bad argument>"),
@@ -200,11 +159,6 @@ namespace xo {
                  * configurable there, where legacy's was neither.
                  */
                 Testcase_Error(16, "DRuntimeError::make", "bad argument",
-                               "<DRuntimeError\n"
-                               "  :src\n"
-                               "    DRuntimeError::make\n"
-                               "  :err\n"
-                               "    bad argument>",
                                "<DRuntimeError\n"
                                "  :src\n"
                                "   DRuntimeError::make\n"
@@ -227,16 +181,12 @@ namespace xo {
             struct Testcase_Array {
                 Testcase_Array(std::uint32_t margin,
                                std::vector<long> elt_v,
-                               const char * expect_deprecated,
                                const char * expect_pretty)
                     : margin_{margin}, elt_v_{std::move(elt_v)},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 std::uint32_t margin_;
                 std::vector<long> elt_v_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -246,10 +196,10 @@ namespace xo {
                 /* degenerate: empty group must not break, and must not emit a
                  * separator it has no elements to separate.
                  */
-                Testcase_Array(80, {}, "[]", "[]"),
-                Testcase_Array(80, {1}, "[1]", "[1]"),
+                Testcase_Array(80, {}, "[]"),
+                Testcase_Array(80, {1}, "[1]"),
                 /* fits: one line, space-separated.  identical. */
-                Testcase_Array(80, {1, 2, 3}, "[1 2 3]", "[1 2 3]"),
+                Testcase_Array(80, {1, 2, 3}, "[1 2 3]"),
                 /* REVIEWED DIVERGENCE, deliberate: both stacks align elements
                  * 2..n under element 0, but they get there differently.
                  *
@@ -261,14 +211,12 @@ namespace xo {
                  * whitespace inside a rendering that claims to have none.
                  */
                 Testcase_Array(8, {100, 200, 300},
-                               "[ 100\n  200\n  300]",
                                "[100\n 200\n 300]"),
                 /* margin narrower than a single element: no further recourse,
                  * so the rendering is unchanged from margin 8 rather than
                  * degenerating.
                  */
                 Testcase_Array(4, {100, 200, 300},
-                               "[ 100\n  200\n  300]",
                                "[100\n 200\n 300]"),
             };
             /** DDictionary is a KEYED sequence: like DArray its arity is
@@ -291,16 +239,12 @@ namespace xo {
 
                 Testcase_Dict(std::uint32_t margin,
                               std::vector<entry_type> entry_v,
-                              const char * expect_deprecated,
                               const char * expect_pretty)
                     : margin_{margin}, entry_v_{std::move(entry_v)},
-                      expect_deprecated_{expect_deprecated},
                       expect_pretty_{expect_pretty} {}
 
                 std::uint32_t margin_;
                 std::vector<entry_type> entry_v_;
-                /** OBSERVED via pretty_deprecated; delete at phase E **/
-                std::string expect_deprecated_;
                 /** OBSERVED via pretty; outlives phase E **/
                 std::string expect_pretty_;
             };
@@ -311,14 +255,13 @@ namespace xo {
                  * separator it has no entries to separate.  Legacy still pads,
                  * so an empty dictionary is TWO characters there and one here.
                  */
-                Testcase_Dict(80, {}, "{ }", "{}"),
-                Testcase_Dict(80, {{"a", 1}}, "{ a: 1; }", "{a: 1;}"),
+                Testcase_Dict(80, {}, "{}"),
+                Testcase_Dict(80, {{"a", 1}}, "{a: 1;}"),
                 /* fits: one line.  ";" TERMINATES each entry rather than
                  * separating them, so the last one carries it too -- legacy's
                  * shape, kept.
                  */
-                Testcase_Dict(80, {{"a", 1}, {"bb", 22}},
-                              "{ a: 1; bb: 22; }", "{a: 1; bb: 22;}"),
+                Testcase_Dict(80, {{"a", 1}, {"bb", 22}}, "{a: 1; bb: 22;}"),
                 /* REVIEWED DIVERGENCE, deliberate, and the same one DArray
                  * settled: both stacks align entries 2..n under entry 0, but
                  * legacy gets there by PADDING (a space after "{", so entry 0
@@ -327,7 +270,6 @@ namespace xo {
                  * left, and no interior whitespace.
                  */
                 Testcase_Dict(12, {{"a", 1}, {"bb", 22}},
-                              "{ a: 1;\n  bb: 22; }",
                               "{a: 1;\n bb: 22;}"),
                 /* margin narrower than a single entry.  Unlike DArray -- whose
                  * elements are atomic, so a too-narrow margin has no further
@@ -336,7 +278,6 @@ namespace xo {
                  * margin 12 while ppsink degrades one step further.
                  */
                 Testcase_Dict(4, {{"a", 1}, {"bb", 22}},
-                              "{ a: 1;\n  bb: 22; }",
                               "{a:\n  1;\n bb:\n  22;}"),
                 /* A key wide enough to crowd the margin on its own.  Each entry
                  * is its own group with a break point after the ":", so the
@@ -348,8 +289,6 @@ namespace xo {
                  * renders margin 12 identically -- it simply cannot fold here.
                  */
                 Testcase_Dict(30, {{"keep_going_until_close_to_margin", 12345}, {"n", 3}},
-                              "{ keep_going_until_close_to_margin: 12345;\n"
-                              "  n: 3; }",
                               "{keep_going_until_close_to_margin:\n"
                               "  12345;\n"
                               " n: 3;}"),
@@ -374,15 +313,11 @@ namespace xo {
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
                     auto p = with_facet<APrintable>::mkobj(DInteger::_box(alloc, tc.value_));
-
-                    std::string deprecated = render_deprecated(p, 80);
                     std::string pretty = render_pretty(p, 80);
 
-                    log && log(xtag("i_tc", i_tc), xtag("value", tc.value_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("value", tc.value_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -405,15 +340,11 @@ namespace xo {
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
                     auto p = with_facet<APrintable>::mkobj(DBoolean::_box(alloc, tc.value_));
-
-                    std::string deprecated = render_deprecated(p, 80);
                     std::string pretty = render_pretty(p, 80);
 
-                    log && log(xtag("i_tc", i_tc), xtag("value", tc.value_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("value", tc.value_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -436,15 +367,11 @@ namespace xo {
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
                     auto p = with_facet<APrintable>::mkobj(DFloat::_box(alloc, tc.value_));
-
-                    std::string deprecated = render_deprecated(p, 80);
                     std::string pretty = render_pretty(p, 80);
 
-                    log && log(xtag("i_tc", i_tc), xtag("value", tc.value_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("value", tc.value_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -471,15 +398,11 @@ namespace xo {
                                                DString::from_cstr(alloc, tc.err_));
 
                     auto p = with_facet<APrintable>::mkobj(e);
-
-                    std::string deprecated = render_deprecated(p, tc.margin_);
                     std::string pretty = render_pretty(p, tc.margin_);
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -509,15 +432,11 @@ namespace xo {
                         REQUIRE(arr->push_back(alloc, DInteger::box<AGCObject>(alloc, elt)));
 
                     auto p = with_facet<APrintable>::mkobj(arr);
-
-                    std::string deprecated = render_deprecated(p, tc.margin_);
                     std::string pretty = render_pretty(p, tc.margin_);
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -549,15 +468,11 @@ namespace xo {
                     }
 
                     auto p = with_facet<APrintable>::mkobj(dict);
-
-                    std::string deprecated = render_deprecated(p, tc.margin_);
                     std::string pretty = render_pretty(p, tc.margin_);
 
-                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
-                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_), xtag("pretty", pretty));
 
                     REHEARSE(rh, pretty == tc.expect_pretty_);
-                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
         }
@@ -590,15 +505,12 @@ namespace xo {
 
             /* fits */
             REQUIRE(render_pretty(p, 80) == "{k: {a: 1; b: 2;}; n: 3;}");
-            REQUIRE(render_deprecated(p, 80) == "{ k: { a: 1; b: 2; }; n: 3; }");
 
             /* outer breaks, inner still fits: entry 1 lines up under entry 0,
              * i.e. indent 1.
              */
             REQUIRE(render_pretty(p, 20) == ("{k: {a: 1; b: 2;};\n"
                                              " n: 3;}"));
-            REQUIRE(render_deprecated(p, 20) == ("{ k: { a: 1; b: 2; };\n"
-                                                 "  n: 3; }"));
 
             /* the entry no longer fits, so it breaks after "k:" and the value
              * starts a fresh line at entry-indent + 1 = 2.  The nested value
@@ -612,9 +524,6 @@ namespace xo {
             REQUIRE(render_pretty(p, 16) == ("{k:\n"
                                              "  {a: 1; b: 2;};\n"
                                              " n: 3;}"));
-            REQUIRE(render_deprecated(p, 16) == ("{ k: { a: 1;\n"
-                                                 "       b: 2; };\n"
-                                                 "  n: 3; }"));
 
             /* Both levels break.  The inner dictionary opens at the running
              * indent (2), so its own begin(1) puts its entries at 3 -- the
@@ -628,9 +537,6 @@ namespace xo {
                                              "  {a: 1;\n"
                                              "   b: 2;};\n"
                                              " n: 3;}"));
-            REQUIRE(render_deprecated(p, 10) == ("{ k: { a: 1;\n"
-                                                 "       b: 2; };\n"
-                                                 "  n: 3; }"));
         }
 
         /** A flat array shows that the group breaks; only a NESTED one shows
@@ -662,7 +568,6 @@ namespace xo {
 
             /* fits */
             REQUIRE(render_pretty(p, 80) == "[[100 200] [300]]");
-            REQUIRE(render_deprecated(p, 80) == "[[100 200] [300]]");
 
             /* outer breaks, inner arrays still fit: element 1 lines up under
              * element 0, i.e. indent 1 -- not column 0, and not the enclosing
@@ -670,8 +575,6 @@ namespace xo {
              */
             REQUIRE(render_pretty(p, 12) == ("[[100 200]\n"
                                              " [300]]"));
-            REQUIRE(render_deprecated(p, 12) == ("[ [100 200]\n"
-                                                 "  [300]]"));
 
             /* both levels break.  The inner array's own "[" sits at column 1, so
              * its elements align at column 2: the offset composes with the
@@ -681,9 +584,6 @@ namespace xo {
             REQUIRE(render_pretty(p, 6) == ("[[100\n"
                                             "  200]\n"
                                             " [300]]"));
-            REQUIRE(render_deprecated(p, 6) == ("[ [ 100\n"
-                                                "    200]\n"
-                                                "  [ 300]]"));
         }
     } /*namespace ut*/
 } /*namespace xo*/

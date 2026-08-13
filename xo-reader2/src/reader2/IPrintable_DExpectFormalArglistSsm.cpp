@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DExpectFormalArglistSsm::pretty_deprecated(const DExpectFormalArglistSsm & self, const ppindentinfo & ppii) -> bool
-        {
-            return self.pretty_deprecated(ppii);
-        }
-
-        auto
         IPrintable_DExpectFormalArglistSsm::pretty(const DExpectFormalArglistSsm & self, PpSink & sink) -> void
         {
             self.pretty(sink);
