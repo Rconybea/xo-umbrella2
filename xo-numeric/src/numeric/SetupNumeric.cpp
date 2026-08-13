@@ -16,10 +16,13 @@
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::mm::AAllocator;
     using xo::facet::FacetRegistry;
     using xo::reflect::typeseq;
@@ -28,7 +31,7 @@ namespace xo {
         bool
         SetupNumeric::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             FacetRegistry::register_impl<ANumeric, DInteger>();
 
@@ -93,7 +96,7 @@ namespace xo {
             obj<AAllocator> mm = rcx.allocator();
             StringTable * stbl = rcx.stringtable();
 
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             bool ok = true;
 

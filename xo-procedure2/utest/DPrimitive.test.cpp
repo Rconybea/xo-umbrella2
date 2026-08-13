@@ -15,7 +15,6 @@
 #include <xo/object2/number/IGCObject_DInteger.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/printable2/Printable.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 
@@ -34,7 +33,6 @@ namespace xo {
     using xo::print::APrintable;
     using xo::facet::with_facet;
     using xo::facet::obj;
-    using xo::scope;
 
     namespace ut {
         static InitEvidence s_init = InitSubsys<S_procedure2_tag>::require();

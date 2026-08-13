@@ -74,7 +74,7 @@ namespace xo {
         virtual int sync() override;
 
     private:
-        /** buffer stsorage **/
+        /** buffer storage **/
         LogBuffer * logbuf_ = nullptr;
     };
 } /*namespace xo*/

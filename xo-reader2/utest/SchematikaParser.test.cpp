@@ -23,6 +23,10 @@
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/facet/TypeRegistry.hpp>
+/* scope/XO_DEBUG -- was arriving via <xo/procedure2/PrimitiveRegistry.hpp>,
+ * which moved to xo::pp::scope.  Explicit until this subsystem migrates too.
+ */
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

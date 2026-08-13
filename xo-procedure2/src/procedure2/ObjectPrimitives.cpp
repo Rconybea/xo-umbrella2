@@ -16,9 +16,12 @@
 #include <xo/stringtable2/String.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <unistd.h> // for getcwd()
-#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
+#include <xo/ppsink/scope.hpp>      /* scope -- was arriving via xo/reflect */
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::scm::ASequence;
     using xo::print::APrintable;
     using xo::mm::AAllocator;
@@ -124,7 +127,7 @@ namespace xo {
                      obj<AGCObject> cell_arg,
                      obj<AGCObject> dest)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             (void)rcx;
             (void)dest;
@@ -231,7 +234,7 @@ namespace xo {
                          obj<AGCObject,DString> key,
                          obj<AGCObject> value)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             log && log(xtag("dict.tseq", dict._typeseq()),
                        xtag("dict.tname", TypeRegistry::id2name(dict._typeseq())));
@@ -277,7 +280,7 @@ namespace xo {
                        obj<AGCObject> fn_gco)
         {
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             log && log(xtag("fn_gco.tseq", fn_gco._typeseq()));
             log && log(xtag("fn_gco.tname", TypeRegistry::id2name(fn_gco._typeseq())));

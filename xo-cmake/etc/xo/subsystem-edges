@@ -37,7 +37,6 @@ xo-gc xo-interpreter2
 xo-gc xo-reader2
 xo-indentlog xo-expression2
 xo-indentlog xo-interpreter2
-xo-indentlog xo-procedure2
 xo-indentlog xo-reader2
 xo-indentlog xo-tokenizer2
 xo-indentlog2 xo-alloc

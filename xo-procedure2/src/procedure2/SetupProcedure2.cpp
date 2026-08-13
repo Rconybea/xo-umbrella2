@@ -16,9 +16,12 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::mm::AAllocator;
     using xo::facet::FacetRegistry;
     using xo::facet::impl_for;
@@ -29,7 +32,7 @@ namespace xo {
         bool
         SetupProcedure2::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             FacetRegistry::register_impl<ARuntimeContext, DSimpleRcx>();
 
@@ -69,7 +72,7 @@ namespace xo {
         bool
         SetupProcedure2::register_types(obj<ACollector> gc)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bool ok = true;
 
@@ -92,7 +95,7 @@ namespace xo {
             obj<AAllocator> mm = rcx.allocator();
             StringTable * stbl = rcx.stringtable();
 
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             bool ok = true;
 

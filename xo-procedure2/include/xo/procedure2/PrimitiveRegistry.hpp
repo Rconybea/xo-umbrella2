@@ -8,7 +8,8 @@
 #include "Procedure.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <functional>
 
 namespace xo {
@@ -73,7 +74,10 @@ namespace xo {
             static bool install_aux(InstallSink sink,
                                     PrimitiveRepr * pm,
                                     InstallFlags flags) {
-                scope log(XO_DEBUG(false));
+                using xo::pp::scope;
+                using xo::pp::xtag;
+
+                scope log(XO_DEBUG_(false));
 
                 if (flags != InstallFlags::f_none) {
                     log && log("create primitive", xtag("name", pm->name()));

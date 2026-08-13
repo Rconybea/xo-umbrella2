@@ -4,9 +4,13 @@
  **/
 
 #include "PrimitiveRegistry.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     namespace scm {
         PrimitiveRegistry &
         PrimitiveRegistry::instance()
@@ -19,7 +23,7 @@ namespace xo {
         void
         PrimitiveRegistry::register_primitives(InstallSource factory)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             init_seq_v_.push_back(factory);
         }
@@ -31,7 +35,7 @@ namespace xo {
                                               InstallSink sink,
                                               InstallFlags flags)
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             bool ok = true;
 

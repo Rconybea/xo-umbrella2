@@ -5,7 +5,6 @@
   xo-type,
   xo-object2,
   xo-subsys,
-  xo-indentlog,
   xo-cmake,
 
   # test-only: UtestRehearser, for the rendered-layout assertions in
@@ -34,7 +33,6 @@ stdenv.mkDerivation (finalattrs:
       cli11
     ];
     propagatedBuildInputs = [
-      xo-indentlog
       xo-type
       xo-object2
       xo-subsys

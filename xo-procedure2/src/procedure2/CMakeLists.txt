@@ -42,9 +42,6 @@ xo_install_include_tree3(include/xo/procedure2)
 xo_dependency(${SELF_LIB} xo_type)
 xo_dependency(${SELF_LIB} xo_object2)
 xo_dependency(${SELF_LIB} subsys)
-# legacy xo-indentlog: scope logging in this subsystem's own sources.
-# Was arriving TRANSITIVELY until xo-object2 dropped it at phase E.
-xo_dependency(${SELF_LIB} indentlog)
 
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
