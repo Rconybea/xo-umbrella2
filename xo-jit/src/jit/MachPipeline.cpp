@@ -58,9 +58,12 @@ namespace xo {
          * + 'jit_compile_layer'
          * + 'jit_our_dynamic_lib'
          */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         llvm::Expected<std::unique_ptr<MachPipeline>>
         MachPipeline::make_aux()
         {
+#pragma GCC diagnostic pop
             MachPipeline::init_once();
 
             static llvm::ExitOnError llvm_exit_on_err;

@@ -26,6 +26,8 @@
 namespace xo {
     namespace jit {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         class Jit {
         private:
             using StringRef = llvm::StringRef;
@@ -186,6 +188,7 @@ namespace xo {
                 this->xsession_->dump(llvm::errs());
             }
         }; /*Jit*/
+#pragma GCC diagnostic pop
 
     } /*namespace jit*/
 } /*namespace xo*/
