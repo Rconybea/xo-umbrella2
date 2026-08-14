@@ -18,22 +18,6 @@ set(PROJECT_CXX_FLAGS "")
 add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
-# facet packages whose interfaces we generate implementations for.
-#
-# xo_add_genfacetimpl() silently skips (STATUS message only, no target) unless
-# share_<FACET_PKG> already exists at the point of the call, so these must be
-# found FIRST.  Without them the targets do not exist and regenerating fails
-# with a bare "No rule to make target".
-#
-# These two are sufficient for every genfacetimpl here, including the
-# FACET_PKG xo_procedure2 entries: the finds below establish share_* for the
-# transitive closure, so no self-referential case is left skipped.  Verified by
-# reconfiguring and counting "not available; skipping" -- expect zero.
-
-find_package(xo_printable2 CONFIG REQUIRED)
-find_package(xo_alloc2 CONFIG REQUIRED)
-
-# ----------------------------------------------------------------
 # output targets
 
 # note: manual target; generated code committed to git

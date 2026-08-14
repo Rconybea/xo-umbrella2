@@ -17,19 +17,6 @@ set(PROJECT_CXX_FLAGS "")
 add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
-# facet packages whose interfaces we generate implementations for.
-#
-# xo_add_genfacetimpl() below silently skips (STATUS message only, no target)
-# unless share_<FACET_PKG> already exists at the point of the call, so the
-# facet package has to be found FIRST.  Previously these targets existed only
-# by accident of a transitive find elsewhere in the file, which is why
-# regenerating this subsystem failed with "No rule to make target" while
-# xo-expression2 -- whose utest happens to depend on xo_numeric -- worked.
-
-find_package(xo_printable2 CONFIG REQUIRED)
-find_package(xo_alloc2 CONFIG REQUIRED)
-
-# ----------------------------------------------------------------
 
 # note: manual target; generated code committed to git
 xo_add_genfacet(
