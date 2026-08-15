@@ -5,13 +5,13 @@
 
 #include "Tokenizer.hpp"
 #include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     using xo::pp::scope;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
     using xo::mm::MemorySizeInfo;
     using std::byte;
@@ -422,7 +422,7 @@ namespace xo {
                          *p_input_state);
                 }
 
-                log && log(tostr0("tokenizer::assemble_token",
+                log && log(tostr("tokenizer::assemble_token",
                                  xtag("tk_text", tk_text)));
 
                 break;
@@ -659,7 +659,7 @@ namespace xo {
             //(DCircularBuffer::const_span_type::from_cstr("\n"));
 
             if (!remainder.empty() || !remainder2.empty()) {
-                throw std::runtime_error(tostr0("Tokenizer::buffer_line: line too long!",
+                throw std::runtime_error(tostr("Tokenizer::buffer_line: line too long!",
                                                xtag("remainder.size", remainder.size())));
             }
 
