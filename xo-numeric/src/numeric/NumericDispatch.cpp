@@ -4,13 +4,13 @@
  **/
 
 #include "NumericDispatch.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/object2/RuntimeError.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
     using xo::mm::AGCObject;
     using xo::facet::TypeRegistry;
@@ -39,19 +39,19 @@ namespace xo {
             if (!target_fn) {
                 // FIXME: use {fmt} here
                 std::string msg
-                    = tostr0(error_headline,
-                             xtag("x.tseq", x._typeseq()),
-                             xtag("x.type", TypeRegistry::id2name(x._typeseq())),
-                             xtag("x.data", x.data()),
-                             xtag("y.tseq", y._typeseq()),
-                             xtag("y.type", TypeRegistry::id2name(y._typeseq())),
-                             xtag("y.data", y.data()),
-                             /* legacy tosn() ended with a newline; kept so the
-                             * DRuntimeError text is byte-identical.  Whether an
-                             * error message should carry a trailing newline at
-                             * all is a separate question -- see the ticket.
-                             */
-                             '\n');
+                    = tostr(error_headline,
+                            xtag("x.tseq", x._typeseq()),
+                            xtag("x.type", TypeRegistry::id2name(x._typeseq())),
+                            xtag("x.data", x.data()),
+                            xtag("y.tseq", y._typeseq()),
+                            xtag("y.type", TypeRegistry::id2name(y._typeseq())),
+                            xtag("y.data", y.data()),
+                            /* legacy tosn() ended with a newline; kept so the
+                            * DRuntimeError text is byte-identical.  Whether an
+                            * error message should carry a trailing newline at
+                            * all is a separate question -- see the ticket.
+                            */
+                            '\n');
 
                 return DRuntimeError::make(rcx.allocator(),
                                            caller,
