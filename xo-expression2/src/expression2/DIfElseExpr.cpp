@@ -8,15 +8,15 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/reflectutil/typeseq.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     /* ppsink vocabulary: exception messages, and print(ostream&) via tag_ostream */
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
 
     using xo::mm::AGCObject;
@@ -164,11 +164,11 @@ namespace xo {
 
             if (when_true->valuetype() != when_false->valuetype()) {
                 throw std::runtime_error
-                    (tostr0("IfExpr::make:"
-                            " types {T1,T2} found for branches of if-expr"
-                            " where equal types expected",
-                            xtag("T1", when_true->valuetype()->canonical_name()),
-                            xtag("T2", when_false->valuetype()->canonical_name())));
+                          (tostr("IfExpr::make:"
+                                 " types {T1,T2} found for branches of if-expr"
+                                 " where equal types expected",
+                                 xtag("T1", when_true->valuetype()->canonical_name()),
+                                 xtag("T2", when_false->valuetype()->canonical_name())));
             }
 
             /* arbitrary choice here */
