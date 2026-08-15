@@ -73,7 +73,25 @@ macro(xo_cxx_toplevel_options2)
     endif()
 endmacro()
 
+# Acknowledge -D variables that would otherwise trigger unwanted
+# 'unused cmake variable' warnings, 
+#
+macro(xo_ack_injected_cli_vars)
+	# - CMAKE_POLICY_DEFAULT_CMP0025 CMAKE_EXPORT_NO_PACKAGE_REGISTRY
+	#   injected by nix build wrapper.
+	#
+    foreach(_xo_injected_var IN ITEMS
+            CMAKE_POLICY_DEFAULT_CMP0025
+            CMAKE_EXPORT_NO_PACKAGE_REGISTRY)
+        set(_xo_injected_ack "${${_xo_injected_var}}")
+    endforeach()
+
+    unset(_xo_injected_var)
+    unset(_xo_injected_ack)
+endmacro()
+
 macro(xo_cxx_toplevel_options3)
+    xo_ack_injected_cli_vars()
     xo_cxx_toplevel_options2()
     xo_toplevel_config2()
     xo_generate_reconfigure_script()
