@@ -19,8 +19,11 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 #xo_dependency(${SELF_LIB} xo_ordinaltree)  # for some reason wants to link -lxo_ordinaltree ??
 xo_dependency(${SELF_LIB} reflect)
 # PUBLIC: Sink.hpp / AbstractSink.hpp / Reactor.hpp use xo::pp::{scope,xtag,
-# log_level} in inline bodies, so consumers need ppsink too.
+# log_level,tostr0} in inline bodies, so consumers need ppsink too.
 xo_dependency(${SELF_LIB} xo_ppsink)
+# AbstractEventProcessor.cpp uses xo::pp::tostr (arena-backed).  Not a swap for
+# ppsink above: the public headers named there still want ppsink directly.
+xo_dependency(${SELF_LIB} xo_indentlog2)
 xo_dependency(${SELF_LIB} webutil)
 xo_dependency(${SELF_LIB} printjson)
 xo_dependency(${SELF_LIB} callback)

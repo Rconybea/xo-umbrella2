@@ -6,6 +6,7 @@
   xo-cmake,
   xo-callback,
   xo-ppsink,
+  xo-indentlog2,
   xo-reflect,
   xo-webutil,
   xo-printjson,
@@ -35,6 +36,7 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-callback
       xo-ppsink
+      xo-indentlog2
       xo-reflect
       xo-webutil
       xo-printjson
