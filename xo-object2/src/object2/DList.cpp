@@ -12,18 +12,18 @@
 // need Collector for mm_do_assign()
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/gc/RCollector_aux.hpp> // for mm_do_assign()
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     /* the ppsink logging/printing vocabulary, for use below */
     using xo::pp::scope;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
 
     using xo::print::APrintable;
@@ -121,7 +121,7 @@ namespace xo {
                 assert(l == nullptr);
 
                 throw std::runtime_error
-                    (tostr0("DList::at: out-of-range index where [0..z) expected",
+                    (tostr("DList::at: out-of-range index where [0..z) expected",
                            xtag("index", index),
                            xtag("z", this->size())));
             }
