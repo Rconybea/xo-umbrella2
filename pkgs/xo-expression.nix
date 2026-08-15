@@ -35,6 +35,7 @@ stdenv.mkDerivation (finalattrs:
     inherit doCheck;
 
     propagatedBuildInputs = [
+                              xo-indentlog2
                               xo-ppsink
                               xo-refcnt xo-reflect
                               xo-flatstring
@@ -43,7 +44,6 @@ stdenv.mkDerivation (finalattrs:
                           catch2
                           xo-cmake
                         ] ++ lib.optionals doCheck [
-                          xo-indentlog2
                           xo-testutil
                           cli11
                         ];
