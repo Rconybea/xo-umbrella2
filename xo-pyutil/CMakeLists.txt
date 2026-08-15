@@ -7,15 +7,7 @@ project(xo_pyutil VERSION 0.1)
 include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)   # very little to unit test here
 
-xo_cxx_toplevel_options2()
-
-# ----------------------------------------------------------------
-# cmake -DCMAKE_BUILD_TYPE=coverage
-xo_toplevel_coverage_config2()
-
-# ----------------------------------------------------------------
-# cmake -DCMAKE_BUILD_TYPE=debug
-xo_toplevel_debug_config2()
+xo_cxx_toplevel_options3()
 
 # ----------------------------------------------------------------
 # bespoke (usually temporary) c++ settings
