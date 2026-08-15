@@ -76,13 +76,13 @@ namespace ut {
 
         stringstream tag_ss;
         {
-            FlatSink sink(style, tag_ss);
+            FlatSink sink(style, tag_ss.rdbuf());
             sink.pp(tag("k", x));
         }
 
         stringstream field_ss;
         {
-            FlatSink sink(style, field_ss);
+            FlatSink sink(style, field_ss.rdbuf());
             sink.pretty_struct("P", field("k", x));
         }
 
@@ -100,8 +100,8 @@ namespace ut {
         red.tag_color = color_spec_type::ansi(31);
 
         stringstream styled_ss, plain_ss;
-        FlatSink styled(red, styled_ss);
-        FlatSink plain(PpStyle::plain(), plain_ss);
+        FlatSink styled(red, styled_ss.rdbuf());
+        FlatSink plain(PpStyle::plain(), plain_ss.rdbuf());
 
         int x = 1;
         styled.pp(tag("k", x));
@@ -122,11 +122,11 @@ namespace ut {
 
         stringstream before_ss, after_ss;
 
-        FlatSink before(before_ss);      /* built under plain (the utest main) */
+        FlatSink before(before_ss.rdbuf());      /* built under plain (the utest main) */
 
         default_style_guard g(red);
 
-        FlatSink after(after_ss);        /* built under red */
+        FlatSink after(after_ss.rdbuf());        /* built under red */
 
         int x = 1;
         before.pp(tag("k", x));
@@ -164,10 +164,10 @@ namespace ut {
         style.tag_value_offset = 4;
 
         stringstream ss;
-        FlatSink sink(style, ss);
+        FlatSink sink(style, ss.rdbuf());
 
         REQUIRE(sink.style().tag_value_offset == 4);
-        REQUIRE(FlatSink(ss).style().tag_value_offset == 1);   /* untouched sink */
+        REQUIRE(FlatSink(ss.rdbuf()).style().tag_value_offset == 1);   /* untouched sink */
     }
 } /*namespace ut*/
 

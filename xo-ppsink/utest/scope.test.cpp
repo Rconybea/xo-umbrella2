@@ -27,7 +27,7 @@ namespace ut {
         scope_config::time_enabled = false;
 
         stringstream ss;
-        FlatSink sink(PpStyle::colored(), ss);
+        FlatSink sink(PpStyle::colored(), ss.rdbuf());
 
         ThreadLogState::log_set_sink(&sink);
         { scope outer("outer"); }
@@ -41,7 +41,7 @@ namespace ut {
         /* ... and with the gate off, byte-identical text without them */
         {
             stringstream plain_ss;
-            FlatSink plain_sink(plain_ss);
+            FlatSink plain_sink(plain_ss.rdbuf());
 
             ThreadLogState::log_set_sink(&plain_sink);
             { scope outer("outer"); }
@@ -57,7 +57,7 @@ namespace ut {
 
         /* capture scope output into a stringstream via a FlatSink */
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         ThreadLogState::log_set_sink(&sink);
         {
@@ -88,7 +88,7 @@ namespace ut {
          * so we check the FORMAT/width only.
          */
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         ThreadLogState::log_set_sink(&sink);
 
         scope_config::time_enabled = true;
@@ -117,7 +117,7 @@ namespace ut {
          * layout is deterministic; the line value itself is not asserted.)
          */
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         ThreadLogState::log_set_sink(&sink);
 
         scope_config::location_enabled = true;
@@ -140,7 +140,7 @@ namespace ut {
         scope_config::time_enabled = false;   /* deterministic output */
 
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         ThreadLogState::log_set_sink(&sink);
 
         std::string before;
@@ -167,7 +167,7 @@ namespace ut {
 
         auto run = [](bool flag) {
             stringstream ss;
-            FlatSink sink(ss);
+            FlatSink sink(ss.rdbuf());
             ThreadLogState::log_set_sink(&sink);
             {
                 scope log(XO_DEBUG_(flag));
@@ -196,7 +196,7 @@ namespace ut {
         scope_config::time_enabled = false;
 
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         ThreadLogState::log_set_sink(&sink);
         {
@@ -220,7 +220,7 @@ namespace ut {
         scope_config::time_enabled = false;
 
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         ThreadLogState::log_set_sink(&sink);
         {

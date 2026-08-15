@@ -18,7 +18,7 @@ namespace ut {
          * emits its 0 spaces, so "(" 1 "," 2 ")" comes out flat.
          */
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         sink.dwim("(");
         sink.dwim(begin(2));
@@ -37,7 +37,7 @@ namespace ut {
          * so a whole structured line is one call.
          */
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         sink("(", begin(2), 1, ",", split(0, 0), 2, end, ")");
 

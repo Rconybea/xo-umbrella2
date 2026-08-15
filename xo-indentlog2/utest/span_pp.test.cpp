@@ -16,7 +16,7 @@ namespace ut {
 
     static std::string pretty_of(const xo::mm::span<const char> & sp) {
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         sink.pp(sp);
         return ss.str();
     }

@@ -148,7 +148,7 @@ namespace ut {
     TEST_CASE("flatsink-put-with-escape", "[escape][flatsink]") {
         auto expand = [](string_view s, bool quote_flag) {
             std::stringstream ss;
-            FlatSink sink(ss);
+            FlatSink sink(ss.rdbuf());
             sink.put_with_escape(s, quote_flag);
             return ss.str();
         };
@@ -247,7 +247,7 @@ namespace ut {
         expected += "\"";
 
         std::stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         sink.put_with_escape(input, true);
 
         REQUIRE(ss.str().size() == 1 + c_n * Escape::c_max_char_expand + 1);

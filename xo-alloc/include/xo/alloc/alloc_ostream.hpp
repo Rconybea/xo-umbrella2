@@ -22,7 +22,7 @@
  *
  *  Equivalent, without this header:
  *  @code
- *    xo::pp::FlatSink sink(std::cout);
+ *    xo::pp::FlatSink sink(std::cout.rdbuf());
  *    sink.pp(obj);
  *  @endcode
  *
@@ -55,7 +55,7 @@ namespace xo {
      **/
     inline std::ostream &
     operator<< (std::ostream & os, gp<Object> x) {
-        xo::pp::FlatSink sink(os);
+        xo::pp::FlatSink sink(os.rdbuf());
 
         sink.pp(x);
 

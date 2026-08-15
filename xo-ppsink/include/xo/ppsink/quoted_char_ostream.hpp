@@ -24,7 +24,7 @@
 namespace xo::pp {
     inline std::ostream &
     operator<<(std::ostream & os, const quoted_char & x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
 
         sink.pp(x);
 

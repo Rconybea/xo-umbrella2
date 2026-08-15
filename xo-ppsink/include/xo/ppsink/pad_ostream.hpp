@@ -22,7 +22,7 @@
 namespace xo::pp {
     inline std::ostream &
     operator<<(std::ostream & os, pad_impl x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
 
         sink.pp(x);
 

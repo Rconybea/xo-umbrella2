@@ -26,7 +26,7 @@ namespace xo {
             /** flat rendering of @p td through the ppsink Prettifier **/
             std::string pretty_of(TypeDescr td) {
                 stringstream ss;
-                FlatSink sink(ss);
+                FlatSink sink(ss.rdbuf());
                 sink.pp(td);
                 sink.complete();
                 return ss.str();
@@ -71,7 +71,7 @@ namespace xo {
             TypeDescr td = nullptr;
 
             stringstream ss;
-            FlatSink sink(ss);
+            FlatSink sink(ss.rdbuf());
             sink.pp(td);
             sink.complete();
 

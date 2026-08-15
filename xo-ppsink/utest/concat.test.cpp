@@ -27,7 +27,7 @@ namespace ut {
     namespace {
         template <typename Fn>
         std::string flat_of(Fn && fn) {
-            stringstream ss; FlatSink sink(ss); fn(sink); return ss.str();
+            stringstream ss; FlatSink sink(ss.rdbuf()); fn(sink); return ss.str();
         }
         template <typename Fn>
         std::string marks_of(Fn && fn) {

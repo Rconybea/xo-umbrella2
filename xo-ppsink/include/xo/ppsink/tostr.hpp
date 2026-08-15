@@ -31,7 +31,7 @@ namespace xo::pp {
     std::string
     tostr(const Ts &... args) {
         std::stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         (sink.pp(args), ...);
         return ss.str();
     }

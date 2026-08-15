@@ -56,7 +56,7 @@ namespace xo {
             std::string
             pretty_str(const T & x) {
                 std::stringstream ss;
-                FlatSink sink(ss);
+                FlatSink sink(ss.rdbuf());
 
                 x.pretty(sink);
 
@@ -68,7 +68,7 @@ namespace xo {
             std::string
             pp_str(const T & x) {
                 std::stringstream ss;
-                FlatSink sink(ss);
+                FlatSink sink(ss.rdbuf());
 
                 sink.pp(x);
 

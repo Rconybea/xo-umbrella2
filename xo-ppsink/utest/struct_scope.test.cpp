@@ -30,7 +30,7 @@ namespace ut {
         template <typename Fn>
         std::string flat_of(Fn && fn) {
             stringstream ss;
-            FlatSink sink(ss);
+            FlatSink sink(ss.rdbuf());
             fn(sink);
             return ss.str();
         }

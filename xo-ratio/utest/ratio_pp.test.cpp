@@ -33,7 +33,7 @@ namespace xo {
             std::string
             pp_str(const T & x) {
                 stringstream ss;
-                FlatSink sink(ss);
+                FlatSink sink(ss.rdbuf());
                 sink.pp(x);
                 return ss.str();
             }

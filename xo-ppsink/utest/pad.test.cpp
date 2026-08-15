@@ -20,7 +20,7 @@ namespace ut {
 
     namespace {
         std::string pp_of(xo::pp::pad_impl x) {
-            stringstream ss; FlatSink s(ss); s.pp(x); return ss.str();
+            stringstream ss; FlatSink s(ss.rdbuf()); s.pp(x); return ss.str();
         }
         std::string os_of(xo::pp::pad_impl x) {
             stringstream ss; ss << x; return ss.str();

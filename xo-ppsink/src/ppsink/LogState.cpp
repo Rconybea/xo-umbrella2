@@ -11,7 +11,7 @@ namespace xo::pp {
     FlatSink *
     require_default_sink() {
         /** low-dependency fallback. No pretty-printing **/
-        static FlatSink s_default_sink(std::clog);
+        static FlatSink s_default_sink(std::clog.rdbuf());
 
         return &s_default_sink;
     } /*namespace*/

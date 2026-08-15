@@ -38,7 +38,7 @@ namespace xo::pp {
     template <typename T>
     inline std::ostream &
     pp_to_stream(std::ostream & os, const T & x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
         sink.pp(x);
         return os;
     }

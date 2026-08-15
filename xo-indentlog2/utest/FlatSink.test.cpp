@@ -119,7 +119,7 @@ namespace ut {
         /* 1. flat rendering */
         std::ostringstream ss;
         {
-            FlatSink sink(ss);
+            FlatSink sink(ss.rdbuf());
             flatsink_drive(sink, tc.step_v_);
         }
 
@@ -156,7 +156,7 @@ namespace ut {
 
         std::ostringstream ss;
         {
-            FlatSink sink(ss);
+            FlatSink sink(ss.rdbuf());
             flatsink_drive(sink, step_v);
         }
 
@@ -173,7 +173,7 @@ namespace ut {
     TEST_CASE("FlatSink.stream_chained", "[FlatSink]")
     {
         std::ostringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         {
             auto ins = sink.stream_open(1);

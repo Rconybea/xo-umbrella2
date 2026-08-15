@@ -10,7 +10,7 @@ using xo::pp::PpSink;
 TEST_CASE("flatsink-put-and-noop-structure", "[flatsink]") {
     /* FlatSink writes put() text straight through; begin/split/end are no-ops */
     std::stringstream ss;
-    FlatSink sink(ss);
+    FlatSink sink(ss.rdbuf());
 
     sink.put("hello").begin().put("a").split().put("b").end().put("!");
 
@@ -20,7 +20,7 @@ TEST_CASE("flatsink-put-and-noop-structure", "[flatsink]") {
 TEST_CASE("flatsink-stream-open", "[flatsink]") {
     /* stream_open returns an inserter that writes straight to the ostream */
     std::stringstream ss;
-    FlatSink sink(ss);
+    FlatSink sink(ss.rdbuf());
     {
         auto ins = sink.stream_open(64);
         ins << 42 << ' ' << "x";

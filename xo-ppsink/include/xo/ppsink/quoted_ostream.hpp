@@ -30,7 +30,7 @@ namespace xo::pp {
     template <quotestyle QuoteStyle>
     inline std::ostream &
     operator<<(std::ostream & os, const quot_impl<QuoteStyle> & x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
 
         sink.pp(x);
 

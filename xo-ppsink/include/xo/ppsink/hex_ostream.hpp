@@ -36,7 +36,7 @@
 namespace xo::pp {
     inline std::ostream &
     operator<<(std::ostream & os, const hex_view & x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
 
         sink.pp(x);
 

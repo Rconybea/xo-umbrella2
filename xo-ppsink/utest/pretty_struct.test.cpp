@@ -42,7 +42,7 @@ namespace ut {
 
     TEST_CASE("pretty_struct-flat", "[pretty_struct]") {
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         int a = 1, b = 2;
         sink.pretty_struct("P", field("a", a), field("b", b));
@@ -56,7 +56,7 @@ namespace ut {
 
     TEST_CASE("pretty_struct-no-fields", "[pretty_struct]") {
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         sink.pretty_struct("P");
         sink.complete();
@@ -102,7 +102,7 @@ namespace ut {
 
     TEST_CASE("pretty_struct-absent-field-skipped", "[pretty_struct]") {
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         int a = 1, b = 2;
         sink.pretty_struct("P", field("a", a), field("b", b, false));
@@ -134,7 +134,7 @@ namespace ut {
 
     TEST_CASE("pretty_struct-all-fields-absent", "[pretty_struct]") {
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         int a = 1;
         sink.pretty_struct("P", field("a", a, false));
@@ -148,7 +148,7 @@ namespace ut {
          * field type has one.  tag() copies, which is fine for a small value.
          */
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         sink.pretty_struct("P", tag("a", 1));
         sink.complete();
@@ -162,7 +162,7 @@ namespace ut {
          * std::string member.
          */
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
 
         Watched w;
         Watched::n_copy_ = 0;

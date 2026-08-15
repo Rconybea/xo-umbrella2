@@ -23,10 +23,10 @@ namespace ut {
     using std::stringstream;
 
     static std::string msec_of(nanos dt) {
-        stringstream ss; FlatSink s(ss); put_hms_msec(s, dt); return ss.str();
+        stringstream ss; FlatSink s(ss.rdbuf()); put_hms_msec(s, dt); return ss.str();
     }
     static std::string usec_of(nanos dt) {
-        stringstream ss; FlatSink s(ss); put_hms_usec(s, dt); return ss.str();
+        stringstream ss; FlatSink s(ss.rdbuf()); put_hms_usec(s, dt); return ss.str();
     }
 
     TEST_CASE("pp_time.hms", "[pp_time]") {
@@ -46,7 +46,7 @@ namespace ut {
         utc_nanos t = timeutil::ymd_hms_usec(20230921, 162935, 123456);
 
         auto render = [](auto fn, utc_nanos tt) {
-            stringstream ss; FlatSink s(ss); fn(s, tt); return ss.str();
+            stringstream ss; FlatSink s(ss.rdbuf()); fn(s, tt); return ss.str();
         };
 
         REQUIRE(render(put_utc_hms_msec, t)     == "16:29:35.123");
@@ -63,7 +63,7 @@ namespace ut {
         /** render @p x through the ppsink path (Prettifier) **/
         template <typename T>
         std::string pp_of(const T & x) {
-            stringstream ss; FlatSink s(ss); s.pp(x); return ss.str();
+            stringstream ss; FlatSink s(ss.rdbuf()); s.pp(x); return ss.str();
         }
         /** render @p x through operator<< (pp_time_ostream.hpp) **/
         template <typename T>

@@ -15,7 +15,7 @@ namespace ut {
     static std::string
     styled(FunctionStyle style, std::string_view pretty) {
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         put_function_name(sink, style, pretty);
         return ss.str();
     }

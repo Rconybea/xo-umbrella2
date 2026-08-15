@@ -742,7 +742,7 @@ namespace xo {
              * mirrors it with a no-op taking a forward-declared PpSink.
              * Output is unchanged on both paths.
              */
-            xo::pp::FlatSink sink(os);
+            xo::pp::FlatSink sink(os.rdbuf());
 
             tree.pretty(sink);
 

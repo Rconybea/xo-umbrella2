@@ -23,7 +23,7 @@ namespace xo::pp {
      *
      *  Use:
      *  @code
-     *    FlatSink sink(cout);
+     *    FlatSink sink(cout.rdbuf());
      *    Prettifier<Foo>::print(sink, foo);
      *  @endcode
      **/
@@ -35,8 +35,9 @@ namespace xo::pp {
         using int32_t = std::int32_t;
 
     public:
-        FlatSink(const PpStyle & style, std::ostream & os);
-        explicit FlatSink(std::ostream & os) : PpSink(PpStyle::default_style()), os_{os} {}
+        FlatSink(const PpStyle & style, std::streambuf * sbuf);
+        explicit FlatSink(std::streambuf * sbuf)
+            : PpSink(PpStyle::default_style()), sbuf_{sbuf}, os_{sbuf} {}
 
         // inherited from PpSink
 
@@ -55,8 +56,15 @@ namespace xo::pp {
         virtual void stream_commit() override final;
 
     private:
-        /** destination for flat output **/
-        std::ostream & os_;
+        /** destination for flat output.  put()/split()/newline() go straight
+         *  here via sputn()/sputc() -- no ostream, no sentry.
+         **/
+        std::streambuf * sbuf_ = nullptr;
+        /** bound to @ref sbuf_, and used ONLY by stream_open(): PpSinkInserter
+         *  renders via operator<<, which needs an ostream.  Declared after
+         *  sbuf_ so it is initialized from it.
+         **/
+        std::ostream os_;
     };
 } /*namespace xo::pp*/
 

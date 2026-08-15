@@ -43,7 +43,7 @@ TEST_CASE("pretty-uses-specialization", "[pretty]") {
     static_assert(has_prettifier<Point_PpsinkTest>);
 
     std::stringstream ss;
-    FlatSink sink(ss);
+    FlatSink sink(ss.rdbuf());
     pretty(sink, Point_PpsinkTest{1, 2});   /* begin/end are no-ops in FlatSink */
 
     REQUIRE(ss.str() == "(1,2)");
@@ -53,7 +53,7 @@ TEST_CASE("pretty-falls-back-to-operator<<", "[pretty]") {
     static_assert(!has_prettifier<Plain_PpsinkTest>);
 
     std::stringstream ss;
-    FlatSink sink(ss);
+    FlatSink sink(ss.rdbuf());
     pretty(sink, Plain_PpsinkTest{7});      /* stream_open -> operator<< */
 
     REQUIRE(ss.str() == "Plain{7}");

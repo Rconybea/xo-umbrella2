@@ -10,14 +10,14 @@ namespace xo::pp {
     using std::uint32_t;
     using std::int32_t;
 
-    FlatSink::FlatSink(const PpStyle & style, std::ostream & os)
-            : PpSink(style), os_{os}
+    FlatSink::FlatSink(const PpStyle & style, std::streambuf * sbuf)
+            : PpSink(style), sbuf_{sbuf}, os_{sbuf}
     {}
 
     PpSink &
     FlatSink::put(std::string_view x)
     {
-        os_.write(x.data(), x.size());
+        sbuf_->sputn(x.data(), x.size());
         return *this;
     }
 
@@ -46,7 +46,7 @@ namespace xo::pp {
 
         for (char ch : x) {
             if (p > flush_limit) {
-                os_.write(buf, p - buf);
+                sbuf_->sputn(buf, p - buf);
                 p = buf;
             }
 
@@ -81,7 +81,7 @@ namespace xo::pp {
     {
         /* flat output never breaks: render a split as its flat spaces */
         for (std::uint32_t i = 0; i < spaces; ++i)
-            os_.put(' ');
+            sbuf_->sputc(' ');
         return *this;
     }
 
@@ -89,7 +89,7 @@ namespace xo::pp {
     FlatSink::newline(int32_t /*offset*/)
     {
         /* a forced break is a hard newline even in flat output (no indent) */
-        os_.put('\n');
+        sbuf_->sputc('\n');
         return *this;
     }
 
@@ -103,7 +103,11 @@ namespace xo::pp {
     PpSinkInserter
     FlatSink::stream_open(uint32_t /*min_z*/)
     {
-        /* no token to reserve: operator<< writes straight to os_ */
+        /* no token to reserve: operator<< writes through os_ to sbuf_.
+         * os_ is ours and outlives each inserter, so a failure on a previous
+         * use would otherwise stick -- clear it (cf PrettySink::stream_open).
+         */
+        os_.clear();
         return PpSinkInserter(this, &os_);
     }
 

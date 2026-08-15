@@ -40,7 +40,7 @@ namespace ut {
         std::string
         flat(const hex_view & x) {
             stringstream ss;
-            FlatSink sink(ss);
+            FlatSink sink(ss.rdbuf());
             sink.pp(x);
             return ss.str();
         }

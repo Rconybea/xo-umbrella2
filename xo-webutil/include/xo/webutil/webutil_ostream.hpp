@@ -23,7 +23,7 @@
  *
  *  Equivalent, without this header:
  *  @code
- *    xo::pp::FlatSink sink(std::cout);
+ *    xo::pp::FlatSink sink(std::cout.rdbuf());
  *    endpoint_descr.pretty(sink);
  *  @endcode
  *  (NB two lines, not one: pretty() takes PpSink&, a non-const lvalue

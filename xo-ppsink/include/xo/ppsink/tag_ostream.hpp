@@ -34,7 +34,7 @@ namespace xo::pp {
     inline std::ostream &
     operator<<(std::ostream & os,
                const tag_impl<PrefixSpace, TagStyle, Name, Value> & t) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
         sink.pp(t);
         return os;
     }

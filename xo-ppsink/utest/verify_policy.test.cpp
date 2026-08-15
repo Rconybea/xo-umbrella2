@@ -31,7 +31,7 @@ namespace ut {
 
     TEST_CASE("verify_policy-report-error", "[verify_policy]") {
         stringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         ThreadLogState::log_set_sink(&sink);
 
         scope log(XO_ENTER0_(always));

@@ -72,7 +72,7 @@ namespace ut {
     template <typename Fn>
     static std::string flat_of(Fn && fn) {
         std::ostringstream ss;
-        FlatSink sink(ss);
+        FlatSink sink(ss.rdbuf());
         fn(sink);
         return ss.str();
     }

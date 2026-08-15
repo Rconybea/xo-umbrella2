@@ -44,28 +44,28 @@
 namespace xo::pp {
     inline std::ostream &
     operator<<(std::ostream & os, iso8601 x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
         sink.pp(x);
         return os;
     }
 
     inline std::ostream &
     operator<<(std::ostream & os, hms_msec x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
         sink.pp(x);
         return os;
     }
 
     inline std::ostream &
     operator<<(std::ostream & os, hms_usec x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
         sink.pp(x);
         return os;
     }
 
     inline std::ostream &
     operator<<(std::ostream & os, ymd_hms_usec x) {
-        FlatSink sink(os);
+        FlatSink sink(os.rdbuf());
         sink.pp(x);
         return os;
     }
