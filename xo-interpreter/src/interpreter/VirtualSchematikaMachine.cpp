@@ -8,7 +8,6 @@
 #include <xo/object/Integer.hpp>
 #include <xo/object/Primitive.hpp>
 #include <xo/object/Procedure.hpp>
-#include <xo/alloc/GC.hpp>
 #include <xo/expression/Apply.hpp>
 #include <xo/expression/AssignExpr.hpp>
 #include <xo/expression/Constant.hpp>
@@ -17,6 +16,8 @@
 #include <xo/expression/PrimitiveExprInterface.hpp>
 #include <xo/expression/Sequence.hpp>
 #include <xo/expression/Variable.hpp>
+#include <xo/alloc/GC.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 
 /** continue after completing a VSM instruction;
  *  achieve by jumping to continuation.
@@ -30,13 +31,13 @@
 
 
 namespace xo {
-    using xo::pp::scope;
-    using xo::pp::xtag;
-    using xo::pp::tostr0;
     using xo::gc::GC;
     using xo::obj::Procedure;
     using xo::obj::Integer;
     using xo::obj::Boolean;
+    using xo::pp::scope;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
 
     namespace scm {
         struct VsmOps {
