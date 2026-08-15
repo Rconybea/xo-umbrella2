@@ -9,10 +9,10 @@
  */
 
 #include "print/toppstr.hpp"
+#include "print/tostr.hpp"
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/pretty_array.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <catch2/catch.hpp>
 #include <array>
 #include <cstdint>
@@ -24,6 +24,7 @@ namespace xo {
         using xo::pp::PpConfig;
         using xo::pp::PpStyle;
         using xo::pp::toppstr;
+        using xo::pp::tostr;
         using xo::pp::color_spec_type;
 
         namespace {
@@ -81,7 +82,7 @@ namespace xo {
             /* at a margin wide enough that nothing breaks, toppstr and tostr
              * must agree -- they differ only in whether breaking is possible.
              */
-            REQUIRE(render_at(200) == xo::pp::tostr0(s_value));
+            REQUIRE(render_at(200) == tostr(s_value));
         }
 
         TEST_CASE("toppstr-is-repeatable", "[toppstr]") {
