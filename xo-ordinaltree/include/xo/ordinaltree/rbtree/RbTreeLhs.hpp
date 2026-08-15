@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xo/ppsink/tostr_xx.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <stdexcept>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in

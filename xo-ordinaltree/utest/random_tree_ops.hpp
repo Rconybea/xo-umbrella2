@@ -1,6 +1,7 @@
 /* @file random_tree_ops.hpp **/
 
 #include "catch2/catch.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>     /* os << xtag(..) */
 #include <xo/ppsink/PrettyVector.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -9,7 +10,6 @@
 #include <algorithm>
 #include <map>
 #include <vector>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace utest {
     struct Util {
@@ -88,7 +88,7 @@ namespace utest {
                        xo::rng::xoshiro256ss * p_rgen,
                        Tree * p_tree)
         {
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             bool ok_flag = true;
@@ -158,12 +158,13 @@ namespace utest {
         {
             // TODO: rewrite in terms of 'random_inserts with explicit vector'.
 
-            using xo::pp::tostr0;
+            using xo::pp::scope;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             bool ok_flag = true;
 
-            xo::pp::scope log(XO_DEBUG_(catch_flag), xtag("lo", lo), xtag("hi", hi), xtag("k", k));
+            scope log(XO_DEBUG_(catch_flag), xtag("lo", lo), xtag("hi", hi), xtag("k", k));
 
             REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
 
@@ -226,12 +227,12 @@ namespace utest {
                        Tree * p_tree)
         {
             using xo::pp::scope;
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             bool ok_flag = true;
 
-            xo::pp::scope log(XO_DEBUG_(catch_flag));
+            scope log(XO_DEBUG_(catch_flag));
 
             REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
 
@@ -303,7 +304,7 @@ namespace utest {
                        xo::rng::xoshiro256ss * p_rgen)
         {
             using xo::pp::scope;
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             xo::pp::scope log(XO_DEBUG_(catch_flag));
@@ -320,7 +321,7 @@ namespace utest {
             /* lookup keys in permutation order */
             std::uint32_t i = 1;
             for (std::uint32_t x : u) {
-                INFO(tostr0(xtag("i", i), xtag("n", n), xtag("x", x)));
+                INFO(tostr(xtag("i", i), xtag("n", n), xtag("x", x)));
 
                 REQUIRE_ORFAIL(ok_flag, catch_flag, tree[x] == x*10);
                 REQUIRE_ORFAIL(ok_flag, catch_flag, tree.verify_ok(catch_flag));
@@ -353,7 +354,7 @@ namespace utest {
                              Tree const & tree)
         {
             using xo::pp::scope;
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             /* -> false if/when verification fails */
@@ -400,7 +401,7 @@ namespace utest {
                                      Tree const & tree)
         {
             using xo::pp::scope;
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             /* -> false if/when verification fails */
@@ -550,7 +551,7 @@ namespace utest {
                           Tree const & rbtree)
         {
             using xo::pp::scope;
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             scope log(XO_DEBUG_(catch_flag));
@@ -568,10 +569,10 @@ namespace utest {
 
                 double reduced = (i+1) * (5*i + dvalue);
 
-                INFO(tostr0(xtag("i", i), xtag("n", n),
-                            xtag("tree.reduced_upto", reduced_upto),
-                            xtag("reduced", reduced),
-                            xtag("dvalue", dvalue)));
+                INFO(tostr(xtag("i", i), xtag("n", n),
+                           xtag("tree.reduced_upto", reduced_upto),
+                           xtag("reduced", reduced),
+                           xtag("dvalue", dvalue)));
 
                 auto glb_ix = rbtree.cfind_sum_glb(reduced);
 
@@ -600,7 +601,7 @@ namespace utest {
                        xo::rng::xoshiro256ss * p_rgen)
         {
             using xo::pp::scope;
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
             using xo::pp::xtag;
 
             scope log(XO_DEBUG_(catch_flag));

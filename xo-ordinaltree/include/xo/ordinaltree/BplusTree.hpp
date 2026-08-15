@@ -29,7 +29,7 @@
 #include <iostream>
 #if __APPLE__ && __MACH__
 # include <sys/sysctl.h>
-#include <xo/ppsink/tostr_xx.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #endif
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
@@ -314,6 +314,8 @@ namespace xo {
              * - throw_flag=false -> return false;
              */
             bool verify_ok(bool throw_flag = true) const {
+                using xo::pp::tostr;
+                using xo::pp::xtag;
 
                 //xo::pp::scope x("verify_ok");
                 //x.log(xo::pp::xtag("n_element", this->n_element_));
@@ -333,10 +335,10 @@ namespace xo {
 
                 if (z != this->n_element_) {
                     if (throw_flag) {
-                        std::string err = xo::pp::tostr0("BplusTree::verify_ok"
+                        std::string err = tostr("BplusTree::verify_ok"
                                                 ": bad key count",
-                                                xo::pp::xtag("expected", this->n_element_),
-                                                xo::pp::xtag("counted", z));
+                                                xtag("expected", this->n_element_),
+                                                xtag("counted", z));
 
                         throw std::runtime_error(err);
                     }
@@ -391,12 +393,15 @@ namespace xo {
              * Require:
              * - 0 <= i < .size
              */
-            const_iterator find_ith(std::size_t i_tree) const {
+            const_iterator find_ith(std::size_t i_tree) const
+            {
+                using xo::pp::tostr;
+                using xo::pp::xtag;
 
                 if (i_tree >= this->size()) {
-                    throw std::runtime_error(xo::pp::tostr0("BplusTree::find_ith: expected index i in range [0..n)",
-                                                   xo::pp::xtag("i", i_tree),
-                                                   xo::pp::xtag("n", this->size())));
+                    throw std::runtime_error(tostr("BplusTree::find_ith: expected index i in range [0..n)",
+                                                   xtag("i", i_tree),
+                                                   xtag("n", this->size())));
                 }
 
                 GenericNodeType * generic_node = this->root_.get();
@@ -405,11 +410,14 @@ namespace xo {
             } /*find_ith*/
 
             BpTreeConstLhs at(Key const & k) const {
+                using xo::pp::tostr;
+                using xo::pp::xtag;
+
                 const_iterator ix = this->find(k);
 
                 if (ix == this->cend()) {
-                    throw std::out_of_range(xo::pp::tostr0("BplusTree::at: expected key argument to appear in tree",
-                                                  xo::pp::xtag("key", k)));
+                    throw std::out_of_range(tostr0("BplusTree::at: expected key argument to appear in tree",
+                                                   xtag("key", k)));
                 }
 
                 return BpTreeConstLhs(this, ix.item_addr());
@@ -596,19 +604,19 @@ namespace xo {
              * but short-circuit if internal inconsistency detected
              */
             std::size_t verify_helper(bool throw_flag) const {
-
-                //xo::pp::scope x("BplusTree.verify_helper");
+                using xo::pp::tostr;
+                using xo::pp::xtag;
 
                 if (Properties::ordinal_tag_value() == tags::ordinal_enabled) {
                     /* verify tree size (maintained in each node) matches toplevel tree size) */
                     if (this->root_ != nullptr) {
                         if (this->size() != BplusTreeUtil<Key, Value, Properties>::get_node_size(this->root_.get())) {
                             if (throw_flag) {
-                                throw std::runtime_error(xo::pp::tostr0("BplusTree::verify_helper"
+                                throw std::runtime_error(tostr("BplusTree::verify_helper"
                                                                ": mismatched tree size computation",
-                                                               xo::pp::xtag("root", this->root_.get()),
-                                                               xo::pp::xtag("bptree.n_element", this->size()),
-                                                               xo::pp::xtag("bptree.root.size", logutil::nodesize(this->root_.get()))));
+                                                               xtag("root", this->root_.get()),
+                                                               xtag("bptree.n_element", this->size()),
+                                                               xtag("bptree.root.size", logutil::nodesize(this->root_.get()))));
                             } else {
                                 return -1;
                             }
@@ -623,12 +631,12 @@ namespace xo {
                 if (this->root_ == nullptr) {
                     if (this->leafnode_begin_ != nullptr || this->leafnode_end_ != nullptr) {
                         if (throw_flag) {
-                            throw std::runtime_error(xo::pp::tostr0("BplusTree::verify_helper"
+                            throw std::runtime_error(tostr("BplusTree::verify_helper"
                                                            ": expected null .leafnode_begin / .leafnode_end pointers"
                                                            " with empty tree",
-                                                           xo::pp::xtag("root", this->root_.get()),
-                                                           xo::pp::xtag("leafnode_begin", this->leafnode_begin_),
-                                                           xo::pp::xtag("leafnode_end", this->leafnode_end_)));
+                                                           xtag("root", this->root_.get()),
+                                                           xtag("leafnode_begin", this->leafnode_begin_),
+                                                           xtag("leafnode_end", this->leafnode_end_)));
                         } else {
                             return -1;
                         }
@@ -643,14 +651,14 @@ namespace xo {
                         || (rightmost_fr.node() != this->leafnode_end_))
                     {
                         if (throw_flag) {
-                            throw std::runtime_error(xo::pp::tostr0("BplusTree::verify_helper"
+                            throw std::runtime_error(tostr("BplusTree::verify_helper"
                                                            ": expected .leafnode_begin / .leafnode_end pointers"
                                                            " to match computed first/last leaf nodes",
-                                                           xo::pp::xtag("root", this->root_.get()),
-                                                           xo::pp::xtag("leafnode_begin[stored]", this->leafnode_begin_),
-                                                           xo::pp::xtag("leafnode_begin[computed]", leftmost_fr.node()),
-                                                           xo::pp::xtag("leafnode_end[stored]", this->leafnode_end_),
-                                                           xo::pp::xtag("leafnode_end[computed]", rightmost_fr.node())));
+                                                           xtag("root", this->root_.get()),
+                                                           xtag("leafnode_begin[stored]", this->leafnode_begin_),
+                                                           xtag("leafnode_begin[computed]", leftmost_fr.node()),
+                                                           xtag("leafnode_end[stored]", this->leafnode_end_),
+                                                           xtag("leafnode_end[computed]", rightmost_fr.node())));
                         } else {
                             return -1;
                         }

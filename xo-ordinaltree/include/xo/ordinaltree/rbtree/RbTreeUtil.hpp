@@ -6,11 +6,11 @@
 #pragma once
 
 #include "Node.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pad_ostream.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header

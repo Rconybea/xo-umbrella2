@@ -4,7 +4,7 @@
 
 #include "IteratorUtil.hpp"
 #include "LeafNode.hpp"
-#include <xo/ppsink/tostr_xx.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
@@ -240,11 +240,13 @@ namespace xo {
 
             private:
                 void check_regular() const {
+                    using xo::pp::tostr;
+                    using xo::pp::xtag;
 
                     if (this->location_ != IL_Regular) {
-                        throw std::runtime_error(xo::pp::tostr0("bplustree iterator: cannot deref iterator"
+                        throw std::runtime_error(tostr("bplustree iterator: cannot deref iterator"
                                                        " in sentinel state",
-                                                       xo::pp::xtag("loc", this->location_)));
+                                                       xtag("loc", this->location_)));
                     }
                 } /*check_regular*/
 

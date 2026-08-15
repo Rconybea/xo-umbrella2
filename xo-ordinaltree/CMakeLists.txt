@@ -43,6 +43,7 @@ xo_headeronly_dependency(${SELF_LIB} xo_allocutil)
 xo_headeronly_dependency(${SELF_LIB} randomgen)
 # PUBLIC: the tree headers use xo::pp::{scope,xtag,tostr,quot,pad} in
 # inline bodies, so consumers need ppsink too.
+xo_headeronly_dependency(${SELF_LIB} xo_indentlog2)
 xo_headeronly_dependency(${SELF_LIB} xo_ppsink)
 
 # NB must follow the xo_dependency() calls above: xo_export_cmake_config()

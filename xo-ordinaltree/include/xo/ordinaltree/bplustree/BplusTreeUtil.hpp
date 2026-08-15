@@ -4,12 +4,12 @@
 
 #include "IteratorUtil.hpp"
 #include "bplustree_tags.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>     /* os << xo::pp::xtag(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <memory> // for std::unique_ptr
 #include <string>
-#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header
@@ -119,6 +119,9 @@ namespace xo {
                                            std::size_t i_tree,
                                            const_iterator cend) {
 
+                using xo::pp::tostr;
+                using xo::pp::xtag;
+
                 if (!generic_node)
                     return cend;
 
@@ -163,11 +166,11 @@ namespace xo {
                             }
 
                             if (i == n) {
-                                throw std::runtime_error(xo::pp::tostr0("BplusTree::find_ith: internal index failure",
-                                                               xo::pp::xtag("i_tree", i_tree),
-                                                               xo::pp::xtag("last_z", z),
-                                                               xo::pp::xtag("n", internal_node->n_elt()),
-                                                               xo::pp::xtag("sum_z", sum_z)));
+                                throw std::runtime_error(tostr("BplusTree::find_ith: internal index failure",
+                                                               xtag("i_tree", i_tree),
+                                                               xtag("last_z", z),
+                                                               xtag("n", internal_node->n_elt()),
+                                                               xtag("sum_z", sum_z)));
                             }
                         }
                         break;
@@ -176,8 +179,8 @@ namespace xo {
                     ++iter;
                 } /*loop over descending internal node path*/
 
-                throw std::runtime_error(xo::pp::tostr0("BplusTree::find_ith: internal loop failure",
-                                               xo::pp::xtag("iter", iter)));
+                throw std::runtime_error(tostr("BplusTree::find_ith: internal loop failure",
+                                               xtag("iter", iter)));
 
                 /* impossible! */
                 return cend;

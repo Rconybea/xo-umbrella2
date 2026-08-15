@@ -12,6 +12,8 @@
 #include "rbtree/NullReduce.hpp"
 #include "rbtree/RbTreeLhs.hpp"
 #include "rbtree/RbTreeUtil.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>  /* os << xo::pp::quot(..) */
 #include <xo/ppsink/FlatSink.hpp>        /* operator<< renders via pretty() */
 #include <xo/ppsink/pretty.hpp>          /* PpSink::pp */
@@ -23,8 +25,6 @@
 #include <concepts>
 #include <iterator>
 #include <stdexcept>
-#include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header
