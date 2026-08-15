@@ -8,16 +8,10 @@
 #include <xo/pyprintjson/pyprintjson.hpp>
 #include <xo/pyreflect/pyreflect.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/timeutil/timeutil.hpp>
-// #include "time/Time.hpp"
-
-// #include "xo/pyutil/pytime.hpp"
 #include <xo/pyutil/pyutil.hpp>
-
-// #include <pybind11/pybind11.h>
-// #include <pybind11/chrono.h>
 #include <pybind11/stl.h>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pp_time.hpp>
 
 namespace xo {
@@ -25,7 +19,7 @@ namespace xo {
     using xo::fn::CallbackId;
     using xo::ref::Refcount;
     using xo::time::utc_nanos;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     namespace py = pybind11;
 
     namespace reactor {
@@ -37,7 +31,7 @@ namespace xo {
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.reactor";
 
-            m.def("time2str", [](utc_nanos tm) { return tostr0(tm); });
+            m.def("time2str", [](utc_nanos tm) { return tostr(tm); });
 
             /* TODO: if we write pycallback/,  then CallbackId wrapper belongs there */
             py::class_<CallbackId>(m, "CallbackId");
