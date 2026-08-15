@@ -3,14 +3,14 @@
 #include "IfExpr.hpp"
 #include "pretty_expression.hpp"
 #include "pretty_variable.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
-//#include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
 
     namespace scm {
         auto IfExpr::check_consistent_valuetype(const rp<Expression> & when_true,
@@ -37,11 +37,11 @@ namespace xo {
 
             if (when_true->valuetype() != when_false->valuetype()) {
                 throw std::runtime_error
-                    (tostr0("IfExpr::make:"
-                            " types {T1,T2} found for branches of if-expr"
-                            " where equal types expected",
-                            xtag("T1", when_true->valuetype()->canonical_name()),
-                            xtag("T2", when_false->valuetype()->canonical_name())));
+                          (tostr("IfExpr::make:"
+                                 " types {T1,T2} found for branches of if-expr"
+                                 " where equal types expected",
+                                 xtag("T1", when_true->valuetype()->canonical_name()),
+                                 xtag("T2", when_false->valuetype()->canonical_name())));
             }
 
             /* arbitrary choice here */

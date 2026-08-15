@@ -2,10 +2,11 @@
 
 #include "GeneralizedExpression.hpp"
 #include "pretty_expression.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <cstdint>
 
 namespace xo {
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
 
     namespace scm {
         namespace {
@@ -47,7 +48,7 @@ namespace xo {
 
         std::string
         GeneralizedExpression::display_string() const {
-            return tostr0(*this);
+            return tostr(*this);
         }
 
 #ifdef SUPERSEDED // currently all derived expression types support pretty printing

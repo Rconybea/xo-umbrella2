@@ -1,9 +1,9 @@
 /** @file TypeBlueprint.cpp **/
 
 #include "typeinf/TypeBlueprint.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     using xo::pp::xtag;

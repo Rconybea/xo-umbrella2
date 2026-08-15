@@ -6,16 +6,17 @@
 #include "pretty_variable.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/function/FunctionTdx.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
-#include <map>
-#include <sstream>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
+#include <map>
+#include <sstream>
 
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::reflect::TypeDescr;
     using xo::reflect::TypeDescrBase;
     using xo::reflect::FunctionTdxInfo;
@@ -57,9 +58,9 @@ namespace xo {
                 return nullptr;
 
             if (explicit_return_td && body->valuetype() && (explicit_return_td != body->valuetype())) {
-                throw std::runtime_error(tostr0("explicit lambda return type T1 conflicts with lambda body T2",
-                                                xtag("T1", explicit_return_td),
-                                                xtag("T2", body->valuetype())));
+                throw std::runtime_error(tostr("explicit lambda return type T1 conflicts with lambda body T2",
+                                               xtag("T1", explicit_return_td),
+                                               xtag("T2", body->valuetype())));
             }
 
             // TODO: unify(explicit_return_td, body->valuetype())

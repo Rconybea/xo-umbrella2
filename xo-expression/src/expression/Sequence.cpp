@@ -10,7 +10,7 @@
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    //using xo::pp::tostr;
 
     namespace scm {
         std::set<std::string>

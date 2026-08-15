@@ -4,15 +4,16 @@
 #include "PrimitiveExpr.hpp"
 #include "exprtype.hpp"
 #include "pretty_expression.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
-#include <cstdint>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
+#include <cstdint>
 
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
 
     namespace scm {
         rp<Apply>
@@ -24,10 +25,10 @@ namespace xo {
 
             if (!fn_valuetype->is_function()) {
                 throw std::runtime_error
-                    (tostr0("Apply::make: found expression F in function position,"
-                            " with value-type FT where a function type expected",
-                            xtag("FT", fn_valuetype->short_name()),
-                            xtag("F", fn_valuetype)));
+                          (tostr("Apply::make: found expression F in function position,"
+                                 " with value-type FT where a function type expected",
+                                 xtag("FT", fn_valuetype->short_name()),
+                                 xtag("F", fn_valuetype)));
             }
 
             TypeDescr fn_retval_type = fn_valuetype->fn_retval();
