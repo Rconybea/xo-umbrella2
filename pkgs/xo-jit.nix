@@ -10,6 +10,7 @@
 
   xo-cmake, xo-tokenizer, xo-expression,
 
+  xo-indentlog2,
   xo-ppsink,
 
   xo-reflectutil,
@@ -45,6 +46,7 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-reflectutil
       xo-expression
+      xo-indentlog2
       xo-ppsink
     ];
 
