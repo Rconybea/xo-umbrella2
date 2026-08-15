@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "DArena.hpp"
+#include <xo/arena/DArena.hpp>
 #include <cstdint>
 
 namespace xo::mm {
