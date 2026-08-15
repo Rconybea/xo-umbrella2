@@ -332,6 +332,32 @@ namespace xo {
             return nullptr;
         }
 
+        /**
+         *  Use:
+         *    DArena arena;
+         *    {
+         *      ArenaReset reset(arena);
+         *
+         *      auto x = arena.alloc(..);
+         *    }
+         *
+         *    // promise: arena in same state as just before reset established
+         *
+         **/
+        struct ArenaReset {
+        public:
+            ArenaReset(DArena & x) : arena_{x},
+                                    ckp_{x.checkpoint()} {}
+            ~ArenaReset() {
+                arena_.restore(ckp_);
+            }
+
+        private:
+            DArena & arena_;
+            /** establish checkpoint in ctor; restore in dtor **/
+            DArena::Checkpoint ckp_;
+        };
+
     } /*namespace mm*/
 } /*namespace xo*/
 

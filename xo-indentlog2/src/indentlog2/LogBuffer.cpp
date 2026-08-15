@@ -11,44 +11,41 @@ namespace xo {
     using xo::mm::ArenaConfig;
     using std::size_t;
 
-    LogBuffer::LogBuffer(const ArenaConfig & config, bool debug_flag)
-        : buf_v_{CharBuffer::map(config)},
-          porigin_{nullptr}, bpptr_{nullptr}, pptr_{nullptr}, epptr_{nullptr}, lstate_{},
+    LogBufferAdapter::LogBufferAdapter(DArena & x, bool debug_flag)
+        : buf_v_{x},
+          porigin_{nullptr},
+          bpptr_{nullptr},
+          pptr_{nullptr},
+          epptr_{nullptr},
+          lstate_{},
           debug_flag_{debug_flag}
-    {
-        // buf_v_ always contains one allocation, comprising its entire size
-
-        /* ask for 256 byte, in practice will get one vm page
-         * However, available memory less than that if we used object header
-         */
-        this->expand_to(256);
-    }
+    {}
 
     auto
-    LogBuffer::committed_span() const -> Span
+    LogBufferAdapter::committed_span() const -> Span
     {
         return Span(porigin_, epptr_);
     }
 
     auto
-    LogBuffer::used_span() const -> Span
+    LogBufferAdapter::used_span() const -> Span
     {
         return Span(porigin_, pptr_);
     }
 
     auto
-    LogBuffer::available_span() const -> Span
+    LogBufferAdapter::available_span() const -> Span
     {
         return Span(pptr_, epptr_);
     }
 
     void
-    LogBuffer::visit_pools(const MemorySizeVisitor & fn) const {
+    LogBufferAdapter::visit_pools(const MemorySizeVisitor & fn) const {
         buf_v_.visit_pools(fn);
     }
 
     bool
-    LogBuffer::expand_to(size_t new_z)
+    LogBufferAdapter::expand_to(size_t new_z)
     {
         bool ok = buf_v_.expand(new_z, "LogBuffer::expand_to");
 
@@ -91,7 +88,7 @@ namespace xo {
     }
 
     bool
-    LogBuffer::_require_avail(uint32_t x)
+    LogBufferAdapter::_require_avail(uint32_t x)
     {
         Span out = this->available_span();
 
@@ -111,7 +108,7 @@ namespace xo {
     }
 
     void
-    LogBuffer::newline_indent(uint32_t indent)
+    LogBufferAdapter::newline_indent(uint32_t indent)
     {
         // terminate the current line
         if (!this->_require_avail(1)) {
@@ -151,7 +148,7 @@ namespace xo {
     }
 
     void
-    LogBuffer::write_span(ConstSpan x)
+    LogBufferAdapter::write_span(ConstSpan x)
     {
         if (!this->_require_avail(x.size())) {
             assert(false);
@@ -168,7 +165,7 @@ namespace xo {
     }
 
     void
-    LogBuffer::flush()
+    LogBufferAdapter::flush()
     {
         if (dest_ && (bpptr_ < pptr_)) {
             dest_->sputn(bpptr_, pptr_ - bpptr_);
@@ -177,7 +174,7 @@ namespace xo {
     }
 
     void
-    LogBuffer::reclaim_line()
+    LogBufferAdapter::reclaim_line()
     {
         // Drain the completed line, then reuse the buffer from porigin_.
         // Valid only at a line boundary (current line empty): column has reset
@@ -197,7 +194,7 @@ namespace xo {
     }
 
     void
-    LogBuffer::reset_buffer()
+    LogBufferAdapter::reset_buffer()
     {
         // drain + reclaim the (final) line, then push it through to the device
         // (record boundary = sync point)
@@ -208,11 +205,26 @@ namespace xo {
     }
 
     void
-    LogBuffer::_check_update_local_state(char * pptr)
+    LogBufferAdapter::_check_update_local_state(char * pptr)
     {
         lstate_._check_update_local_state(porigin_, pptr, debug_flag_);
         this->pptr_ = pptr;
     }
+
+    // ----- LogBuffer -----
+
+    LogBuffer::LogBuffer(const ArenaConfig & config, bool debug_flag)
+        : LogBufferAdapter{arena_, debug_flag},
+          arena_{CharBuffer::map(config)}
+    {
+        // buf_v_ always contains one allocation, comprising its entire size
+
+        /* ask for 256 byte, in practice will get one vm page
+         * However, available memory less than that if we used object header
+         */
+        this->expand_to(256);
+    }
+
 } /*namespace xo*/
 
 /* end LogBuffer.cpp */

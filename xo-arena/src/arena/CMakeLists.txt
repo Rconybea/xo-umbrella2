@@ -23,6 +23,7 @@ xo_install_include_tree3(include/xo/arena)
 # NOTE: dependency set here must be kept consistent with
 #       xo-arena/cmake/xo_arenaConfig.cmake.in
 
+xo_dependency(${SELF_LIB} subsys)
 xo_dependency(${SELF_LIB} xo_reflectutil)
 xo_dependency(${SELF_LIB} xo_ppsink)
 

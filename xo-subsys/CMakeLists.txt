@@ -17,7 +17,6 @@ xo_toplevel_coverage_config2()
 # cmake -DCMAKE_BUILD_TYPE=debug
 xo_toplevel_debug_config2()
 
-
 #set(XO_PROJECT_NAME subsys)
 
 # ----------------------------------------------------------------

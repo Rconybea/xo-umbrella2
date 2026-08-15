@@ -13,7 +13,6 @@
 
 namespace xo {
     using xo::facet::FacetRegistry;
-    //using xo::facet::TypeRegistry;
     using xo::reflect::typeseq;
     using xo::pp::scope;
     using xo::pp::xtag;

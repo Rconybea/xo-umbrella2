@@ -7,6 +7,9 @@
 #include <xo/ppsink/escape.hpp>
 
 namespace xo::pp {
+    using std::uint32_t;
+    using std::int32_t;
+
     FlatSink::FlatSink(const PpStyle & style, std::ostream & os)
             : PpSink(style), os_{os}
     {}
@@ -67,14 +70,14 @@ namespace xo::pp {
     }
 
     PpSink &
-    FlatSink::begin(std::int32_t /*offset*/)
+    FlatSink::begin(int32_t /*offset*/)
     {
         /* flat output discards group structure (and its indent) */
         return *this;
     }
 
     PpSink &
-    FlatSink::split(std::uint32_t spaces, std::int32_t /*offset*/)
+    FlatSink::split(uint32_t spaces, int32_t /*offset*/)
     {
         /* flat output never breaks: render a split as its flat spaces */
         for (std::uint32_t i = 0; i < spaces; ++i)
@@ -83,7 +86,7 @@ namespace xo::pp {
     }
 
     PpSink &
-    FlatSink::newline(std::int32_t /*offset*/)
+    FlatSink::newline(int32_t /*offset*/)
     {
         /* a forced break is a hard newline even in flat output (no indent) */
         os_.put('\n');

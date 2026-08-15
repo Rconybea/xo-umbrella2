@@ -13,7 +13,7 @@ namespace xo {
     using CharBuffer = xo::mm::DArena;
 
     /** @brief Arena-backed buffer storage for logging and pretty printing **/
-    class LogBuffer {
+    class LogBufferAdapter {
         // Originally adapted from xo::log_streambuf, with changes:
         // 1. Use DArena for memory.
         // 2. Accounting in separate class (LineState, q.v.).
@@ -29,8 +29,7 @@ namespace xo {
         using size_t = std::size_t;
 
     public:
-        /** Create instance using @p config for @ref buf_v_ **/
-        LogBuffer(const ArenaConfig & config, bool debug_flag);
+        explicit LogBufferAdapter(DArena & buf, bool debug_flag);
 
         bool debug_flag() const { return debug_flag_; }
         size_t local_ppos() const { return lstate_.local_ppos(); }
@@ -93,11 +92,12 @@ namespace xo {
          **/
         void reclaim_line();
 
+    private:
         /** @defgroup LogBuffer-instance-vars **/
         ///@{
 
-        /** character storage **/
-        CharBuffer buf_v_;
+        /** buffer storage here **/
+        DArena & buf_v_;
         /** checkpoint for realloc **/
         DArena::Checkpoint buf_ckp_;
         /** pinned origin of usable buffered memory.
@@ -124,6 +124,18 @@ namespace xo {
         std::streambuf * dest_ = nullptr;
 
         ///@}
+    };
+
+    /** Buffer for logging, owns its arena
+     **/
+    class LogBuffer : public LogBufferAdapter {
+    public:
+        /** Create instance using @p config for @ref buf_v_ **/
+        LogBuffer(const ArenaConfig & config, bool debug_flag);
+
+    private:
+        /** character storage **/
+        CharBuffer arena_;
     };
 }
 

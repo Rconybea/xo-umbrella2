@@ -29,6 +29,12 @@ namespace xo::pp {
      **/
     class FlatSink : public PpSink {
     public:
+        using PpSink::split;
+        using PpSink::newline;
+        using uint32_t = std::uint32_t;
+        using int32_t = std::int32_t;
+
+    public:
         FlatSink(const PpStyle & style, std::ostream & os);
         explicit FlatSink(std::ostream & os) : PpSink(PpStyle::default_style()), os_{os} {}
 
@@ -37,15 +43,13 @@ namespace xo::pp {
         /* keep the inherited split()/split(spaces) and newline()
          * convenience overloads visible alongside the overrides below
          */
-        using PpSink::split;
-        using PpSink::newline;
 
         virtual PpSink & put(std::string_view x) override final;
         virtual PpSink & put_with_escape(std::string_view x, bool quote_flag) override final;
         virtual PpSink & begin() override final;
-        virtual PpSink & begin(std::int32_t offset) override final;
-        virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) override final;
-        virtual PpSink & newline(std::int32_t offset) override final;
+        virtual PpSink & begin(int32_t offset) override final;
+        virtual PpSink & split(uint32_t spaces, int32_t offset) override final;
+        virtual PpSink & newline(int32_t offset) override final;
         virtual PpSink & end() override final;
         virtual PpSinkInserter stream_open(uint32_t min_z) override final;
         virtual void stream_commit() override final;

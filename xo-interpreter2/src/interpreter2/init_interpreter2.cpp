@@ -20,6 +20,8 @@ namespace xo {
     void
     InitSubsys<S_interpreter2_tag>::init()
     {
+        // Runtime initialization for xo-interpreter2
+
         SetupInterpreter2::register_facets();
         CollectorTypeRegistry::instance().register_types(&SetupInterpreter2::register_types);
         PrimitiveRegistry::instance().register_primitives(&SetupInterpreter2::register_primitives);

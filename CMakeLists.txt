@@ -46,9 +46,9 @@ xo_cxx_toplevel_options3()
 set(PROJECT_CXX_FLAGS "")
 add_definitions(${PROJECT_CXX_FLAGS})
 
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
-endif()
+# NB c++ standard comes from xo_toplevel_compile_options() (xo-cmake), which
+# xo_cxx_toplevel_options3() above has already run -- currently 23.
+# Override with -DCMAKE_CXX_STANDARD=N.
 
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 

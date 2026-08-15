@@ -2,13 +2,16 @@
 
 set(SELF_LIB xo_indentlog2)
 set(SELF_SRCS
+    init_indentlog2.cpp
+    SetupIndentlog2.cpp
+    TempArena.cpp
     LogStreambuf.cpp
-	LogConfig.cpp
+    LogConfig.cpp
     LogBuffer.cpp
     PrettySink.cpp
-	PpState.cpp
+    PpState.cpp
     LineState.cpp
-	PpTokenStreambuf.cpp
+    PpTokenStreambuf.cpp
     PpToken.cpp
     PpConfig.cpp
 )
