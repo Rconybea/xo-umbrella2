@@ -4,19 +4,12 @@
 #include "pyunit.hpp"
 #include <xo/unit/xquantity.hpp>
 #include <xo/unit/xquantity_iostream.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/pyutil/pyutil.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pretty_ostream.hpp>  /* operator<< fallback for xquantity */
-//#include <pybind11/pybind11.h>
-//#include <pybind11/stl.h>
-//#include <pybind11/chrono.h>
-//#include <pybind11/operators.h>
 
 namespace xo {
-    /* this TU sits in namespace xo, so before the ppsink migration
-     * unqualified tostr resolved to legacy xo::tostr.
-     */
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
 
     namespace py = pybind11;
     using Unit = xo::qty::natural_unit<std::int64_t>;
@@ -32,7 +25,7 @@ namespace xo {
                      [](Unit & x)
                          {
                              /* e.g. "<unit g>" for xo::qty::nu::gram */
-                             return tostr0("<Unit ", x.abbrev(), ">");
+                             return tostr("<Unit ", x.abbrev(), ">");
                          })
                 ;
 
@@ -178,7 +171,7 @@ namespace xo {
                 .def("__repr__",
                      [](const XoQuantity & x)
                          {
-                             return tostr0(x);
+                             return tostr(x);
                          })
                 .def("abbrev",
                      [](const XoQuantity & x) {

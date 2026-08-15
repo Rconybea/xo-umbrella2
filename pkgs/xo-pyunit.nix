@@ -5,7 +5,7 @@
   # xo dependencies
   xo-cmake, #xo-refcnt,
   xo-refcnt,
-  xo-ppsink,
+  xo-indentlog2,
   xo-pyutil, #xo-reflect,
   xo-unit,
 
