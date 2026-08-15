@@ -1,11 +1,11 @@
 /** @file LocalEnv.cpp **/
 
 #include "LocalEnv.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/ppsink/quoted.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
-#include <xo/ppsink/tostr_xx.hpp>
 #include <cstring>
 
 namespace xo {
@@ -17,7 +17,7 @@ namespace xo {
     using xo::reflect::EstablishTypeDescr;
     using xo::reflect::StlVectorTdx;
     using xo::pp::quot;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
 
     namespace scm {
@@ -80,9 +80,9 @@ namespace xo {
         {
             assert(v);
 
-            throw std::runtime_error(tostr0("LocalEnv::establish_var:"
-                                            " inserting new variables not supported for LocalEnv",
-                                            xtag("v.name", v->name())));
+            throw std::runtime_error(tostr("LocalEnv::establish_var:"
+                                           " inserting new variables not supported for LocalEnv",
+                                           xtag("v.name", v->name())));
         }
 
         TaggedPtr

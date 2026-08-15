@@ -7,7 +7,6 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     using xo::pp::xtag;
