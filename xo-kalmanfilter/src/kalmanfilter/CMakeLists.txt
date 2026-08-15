@@ -28,5 +28,5 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 
 xo_dependency(${SELF_LIB} reactor)
 # sources use xo::pp::{scope,xtag,tostr}; no public header needs it.
-xo_dependency(${SELF_LIB} xo_ppsink)
+xo_dependency(${SELF_LIB} xo_indentlog2)
 xo_external_target_dependency(${SELF_LIB} Eigen3 Eigen3::Eigen)

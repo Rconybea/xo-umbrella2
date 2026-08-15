@@ -5,13 +5,13 @@
 #include "print_eigen.hpp"
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 #include <ostream>
 #include <string>
-#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
-#include <xo/ppsink/tostr_xx.hpp>
-#include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
     using xo::reflect::Reflect;

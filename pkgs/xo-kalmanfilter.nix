@@ -4,7 +4,7 @@
 
   xo-cmake,
 
-  xo-ppsink,
+  xo-indentlog2,
   xo-statistics,
   xo-reactor,
 
@@ -23,7 +23,7 @@ stdenv.mkDerivation (finalattrs:
     inherit doCheck;
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
     propagatedBuildInputs = [
-      xo-ppsink
+      xo-indentlog2
       eigen
       xo-statistics
       xo-reactor
