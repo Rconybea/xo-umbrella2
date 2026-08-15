@@ -35,9 +35,7 @@ stdenv.mkDerivation (finalattrs:
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
     propagatedBuildInputs = [
       xo-refcnt
-      xo-ppsink
-      #xo-refcnt
+      xo-indentlog2
       xo-pyutil
-      #xo-reflect
       xo-unit ];
   })
