@@ -10,6 +10,7 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/timeutil/timeutil.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
@@ -231,16 +232,18 @@ namespace xo {
             virtual void clear() override { this->tree_.clear(); }
 
             virtual void insert_tp(TaggedPtr const & ev_tp) override {
+                using xo::pp::tostr;
+                using xo::pp::xtag;
 
                 Event * p_ev = ev_tp.recover_native<Event>();
 
                 if (p_ev) {
                     this->insert(*p_ev);
                 } else {
-                    throw std::runtime_error(xo::pp::tostr0("StructEventStore<Event>::insert_tp"
+                    throw std::runtime_error(tostr("StructEventStore<Event>::insert_tp"
                                                    ": unable to convert ev_tp to Event",
-                                                   xo::pp::xtag("ev_tp.type", ev_tp.td()->canonical_name()),
-                                                   xo::pp::xtag("Event", reflect::type_name<Event>())));
+                                                   xtag("ev_tp.type", ev_tp.td()->canonical_name()),
+                                                   xtag("Event", reflect::type_name<Event>())));
                 }
             } /*insert_tp*/
 
@@ -256,10 +259,11 @@ namespace xo {
             // ----- Inherited from AbstractSource -----
 
             virtual void display(std::ostream & os) const override {
+                using xo::pp::xtqag;
 
                 os << "<EventStoreImpl"
-                   << xo::pp::xtag("name", this->name())
-                   << xo::pp::xtag("n_in_ev", this->n_in_ev())
+                   << xtag("name", this->name())
+                   << xtag("n_in_ev", this->n_in_ev())
                    << ">";
             } /*display*/
 

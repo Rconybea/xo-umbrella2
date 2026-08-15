@@ -6,6 +6,7 @@
 #include "AbstractSource.hpp"
 #include "PolyAdapterSink.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
@@ -81,7 +82,7 @@ namespace xo {
                     }
 
                     if (!native_sink) {
-                        using xo::pp::tostr0;
+                        using xo::pp::tostr;
                         using xo::pp::xtag;
 
 #ifdef DEBUG_EVENT_TYPEINFO
@@ -91,7 +92,7 @@ namespace xo {
 
                         std::size_t src_hashcode = typeid(T).hash_code();
 
-                        throw std::runtime_error(tostr0("Sink1<T>::require_native"
+                        throw std::runtime_error(tostr("Sink1<T>::require_native"
                                                        ": wanted to sink S,  but sink expects T",
                                                        xtag("caller", caller),
                                                        xtag("T", sink->sink_ev_type()->canonical_name()),
@@ -131,7 +132,7 @@ namespace xo {
             } /*attach_source*/
 
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
                 using xo::pp::xtag;
 
                 T * p_ev = ev_tp.recover_native<T>();
@@ -139,10 +140,10 @@ namespace xo {
                 if (p_ev) {
                     this->notify_ev(*p_ev);
                 } else {
-                    throw std::runtime_error(tostr0("Sink1<T>::notify_ev_tp"
-                                                    ": unable to convert ev_tp to T",
-                                                    xtag("ev_tp.type", ev_tp.td()->canonical_name()),
-                                                    xtag("T", reflect::type_name<T>())));
+                    throw std::runtime_error(tostr("Sink1<T>::notify_ev_tp"
+                                                   ": unable to convert ev_tp to T",
+                                                   xtag("ev_tp.type", ev_tp.td()->canonical_name()),
+                                                   xtag("T", reflect::type_name<T>())));
                 }
             } /*notify_ev_tp*/
         }; /*Sink1*/
