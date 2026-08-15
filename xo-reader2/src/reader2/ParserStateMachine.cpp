@@ -8,6 +8,7 @@
 #include "ParserStack.hpp"
 #include "SyntaxStateMachine.hpp"
 #include "ToplevelSeqSsm.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/numeric/NumericPrimitives.hpp>
 #include <xo/procedure2/PrimitiveRegistry.hpp>
 #include <xo/procedure2/SimpleRcx.hpp>
@@ -17,7 +18,6 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <stdexcept>
@@ -25,7 +25,7 @@
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
@@ -603,10 +603,10 @@ namespace xo {
 
             if (!stack_) {
                 // parsing stack should always have toplevel expression sequence
-                throw std::runtime_error(tostr0("unexpected empty parsing stack",
-                                                xtag("token", tk),
-                                                xtag("help", "do it the same. but better!")
-                                                ));
+                throw std::runtime_error(tostr("unexpected empty parsing stack",
+                                               xtag("token", tk),
+                                               xtag("help", "do it the same. but better!")
+                                               ));
             }
 
             stack_->top().on_token(tk, this);
@@ -643,11 +643,11 @@ namespace xo {
             // - want to write error message using DArena
             // - need something like log_streambuf and/or tostr() that's arena-aware
 
-            auto errmsg_string = tostr0("Unexpected token for parsing state",
-                                        xtag("token", tk),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_input_on_token"));
+            auto errmsg_string = tostr("Unexpected token for parsing state",
+                                       xtag("token", tk),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_input_on_token"));
 
             assert(expr_alloc_);
 
@@ -666,11 +666,11 @@ namespace xo {
             // - want to write error message using DArena
             // - need something like log_streambuf and/or tostr() that's arena-aware
 
-            auto errmsg_string = tostr0("Unexpected symbol for parsing state",
-                                        xtag("symbol", sym),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_input_on_symbol"));
+            auto errmsg_string = tostr("Unexpected symbol for parsing state",
+                                       xtag("symbol", sym),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_input_on_symbol"));
 
             assert(expr_alloc_);
 
@@ -689,11 +689,11 @@ namespace xo {
             // - want to write error message using DArena
             // - need something like log_streambuf and/or tostr() that's arena-aware
 
-            auto errmsg_string = tostr0("Unexpected type-description for parsing state",
-                                        xtag("td", td),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_input_on_typedescr"));
+            auto errmsg_string = tostr("Unexpected type-description for parsing state",
+                                       xtag("td", td),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_input_on_typedescr"));
 
             assert(expr_alloc_);
 
@@ -712,11 +712,11 @@ namespace xo {
             // - want to write error message using DArena
             // - need something like log_streambuf and/or tostr() that's arena-aware
 
-            auto errmsg_string = tostr0("Unexpected type for parsing state",
-                                        xtag("type", type),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_input_on_type"));
+            auto errmsg_string = tostr("Unexpected type for parsing state",
+                                       xtag("type", type),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_input_on_type"));
 
             assert(expr_alloc_);
 
@@ -736,12 +736,12 @@ namespace xo {
             // - want to write error message using DArena
             // - need something like log_streambuf and/or tostr() that's arena-aware
 
-            auto errmsg_string = tostr0("Unexpected formal",
-                                        xtag("param_name", std::string_view(*param_name)),
-                                        xtag("param_type", param_type),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_parsed_formal"));
+            auto errmsg_string = tostr("Unexpected formal",
+                                       xtag("param_name", std::string_view(*param_name)),
+                                       xtag("param_type", param_type),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_parsed_formal"));
 
             assert(expr_alloc_);
 
@@ -762,13 +762,13 @@ namespace xo {
             // - want to write error message using DArena
             // - need something like log_streambuf and/or tostr() that's arena-aware
 
-            auto errmsg_string = tostr0("Unexpected formal",
-                                        xtag("param_name", std::string_view(*param_name)),
-                                        xtag("param_type", param_type),
-                                        xtag("tk", tk),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_parsed_formal"));
+            auto errmsg_string = tostr("Unexpected formal",
+                                       xtag("param_name", std::string_view(*param_name)),
+                                       xtag("param_type", param_type),
+                                       xtag("tk", tk),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_parsed_formal"));
 
             assert(expr_alloc_);
 
@@ -785,11 +785,11 @@ namespace xo {
         {
             obj<APrintable,DArray> arglist_pr(arglist);
 
-            auto errmsg_string = tostr0("Unexpected formal arglist",
-                                        xtag("arglist", arglist_pr),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_parsed_formal_arglist"));
+            auto errmsg_string = tostr("Unexpected formal arglist",
+                                       xtag("arglist", arglist_pr),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_parsed_formal_arglist"));
 
             assert(expr_alloc_);
 
@@ -815,11 +815,11 @@ namespace xo {
              *  problem here: we have pretty() support for obj<AExpression>,
              *  but not "ordinary printing" support.  So expression doesn't get printed
              **/
-            auto errmsg_string = tostr0("Unexpected expression",
-                                        xtag("expr", expr_pr),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_parsed_expression"));
+            auto errmsg_string = tostr("Unexpected expression",
+                                       xtag("expr", expr_pr),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_parsed_expression"));
 
             assert(expr_alloc_);
 
@@ -847,12 +847,12 @@ namespace xo {
              *  problem here: we have pretty() support for obj<AExpression>,
              *  but not "ordinary printing" support.  So expression doesn't get printed
              **/
-            auto errmsg_string = tostr0("Unexpected expression",
-                                        xtag("expr", expr_pr),
-                                        xtag("tk", tk),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_parsed_expression"));
+            auto errmsg_string = tostr("Unexpected expression",
+                                       xtag("expr", expr_pr),
+                                       xtag("tk", tk),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_parsed_expression"));
 
             assert(expr_alloc_);
 
@@ -874,11 +874,11 @@ namespace xo {
              *  problem here: we have pretty() support for obj<AExpression>,
              *  but not "ordinary printing" support.  So expression doesn't get printed
              **/
-            auto errmsg_string = tostr0("Unexpected quoted literal",
-                                        xtag("lit", lit_pr),
-                                        xtag("expecting", expect_str),
-                                        xtag("ssm", ssm_name),
-                                        xtag("via", "ParserStateMachine::illegal_quoted_literal"));
+            auto errmsg_string = tostr("Unexpected quoted literal",
+                                       xtag("lit", lit_pr),
+                                       xtag("expecting", expect_str),
+                                       xtag("ssm", ssm_name),
+                                       xtag("via", "ParserStateMachine::illegal_quoted_literal"));
 
             assert(expr_alloc_);
 
@@ -892,9 +892,9 @@ namespace xo {
         ParserStateMachine::error_unbound_variable(std::string_view ssm_name,
                                                    std::string_view sym)
         {
-            auto errmsg_string = tostr0("No binding for symbol",
-                                        xtag("symbol", sym),
-                                        xtag("ssm", ssm_name));
+            auto errmsg_string = tostr("No binding for symbol",
+                                       xtag("symbol", sym),
+                                       xtag("ssm", ssm_name));
 
             auto errmsg = DString::from_view(expr_alloc_,
                                              std::string_view(errmsg_string));

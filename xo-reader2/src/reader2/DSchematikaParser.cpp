@@ -7,14 +7,14 @@
 #include "ParserStack.hpp"
 #include "ParserStateMachine.hpp"
 #include "SchematikaParser.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 /* os << xtag(..); see the ostream-containment milestone */
 #include <xo/ppsink/tag_ostream.hpp>
 #include <cstddef>
 #include <stdexcept>
-#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     using xo::pp::scope;
@@ -22,7 +22,7 @@ namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
     using xo::mm::MemorySizeInfo;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
 
     namespace scm {
@@ -131,10 +131,10 @@ namespace xo {
             scope log(XO_DEBUG_(debug_flag_), xtag("tk", tk));
 
             if (psm_.stack() == nullptr) {
-                throw std::runtime_error(tostr0("DSchematikaParser::include_token",
-                                                ": parser not expecting input"
-                                                "(call parser.begin_translation_unit()..?)",
-                                                xtag("token", tk)));
+                throw std::runtime_error(tostr("DSchematikaParser::include_token",
+                                               ": parser not expecting input"
+                                               "(call parser.begin_translation_unit()..?)",
+                                               xtag("token", tk)));
             }
 
             /* stack is non-empty */
