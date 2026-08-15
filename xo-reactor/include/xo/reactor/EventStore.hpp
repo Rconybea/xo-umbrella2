@@ -259,7 +259,7 @@ namespace xo {
             // ----- Inherited from AbstractSource -----
 
             virtual void display(std::ostream & os) const override {
-                using xo::pp::xtqag;
+                using xo::pp::xtag;
 
                 os << "<EventStoreImpl"
                    << xtag("name", this->name())
