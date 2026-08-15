@@ -5,6 +5,7 @@
 
 #include "ObjectConversion.hpp"
 #include <xo/alloc/Object.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 #include <xo/allocutil/IAlloc.hpp>
 
@@ -144,7 +145,7 @@ namespace xo {
                 return String::copy(mm, x.c_str());
             }
             static std::string from_object(gc::IAlloc *, gp<Object> x) {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
                 using xo::pp::xtag;
 
                 /* NB qualified, not a using-declaration.  The argument type
@@ -164,8 +165,8 @@ namespace xo {
                     return std::string(x_str->c_str());
                 } else {
                     throw std::runtime_error
-                        (tostr0("ObjectConversion_String"
-                                ": x found where string expected", xtag("x", x)));
+                        (tostr("ObjectConversion_String"
+                               ": x found where string expected", xtag("x", x)));
                 }
 
             }

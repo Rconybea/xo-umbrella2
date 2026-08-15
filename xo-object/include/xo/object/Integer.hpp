@@ -7,6 +7,7 @@
 
 #include "Number.hpp"
 #include "ObjectConversion.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 
@@ -48,7 +49,7 @@ namespace xo {
                 return new (MMPtr(mm)) Integer(x);
             }
             static IntType from_object(gc::IAlloc *, gp<Object> x) {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
                 using xo::pp::xtag;
 
                 /* NB qualified, not a using-declaration.  The argument type
@@ -61,7 +62,7 @@ namespace xo {
                 if (x_int.get()) {
                     return x_int->value();
                 } else {
-                    throw std::runtime_error(tostr0("ObjectConversion_Integer: x found where Integer expected",
+                    throw std::runtime_error(tostr("ObjectConversion_Integer: x found where Integer expected",
                                                    xtag("x", x)));
                 }
             }

@@ -9,8 +9,8 @@
 #include "Integer.hpp"
 #include "String.hpp"
 #include <xo/alloc/Blob.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
@@ -24,7 +24,7 @@ namespace xo {
          * *ambiguous* with legacy xo::xtag (still visible via headers that
          * have not migrated) rather than shadowing it.
          */
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         namespace {
@@ -50,7 +50,7 @@ namespace xo {
                 gp<Integer> int_obj = Integer::from(obj);
 
                 if (!int_obj.get()) {
-                    throw std::runtime_error(tostr0("Object obj found where Integer expected",
+                    throw std::runtime_error(tostr("Object obj found where Integer expected",
                                                    xtag("obj", obj)));
                 }
 
@@ -89,7 +89,7 @@ namespace xo {
                 gp<Float> float_obj = Float::from(obj);
 
                 if (!float_obj.get()) {
-                    throw std::runtime_error(tostr0("Object obj found where Float expected",
+                    throw std::runtime_error(tostr("Object obj found where Float expected",
                                                    xtag("obj", obj)));
                 }
 
@@ -125,7 +125,7 @@ namespace xo {
                 gp<Boolean> bool_obj = Boolean::from(obj);
 
                 if (!bool_obj.get()) {
-                    throw std::runtime_error(tostr0("Object obj found where Boolean expected",
+                    throw std::runtime_error(tostr("Object obj found where Boolean expected",
                                                    xtag("obj", obj)));
                 }
 
@@ -148,7 +148,7 @@ namespace xo {
                 gp<String> string_obj = String::from(obj);
 
                 if (!string_obj.get()) {
-                    throw std::runtime_error(tostr0("Object obj founcd where String expected",
+                    throw std::runtime_error(tostr("Object obj founcd where String expected",
                                                    xtag("obj", obj)));
                 }
 
@@ -189,7 +189,7 @@ namespace xo {
             } else {
                 if (throw_flag) {
                     throw std::runtime_error
-                        (tostr0("no to-object-converter available for instance of type",
+                        (tostr("no to-object-converter available for instance of type",
                                xtag("id", x_tp.td()->id()),
                                xtag("name", x_tp.td()->short_name())));
                 }
@@ -207,7 +207,7 @@ namespace xo {
                 return (cvt->cvt_from_object_)(mm, obj);
             } else {
                 if (throw_flag) {
-                    throw std::runtime_error(tostr0("no from-object-converter available for instance of type",
+                    throw std::runtime_error(tostr("no from-object-converter available for instance of type",
                                                    xtag("id", target_id)));
                 }
 

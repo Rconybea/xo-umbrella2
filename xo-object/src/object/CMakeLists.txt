@@ -15,7 +15,9 @@ xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)
 xo_headeronly_dependency(${SELF_LIB} xo_unit)
 xo_headeronly_dependency(${SELF_LIB} callback)
 xo_dependency(${SELF_LIB} xo_alloc)
-# PUBLIC: Boolean/Float/Integer/String.hpp use xo::pp::{xtag,tostr} in
-# inline bodies, so consumers need ppsink too.
+# PUBLIC: Boolean/Float/Integer/String.hpp use xo::pp::xtag in inline bodies,
+# so consumers need ppsink too.
 xo_dependency(${SELF_LIB} xo_ppsink)
+# PUBLIC for the same reason: those headers also call xo::pp::tostr inline.
+xo_dependency(${SELF_LIB} xo_indentlog2)
 #xo_dependency(${SELF_LIB} reflect)  # should be able to get this indirectly via xo_alloc

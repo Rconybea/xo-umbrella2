@@ -7,6 +7,7 @@
 
 #include "ObjectConversion.hpp"
 #include <xo/alloc/Object.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 
 namespace xo {
@@ -45,7 +46,7 @@ namespace xo {
                 return Boolean::boolean_obj(x);
             }
             static BoolType from_object(gc::IAlloc *, gp<Object> x) {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
                 using xo::pp::xtag;
 
                 /* NB qualified, not a using-declaration.  The argument type
@@ -58,8 +59,8 @@ namespace xo {
                 if (x_bool.get()) {
                     return x_bool->value();
                 } else {
-                    throw std::runtime_error(tostr0("ObjectConversion_Boolean: x found where Boolean expected",
-                                                    xtag("x", x)));
+                    throw std::runtime_error(tostr("ObjectConversion_Boolean: x found where Boolean expected",
+                                                   xtag("x", x)));
                 }
             }
         };
