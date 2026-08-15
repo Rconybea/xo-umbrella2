@@ -6,9 +6,9 @@
 #pragma once
 
 #include "TypeDescr.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     namespace scm {
@@ -32,7 +32,7 @@ namespace xo {
             void assign_td(TypeDescr x) { td_ = x; }
 
             void print(std::ostream & os) const {
-            using xo::pp::xtag;
+                using xo::pp::xtag;
 
                 os << "<formal_arg";
                 if (!name_.empty())

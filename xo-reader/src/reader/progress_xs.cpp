@@ -9,10 +9,10 @@
 #include <xo/expression/Apply.hpp>
 #include <xo/expression/AssignExpr.hpp>
 #include <xo/expression/pretty_expression.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
