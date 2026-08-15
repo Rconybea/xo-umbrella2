@@ -6,6 +6,7 @@
 #include "GcosTestutil.hpp"
 #include "MockCollector.hpp"
 #include <xo/gc/X1VerifyStats.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/object2/Boolean.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/object2/ListOps.hpp>
@@ -16,7 +17,6 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <vector>
@@ -28,7 +28,7 @@ namespace ut {
      */
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
 
     using xo::scm::ListOps;
     using xo::scm::DList;
@@ -311,7 +311,7 @@ namespace ut {
         // verify we have non-zero space!
         {
             for (Generation gi = g0; gi < gn; ++gi) {
-                INFO(tostr0(xtag("gi", gi)));
+                INFO(tostr(xtag("gi", gi)));
 
                 REQUIRE(gcos.to_space(gi)->allocated() == 0);
                 REQUIRE(gcos.to_space(gi)->reserved() >= gc_size);
@@ -606,14 +606,14 @@ namespace ut {
 
         X1VerifyStats * verify_stats = p_gcos->verify_stats();
 
-        INFO(tostr0(xtag("n_gc_root", verify_stats->n_gc_root_),
-                    xtag("n_ext", verify_stats->n_ext_),
-                    xtag("n_from", verify_stats->n_from_),
-                    xtag("n_to", verify_stats->n_to_),
-                    xtag("n_fwd", verify_stats->n_fwd_),
-                    xtag("n_age_ok", verify_stats->n_age_ok_),
-                    xtag("n_age_bad", verify_stats->n_age_bad_),
-                    xtag("n_no_iface", verify_stats->n_no_iface_)));
+        INFO(tostr(xtag("n_gc_root", verify_stats->n_gc_root_),
+                   xtag("n_ext", verify_stats->n_ext_),
+                   xtag("n_from", verify_stats->n_from_),
+                   xtag("n_to", verify_stats->n_to_),
+                   xtag("n_fwd", verify_stats->n_fwd_),
+                   xtag("n_age_ok", verify_stats->n_age_ok_),
+                   xtag("n_age_bad", verify_stats->n_age_bad_),
+                   xtag("n_no_iface", verify_stats->n_no_iface_)));
 
         REQUIRE(verify_stats->is_ok());
     }
@@ -674,7 +674,7 @@ namespace ut {
 
         // new objects appear in to-space for generation 0.
         for (Generation gi = g0; gi < gn; ++gi) {
-            INFO(tostr0(xtag("gi", gi)));
+            INFO(tostr(xtag("gi", gi)));
 
             if (loop_index == 0) {
                 if ((gi == 0) && (x1_v.size() > 0)) {
@@ -861,8 +861,8 @@ namespace ut {
                      || gcos.contains_allocated(Role::to_space(), x1_gco.data())));
             AllocInfo obj_info = gcos.alloc_info((std::byte *)x1_gco.data());
 
-            INFO(tostr0(xtag("obj_info.tseq", obj_info.tseq()),
-                        xtag("obj_info.tname", TypeRegistry::id2name(typeseq(obj_info.tseq())))));
+            INFO(tostr(xtag("obj_info.tseq", obj_info.tseq()),
+                       xtag("obj_info.tname", TypeRegistry::id2name(typeseq(obj_info.tseq())))));
 
             REQUIRE(obj_info.size() >= x1.alloc_z_);
             REQUIRE(obj_info.payload().first == (std::byte *)x1_gco.data());
