@@ -10,7 +10,7 @@
 
 namespace xo {
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::reflect::Reflect;
 
     namespace scm {
@@ -63,11 +63,11 @@ namespace xo {
             if (!td) {
                 const char * exp = get_expect_str();
 
-                std::string errmsg = tostr("expect_type_xs: unexpected token for parsing state",
-                                           xtag("expecting", exp),
-                                           xtag("token", tk.tk_type()),
-                                           xtag("text", tk.text()),
-                                           xtag("state", this->exs_type()));
+                std::string errmsg = tostr0("expect_type_xs: unexpected token for parsing state",
+                                            xtag("expecting", exp),
+                                            xtag("token", tk.tk_type()),
+                                            xtag("text", tk.text()),
+                                            xtag("state", this->exs_type()));
 
                 p_psm->on_error(c_self_name, std::move(errmsg));
             }

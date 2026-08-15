@@ -471,10 +471,10 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
     float y_zero = y_scale(0);
 
     if ((y_zero < chart_rect.y_lo()) || (y_zero > chart_rect.y_hi())) {
-        throw std::runtime_error(tostr("expected y_zero within chart range [y_lo,y_hi]",
-                                       xtag("y_lo", chart_rect.y_lo()),
-                                       xtag("y_zero", y_zero),
-                                       xtag("y_hi", chart_rect.y_hi())));
+        throw std::runtime_error(tostr0("expected y_zero within chart range [y_lo,y_hi]",
+                                        xtag("y_lo", chart_rect.y_lo()),
+                                        xtag("y_zero", y_zero),
+                                        xtag("y_hi", chart_rect.y_hi())));
 
     }
 

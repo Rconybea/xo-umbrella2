@@ -2,7 +2,7 @@
 
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/pretty_ostream.hpp> /* Plain_PpsinkTest exercises the operator<< fallback */
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <catch2/catch.hpp>
 #include <cstdint>
 #include <limits>
@@ -13,7 +13,7 @@ using xo::pp::PpSink;
 using xo::pp::Prettifier;
 using xo::pp::pretty;
 using xo::pp::has_prettifier;
-using xo::pp::tostr;
+using xo::pp::tostr0;
 
 /* a type that opts in to Prettifier */
 struct Point_PpsinkTest { int x; int y; };
@@ -84,17 +84,17 @@ TEST_CASE("prettifier-integer-widths", "[pretty][scalar]") {
     static_assert(has_prettifier<std::uint32_t>);
     static_assert(has_prettifier<std::int64_t>);
 
-    CHECK(tostr(static_cast<short>(-5)) == "-5");
-    CHECK(tostr(static_cast<unsigned short>(5)) == "5");
-    CHECK(tostr(42) == "42");
-    CHECK(tostr(4000000000u) == "4000000000");
-    CHECK(tostr(-1234567890123L) == "-1234567890123");
-    CHECK(tostr(1234567890123UL) == "1234567890123");
-    CHECK(tostr(static_cast<std::size_t>(42)) == "42");
+    CHECK(tostr0(static_cast<short>(-5)) == "-5");
+    CHECK(tostr0(static_cast<unsigned short>(5)) == "5");
+    CHECK(tostr0(42) == "42");
+    CHECK(tostr0(4000000000u) == "4000000000");
+    CHECK(tostr0(-1234567890123L) == "-1234567890123");
+    CHECK(tostr0(1234567890123UL) == "1234567890123");
+    CHECK(tostr0(static_cast<std::size_t>(42)) == "42");
 
     /* the extremes: buf[24] must hold the longest rendering of any width */
-    CHECK(tostr(std::numeric_limits<std::int64_t>::min()) == "-9223372036854775808");
-    CHECK(tostr(std::numeric_limits<std::uint64_t>::max()) == "18446744073709551615");
+    CHECK(tostr0(std::numeric_limits<std::int64_t>::min()) == "-9223372036854775808");
+    CHECK(tostr0(std::numeric_limits<std::uint64_t>::max()) == "18446744073709551615");
 }
 
 TEST_CASE("prettifier-bool-stays-1-0", "[pretty][scalar]") {
@@ -104,8 +104,8 @@ TEST_CASE("prettifier-bool-stays-1-0", "[pretty][scalar]") {
      * renderings pinned across the tree already contain it -- e.g. TypeDescr's
      * ":complete 1".  Prettifier<bool> removes the ostream, not the format.
      */
-    CHECK(tostr(true) == "1");
-    CHECK(tostr(false) == "0");
+    CHECK(tostr0(true) == "1");
+    CHECK(tostr0(false) == "0");
 }
 
 TEST_CASE("prettifier-leaves-char-types-alone", "[pretty][scalar]") {
@@ -121,7 +121,7 @@ TEST_CASE("prettifier-leaves-char-types-alone", "[pretty][scalar]") {
     static_assert(!has_prettifier<std::int8_t>);
     static_assert(!has_prettifier<std::uint8_t>);
 
-    CHECK(tostr('A') == "A");
-    CHECK(tostr(static_cast<signed char>(65)) == "A");
-    CHECK(tostr(static_cast<unsigned char>(65)) == "A");
+    CHECK(tostr0('A') == "A");
+    CHECK(tostr0(static_cast<signed char>(65)) == "A");
+    CHECK(tostr0(static_cast<unsigned char>(65)) == "A");
 }

@@ -14,7 +14,7 @@ namespace xo {
     using std::cerr;
     using std::endl;
 
-    LogStreambuf::LogStreambuf(LogBuffer * logbuf)
+    LogStreambuf::LogStreambuf(LogBufferAdapter * logbuf)
       : logbuf_{logbuf}
     {
         if (logbuf_)

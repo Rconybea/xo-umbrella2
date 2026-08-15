@@ -5,7 +5,8 @@
 #include <cstdint>
 
 namespace xo {
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
+
     namespace scm {
         namespace {
             using xo::scm::prefix_type;
@@ -46,7 +47,7 @@ namespace xo {
 
         std::string
         GeneralizedExpression::display_string() const {
-            return tostr(*this);
+            return tostr0(*this);
         }
 
 #ifdef SUPERSEDED // currently all derived expression types support pretty printing

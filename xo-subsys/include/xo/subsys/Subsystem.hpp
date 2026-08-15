@@ -8,7 +8,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <cstddef>
 #include <functional>
 #include <iostream>
@@ -151,13 +151,13 @@ namespace xo {
 
         template<typename SubsystemTag>
         static bool verify_present(std::string subsys_tag) {
-            using xo::pp::tostr;
+            using xo::pp::tostr0;
 
             SubsystemImpl * subsys = establish<SubsystemTag>();
 
             if (!subsys->require_flag()) {
-                throw std::runtime_error(tostr("subsystem not present."
-                                               "(missing InitSubsys<", subsys_tag, ">::require() ?)"));
+                throw std::runtime_error(tostr0("subsystem not present."
+                                                "(missing InitSubsys<", subsys_tag, ">::require() ?)"));
                 return false;
             }
 

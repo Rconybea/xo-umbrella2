@@ -237,7 +237,7 @@ namespace xo {
                 if (p_ev) {
                     this->insert(*p_ev);
                 } else {
-                    throw std::runtime_error(xo::pp::tostr("StructEventStore<Event>::insert_tp"
+                    throw std::runtime_error(xo::pp::tostr0("StructEventStore<Event>::insert_tp"
                                                    ": unable to convert ev_tp to Event",
                                                    xo::pp::xtag("ev_tp.type", ev_tp.td()->canonical_name()),
                                                    xo::pp::xtag("Event", reflect::type_name<Event>())));

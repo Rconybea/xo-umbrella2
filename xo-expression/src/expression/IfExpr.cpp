@@ -10,7 +10,8 @@
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
+
     namespace scm {
         auto IfExpr::check_consistent_valuetype(const rp<Expression> & when_true,
                                                 const rp<Expression> & when_false) -> TypeDescr
@@ -36,11 +37,11 @@ namespace xo {
 
             if (when_true->valuetype() != when_false->valuetype()) {
                 throw std::runtime_error
-                    (tostr("IfExpr::make:"
-                           " types {T1,T2} found for branches of if-expr"
-                           " where equal types expected",
-                           xtag("T1", when_true->valuetype()->canonical_name()),
-                           xtag("T2", when_false->valuetype()->canonical_name())));
+                    (tostr0("IfExpr::make:"
+                            " types {T1,T2} found for branches of if-expr"
+                            " where equal types expected",
+                            xtag("T1", when_true->valuetype()->canonical_name()),
+                            xtag("T2", when_false->valuetype()->canonical_name())));
             }
 
             /* arbitrary choice here */

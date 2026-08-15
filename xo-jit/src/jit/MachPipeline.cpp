@@ -4,16 +4,16 @@
 #include "activation_record.hpp"
 #include "type2llvm.hpp"
 #include <xo/expression/pretty_variable.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
 #include <string>
 
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::scm::exprtype;
     using xo::scm::Expression;
     using xo::scm::ConstantInterface;
@@ -1150,7 +1150,7 @@ namespace xo {
 
         std::string
         MachPipeline::display_string() const {
-            return tostr(*this);
+            return tostr0(*this);
         }
     } /*namespace jit*/
 } /*namespace xo*/

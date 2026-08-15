@@ -10,7 +10,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pad_ostream.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header
@@ -578,7 +578,7 @@ namespace xo {
                                             Reduce const & reduce_fn,
                                             bool debug_flag,
                                             RbNode ** pp_root) {
-                    
+
                     constexpr bool c_excessive_verify_enabled = false;
 
                     xo::pp::scope log(XO_DEBUG_(debug_flag));
@@ -876,8 +876,8 @@ namespace xo {
                                     = reinterpret_cast<const void * const *>(N->child_addr(Direction::D_Left));
 
                                 XO_EXPECT_(gc.check_write_barrier(src, lhs, false),
-                                          xo::pp::tostr("RbTreeUtil::insert_aux",
-                                                ": expect mlog entry for xgen child pointer"));
+                                          xo::pp::tostr0("RbTreeUtil::insert_aux",
+                                                         ": expect mlog entry for xgen child pointer"));
                             }
 
                             assert(is_red(N->child(d)));
@@ -933,7 +933,7 @@ namespace xo {
                                               bool debug_flag,
                                               RbNode **pp_root)
                     {
-                        
+
                         using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
                         //constexpr char const *c_self = "RbTreeUtil::remove_black_leaf";
@@ -1716,7 +1716,9 @@ namespace xo {
                                                 RbNode const * N,
                                                 int32_t * p_black_height)
                     {
-                                                using allocator_traits = xo::gc::gc_allocator_traits<NodeAllocator>;
+                        using allocator_traits = xo::gc::gc_allocator_traits<NodeAllocator>;
+                        using xo::pp::tostr0;
+                        using xo::pp::xtag;
 
                         constexpr char const *c_self = "RbTreeUtil::verify_subtree_ok";
 
@@ -1742,8 +1744,8 @@ namespace xo {
                                                           uint32_t bd)
                             {
                                 XO_EXPECT_(x->_is_forwarded() == false,
-                                          xo::pp::tostr(c_self, (": stray forwarding pointer where node expected"),
-                                                xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x)
+                                          tostr0(c_self, (": stray forwarding pointer where node expected"),
+                                                xtag("i", i_node), xo::pp::xtag("node[i]", x)
                                                 ));
 
                                 if (x->parent()) {
@@ -1751,20 +1753,20 @@ namespace xo {
                                     const void * const * lhs = reinterpret_cast<const void * const *>(x->parent_addr());
 
                                     XO_EXPECT_(gc.check_write_barrier(src, lhs, false),
-                                              xo::pp::tostr(c_self, (": expect mlog entry for xgen parent pointer"),
-                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
-                                                    xo::pp::xtag("key[i]", x->key()),
-                                                    xo::pp::xtag("parent", x->parent())));
+                                               tostr0(c_self, (": expect mlog entry for xgen parent pointer"),
+                                                    xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                    xtag("key[i]", x->key()),
+                                                    xtag("parent", x->parent())));
                                 }
 
                                 /* RB2. if c=x->child(d), then c->parent()=x */
 
                                 if (x->left_child()) {
                                     XO_EXPECT_(x->left_child()->_is_forwarded() == false,
-                                              xo::pp::tostr(c_self, (": forwarding pointer where left child expected"),
-                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
-                                                    xo::pp::xtag("key[i]", x->key()),
-                                                    xo::pp::xtag("child", x->left_child())
+                                               tostr0(c_self, (": forwarding pointer where left child expected"),
+                                                      xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                      xtag("key[i]", x->key()),
+                                                      xtag("child", x->left_child())
                                                     ));
 
                                     {
@@ -1772,31 +1774,31 @@ namespace xo {
                                         const void * const * lhs = reinterpret_cast<const void * const *>(x->child_addr(detail::Direction(0)));
 
                                         XO_EXPECT_(gc.check_write_barrier(parent, lhs, false),
-                                                  xo::pp::tostr(c_self, (": expect mlog entry for xgen left child pointer"),
-                                                        xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
-                                                        xo::pp::xtag("key[i]", x->key()),
-                                                        xo::pp::xtag("child", x->left_child())));
+                                                   tostr0(c_self, (": expect mlog entry for xgen left child pointer"),
+                                                          xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                          xtag("key[i]", x->key()),
+                                                          xtag("child", x->left_child())));
                                     }
 
                                     XO_EXPECT_(x == x->left_child()->parent(),
-                                              xo::pp::tostr(c_self, (": expect symmetric child/parent pointers"),
-                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
-                                                    xo::pp::xtag("key[i]", x->key()),
-                                                    xo::pp::xtag("child", x->left_child()),
-                                                    xo::pp::xtag("child.key", x->left_child()->key()),
-                                                    xo::pp::xtag("child.parent", x->left_child()->parent()),
-                                                    xo::pp::xtag("child.parent._is_forwarded",
-                                                         x->left_child()->parent()->_is_forwarded())
-                                                    ));
+                                               tostr0(c_self, (": expect symmetric child/parent pointers"),
+                                                      xtag("i", i_node), xtag("node[i]", x),
+                                                      xtag("key[i]", x->key()),
+                                                      xtag("child", x->left_child()),
+                                                      xtag("child.key", x->left_child()->key()),
+                                                      xtag("child.parent", x->left_child()->parent()),
+                                                      xtag("child.parent._is_forwarded",
+                                                           x->left_child()->parent()->_is_forwarded())
+                                                      ));
 
                                 }
 
                                 if (x->right_child()) {
                                     XO_EXPECT_(x->right_child()->_is_forwarded() == false,
-                                              xo::pp::tostr(c_self, (": forwarding pointer where right child expected"),
-                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
-                                                    xo::pp::xtag("key[i]", x->key()),
-                                                    xo::pp::xtag("child", x->right_child())
+                                               tostr0(c_self, (": forwarding pointer where right child expected"),
+                                                    xtag("i", i_node), xtag("node[i]", x),
+                                                    xtag("key[i]", x->key()),
+                                                    xtag("child", x->right_child())
                                                     ));
 
                                     {
@@ -1805,21 +1807,21 @@ namespace xo {
                                             = reinterpret_cast<const void * const *>(x->child_addr(Direction::D_Right));
 
                                         XO_EXPECT_(gc.check_write_barrier(parent, lhs, false),
-                                                  xo::pp::tostr(c_self, (": expect mlog entry for xgen right child pointer"),
-                                                        xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
-                                                        xo::pp::xtag("key[i]", x->key()),
-                                                        xo::pp::xtag("child", x->right_child())));
+                                                   tostr0(c_self, (": expect mlog entry for xgen right child pointer"),
+                                                        xtag("i", i_node), xtag("node[i]", x),
+                                                        xtag("key[i]", x->key()),
+                                                        xtag("child", x->right_child())));
                                     }
 
                                     XO_EXPECT_(x == x->right_child()->parent(),
-                                              xo::pp::tostr(c_self, ": expect symmetric child/parent pointers",
-                                                    xo::pp::xtag("i", i_node),
-                                                    xo::pp::xtag("node[i]", x),
-                                                    xo::pp::xtag("key[i]", x->key()),
-                                                    xo::pp::xtag("child", x->right_child()),
-                                                    xo::pp::xtag("child.key", x->right_child()->key()),
-                                                    xo::pp::xtag("child.parent", x->right_child()->parent()),
-                                                    xo::pp::xtag("child.parent._is_forwarded", x->right_child()->parent()->_is_forwarded())
+                                               tostr0(c_self, ": expect symmetric child/parent pointers",
+                                                    xtag("i", i_node),
+                                                    xtag("node[i]", x),
+                                                    xtag("key[i]", x->key()),
+                                                    xtag("child", x->right_child()),
+                                                    xtag("child.key", x->right_child()->key()),
+                                                    xtag("child.parent", x->right_child()->parent()),
+                                                    xtag("child.parent._is_forwarded", x->right_child()->parent()->_is_forwarded())
                                                     ));
                                 }
 
@@ -1830,12 +1832,12 @@ namespace xo {
                                         black_height = bd;
                                     } else {
                                         XO_EXPECT_(black_height == bd,
-                                                  xo::pp::tostr(c_self,
+                                                  tostr0(c_self,
                                                         ": expect all RB-tree nodes to have the same "
                                                         "black-height",
-                                                        xo::pp::xtag("i1", i_black_height), xo::pp::xtag("i2", i_node),
-                                                        xo::pp::xtag("blackheight(i1)", black_height),
-                                                        xo::pp::xtag("blackheight(i2)", bd)));
+                                                        xtag("i1", i_black_height), xtag("i2", i_node),
+                                                        xtag("blackheight(i1)", black_height),
+                                                        xtag("blackheight(i2)", bd)));
                                     }
                                 }
 
@@ -1852,25 +1854,25 @@ namespace xo {
 
                                 XO_EXPECT_(
                                     x->is_red_violation() == false,
-                                    xo::pp::tostr(c_self,
+                                    tostr0(c_self,
                                           (": expect RB-shape tree to have no red violations but "
                                               "red y is child of red x"),
-                                          xo::pp::xtag("i", i_node), xo::pp::xtag("x.addr", x),
-                                          xo::pp::xtag("x.col", ((x->color() == C_Black) ? "B" : "r")),
-                                          xo::pp::xtag("x.key", x->key()),
-                                          xo::pp::xtag("y.addr", red_child),
-                                          xo::pp::xtag("y.col", ((red_child->color() == C_Black) ? "B" : "r")),
-                                          xo::pp::xtag("y.key", red_child->key())));
+                                          xtag("i", i_node), xtag("x.addr", x),
+                                          xtag("x.col", ((x->color() == C_Black) ? "B" : "r")),
+                                          xtag("x.key", x->key()),
+                                          xtag("y.addr", red_child),
+                                          xtag("y.col", ((red_child->color() == C_Black) ? "B" : "r")),
+                                          xtag("y.key", red_child->key())));
 
                                 /* RB5.  inorder traversal visits nodes in strictly increasing key order */
 
                                 if (last_key) {
                                     XO_EXPECT_((*last_key) < x->key(),
-                                              xo::pp::tostr(c_self,
+                                              tostr0(c_self,
                                                     ": expect inorder traversal to visit keys"
                                                     " in strictly increasing order",
-                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("key[i-1]", *last_key),
-                                                    xo::pp::xtag("key[i]", x->key())));
+                                                    xtag("i", i_node), xtag("key[i-1]", *last_key),
+                                                    xtag("key[i]", x->key())));
                                 }
 
                                 last_key = &(x->key());
@@ -1881,12 +1883,12 @@ namespace xo {
                                 XO_EXPECT_(x->size() == (tree_size(x->left_child())
                                                         + 1
                                                         + tree_size(x->right_child())),
-                                          xo::pp::tostr(c_self,
+                                          tostr0(c_self,
                                                 ": expect Node::size to be 1 + sum of childrens' size",
-                                                xo::pp::xtag("i", i_node),
-                                                xo::pp::xtag("key[i]", x->key()),
-                                                xo::pp::xtag("left.size", tree_size(x->left_child())),
-                                                xo::pp::xtag("right.size", tree_size(x->right_child()))));
+                                                xtag("i", i_node),
+                                                xtag("key[i]", x->key()),
+                                                xtag("left.size", tree_size(x->left_child())),
+                                                xtag("right.size", tree_size(x->right_child()))));
 
                                 /* RB7. Node::reduced reports the value of
                                  *       f(f(L, Node::value), R)
@@ -1898,19 +1900,19 @@ namespace xo {
 
                                 XO_EXPECT_(reduce_fn.is_equal
                                           (x->reduced1(), reduced_pair.first),
-                                          xo::pp::tostr(c_self,
+                                          tostr0(c_self,
                                                 ": expect Node::reduced to be reduce_fn"
                                                 " applied to (.L, .value)",
-                                                xo::pp::xtag("node.reduced1", x->reduced1()),
-                                                xo::pp::xtag("reduced_pair.first", reduced_pair.first)));
+                                                xtag("node.reduced1", x->reduced1()),
+                                                xtag("reduced_pair.first", reduced_pair.first)));
 
                                 XO_EXPECT_(reduce_fn.is_equal
                                           (x->reduced2(), reduced_pair.second),
-                                          xo::pp::tostr(c_self,
+                                          tostr0(c_self,
                                                 ": expect Node::reduced to be reduce_fn"
                                                 " applied to (.L, .value, .R)",
-                                                xo::pp::xtag("node.reduced2", x->reduced2()),
-                                                xo::pp::xtag("reduce2_expr", reduced_pair.second)));
+                                                xtag("node.reduced2", x->reduced2()),
+                                                xtag("reduce2_expr", reduced_pair.second)));
 
                                 ++i_node;
                             };
@@ -1924,9 +1926,9 @@ namespace xo {
                         std::size_t subtree_z = N ? N->size() : 0ul;
 
                         XO_EXPECT_(i_node == subtree_z,
-                                  xo::pp::tostr(c_self, ": expect visit count = node.size",
-                                        xo::pp::xtag("visit_count", i_node),
-                                        xo::pp::xtag("node.size", 0)));
+                                  tostr0(c_self, ": expect visit count = node.size",
+                                        xtag("visit_count", i_node),
+                                        xtag("node.size", 0)));
 
                         return i_node;
                     } /*verify_subtree_ok*/
@@ -1936,20 +1938,22 @@ namespace xo {
                  **/
                 static void display_aux(Direction side, RbNode const *N, uint32_t d,
                                         xo::pp::scope *p_scope) {
-                    
+
+                    using xo::pp::xtag;
+
                     if (N) {
                         p_scope->log(xo::pp::pad(d),
-                                     xo::pp::xtag("addr", N),
-                                     xo::pp::xtag("par", N->parent()),
-                                     xo::pp::xtag("side", ((side == D_Left)    ? "L"
+                                     xtag("addr", N),
+                                     xtag("par", N->parent()),
+                                     xtag("side", ((side == D_Left)    ? "L"
                                                       : (side == D_Right) ? "R"
                                                       : "root")),
-                                     xo::pp::xtag("col", (N->is_black() ? "B" : "r")),
-                                     xo::pp::xtag("key", N->key()),
-                                     xo::pp::xtag("value", N->value()),
-                                     xo::pp::xtag("wt", N->size()),
-                                     xo::pp::xtag("reduced1", N->reduced1()),
-                                     xo::pp::xtag("reduced2", N->reduced2()));
+                                     xtag("col", (N->is_black() ? "B" : "r")),
+                                     xtag("key", N->key()),
+                                     xtag("value", N->value()),
+                                     xtag("wt", N->size()),
+                                     xtag("reduced1", N->reduced1()),
+                                     xtag("reduced2", N->reduced2()));
                         display_aux(D_Left, N->left_child(), d + 1, p_scope);
                         display_aux(D_Right, N->right_child(), d + 1, p_scope);
                     }

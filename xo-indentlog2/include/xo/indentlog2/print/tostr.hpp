@@ -9,8 +9,9 @@
 
 #include "LogStreambuf.hpp"
 #include "LogBuffer.hpp"
-#include <xo/arena/TempArena.hpp>
+#include "TempArena.hpp"
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pretty_ostream.hpp> /* pretty() + <ostream> for operator<< fallback */
 #include <xo/reflectutil/typeseq.hpp>
 #include <algorithm> // for std::min
 #include <string>
@@ -51,14 +52,14 @@ namespace xo::pp {
         // TempReset reset;
         DArena & arena{TempArena::local()};
         ArenaReset reset{arena};
-        LogBufferAdapter buf{arena};
+        LogBufferAdapter buf{arena, false /*debug_flag*/};
         LogStreambuf logbuf{&buf};
-        //ostream ss{&sbuf};
         FlatSink sink{&logbuf};
 
         (sink.pp(args), ...);
 
-        auto retval = sbuf.str();
+        auto span = buf.used_span();
+        auto retval = std::string(span.lo(), span.hi());
 
         return retval;
     }

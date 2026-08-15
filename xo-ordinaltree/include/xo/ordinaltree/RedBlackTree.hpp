@@ -24,7 +24,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header
@@ -620,17 +620,17 @@ namespace xo {
 
                 /* RB0. */
                 if (root_ == nullptr) {
-                    XO_EXPECT_(size_ == 0, xo::pp::tostr(c_self, ": expect .size=0 with null root",
+                    XO_EXPECT_(size_ == 0, xo::pp::tostr0(c_self, ": expect .size=0 with null root",
                                                 xo::pp::xtag("size", size_)));
                 }
 
                 /* RB1. */
                 if (root_ != nullptr) {
                     XO_EXPECT_(root_->parent() == nullptr,
-                              xo::pp::tostr(c_self, ": expect root->parent=nullptr",
+                              xo::pp::tostr0(c_self, ": expect root->parent=nullptr",
                                     xo::pp::xtag("parent", root_->parent())));
                     XO_EXPECT_(root_->size() == this->size_,
-                              xo::pp::tostr(c_self, ": expect self.size=root.size",
+                              xo::pp::tostr0(c_self, ": expect self.size=root.size",
                                     xo::pp::xtag("self.size", size_),
                                     xo::pp::xtag("root.size", root_->size())));
                 }
@@ -646,7 +646,7 @@ namespace xo {
 
                 /* RB8. RedBlackTree.size() equals #of nodes in tree */
                 XO_EXPECT_(n_node == this->size_,
-                          xo::pp::tostr(c_self, ": expect self.size={#of nodes n in tree}",
+                          xo::pp::tostr0(c_self, ": expect self.size={#of nodes n in tree}",
                                 xo::pp::xtag("self.size", size_),
                                 xo::pp::xtag("n", n_node)));
 

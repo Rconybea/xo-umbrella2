@@ -12,7 +12,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <cassert>
 
 namespace xo {
@@ -261,7 +261,7 @@ namespace xo {
                                          input_state_type & input_state_ref) -> result_type
         {
             using xo::pp::scope;
-            using xo::pp::tostr;
+            using xo::pp::tostr0;
             using xo::pp::xtag;
 
             /* literal|pretty|streamlined */
@@ -557,8 +557,8 @@ namespace xo {
                          input_state_ref);
                 }
 
-                log && log(tostr("tokenizer::assemble_token",
-                                 xtag("tk_text", tk_text)));
+                log && log(tostr0("tokenizer::assemble_token",
+                                  xtag("tk_text", tk_text)));
 
                 break;
             }

@@ -7,7 +7,7 @@
 
 #include "tokentype.hpp"
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 /* print() streams tags to an ostream */
 #include <xo/ppsink/tag_ostream.hpp>
 #include <cstdint>
@@ -213,14 +213,14 @@ namespace xo {
         template <typename CharT>
         bool
         token<CharT>::bool_value() const {
-            using xo::pp::tostr;
+            using xo::pp::tostr0;
             using xo::pp::xtag;
 
             if (tk_type_ != tokentype::tk_bool) {
                 throw (std::runtime_error
-                       (tostr("token::bool_value",
-                              ": token with type tk found where tk_bool expected",
-                              xtag("tk", tk_type_))));
+                       (tostr0("token::bool_value",
+                               ": token with type tk found where tk_bool expected",
+                               xtag("tk", tk_type_))));
             }
 
             if (text_ == "true")
@@ -229,9 +229,9 @@ namespace xo {
                 return false;
 
             throw (std::runtime_error
-                   (tostr("token::bool_value",
-                          ": unexpected input string tk_bool token",
-                          xtag("text", text_))));
+                   (tostr0("token::bool_value",
+                           ": unexpected input string tk_bool token",
+                           xtag("text", text_))));
 
             return false;
         }
@@ -239,20 +239,20 @@ namespace xo {
         template <typename CharT>
         std::int64_t
         token<CharT>::i64_value() const {
-            using xo::pp::tostr;
+            using xo::pp::tostr0;
             using xo::pp::xtag;
 
             if (tk_type_ != tokentype::tk_i64) {
                 throw (std::runtime_error
-                       (tostr("token::i64_value",
-                              ": token with type tk found where tk_i64 expected",
-                              xtag("tk", tk_type_))));
+                       (tostr0("token::i64_value",
+                               ": token with type tk found where tk_i64 expected",
+                               xtag("tk", tk_type_))));
             }
 
             if (text_.empty()) {
                 throw (std::runtime_error
-                       (tostr("token::i64_value",
-                              ": unexpected empty input string for tk_i64 token")));
+                       (tostr0("token::i64_value",
+                               ": unexpected empty input string for tk_i64 token")));
             }
 
             int sign = 1;
@@ -272,9 +272,9 @@ namespace xo {
 
                 if (ix == end_ix) {
                     throw (std::runtime_error
-                           (tostr("token::i64_value",
-                                  ": input text found where at least one digit expected",
-                                  xtag("text", text_))));
+                           (tostr0("token::i64_value",
+                                   ": input text found where at least one digit expected",
+                                   xtag("text", text_))));
                 }
 
                 for (; ix != end_ix; ++ix) {
@@ -285,7 +285,7 @@ namespace xo {
                         value += (ch - '0');
                     } else {
                         throw (std::runtime_error
-                               (tostr("token::i64_value",
+                               (tostr0("token::i64_value",
                                       ": unexpected char ch in integer token",
                                       xtag("ch", ch))));
                     }
@@ -298,20 +298,20 @@ namespace xo {
         template <typename CharT>
         double
         token<CharT>::f64_value() const {
-            using xo::pp::tostr;
+            using xo::pp::tostr0;
             using xo::pp::xtag;
 
             if (tk_type_ != tokentype::tk_f64) {
                 throw (std::runtime_error
-                       (tostr("token::f64_value",
-                              ": token with type tk found where tk_f64 expected",
+                       (tostr0("token::f64_value",
+                               ": token with type tk found where tk_f64 expected",
                               xtag("tk", tk_type_))));
             }
 
             if (text_.empty()) {
                 throw (std::runtime_error
-                       (tostr("token::f64_value",
-                              ": unexpected empty input string for tk_f64 token")));
+                       (tostr0("token::f64_value",
+                               ": unexpected empty input string for tk_f64 token")));
             }
 
             int sign = 1;
@@ -345,9 +345,9 @@ namespace xo {
 
                 if (ix == end_ix) {
                     throw (std::runtime_error
-                           (tostr("token::f64_value",
-                                  ": input text found where at least one digit expected",
-                                  xtag("text", text_))));
+                           (tostr0("token::f64_value",
+                                   ": input text found where at least one digit expected",
+                                   xtag("text", text_))));
                 }
 
                 /* true iff decimal point '.' present in mantissa */
@@ -368,9 +368,9 @@ namespace xo {
                     if (ch == '.') {
                         if (have_decimal_point) {
                             throw (std::runtime_error
-                                   (tostr("token::f64_value",
-                                          ": input text found where at most one decimal point expected",
-                                          xtag("text", text_))));
+                                   (tostr0("token::f64_value",
+                                           ": input text found where at most one decimal point expected",
+                                           xtag("text", text_))));
                         }
 
                         have_decimal_point = true;
@@ -384,7 +384,7 @@ namespace xo {
                         break; // done with mantissa
                     } else {
                         throw (std::runtime_error
-                               (tostr("token::i64_value",
+                               (tostr0("token::i64_value",
                                       ": unexpected char ch in integer token",
                                       xtag("ch", ch))));
                     }
@@ -401,9 +401,9 @@ namespace xo {
 
                     if (ix == end_ix) {
                         throw (std::runtime_error
-                               (tostr("token::f64_value",
-                                      ": on input text, expect at least one digit following exponent marker e|E",
-                                      xtag("text", text_))));
+                               (tostr0("token::f64_value",
+                                       ": on input text, expect at least one digit following exponent marker e|E",
+                                       xtag("text", text_))));
                     }
 
                     CharT ch = *ix;
@@ -423,10 +423,10 @@ namespace xo {
                             exponent += (ch - '0');
                         } else {
                             throw (std::runtime_error
-                                   (tostr("token::f64_value",
-                                          "; on input text, expect only digits following"
-                                          " (possibly signed) exponenct marker",
-                                          xtag("text", text_))));
+                                   (tostr0("token::f64_value",
+                                           "; on input text, expect only digits following"
+                                           " (possibly signed) exponenct marker",
+                                           xtag("text", text_))));
                         }
                     }
                 }

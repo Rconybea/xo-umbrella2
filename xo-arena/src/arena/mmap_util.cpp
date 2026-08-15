@@ -8,7 +8,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <cassert>
 #include <stdexcept>
 #include <sys/mman.h> // for mmap
@@ -17,7 +17,7 @@ namespace xo {
     /* the ppsink logging vocabulary, for use below */
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     namespace mm {
         auto
@@ -63,8 +63,8 @@ namespace xo {
             // 3. assess mmap success
             {
                 if (base == MAP_FAILED) {
-                    throw std::runtime_error(tostr("ArenaAlloc: uncommitted allocation failed",
-                                                   xtag("size", req_z)));
+                    throw std::runtime_error(tostr0("ArenaAlloc: uncommitted allocation failed",
+                                                    xtag("size", req_z)));
                 }
 
                 assert((size_t)aligned_base % align_z == 0);

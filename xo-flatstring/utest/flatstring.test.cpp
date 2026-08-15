@@ -6,7 +6,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp> /* Catch2 INFO() streams tags to an ostream */
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <catch2/catch.hpp>
 #include <cstring> /* ::strlen, ::strncmp -- previously arrived transitively via indentlog */
 #include <type_traits>
@@ -20,7 +20,7 @@ namespace xo {
      * using-declarations are unambiguous here.
      */
     using xo::pp::scope;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
 
     namespace ut {
@@ -156,7 +156,7 @@ namespace xo {
         void
         flatstring_assign_tests(const String1 & str, const char * text,
                                 const String2 & str2, const char * text2) {
-            INFO(tostr(XTAG_(str), XTAG_(text), XTAG_(text2)));
+            INFO(tostr0(XTAG_(str), XTAG_(text), XTAG_(text2)));
 
             String1 str_copy;
 
@@ -167,7 +167,7 @@ namespace xo {
             {
                 str_copy.assign(text2);
 
-                INFO(tostr(XTAG_(str_copy), XTAG_(text2)));
+                INFO(tostr0(XTAG_(str_copy), XTAG_(text2)));
 
                 REQUIRE(::strncmp(str_copy.c_str(), text2,
                                   std::min(::strlen(text2)+1, str_copy.capacity())) == 0);
@@ -182,7 +182,7 @@ namespace xo {
 
                 str_copy.assign(text2, prefix);
 
-                INFO(tostr(XTAG_(prefix), XTAG_(str_copy), XTAG_(text2)));
+                INFO(tostr0(XTAG_(prefix), XTAG_(str_copy), XTAG_(text2)));
 
                 if (prefix == 0) {
                     REQUIRE(str_copy.empty());
@@ -197,12 +197,12 @@ namespace xo {
             String2 text2_copy;
             text2_copy.assign(text2);
 
-            INFO(tostr(XTAG_(text2_copy)));
+            INFO(tostr0(XTAG_(text2_copy)));
 
             for (size_t i = 0, n = text2_copy.size(); i < n; ++i) {
                 /* deliberately letting j extend beyond the end of text2_copy */
                 for (size_t j = i; j < n+10; ++j) {
-                    INFO(tostr(XTAG_(n), XTAG_(i), XTAG_(j)));
+                    INFO(tostr0(XTAG_(n), XTAG_(i), XTAG_(j)));
 
                     str_copy.assign(str);
 
@@ -210,7 +210,7 @@ namespace xo {
 
                     str_copy.assign(text2_copy, i, j-i);
 
-                    INFO(tostr(XTAG_(str_copy.fixed_capacity), XTAG_(str_copy)));
+                    INFO(tostr0(XTAG_(str_copy.fixed_capacity), XTAG_(str_copy)));
 
                     REQUIRE(str_copy.size() == std::min(j-i,
                                                         std::min(text2_copy.size()-i,
@@ -267,7 +267,7 @@ namespace xo {
         template <typename String>
         void
         flatstring_runtime_tests(const String & str, const char * text) {
-            INFO(tostr(XTAG_(str), XTAG_(text)));
+            INFO(tostr0(XTAG_(str), XTAG_(text)));
 
             REQUIRE(str.fixed_capacity == strlen(text)+1);
             REQUIRE(str.capacity() == strlen(text));

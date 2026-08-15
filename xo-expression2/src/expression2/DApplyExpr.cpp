@@ -11,7 +11,7 @@
 #include <xo/ppsink/concat.hpp>         /* concat("arg", n) for generated names */
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.struct_open(..), struct_scope */
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     /* the ppsink printing vocabulary, for the exception messages below.
@@ -19,7 +19,7 @@ namespace xo {
      * <xo/indentlog/print/pretty.hpp>, which phase E removed with the
      * pretty_deprecated body that needed it.
      */
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
 
     using xo::print::APrintable;
@@ -88,8 +88,8 @@ namespace xo {
             } else {
                 assert(false);
 
-                throw std::runtime_error(tostr("assign out-of-range argument i_arg where [0..n_args) expected",
-                                               xtag("i_arg", i_arg),
+                throw std::runtime_error(tostr0("assign out-of-range argument i_arg where [0..n_args) expected",
+                                                xtag("i_arg", i_arg),
                                                xtag("expr", expr),
                                                xtag("n_args", n_args_)));
 
@@ -100,7 +100,7 @@ namespace xo {
         DApplyExpr::arg(size_type i) const
         {
             if (i >= n_args_) [[unlikely]] {
-                throw std::runtime_error(tostr("attempt to fetch argument i where [0..n) expected",
+                throw std::runtime_error(tostr0("attempt to fetch argument i where [0..n) expected",
                                                xtag("i", i),
                                                xtag("n", n_args_),
                                                xtag("src", "DApplyExpr::arg")));

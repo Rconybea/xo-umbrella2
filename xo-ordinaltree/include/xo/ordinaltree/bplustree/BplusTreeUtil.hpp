@@ -9,7 +9,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <memory> // for std::unique_ptr
 #include <string>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header
@@ -163,7 +163,7 @@ namespace xo {
                             }
 
                             if (i == n) {
-                                throw std::runtime_error(xo::pp::tostr("BplusTree::find_ith: internal index failure",
+                                throw std::runtime_error(xo::pp::tostr0("BplusTree::find_ith: internal index failure",
                                                                xo::pp::xtag("i_tree", i_tree),
                                                                xo::pp::xtag("last_z", z),
                                                                xo::pp::xtag("n", internal_node->n_elt()),
@@ -176,7 +176,7 @@ namespace xo {
                     ++iter;
                 } /*loop over descending internal node path*/
 
-                throw std::runtime_error(xo::pp::tostr("BplusTree::find_ith: internal loop failure",
+                throw std::runtime_error(xo::pp::tostr0("BplusTree::find_ith: internal loop failure",
                                                xo::pp::xtag("iter", iter)));
 
                 /* impossible! */

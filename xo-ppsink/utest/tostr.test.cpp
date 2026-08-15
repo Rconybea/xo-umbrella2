@@ -1,25 +1,24 @@
 /** @file tostr.test.cpp
  *
- *  exercise xo::pp::tostr (from xo/ppsink/tostr.hpp) -- the flat, FlatSink-over-
- *  stringstream string builder that replaces legacy xo::tostr.
+ *  exercise xo::pp::tostr0 (from xo/ppsink/tostr0.hpp)
  **/
 
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <catch2/catch.hpp>
 #include <string>
 
 namespace ut {
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     TEST_CASE("tostr-basic", "[tostr]") {
-        REQUIRE(tostr() == "");                       /* empty pack */
-        REQUIRE(tostr("hello") == "hello");           /* single string leaf */
-        REQUIRE(tostr("a", "b", "c") == "abc");       /* concatenation, no separator */
+        REQUIRE(tostr0() == "");                       /* empty pack */
+        REQUIRE(tostr0("hello") == "hello");           /* single string leaf */
+        REQUIRE(tostr0("a", "b", "c") == "abc");       /* concatenation, no separator */
     }
 
     TEST_CASE("tostr-mixed", "[tostr]") {
-        REQUIRE(tostr("x=", 42) == "x=42");           /* string + int (Prettifier<int>) */
-        REQUIRE(tostr(1, 2, 3) == "123");
+        REQUIRE(tostr0("x=", 42) == "x=42");           /* string + int (Prettifier<int>) */
+        REQUIRE(tostr0(1, 2, 3) == "123");
     }
 
     /* a type with an operator<< and no Prettifier<> -- the only way left to
@@ -37,7 +36,7 @@ namespace ut {
     TEST_CASE("tostr-fallback", "[tostr]") {
         static_assert(!xo::pp::has_prettifier<FallbackOnly_TostrTest>);
 
-        REQUIRE(tostr("v=", FallbackOnly_TostrTest{3}) == "v=F(3)");
+        REQUIRE(tostr0("v=", FallbackOnly_TostrTest{3}) == "v=F(3)");
     }
 
     TEST_CASE("tostr-double", "[tostr]") {
@@ -46,7 +45,7 @@ namespace ut {
          */
         static_assert(xo::pp::has_prettifier<double>);
 
-        REQUIRE(tostr("v=", 2.5) == "v=2.5");
+        REQUIRE(tostr0("v=", 2.5) == "v=2.5");
     }
 } /*namespace ut*/
 

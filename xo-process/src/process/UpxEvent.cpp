@@ -5,11 +5,11 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     using xo::reflect::StructReflector;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
 
     namespace process {
@@ -38,7 +38,7 @@ namespace xo {
 
         std::string
         UpxEvent::display_string() const {
-            return tostr(*this);
+            return tostr0(*this);
         } /*display_string*/
 
     } /*namespace process*/

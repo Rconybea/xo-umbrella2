@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GenericNode.hpp"
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
@@ -443,14 +443,14 @@ namespace xo {
 
             if (this->n_elt_ >= this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("InternalNode::insert_node: node already full",
+                throw std::runtime_error(xo::pp::tostr0("InternalNode::insert_node: node already full",
                                                xo::pp::xtag("node.n_elt", this->n_elt()),
                                                xo::pp::xtag("branching_factor", this->branching_factor())));
             }
 
             if (ix > this->n_elt_) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("InternalNode::insert_node: insert position out of range",
+                throw std::runtime_error(xo::pp::tostr0("InternalNode::insert_node: insert position out of range",
                                                xo::pp::xtag("ix", ix),
                                                xo::pp::xtag("node.n_elt", this->n_elt()),
                                                xo::pp::xtag("bf", this->branching_factor())));
@@ -490,7 +490,7 @@ namespace xo {
 
             if (ix >= this->n_elt_) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("InternalNode::remove_node: target position out of range",
+                throw std::runtime_error(xo::pp::tostr0("InternalNode::remove_node: target position out of range",
                                                xo::pp::xtag("ix", ix),
                                                xo::pp::xtag("node.n_elt", this->n_elt()),
                                                xo::pp::xtag("bf", this->branching_factor())));
@@ -534,7 +534,7 @@ namespace xo {
 
             if (this->n_elt() + n > this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("InternalNode.prepend_from_lh_sibling: expected combined #elt <= bf",
+                throw std::runtime_error(xo::pp::tostr0("InternalNode.prepend_from_lh_sibling: expected combined #elt <= bf",
                                                xo::pp::xtag("self.n_elt", this->n_elt()),
                                                xo::pp::xtag("n", n),
                                                xo::pp::xtag("bf", this->branching_factor())));
@@ -583,7 +583,7 @@ namespace xo {
 
             if (this->n_elt() + n > this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("InternalNode.append_from_rh_sibling: expected combined #elt <= bf",
+                throw std::runtime_error(xo::pp::tostr0("InternalNode.append_from_rh_sibling: expected combined #elt <= bf",
                                                xo::pp::xtag("self.n_elt", this->n_elt()),
                                                xo::pp::xtag("n", n),
                                                xo::pp::xtag("bf", this->branching_factor())));
@@ -635,7 +635,7 @@ namespace xo {
 
             /* verify immediate parent pointer is correct */
             if (this->parent() != parent) {
-                throw std::runtime_error(xo::pp::tostr("InternalNode::verify_helper"
+                throw std::runtime_error(xo::pp::tostr0("InternalNode::verify_helper"
                                                ": expected parent pointer to refer to actual parent",
                                                xo::pp::xtag("stored_parent", this->parent()),
                                                xo::pp::xtag("actual_parent", parent)));
@@ -656,7 +656,7 @@ namespace xo {
                 NodeType i_nodetype = this->lookup_elt(i).child()->node_type();
 
                 if ((i > 0) && (i_nodetype != target_child_node_type)) {
-                    throw std::runtime_error(xo::pp::tostr("InternalNode::verify_helper"
+                    throw std::runtime_error(xo::pp::tostr0("InternalNode::verify_helper"
                                                    ": expected all children to share the same node type",
                                                    xo::pp::xtag("i", i),
                                                    xo::pp::xtag("elt[0].node_type", target_child_node_type),
@@ -692,7 +692,7 @@ namespace xo {
                 std::size_t self_z = BplusTreeUtil<Key, Value, Properties>::get_node_size(this);
 
                 if (sum_z != self_z) {
-                    throw std::runtime_error(xo::pp::tostr("InternalNode::verify_helper",
+                    throw std::runtime_error(xo::pp::tostr0("InternalNode::verify_helper",
                                                    ": inconsistent subtree size",
                                                    xo::pp::xtag("node", this),
                                                    xo::pp::xtag("treez[stored]", self_z),
@@ -715,7 +715,7 @@ namespace xo {
                 if (prev.key() < elt.key()) {
                     ;
                 } else {
-                    throw std::runtime_error(xo::pp::tostr("InternalNode::verify_helper"
+                    throw std::runtime_error(xo::pp::tostr0("InternalNode::verify_helper"
                                                    ": expected local keys in strictly increasing order",
                                                    xo::pp::xtag("i", i),
                                                    xo::pp::xtag("key(i-1)", prev.key()),
@@ -728,7 +728,7 @@ namespace xo {
                 if (this->lookup_elt(n-1).key() < lub_key) {
                     ;
                 } else {
-                    throw std::runtime_error(xo::pp::tostr("InternalNode::verify_helper"
+                    throw std::runtime_error(xo::pp::tostr0("InternalNode::verify_helper"
                                                    ": expected highest local key before parent-supplied lub key",
                                                    xo::pp::xtag("n", n),
                                                    xo::pp::xtag("key(n-1)", this->lookup_elt(n-1).key()),

@@ -8,26 +8,17 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
-// #include "formal_arg.hpp"
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/expression/Variable.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
 #include <stdexcept>
 #include <xo/ppsink/pretty_struct.hpp>
-//#include "define_xs.hpp"
-//#include "progress_xs.hpp"
-//#include "paren_xs.hpp"
-//#include "expect_expr_xs.hpp"
-//#include "xo/expression/Constant.hpp"
-//#include "xo/reflect/Reflect.hpp"
 
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::scope;
-    //using xo::scm::Constant;
-    //using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
 
     namespace scm {
@@ -142,7 +133,7 @@ namespace xo {
             constexpr const char * c_self_name = "exprstate::on_formal";
             const char * exp = this->get_expect_str();
 
-            std::string errmsg = tostr("unexpected formal-arg for parsing state",
+            std::string errmsg = tostr0("unexpected formal-arg for parsing state",
                                        xtag("expecting", exp),
                                        xtag("formal", formal),
                                        xtag("state", this->exs_type()));
@@ -165,7 +156,7 @@ namespace xo {
             constexpr const char * c_self_name = "exprstate::on_formal_arglist";
             const char * exp = get_expect_str();
 
-            std::string errmsg = tostr("unexpected formal-arglist for parsing state",
+            std::string errmsg = tostr0("unexpected formal-arglist for parsing state",
                                        xtag("expecting", exp),
                                        xtag("argl", argl),
                                        xtag("state", this->exs_type()));
@@ -603,7 +594,7 @@ namespace xo {
                                        const token_type & tk) const
         {
             throw std::runtime_error
-                (tostr(self_name,
+                (tostr0(self_name,
                        ": unexpected input token for parsing state",
                        xtag("token", tk),
                        xtag("state", *this)));
@@ -615,7 +606,7 @@ namespace xo {
                                         const char * expect_str,
                                         parserstatemachine * p_psm) const
         {
-            std::string errmsg = tostr("unexpected expression for parsing state",
+            std::string errmsg = tostr0("unexpected expression for parsing state",
                                        xtag("expecting", expect_str),
                                        xtag("expr", expr),
                                        xtag("state", this->exs_type()));
@@ -629,7 +620,7 @@ namespace xo {
                                           const char * expect_str,
                                           parserstatemachine * p_psm) const
         {
-            std::string errmsg = tostr("exprstate::illegal_input_on_token: unexpected token for parsing state",
+            std::string errmsg = tostr0("exprstate::illegal_input_on_token: unexpected token for parsing state",
                                        xtag("expecting", expect_str),
                                        xtag("token", tk.tk_type()),
                                        xtag("text", tk.text()),
@@ -644,7 +635,7 @@ namespace xo {
                                            const char * expect_str,
                                            parserstatemachine * p_psm) const
         {
-            std::string errmsg = tostr("unexpected symbol",
+            std::string errmsg = tostr0("unexpected symbol",
                                        xtag("expecting", expect_str),
                                        xtag("symbol", symbol),
                                        xtag("state", this->exs_type()));
@@ -658,7 +649,7 @@ namespace xo {
                                          const char * expect_str,
                                          parserstatemachine * p_psm) const
         {
-            std::string errmsg = tostr("unexpected type",
+            std::string errmsg = tostr0("unexpected type",
                                        xtag("expecting", expect_str),
                                        xtag("type", td),
                                        xtag("state", this->exs_type()));
@@ -671,7 +662,7 @@ namespace xo {
                                           const token_type & tk,
                                           parserstatemachine * p_psm) const
         {
-            std::string errmsg = tostr("unknown variable name",
+            std::string errmsg = tostr0("unknown variable name",
                                        xtag("var", tk.text()));
 
             p_psm->on_error(self_name, std::move(errmsg));

@@ -5,11 +5,11 @@
 
 #include "number/GCObjectConversion_DInteger.hpp"
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     /* the ppsink printing vocabulary, for use below */
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
 
     using xo::mm::AGCObject;
@@ -33,7 +33,7 @@ namespace xo {
 
             if (!int_obj) {
                 throw std::runtime_error
-                    (tostr("Object obj found where Integer expected",
+                    (tostr0("Object obj found where Integer expected",
                            xtag("obj", gco)));
             }
 

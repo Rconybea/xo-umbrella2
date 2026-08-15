@@ -12,12 +12,12 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::scope;
     using xo::scm::Expression;
     using xo::scm::AssignExpr;
@@ -139,7 +139,7 @@ namespace xo {
                                       bp<Expression> expr2,
                                       parserstatemachine * p_psm) const
         {
-            std::string errmsg = tostr("incompatible argument types T1,T2 to op",
+            std::string errmsg = tostr0("incompatible argument types T1,T2 to op",
                                        xtag("op", op),
                                        xtag("T1", expr1->valuetype()),
                                        xtag("T2", expr2->valuetype()));
@@ -157,7 +157,7 @@ namespace xo {
             constexpr const char * c_self_name = "progress_xs::assemble_expr";
 
             if ((op_type_ != optype::invalid) && (rhs_.get() == nullptr)) {
-                std::string errmsg = tostr("expected expression on rhs of operator op",
+                std::string errmsg = tostr0("expected expression on rhs of operator op",
                                            xtag("lhs", lhs_),
                                            xtag("op", op_type_));
 
@@ -179,7 +179,7 @@ namespace xo {
 
                 if (!lhs) {
                     throw std::runtime_error
-                        (tostr("progress_xs::assemble_expr",
+                        (tostr0("progress_xs::assemble_expr",
                                " expect variable on lhs of assignment operator :=",
                                xtag("lhs", lhs_),
                                xtag("rhs", rhs_)));
@@ -425,7 +425,7 @@ namespace xo {
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
             if (xs_stack.empty()) {
-                throw std::runtime_error(tostr(self_name,
+                throw std::runtime_error(tostr0(self_name,
                                                ": expected non-empty parsing state"));
             }
 
@@ -578,7 +578,7 @@ namespace xo {
              std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
              if (xs_stack.empty()) {
-                 throw std::runtime_error(tostr(self_name,
+                 throw std::runtime_error(tostr0(self_name,
                                                 ": expected non-empty parsing stack"));
              }
 
@@ -754,7 +754,7 @@ namespace xo {
                 }
 
             } else {
-                throw std::runtime_error(tostr(c_self_name,
+                throw std::runtime_error(tostr0(c_self_name,
                                                ": expected expression following operator",
                                                xtag("tk", tk)));
             }

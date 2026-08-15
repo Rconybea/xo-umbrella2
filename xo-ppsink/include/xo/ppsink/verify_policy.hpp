@@ -13,7 +13,7 @@
 #pragma once
 
 #include "scope.hpp"
-#include "tostr.hpp"
+#include "tostr0.hpp"
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -44,11 +44,11 @@ namespace xo {
         template<typename... Tn>
         bool report_error(xo::pp::scope & log, Tn&&... args)
         {
-            using xo::pp::tostr;
+            using xo::pp::tostr0;
 
             if (!this->is_silent()) {
                 // TODO: consider global arena here for string
-                std::string msg = tostr(std::forward<Tn>(args)...);
+                std::string msg = tostr0(std::forward<Tn>(args)...);
 
                 if (this->log_flag()) {
                     log.retroactively_enable();

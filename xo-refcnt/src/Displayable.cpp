@@ -3,12 +3,12 @@
 #include "Displayable.hpp"
 
 namespace xo {
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     namespace ref {
         std::string
         Displayable::display_string() const {
-            return tostr(*this);
+            return tostr0(*this);
         } /*display_string*/
     } /*namespace ref*/
 } /*namespace xo*/

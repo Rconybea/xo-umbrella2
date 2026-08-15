@@ -25,13 +25,13 @@
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::scm::ParserConfig;
     using xo::scm::DSchematikaParser;
 
@@ -218,8 +218,8 @@ namespace xo {
             size_t n_tk = tk_v.size();
 
             for (const auto & tk : tk_v) {
-                INFO(tostr(xtag("i_tk", i_tk),
-                           xtag("tk", tk)));
+                INFO(tostr0(xtag("i_tk", i_tk),
+                            xtag("tk", tk)));
 
                 auto & result = fixture->parser_->on_token(tk);
 

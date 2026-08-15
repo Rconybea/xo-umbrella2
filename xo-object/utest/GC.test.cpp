@@ -13,7 +13,7 @@
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <unordered_set>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     using xo::obj::List;
@@ -31,7 +31,7 @@ namespace xo {
          * have not migrated) rather than shadowing it.
          */
         using xo::pp::scope;
-        using xo::pp::tostr;
+        using xo::pp::tostr0;
         using xo::pp::xtag;
 
 
@@ -274,7 +274,7 @@ namespace xo {
                 std::unordered_set<std::uintptr_t> visited_set;
 
                 for (std::size_t i = 0, n = from_model.roots_.size(); i < n; ++i) {
-                    INFO(tostr(xtag("i", i), xtag("n", n)));
+                    INFO(tostr0(xtag("i", i), xtag("n", n)));
 
                     REQUIRE(verify_equal_aux(from_model,
                                              from_model.roots_.at(i),
@@ -305,7 +305,7 @@ namespace xo {
                     std::size_t new_index = this->nodes_.size();
                     {
                         if (x_int.is_null() && x_list.is_null())
-                            throw std::runtime_error(tostr("expecting object graph containing int|cons|nil only", xtag("x", x)));
+                            throw std::runtime_error(tostr0("expecting object graph containing int|cons|nil only", xtag("x", x)));
 
                         if (!x_int.is_null()) {
                             new_model.index_ = new_index;

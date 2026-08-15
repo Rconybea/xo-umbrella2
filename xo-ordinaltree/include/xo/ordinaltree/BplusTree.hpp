@@ -29,7 +29,7 @@
 #include <iostream>
 #if __APPLE__ && __MACH__
 # include <sys/sysctl.h>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #endif
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
@@ -333,7 +333,7 @@ namespace xo {
 
                 if (z != this->n_element_) {
                     if (throw_flag) {
-                        std::string err = xo::pp::tostr("BplusTree::verify_ok"
+                        std::string err = xo::pp::tostr0("BplusTree::verify_ok"
                                                 ": bad key count",
                                                 xo::pp::xtag("expected", this->n_element_),
                                                 xo::pp::xtag("counted", z));
@@ -394,7 +394,7 @@ namespace xo {
             const_iterator find_ith(std::size_t i_tree) const {
 
                 if (i_tree >= this->size()) {
-                    throw std::runtime_error(xo::pp::tostr("BplusTree::find_ith: expected index i in range [0..n)",
+                    throw std::runtime_error(xo::pp::tostr0("BplusTree::find_ith: expected index i in range [0..n)",
                                                    xo::pp::xtag("i", i_tree),
                                                    xo::pp::xtag("n", this->size())));
                 }
@@ -408,7 +408,7 @@ namespace xo {
                 const_iterator ix = this->find(k);
 
                 if (ix == this->cend()) {
-                    throw std::out_of_range(xo::pp::tostr("BplusTree::at: expected key argument to appear in tree",
+                    throw std::out_of_range(xo::pp::tostr0("BplusTree::at: expected key argument to appear in tree",
                                                   xo::pp::xtag("key", k)));
                 }
 
@@ -604,7 +604,7 @@ namespace xo {
                     if (this->root_ != nullptr) {
                         if (this->size() != BplusTreeUtil<Key, Value, Properties>::get_node_size(this->root_.get())) {
                             if (throw_flag) {
-                                throw std::runtime_error(xo::pp::tostr("BplusTree::verify_helper"
+                                throw std::runtime_error(xo::pp::tostr0("BplusTree::verify_helper"
                                                                ": mismatched tree size computation",
                                                                xo::pp::xtag("root", this->root_.get()),
                                                                xo::pp::xtag("bptree.n_element", this->size()),
@@ -623,7 +623,7 @@ namespace xo {
                 if (this->root_ == nullptr) {
                     if (this->leafnode_begin_ != nullptr || this->leafnode_end_ != nullptr) {
                         if (throw_flag) {
-                            throw std::runtime_error(xo::pp::tostr("BplusTree::verify_helper"
+                            throw std::runtime_error(xo::pp::tostr0("BplusTree::verify_helper"
                                                            ": expected null .leafnode_begin / .leafnode_end pointers"
                                                            " with empty tree",
                                                            xo::pp::xtag("root", this->root_.get()),
@@ -643,7 +643,7 @@ namespace xo {
                         || (rightmost_fr.node() != this->leafnode_end_))
                     {
                         if (throw_flag) {
-                            throw std::runtime_error(xo::pp::tostr("BplusTree::verify_helper"
+                            throw std::runtime_error(xo::pp::tostr0("BplusTree::verify_helper"
                                                            ": expected .leafnode_begin / .leafnode_end pointers"
                                                            " to match computed first/last leaf nodes",
                                                            xo::pp::xtag("root", this->root_.get()),

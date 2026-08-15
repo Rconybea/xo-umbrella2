@@ -9,14 +9,14 @@
 #include <xo/jit/intrinsics.hpp>
 #include <pybind11/stl.h>
 #include <llvm/Config/llvm-config.h>
-/* tostr/xtag used below; they used to arrive via xo-jit's headers,
+/* tostr0/xtag used below; they used to arrive via xo-jit's headers,
  * which no longer pull in legacy xo-indentlog.
  */
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
     namespace jit {
         using xo::scm::Expression;
@@ -209,14 +209,14 @@ namespace xo {
                              auto factory = pycaller_store::instance()->lookup_prototype(prototype);
 
                              if (!factory) {
-                                 throw std::runtime_error(tostr("MachPipeline.lookup_fn: unknown function prototype p",
-                                                                xtag("p", prototype)));
+                                 throw std::runtime_error(tostr0("MachPipeline.lookup_fn: unknown function prototype p",
+                                                                 xtag("p", prototype)));
                              }
 
                              return (*factory)(fn_addr);
                          } else {
-                             throw std::runtime_error(tostr("MachPipeline.lookup_fn: lookup on symbol S failed",
-                                                            xtag("S", symbol)));
+                             throw std::runtime_error(tostr0("MachPipeline.lookup_fn: lookup on symbol S failed",
+                                                             xtag("S", symbol)));
                          }
                      },
                      py::arg("prototype"), py::arg("symbol"),

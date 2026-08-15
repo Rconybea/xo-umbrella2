@@ -8,13 +8,14 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::pp::scope;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+
     namespace ut {
         // rehearser copied from xo_tokenizer/utest/tokenizer.test.cpp
 

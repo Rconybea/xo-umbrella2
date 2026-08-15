@@ -144,6 +144,9 @@ namespace xo {
                 return String::copy(mm, x.c_str());
             }
             static std::string from_object(gc::IAlloc *, gp<Object> x) {
+                using xo::pp::tostr0;
+                using xo::pp::xtag;
+
                 /* NB qualified, not a using-declaration.  The argument type
                  * gp<Object> lives in namespace xo, so ADL adds legacy
                  * xo::xtag to the candidate set -- and ADL is not suppressed
@@ -161,8 +164,8 @@ namespace xo {
                     return std::string(x_str->c_str());
                 } else {
                     throw std::runtime_error
-                        (xo::pp::tostr("ObjectConversion_String"
-                               ": x found where string expected", xo::pp::xtag("x", x)));
+                        (tostr0("ObjectConversion_String"
+                                ": x found where string expected", xtag("x", x)));
                 }
 
             }

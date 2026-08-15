@@ -360,7 +360,7 @@ namespace utest {
             /* lookup keys in permutation order */
             std::uint32_t i = 1;
             for (std::uint32_t x : u) {
-                INFO(tostr(xtag("i", i), xtag("n", n), xtag("x", x)));
+                INFO(tostr0(xtag("i", i), xtag("n", n), xtag("x", x)));
 
                 auto find_ix = map.find(x);
 

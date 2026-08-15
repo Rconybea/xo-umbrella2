@@ -3,7 +3,7 @@
 #pragma once
 
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <xo/cxxutil/demangle.hpp>
 
 // #include <boost/intrusive_ptr.hpp>
@@ -100,11 +100,11 @@ namespace xo {
                     intrusive_ptr_add_ref(ptr_);
                     ; /* trivial aliasing,  proceed */
                 } else {
-                    using xo::pp::tostr;
+                    using xo::pp::tostr0;
                     using xo::pp::xtag;
-                    throw std::runtime_error(tostr("attempt to use aliasing ctor with",
-                                                   xtag("Y", reflect::type_name<Y>()),
-                                                   xtag("T", reflect::type_name<T>())));
+                    throw std::runtime_error(tostr0("attempt to use aliasing ctor with",
+                                                    xtag("Y", reflect::type_name<Y>()),
+                                                    xtag("T", reflect::type_name<T>())));
                 }
             } /*ctor*/
 

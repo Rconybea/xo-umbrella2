@@ -10,7 +10,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <catch2/catch.hpp>
 #include <map>
 
@@ -21,7 +21,7 @@ namespace utest {
      */
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     using xo::mm::AllocInfo;
     using xo::mm::DArena;
@@ -210,9 +210,9 @@ namespace utest {
                 }
 
                 for (AllocInfo info : range) {
-                    INFO(tostr(xtag("alloc_map.size", alloc_map.size()),
+                    INFO(tostr0(xtag("alloc_map.size", alloc_map.size()),
                                xtag("i_alloc", i_alloc)));
-                    INFO(tostr(xtag("payload.first", info.payload().first)));
+                    INFO(tostr0(xtag("payload.first", info.payload().first)));
 
                     const std::byte * alloc_lo = info.payload().first;
 

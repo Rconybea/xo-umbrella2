@@ -16,11 +16,11 @@
 #include <xo/facet/obj.hpp>
 //#include "xo/alloc/Blob.hpp"
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     /* ppsink printing vocabulary for the exception messages below */
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
 
     using xo::mm::AGCObject;
@@ -60,8 +60,8 @@ namespace xo {
 
                 if (!int_obj) {
                     throw std::runtime_error
-                        (tostr("Object obj found where Integer expected",
-                               xtag("obj", obj)));
+                        (tostr0("Object obj found where Integer expected",
+                                xtag("obj", obj)));
                 }
 
                 void * mem = mm.alloc(typeseq::id<T>(), sizeof(T));
@@ -100,8 +100,8 @@ namespace xo {
 
                 if (!float_obj) {
                     throw std::runtime_error
-                        (tostr("Object obj found where Float expected",
-                               xtag("obj", obj)));
+                        (tostr0("Object obj found where Float expected",
+                                xtag("obj", obj)));
                 }
 
                 void * mem = mm.alloc(typeseq::id<T>(), sizeof(T));
@@ -140,8 +140,8 @@ namespace xo {
 
                 if (!bool_obj) {
                     throw std::runtime_error
-                        (tostr("Object obj found where Boolean expected",
-                               xtag("obj", obj)));
+                        (tostr0("Object obj found where Boolean expected",
+                                xtag("obj", obj)));
                 }
 
                 return Reflect::make_tp(bool_obj.data()->value() ? &s_true : &s_false);
@@ -172,8 +172,8 @@ namespace xo {
 
                 if (!string_obj) {
                     throw std::runtime_error
-                        (tostr("Object obj founcd where String expected",
-                               xtag("obj", obj)));
+                        (tostr0("Object obj founcd where String expected",
+                                xtag("obj", obj)));
                 }
 
                 // still don't have impl for this
@@ -224,9 +224,9 @@ namespace xo {
             } else {
                 if (throw_flag) {
                     throw std::runtime_error
-                        (tostr("no to-object-converter available for instance of type",
-                               xtag("id", x_tp.td()->id()),
-                               xtag("name", x_tp.td()->short_name())));
+                        (tostr0("no to-object-converter available for instance of type",
+                                xtag("id", x_tp.td()->id()),
+                                xtag("name", x_tp.td()->short_name())));
                 }
 
                 return obj<AGCObject>();
@@ -246,8 +246,8 @@ namespace xo {
             } else {
                 if (throw_flag) {
                     throw std::runtime_error
-                        (tostr("no from-object-converter available for instance of type",
-                               xtag("id", target_id)));
+                        (tostr0("no from-object-converter available for instance of type",
+                                xtag("id", target_id)));
                 }
 
                 return TaggedPtr::universal_null();

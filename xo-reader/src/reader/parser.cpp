@@ -15,14 +15,14 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 // #include "xo/expression/LocalSymtab.hpp"
 // #include <regex>
 #include <stdexcept>
 
 namespace xo {
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::scope;
     using xo::scm::Expression;
     using xo::scm::LocalSymtab;
@@ -64,7 +64,7 @@ namespace xo {
             scope log(XO_DEBUG_(psm_.debug_flag()), xtag("tk", tk));
 
             if (psm_.xs_stack_.empty()) {
-                throw std::runtime_error(tostr("parser::include_token",
+                throw std::runtime_error(tostr0("parser::include_token",
                                                 ": parser not expecting input"
                                                "(call parser.begin_translation_unit()..?)",
                                                xtag("token", tk)));

@@ -12,7 +12,6 @@
  * legacy xo::xtag by ADL in any consumer that still sees xo-indentlog.
  */
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <llvm/IR/IRBuilder.h>
@@ -74,6 +73,7 @@ namespace xo {
             llvm::Type * llvm_type_ = nullptr;
         };
 
+        // TODO: move to activation_record_ostream.hpp; prefer PpSink-based infra
         inline std::ostream &
         operator<<(std::ostream & os, const runtime_binding_detail & x) {
             os << "<runtime_binding_detail"

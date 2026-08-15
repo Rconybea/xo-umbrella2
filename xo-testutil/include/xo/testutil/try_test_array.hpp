@@ -7,7 +7,7 @@
 
 #include "UtestRehearser.hpp"
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <catch2/catch.hpp>
 #include <cstddef>
 #include <vector>
@@ -18,14 +18,14 @@ namespace xo {
     void try_test_array(const std::vector<TestCase> & tc_v,
                         RehearseFn rehearse_fn)
     {
-        using xo::pp::tostr;
+        using xo::pp::tostr0;
         using xo::pp::xtag;
 
         for (size_t i_tc = 0, n_tc = tc_v.size(); i_tc < n_tc; ++i_tc)
         {
             const auto & tc = tc_v[i_tc];
 
-            INFO(tostr(xtag("i_tc", i_tc)));
+            INFO(tostr0(xtag("i_tc", i_tc)));
 
             UtestRehearser rh;
 

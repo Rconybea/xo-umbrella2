@@ -12,7 +12,8 @@
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
+
     namespace scm {
         rp<Apply>
         Apply::make(const rp<Expression> & fn,
@@ -23,10 +24,10 @@ namespace xo {
 
             if (!fn_valuetype->is_function()) {
                 throw std::runtime_error
-                    (tostr("Apply::make: found expression F in function position,"
-                           " with value-type FT where a function type expected",
-                           xtag("FT", fn_valuetype->short_name()),
-                           xtag("F", fn_valuetype)));
+                    (tostr0("Apply::make: found expression F in function position,"
+                            " with value-type FT where a function type expected",
+                            xtag("FT", fn_valuetype->short_name()),
+                            xtag("F", fn_valuetype)));
             }
 
             TypeDescr fn_retval_type = fn_valuetype->fn_retval();

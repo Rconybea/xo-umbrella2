@@ -153,7 +153,7 @@ namespace xo {
 
                         scope log(XO_DEBUG2_(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
 
-                        INFO(tostr(xtag("i_tc", i_tc), xtag("n", n)));
+                        INFO(tostr0(xtag("i_tc", i_tc), xtag("n", n)));
 
                         ok_flag = true; // unless contradicted below
 
@@ -436,7 +436,7 @@ namespace xo {
 
                         scope log(XO_DEBUG2_(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
 
-                        INFO(tostr(xtag("i_tc", i_tc), xtag("n", n)));
+                        INFO(tostr0(xtag("i_tc", i_tc), xtag("n", n)));
 
                         ok_flag = true; // unless contradicted below
 

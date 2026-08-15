@@ -24,10 +24,10 @@
 #include <xo/expression/Lambda.hpp>
 #include <xo/expression/PrimitiveExpr.hpp>
 #include <xo/expression/Variable.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
 #include <iostream>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"

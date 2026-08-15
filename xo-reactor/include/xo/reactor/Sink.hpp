@@ -81,6 +81,9 @@ namespace xo {
                     }
 
                     if (!native_sink) {
+                        using xo::pp::tostr0;
+                        using xo::pp::xtag;
+
 #ifdef DEBUG_EVENT_TYPEINFO
                         std::type_info const * sink_parent_typeinfo
                             = sink->parent_typeinfo();
@@ -88,21 +91,21 @@ namespace xo {
 
                         std::size_t src_hashcode = typeid(T).hash_code();
 
-                        throw std::runtime_error(xo::pp::tostr("Sink1<T>::require_native"
+                        throw std::runtime_error(tostr0("Sink1<T>::require_native"
                                                        ": wanted to sink S,  but sink expects T",
-                                                       xo::pp::xtag("caller", caller),
-                                                       xo::pp::xtag("T", sink->sink_ev_type()->canonical_name()),
-                                                       xo::pp::xtag("S", reflect::type_name<T>()),
-                                                       xo::pp::xtag("required_hashcode", typeid(Sink1<T>).hash_code()),
-                                                       xo::pp::xtag("required_name", typeid(Sink1<T>).name()),
-                                                       xo::pp::xtag("src_hashcode", src_hashcode),
-                                                       xo::pp::xtag("sink_hashcode", sink->sink_ev_type()->native_typeinfo()->hash_code())
+                                                       xtag("caller", caller),
+                                                       xtag("T", sink->sink_ev_type()->canonical_name()),
+                                                       xtag("S", reflect::type_name<T>()),
+                                                       xtag("required_hashcode", typeid(Sink1<T>).hash_code()),
+                                                       xtag("required_name", typeid(Sink1<T>).name()),
+                                                       xtag("src_hashcode", src_hashcode),
+                                                       xtag("sink_hashcode", sink->sink_ev_type()->native_typeinfo()->hash_code())
 #ifdef DEBUG_EVENT_TYPEINFO
-                                                       , xo::pp::xtag("sink_hashcode", sink->item_typeinfo()->hash_code())
-                                                       , xo::pp::xtag("sink_parent_hashcode", sink_parent_typeinfo->hash_code())
-                                                       , xo::pp::xtag("sink_parent_name", sink_parent_typeinfo->name())
-                                                       , xo::pp::xtag("sink.type", sink->self_typename())
-                                                       , xo::pp::xtag("sink.parent_type", sink->parent_typename())
+                                                       , xtag("sink_hashcode", sink->item_typeinfo()->hash_code())
+                                                       , xtag("sink_parent_hashcode", sink_parent_typeinfo->hash_code())
+                                                       , xtag("sink_parent_name", sink_parent_typeinfo->name())
+                                                       , xtag("sink.type", sink->self_typename())
+                                                       , xtag("sink.parent_type", sink->parent_typename())
 #endif
                                                      ));
                     }
@@ -128,16 +131,18 @@ namespace xo {
             } /*attach_source*/
 
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override {
+                using xo::pp::tostr0;
+                using xo::pp::xtag;
 
                 T * p_ev = ev_tp.recover_native<T>();
 
                 if (p_ev) {
                     this->notify_ev(*p_ev);
                 } else {
-                    throw std::runtime_error(xo::pp::tostr("Sink1<T>::notify_ev_tp"
-                                                   ": unable to convert ev_tp to T",
-                                                   xo::pp::xtag("ev_tp.type", ev_tp.td()->canonical_name()),
-                                                   xo::pp::xtag("T", reflect::type_name<T>())));
+                    throw std::runtime_error(tostr0("Sink1<T>::notify_ev_tp"
+                                                    ": unable to convert ev_tp to T",
+                                                    xtag("ev_tp.type", ev_tp.td()->canonical_name()),
+                                                    xtag("T", reflect::type_name<T>())));
                 }
             } /*notify_ev_tp*/
         }; /*Sink1*/

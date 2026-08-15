@@ -16,7 +16,7 @@ namespace xo {
         using streamsize = std::streamsize;
 
     public:
-        LogStreambuf(LogBuffer * logbuf);
+        LogStreambuf(LogBufferAdapter * logbuf);
 
         /** allocated buffer extned available to hold content (allocated + available) **/
         Span committed_span();
@@ -75,7 +75,7 @@ namespace xo {
 
     private:
         /** buffer storage **/
-        LogBuffer * logbuf_ = nullptr;
+        LogBufferAdapter * logbuf_ = nullptr;
     };
 } /*namespace xo*/
 

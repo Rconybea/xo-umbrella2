@@ -7,7 +7,7 @@
 
 namespace xo::mm {
     uint32_t
-    TempArena::s_cap = 0;
+    TempArena::s_cap = 4 * 1024;
 
     void
     TempArena::init(uint32_t cap)

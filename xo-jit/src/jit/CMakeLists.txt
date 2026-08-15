@@ -12,8 +12,7 @@ set(SELF_SRCS
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_dependency(${SELF_LIB} xo_expression)
-# activation_record.hpp names xo::pp::xtag in a public header, so this is PUBLIC.
-xo_dependency(${SELF_LIB} xo_ppsink)
+xo_dependency(${SELF_LIB} xo_indentlog2)
 
 # llvm {16,17} api will not build without some retro work
 find_package(LLVM 18.1 REQUIRED CONFIG)

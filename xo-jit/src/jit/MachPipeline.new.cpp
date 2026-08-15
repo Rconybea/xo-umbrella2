@@ -6,7 +6,7 @@
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::scm::exprtype;
     using xo::scm::Expression;
     using xo::scm::ConstantInterface;
@@ -1336,7 +1336,7 @@ namespace xo {
 
         std::string
         MachPipeline::display_string() const {
-            return tostr(*this);
+            return tostr0(*this);
         }
     } /*namespace jit*/
 } /*namespace xo*/

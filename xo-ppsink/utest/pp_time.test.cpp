@@ -5,7 +5,7 @@
 #include <xo/ppsink/pp_time_ostream.hpp>
 #include <xo/ppsink/pretty.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <catch2/catch.hpp>
 #include <chrono>
 #include <sstream>
@@ -120,7 +120,7 @@ namespace ut {
         REQUIRE(pp_of(dt) == "09:30:00.123456");
 
         /* reached through the ordinary printing vocabulary, not just sink.pp */
-        REQUIRE(xo::pp::tostr(t0) == "20220926:09:30:00.123456");
+        REQUIRE(xo::pp::tostr0(t0) == "20220926:09:30:00.123456");
         REQUIRE(pp_of(xo::pp::tag("t", t0)) == ":t 20220926:09:30:00.123456");
     }
 

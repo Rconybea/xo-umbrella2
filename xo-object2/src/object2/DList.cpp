@@ -18,12 +18,12 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     /* the ppsink logging/printing vocabulary, for use below */
     using xo::pp::scope;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
 
     using xo::print::APrintable;
@@ -121,7 +121,7 @@ namespace xo {
                 assert(l == nullptr);
 
                 throw std::runtime_error
-                    (tostr("DList::at: out-of-range index where [0..z) expected",
+                    (tostr0("DList::at: out-of-range index where [0..z) expected",
                            xtag("index", index),
                            xtag("z", this->size())));
             }

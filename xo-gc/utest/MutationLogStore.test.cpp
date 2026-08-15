@@ -16,7 +16,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
@@ -29,7 +29,7 @@ namespace ut {
      */
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     using xo::scm::DList;
     using xo::scm::DBoolean;
@@ -438,7 +438,7 @@ namespace ut {
                        "testcase loop",
                        xtag("i_tc", i_tc));
 
-            INFO(tostr(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
+            INFO(tostr0(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
 
             MlsFixture fixture(tc);
 
@@ -471,14 +471,14 @@ namespace ut {
                 fixture.gcos_.verify_ok();
                 fixture.mls_.verify_ok();
 
-                INFO(tostr(xtag("n_gc_root", fixture.verify_stats_.n_gc_root_),
-                           xtag("n_ext", fixture.verify_stats_.n_ext_),
-                           xtag("n_from", fixture.verify_stats_.n_from_),
-                           xtag("n_to", fixture.verify_stats_.n_to_)));
-                INFO(tostr(xtag("n_fwd", fixture.verify_stats_.n_fwd_),
-                           xtag("n_age_ok", fixture.verify_stats_.n_age_ok_),
-                           xtag("n_age_bad", fixture.verify_stats_.n_age_bad_),
-                           xtag("n_no_iface", fixture.verify_stats_.n_no_iface_)));
+                INFO(tostr0(xtag("n_gc_root", fixture.verify_stats_.n_gc_root_),
+                            xtag("n_ext", fixture.verify_stats_.n_ext_),
+                            xtag("n_from", fixture.verify_stats_.n_from_),
+                            xtag("n_to", fixture.verify_stats_.n_to_)));
+                INFO(tostr0(xtag("n_fwd", fixture.verify_stats_.n_fwd_),
+                            xtag("n_age_ok", fixture.verify_stats_.n_age_ok_),
+                            xtag("n_age_bad", fixture.verify_stats_.n_age_bad_),
+                            xtag("n_no_iface", fixture.verify_stats_.n_no_iface_)));
 
                 REQUIRE(fixture.verify_stats_.is_ok());
             }

@@ -12,7 +12,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <cassert>
 #include <exception>
 #include <new>        // for std::launder()
@@ -24,7 +24,7 @@ namespace xo {
     /* the ppsink logging vocabulary, for use below */
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     using xo::reflect::typeseq;
     using std::byte;
@@ -61,8 +61,8 @@ namespace xo {
             if (!span.lo()) {
                 // control here implies mmap() failed silently
 
-                throw std::runtime_error(tostr("ArenaAlloc: reserve address range failed",
-                                               xtag("size", cfg.size_)));
+                throw std::runtime_error(tostr0("ArenaAlloc: reserve address range failed",
+                                                xtag("size", cfg.size_)));
             }
 
 

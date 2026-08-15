@@ -32,7 +32,7 @@
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::gc::GC;
     using xo::obj::Procedure;
     using xo::obj::Integer;
@@ -260,8 +260,8 @@ namespace xo {
                     case exprtype::n_expr:
                         this->pc_ = nullptr;
                         this->value_ = nullptr;
-                        this->error_ = SchematikaError(tostr("execute_vsm: not implemented",
-                                                             xtag("extype", expr_->extype())));
+                        this->error_ = SchematikaError(tostr0("execute_vsm: not implemented",
+                                                              xtag("extype", expr_->extype())));
                         this->cont_ = nullptr;
                         break;
                     }
@@ -334,9 +334,9 @@ namespace xo {
                  *   xo/object/String.hpp
                  */
 
-                VSM_ERROR(tostr("constant_op: unable to convert native value to object",
-                                xtag("id", expr->value_tp().td()->id()),
-                                xtag("short_name", expr->value_tp().td()->short_name())));
+                VSM_ERROR(tostr0("constant_op: unable to convert native value to object",
+                                 xtag("id", expr->value_tp().td()->id()),
+                                 xtag("short_name", expr->value_tp().td()->short_name())));
             }
         }
 
@@ -356,7 +356,7 @@ namespace xo {
                 this->value_ = *slot;
                 this->pc_ = cont_;
             } else {
-                std::string err = tostr("no binding for primitive", xtag("name", expr->name()));
+                std::string err = tostr0("no binding for primitive", xtag("name", expr->name()));
 
                 this->value_ = nullptr;
                 this->error_ = SchematikaError(err);
@@ -450,7 +450,7 @@ namespace xo {
 
                 this->cont_ = &VsmOps::complete_assign_op;
             } else {
-                std::string err = tostr("no binding for lhs of assignment", xtag("name", assign->lhs()->name()));
+                std::string err = tostr0("no binding for lhs of assignment", xtag("name", assign->lhs()->name()));
 
                 this->value_ = nullptr;
                 this->error_ = SchematikaError(err);
@@ -520,7 +520,7 @@ namespace xo {
                  * all.
                  */
 
-                std::string err = tostr("no binding for variable", xtag("name", var->name()));
+                std::string err = tostr0("no binding for variable", xtag("name", var->name()));
 
                 this->value_ = nullptr;
                 this->error_ = SchematikaError(err);
@@ -604,7 +604,7 @@ namespace xo {
                 this->stack_ = sp0->parent();
                 this->cont_ = sp0->continuation();
             } else {
-                std::string err = tostr("expect boolean value for result of if-expr test", xtag("value", test_value));
+                std::string err = tostr0("expect boolean value for result of if-expr test", xtag("value", test_value));
 
                 this->value_ = nullptr;
                 this->error_ = SchematikaError(err);
@@ -842,11 +842,11 @@ namespace xo {
             gp<Procedure> fn = Procedure::from((*sp0)[0]);
 
             if (fn->n_args() + 1 != sp0->size()) {
-                throw std::runtime_error(tostr("VirtualSchematikaMachine::apply_op:"
-                                               " argument mismatch in apply"
-                                               ": k arguments supplied where n expected",
-                                               xtag("k", sp0->size() - 1),
-                                               xtag("n", fn->n_args())));
+                throw std::runtime_error(tostr0("VirtualSchematikaMachine::apply_op:"
+                                                " argument mismatch in apply"
+                                                ": k arguments supplied where n expected",
+                                                xtag("k", sp0->size() - 1),
+                                                xtag("n", fn->n_args())));
             }
 
             /* todo:

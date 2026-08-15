@@ -10,7 +10,8 @@
 namespace xo {
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
+
     namespace scm {
         std::set<std::string>
         Sequence::get_free_variables() const {

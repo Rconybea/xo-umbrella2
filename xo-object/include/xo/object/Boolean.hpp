@@ -45,6 +45,9 @@ namespace xo {
                 return Boolean::boolean_obj(x);
             }
             static BoolType from_object(gc::IAlloc *, gp<Object> x) {
+                using xo::pp::tostr0;
+                using xo::pp::xtag;
+
                 /* NB qualified, not a using-declaration.  The argument type
                  * gp<Object> lives in namespace xo, so ADL adds legacy
                  * xo::xtag to the candidate set -- and ADL is not suppressed
@@ -55,7 +58,8 @@ namespace xo {
                 if (x_bool.get()) {
                     return x_bool->value();
                 } else {
-                    throw std::runtime_error(xo::pp::tostr("ObjectConversion_Boolean: x found where Boolean expected", xo::pp::xtag("x", x)));
+                    throw std::runtime_error(tostr0("ObjectConversion_Boolean: x found where Boolean expected",
+                                                    xtag("x", x)));
                 }
             }
         };

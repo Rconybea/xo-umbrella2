@@ -7,13 +7,13 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     namespace qty {
         TEST_CASE("quantity.mass", "[quantity]") {
@@ -101,16 +101,16 @@ namespace xo {
 
             log && log(xtag("pg", pg));
 
-            REQUIRE(tostr(pg) == "1pg");
-            REQUIRE(tostr(ng) == "1ng");
-            REQUIRE(tostr(ug) == "1ug");
-            REQUIRE(tostr(mg) == "1mg");
-            REQUIRE(tostr(g) == "1g");
-            REQUIRE(tostr(kg) == "1kg");
-            REQUIRE(tostr(t) == "1t");
-            REQUIRE(tostr(kt) == "1kt");
-            REQUIRE(tostr(mt) == "1Mt");
-            REQUIRE(tostr(gt) == "1Gt");
+            REQUIRE(tostr0(pg) == "1pg");
+            REQUIRE(tostr0(ng) == "1ng");
+            REQUIRE(tostr0(ug) == "1ug");
+            REQUIRE(tostr0(mg) == "1mg");
+            REQUIRE(tostr0(g) == "1g");
+            REQUIRE(tostr0(kg) == "1kg");
+            REQUIRE(tostr0(t) == "1t");
+            REQUIRE(tostr0(kt) == "1kt");
+            REQUIRE(tostr0(mt) == "1Mt");
+            REQUIRE(tostr0(gt) == "1Gt");
         } /*TEST_CASE(quantity.mass)*/
 
         TEST_CASE("quantity.distance", "[quantity]") {
@@ -189,16 +189,16 @@ namespace xo {
             log && log(xtag("lsec.abbrev", lsec.abbrev()));
             log && log(xtag("AU.abbrev", AU.abbrev()));
 
-            REQUIRE(tostr(pm) == "1pm");
-            REQUIRE(tostr(nm) == "1nm");
-            REQUIRE(tostr(um) == "1um");
-            REQUIRE(tostr(mm) == "1mm");
-            REQUIRE(tostr(m) == "1m");
-            REQUIRE(tostr(km) == "1km");
-            REQUIRE(tostr(Mm) == "1Mm");
-            REQUIRE(tostr(Gm) == "1Gm");
-            REQUIRE(tostr(lsec) == "1lsec");
-            REQUIRE(tostr(AU) == "1AU");
+            REQUIRE(tostr0(pm) == "1pm");
+            REQUIRE(tostr0(nm) == "1nm");
+            REQUIRE(tostr0(um) == "1um");
+            REQUIRE(tostr0(mm) == "1mm");
+            REQUIRE(tostr0(m) == "1m");
+            REQUIRE(tostr0(km) == "1km");
+            REQUIRE(tostr0(Mm) == "1Mm");
+            REQUIRE(tostr0(Gm) == "1Gm");
+            REQUIRE(tostr0(lsec) == "1lsec");
+            REQUIRE(tostr0(AU) == "1AU");
 
         } /*TEST_CASE(quantity.distance)*/
 
@@ -306,20 +306,20 @@ namespace xo {
             log && log(xtag("yr360.abbrev", yr360.abbrev()));
             log && log(xtag("yr365.abbrev", yr365.abbrev()));
 
-            REQUIRE(tostr(ps) == "1ps");
-            REQUIRE(tostr(ns) == "1ns");
-            REQUIRE(tostr(us) == "1us");
-            REQUIRE(tostr(ms) == "1ms");
-            REQUIRE(tostr(s) == "1s");
-            REQUIRE(tostr(min) == "1min");
-            REQUIRE(tostr(hr) == "1hr");
-            REQUIRE(tostr(dy) == "1dy");
-            REQUIRE(tostr(wk) == "1wk");
-            REQUIRE(tostr(mo) == "1mo");
-            REQUIRE(tostr(yr) == "1yr");
-            REQUIRE(tostr(yr250) == "1yr250");
-            REQUIRE(tostr(yr360) == "1yr360");
-            REQUIRE(tostr(yr365) == "1yr365");
+            REQUIRE(tostr0(ps) == "1ps");
+            REQUIRE(tostr0(ns) == "1ns");
+            REQUIRE(tostr0(us) == "1us");
+            REQUIRE(tostr0(ms) == "1ms");
+            REQUIRE(tostr0(s) == "1s");
+            REQUIRE(tostr0(min) == "1min");
+            REQUIRE(tostr0(hr) == "1hr");
+            REQUIRE(tostr0(dy) == "1dy");
+            REQUIRE(tostr0(wk) == "1wk");
+            REQUIRE(tostr0(mo) == "1mo");
+            REQUIRE(tostr0(yr) == "1yr");
+            REQUIRE(tostr0(yr250) == "1yr250");
+            REQUIRE(tostr0(yr360) == "1yr360");
+            REQUIRE(tostr0(yr365) == "1yr365");
         } /*TEST_CASE(quantity.time)*/
 
         TEST_CASE("quantity.mult", "[quantity.mult]") {
@@ -391,7 +391,7 @@ namespace xo {
             static_assert(ccy.abbrev() == flatstring("ccy"));
 
             log && log(xtag("ccy.abbrev", ccy.abbrev()));
-            REQUIRE(tostr(ccy) == "1ccy");
+            REQUIRE(tostr0(ccy) == "1ccy");
         } /*TEST_CASE(quantity.currency)*/
 
         TEST_CASE("quantity.mult2", "[quantity.mult]") {

@@ -7,7 +7,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header
@@ -362,7 +362,7 @@ namespace xo {
 
             if (this->n_elt_ >= this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("LeafNode::insert_leaf: leaf already full",
+                throw std::runtime_error(xo::pp::tostr0("LeafNode::insert_leaf: leaf already full",
                                                xo::pp::xtag("leaf.n_elt", this->n_elt()),
                                                xo::pp::xtag("branching_factor", this->branching_factor())));
             }
@@ -394,7 +394,7 @@ namespace xo {
                       xo::pp::xtag("ix", ix));
 
             if (this->n_elt_ == 0) {
-                throw std::runtime_error(xo::pp::tostr("LeafNode::remove_leaf: leaf already empty",
+                throw std::runtime_error(xo::pp::tostr0("LeafNode::remove_leaf: leaf already empty",
                                                xo::pp::xtag("leaf.n_elt", this->n_elt()),
                                                xo::pp::xtag("branching_factor", this->branching_factor())));
             }
@@ -424,7 +424,7 @@ namespace xo {
 
             if (this->n_elt() + n > this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("LeafNode.prepend_from_lh_sibling: expected combined #elt <= bf",
+                throw std::runtime_error(xo::pp::tostr0("LeafNode.prepend_from_lh_sibling: expected combined #elt <= bf",
                                                xo::pp::xtag("self.n_elt", this->n_elt()),
                                                xo::pp::xtag("n", n),
                                                xo::pp::xtag("bf", this->branching_factor())));
@@ -460,7 +460,7 @@ namespace xo {
 
             if (this->n_elt() + n > this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(xo::pp::tostr("LeafNode.append_from_rh_sibling: expected combined #elt <= bf",
+                throw std::runtime_error(xo::pp::tostr0("LeafNode.append_from_rh_sibling: expected combined #elt <= bf",
                                                xo::pp::xtag("self.n_elt", this->n_elt()),
                                                xo::pp::xtag("n", n),
                                                xo::pp::xtag("bf", this->branching_factor())));
@@ -518,7 +518,7 @@ namespace xo {
 
             /* verify immediate parent pointer is correct */
             if (this->parent() != parent) {
-                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
+                throw std::runtime_error(xo::pp::tostr0("LeafNode::verify_helper"
                                                ": expected parent pointer to refer to actual parent",
                                                xo::pp::xtag("stored_parent", this->parent()),
                                                xo::pp::xtag("actual_parent", parent)));
@@ -533,7 +533,7 @@ namespace xo {
                 if (prev.key() < elt.key()) {
                     ;
                 } else {
-                    throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
+                    throw std::runtime_error(xo::pp::tostr0("LeafNode::verify_helper"
                                                    ": expected local keys in strictly increasing order",
                                                    xo::pp::xtag("i", i),
                                                    xo::pp::xtag("key(i-1)", prev.key()),
@@ -545,7 +545,7 @@ namespace xo {
                 if (this->lookup_elt(n-1).key() < lub_key) {
                     ;
                 } else {
-                    throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
+                    throw std::runtime_error(xo::pp::tostr0("LeafNode::verify_helper"
                                                    ": expected last local key before parent-supplied lub key",
                                                    xo::pp::xtag("n", n),
                                                    xo::pp::xtag("key(n-1)", this->lookup_elt(n-1).key()),
@@ -557,7 +557,7 @@ namespace xo {
             if ((lh_leaf && (lh_leaf->next_leafnode() != this))
                 || (this->prev_leafnode() != lh_leaf))
             {
-                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
+                throw std::runtime_error(xo::pp::tostr0("LeafNode::verify_helper"
                                                ": inconsistent prev/next leaf pointers",
                                                xo::pp::xtag("parent", parent),
                                                xo::pp::xtag("lh_leaf", lh_leaf),
@@ -569,7 +569,7 @@ namespace xo {
             if ((this->next_leafnode() != rh_leaf)
                 || (rh_leaf && (rh_leaf->prev_leafnode() != this)))
             {
-                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
+                throw std::runtime_error(xo::pp::tostr0("LeafNode::verify_helper"
                                                ": inconsistent prev/next leaf pointers",
                                                xo::pp::xtag("parent", parent),
                                                xo::pp::xtag("self", this),
@@ -588,7 +588,7 @@ namespace xo {
             LeafNodeItemType const & elt = this->lookup_elt(0);
 
             if (elt.key() != key) {
-                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_glb_key"
+                throw std::runtime_error(xo::pp::tostr0("LeafNode::verify_glb_key"
                                                ": expected stored greatest-lower-bound key to match leftmost leaf's key",
                                                xo::pp::xtag("@", this),
                                                xo::pp::xtag("reported_key", key),

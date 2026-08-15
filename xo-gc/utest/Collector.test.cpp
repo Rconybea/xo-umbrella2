@@ -24,7 +24,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
@@ -36,7 +36,7 @@ namespace xo {
      */
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     using xo::scm::DRuntimeError;
     using xo::scm::DDictionary;
@@ -452,7 +452,7 @@ namespace xo {
                            "testcase loop",
                            xtag("i_tc", i_tc));
 
-                INFO(tostr(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
+                INFO(tostr0(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
 
                 X1Fixture fixture(i_tc, tc);
 

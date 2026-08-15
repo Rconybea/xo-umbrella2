@@ -8,7 +8,7 @@
 #include "pretty_variable.hpp"
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <cstdint>
 #include <xo/ppsink/pretty_struct.hpp>
 

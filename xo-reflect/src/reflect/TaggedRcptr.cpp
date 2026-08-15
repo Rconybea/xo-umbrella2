@@ -5,27 +5,27 @@
 
 #include "TaggedRcptr.hpp"
 #include <xo/ppsink/tag_ostream.hpp>   /* xtag + operator<<(ostream, tag) */
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
-  using xo::pp::xtag;
-  using xo::pp::tostr;
+    using xo::pp::xtag;
+    using xo::pp::tostr0;
 
-  namespace reflect {
-    void
-    TaggedRcptr::display(std::ostream & os) const
-    {
-      os << "<TaggedRcptr"
-     << xtag("type", this->td()->canonical_name())
-     << xtag("addr", this->rc_address())
-     << ">";
-    } /*display*/
+    namespace reflect {
+        void
+        TaggedRcptr::display(std::ostream & os) const
+        {
+            os << "<TaggedRcptr"
+            << xtag("type", this->td()->canonical_name())
+            << xtag("addr", this->rc_address())
+            << ">";
+        } /*display*/
 
-    std::string
-    TaggedRcptr::display_string() const {
-      return tostr(*this);
-    } /*display_string*/
-  } /*namespace reflect*/
+        std::string
+        TaggedRcptr::display_string() const {
+            return tostr0(*this);
+        } /*display_string*/
+    } /*namespace reflect*/
 } /*namespace xo*/
 
 /* end TaggedRcptr.cpp */

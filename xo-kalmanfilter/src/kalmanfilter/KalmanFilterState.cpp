@@ -10,7 +10,7 @@
 #include <ostream>
 #include <string>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
@@ -31,7 +31,7 @@ namespace xo {
          * *ambiguous* with legacy xo::xtag (still visible via headers that
          * have not migrated) rather than shadowing it.
          */
-        using xo::pp::tostr;
+        using xo::pp::tostr0;
         using xo::pp::xtag;
 
         // ----- KalmanFilterState -----
@@ -153,7 +153,7 @@ namespace xo {
 
             if (n != P.rows() || n != P.cols()) {
                 std::string err_msg
-                    = tostr("with n=x.size expect [n x n] covar matrix P",
+                    = tostr0("with n=x.size expect [n x n] covar matrix P",
                             xtag("n", x.size()),
                             xtag("P.rows", P.rows()),
                             xtag("P.cols", P.cols()));
@@ -164,7 +164,7 @@ namespace xo {
             if ((K.rows() > 0) && (K.rows() > 0)) {
                 if (n != K.rows()) {
                     std::string err_msg
-                        = tostr("with n=x.size expect [m x n] gain matrix K",
+                        = tostr0("with n=x.size expect [m x n] gain matrix K",
                                 xtag("n", x.size()),
                                 xtag("K.rows", K.rows()),
                                 xtag("K.cols", K.cols()));

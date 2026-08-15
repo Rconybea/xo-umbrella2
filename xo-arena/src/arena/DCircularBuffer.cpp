@@ -8,7 +8,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <cassert>
 #include <sys/mman.h>
 #include <unistd.h> // for ::getpagesize() on osx
@@ -22,7 +22,7 @@ namespace xo {
          */
         using xo::pp::scope;
         using xo::pp::xtag;
-        using xo::pp::tostr;
+        using xo::pp::tostr0;
 
         DCircularBuffer::DCircularBuffer(DCircularBuffer && other)
         : config_{other.config_},
@@ -65,8 +65,8 @@ namespace xo {
                                                config.debug_flag_));
 
             if (!mapped_span.lo()) {
-                throw std::runtime_error(tostr("DCircularBuffer: reserve address range failed",
-                                               xtag("size", config.max_capacity_)));
+                throw std::runtime_error(tostr0("DCircularBuffer: reserve address range failed",
+                                                xtag("size", config.max_capacity_)));
             }
 
             return DCircularBuffer(config, page_z, align_z, mapped_span);

@@ -7,12 +7,12 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <cstdint>
 
 namespace xo {
     /* the ppsink printing vocabulary, for use below */
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
 
     using xo::print::APrintable;
@@ -68,7 +68,7 @@ namespace xo {
             if (ix < size_) {
                 return elts_[ix];
             } else {
-                throw std::runtime_error(tostr("DArray::at: out-of-range index where [0..z) expected",
+                throw std::runtime_error(tostr0("DArray::at: out-of-range index where [0..z) expected",
                                                xtag("index", ix),
                                                xtag("z", this->size())));
                 return obj<AGCObject>();

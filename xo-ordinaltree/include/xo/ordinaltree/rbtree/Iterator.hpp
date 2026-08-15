@@ -7,7 +7,7 @@
 
 #include "Node.hpp"
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header rather than brought in
  * by using-declarations: a using-decl at namespace scope in a public header
@@ -167,9 +167,10 @@ namespace xo {
 
             protected:
                 void check_regular() const {
+                    using xo::pp::tostr0;
 
                     if(this->location_ != IL_Regular)
-                        throw std::runtime_error(xo::pp::tostr("rbtree iterator: cannot deref iterator"
+                        throw std::runtime_error(tostr0("rbtree iterator: cannot deref iterator"
                                                        " in non-regular state"));
                 } /*check_regular*/
 

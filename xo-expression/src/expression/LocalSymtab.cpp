@@ -9,13 +9,14 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
     using xo::pp::scope;
+
     namespace scm {
         rp<LocalSymtab>
         LocalSymtab::make_empty() {
@@ -79,9 +80,9 @@ namespace xo {
         void
         LocalSymtab::assign_parent(bp<SymbolTable> p) {
             if ((parent_env_.get() != nullptr) && (parent_env_.get() != p.get())) {
-                throw std::runtime_error(tostr("LocalSymtab::assign_parent(P2): already have established parent P1",
-                                               xtag("P1", parent_env_),
-                                               xtag("P2", p)));
+                throw std::runtime_error(tostr0("LocalSymtab::assign_parent(P2): already have established parent P1",
+                                                xtag("P1", parent_env_),
+                                                xtag("P2", p)));
 
                 assert(false);
             }

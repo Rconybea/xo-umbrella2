@@ -12,7 +12,7 @@
 
 #include <xo/ppsink/concat.hpp>
 #include <xo/ppsink/FlatSink.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr0.hpp>
 #include <xo/ppsink/pretty_ostream.hpp>
 #include "MarkSink.hpp"
 #include <catch2/catch.hpp>
@@ -73,7 +73,7 @@ namespace ut {
             std::string via_concat = flat_of([&i](xo::pp::PpSink & sink) {
                 sink.pp(concat("[", i, "]"));
             });
-            REQUIRE(via_concat == xo::pp::tostr("[", i, "]"));
+            REQUIRE(via_concat == xo::pp::tostr0("[", i, "]"));
         }
     }
 

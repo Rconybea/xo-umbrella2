@@ -12,7 +12,7 @@
 #include <catch2/catch.hpp>
 #include <fstream>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
@@ -42,7 +42,7 @@ namespace xo {
          */
         using xo::pp::log_level;
         using xo::pp::scope;
-        using xo::pp::tostr;
+        using xo::pp::tostr0;
         using xo::pp::xtag;
 
         namespace {
@@ -118,7 +118,7 @@ namespace xo {
             VectorXd x0(1);
             x0 << 10.0 + normal_rng();
 
-            INFO(tostr("x0=", x0));
+            INFO(tostr0("x0=", x0));
 
             z_stats.include_sample(x0[0]);
 
@@ -151,7 +151,7 @@ namespace xo {
                 VectorXd z(1);
                 z << 10.0 + normal_rng();
 
-                INFO(tostr("z=", z));
+                INFO(tostr0("z=", z));
 
                 z_stats.include_sample(z[0]);
 
@@ -234,7 +234,7 @@ namespace xo {
             VectorXd x0(1);
             x0 << 10.0 + normal_rng();
 
-            INFO(tostr("x0=", x0));
+            INFO(tostr0("x0=", x0));
 
             z_stats.include_sample(x0[0]);
 
@@ -266,7 +266,7 @@ namespace xo {
                 VectorXd z(1);
                 z << 10.0 + normal_rng();
 
-                INFO(tostr("z=", z));
+                INFO(tostr0("z=", z));
 
                 z_stats.include_sample(z[0]);
 
@@ -378,7 +378,7 @@ namespace xo {
             VectorXd x0(1);
             x0 << 10.0 + normal_rng();
 
-            INFO(tostr("x0=", x0));
+            INFO(tostr0("x0=", x0));
 
             z_stats.include_sample(x0[0]);
 
@@ -406,7 +406,7 @@ namespace xo {
              * as in test "kalman-identity"
              */
             for(uint32_t i_step = 1; i_step < 51; ++i_step) {
-                INFO(tostr(xtag("i_step", i_step)));
+                INFO(tostr0(xtag("i_step", i_step)));
 
                 /* note: for this filter, measurement time doesn't affect behavior */
                 utc_nanos tkp1 = sk->tm() + seconds(1);
@@ -417,7 +417,7 @@ namespace xo {
                 z_stats.include_sample(z[0]);
                 z_stats.include_sample(z[1]);
 
-                INFO(tostr(xtag("i_step", i_step), xtag("z", z)));
+                INFO(tostr0(xtag("i_step", i_step), xtag("z", z)));
 
                 rp<KalmanFilterInput> inputk
                     = KalmanFilterInput::make_present(tkp1, z);
@@ -643,7 +643,7 @@ namespace xo {
                      self_test_name.c_str(),
                      self_test_name.c_str());
 
-            INFO(tostr(self_test_name, xtag("cmd", (cmd_buf))));
+            INFO(tostr0(self_test_name, xtag("cmd", (cmd_buf))));
 
             std::int32_t err = ::system(cmd_buf);
 

@@ -7,7 +7,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
@@ -22,7 +22,7 @@ namespace xo {
          * have not migrated) rather than shadowing it.
          */
         using xo::pp::scope;
-        using xo::pp::tostr;
+        using xo::pp::tostr0;
         using xo::pp::xtag;
 
         // ----- KalmanFilter -----
@@ -79,7 +79,7 @@ namespace xo {
         std::string
         KalmanFilter::display_string() const
         {
-            return tostr(*this);
+            return tostr0(*this);
         } /*display_string*/
     } /*namespace kalman*/
 } /*namespace xo*/

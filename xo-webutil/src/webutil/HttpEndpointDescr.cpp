@@ -3,7 +3,7 @@
 #include "HttpEndpointDescr.hpp"
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/quoted.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     namespace web {
@@ -29,12 +29,12 @@ namespace xo {
 
         std::string
         HttpEndpointDescr::display_string() const {
-            using xo::pp::tostr;
+            using xo::pp::tostr0;
 
             /* routes through Prettifier<HttpEndpointDescr> (declared in the
              * header), which calls pretty() above.  No operator<< involved.
              */
-            return tostr(*this);
+            return tostr0(*this);
         }
     } /*namespace web*/
 

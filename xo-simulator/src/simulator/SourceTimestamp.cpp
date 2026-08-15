@@ -5,7 +5,7 @@
 
 #include "SourceTimestamp.hpp"
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     namespace sim {
@@ -26,7 +26,7 @@ namespace xo {
         std::string
         SourceTimestamp::display_string() const
         {
-            return xo::pp::tostr(*this);
+            return xo::pp::tostr0(*this);
         } /*display_string*/
     } /*namespace sim*/
 } /*namespace xo*/

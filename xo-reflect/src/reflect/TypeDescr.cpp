@@ -10,14 +10,14 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) in display() */
-#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tostr_xx.hpp>
 #include <sstream>                     /* std::ostringstream -- was via indentlog */
 #include <stdexcept>                   /* std::runtime_error -- was via indentlog */
 
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr;
+    using xo::pp::tostr0;
 
     namespace reflect {
         uint32_t
@@ -212,9 +212,9 @@ namespace xo {
             auto ix = s_canonical_type_table_map.find(name);
 
             if (ix == s_canonical_type_table_map.end()) {
-                throw std::runtime_error(tostr("TypeDescrBase::lookup_by_name"
-                                               ": no registered type with canonical name T",
-                                               xtag("T", name)));
+                throw std::runtime_error(tostr0("TypeDescrBase::lookup_by_name"
+                                                ": no registered type with canonical name T",
+                                                xtag("T", name)));
             }
 
             return ix->second;
@@ -347,7 +347,7 @@ namespace xo {
         std::string
         TypeDescrBase::display_string() const
         {
-            return tostr(*this);
+            return tostr0(*this);
         } /*display_string*/
 
         bool
