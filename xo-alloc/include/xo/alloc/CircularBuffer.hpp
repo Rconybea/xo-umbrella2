@@ -5,10 +5,10 @@
 
 #pragma once
 
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <cassert>
 #include <cstdint>
 #include <vector>
@@ -96,13 +96,13 @@ namespace xo {
             // void shrink_to_fit(); // not implemented
 
             reference at(size_type pos) {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
                 using xo::pp::xtag;
 
                 if ((pos < 0) || (pos >= size_)) {
-                    throw std::out_of_range(tostr0("CircularBuffer::at: index out of range",
-                                                   xtag("pos", pos),
-                                                   xtag("size", size_)));
+                    throw std::out_of_range(tostr("CircularBuffer::at: index out of range",
+                                                  xtag("pos", pos),
+                                                  xtag("size", size_)));
                 }
 
                 return contents_[this->location_of(pos)];

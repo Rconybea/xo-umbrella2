@@ -19,7 +19,6 @@
 #include <xo/alloc/ArenaAlloc.hpp>
 #include <xo/ppsink/pretty.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>

@@ -6,13 +6,13 @@
 #include "GC.hpp"
 #include "GcStatistics.hpp"
 #include "Object.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     namespace gc {
@@ -21,7 +21,7 @@ namespace xo {
          * headers that have not migrated) rather than shadowing it.
          */
         using xo::pp::scope;
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         bool
@@ -84,13 +84,13 @@ namespace xo {
             std::size_t tenured_size = config.initial_tenured_z_;
 
             if (config_.incr_gc_threshold_ > nursery_size) {
-                throw std::runtime_error(tostr0("GC::ctor: expected nursery gc threshold < nursery size",
+                throw std::runtime_error(tostr("GC::ctor: expected nursery gc threshold < nursery size",
                                                xtag("nursery-gc-threshold", config_.incr_gc_threshold_),
                                                xtag("nursery-size", nursery_size)));
             }
 
             if (nursery_size + config_.full_gc_threshold_ > tenured_size) {
-                throw std::runtime_error(tostr0("GC::ctor: expected nursery size + tenured gc threshold < tenured size",
+                throw std::runtime_error(tostr("GC::ctor: expected nursery size + tenured gc threshold < tenured size",
                                                xtag("nursery-size", nursery_size),
                                                xtag("tenured-size", tenured_size),
                                                xtag("full-gc-threshold", config_.full_gc_threshold_)
@@ -628,7 +628,7 @@ namespace xo {
 
             if (!this->contains(parent)) {
                 if (may_throw_flag) {
-                    throw std::runtime_error(tostr0("GC::check_write_barrier",
+                    throw std::runtime_error(tostr("GC::check_write_barrier",
                                                    ": expected parent object P in GC to-space",
                                                    xtag("P", parent)));
                 }
@@ -644,11 +644,11 @@ namespace xo {
             if ((lhs_addr < parent_addr) || (parent_addr + parent_z < lhs_addr)) {
                 if (may_throw_flag) {
                     throw std::runtime_error
-                        (tostr0("GC::check_write_barrier",
-                                ": expected lhs address L within address extent z of parent P",
-                                xtag("P", parent), xtag("z", parent_z),
-                                xtag("P+z", parent_addr + parent_z),
-                                xtag("L", lhs)));
+                        (tostr("GC::check_write_barrier",
+                               ": expected lhs address L within address extent z of parent P",
+                               xtag("P", parent), xtag("z", parent_z),
+                               xtag("P+z", parent_addr + parent_z),
+                               xtag("L", lhs)));
                 }
                 return false;
             }
@@ -730,7 +730,7 @@ namespace xo {
 
             if (may_throw_flag) {
                 throw std::runtime_error
-                    (tostr0("GC::check_write_barrier",
+                    (tostr("GC::check_write_barrier",
                            ": expected mlog entry for xgen pointer L->C within parent P",
                            xtag("P", parent), xtag("L", lhs), xtag("C", rhs),
                            xtag("gen(P)", parent_gen), xtag("gen(C)", rhs_gen)));

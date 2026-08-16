@@ -6,10 +6,10 @@
 #include "ArenaAlloc.hpp"
 #include "Object.hpp"
 #include "ObjectStatistics.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <cassert>
 #include <sys/mman.h>
 #include <unistd.h> // for getpagesize() on OSX
@@ -23,7 +23,7 @@ namespace xo {
          * headers that have not migrated) rather than shadowing it.
          */
         using xo::pp::scope;
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         namespace {
@@ -85,8 +85,8 @@ namespace xo {
                        xtag("hi", reinterpret_cast<byte *>(base) + z));
 
             if (base == MAP_FAILED) {
-                throw std::runtime_error(tostr0("ArenaAlloc: uncommitted allocation failed",
-                                                xtag("size", z)));
+                throw std::runtime_error(tostr("ArenaAlloc: uncommitted allocation failed",
+                                               xtag("size", z)));
             }
 
             byte * aligned_base = reinterpret_cast<byte *>(align_lub(reinterpret_cast<size_t>(base),
@@ -128,8 +128,8 @@ namespace xo {
             this->debug_flag_  = debug_flag;
 
             if (!lo_) {
-                throw std::runtime_error(tostr0("ArenaAlloc: allocation failed",
-                                                xtag("size", z)));
+                throw std::runtime_error(tostr("ArenaAlloc: allocation failed",
+                                               xtag("size", z)));
             }
 
             log && log(xtag("lo", (void*)lo_),
@@ -181,8 +181,8 @@ namespace xo {
             }
 
             if (lo_ + offset_z > hi_) {
-                throw std::runtime_error(tostr0("ArenaAlloc::expand: requested size exceeds reserved size",
-                                                xtag("requested", offset_z), xtag("reserved", reserved())));
+                throw std::runtime_error(tostr("ArenaAlloc::expand: requested size exceeds reserved size",
+                                               xtag("requested", offset_z), xtag("reserved", reserved())));
             }
 
             /*
@@ -220,9 +220,9 @@ namespace xo {
                        xtag("commit_end", commit_start + add_commit_z));
 
             if (::mprotect(commit_start, add_commit_z, PROT_READ | PROT_WRITE) != 0) {
-                throw std::runtime_error(tostr0("ArenaAlloc::expand: commit failure",
-                                                xtag("committed_z", committed_z_),
-                                                xtag("add_commit_z", add_commit_z)));
+                throw std::runtime_error(tostr("ArenaAlloc::expand: commit failure",
+                                               xtag("committed_z", committed_z_),
+                                               xtag("add_commit_z", add_commit_z)));
             }
 
             this->committed_z_ = aligned_offset_z;
@@ -245,8 +245,8 @@ namespace xo {
                 if (checkpoint_ > free_ptr_)
                     this->checkpoint_ = free_ptr_;
             } else {
-                throw std::runtime_error(tostr0("LinearAllog::set_free_ptr(x): expected lo <= x < limit",
-                                                xtag("lo", lo_), xtag("x", x), xtag("limit", limit_)));
+                throw std::runtime_error(tostr("LinearAllog::set_free_ptr(x): expected lo <= x < limit",
+                                               xtag("lo", lo_), xtag("x", x), xtag("limit", limit_)));
             }
         }
 

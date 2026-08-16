@@ -4,10 +4,10 @@
  */
 
 #include "xo/alloc/CircularBuffer.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
 #include <iostream>
 #include <catch2/catch.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
@@ -18,7 +18,7 @@ namespace xo {
          * *ambiguous* with legacy xo::xtag (visible via headers that have not
          * migrated) rather than shadowing it.
          */
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         TEST_CASE("circular_buffer_0", "[circular_buffer]")
@@ -125,7 +125,7 @@ namespace xo {
             for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
                 const Testcase_CircularBuffer & tc = s_testcase_v[i_tc];
 
-                INFO(tostr0(xtag("i_tc", i_tc),
+                INFO(tostr(xtag("i_tc", i_tc),
                            xtag("capacity", tc.capacity_),
                            xtag("contents", tc.contents_)));
 
@@ -141,7 +141,7 @@ namespace xo {
 
                     std::size_t n = 0;
                     for (const auto & s : tc.contents_) {
-                        INFO(tostr0(xtag("n0", n), xtag("s", s)));
+                        INFO(tostr(xtag("n0", n), xtag("s", s)));
                         ++n;
                         INFO(xtag("n1", n));
 
@@ -153,7 +153,7 @@ namespace xo {
 
                         std::size_t i = 0;
                         for (const auto & qi : q) {
-                            INFO(tostr0(xtag("i", i), xtag("qi", qi)));
+                            INFO(tostr(xtag("i", i), xtag("qi", qi)));
 
                             if (n <= tc.capacity_) {
                                 REQUIRE(qi == tc.contents_.at(i));

@@ -5,8 +5,8 @@
 
 #include "xo/alloc/GcStatistics.hpp"
 #include <xo/indentlog2/print/toppstr.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/hex.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty.hpp>
@@ -53,14 +53,14 @@ namespace xo {
          * *ambiguous* with legacy xo::xtag (visible via headers that have not
          * migrated) rather than shadowing it.
          */
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         TEST_CASE("PerGenerationStatistics", "[alloc][gc]")
         {
             PerGenerationStatistics stats;
 
-            std::string s = tostr0(stats);
+            std::string s = tostr(stats);
 
             //std::cerr << hex_view(s.c_str(), s.c_str() + s.length(), true /*as_text*/) << std::endl;
 
@@ -74,7 +74,7 @@ namespace xo {
         {
             GcStatistics stats;
 
-            std::string s = tostr0(stats);
+            std::string s = tostr(stats);
 
             REQUIRE(s == "<GcStatistics :gen_v [<PerGenerationStatistics :used_z 0 :n_gc 0 :new_alloc_z 0 :scanned_z 0 :survive_z 0 :promote_z 0>,<PerGenerationStatistics :used_z 0 :n_gc 0 :new_alloc_z 0 :scanned_z 0 :survive_z 0 :promote_z 0>] :total_allocated 0 :total_promoted_sab 0 :total_promoted 0 :n_mutation 0 :n_logged_mutation 0 :n_xgen_mutation 0 :n_xckp_mutation 0>");
 
@@ -84,7 +84,7 @@ namespace xo {
         {
             GcStatisticsExt stats;
 
-            std::string s = tostr0(stats);
+            std::string s = tostr(stats);
 
 
 

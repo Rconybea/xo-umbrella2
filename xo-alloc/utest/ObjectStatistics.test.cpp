@@ -4,10 +4,10 @@
  */
 
 #include "xo/alloc/ObjectStatistics.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/ppsink/hex.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty.hpp>
@@ -32,14 +32,14 @@ namespace xo {
          * *ambiguous* with legacy xo::xtag (visible via headers that have not
          * migrated) rather than shadowing it.
          */
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         TEST_CASE("PerObjectTypeStatistics", "[alloc][gc]")
         {
             PerObjectTypeStatistics stats;
 
-            std::string s = tostr0(stats);
+            std::string s = tostr(stats);
 
             //std::cerr << hex_view(s.c_str(), s.c_str() + s.length(), true /*as_text*/) << std::endl;
 
@@ -56,7 +56,7 @@ namespace xo {
             stats.survive_n_ = 2;
             stats.survive_z_ = 8;
 
-            std::string s = tostr0(stats);
+            std::string s = tostr(stats);
 
             //std::cerr << hex_view(s.c_str(), s.c_str() + s.length(), true /*as_text*/) << std::endl;
 
@@ -68,7 +68,7 @@ namespace xo {
         {
             ObjectStatistics stats;
 
-            std::string s = tostr0(stats);
+            std::string s = tostr(stats);
 
 
 
@@ -81,7 +81,7 @@ namespace xo {
             ObjectStatistics stats;
             stats.per_type_stats_v_.push_back(PerObjectTypeStatistics());
 
-            std::string s = tostr0(stats);
+            std::string s = tostr(stats);
 
 
 
