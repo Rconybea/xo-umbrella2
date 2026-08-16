@@ -2,6 +2,7 @@
 
 #include "xo/jit/MachPipeline.hpp"
 #include <xo/expression/PrimitiveExpr.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ratio/ratio.hpp>
 #include <xo/ratio/ratio_reflect.hpp>
 #include <xo/reflect/reflect_struct.hpp>
@@ -15,7 +16,7 @@
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::jit::MachPipeline;
     using xo::scm::make_apply;
     using xo::scm::make_var;
@@ -141,7 +142,7 @@ namespace xo {
 
                 TestCase const & testcase = s_testcase_v[i_tc];
 
-                INFO(tostr0(xtag("i_tc", i_tc)));
+                INFO(tostr(xtag("i_tc", i_tc)));
 
                 auto ast = (*testcase.make_ast_)();
 
@@ -206,7 +207,7 @@ namespace xo {
                     double input = testcase.call_v_[j_call].first;
                     double expected = testcase.call_v_[j_call].second;
 
-                    INFO(tostr0(xtag("j_call", j_call), xtag("input", input), xtag("expected", expected)));
+                    INFO(tostr(xtag("j_call", j_call), xtag("input", input), xtag("expected", expected)));
 
                     auto actual = (*fn_ptr)(nullptr /*env*/, input);
 
