@@ -7,10 +7,10 @@
 #include <chrono>
 #include "DrawState.hpp"
 #include "xo/imgui/VulkanApp.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <fstream>
 #include <iostream>
 #include <backends/imgui_impl_sdl2.h>
@@ -251,7 +251,7 @@ namespace {
 
         if (fonts_path) {
             const float font_size = 14.0f;
-            std::string font_path = xo::pp::tostr0(fonts_path, "/truetype/DejaVuSans.ttf");
+            std::string font_path = xo::pp::tostr(fonts_path, "/truetype/DejaVuSans.ttf");
 
             /* check file exists */
             std::ifstream font_in(font_path);

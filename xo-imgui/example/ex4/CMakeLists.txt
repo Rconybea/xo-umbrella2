@@ -17,5 +17,7 @@ if (XO_ENABLE_EXAMPLES)
         xo_dependency(${SELF_EXE} xo_flatstring)
         xo_dependency(${SELF_EXE} xo_alloc)
         xo_dependency(${SELF_EXE} xo_ppsink)
+        # imgui_ex4.cpp / DrawState.cpp call xo::pp::tostr
+        xo_dependency(${SELF_EXE} xo_indentlog2)
     endif()
 endif()

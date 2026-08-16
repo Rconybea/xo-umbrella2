@@ -46,5 +46,6 @@ if (XO_ENABLE_VULKAN)
     target_include_directories(${SELF_LIB} PUBLIC ${IMGUI_INCLUDE_DIR}/imgui)
 
     # NB no xo-indentlog dep: nothing under src/ or include/ uses it.
-    # (the examples use xo::pp::{scope,xtag} and declare xo_ppsink)
+    # (the examples use xo::pp::{scope,xtag,tostr}; ex4 declares xo_ppsink +
+    #  xo_indentlog2, the others reach both through xo_object / xo_alloc)
 endif()
