@@ -10,7 +10,6 @@
 #include <xo/statistics/SampleStatistics.hpp>
 #include <xo/randomgen/normalgen.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
-#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 #include <catch2/catch.hpp>
