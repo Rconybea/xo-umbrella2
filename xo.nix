@@ -95,6 +95,17 @@ let
                                                                  llvm = llvmPackages1.llvm;
     };
 
+    # Published documentation site.  Membership is derived, not listed: every package
+    # whose derivation carries buildDocs = true contributes a subsystem page, so the
+    # site cannot drift from the set that actually builds docs.
+    #
+    # removeAttrs breaks the recursion -- filterAttrs forces each value to read
+    # .buildDocs, and xo-docs-site is itself a member of xoPackages.
+    xo-docs-site      = callPackage pkgs/xo-docs-site.nix {
+      subsystems = lib.filterAttrs (_: drv: drv.buildDocs or false)
+                                   (removeAttrs xoPackages [ "xo-docs-site" ]);
+    };
+
     inherit llvmXo;
   };
 

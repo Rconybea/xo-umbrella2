@@ -78,5 +78,6 @@ in
       xo-pykalmanfilter
       xo-imgui
       xo-userenv
+      xo-docs-site
       ;
   }

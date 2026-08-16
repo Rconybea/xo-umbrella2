@@ -289,6 +289,13 @@ $ nix-build -A xo-userenv
 
 output now in `./result`
 
+## To view published docs
+
+Documentation for each subsystem that builds it is published at
+[conybeare.us/xo-docs/](https://conybeare.us/xo-docs/), refreshed by CI on every push
+to `main`.  A subsystem appears there once its package in `xo.nix` sets
+`buildDocs = true`; see `pkgs/xo-docs-site.nix`.
+
 ## To view docs locally
 
 ### find local IP address

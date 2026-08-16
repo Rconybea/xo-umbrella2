@@ -409,3 +409,29 @@ jobs:
           echo nix-build ci.nix -A xo-imgui
           nix-build ci.nix -A xo-imgui
           ls -l ./result
+
+      # Publish subsystem documentation to https://conybeare.us/xo-docs/.
+      #
+      # Nothing is rendered here: every subsystem with buildDocs = true already
+      # installed its html tree during the builds above, and xo-docs-site just gathers
+      # them behind stable per-subsystem URLs.
+      #
+      # -o makes 'current' a gc root, so nix-collect-garbage cannot collect the trees
+      # nginx is serving.  Replacing the symlink releases the previous revision, so
+      # exactly one is retained.
+      #
+      # /var/www/xo-docs is created, owned by this runner, by the vpn1 fleet repo's
+      # activate.sh -- which also carries the matching nginx location.
+      - name: publish docs
+        run: |
+          echo nix-build ci.nix -A xo-docs-site -o /var/www/xo-docs/current
+          nix-build ci.nix -A xo-docs-site -o /var/www/xo-docs/current
+          ls -l /var/www/xo-docs/current/
+
+          # Check from outside rather than trusting the build: a site nginx cannot
+          # read, or a location block that never got installed, fails silently.
+          # --resolve avoids depending on hairpin NAT back to our own public address.
+          # This also means an expired TLS cert turns CI red, which is deliberate --
+          # vpn1 has no other alerting path yet.
+          curl -sS --fail --resolve conybeare.us:443:127.0.0.1 \
+               -o /dev/null https://conybeare.us/xo-docs/
