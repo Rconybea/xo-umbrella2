@@ -5,6 +5,7 @@
   # xo dependencies
   xo-cmake,
   xo-ppsink,
+  xo-indentlog2,
   xo-reactor,
 } :
 
@@ -21,6 +22,7 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-ppsink
+      xo-indentlog2
       xo-reactor
     ];
   })
