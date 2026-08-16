@@ -25,7 +25,6 @@
 #include "xo/webutil/webutil_ostream.hpp"
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/pretty.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>

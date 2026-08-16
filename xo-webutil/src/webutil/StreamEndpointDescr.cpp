@@ -1,9 +1,9 @@
 /* @file StreamEndpointDescr.cpp */
 
 #include "StreamEndpointDescr.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/quoted.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     namespace web {
@@ -31,12 +31,12 @@ namespace xo {
 
         std::string
         StreamEndpointDescr::display_string() const {
-            using xo::pp::tostr0;
+            using xo::pp::tostr;
 
             /* routes through Prettifier<StreamEndpointDescr> (declared in the
              * header), which calls pretty() above.  No operator<< involved.
              */
-            return tostr0(*this);
+            return tostr(*this);
         }
     } /*namespace web*/
 } /*namespace xo*/

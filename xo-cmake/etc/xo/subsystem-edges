@@ -58,6 +58,7 @@ xo-indentlog2 xo-reader2
 xo-indentlog2 xo-reflect
 xo-indentlog2 xo-simulator
 xo-indentlog2 xo-stringtable2
+xo-indentlog2 xo-webutil
 xo-jit xo-pyjit
 xo-kalmanfilter xo-pykalmanfilter
 xo-numeric xo-expression2

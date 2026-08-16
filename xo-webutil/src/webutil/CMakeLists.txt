@@ -11,8 +11,11 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 
 xo_dependency(${SELF_LIB} refcnt)
 xo_dependency(${SELF_LIB} callback)
-# StreamEndpointDescr.cpp / HttpEndpointDescr.cpp use xo::pp::{xtag,tostr}.
-# Only the .cpp files -- no public header of xo-webutil needs it.
+# PUBLIC: StreamEndpointDescr.hpp / HttpEndpointDescr.hpp name xo::pp::PpSink
+# and include Prettifier.hpp, so consumers need ppsink too.
 xo_dependency(${SELF_LIB} xo_ppsink)
+# StreamEndpointDescr.cpp / HttpEndpointDescr.cpp call xo::pp::tostr; no public
+# header of xo-webutil needs indentlog2.
+xo_dependency(${SELF_LIB} xo_indentlog2)
 
 # end CMakeLists.txt
