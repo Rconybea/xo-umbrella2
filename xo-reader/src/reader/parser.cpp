@@ -20,7 +20,7 @@
 
 namespace xo {
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::scope;
     using xo::scm::Expression;
     using xo::scm::LocalSymtab;
@@ -62,8 +62,8 @@ namespace xo {
             scope log(XO_DEBUG_(psm_.debug_flag()), xtag("tk", tk));
 
             if (psm_.xs_stack_.empty()) {
-                throw std::runtime_error(tostr0("parser::include_token",
-                                                ": parser not expecting input"
+                throw std::runtime_error(tostr("parser::include_token",
+                                               ": parser not expecting input"
                                                "(call parser.begin_translation_unit()..?)",
                                                xtag("token", tk)));
             }
