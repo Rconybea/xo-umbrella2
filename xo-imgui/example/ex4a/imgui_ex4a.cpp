@@ -1845,7 +1845,7 @@ int main(int, char **)
 
     if (fonts_path) {
         const float font_size = 14.0f;
-        std::string font_path = xo::tostr0(fonts_path, "/truetype/DejaVuSans.ttf");
+        std::string font_path = xo::pp::tostr(fonts_path, "/truetype/DejaVuSans.ttf");
 
         /* check file exists */
         std::ifstream font_in(font_path);
@@ -3988,7 +3988,7 @@ int main(int, char **)
 
     if (fonts_path) {
         const float font_size = 14.0f;
-        std::string font_path = xo::tostr0(fonts_path, "/truetype/DejaVuSans.ttf");
+        std::string font_path = xo::pp::tostr(fonts_path, "/truetype/DejaVuSans.ttf");
 
         /* check file exists */
         std::ifstream font_in(font_path);
