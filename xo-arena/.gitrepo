@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-arena.git
 	branch = main
-	commit = 44c808b89026ec7d2f65306a6a6c56128a6bf6c5
-	parent = 10311934a8b6cfe9ac6e5264284440f1204275ff
+	commit = 9c14d74231894644809c4d02a5e165ccdf12f07b
+	parent = 4c6c8b01d15c8150a520287b3362c515e1225086
 	method = merge
 	cmdver = 0.4.9
