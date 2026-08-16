@@ -7,10 +7,10 @@ xo-randomgen
 xo-flatstring
 xo-reflectutil
 xo-arena
-xo-facet
-xo-printable2
 xo-testutil
 xo-indentlog2
+xo-facet
+xo-printable2
 xo-alloc2
 xo-refcnt
 xo-pyutil

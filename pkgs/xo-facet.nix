@@ -6,6 +6,7 @@
   xo-cmake,
   xo-reflectutil,
   xo-arena,
+  xo-indentlog2,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -24,5 +25,6 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-reflectutil
       xo-arena
+      xo-indentlog2
     ];
   })

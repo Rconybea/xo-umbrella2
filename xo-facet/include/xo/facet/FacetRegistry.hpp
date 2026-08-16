@@ -11,10 +11,10 @@
 #include "facet_implementation.hpp"
 #include "obj.hpp"
 #include <xo/arena/DArenaHashMap.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/reflectutil/typeseq_pp.hpp> /* Prettifier<typeseq>: dump() renders typeseqs */
 // #include <unordered_map>
 #include <utility>
@@ -143,10 +143,10 @@ namespace xo {
                 auto retval = try_variant<ATo>(from);
 
                 if (!retval) {
-                    using xo::pp::tostr0;
+                    using xo::pp::tostr;
                     using xo::pp::xtag;
 
-                    throw std::runtime_error(tostr0("FacetRegistry::variant failed",
+                    throw std::runtime_error(tostr("FacetRegistry::variant failed",
                                                    xtag("AFrom.tseq", typeseq::id<AFrom>()),
                                                    xtag("AFrom.tname", typerecd::recd<AFrom>().name()),
                                                    xtag("ATo.tseq", typeseq::id<ATo>()),
@@ -196,7 +196,7 @@ namespace xo {
             }
 
             void dump(std::ostream * p_out) {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
 
                 (*p_out) << std::endl;
                 (*p_out) << "<FacetRegistry" << std::endl;
@@ -208,8 +208,8 @@ namespace xo {
                      * free of <ostream>.  See
                      * .xo-backlog/milestones/ostream-containment.md
                      */
-                    << "  [" << tostr0(kv.first.first)
-                    << "," << tostr0(kv.first.second) << "]"
+                    << "  [" << tostr(kv.first.first)
+                    << "," << tostr(kv.first.second) << "]"
                     << " -> " << kv.second << std::endl;
                 }
                 (*p_out) << ">" << std::endl;
