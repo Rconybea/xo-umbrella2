@@ -6,6 +6,7 @@
 #include "print/PrettySink.hpp"
 #include <xo/testutil/try_test_array.hpp>
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/pretty_ostream.hpp>
 #include <catch2/catch.hpp>
 #include <cstdint>
 #include <ostream>
@@ -135,7 +136,7 @@ namespace ut {
             case Step_PrettySink::k_stream_finish:
                 {
                     auto ins = pp.stream_open(1 /*min_z*/);
-                    ins.os() << step.text_; // os() form
+                    ins << step.text_;
                     ins.finish();           // explicit; dtor's finish() is a no-op
                 }
                 break;

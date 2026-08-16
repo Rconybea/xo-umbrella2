@@ -7,6 +7,7 @@
 #include <xo/testutil/try_test_array.hpp>
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pretty_ostream.hpp>
 #include <catch2/catch.hpp>
 #include <ostream>
 #include <sstream>

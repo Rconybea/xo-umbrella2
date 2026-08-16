@@ -4,6 +4,7 @@
  **/
 
 #include <xo/ppsink/tostr0.hpp>
+#include <xo/ppsink/pretty_ostream.hpp>
 #include <catch2/catch.hpp>
 #include <string>
 

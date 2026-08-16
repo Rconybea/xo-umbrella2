@@ -1,6 +1,7 @@
 /* @file FlatSink.test.cpp */
 
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pretty_ostream.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 

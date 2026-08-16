@@ -37,7 +37,8 @@ namespace xo::pp {
     public:
         FlatSink(const PpStyle & style, std::streambuf * sbuf);
         explicit FlatSink(std::streambuf * sbuf)
-            : PpSink(PpStyle::default_style()), sbuf_{sbuf}, os_{sbuf} {}
+            : PpSink(PpStyle::default_style()), sbuf_{sbuf}
+{}
 
         // inherited from PpSink
 
@@ -60,11 +61,13 @@ namespace xo::pp {
          *  here via sputn()/sputc() -- no ostream, no sentry.
          **/
         std::streambuf * sbuf_ = nullptr;
+#ifdef OBSOLETE
         /** bound to @ref sbuf_, and used ONLY by stream_open(): PpSinkInserter
          *  renders via operator<<, which needs an ostream.  Declared after
          *  sbuf_ so it is initialized from it.
          **/
         std::ostream os_;
+#endif
     };
 } /*namespace xo::pp*/
 

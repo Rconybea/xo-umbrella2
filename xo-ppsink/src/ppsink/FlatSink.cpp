@@ -11,7 +11,10 @@ namespace xo::pp {
     using std::int32_t;
 
     FlatSink::FlatSink(const PpStyle & style, std::streambuf * sbuf)
-            : PpSink(style), sbuf_{sbuf}, os_{sbuf}
+            : PpSink(style), sbuf_{sbuf}
+#ifdef OBSOLETE
+, os_{sbuf}
+#endif
     {}
 
     PpSink &
@@ -53,11 +56,13 @@ namespace xo::pp {
             p = Escape::str_copy(std::string_view(&ch, 1), p);
         }
 
-        if (quote_flag)
+        if (quote_flag) {
             *p++ = Escape::c_quote;
+        }
 
-        if (p > buf)
-            os_.write(buf, p - buf);
+        if (p > buf) {
+            sbuf_->sputn(buf, p - buf);
+        }
 
         return *this;
     }
@@ -103,12 +108,14 @@ namespace xo::pp {
     PpSinkInserter
     FlatSink::stream_open(uint32_t /*min_z*/)
     {
+#ifdef OBSOLETE
         /* no token to reserve: operator<< writes through os_ to sbuf_.
          * os_ is ours and outlives each inserter, so a failure on a previous
          * use would otherwise stick -- clear it (cf PrettySink::stream_open).
          */
         os_.clear();
-        return PpSinkInserter(this, &os_);
+#endif
+        return PpSinkInserter(this, sbuf_);
     }
 
     void

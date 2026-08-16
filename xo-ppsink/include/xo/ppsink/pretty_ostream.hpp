@@ -43,6 +43,33 @@ namespace xo::pp {
         return os;
     }
 
+    /** convenience so given a PpSinkInserter:
+     *    PpSinkInserter ins = ppsink.stream_open(..);
+     *  we can write
+     *    ins << x << ...;
+     *  instead of
+     *    ins.os() << x << ...;
+     **/
+    /** NB deliberately UNconstrained.  `requires requires (std::ostream & os,
+     *  const T & x) { os << x; }` looks right and does not compile: for a T in
+     *  namespace xo::pp (tag_impl, quot_impl, ..) ADL brings every xo::pp
+     *  operator<< into that overload resolution -- including this one -- so the
+     *  constraint's satisfaction depends on itself, which gcc rejects outright.
+     *  std::ostream never converts to PpSinkInserter&, but constraint checking
+     *  happens before that is determined.
+     *
+     *  Consequence: xo::pp::pp_streamable<T> (pretty.hpp) answers "did this TU
+     *  include pretty_ostream.hpp", not "is T streamable".  A T with no
+     *  operator<<(std::ostream&, const T&) therefore fails inside this body
+     *  rather than at pretty()'s static_assert.
+     **/
+    template <typename T>
+    inline PpSinkInserter &
+    operator<<(PpSinkInserter & ins, const T & x) {
+        std::ostream os(ins.sbuf());
+        os << x;
+        return ins;
+    }
 }
 
 /* end pretty_ostream.hpp */

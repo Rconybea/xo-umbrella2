@@ -53,7 +53,7 @@ namespace ut {
         }
         PpSink & end() override { os_ << "</G>"; return *this; }
         xo::pp::PpSinkInserter stream_open(std::uint32_t) override {
-            return xo::pp::PpSinkInserter(this, &os_);
+            return xo::pp::PpSinkInserter(this, os_.rdbuf());
         }
         void stream_commit() override {}
 

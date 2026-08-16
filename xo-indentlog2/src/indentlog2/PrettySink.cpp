@@ -16,7 +16,6 @@ namespace xo {
         : PpSink(PpStyle::default_style()),
           pps_{cfg.layout()},
           sbuf_{&pps_},
-          os_(&sbuf_),
           logbuf_{cfg.logbuf().logbuf_config(), cfg.logbuf().logbuf_debug_flag()}
         {
             /* presentation style travels with the config (PpConfig::style()),
@@ -131,9 +130,11 @@ namespace xo {
             assert(pps_.has_open_string() == false);
 
             sbuf_.open(min_z);
+#ifdef OBSOLETE
             os_.clear();  // in case badbit set on previous use
+#endif
 
-            return PpSinkInserter(this, &os_);
+            return PpSinkInserter(this, &sbuf_);
         }
 
         void

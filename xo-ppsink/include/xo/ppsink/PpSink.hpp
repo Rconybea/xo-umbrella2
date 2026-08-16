@@ -24,11 +24,11 @@ namespace xo::pp {
      **/
     class PpSinkInserter {
     public:
-        explicit PpSinkInserter(PpSink * pps, std::ostream * os);
+        explicit PpSinkInserter(PpSink * pps, std::streambuf * sbuf);
         PpSinkInserter(const PpSinkInserter &) = delete;
         ~PpSinkInserter();
 
-        std::ostream & os() { return *os_; }
+        std::streambuf * sbuf() { return sbuf_; }
 
         /** finalizer.  Will be called at least once. Idempotent; dtor invokes **/
         void finish();
@@ -39,22 +39,13 @@ namespace xo::pp {
         /** pretty-printer api **/
         PpSink * ppsink_ = nullptr;
         /** stream api.  Writing to @ref stream_ appends to @ref sink_ **/
-        std::ostream * os_ = nullptr;
+        std::streambuf * sbuf_ = nullptr;
     };
 
-    /** convenience so given a PpSinkInserter:
-     *    PpSinkInserter ins = ppsink.stream_open(..);
-     *  we can write
-     *    ins << x << ...;
-     *  instead of
-     *    ins.os() << x << ...;
+    /** RAII scope for a struct with a runtime number of fields; defined in
+     *  pretty_struct.hpp.  Named here so PpSink::struct_open() can return it.
      **/
-    template <typename T>
-    inline PpSinkInserter &
-    operator<<(PpSinkInserter & ins, const T & x) {
-        ins.os() << x;
-        return ins;
-    }
+    class struct_scope;
 
     /** @brief Interface for a stream with pretty-printing support
      *
@@ -62,12 +53,6 @@ namespace xo::pp {
      *  pretty-printing during implementation of xo-facet itself.
      *  May revisit later.
      **/
-
-    /** RAII scope for a struct with a runtime number of fields; defined in
-     *  pretty_struct.hpp.  Named here so PpSink::struct_open() can return it.
-     **/
-    class struct_scope;
-
     class PpSink {
     public:
         using uint32_t = std::uint32_t;

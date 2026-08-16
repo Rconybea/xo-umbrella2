@@ -10,8 +10,8 @@ namespace xo::pp {
       : style_{style}
     {}
 
-    PpSinkInserter::PpSinkInserter(PpSink * ppsink, std::ostream * os)
-      : ppsink_{ppsink}, os_{os}
+    PpSinkInserter::PpSinkInserter(PpSink * ppsink, std::streambuf * sbuf)
+      : ppsink_{ppsink}, sbuf_{sbuf}
     {
     }
 
@@ -28,7 +28,7 @@ namespace xo::pp {
 
             // ensure we can't reuse this
             ppsink_ = nullptr;
-            os_ = nullptr;
+            sbuf_ = nullptr;
         }
     }
 

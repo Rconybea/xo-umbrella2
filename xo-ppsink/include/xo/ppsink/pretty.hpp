@@ -26,20 +26,49 @@ namespace xo::pp {
      *     native path: writes directly to the PpSink and can emit begin/split/end.
      *  2. string-like leaf (convertible to std::string_view) -- straight to
      *     PpSink::put, no ostream.
-     *  3. fallback: operator<< via a streamed token.  This is the ONLY path
-     *     that needs <ostream> (at the point of instantiation); prefer a
+     *  3. fallback: operator<< via a streamed token -- available only when the
+     *     translation unit included pretty_ostream.hpp, which is where
+     *     operator<<(PpSinkInserter&, const T&) is declared.  Prefer a
      *     Prettifier<T> specialization so a type never lands here.
+     *
+     *  A type that reaches neither 1, 2 nor 3 is a compile error, not a
+     *  placeholder rendering -- deliberately.  Whether 3 is available is a
+     *  property of the TU, so a silent fallback would give pretty<T> different
+     *  behaviour in different TUs, and the linker would pick one arbitrarily.
      **/
+    /** true iff an operator<<(PpSinkInserter&, ..) is visible here -- i.e.
+     *  whether this translation unit included pretty_ostream.hpp.
+     *
+     *  NB this is a property of the TU, not of @p T: the inserter it looks for
+     *  is unconstrained, for a reason recorded at its definition.  So a @p T
+     *  with no operator<<(std::ostream&, const T&) still satisfies this, and
+     *  fails later inside pretty_ostream.hpp instead of at the static_assert
+     *  below.  Worth knowing when reading a failure: "no match for operator<<"
+     *  pointing INTO pretty_ostream.hpp means the type is unstreamable; the
+     *  static_assert means the header is simply not included.
+     **/
+    template <typename T>
+    concept pp_streamable = requires (PpSinkInserter & ins, const T & x) {
+        ins << x;
+    };
+
     template <typename T>
     void pretty(PpSink & sink, const T & x) {
         if constexpr (has_prettifier<T>) {
             Prettifier<T>::print(sink, x);
         } else if constexpr (std::is_convertible_v<T, std::string_view>) {
             sink.put(std::string_view(x));
-        } else {
+        } else if constexpr (pp_streamable<T>) {
             auto ins = sink.stream_open(1 /*min_z*/);
             ins << x;
             /* PpSinkInserter dtor commits the token */
+        } else {
+            static_assert(pp_streamable<T>,
+                          "xo::pp::pretty: don't know how to render this type. "
+                          "Either specialize Prettifier<T> (preferred: it composes, "
+                          "and can emit break points), or #include "
+                          "<xo/ppsink/pretty_ostream.hpp> in this translation unit "
+                          "to render it as one opaque token via operator<<.");
         }
     }
 

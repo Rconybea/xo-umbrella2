@@ -11,7 +11,7 @@
 #include "../LogBuffer.hpp"
 #include "../TempArena.hpp"
 #include <xo/ppsink/FlatSink.hpp>
-#include <xo/ppsink/pretty_ostream.hpp> /* pretty() + <ostream> for operator<< fallback */
+#include <xo/ppsink/pretty.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 #include <algorithm> // for std::min
 #include <string>

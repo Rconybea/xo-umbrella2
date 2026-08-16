@@ -18,7 +18,8 @@
 #pragma once
 
 #include "FlatSink.hpp"
-#include "pretty_ostream.hpp" /* pretty() + <ostream> for the operator<< fallback */
+//#include "pretty_ostream.hpp" /* pretty() + <ostream> for the operator<< fallback */
+#include "pretty.hpp"
 #include <sstream>
 #include <string>
 
