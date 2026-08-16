@@ -23,6 +23,10 @@ if (ENABLE_TESTING)
     # at least need explicit {xo_ppsink, randomgen} deps in a submodule build
     # xo_dependency, not headeronly: xo-ppsink is a compiled library
     xo_dependency(${SELF_EXE} xo_ppsink)
+    # quantity.test.cpp / xquantity.test.cpp call xo::pp::tostr.  Declared even
+    # though xo-unit -> xo-ratio -> xo-reflect already reaches indentlog2: the
+    # same reason ppsink is spelled out above rather than inherited.
+    xo_dependency(${SELF_EXE} xo_indentlog2)
     xo_headeronly_dependency(${SELF_EXE} randomgen)
     xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 endif()

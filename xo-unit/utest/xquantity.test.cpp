@@ -2,11 +2,11 @@
 
 #include "xquantity.hpp"
 #include "xquantity_iostream.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
@@ -18,7 +18,7 @@ namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
     using xo::pp::tag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
 
     namespace u = xo::qty::u;
     namespace nu = xo::qty::nu;
@@ -159,7 +159,7 @@ namespace xo {
                 for (size_t i=0; i<n_experiment; ++i) {
                     scope log1(XO_DEBUG_(debug_flag));
 
-                    INFO(tostr0(XTAG_(nu), XTAG_(i)));
+                    INFO(tostr(XTAG_(nu), XTAG_(i)));
 
                     /* choose which dimensions to use */
                     std::set<xo::qty::dim> dim_set;

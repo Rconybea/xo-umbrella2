@@ -25,12 +25,12 @@ add_subdirectory(utest)
 set(SELF_LIB xo_unit)
 xo_add_headeronly_library(${SELF_LIB})
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
-xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 xo_headeronly_dependency(${SELF_LIB} xo_flatstring)
 xo_headeronly_dependency(${SELF_LIB} xo_ratio)
-# bpu_iostream.hpp uses xo::pp::xtag, and every xo-unit *_iostream header
-# funnels through it, so this is PUBLIC rather than opt-in.
 xo_headeronly_dependency(${SELF_LIB} xo_ppsink)
+# NB must come after the xo_*dependency() calls above: it generates
+# @XO_FIND_DEPENDENCY_BLOCK@ from ${SELF_LIB}'s xo_deps property as it runs.
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 if (XO_ENABLE_EXAMPLES)
     install(TARGETS xo_unit_ex1    DESTINATION bin/xo/example)

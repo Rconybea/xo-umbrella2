@@ -2,11 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 
-find_dependency(xo_flatstring)
-find_dependency(xo_ratio)
-find_dependency(xo_ppsink)
-#find_dependency(printjson)
-#find_dependency(callback)
+@XO_FIND_DEPENDENCY_BLOCK@
 
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Share.cmake")

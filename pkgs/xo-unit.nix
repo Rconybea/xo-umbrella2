@@ -9,6 +9,7 @@
   xo-cmake, xo-ratio, xo-flatstring,
 
   xo-ppsink,
+  xo-indentlog2,
   # test-only xo dependencies
   xo-randomgen,
 
@@ -47,6 +48,8 @@ stdenv.mkDerivation (finalattrs:
     ]
     ++ lib.optionals doCheck [
       xo-randomgen
+      # utests call xo::pp::tostr; the library itself does not
+      xo-indentlog2
     ]
     ++ lib.optionals buildExamples [
     ]
