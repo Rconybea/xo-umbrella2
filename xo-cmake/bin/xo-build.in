@@ -81,6 +81,10 @@ Options:
                           Exists so the flags above stop being something anyone
                           has to remember: --with-examples in particular, whose
                           absence reports green on a tree that does not build.
+                          Also adds --with-vulkan=ON when this host has vulkan,
+                          since xo-imgui's ex3/ex4/ex4a are gated on it and are
+                          otherwise skipped without comment.  An explicit
+                          --with-vulkan=VKFLAG overrides that, either way.
   -- CMAKE_ARGS           everything after -- is appended verbatim to the cmake
                           CONFIGURE command line, and nowhere else.  Same
                           convention as xo-reconfigure.  Combines with --sweep,
@@ -488,6 +492,27 @@ if [[ ${sweep_flag} -eq 1 ]]; then
     # --all expansion below, so xonames still holds only explicit names.
     if [[ ${#xonames[@]} -eq 0 && ${all_flag} -eq 0 ]]; then
         sweep_argv+=(--all)
+    fi
+
+    # XO_ENABLE_VULKAN defaults OFF (xo-cmake/cmake/xo_macros/xo_cxx.cmake),
+    # and xo-imgui's ex3/ex4/ex4a are gated on it -- so a sweep that does not
+    # ask for it compiles two of five examples and still reports xo-imgui ok.
+    # That is the same species of silent under-coverage as --with-examples
+    # above; see .xo-backlog/xo-imgui/issues/03.
+    #
+    # Enabled by capability rather than by hostname: on a machine without
+    # vulkan, find_package(Vulkan REQUIRED) in xo-imgui/src/imgui/CMakeLists.txt
+    # would turn a green sweep red.  An explicit --with-vulkan always wins,
+    # including --with-vulkan=OFF.
+    if [[ -z ${with_vulkan} ]]; then
+        if [[ -n ${VULKAN_SDK:-} ]] || pkg-config --exists vulkan 2>/dev/null; then
+            sweep_argv+=(--with-vulkan=ON)
+            >&2 echo "xo-build: --sweep: vulkan available, adding --with-vulkan=ON" \
+                     "(pass --with-vulkan=OFF to override)"
+        else
+            >&2 echo "xo-build: --sweep: no vulkan found;" \
+                     "xo-imgui examples ex3/ex4/ex4a will not be compiled"
+        fi
     fi
 
     sweep_build_rc=0
