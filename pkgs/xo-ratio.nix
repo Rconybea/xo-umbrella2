@@ -10,7 +10,7 @@
 
   xo-ppsink,
   # test-only xo dependencies
-  xo-reflect, xo-randomgen,
+  xo-reflect, xo-randomgen, xo-indentlog2,
   xo-testutil,
 
   buildDocs ? false,
@@ -54,6 +54,7 @@ stdenv.mkDerivation (finalattrs:
     ++ lib.optionals doCheck [
       xo-reflect
       xo-randomgen
+      xo-indentlog2
       xo-testutil
       catch2
       cli11

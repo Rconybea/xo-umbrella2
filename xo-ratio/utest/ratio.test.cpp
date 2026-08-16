@@ -7,7 +7,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* INFO()/tostr() reach values via ostream */
-#include <xo/ppsink/tostr_xx.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 // #include <xo/ppsink/hex.hpp>   // for hex_view(), when inspecting ratio layout
@@ -22,7 +22,7 @@ namespace xo {
      * xo::tostr via the enclosing namespace.
      */
     using xo::pp::scope;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
 
     using std::exponential_distribution;
@@ -91,7 +91,7 @@ namespace xo {
             INFO(XTAG_(ratio_v));
 
             for (std::uint32_t i=0; i<n_experiment; ++i) {
-                INFO(tostr0(XTAG_(i), XTAG_(n_experiment)));
+                INFO(tostr(XTAG_(i), XTAG_(n_experiment)));
 
                 /* choose a couple of ratios at random */
                 auto ratio1 = ratio_v[rng() % n_ratio];

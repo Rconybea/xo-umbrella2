@@ -21,6 +21,7 @@ if (ENABLE_TESTING)
     xo_headeronly_dependency(${SELF_EXE} xo_reflectutil)
     xo_dependency(${SELF_EXE} randomgen)
     xo_dependency(${SELF_EXE} xo_ppsink)
+    xo_dependency(${SELF_EXE} xo_indentlog2)
     xo_dependency(${SELF_EXE} xo_flatstring)
     # UtestAppStart/UtestListener: shared utest main, see ratio_utest_main.cpp
     xo_dependency(${SELF_EXE} xo_testutil)
