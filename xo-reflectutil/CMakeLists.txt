@@ -31,7 +31,6 @@ xo_add_headeronly_library(${SELF_LIB})
 xo_headeronly_dependency(${SELF_LIB} xo_ppsink)
 
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
-xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
 # docs targets depend on all the other library/utest targets
@@ -44,5 +43,7 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 #xo_headeronly_dependency(${SELF_LIB} xo_flatstring)
 #xo_headeronly_dependency(${SELF_LIB} randomgen)
 # etc..
+
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # end CMakeLists.txt

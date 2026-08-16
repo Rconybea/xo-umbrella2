@@ -19,9 +19,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # ----------------------------------------------------------------
 
 # must complete definition of expression lib before configuring examples
-#add_subdirectory(src/alloc)
 add_subdirectory(utest)
-#xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 set(SELF_LIB xo_facet)
 xo_add_headeronly_library(${SELF_LIB})
