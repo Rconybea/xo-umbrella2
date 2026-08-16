@@ -135,7 +135,7 @@ namespace xo {
 
             if ((P_ext.rows() != n) || (P_ext.cols() != n)) {
                 std::string err_msg
-                    = tostr0("kalman_gain: with dim(H) = [m x n] expect dim(P) = [n x n]",
+                    = tostr("kalman_gain: with dim(H) = [m x n] expect dim(P) = [n x n]",
                             xtag("m", m), xtag("n", n),
                             xtag("P.rows", P_ext.rows()),
                             xtag("P.cols", P_ext.cols()));
@@ -145,7 +145,7 @@ namespace xo {
 
             if ((R.rows() != m) || (R.cols() != m)) {
                 std::string err_msg
-                    = tostr0("kalman_gain: with dim(H) = [m x n] expect dim(R) = [m x m]",
+                    = tostr("kalman_gain: with dim(H) = [m x n] expect dim(R) = [m x m]",
                             xtag("m", m), xtag("n", n),
                             xtag("R.rows", R.rows()), xtag("R.cols", R.cols()));
 

@@ -31,7 +31,7 @@ namespace xo {
          * *ambiguous* with legacy xo::xtag (still visible via headers that
          * have not migrated) rather than shadowing it.
          */
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         // ----- KalmanFilterState -----
@@ -153,7 +153,7 @@ namespace xo {
 
             if (n != P.rows() || n != P.cols()) {
                 std::string err_msg
-                    = tostr0("with n=x.size expect [n x n] covar matrix P",
+                    = tostr("with n=x.size expect [n x n] covar matrix P",
                             xtag("n", x.size()),
                             xtag("P.rows", P.rows()),
                             xtag("P.cols", P.cols()));
@@ -164,7 +164,7 @@ namespace xo {
             if ((K.rows() > 0) && (K.rows() > 0)) {
                 if (n != K.rows()) {
                     std::string err_msg
-                        = tostr0("with n=x.size expect [m x n] gain matrix K",
+                        = tostr("with n=x.size expect [m x n] gain matrix K",
                                 xtag("n", x.size()),
                                 xtag("K.rows", K.rows()),
                                 xtag("K.cols", K.cols()));

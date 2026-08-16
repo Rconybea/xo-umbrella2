@@ -13,7 +13,7 @@ namespace xo {
          * *ambiguous* with legacy xo::xtag (still visible via headers that
          * have not migrated) rather than shadowing it.
          */
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         void
@@ -27,7 +27,7 @@ namespace xo {
         std::string
         KalmanFilterSpec::display_string() const
         {
-            return tostr0(*this);
+            return tostr(*this);
         } /*display_string*/
     } /*namespace kalman*/
 } /*namespace xo*/

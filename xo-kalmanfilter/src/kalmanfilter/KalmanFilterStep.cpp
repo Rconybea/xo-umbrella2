@@ -18,7 +18,7 @@ namespace xo {
          * have not migrated) rather than shadowing it.
          */
         using xo::pp::scope;
-        using xo::pp::tostr0;
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         rp<KalmanFilterState>
@@ -84,7 +84,7 @@ namespace xo {
         std::string
         KalmanFilterStep::display_string() const
         {
-            return tostr0(*this);
+            return tostr(*this);
         } /*display_string*/
     } /*namespace kalman*/
 } /*namespace xo*/
