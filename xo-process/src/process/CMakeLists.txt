@@ -15,4 +15,6 @@ xo_dependency(${SELF_LIB} printjson)
 # RealizationSource.hpp / RealizationCallback.hpp name xo::pp:: in public
 # headers, so this is PUBLIC.
 xo_dependency(${SELF_LIB} xo_ppsink)
+# UpxEvent.cpp uses xo::pp::tostr; no public header needs indentlog2.
+xo_dependency(${SELF_LIB} xo_indentlog2)
 #xo_dependency(${SELF_LIB} callback)
