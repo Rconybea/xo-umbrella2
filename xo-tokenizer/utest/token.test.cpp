@@ -4,15 +4,15 @@
  */
 
 #include "xo/tokenizer/token.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <catch2/catch.hpp>
 #include <memory>
 
 namespace xo {
     using token = xo::scm::token<char>;
     using xo::scm::tokentype;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
     using xo::pp::xtag;
 
     namespace ut {
@@ -236,7 +236,7 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
                     auto const & testcase = s_testcase_v[i_tc];
 
-                    INFO(tostr0(xtag("i_tc", i_tc),
+                    INFO(tostr(xtag("i_tc", i_tc),
                                xtag("text", testcase.text_)
                              ));
 
