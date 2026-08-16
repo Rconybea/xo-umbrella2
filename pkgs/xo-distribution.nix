@@ -5,6 +5,7 @@
   xo-cmake,
 
   xo-ppsink,
+  xo-indentlog2,
   xo-refcnt,
 
   doCheck ? true,
@@ -25,6 +26,7 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-ppsink
+      xo-indentlog2
       xo-refcnt
     ];
   })

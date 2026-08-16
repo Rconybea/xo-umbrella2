@@ -10,7 +10,7 @@
 #include <xo/jit/intrinsics.hpp>
 #include <pybind11/stl.h>
 #include <llvm/Config/llvm-config.h>
-/* tostr0/xtag used below; they used to arrive via xo-jit's headers,
+/* tostr/xtag used below; they used to arrive via xo-jit's headers,
  * which no longer pull in legacy xo-indentlog.
  */
 #include <xo/ppsink/tag_ostream.hpp>

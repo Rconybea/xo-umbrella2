@@ -7,11 +7,11 @@
 
 #include "Distribution.hpp"
 #include "Normal.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/PrettyVector.hpp>   /* Prettifier<std::vector<T>> */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>    /* os << xtag(..) */
-#include <xo/ppsink/tostr_xx.hpp>
 #include <cmath>
 #include <cstdint>
 #include <vector>
@@ -649,7 +649,7 @@ namespace xo {
                 os << ">";
             } /*display*/
 
-            std::string display_string() const { return xo::pp::tostr0(*this); }
+            std::string display_string() const { return xo::pp::tostr(*this); }
 
         private:
             ExplicitDist(Domain bucket_dx, Domain ref_value)

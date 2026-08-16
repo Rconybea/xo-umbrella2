@@ -3,10 +3,10 @@
 #pragma once
 
 #include "Distribution.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <stdexcept>   /* std::runtime_error -- was arriving via indentlog */
 #include <cmath>
 #include <cstdint>
@@ -179,12 +179,12 @@ namespace xo {
             } /*distr2_impl*/
 
             static double distr_impl(double x) {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
 
                 constexpr char const * c_self = "KolmogorovSmirnov::distr_impl";
 
                 if(x < 0.0)
-                    throw std::runtime_error(tostr0(c_self, "KS(x) cdf defined for x>=0"));
+                    throw std::runtime_error(tostr(c_self, "KS(x) cdf defined for x>=0"));
 
                 if(x == 0.0)
                     return 0;
