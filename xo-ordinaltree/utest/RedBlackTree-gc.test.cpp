@@ -6,6 +6,7 @@
 #include "random_tree_ops.hpp"
 #include "xo/ordinaltree/RedBlackTree.hpp"
 #include "xo/ordinaltree/rbtree/SumReduce.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/object/String.hpp>
 #include <xo/alloc/GC.hpp>
 #include <catch2/catch.hpp>
@@ -153,7 +154,7 @@ namespace xo {
 
                         scope log(XO_DEBUG2_(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
 
-                        INFO(tostr0(xtag("i_tc", i_tc), xtag("n", n)));
+                        INFO(tostr(xtag("i_tc", i_tc), xtag("n", n)));
 
                         ok_flag = true; // unless contradicted below
 
@@ -436,7 +437,7 @@ namespace xo {
 
                         scope log(XO_DEBUG2_(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
 
-                        INFO(tostr0(xtag("i_tc", i_tc), xtag("n", n)));
+                        INFO(tostr(xtag("i_tc", i_tc), xtag("n", n)));
 
                         ok_flag = true; // unless contradicted below
 

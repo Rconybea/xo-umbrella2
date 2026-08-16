@@ -416,8 +416,8 @@ namespace xo {
                 const_iterator ix = this->find(k);
 
                 if (ix == this->cend()) {
-                    throw std::out_of_range(tostr0("BplusTree::at: expected key argument to appear in tree",
-                                                   xtag("key", k)));
+                    throw std::out_of_range(tostr("BplusTree::at: expected key argument to appear in tree",
+                                                  xtag("key", k)));
                 }
 
                 return BpTreeConstLhs(this, ix.item_addr());

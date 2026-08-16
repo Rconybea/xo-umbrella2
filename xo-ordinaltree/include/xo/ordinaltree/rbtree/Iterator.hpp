@@ -167,10 +167,10 @@ namespace xo {
 
             protected:
                 void check_regular() const {
-                    using xo::pp::tostr0;
+                    using xo::pp::tostr;
 
                     if(this->location_ != IL_Regular)
-                        throw std::runtime_error(tostr0("rbtree iterator: cannot deref iterator"
+                        throw std::runtime_error(tostr("rbtree iterator: cannot deref iterator"
                                                        " in non-regular state"));
                 } /*check_regular*/
 

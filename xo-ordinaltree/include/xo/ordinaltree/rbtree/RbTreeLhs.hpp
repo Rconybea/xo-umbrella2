@@ -40,11 +40,11 @@ namespace xo {
                     {}
 
                 operator mapped_type const & () const {
-                    using xo::pp::tostr0;
+                    using xo::pp::tostr;
 
                     if (!this->node_) {
                         throw std::runtime_error
-                            (tostr0("RedBlackTreeLhsBase: attempt to use empty lhs object as rvalue"));
+                            (tostr("RedBlackTreeLhsBase: attempt to use empty lhs object as rvalue"));
                     }
 
                     return this->node_->contents().second;
@@ -95,7 +95,7 @@ namespace xo {
                     : RedBlackTreeLhsBase<RedBlackTree, RbNode>(tree, node), key_(key) {}
 
                 RedBlackTreeLhs & operator=(mapped_type const & v) {
-                    using xo::pp::tostr0;
+                    using xo::pp::tostr;
 
                     constexpr bool c_debug_flag = false;
 
@@ -117,14 +117,14 @@ namespace xo {
                         assert(false);
 
                         throw std::runtime_error
-                            (tostr0("rbtree: attempt to apply operator= thru empty lhs object"));
+                            (tostr("rbtree: attempt to apply operator= thru empty lhs object"));
                     }
 
                     return *this;
                 } /*operator=*/
 
                 RedBlackTreeLhs & operator+=(mapped_type const & v) {
-                    using xo::pp::tostr0;
+                    using xo::pp::tostr;
 
                     if(this->p_tree_) {
                         if(this->node_) {
@@ -147,7 +147,7 @@ namespace xo {
                         assert(false);
 
                         throw std::runtime_error
-                            (tostr0("rbtree: attempt to apply operator+= through empty lhs object"));
+                            (tostr("rbtree: attempt to apply operator+= through empty lhs object"));
                     }
 
                     return *this;

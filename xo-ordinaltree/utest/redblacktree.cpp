@@ -4,6 +4,7 @@
 #include "random_tree_ops.hpp"
 #include "xo/ordinaltree/rbtree/OrdinalReduce.hpp"
 #include "xo/ordinaltree/rbtree/SumReduce.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <map>
 
 namespace {
@@ -71,10 +72,10 @@ namespace {
 
             double reduced = (i+1) * (5*i + dvalue);
 
-            INFO(tostr0(xtag("i", i), xtag("n", n),
-                        xtag("tree.reduced_upto", reduced_upto),
-                        xtag("reduced", reduced),
-                        xtag("dvalue", dvalue)));
+            INFO(tostr(xtag("i", i), xtag("n", n),
+                       xtag("tree.reduced_upto", reduced_upto),
+                       xtag("reduced", reduced),
+                       xtag("dvalue", dvalue)));
 
             auto glb_ix = rbtree.cfind_sum_glb(reduced);
 
