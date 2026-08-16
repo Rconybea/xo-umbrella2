@@ -7,6 +7,7 @@
   xo-refcnt,
   xo-subsys,
   xo-ppsink,
+  xo-indentlog2,
   xo-cmake,
 
   doCheck ? true,
@@ -27,5 +28,5 @@ stdenv.mkDerivation (finalattrs:
                           cli11
                         ]
     ;
-    propagatedBuildInputs = [ xo-subsys xo-refcnt xo-ppsink ];
+    propagatedBuildInputs = [ xo-subsys xo-refcnt xo-ppsink xo-indentlog2 ];
   })

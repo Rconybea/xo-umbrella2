@@ -55,6 +55,7 @@ xo-indentlog2 xo-pyunit
 xo-indentlog2 xo-reactor
 xo-indentlog2 xo-reader
 xo-indentlog2 xo-reader2
+xo-indentlog2 xo-reflect
 xo-indentlog2 xo-simulator
 xo-indentlog2 xo-stringtable2
 xo-jit xo-pyjit

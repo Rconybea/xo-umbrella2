@@ -7,8 +7,8 @@
 
 #include "xo/reflect/EstablishTypeDescr.hpp"
 #include "xo/reflect/TypeDescrExtra.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tostr_xx.hpp>
 #include <stdexcept>   /* std::runtime_error -- used to arrive via indentlog */
 
 namespace xo {
@@ -64,17 +64,17 @@ namespace xo {
             }
 
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
-                using xo::pp::tostr0;
+                using xo::pp::tostr;
                 using xo::pp::xtag;
 
                 target_t * ptr = reinterpret_cast<target_t *>(object);
 
                 if (i > 0) {
-                    throw std::runtime_error(tostr0("RefPointerTdx<T>::child_tp"
-                                                    ": attempt to fetch child #i from a ref::rp<T>",
-                                                    xtag("T", type_name<target_t>()),
-                                                    xtag("i", i),
-                                                    xtag("n", this->n_child(object))));
+                    throw std::runtime_error(tostr("RefPointerTdx<T>::child_tp"
+                                                   ": attempt to fetch child #i from a ref::rp<T>",
+                                                   xtag("T", type_name<target_t>()),
+                                                   xtag("i", i),
+                                                   xtag("n", this->n_child(object))));
                 }
 
                 return establish_most_derived_tp(ptr->get());

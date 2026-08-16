@@ -4,12 +4,12 @@
  */
 
 #include "TaggedRcptr.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* xtag + operator<<(ostream, tag) */
-#include <xo/ppsink/tostr_xx.hpp>
 
 namespace xo {
     using xo::pp::xtag;
-    using xo::pp::tostr0;
+    using xo::pp::tostr;
 
     namespace reflect {
         void
@@ -23,7 +23,7 @@ namespace xo {
 
         std::string
         TaggedRcptr::display_string() const {
-            return tostr0(*this);
+            return tostr(*this);
         } /*display_string*/
     } /*namespace reflect*/
 } /*namespace xo*/
