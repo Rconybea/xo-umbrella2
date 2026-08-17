@@ -4,28 +4,35 @@
  **/
 
 #include "typeinf/type_unifier.hpp"
+#include "typeinf/type_unifier_ostream.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+//#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/refcnt/Refcounted_pp.hpp>
 
 namespace xo {
     using xo::pp::xtag;
     using xo::pp::tostr;
 
     namespace scm {
-        std::ostream &
-        operator<< (std::ostream & os,
-                    const unify_result & x)
+        void
+        unify_result::pretty(PpSink & pp) const
         {
-            os << "<unify_result"
-               << xtag("success", x.success_)
-               << xtag("unified", x.unified_);
-            if (x.error_src_function_)
-                os << xtag("error_src_function", x.error_src_function_);
-            if (!x.error_description_.empty())
-                os << xtag("error_description", x.error_description_);
-            os << ">";
-            return os;
+            auto st = pp.struct_open("unify_result");
+
+            st.field("success", success_);
+            st.field("unified", unified_);
+            if (error_src_function_)
+                st.field("error_src_function", error_src_function_);
+            if (!error_description_.empty())
+                st.field("error_description", error_description_);
+        }
+
+        void
+        unify_result::print(std::ostream & os) const
+        {
+            os << tostr(*this);
         }
 
         unify_result

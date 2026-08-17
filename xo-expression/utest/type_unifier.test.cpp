@@ -3,9 +3,12 @@
  * author: Roland Conybeare, Jul 2025
  */
 
-#include "xo/expression/typeinf/type_unifier.hpp"
+#include <xo/expression/typeinf/type_unifier_ostream.hpp>
+#include <xo/expression/typeinf/type_unifier.hpp>
+#include <xo/expression/typeinf/TypeBlueprint_ostream.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/refcnt/Refcounted_ostream.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>

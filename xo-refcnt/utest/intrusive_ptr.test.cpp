@@ -76,7 +76,7 @@ namespace xo {
             REQUIRE(p1_brw.get() == nullptr);
             REQUIRE(p1_brw.operator->() == nullptr);
             /* null borrow is false-y */
-            REQUIRE(p1_brw == false);
+            REQUIRE(!p1_brw);
 
             /* can promote a borrowed pointer */
             rp<JustRefcount> pp = p1_brw.promote();

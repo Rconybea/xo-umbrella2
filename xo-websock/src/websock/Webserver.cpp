@@ -25,6 +25,7 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <json/json.h> // for Json::Reader,  to parse json input
 #include <condition_variable>
@@ -32,6 +33,7 @@
 #include <regex>
 #include <unordered_map>
 #include <vector>
+#include <xo/refcnt/Refcounted_pp.hpp>
 
 namespace xo {
     using xo::web::Alist;
@@ -1976,7 +1978,10 @@ namespace xo {
 
         void
         Webserver::pretty(PpSink & pp) const {
-            pp.pretty_struct("Webserver", xtag("state", this->state()));
+            using xo::pp::field;
+
+            pp.pretty_struct("Webserver",
+                             field("state", this->state()));
         } /*display*/
 
         std::string

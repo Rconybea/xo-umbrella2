@@ -1,6 +1,7 @@
 /** @file exprrepl.cpp **/
 
-#include "xo/reader/reader.hpp"
+#include <xo/reader/reader.hpp>
+#include <xo/refcnt/Refcounted_ostream.hpp>
 #include <iostream>
 #include <unistd.h> // for isatty
 

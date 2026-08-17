@@ -4,6 +4,9 @@
 
 #include "Refcounted.hpp"
 #include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/pretty.hpp>
+
+#include <concepts>
 
 namespace xo {
     namespace ref {
@@ -20,5 +23,19 @@ namespace xo {
 
     } /*namespace ref*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** Prettifier for anything deriving from ref::Displayable.
+     *  Must live here to insure that it's consistently applied
+     *  (else ODR violation!)
+     **/
+    template <typename T>
+        requires std::derived_from<T, xo::ref::Displayable>
+    struct Prettifier<T> {
+        static void print(PpSink & sink, const T & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end Displayable.hpp */

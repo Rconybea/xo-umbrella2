@@ -131,7 +131,7 @@ namespace xo {
 
             T * operator->() const { return ptr_; }
 
-            operator bool() const { return ptr_ != nullptr; }
+            explicit operator bool() const { return ptr_ != nullptr; }
 
             intrusive_ptr<T> & operator=(intrusive_ptr<T> const & rhs) {
                 T * x = rhs.get();
@@ -296,7 +296,7 @@ namespace xo {
             T & operator*() const { return *ptr_; }
             T * operator->() const { return ptr_; }
 
-            operator bool() const { return ptr_ != nullptr; }
+            explicit operator bool() const { return ptr_ != nullptr; }
 
             static int32_t compare(Borrow const & x, Borrow const & y) {
                 return ptrdiff_t(x.get() - y.get());

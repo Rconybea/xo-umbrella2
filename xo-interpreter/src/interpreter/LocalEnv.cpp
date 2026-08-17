@@ -4,6 +4,7 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/refcnt/Refcounted_ostream.hpp>
 #include <xo/ppsink/quoted.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <cstring>
@@ -54,7 +55,7 @@ namespace xo {
         {
             assert(symtab_.get());
 
-            return symtab_->lookup_local(vname);
+            return (bool)symtab_->lookup_local(vname);
         }
 
         gp<Object> *

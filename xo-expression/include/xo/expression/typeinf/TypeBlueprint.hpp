@@ -1,89 +1,86 @@
 /** @file TypeBlueprint.hpp **/
 
+#pragma once
+
 #include "type_ref.hpp"
-#include <xo/refcnt/Refcounted.hpp>
+#include <xo/refcnt/Displayable.hpp>
 #include <map>
 #include <set>
 
-namespace xo {
-    namespace scm {
-        class TypeBlueprint;
+namespace xo::scm {
+    class TypeBlueprint;
 
-        /** map from a type variable, to contraints on the resolution of that variable **/
-        using type_substitution_map = std::map<type_var, rp<TypeBlueprint>>;
+    /** map from a type variable, to contraints on the resolution of that variable **/
+    using type_substitution_map = std::map<type_var, rp<TypeBlueprint>>;
 
-        /** @class TypeBlueprint
-         *  @brief record constraints on a type variable.
-         *
-         *  Within type unification, a TypeBlueprint represents
-         *  current state of knowledge as to the resolution of a particular type.
-         *
-         *  Structurally homologous to @ref xo::reflect::TypeDescr,
-         *  but TypeDescr is intended to represent fully-defined types.
-         *  Conversely TypeBlueprint instances will be abandoned once
-         *  a corresponding TypeDescr exists.
+    /** @class TypeBlueprint
+     *  @brief record constraints on a type variable.
+     *
+     *  Within type unification, a TypeBlueprint represents
+     *  current state of knowledge as to the resolution of a particular type.
+     *
+     *  Structurally homologous to @ref xo::reflect::TypeDescr,
+     *  but TypeDescr is intended to represent fully-defined types.
+     *  Conversely TypeBlueprint instances will be abandoned once
+     *  a corresponding TypeDescr exists.
+     **/
+    class TypeBlueprint : public xo::ref::Displayable {
+    public:
+        using TypeDescr = xo::reflect::TypeDescr;
+
+    public:
+        TypeBlueprint() = default;
+
+        /** contruct blueprint for type_ref @p ref **/
+        static rp<TypeBlueprint> make(const type_ref& ref);
+        /** contruct blueprint for type variable @p name.
+         *  equivalent to @c make(type_ref(name, nullptr))
          **/
-        class TypeBlueprint : public xo::ref::Refcount {
-        public:
-            using TypeDescr = xo::reflect::TypeDescr;
+        static rp<TypeBlueprint> typevar(const type_var& name);
 
-        public:
-            TypeBlueprint() = default;
+        /** compare two blueprints for equality.
+         *  blueprints are equal iff (we know that) they refer to the same concrete type.
+         **/
+        static bool equals(bp<TypeBlueprint> lhs, bp<TypeBlueprint> rhs);
 
-            /** contruct blueprint for type_ref @p ref **/
-            static rp<TypeBlueprint> make(const type_ref& ref);
-            /** contruct blueprint for type variable @p name.
-             *  equivalent to @c make(type_ref(name, nullptr))
-             **/
-            static rp<TypeBlueprint> typevar(const type_var& name);
+        const type_ref& ref() const { return ref_; }
+        const type_var& id() const { return ref_.id(); }
+        TypeDescr td() const { return ref_.td(); }
 
-            /** compare two blueprints for equality.
-             *  blueprints are equal iff (we know that) they refer to the same concrete type.
-             **/
-            static bool equals(bp<TypeBlueprint> lhs, bp<TypeBlueprint> rhs);
+        bool is_concrete() const { return ref_.is_concrete(); }
+        bool is_variable() const;
 
-            const type_ref& ref() const { return ref_; }
-            const type_var& id() const { return ref_.id(); }
-            TypeDescr td() const { return ref_.td(); }
+        /** upsert into @p *p_typevarset all unresolved type variables **/
+        void upsert_typevars(std::set<type_var> * p_typevar_set) const;
 
-            bool is_concrete() const { return ref_.is_concrete(); }
-            bool is_variable() const;
+        /** apply substitutions in @p sub_map to this type **/
+        bp<TypeBlueprint> substitute(const type_substitution_map& sub_map);
 
-            /** upsert into @p *p_typevarset all unresolved type variables **/
-            void upsert_typevars(std::set<type_var> * p_typevar_set) const;
+        /** replace with resolved type description.
+         *  Promise:
+         *  1. ref().td()  == @p td
+         *  2. this->is_concrete() == true
+         *  3. this->is_variable() == false
+         **/
+        void resolve_to(TypeDescr td);
 
-            /** apply substitutions in @p sub_map to this type **/
-            bp<TypeBlueprint> substitute(const type_substitution_map& sub_map);
+        /** write human-readable representation to stream @p os **/
+        virtual void pretty(PpSink & sink) const override;
+        /** assemble pretty output as string **/
+        virtual std::string display_string() const override;
 
-            /** replace with resolved type description.
-             *  Promise:
-             *  1. ref().td()  == @p td
-             *  2. this->is_concrete() == true
-             *  3. this->is_variable() == false
-             **/
-            void resolve_to(TypeDescr td);
+    private:
+        /** construct blueprint for @p ref **/
+        explicit TypeBlueprint(const type_ref & ref);
 
-            /** write human-readable representation to stream @p os **/
-            void display(std::ostream & os) const;
+    private:
+        /** name of the type being constrained here **/
+        type_ref ref_;
 
-        private:
-            /** construct blueprint for @p ref **/
-            explicit TypeBlueprint(const type_ref & ref);
+        // additional descriptive info..
+    };
 
-        private:
-            /** name of the type being constrained here **/
-            type_ref ref_;
-
-            // additional descriptive info..
-        };
-
-        inline std::ostream &
-        operator<<(std::ostream & os, const TypeBlueprint & x) {
-            x.display(os);
-            return os;
-        }
-    } /*namespace scm*/
-} /*namespace xo*/
+} /*namespace xo::scm*/
 
 
 /** end TypeBlueprint.hpp **/

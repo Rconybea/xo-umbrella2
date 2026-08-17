@@ -7,6 +7,7 @@
 
 #include "Sink.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/refcnt/Refcounted_pp.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
  * using-declarations.  Two reasons:

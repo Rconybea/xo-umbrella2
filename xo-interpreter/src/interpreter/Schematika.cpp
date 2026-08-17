@@ -8,16 +8,17 @@
 #include "GlobalEnv.hpp"
 #include "VirtualSchematikaMachine.hpp"
 #include <xo/reader/reader.hpp>
-#include <replxx.hxx>
+#include <xo/expression/pretty_expression.hpp>
 /* os << gp<Object>, flat form.  The REPL has a PrettySink in hand (see the
  * commented-out pps.pretty(value) at the print-value site) and could render
  * results with line breaking instead -- deliberately NOT done here, since this
  * conversion is meant to leave rendered output unchanged.
  */
 #include <xo/alloc/alloc_ostream.hpp>
-#include <ostream>
 #include <xo/indentlog2/print/PrettySink.hpp>
-#include <xo/expression/pretty_expression.hpp>
+#include <xo/refcnt/Refcounted_ostream.hpp>
+#include <replxx.hxx>
+#include <ostream>
 #include <unistd.h> // for STDIN_FILENO on OSX
 
 namespace xo {

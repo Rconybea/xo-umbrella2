@@ -14,6 +14,7 @@
 #include <xo/cxxutil/demangle.hpp>
 #include <typeinfo>
 #include <xo/ppsink/pretty_pair.hpp>      /* Prettifier<std::pair<T,U>> */
+#include <xo/refcnt/Refcounted_pp.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
  * using-declarations.  Two reasons:

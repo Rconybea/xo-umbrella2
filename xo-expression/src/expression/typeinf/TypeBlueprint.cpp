@@ -2,11 +2,12 @@
 
 #include "typeinf/TypeBlueprint.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
-#include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
+    //using xo::pp::xtag;
+
     namespace scm {
         TypeBlueprint::TypeBlueprint(const type_ref & x)
             : ref_{x}
@@ -100,13 +101,21 @@ namespace xo {
         }
 
         void
-        TypeBlueprint::display(std::ostream & os) const
+        TypeBlueprint::pretty(PpSink & pp) const
         {
-            os << "<TypeBlueprint";
-            os << xtag("id", id());
+            auto st = pp.struct_open("TypeBlueprint");
+            st.field("id", id());
             if (td())
-                os << xtag("td", td()->canonical_name());
-            os << ">";
+                st.field("td", td()->canonical_name());
+        }
+
+        std::string
+        TypeBlueprint::display_string() const {
+            using xo::pp::tostr;
+
+            TypeBlueprint * self = const_cast<TypeBlueprint*>(this);
+
+            return tostr(*self);
         }
 
     } /*namespace scm*/
