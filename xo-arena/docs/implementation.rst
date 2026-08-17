@@ -145,6 +145,8 @@ Example Object Diagram
     n1 -[hidden]down- n2
     n2 -[hidden]down- n3
 
+See :doc:`lifecycle` for these same extents in motion.
+
 Remarks:
 
 * See xo-alloc2 for abstract allocator trait *AAllocator*

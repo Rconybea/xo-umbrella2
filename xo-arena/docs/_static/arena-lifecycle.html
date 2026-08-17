@@ -1,0 +1,1356 @@
+<!doctype html>
+<!--
+  xo-arena memory lifecycle -- an animated view of the same extents drawn statically by
+  the "memory layout" diagram in docs/implementation.rst: lo_ -> free_ (allocated),
+  free_ -> limit_ (available), limit_ -> hi_ (reserved but not committed).
+
+  Self-contained by design: one file, no build step, no framework, and no network access
+  at all -- no CDN, no web font, no @import.  Plain ES5 JavaScript plus one Canvas 2D
+  context for the page-zoom strip; everything else is DOM and CSS.  Colours come from CSS
+  custom properties, which the canvas reads via getComputedStyle, so the light/dark theme
+  carries into the canvas too.
+
+  Sphinx copies this verbatim from html_static_path (see docs/conf.py).  It is embedded in
+  an iframe so its stylesheet cannot collide with sphinx_rtd_theme; add ?embed=1 to drop
+  the explanatory sections the surrounding page already provides.  The caveat stays
+  visible in both modes.
+
+  The allocation sizes are a model, not a captured trace.  The arithmetic follows
+  src/arena/DArena.cpp: 8-byte alignment, an 8-byte header per allocation, and commit
+  targets rounded up to arena_align_z_.
+-->
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+<body>
+<title>xo-arena Memory Lifecycle</title>
+
+<style>
+  :root {
+    --ground:    #EDF0F4;
+    --surface:   #FCFDFE;
+    --surface-2: #E3E9EF;
+    --ink:       #101720;
+    --ink-2:     #55626F;
+    --ink-3:     #7E8998;
+    --rule:      #C7D0DB;
+    --rule-soft: #DDE3EA;
+
+    --used:      #0F6E77;
+    --overhead:  #6FAAB0;
+    --unused:    #E7DCCE;
+    --commit:    #B25A0F;
+    --commit-dim:#D9A473;
+    --reserve:   #D6DCE4;
+    --hatch:     #C2CAD4;
+
+    --shadow: 0 1px 2px rgba(16, 23, 32, .06), 0 8px 24px rgba(16, 23, 32, .06);
+
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:    #090E14;
+      --surface:   #121A23;
+      --surface-2: #1A2430;
+      --ink:       #E7EDF4;
+      --ink-2:     #9CAABB;
+      --ink-3:     #6C7B8D;
+      --rule:      #25303C;
+      --rule-soft: #1B242F;
+
+      --used:      #35BAB1;
+      --overhead:  #1C6B6E;
+      --unused:    #302518;
+      --commit:    #E59547;
+      --commit-dim:#7A5227;
+      --reserve:   #18202A;
+      --hatch:     #263140;
+
+      --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:    #090E14;
+    --surface:   #121A23;
+    --surface-2: #1A2430;
+    --ink:       #E7EDF4;
+    --ink-2:     #9CAABB;
+    --ink-3:     #6C7B8D;
+    --rule:      #25303C;
+    --rule-soft: #1B242F;
+
+    --used:      #35BAB1;
+    --overhead:  #1C6B6E;
+    --unused:    #302518;
+    --commit:    #E59547;
+    --commit-dim:#7A5227;
+    --reserve:   #18202A;
+    --hatch:     #263140;
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .35);
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+  }
+
+  /* ---- header ---- */
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: .74rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 .6rem;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    margin: 0 0 .75rem;
+  }
+
+  .lede {
+    max-width: 62ch;
+    color: var(--ink-2);
+    font-size: 1.06rem;
+    margin: 0;
+  }
+
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  /* ---- phase rail ---- */
+
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: .5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .phase {
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--surface);
+    padding: .7rem .85rem;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    transition: border-color .25s, background .25s;
+  }
+
+  .phase .n {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .12em;
+    color: var(--ink-3);
+  }
+
+  .phase .call {
+    font-family: var(--font-mono);
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .phase .what { font-size: .8rem; color: var(--ink-2); }
+
+  .phase[data-active="true"] {
+    border-color: var(--commit);
+    background: var(--surface-2);
+  }
+
+  .phase[data-active="true"] .n { color: var(--commit); }
+
+  /* ---- panels ---- */
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+  }
+
+  .panel-title {
+    font-family: var(--font-mono);
+    font-size: .74rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0;
+  }
+
+  .panel-note { font-size: .8rem; color: var(--ink-3); margin: 0; }
+
+  /* ---- the address strip ---- */
+
+  .strip-frame { display: flex; flex-direction: column; gap: .35rem; }
+
+  /* The overview covers 16x the address range of the strip above it.  Same width, so
+     both read as the same span of addresses, but a fraction of the height -- a ribbon
+     under a magnified view, rather than a second view competing with it. */
+  .strip-frame.overview .strip { height: 24px; }
+
+  .ticks {
+    height: 9px;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .ticks::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--rule) 0 1px,
+      transparent 1px var(--tick-gap, 6.25%)
+    );
+    opacity: var(--tick-opacity, 1);
+    transition: opacity .3s;
+  }
+
+  .strip {
+    position: relative;
+    height: 84px;
+    display: flex;
+    background: var(--reserve);
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0 7px,
+      var(--hatch) 7px 8px
+    );
+    border: 1px solid var(--rule);
+    overflow: hidden;
+  }
+
+  .band { height: 100%; }
+  .band-used     { background: var(--used); }
+  .band-unused   { background: var(--unused); }
+
+  /* Overhead is 8 bytes per allocation scattered through the allocated range, not a
+     slab at the end of it.  Drawn as a stripe spanning that whole range whose HEIGHT is
+     its share, so the stripe's area is the share -- and so a fraction of a percent stays
+     visible as a hairline instead of a sliver too narrow to paint. */
+  .band-overhead {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--overhead);
+    height: 0;
+  }
+
+  .commit-line {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    background: var(--commit);
+    transform: translateX(-1px);
+  }
+
+  .commit-line::after {
+    content: "";
+    position: absolute;
+    inset: 0 -5px;
+    background: var(--commit);
+    opacity: 0;
+  }
+
+  .commit-line.flash::after { animation: commitFlash .55s ease-out; }
+
+  @keyframes commitFlash {
+    0%   { opacity: .55; }
+    100% { opacity: 0; }
+  }
+
+  .axis {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* scale headings, shared by the two strips */
+
+  .scale-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .scale-range {
+    text-transform: none;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+
+  #zoom {
+    display: block;
+    width: 100%;
+    height: 92px;
+    border: 1px solid var(--rule);
+  }
+
+  .strip-wrap { position: relative; }
+
+  /* which slice of the reservation the zoom strip above is showing.
+     Lives outside .strip so the overhang is not clipped by its overflow. */
+  .viewport {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    /* Horizontal rules only.  A closed rectangle put its right edge exactly where the
+       commit frontier sits -- the current page is the one free_ is in, and limit_ is at
+       that page's end -- so the amber line was hidden almost all the time. */
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    min-width: 3px;
+    pointer-events: none;
+    box-sizing: border-box;
+    transition: left .12s linear, width .12s linear;
+  }
+
+
+  /* ---- legend ---- */
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem 1.25rem;
+    font-size: .82rem;
+    color: var(--ink-2);
+  }
+
+  .legend span { display: inline-flex; align-items: center; gap: .45rem; }
+
+  .swatch {
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--rule);
+    flex: none;
+  }
+
+  .sw-used     { background: var(--used); }
+  .sw-overhead { background: var(--overhead); height: 4px; align-self: center; }
+  .sw-unused   { background: var(--unused); }
+  .sw-reserve  {
+    background: var(--reserve);
+    background-image: repeating-linear-gradient(135deg, transparent 0 4px, var(--hatch) 4px 5px);
+  }
+  .sw-commit   { background: var(--commit); width: 3px; border: none; height: 15px; }
+
+  /* ---- readout ---- */
+
+  .readout {
+    display: grid;
+    /* 120px keeps all six cells on one row inside a docs content column (~785px);
+       any wider and the sixth wraps alone under five, leaving a hole. */
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px;
+    background: var(--rule-soft);
+    border: 1px solid var(--rule-soft);
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: .7rem .85rem;
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+  }
+
+  .stat .k {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .stat .v {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  /* six cells share the row, so a long sub-label must ellipsize rather than clip mid-glyph */
+  .stat .sub {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    color: var(--ink-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stat[data-accent="used"] .v { color: var(--used); }
+  .stat[data-accent="commit"] .v { color: var(--commit); }
+
+  /* ---- log ---- */
+
+  .log-block { display: flex; flex-direction: column; gap: .45rem; }
+
+  .log {
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    line-height: 1.7;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    padding: .6rem .8rem;
+    height: 148px;
+    overflow-y: auto;
+    margin: 0;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .log div { white-space: pre; }
+  .log .ev-commit { color: var(--commit); }
+  .log .ev-phase  { color: var(--ink); font-weight: 600; }
+  .log .ev-clear  { color: var(--used); }
+
+  /* ---- controls ---- */
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .55rem 1rem;
+  }
+
+  button {
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    letter-spacing: .04em;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: .42rem .9rem;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+
+  button:hover { border-color: var(--ink-3); }
+  button:focus-visible { outline: 2px solid var(--commit); outline-offset: 2px; }
+  button[data-primary] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  button[data-primary]:hover { opacity: .88; }
+
+  .ctl-group {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    color: var(--ink-2);
+  }
+
+  input[type="range"] { width: 108px; accent-color: var(--commit); }
+  input[type="checkbox"] { accent-color: var(--commit); width: 15px; height: 15px; }
+  label { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; }
+  label:focus-within { outline: 2px solid var(--commit); outline-offset: 3px; }
+
+  /* ---- prose ---- */
+
+  .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 1.1rem; }
+  .prose h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin: .5rem 0 0;
+    text-wrap: balance;
+  }
+  .prose p { margin: 0; color: var(--ink-2); }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: .875em;
+    background: var(--surface-2);
+    border: 1px solid var(--rule-soft);
+    border-radius: 2px;
+    padding: .08em .32em;
+    color: var(--ink);
+  }
+
+  .defs { display: flex; flex-direction: column; gap: .8rem; margin: 0; }
+  .defs > div {
+    display: grid;
+    grid-template-columns: minmax(0, 13rem) 1fr;
+    gap: .2rem 1.25rem;
+    padding-bottom: .8rem;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .defs dt {
+    font-family: var(--font-mono);
+    font-size: .84rem;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .defs dd { margin: 0; color: var(--ink-2); font-size: .93rem; }
+  .defs .src { font-family: var(--font-mono); font-size: .74rem; color: var(--ink-3); }
+
+  .caveat {
+    border-left: 2px solid var(--commit);
+    padding-left: 1rem;
+    color: var(--ink-2);
+    font-size: .93rem;
+  }
+
+  footer {
+    font-family: var(--font-mono);
+    font-size: .74rem;
+    color: var(--ink-3);
+    border-top: 1px solid var(--rule);
+    padding-top: 1rem;
+  }
+
+  @media (max-width: 620px) {
+    .defs > div { grid-template-columns: 1fr; }
+    #zoom { height: 68px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+
+  /* Embedded in a page that supplies its own prose (see xo-arena docs/implementation.rst):
+     drop the explanatory sections, but never the caveat -- a model must say it is one
+     wherever it is shown. */
+  .embed .wrap { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+  .embed .prose > *:not(.caveat) { display: none; }
+  .embed footer { display: none; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">xo::mm::DArena</p>
+    <h1>The life of an arena</h1>
+    <p class="lede">
+      An arena reserves a large range of addresses up front and hands it out with a bump
+      pointer. What it <strong>uses</strong> creeps forward continuously; what it
+      <strong>commits</strong> — the memory actually backed by pages — can only move in
+      whole superpages, so it advances in jumps.
+    </p>
+  </header>
+
+  <ol class="phases" id="phases">
+    <li class="phase" data-phase="reserve">
+      <span class="n">PHASE 1</span>
+      <span class="call">mmap(PROT_NONE)</span>
+      <span class="what">Address range reserved. Nothing is backed yet.</span>
+    </li>
+    <li class="phase" data-phase="allocate">
+      <span class="n">PHASE 2</span>
+      <span class="call">alloc()</span>
+      <span class="what">Bump pointer creeps; commit jumps to keep ahead of it.</span>
+    </li>
+    <li class="phase" data-phase="clear">
+      <span class="n">PHASE 3</span>
+      <span class="call">clear()</span>
+      <span class="what">Bump pointer resets. Committed memory is kept.</span>
+    </li>
+    <li class="phase" data-phase="unmap">
+      <span class="n">PHASE 4</span>
+      <span class="call">unmap()</span>
+      <span class="what">The whole range goes back to the kernel.</span>
+    </li>
+  </ol>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Address range</h2>
+      <p class="panel-note" id="strip-note">32 MB reserved &middot; 2 MB superpages</p>
+    </div>
+
+    <div class="strip-frame">
+      <div class="scale-head">
+        <span class="scale-name" id="zoom-name">current superpage</span>
+        <span class="scale-range" id="zoom-range">—</span>
+      </div>
+      <canvas id="zoom" aria-label="allocations inside the page the bump pointer is in"></canvas>
+      <div class="axis">
+        <span id="zoom-lo">—</span>
+        <span id="zoom-note">each block is one alloc</span>
+        <span id="zoom-hi">—</span>
+      </div>
+    </div>
+
+    <div class="strip-frame overview">
+      <div class="scale-head">
+        <span class="scale-name">whole reservation</span>
+        <span class="scale-range" id="full-range">32.0 MB</span>
+      </div>
+      <div class="ticks" id="ticks"></div>
+      <div class="strip-wrap">
+        <div class="strip" id="strip">
+          <div class="band band-used" id="band-used"></div>
+          <div class="band band-overhead" id="band-overhead"></div>
+          <div class="band band-unused" id="band-unused"></div>
+          <div class="commit-line" id="commit-line"></div>
+        </div>
+        <div class="viewport" id="viewport"></div>
+      </div>
+      <div class="axis">
+        <span id="axis-lo">lo_</span>
+        <span id="axis-mid"></span>
+        <span id="axis-hi">hi_</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="swatch sw-used"></i>used — payload bytes</span>
+      <span><i class="swatch sw-overhead"></i>overhead — header + padding, stripe height is its share</span>
+      <span><i class="swatch sw-unused"></i>unused — committed, not handed out</span>
+      <span><i class="swatch sw-reserve"></i>reserved — addresses only</span>
+      <span><i class="swatch sw-commit"></i>limit_ — commit frontier</span>
+    </div>
+
+    <div class="readout">
+      <div class="stat" data-accent="used">
+        <span class="k">used</span><span class="v" id="v-used">0 B</span>
+        <span class="sub" id="s-used">payload</span>
+      </div>
+      <div class="stat">
+        <span class="k">overhead</span><span class="v" id="v-over">0 B</span>
+        <span class="sub" id="s-over">header + padding</span>
+      </div>
+      <div class="stat">
+        <span class="k">allocated</span><span class="v" id="v-alloc">0 B</span>
+        <span class="sub" id="s-alloc">free_ &minus; lo_</span>
+      </div>
+      <div class="stat" data-accent="commit">
+        <span class="k">committed</span><span class="v" id="v-commit">0 B</span>
+        <span class="sub" id="s-commit">0 superpages</span>
+      </div>
+      <div class="stat">
+        <span class="k">unused</span><span class="v" id="v-avail">0 B</span>
+        <span class="sub">available()</span>
+      </div>
+      <div class="stat">
+        <span class="k">reserved</span><span class="v" id="v-reserve">32.0 MB</span>
+        <span class="sub">hi_ &minus; lo_</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btn-play" data-primary>Play</button>
+      <button id="btn-alloc">Step one alloc</button>
+      <button id="btn-step">Step one commit</button>
+      <button id="btn-reset">Restart</button>
+      <span class="ctl-group">
+        <label>speed
+          <input type="range" id="speed" min="2" max="20" value="8" />
+        </label>
+      </span>
+      <span class="ctl-group">
+        <label>object size
+          <input type="range" id="objsize" min="6" max="18" step="1" value="14"
+                 aria-describedby="objsize-label" />
+        </label>
+        <span id="objsize-label">16.0 KB avg</span>
+      </span>
+      <span class="ctl-group">
+        <label>
+          <input type="checkbox" id="huge" checked />
+          2 MB superpages
+        </label>
+      </span>
+    </div>
+
+    <div class="log-block">
+      <h2 class="panel-title">Event log</h2>
+      <pre class="log" id="log" aria-live="polite"></pre>
+    </div>
+  </section>
+
+  <section class="prose">
+    <h2>What the four numbers mean</h2>
+    <p>
+      <code>DArena</code> tracks three pointers into one reserved range — <code>lo_</code>,
+      the bump pointer <code>free_</code>, and the commit frontier <code>limit_</code> —
+      plus the end of the reservation, <code>hi_</code>. Every quantity above is a
+      difference between two of them.
+    </p>
+
+    <dl class="defs">
+      <div>
+        <dt>reserved()</dt>
+        <dd>
+          <code>hi_ - lo_</code>. Fixed when the arena is built: one
+          <code>mmap</code> with no access rights. Costs address space, not memory.
+          <div class="src">DArena.hpp:110</div>
+        </dd>
+      </div>
+      <div>
+        <dt>committed()</dt>
+        <dd>
+          <code>committed_z_</code>. Memory actually backed by pages, moved only by
+          <code>expand()</code> calling <code>mprotect(PROT_READ|PROT_WRITE)</code>.
+          <div class="src">DArena.hpp:117 &middot; DArena.cpp:594</div>
+        </dd>
+      </div>
+      <div>
+        <dt>allocated()</dt>
+        <dd>
+          <code>free_ - lo_</code>. Everything the bump pointer has passed over, including
+          each allocation's 8-byte header and its padding up to 8-byte alignment.
+          <div class="src">DArena.hpp:114</div>
+        </dd>
+      </div>
+      <div>
+        <dt>used</dt>
+        <dd>
+          Payload only — what callers asked for. The gap up to <code>allocated()</code> is
+          bookkeeping, not waste; the gap from there to <code>committed()</code> is
+          <code>available()</code>, memory ready for the next allocation with no syscall.
+          <div class="src">MemorySizeInfo.hpp:47 &middot; DArena.hpp:120</div>
+        </dd>
+      </div>
+    </dl>
+
+    <h2>Why commit moves in jumps</h2>
+    <p>
+      Each allocation asks <code>expand()</code> for <code>allocated() + z1</code> bytes.
+      If that still fits below <code>limit_</code>, nothing happens — the common case, and
+      the reason allocation is a pointer bump. When it doesn't fit, <code>expand()</code>
+      rounds the target up to the arena's alignment and <code>mprotect</code>s the
+      difference in one call:
+    </p>
+    <p>
+      <code>aligned_target_z = padding::with_padding(target_z, arena_align_z_)</code>
+    </p>
+    <p>
+      That alignment is the 2 MB <code>hugepage_z_</code> whenever the requested arena is at
+      least one superpage, and the 4 KB page size otherwise. Hence the staircase: sixteen
+      2 MB treads across a 32 MB reservation. Turn the superpages off above and the same run
+      climbs in 4 KB steps — so fine that the commit frontier looks continuous, which is
+      exactly the trade. Superpages relieve TLB pressure, at the cost of committing up to
+      2 MB before it is needed.
+    </p>
+
+    <h2>Clearing is not freeing</h2>
+    <p>
+      <code>clear()</code> sets <code>free_ = lo_</code> and re-establishes the guard bytes.
+      It does not touch <code>committed_z_</code> or <code>limit_</code>. Used and allocated
+      collapse; the physical memory stays with the process, ready to be handed out again
+      without another <code>mprotect</code>. Only <code>unmap()</code> — also what the
+      destructor runs — returns the range to the kernel.
+    </p>
+
+    <p class="caveat">
+      This is a model, not a recording. The arithmetic follows the source — 8-byte alignment,
+      an 8-byte header per allocation, commit targets rounded to <code>arena_align_z_</code> —
+      but the allocation sizes are an illustrative mix rather than a captured trace: three
+      populations — small objects, buffers, the occasional big one — scaled so the mean matches
+      the object-size slider. Guard bytes are off, matching the default
+      <code>guard_z_ = 0</code>. Overhead is worth driving with that slider: at 16 KB objects the
+      8-byte header and its padding come to well under a tenth of a percent of what the arena
+      hands out, and at 64 B they cost more than a tenth of it. On the reservation ribbon that
+      share is a stripe through the middle of the allocated block rather than a slab at its end,
+      since the headers are scattered through the range and not gathered anywhere; it is held to
+      a minimum of one pixel so a small share stays visible. Below roughly a pixel per allocation
+      the page view stops drawing boundaries and says so, since at that point they are a grey
+      wash rather than information. Something that ran out of reserve would capture
+      <code>reserve_exhausted</code> and return null rather than growing; this run never gets
+      that far.
+    </p>
+  </section>
+
+  <footer>xo-arena &middot; xo::mm::DArena &middot; grounded in xo-umbrella2/xo-arena</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ?embed -- hosted inside a page that supplies its own prose; see the .embed rules */
+  if (window.location.search.indexOf("embed") >= 0) {
+    document.documentElement.className += " embed";
+  }
+
+  var KB = 1024, MB = 1024 * KB;
+  var RESERVE  = 32 * MB;
+  var HUGEPAGE = 2 * MB;
+  var PAGE     = 4 * KB;
+  var HEADER   = 8;      /* store_header_flag_ = true */
+  var ALIGN    = 8;      /* c_alloc_alignment */
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* Pace: slider units x this = ALLOCATIONS per second.  Rate is what the slider means;
+     how long a run lasts is then an outcome of the object size, not a promise.  At the
+     middle of the range (11) that is ~30 allocs/s, which fills the arena in about a
+     minute at the default object size -- in expectation, since the sizes are random. */
+  var ALLOCS_PER_UNIT = 2.7;
+
+  var el = {
+    used: document.getElementById("band-used"),
+    overhead: document.getElementById("band-overhead"),
+    unused: document.getElementById("band-unused"),
+    line: document.getElementById("commit-line"),
+    ticks: document.getElementById("ticks"),
+    strip: document.getElementById("strip"),
+    vUsed: document.getElementById("v-used"),
+    vOver: document.getElementById("v-over"),
+    sOver: document.getElementById("s-over"),
+    vAlloc: document.getElementById("v-alloc"),
+    vCommit: document.getElementById("v-commit"),
+    vAvail: document.getElementById("v-avail"),
+    vReserve: document.getElementById("v-reserve"),
+    sUsed: document.getElementById("s-used"),
+    sAlloc: document.getElementById("s-alloc"),
+    sCommit: document.getElementById("s-commit"),
+    axisMid: document.getElementById("axis-mid"),
+    axisHi: document.getElementById("axis-hi"),
+    zoom: document.getElementById("zoom"),
+    zoomName: document.getElementById("zoom-name"),
+    zoomRange: document.getElementById("zoom-range"),
+    zoomLo: document.getElementById("zoom-lo"),
+    zoomHi: document.getElementById("zoom-hi"),
+    zoomNote: document.getElementById("zoom-note"),
+    fullRange: document.getElementById("full-range"),
+    viewport: document.getElementById("viewport"),
+    log: document.getElementById("log"),
+    play: document.getElementById("btn-play"),
+    allocStep: document.getElementById("btn-alloc"),
+    step: document.getElementById("btn-step"),
+    reset: document.getElementById("btn-reset"),
+    speed: document.getElementById("speed"),
+    objsize: document.getElementById("objsize"),
+    objsizeLabel: document.getElementById("objsize-label"),
+    huge: document.getElementById("huge"),
+    note: document.getElementById("strip-note"),
+    phases: document.getElementById("phases")
+  };
+
+  /* ---------- the model ---------- */
+
+  var st;
+
+  function granularity() {
+    /* DArena.cpp:45,51 -- hugepages only when the arena is at least one superpage */
+    return el.huge.checked ? HUGEPAGE : PAGE;
+  }
+
+  function roundUp(z, g) { return Math.ceil(z / g) * g; }
+
+  function fresh() {
+    return {
+      phase: "reserve",
+      used: 0,
+      allocated: 0,
+      committed: 0,
+      reserved: RESERVE,
+      mapped: false,
+      requested: 0,     /* cumulative payload bytes ever asked for -- monotone */
+      nalloc: 0,
+      ncommit: 0,
+      /* recent allocations as {s, p, e}: header starts at s, payload runs to p,
+         padding to e.  Only needed for the zoom strip, so the tail is enough. */
+      allocs: [],
+      pageIndex: -1,
+      pageAllocs: 0,
+      credit: 0,        /* unspent allocations, carried between frames */
+      phaseT: 0,
+      seed: 20260816
+    };
+  }
+
+  /* deterministic PRNG so a run is reproducible and a reset is comparable */
+  function rnd() {
+    st.seed = (st.seed * 1664525 + 1013904223) % 4294967296;
+    return st.seed / 4294967296;
+  }
+
+  /* A three-part mix -- small objects, buffers, the occasional big one -- scaled so its
+     mean matches the object-size slider.  The shape stays put; only the scale moves, so
+     dragging the slider changes how coarse the workload is and nothing else.
+     BASE_MEAN is the mean of the unscaled mix, measured by running it. */
+  var BASE_MEAN = 16.6 * KB;
+
+  function meanObjectSize() {
+    return Math.pow(2, Number(el.objsize.value));
+  }
+
+  function nextRequest() {
+    var k = meanObjectSize() / BASE_MEAN;
+    var r = rnd(), z;
+
+    if (r < 0.60)      z = 512 + rnd() * 3.5 * KB;    /* small objects */
+    else if (r < 0.93) z = 6 * KB + rnd() * 26 * KB;  /* buffers */
+    else               z = 64 * KB + rnd() * 128 * KB;
+
+    /* a request is at least one aligned word, however far down the slider goes */
+    return Math.max(ALIGN, Math.floor(z * k));
+  }
+
+  function alloc(reqZ) {
+    var z0 = roundUp(reqZ, ALIGN);   /* padding::alloc_padding */
+    var z1 = HEADER + z0;
+    var target = st.allocated + z1;
+
+    if (target > st.reserved) return false;   /* would be reserve_exhausted */
+
+    if (target > st.committed) {
+      var g = granularity();
+      var before = st.committed;
+      st.committed = roundUp(target, g);
+      st.ncommit += 1;
+      onCommit(before, st.committed);
+    }
+
+    var start = st.allocated;
+    st.allocs.push({ s: start, p: start + HEADER + reqZ, e: target });
+    if (st.allocs.length > 5000) st.allocs.splice(0, 1500);
+
+    /* how many allocations landed in the page now filling.  Counted here rather than
+       from st.allocs, whose tail may not reach back to the start of the page. */
+    var gi = Math.floor((target - 1) / granularity());
+    if (gi !== st.pageIndex) { st.pageIndex = gi; st.pageAllocs = 0; }
+    st.pageAllocs += 1;
+
+    st.allocated = target;
+    st.used += reqZ;
+    st.requested += reqZ;
+    st.nalloc += 1;
+    return true;
+  }
+
+  /* ---------- formatting ---------- */
+
+  function fmt(z) {
+    if (z >= MB) return (z / MB).toFixed(z >= 10 * MB ? 1 : 2) + " MB";
+    if (z >= KB) return (z / KB).toFixed(z >= 100 * KB ? 0 : 1) + " KB";
+    return z + " B";
+  }
+
+  function pad(s, n) { s = String(s); while (s.length < n) s = " " + s; return s; }
+
+  /* ---------- log ---------- */
+
+  function log(text, cls) {
+    var d = document.createElement("div");
+    d.textContent = text;
+    if (cls) d.className = cls;
+    el.log.appendChild(d);
+    while (el.log.childNodes.length > 120) el.log.removeChild(el.log.firstChild);
+    el.log.scrollTop = el.log.scrollHeight;
+  }
+
+  function onCommit(before, after) {
+    var g = granularity();
+    log("mprotect  +" + pad(fmt(after - before), 8) +
+        "   committed " + pad(fmt(after), 9) +
+        "   (" + (after / g) + " x " + fmt(g) + ")", "ev-commit");
+  }
+
+  /* ---------- phases ---------- */
+
+  function setPhase(name) {
+    st.phase = name;
+    st.phaseT = 0;
+    var items = el.phases.querySelectorAll(".phase");
+    for (var i = 0; i < items.length; i++) {
+      items[i].setAttribute("data-active", String(items[i].getAttribute("data-phase") === name));
+    }
+  }
+
+  function enterPhase(name) {
+    setPhase(name);
+    if (name === "reserve") {
+      st.mapped = true;
+      log("mmap      " + fmt(RESERVE) + " PROT_NONE   reserved, nothing backed", "ev-phase");
+    } else if (name === "allocate") {
+      log("alloc     bump pointer running", "ev-phase");
+    } else if (name === "clear") {
+      log("clear()   free_ = lo_   committed stays at " + fmt(st.committed), "ev-clear");
+      st.used = 0;
+      st.allocated = 0;
+      st.allocs = [];
+      st.pageIndex = -1;
+      st.pageAllocs = 0;
+    } else if (name === "unmap") {
+      log("unmap()   munmap [lo_, hi_)   everything returns to the kernel", "ev-phase");
+      st.used = 0;
+      st.allocated = 0;
+      st.allocs = [];
+      st.pageIndex = -1;
+      st.pageAllocs = 0;
+      st.committed = 0;
+      st.reserved = 0;
+      st.mapped = false;
+    }
+  }
+
+  /* ---------- rendering ---------- */
+
+  var lastCommitDrawn = 0;
+
+  function render() {
+    var span = RESERVE;
+    var overBytes = Math.max(0, st.allocated - st.used);
+    var pctAlloc = st.allocated / span * 100;
+    var pctUnused = Math.max(0, (st.committed - st.allocated)) / span * 100;
+
+    /* the block is the allocated range; the stripe inside it is the overhead share */
+    el.used.style.width = pctAlloc + "%";
+    el.unused.style.width = pctUnused + "%";
+
+    el.overhead.style.width = pctAlloc + "%";
+    el.overhead.style.height = (st.allocated > 0 ? overBytes / st.allocated * 100 : 0) + "%";
+    el.overhead.style.minHeight = overBytes > 0 ? "1px" : "0";
+
+    el.line.style.left = (st.committed / span * 100) + "%";
+    el.line.style.opacity = st.committed > 0 ? "1" : "0";
+    el.strip.style.opacity = st.mapped ? "1" : ".28";
+    el.zoom.style.opacity = st.mapped ? "1" : ".28";
+
+    if (st.committed !== lastCommitDrawn) {
+      if (st.committed > lastCommitDrawn && !reduceMotion) {
+        el.line.classList.remove("flash");
+        void el.line.offsetWidth;
+        el.line.classList.add("flash");
+      }
+      lastCommitDrawn = st.committed;
+    }
+
+    var over = Math.max(0, st.allocated - st.used);
+    el.vUsed.textContent = fmt(st.used);
+    el.vOver.textContent = fmt(over);
+    el.sOver.textContent = st.allocated > 0
+      ? (over / st.allocated * 100).toFixed(2) + "% of allocated"
+      : "header + padding";
+    el.vAlloc.textContent = fmt(st.allocated);
+    el.vCommit.textContent = fmt(st.committed);
+    el.vAvail.textContent = fmt(Math.max(0, st.committed - st.allocated));
+    el.vReserve.textContent = fmt(st.reserved);
+
+    el.sUsed.textContent = st.nalloc.toLocaleString() + " allocs";
+    el.sAlloc.textContent = "free_ − lo_";
+    var g = granularity();
+    el.sCommit.textContent = st.ncommit + " mprotect @ " + fmt(g);
+
+    el.axisMid.textContent = "limit_ @ " + fmt(st.committed);
+    el.axisHi.textContent = "hi_ @ " + fmt(RESERVE);
+    el.fullRange.textContent = "0 – " + fmt(RESERVE);
+
+    drawZoom();
+  }
+
+  /* ---------- the zoom strip: one commit granule, at byte resolution ---------- */
+
+  var zctx = el.zoom.getContext("2d");
+
+  function css(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  /* the granule the bump pointer sits in -- the page that is currently filling */
+  function zoomWindow() {
+    var g = granularity();
+    var at = st.allocated > 0 ? st.allocated - 1 : 0;
+    var w0 = Math.floor(at / g) * g;
+    return { g: g, w0: w0, w1: w0 + g, index: Math.floor(w0 / g) };
+  }
+
+  function drawZoom() {
+    var win = zoomWindow();
+    var dpr = window.devicePixelRatio || 1;
+    var w = el.zoom.clientWidth, h = el.zoom.clientHeight;
+
+    if (el.zoom.width !== Math.round(w * dpr) || el.zoom.height !== Math.round(h * dpr)) {
+      el.zoom.width = Math.round(w * dpr);
+      el.zoom.height = Math.round(h * dpr);
+    }
+    zctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    zctx.clearRect(0, 0, w, h);
+
+    var X = function (b) { return (b - win.w0) / win.g * w; };
+
+    /* ground: committed-but-unused inside this page, or bare reserve past limit_ */
+    zctx.fillStyle = css("--unused");
+    zctx.fillRect(0, 0, w, h);
+
+    if (st.committed < win.w1) {
+      var cx = Math.max(0, X(st.committed));
+      zctx.fillStyle = css("--reserve");
+      zctx.fillRect(cx, 0, w - cx, h);
+    }
+
+    if (!st.mapped) { paintZoomLabels(win); return; }
+
+    var colUsed = css("--used"), colOver = css("--overhead");
+
+    /* Everything the bump pointer has passed over in this window, as one block.  The
+       per-alloc pass below refines it; drawing it first means the picture stays right
+       even when the retained tail of allocations does not reach back to w0. */
+    if (st.allocated > win.w0) {
+      zctx.fillStyle = colUsed;
+      zctx.fillRect(0, 0, X(Math.min(st.allocated, win.w1)), h);
+    }
+
+    var list = st.allocs, first = -1, count = 0;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].e <= win.w0) continue;
+      if (list[i].s >= win.w1) break;
+      if (first < 0) first = i;
+      count += 1;
+    }
+
+    /* Below about a pixel per allocation the boundaries stop being information and
+       start being a grey wash, so leave the block undivided and say so.  Also needs the
+       whole page still retained -- a partial tail would draw as gaps. */
+    var total = st.pageAllocs;
+    var detail = total > 0 && (w / total) >= 1.2 && count >= total;
+
+    if (detail) {
+      for (var j = first; j < first + count; j++) {
+        var a = list[j];
+        var x0 = X(Math.max(a.s, win.w0));
+        var x1 = X(Math.min(a.e, win.w1));
+
+        /* header + trailing padding */
+        zctx.fillStyle = colOver;
+        zctx.fillRect(x0, 0, Math.max(x1 - x0, 0.4), h);
+
+        /* payload, inset by the 8-byte header */
+        var px0 = X(Math.max(a.s + HEADER, win.w0));
+        var px1 = X(Math.min(a.p, win.w1));
+        if (px1 > px0) {
+          zctx.fillStyle = colUsed;
+          zctx.fillRect(px0, 0, Math.max(px1 - px0, 0.4), h);
+        }
+      }
+    }
+
+    /* limit_ inside this window */
+    if (st.committed > win.w0 && st.committed <= win.w1) {
+      zctx.fillStyle = css("--commit");
+      zctx.fillRect(Math.min(X(st.committed), w - 2), 0, 2, h);
+    }
+
+    /* free_ -- where the next allocation lands */
+    if (st.allocated > win.w0 && st.allocated < win.w1) {
+      zctx.fillStyle = css("--ink-2");
+      zctx.fillRect(X(st.allocated), 0, 1, h);
+    }
+
+    paintZoomLabels(win, total, detail);
+  }
+
+  function paintZoomLabels(win, count, detail) {
+    var g = win.g;
+    var total = Math.ceil(RESERVE / g);
+    el.zoomName.textContent = (g === HUGEPAGE ? "current superpage" : "current page") +
+      "  " + (win.index + 1) + " of " + total;
+    el.zoomRange.textContent = fmt(win.w0) + " – " + fmt(win.w1) + "  (" + fmt(g) + ")";
+    el.zoomLo.textContent = "+0";
+    el.zoomHi.textContent = "+" + fmt(g);
+    el.zoomNote.textContent = !count
+      ? "nothing allocated here yet"
+      : count.toLocaleString() + (count === 1 ? " alloc in this page" : " allocs in this page") +
+        (detail ? "" : " — too fine to draw separately");
+
+    /* mark the same slice on the whole-reservation strip below */
+    el.viewport.style.left = (win.w0 / RESERVE * 100) + "%";
+    el.viewport.style.width = (win.g / RESERVE * 100) + "%";
+    el.viewport.style.opacity = st.mapped ? "1" : "0";
+  }
+
+  /* ---------- driver ---------- */
+
+  var running = false, raf = null, lastT = 0;
+
+  function tick(t) {
+    if (!running) return;
+    var dt = Math.min(64, t - (lastT || t));
+    lastT = t;
+    st.phaseT += dt;
+
+    if (st.phase === "reserve") {
+      if (st.phaseT > 900) { enterPhase("allocate"); }
+    } else if (st.phase === "allocate") {
+      /* Credit carried ACROSS frames, in allocations.  Carrying it is what lets the
+         slider go below one allocation per frame; spending a per-frame budget and
+         discarding the remainder put a floor under the pace at ~60 allocs/s. */
+      st.credit += dt / 1000 * Number(el.speed.value) * ALLOCS_PER_UNIT;
+
+      var guard = 0;
+      while (st.credit >= 1 && guard < 4000) {
+        if (!alloc(nextRequest())) { st.credit = 0; break; }
+        st.credit -= 1;
+        guard += 1;
+      }
+      if (st.allocated > RESERVE * 0.93) { enterPhase("clear"); }
+    } else if (st.phase === "clear") {
+      if (st.phaseT > 1400) { enterPhase("unmap"); }
+    } else if (st.phase === "unmap") {
+      if (st.phaseT > 1800) { restart(true); }
+    }
+
+    render();
+    raf = requestAnimationFrame(tick);
+  }
+
+  function play() {
+    if (running) return;
+    running = true;
+    lastT = 0;
+    el.play.textContent = "Pause";
+    raf = requestAnimationFrame(tick);
+  }
+
+  function pause() {
+    running = false;
+    if (raf) cancelAnimationFrame(raf);
+    el.play.textContent = "Play";
+  }
+
+  function restart(keepRunning) {
+    var wasRunning = running;
+    pause();
+    st = fresh();
+    lastCommitDrawn = 0;
+    el.log.textContent = "";
+    enterPhase("reserve");
+    render();
+    if (keepRunning || wasRunning) play();
+  }
+
+  /* ready the arena for a manual step, whatever phase we were in */
+  function readyToAlloc() {
+    pause();
+    if (!st.mapped) restart(false);          /* after unmap there is nothing to allocate from */
+    if (st.phase !== "allocate") enterPhase("allocate");
+  }
+
+  /* one allocation, with the arithmetic spelled out in the log */
+  el.allocStep.addEventListener("click", function () {
+    readyToAlloc();
+
+    var z = nextRequest();
+    var z0 = roundUp(z, ALIGN);
+    var z1 = HEADER + z0;
+
+    log("alloc     req " + pad(fmt(z), 8) +
+        "   pad +" + pad(z0 - z, 2) + " B" +
+        "   hdr +" + HEADER + " B" +
+        "   bump " + pad(fmt(z1), 8));
+
+    if (!alloc(z)) {
+      log("          reserve_exhausted -- alloc returns nullptr", "ev-commit");
+    }
+
+    render();
+  });
+
+  /* advance until the next commit jump, then stop */
+  el.step.addEventListener("click", function () {
+    readyToAlloc();
+    var target = st.ncommit + 1;
+    var guard = 0;
+    while (st.ncommit < target && guard < 200000) {
+      if (!alloc(nextRequest())) break;
+      guard += 1;
+    }
+    render();
+  });
+
+  el.play.addEventListener("click", function () { running ? pause() : play(); });
+  el.reset.addEventListener("click", function () { restart(false); });
+
+  /* Object size takes effect on the next allocation rather than restarting: watching the
+     grain change mid-run, and the overhead percentage move with it, is the point. */
+  el.objsize.addEventListener("input", function () {
+    var mean = meanObjectSize();
+    el.objsizeLabel.textContent = fmt(mean) + " avg";
+    log("config    mean object size = " + fmt(mean) +
+        "   (header is " + (HEADER / mean * 100).toFixed(HEADER / mean > 0.01 ? 1 : 3) +
+        "% of it)", "ev-phase");
+    render();
+  });
+
+  el.huge.addEventListener("change", function () {
+    var g = granularity();
+    el.note.textContent = "32 MB reserved · " + (g === HUGEPAGE ? "2 MB superpages" : "4 KB pages");
+    /* tick spacing follows the commit granularity; 8192 hairlines would just be grey */
+    if (g === HUGEPAGE) {
+      el.ticks.style.setProperty("--tick-gap", (HUGEPAGE / RESERVE * 100) + "%");
+      el.ticks.style.setProperty("--tick-opacity", "1");
+    } else {
+      el.ticks.style.setProperty("--tick-opacity", "0");
+    }
+    log("config    arena_align_z_ = " + fmt(g) +
+        (g === HUGEPAGE ? "   (cfg.size_ >= hugepage_z_)" : "   (hugepages off)"), "ev-phase");
+    restart(false);
+  });
+
+  window.addEventListener("resize", function () { render(); });
+
+  /* initial paint */
+  el.ticks.style.setProperty("--tick-gap", (HUGEPAGE / RESERVE * 100) + "%");
+  el.objsizeLabel.textContent = fmt(meanObjectSize()) + " avg";
+  st = fresh();
+  enterPhase("reserve");
+  render();
+
+  if (!reduceMotion) play();
+})();
+</script>
+
+</body>
+</html>
