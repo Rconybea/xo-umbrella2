@@ -22,6 +22,7 @@
 #include "WebsocketSink.hpp"
 #include "WsSafetyToken.hpp"
 #include <xo/printjson/PrintJson.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
@@ -1974,11 +1975,18 @@ namespace xo {
         } /*make*/
 
         void
-        Webserver::display(std::ostream & os) const {
-            os << "<Webserver"
-               << xtag("state", this->state())
-               << ">";
+        Webserver::pretty(PpSink & pp) const {
+            pp.pretty_struct("Webserver", xtag("state", this->state()));
         } /*display*/
+
+        std::string
+        Webserver::display_string() const {
+            using xo::pp::tostr;
+
+            Webserver * self = const_cast<Webserver*>(this);
+
+            return tostr(rp<Webserver>(self));
+        }
     } /*namespace web*/
 } /*namespace xo*/
 

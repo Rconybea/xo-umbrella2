@@ -3,25 +3,20 @@
 #pragma once
 
 #include "Refcounted.hpp"
+#include <xo/ppsink/PpSink.hpp>
 
 namespace xo {
     namespace ref {
         class Displayable : public Refcount {
         public:
-            /* write some kind of human-readable representation on stream */
-            virtual void display(std::ostream & os) const = 0;
-            std::string display_string() const;
-        }; /*Displayable*/
+            using PpSink = xo::pp::PpSink;
 
-        /* see also
-         *   operator<<(std::ostream &, intrusive_ptr<T> const &)
-         * in [Refcounted.hpp]
-         */
-        inline std::ostream &
-        operator<<(std::ostream &os, Displayable const & x) {
-            x.display(os);
-            return os;
-        } /*operator<<*/
+        public:
+            /* write some kind of human-readable representation on stream */
+            virtual void pretty(PpSink & pp) const = 0;
+            // implement display_string() in derived classes that also have xo-indentlog2
+            virtual std::string display_string() const = 0;
+        }; /*Displayable*/
 
     } /*namespace ref*/
 } /*namespace xo*/

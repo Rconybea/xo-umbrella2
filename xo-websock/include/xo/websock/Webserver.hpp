@@ -108,7 +108,8 @@ namespace xo {
 
             // ----- Inherited from Displayable -----
 
-            virtual void display(std::ostream & os) const;
+            virtual void pretty(PpSink & pp) const override;
+            virtual std::string display_string() const override;
         }; /*Webserver*/
     } /*namespace web*/
 } /*namespace xo*/
