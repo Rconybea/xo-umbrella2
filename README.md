@@ -322,7 +322,7 @@ $ nix-build -A xo-userenv
 $ (cd result && python3 -m http.server 3000)
 ```
 
-browse to "<host-ip-address>:3000/share/doc/xo-flatstring/html"
+browse to "<host-ip-address>:3000/share/doc/xo_flatstring/html"
 
 ## To add a new satellite repo / missing satellite remote
 
