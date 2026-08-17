@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'xo unit documentation'
+project = 'xo unit'
 copyright = '2024,2025, Roland Conybeare'
 author = 'Roland Conybeare'
 
