@@ -14,7 +14,7 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/reflect/TypeDescr_pp.hpp>   /* Prettifier<TypeDescr> for the :td field */
+#include <xo/reflect/TypeDescr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <string_view>
 #include <tuple>

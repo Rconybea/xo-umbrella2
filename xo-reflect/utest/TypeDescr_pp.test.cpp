@@ -9,7 +9,7 @@
  */
 
 #include "xo/reflect/Reflect.hpp"
-#include "xo/reflect/TypeDescr_pp.hpp"
+#include "xo/reflect/TypeDescr.hpp"
 #include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>

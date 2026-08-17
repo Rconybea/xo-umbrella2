@@ -6,7 +6,7 @@
 #include "TypeRef.hpp"
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/reflect/TypeDescr_pp.hpp>   /* Prettifier<TypeDescr> for the :td field */
+#include <xo/reflect/TypeDescr.hpp>      /* Prettifier<TypeDescr> for the :td field */
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/pretty_struct.hpp>   /* sink.struct_open(..) */
 #include <xo/ppsink/quoted.hpp>          /* xo::pp::quot */

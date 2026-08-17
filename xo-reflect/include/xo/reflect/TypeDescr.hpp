@@ -3,6 +3,7 @@
 #pragma once
 
 #include "TypeDescrExtra.hpp"
+#include <xo/ppsink/Prettifier.hpp>
 #include <xo/ppsink/PpSink.hpp>
 #include <xo/cxxutil/demangle.hpp>
 #include <cassert>
@@ -551,46 +552,72 @@ namespace xo {
              **/
             std::unique_ptr<TypeDescrExtra> tdextra_;
         }; /*TypeDescrBase*/
+    } /*reflect*/
+} /*xo*/
 
-        inline std::ostream &
+namespace xo::pp {
+    template <>
+    struct Prettifier<xo::reflect::TypeDescrBase> {
+        static void print(PpSink & sink, const xo::reflect::TypeDescrBase & td) {
+            td.pretty(sink);
+        }
+    };
+
+    /** TypeDescr is a pointer (const TypeDescrBase *).
+     *
+     *  A null descriptor prints nothing, preserving the legacy
+     *  ppdetail<TypeDescr> behaviour (`return td ? td->pretty(ppii) : true`).
+     *  Printing "<null>" instead would arguably be friendlier, but that is an
+     *  output-visible change and belongs in its own commit.
+     **/
+    template <>
+    struct Prettifier<xo::reflect::TypeDescr> {
+        static void print(PpSink & sink, xo::reflect::TypeDescr td) {
+            if (td)
+                td->pretty(sink);
+        }
+    };
+}
+
+namespace xo::reflect {
+    inline std::ostream &
         operator<<(std::ostream & os, const TypeDescrBase & x) {
-            x.display(os);
-            return os;
-        } /*operator<<*/
+        x.display(os);
+        return os;
+    } /*operator<<*/
 
-        inline std::ostream &
+    inline std::ostream &
         operator<<(std::ostream & os, const TypeDescrBase * p) {
-            if (p)
-                p->display(os);
-            else
-                os << "<nullptr>";
-            return os;
-        }
+        if (p)
+            p->display(os);
+        else
+            os << "<nullptr>";
+        return os;
+    }
 
-        /* tag to drive overload resolution */
-        struct reflected_types_printer {};
+    /* tag to drive overload resolution */
+    struct reflected_types_printer {};
 
-        inline std::ostream &
+    inline std::ostream &
         operator<<(std::ostream & os, reflected_types_printer) {
-            TypeDescrBase::print_reflected_types(os);
-            return os;
-        }
+        TypeDescrBase::print_reflected_types(os);
+        return os;
+    }
 
-        class TypeDescrTable {
-        public:
-            TypeDescrTable * instance() { return &s_instance; }
+    class TypeDescrTable {
+    public:
+        TypeDescrTable * instance() { return &s_instance; }
 
-        private:
-            /** initialize with builtin atomic types:
-             *    float, double, char, short, int, long, bool
-             **/
-            TypeDescrTable();
+    private:
+        /** initialize with builtin atomic types:
+         *    float, double, char, short, int, long, bool
+         **/
+        TypeDescrTable();
 
-        private:
-            static TypeDescrTable s_instance;
-        };
-    } /*namespace reflect*/
-} /*namespace xo*/
+    private:
+        static TypeDescrTable s_instance;
+    };
+} /*namespace xo::reflect*/
 
 /* NB: printing hookups live in separate headers, so TypeDescr.hpp itself
  * carries no pretty-printing vocabulary:
