@@ -6,12 +6,12 @@
 #pragma once
 
 #include "type_name.hpp"
+#include <xo/ppsink/pretty.hpp>
 #include <cstdint>
 #include <ostream>
 
 namespace xo {
     namespace reflect {
-//        template <typename Tag = class typerecd_tag>
         struct typerecd {
             /** sentinel value **/
             typerecd() = default;
@@ -134,5 +134,15 @@ namespace xo {
 
     } /*namespace reflect*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** @brief structured pretty-printing for xo::reflect::typeseq. **/
+    template <>
+    struct Prettifier<xo::reflect::typeseq> {
+        static void print(PpSink & sink, const xo::reflect::typeseq & x) {
+            sink.pp(x.seqno());
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end typeseq.hpp */

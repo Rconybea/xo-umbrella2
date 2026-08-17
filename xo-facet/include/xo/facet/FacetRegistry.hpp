@@ -15,8 +15,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/reflectutil/typeseq_pp.hpp> /* Prettifier<typeseq>: dump() renders typeseqs */
-// #include <unordered_map>
+#include <xo/reflectutil/typeseq.hpp>
 #include <utility>
 
 namespace xo {
