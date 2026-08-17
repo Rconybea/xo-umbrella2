@@ -6,7 +6,11 @@
 #pragma once
 
 //#include "xo/indentlog/scope.hpp"
+#include <xo/ppsink/quoted.hpp>
+#include <xo/ppsink/tag.hpp> /* xo::pp::{Prettifier, tag, unq, PpSink} */
 #include <cassert>
+#include <charconv>
+#include <cstdio>
 #include <cstdint>
 #include <cstring>
 #include <ranges>
@@ -300,6 +304,41 @@ namespace xo {
         ///@}
     } /*namespace mm*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** @brief structured pretty-printing for xo::mm::span into a PpSink.
+     *
+     *  Renders as  @code <span :addr 0x.. :size N :text CONTENT> @endcode
+     *  (mirrors the legacy span ostream summary in span_ppdetail.hpp), with
+     *  each field a tag so it participates in pretty-print line breaking.
+     *  ostream-free.
+     **/
+    template <typename CharT>
+    struct Prettifier<xo::mm::span<CharT>> {
+        static void print(PpSink & sink, const xo::mm::span<CharT> & x) {
+            char addr_buf[2 + 2 * sizeof(void *) + 1];   /* "0x" + hex digits + NUL */
+            std::snprintf(addr_buf, sizeof(addr_buf), "%p", (const void *)x.lo());
+
+            char size_buf[24];                           /* holds any uint64 */
+            auto [size_end, ec] = std::to_chars(size_buf, size_buf + sizeof(size_buf),
+                                                x.size());
+            (void)ec;   /* cannot fail: buf is large enough */
+
+            sink.put("<span");
+            sink.begin(2);
+            sink.split(1);
+            sink.pp(tag("addr", std::string_view(addr_buf)));
+            sink.split(1);
+            sink.pp(tag("size", std::string_view(size_buf,
+                                                 static_cast<std::size_t>(size_end - size_buf))));
+            sink.split(1);
+            sink.pp(tag("text", unq(x.to_string_view())));
+            sink.put(">");
+            sink.end();
+        }
+    };
+} /*namespace xo::pp*/
+
 
 /** span is a non-owning view: iterators obtained from it remain valid after
  *  the span object itself goes away.  Without this specialization

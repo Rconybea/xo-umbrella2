@@ -13,7 +13,6 @@
 /* tostr/xtag used below; they used to arrive via xo-jit's headers,
  * which no longer pull in legacy xo-indentlog.
  */
-#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using xo::pp::tostr;

@@ -6,7 +6,6 @@
  */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 
 void
 AnimateGcCopyCb::notify_gc_copy(std::size_t z,

@@ -9,7 +9,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
 #include <cstddef>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
     namespace gc {

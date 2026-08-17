@@ -11,7 +11,6 @@
 #include <xo/alloc/Blob.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;

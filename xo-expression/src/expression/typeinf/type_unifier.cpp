@@ -9,7 +9,6 @@
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag.hpp>
 //#include <xo/ppsink/tag_ostream.hpp>
-#include <xo/refcnt/Refcounted_pp.hpp>
 
 namespace xo {
     using xo::pp::xtag;

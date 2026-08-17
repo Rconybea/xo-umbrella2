@@ -4,6 +4,7 @@
 
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tostr0.hpp>
+#include <xo/ppsink/pretty.hpp>
 #include <xo/cxxutil/demangle.hpp>
 
 // #include <boost/intrusive_ptr.hpp>
@@ -338,5 +339,46 @@ namespace xo {
 
     } /*namespace ref*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** Prettifier for rp<T> / bp<T>: forward to the pointee, so a refcounted
+     *  handle pretty-prints as whatever it points at.  FORWARDERS -- they carry
+     *  no layout of their own -- so a T with a Prettifier<T> automatically
+     *  pretty-prints through rp<T>.  Null renders as "<nullptr T>", matching
+     *  Refcounted_ostream.hpp and the legacy ppdetail forwarder.
+     *
+     *  HERE, not in a Refcounted_pp.hpp sidecar: xo::pp::pretty() branches on
+     *  has_prettifier<T> at the point of instantiation, so an opt-in Prettifier
+     *  emits two different bodies for the same vague-linkage symbol depending
+     *  on what a TU included -- an ODR violation with no diagnostic.  See
+     *  .xo-backlog/xo-ppsink/issues/13.
+     **/
+    template <typename T>
+    struct Prettifier<xo::ref::intrusive_ptr<T>> {
+        static void print(PpSink & sink, const xo::ref::intrusive_ptr<T> & x) {
+            if (const T * p = x.get()) {
+                sink.pp(*p);
+            } else {
+                sink.put("<nullptr ");
+                sink.put(xo::reflect::type_name<T>());
+                sink.put(">");
+            }
+        }
+    };
+
+    template <typename T>
+    struct Prettifier<xo::ref::Borrow<T>> {
+        static void print(PpSink & sink, xo::ref::Borrow<T> x) {
+            if (const T * p = x.get()) {
+                sink.pp(*p);
+            } else {
+                sink.put("<nullptr ");
+                sink.put(xo::reflect::type_name<T>());
+                sink.put(">");
+            }
+        }
+    };
+} /*namespace xo::pp*/
+
 
 /* end Refcounted.hpp */

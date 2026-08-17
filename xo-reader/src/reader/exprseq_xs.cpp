@@ -6,7 +6,6 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 #include "define_xs.hpp"
 #include "expect_symbol_xs.hpp"
 #include "if_else_xs.hpp"

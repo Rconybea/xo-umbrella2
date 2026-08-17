@@ -4,7 +4,7 @@
  *  -- the ppsink-native structured printing for an arena span.
  **/
 
-#include <xo/arena/span_pp.hpp>
+#include <xo/arena/span.hpp>
 #include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>

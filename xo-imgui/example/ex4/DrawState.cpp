@@ -7,7 +7,6 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 
 using xo::gc::GcStatisticsHistory;
 using xo::gc::generation;

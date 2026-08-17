@@ -12,7 +12,6 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     namespace gc {

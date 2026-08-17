@@ -16,7 +16,6 @@
  * the two ambiguous by ADL (the tag argument types live in namespace xo).
  * Retire when xo-interpreter migrates to ppsink.
  */
-#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 

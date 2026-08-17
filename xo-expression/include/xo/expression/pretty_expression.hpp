@@ -6,7 +6,6 @@
 #pragma once
 
 #include "Expression.hpp"
-#include <xo/refcnt/Refcounted_pp.hpp>   /* Prettifier<rp<T>> forwarder */
 #include <xo/ppsink/pretty.hpp>
 
 namespace xo::pp {

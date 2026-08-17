@@ -6,7 +6,6 @@
 #include <xo/unit/xquantity_iostream.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/pyutil/pyutil.hpp>
-#include <xo/ppsink/pretty_ostream.hpp>  /* operator<< fallback for xquantity */
 
 namespace xo {
     using xo::pp::tostr;

@@ -2,7 +2,6 @@
 
 #include "activation_record.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 #include <iostream>
 
 namespace xo {
