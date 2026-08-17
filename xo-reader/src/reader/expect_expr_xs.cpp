@@ -14,7 +14,6 @@
 #include "sequence_xs.hpp"
 #include <xo/expression/Constant.hpp>
 #include <xo/expression/Lambda.hpp>
-#include <xo/expression/pretty_expression.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>

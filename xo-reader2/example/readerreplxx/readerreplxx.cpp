@@ -9,7 +9,6 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>

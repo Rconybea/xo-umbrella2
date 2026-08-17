@@ -3,7 +3,6 @@
 #include "exprstate.hpp"
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
-#include "pretty_expression.hpp"
 #include "pretty_parserstatemachine.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>

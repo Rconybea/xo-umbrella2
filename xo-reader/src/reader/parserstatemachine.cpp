@@ -6,9 +6,7 @@
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
 #include "pretty_envframestack.hpp"
-#include "pretty_localenv.hpp"
 #include "pretty_parserstatemachine.hpp"
-#include <xo/expression/pretty_expression.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>

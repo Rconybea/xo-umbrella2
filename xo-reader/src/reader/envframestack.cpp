@@ -5,7 +5,6 @@
 
 #include "envframestack.hpp"
 #include "pretty_envframestack.hpp"
-#include "pretty_localenv.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/refcnt/Refcounted_ostream.hpp>
 #include <xo/ppsink/scope.hpp>

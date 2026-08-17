@@ -16,7 +16,6 @@
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/abox.hpp>
 #include <xo/facet/TypeRegistry.hpp>
-#include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
@@ -271,7 +270,7 @@ namespace xo {
             };
 
             vsm_std_utest_pattern(c_debug_flag, testname,
-                                  "3.14159265 / 0.5;", verify_fn);                                  
+                                  "3.14159265 / 0.5;", verify_fn);
         }
 
         TEST_CASE("VirtualSchematikaMachine-cmp1", "[interpreter2][VSM]")

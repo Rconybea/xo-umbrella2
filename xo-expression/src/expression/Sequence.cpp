@@ -1,7 +1,6 @@
 /* @file Sequence.cpp */
 
 #include "Sequence.hpp"
-#include "pretty_expression.hpp"
 #include <cstddef>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>

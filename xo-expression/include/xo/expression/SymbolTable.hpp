@@ -7,7 +7,7 @@
 
 #include "Variable.hpp"
 #include "binding_path.hpp"
-#include <xo/refcnt/Refcounted.hpp>
+#include <xo/refcnt/Displayable.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
@@ -22,7 +22,7 @@ namespace xo {
          *  When generating code (see xo-jit): rhs can be any expression,
          *  for example a Lambda.
          **/
-        class SymbolTable : public ref::Refcount {
+        class SymbolTable : public ref::Displayable {
         public:
             /** true if this is toplevel (global) environment.
              *  Toplevel environment doesn't have slot numbers.
@@ -53,9 +53,12 @@ namespace xo {
             virtual void upsert_local(bp<Variable> target) = 0;
 
             virtual void print(std::ostream & os) const = 0;
-            virtual void pretty(xo::pp::PpSink & sink) const = 0;
+
+            virtual void pretty(xo::pp::PpSink & sink) const override = 0;
+            virtual std::string display_string() const override;
         };
 
+        // TODO: move to SymbolTable_ostream.hpp
         inline std::ostream &
         operator<< (std::ostream & os, const SymbolTable & x) {
             x.print(os);
@@ -63,6 +66,5 @@ namespace xo {
         }
     } /*namespace scm*/
 } /*namespace xo*/
-
 
 /* end SymbolTable.hpp */

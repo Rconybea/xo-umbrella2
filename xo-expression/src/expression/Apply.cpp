@@ -3,7 +3,6 @@
 #include "Apply.hpp"
 #include "PrimitiveExpr.hpp"
 #include "exprtype.hpp"
-#include "pretty_expression.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
 #include <xo/ppsink/tag_ostream.hpp>

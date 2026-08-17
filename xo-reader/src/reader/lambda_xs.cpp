@@ -7,8 +7,6 @@
 #include "expect_type_xs.hpp"
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
-#include "pretty_expression.hpp"
-#include "pretty_variable.hpp"
 #include <xo/expression/Lambda.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>

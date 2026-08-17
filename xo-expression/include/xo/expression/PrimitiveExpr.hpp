@@ -7,7 +7,6 @@
 
 #include "PrimitiveExprInterface.hpp"
 #include "llvmintrinsic.hpp"
-#include "pretty_expression.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>

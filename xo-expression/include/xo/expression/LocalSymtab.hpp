@@ -129,5 +129,20 @@ namespace xo {
     } /*namespace scm*/
 } /*namespace xo*/
 
+namespace xo::pp {
+    // prettifier for LocalSymtab*
+    template <>
+    struct Prettifier<xo::scm::LocalSymtab *> {
+        static void print(PpSink & sink, const xo::scm::LocalSymtab * x) {
+            if (x) {
+                x->pretty(sink);
+            } else {
+                sink.put("<nullptr ");
+                sink.put(xo::reflect::type_name<xo::scm::LocalSymtab>());
+                sink.put(">");
+            }
+        }
+    };
+}
 
 /* end LocalSymtab.hpp */

@@ -4,7 +4,6 @@
  */
 
 #include "LocalSymtab.hpp"
-#include "pretty_variable.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
 #include <xo/ppsink/scope.hpp>

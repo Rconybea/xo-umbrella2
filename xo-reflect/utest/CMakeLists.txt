@@ -7,7 +7,8 @@ set(SELF_SOURCE_FILES
     VectorTdx.test.cpp
     StructTdx.test.cpp
     FunctionTdx.test.cpp
-    TypeDescr_pp.test.cpp)
+    TypeDescr_pp.test.cpp
+    ostream_baseline.test.cpp)
 
 xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)

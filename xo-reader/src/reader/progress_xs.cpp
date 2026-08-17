@@ -8,7 +8,6 @@
 #include "pretty_exprstatestack.hpp"
 #include <xo/expression/Apply.hpp>
 #include <xo/expression/AssignExpr.hpp>
-#include <xo/expression/pretty_expression.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>

@@ -1,7 +1,6 @@
 /* @file GeneralizedExpression.cpp */
 
 #include "GeneralizedExpression.hpp"
-#include "pretty_expression.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <cstdint>
 

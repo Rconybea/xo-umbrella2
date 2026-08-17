@@ -5,7 +5,6 @@
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include "progress_xs.hpp"
-#include <xo/expression/pretty_expression.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>

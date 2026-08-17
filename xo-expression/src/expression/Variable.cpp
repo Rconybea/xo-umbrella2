@@ -2,7 +2,6 @@
 
 #include "Variable.hpp"
 #include "SymbolTable.hpp"
-#include "pretty_expression.hpp"
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/quoted.hpp>
 #include <xo/ppsink/pretty_struct.hpp>

@@ -11,6 +11,7 @@ set(SELF_SRCS
     Variable.cpp
     IfExpr.cpp
     Sequence.cpp
+	SymbolTable.cpp
     GlobalSymtab.cpp
     LocalSymtab.cpp
     ConvertExpr.cpp

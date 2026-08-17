@@ -18,8 +18,6 @@
 #include "xo/expression/Sequence.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/LocalSymtab.hpp"
-#include "xo/expression/pretty_expression.hpp"
-#include "xo/expression/pretty_localenv.hpp"
 #include "print/PrettySink.hpp"
 #include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/arena/ArenaConfig.hpp>

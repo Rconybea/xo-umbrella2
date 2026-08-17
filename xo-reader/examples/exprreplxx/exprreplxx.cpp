@@ -4,7 +4,6 @@
 #include <replxx.hxx>
 #include <iostream>
 #include <xo/indentlog2/print/PrettySink.hpp>
-#include <xo/expression/pretty_expression.hpp>
 #include <unistd.h> // for isatty
 
 // presumeably replxx assumes input is a tty

@@ -5,7 +5,6 @@
 #include "expect_symbol_xs.hpp"
 #include "expect_type_xs.hpp"
 #include "parserstatemachine.hpp"
-#include "pretty_expression.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>

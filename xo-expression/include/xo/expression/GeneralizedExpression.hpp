@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "xo/expression/typeinf/type_ref.hpp"
-#include <xo/refcnt/Refcounted.hpp>
-#include <xo/ppsink/PpSink.hpp>   /* xo::pp::PpSink -- named by pretty() below */
-// #include "xo/reflect/TypeDescr.hpp"
 #include "exprtype.hpp"
+#include "typeinf/type_ref.hpp"
+#include <xo/refcnt/Refcounted.hpp>
+#include <xo/ppsink/pretty.hpp>
+#include <concepts>
 
 namespace xo {
     namespace scm {
@@ -71,5 +71,17 @@ namespace xo {
     } /*namespace scm*/
 } /*namespace xo*/
 
+namespace xo::pp {
+    /* the hierarchy dispatches dynamically through the virtual
+     * GeneralizedExpression::pretty(); these just enter it.
+     */
+    template <typename T>
+    requires std::derived_from<T, xo::scm::GeneralizedExpression>
+    struct Prettifier<T> {
+        static void print(PpSink & sink, const T & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end GeneralizedExpression.hpp */

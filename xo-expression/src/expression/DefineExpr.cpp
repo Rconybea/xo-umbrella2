@@ -5,7 +5,6 @@
 
 #include "DefineExpr.hpp"
 #include "Variable.hpp"
-#include "pretty_expression.hpp"
 #include <cstdint>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>

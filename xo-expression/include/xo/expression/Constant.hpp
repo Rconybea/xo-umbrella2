@@ -6,7 +6,6 @@
 #pragma once
 
 #include "ConstantInterface.hpp"
-#include "pretty_expression.hpp"
 #include <type_traits>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/quoted.hpp>

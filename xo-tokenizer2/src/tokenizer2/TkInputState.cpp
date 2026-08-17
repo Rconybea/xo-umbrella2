@@ -4,7 +4,7 @@
  **/
 
 #include "TkInputState.hpp"
-#include <xo/arena/span_ppdetail.hpp> /* xo::print::printspan (span ostream printing) */
+#include "span.hpp"
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 
@@ -127,7 +127,7 @@ namespace xo {
             this->current_pos_ = 0;
             this->whitespace_ = 0;
 
-            log && log(xtag("current_line", print::printspan(current_line_)),
+            log && log(xtag("current_line", current_line_),
                        xtag("current_pos", current_pos_));
 
             return std::make_pair(input_error::ok,

@@ -1,8 +1,6 @@
 /* @file IfExpr.cpp */
 
 #include "IfExpr.hpp"
-#include "pretty_expression.hpp"
-#include "pretty_variable.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
