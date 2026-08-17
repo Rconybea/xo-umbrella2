@@ -1,7 +1,6 @@
 /* @file Displayable.cpp */
 
 #include "Displayable.hpp"
-#include <xo/ppsink/pretty_ostream.hpp>
 
 namespace xo {
     using xo::pp::tostr0;

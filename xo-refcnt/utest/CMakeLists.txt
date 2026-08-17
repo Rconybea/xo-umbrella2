@@ -2,7 +2,7 @@
 
 set(SELF_EXECUTABLE_NAME utest.refcnt)
 # These tests can use the Catch2-provided main
-set(SELF_SOURCE_FILES intrusive_ptr.test.cpp refcnt_utest_main.cpp)
+set(SELF_SOURCE_FILES intrusive_ptr.test.cpp Refcounted_ostream.test.cpp refcnt_utest_main.cpp)
 
 xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 

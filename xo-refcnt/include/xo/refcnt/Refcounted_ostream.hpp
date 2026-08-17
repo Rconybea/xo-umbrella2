@@ -5,8 +5,9 @@
 
 #include <xo/refcnt/Refcounted.hpp>
 
-namespace xo::pp {
+#include <ostream>
 
+namespace xo::ref {
     template<typename T>
     inline std::ostream &
         operator<<(std::ostream & os, intrusive_ptr<T> const & x) {
@@ -29,6 +30,6 @@ namespace xo::pp {
         return os;
     } /*operator<<*/
 
-} /*namespace xo::pp*/
+} /*namespace xo::ref*/
 
 /* end Refcounted_ostream.hpp */
