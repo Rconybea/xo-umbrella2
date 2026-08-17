@@ -191,6 +191,7 @@ namespace xo {
 
         }
 
+        /* This case drives try_insert() -> never grows the table. */
         TEST_CASE("DArenaHashMap-try-insert2", "[arena][DArenaHashMap]")
         {
             using HashMap = DArenaHashMap<int, int>;
@@ -210,8 +211,8 @@ namespace xo {
              *       observes test failure
              */
 
-            for (std::uint32_t n = 0; n <= 8; ) {
-                HashMap hash_map("utest");
+            for (std::uint32_t n = 0; n <= 128; ) {
+                HashMap hash_map("utest", 2 * n + 1);
 
                 auto test_fn = [&rgen, &hash_map](bool dbg_flag,
                                                   std::uint32_t n)
@@ -239,7 +240,49 @@ namespace xo {
                 else
                     n = 2*n;
             }
-        }
+        } /*DArenaHashMap-try-insert2*/
+
+        /* This case drives insert() -> grows the table.
+         * A default-constructed map holds one 16-slot group and doubles when
+         * load_factor() reaches 0.875, so the scales below climb
+         *   16 -> 32 -> 64 -> 128 -> 256 -> 512 slots.
+         *
+         * Regression: until 2026-08-17 _try_grow() doubled the group *exponent*
+         * instead of the group count, so the third rung produced 6 groups rather
+         * than 8 -- a capacity that is not a power of 2, while every probe masks
+         * with capacity-1.  No test grew a table more than twice, so nothing caught
+         * it; scales here run to 256 for that reason.
+         */
+        TEST_CASE("DArenaHashMap-grow", "[arena][DArenaHashMap]")
+        {
+            using HashMap = DArenaHashMap<int, int>;
+
+            for (std::uint32_t n = 0; n <= 256; ) {
+                HashMap hash_map("utest");
+
+                auto test_fn = [&hash_map](bool dbg_flag,
+                                           std::uint32_t n)
+                    {
+                        bool ok_flag = true;
+
+                        ok_flag &= HashMapUtil<HashMap>::linear_inserts(n, dbg_flag, &hash_map);
+
+                        ok_flag &= HashMapUtil<HashMap>::check_linear_inserts(n, dbg_flag, hash_map);
+
+                        ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0 /*dvalue*/,
+                                                                               dbg_flag, hash_map);
+
+                        return ok_flag;
+                    };
+
+                bool ok_flag = UtestTools::bimodal_test("DArenaHashMap-grow", test_fn, n);
+
+                if (n == 0)
+                    n = 1;
+                else
+                    n = 2*n;
+            }
+        } /*DArenaHashMap-grow*/
 
         TEST_CASE("DArenaHashMap-operator-bracket", "[arena][DArenaHashMap]")
         {

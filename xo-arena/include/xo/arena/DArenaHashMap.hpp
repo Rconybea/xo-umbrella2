@@ -387,7 +387,10 @@ namespace xo {
                 n_group_2x = 1;
             } else {
                 n_group_exponent_2x = store_.n_group_exponent_ + 1;
-                n_group_2x = 2 * n_group_exponent_2x;
+                /* preserves the {x, 2^x} pairing HashMapStore requires: probe arithmetic
+                 * masks with (capacity - 1), so n_slot_ must stay a power of 2 (SM1.3, SM1.5)
+                 */
+                n_group_2x = 2 * store_.n_group_;
             }
 
             // optimization when table is empty.  in that case can resize

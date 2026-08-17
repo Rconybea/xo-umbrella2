@@ -256,6 +256,104 @@ namespace utest {
             return random_inserts(0, n, 1, catch_flag, p_rgen, p_map);
         }
 
+        /* insert the keys {0, 1, .., n-1} into *p_map, in order,
+         * with value 10*key (the dvalue=0 case of the convention the
+         * check_.._iterator() helpers assume).
+         *
+         * Uses insert(), not try_insert(), so the table grows: this is the
+         * only helper here that exercises DArenaHashMap::_try_grow().
+         * Table state is verified after each insert, since a growth that
+         * corrupts it (see DArenaHashMap-grow) is otherwise invisible until
+         * a later lookup misses.
+         */
+        static bool
+        linear_inserts(std::uint32_t n,
+                       bool catch_flag,
+                       HashMap * p_map)
+        {
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            bool ok_flag = true;
+
+            scope log(XO_DEBUG_(catch_flag), xtag("n", n));
+
+            /* first pass wants a verdict, not a diagnostic: the silent policy returns
+             * false instead of logging + throwing, which is what lets bimodal_test()
+             * rerun the failing scale with logging on
+             */
+            auto policy = (catch_flag
+                           ? xo::verify_policy::chatty()
+                           : xo::verify_policy());
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->verify_ok(policy));
+
+            std::size_t map_z0 = p_map->size();
+
+            for (std::uint32_t i = 0; i < n; ++i) {
+                auto key = static_cast<typename HashMap::key_type>(i);
+
+                log && log(xtag("i", i), xtag("key", key),
+                           xtag("size", p_map->size()),
+                           xtag("capacity", p_map->capacity()));
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               p_map->insert(typename HashMap::value_type(key, 10 * key)));
+
+                /* SM1.3 (n_group_ vs n_group_exponent_) and SM1.5 (n_slot_ a power of 2)
+                 * live here; a growth that computes the wrong group count trips them
+                 */
+                REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->verify_ok(policy));
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->size() == map_z0 + i + 1);
+
+                std::size_t cap = p_map->capacity();
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, cap == p_map->groups() * HashMap::c_group_size);
+                /* probe arithmetic masks with (capacity - 1), so this must hold */
+                REQUIRE_ORFAIL(ok_flag, catch_flag, (cap > 0) && ((cap & (cap - 1)) == 0));
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               p_map->load_factor() <= HashMap::c_max_load_factor);
+            }
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->size() == map_z0 + n);
+
+            return ok_flag;
+        } /*linear_inserts*/
+
+        /* verify the keys {0, 1, .., n-1} are all present with value 10*key.
+         * Complements linear_inserts(): a table left with a capacity that is not a
+         * power of 2 has slots no probe can reach, so keys go missing here.
+         */
+        static bool
+        check_linear_inserts(std::uint32_t n,
+                             bool catch_flag,
+                             HashMap & map)
+        {
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            bool ok_flag = true;
+
+            scope log(XO_DEBUG_(catch_flag), xtag("n", n));
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag, map.size() == n);
+
+            for (std::uint32_t i = 0; i < n; ++i) {
+                auto key = static_cast<typename HashMap::key_type>(i);
+
+                auto ix = map.find(key);
+
+                log && log(xtag("i", i), xtag("key", key), xtag("found", ix != map.end()));
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, ix != map.end());
+                REQUIRE_ORFAIL(ok_flag, catch_flag, ix->first == key);
+                REQUIRE_ORFAIL(ok_flag, catch_flag, ix->second == 10 * key);
+            }
+
+            return ok_flag;
+        } /*check_linear_inserts*/
+
 #ifdef NOT_YET
         /* do n random removes (taken from *p_rgen) from *p_rbtree;
          * assumes *p_rbtree has keys [0 .. n-1] where n=p_rbtreẹsize
