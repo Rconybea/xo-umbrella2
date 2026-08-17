@@ -41,6 +41,7 @@
 #include "HttpEndpointDescr.hpp"
 #include "StreamEndpointDescr.hpp"
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pretty_ostream.hpp> /* xo::pp::pp_to_stream */
 #include <xo/ppsink/pretty.hpp> /* PpSink::pp */
 #include <ostream>
 

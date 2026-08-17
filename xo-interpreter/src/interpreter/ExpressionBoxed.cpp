@@ -4,6 +4,7 @@
  **/
 
 #include "ExpressionBoxed.hpp"
+#include <xo/expression/pretty_expression.hpp>   /* Prettifier<Expression> + rp<T> forwarder */
 #include <xo/reflect/Reflect.hpp>
 
 namespace xo {
