@@ -50,6 +50,7 @@ namespace xo::pp {
             }
         }
     };
+
 } /*namespace xo::pp*/
 
 /* end Refcounted_pp.hpp */

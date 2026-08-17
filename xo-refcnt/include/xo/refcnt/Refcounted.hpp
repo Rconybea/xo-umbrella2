@@ -234,17 +234,6 @@ namespace xo {
         extern void intrusive_ptr_add_ref(Refcount * x);
         extern void intrusive_ptr_release(Refcount * x);
 
-        template<typename T>
-        inline std::ostream &
-        operator<<(std::ostream & os, intrusive_ptr<T> const & x) {
-            if (x.get()) {
-                os << *(x.get());
-            } else {
-                os << "<nullptr " << reflect::type_name<T>() << ">";
-            }
-            return os;
-        } /*operator<<*/
-
         /** Wrap a (presumably non-reference-counted) class T so that it has a refcount.
          **/
         template <typename T>
@@ -346,17 +335,6 @@ namespace xo {
         intrusive_ptr<T>::borrow() const {
             return Borrow<T>(*this);
         } /*borrow*/
-
-        template<typename T>
-        inline std::ostream &
-        operator<<(std::ostream & os, Borrow<T> x) {
-            if (x) {
-                os << *x;
-            } else {
-                os << "<nullptr "  << reflect::type_name<T>() << ">";
-            }
-            return os;
-        } /*operator<<*/
 
     } /*namespace ref*/
 } /*namespace xo*/
