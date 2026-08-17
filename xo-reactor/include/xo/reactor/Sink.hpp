@@ -13,7 +13,6 @@
 #include <xo/timeutil/timeutil.hpp>
 #include <xo/cxxutil/demangle.hpp>
 #include <typeinfo>
-#include <xo/ppsink/pretty_ostream.hpp>   /* pp_to_stream */
 #include <xo/ppsink/pretty_pair.hpp>      /* Prettifier<std::pair<T,U>> */
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
