@@ -125,3 +125,42 @@ TEST_CASE("prettifier-leaves-char-types-alone", "[pretty][scalar]") {
     CHECK(tostr0(static_cast<signed char>(65)) == "A");
     CHECK(tostr0(static_cast<unsigned char>(65)) == "A");
 }
+
+/* Pointers: byte-identical to operator<<(std::ostream&, const void*).
+ *
+ * The null case is the one worth pinning: libstdc++ renders a null pointer as
+ * a bare "0", not "0x0" -- so a naive "0x" + to_chars would have changed output
+ * for every null pointer in the tree.
+ *
+ * void* and const void* are checked separately because Prettifier<T> matches
+ * exactly: covering one does not cover the other.  They were 307 and 52 of the
+ * 776 fallback instantiations measured 2026-08-16 (see
+ * .xo-backlog/xo-ppsink/issues/12-operator-fallback-inventory.md).
+ */
+TEST_CASE("prettifier-pointer", "[prettifier][pointer]") {
+    static_assert(xo::pp::has_prettifier<void *>);
+    static_assert(xo::pp::has_prettifier<const void *>);
+
+    int v = 7;
+    void * cases[] = { nullptr,
+                       reinterpret_cast<void *>(1),
+                       reinterpret_cast<void *>(0xff),
+                       static_cast<void *>(&v) };
+
+    for (void * p : cases) {
+        const void * cp = p;
+
+        std::stringstream expect_p, expect_cp;
+        expect_p << p;
+        expect_cp << cp;
+
+        INFO("expect " + expect_p.str());
+
+        CHECK(tostr0(p) == expect_p.str());
+        CHECK(tostr0(cp) == expect_cp.str());
+    }
+
+    /* the shape, spelled out, so a change on either side is visible here */
+    CHECK(tostr0(static_cast<void *>(nullptr)) == "0");
+    CHECK(tostr0(reinterpret_cast<void *>(0xff)) == "0xff");
+}

@@ -11,6 +11,7 @@
 
 #include "PpSink.hpp"
 #include <charconv>
+#include <cstdint>
 #include <concepts>
 #include <string_view>
 #include <type_traits>
@@ -38,21 +39,8 @@ namespace xo::pp {
         Prettifier<T>::print(sink, x);
     };
 
-    /** integer types that should render as NUMBERS.
-     *
-     *  Deliberately not simply std::integral.  `char`, `signed char`,
-     *  `unsigned char` and the char8/16/32/wchar types are integral, but
-     *  operator<< renders them as CHARACTERS -- measured 2026-08-10:
-     *  `'A'`, `(signed char)65` and `(unsigned char)65` all print "A", and
-     *  `(std::int8_t)-1` prints one garbage byte.  Bringing them under a
-     *  to_chars Prettifier would turn 'A' into "65" everywhere in xo, which is
-     *  an output-visible change and not the point of this specialization.
-     *
-     *  NB this makes std::int8_t / std::uint8_t character types on any normal
-     *  platform, since they are typedefs for (un)signed char.  That is
-     *  inherited from operator<<, not chosen here.
-     *
-     *  `bool` is excluded too, and handled separately below.
+    /** Integer types that should render as NUMBERS.
+     *  Takes all integral types except for bool and char-oriented types
      **/
     template <typename T>
     concept pp_number_integral
@@ -66,20 +54,13 @@ namespace xo::pp {
        && !std::same_as<std::remove_cv_t<T>, char16_t>
        && !std::same_as<std::remove_cv_t<T>, char32_t>;
 
-    /** scalar leaf: render an integer via std::to_chars (ostream-free).
-     *
-     *  Covers every width -- short, int, long, long long and their unsigned
-     *  forms, hence also std::size_t, std::uint32_t and friends.  Before this
-     *  existed only `int` had a Prettifier, so `std::uint32_t` (e.g. a
-     *  container's size()) fell through to the operator<< fallback: correct
-     *  output, but via an ostream, and invisibly.
-     *
-     *  Output-neutral by construction: to_chars and operator<< agree on
-     *  decimal integers, verified across all widths in
-     *  xo-ppsink/utest/Prettifier.test.cpp.
-     *
-     *  An unsigned 64-bit value is at most 20 digits, a signed one 19 plus a
-     *  sign; buf[24] is ample for every width.
+    /** Use:
+     *    PpSink sink = ...;
+     *    using T = uint32_t; // or another integral type
+     *    T x = 123;
+     *    Prettifier<T>::print(sink, x);
+     *  writes
+     *    "123" to sink
      **/
     template <pp_number_integral T>
     struct Prettifier<T> {
@@ -92,19 +73,11 @@ namespace xo::pp {
         }
     };
 
-    /** scalar leaf: render a bool as "1"/"0", ostream-free.
-     *
-     *  **Preserves the current rendering, deliberately.**  operator<< prints a
-     *  bool as 1/0 unless std::boolalpha is set, and nothing in xo sets it --
-     *  measured 2026-08-10.  Renderings already pinned across the tree contain
-     *  it (e.g. TypeDescr's ":complete 1",
-     *  xo-expression2/utest/printable_render.test.cpp).
-     *
-     *  So this specialization removes an ostream round-trip and changes no
-     *  output.  Whether "true"/"false" would be BETTER is open and is now a
-     *  one-line change in one place rather than a property inherited from
-     *  <ostream> -- the same framing as c_default_float_precision above.  It
-     *  would be output-visible and wants its own commit.
+    /** Use:
+     *    PpSink sink = ...;
+     *    Prettifier<double>::print(sink, true)
+     *  writes
+     *    "1" to sink.
      **/
     template <>
     struct Prettifier<bool> {
@@ -114,40 +87,17 @@ namespace xo::pp {
     };
 
     /** default precision for floating-point leaves.
-     *
-     *  6 significant digits, matching std::ostream's default -- which is what
-     *  a double rendered as BEFORE this specialization existed, by falling
-     *  through the empty primary template to operator<<.  Preserved
-     *  deliberately: changing it changes every float rendering in xo, and that
-     *  is a decision to take on its own, not a side effect of moving the
-     *  default somewhere visible.
-     *
-     *  See .xo-backlog/xo-ppsink/issues/07-nested-formatting-context.md
+     *  Matching ostream's default as placeholder for something more elaborate.
      **/
     static constexpr int c_default_float_precision = 6;
 
-    /** scalar leaf: render a double via std::to_chars (ostream-free).
+    /** Use:
+     *    PpSink sink = ...;
+     *    Prettifier<double>::print(sink, 0.1234)
+     *  writes
+     *    "0.1234" to sink.
      *
-     *  chars_format::general with precision 6 is exactly printf's "%.6g", and
-     *  so exactly what std::ostream produced by default.  Note this is NOT
-     *  to_chars' no-precision overload, which gives the shortest round-trip
-     *  form (1.0/3.0 -> 0.3333333333333333) and would change every rendering.
-     *
-     *  THIS IS THE ENTRY POINT for future formatting control: a nested
-     *  formatting context can be reached through @p sink without changing this
-     *  signature, since the sink is already in hand.  See issue 07.
-     *
-     *  Stream state no longer applies, and that is the point rather than a
-     *  concession.  Previously a caller who set precision on the ostream under
-     *  a FlatSink would see it honoured, because rendering went through
-     *  operator<<.  Formatting now belongs to the sink, not to whatever stream
-     *  happens to be beneath it.
-     *
-     *  Legacy already treated stream state as something to work around rather
-     *  than use: xo-indentlog/print/fixed.hpp saves flags() and precision(),
-     *  sets its own, prints, and restores them -- six lines of ceremony purely
-     *  to stop one value's formatting leaking into a shared stream.  Nothing
-     *  in xo relied on ambient stream state; it defended against it.
+     *  Equivalent to "%.6g" for now
      **/
     template <>
     struct Prettifier<double> {
@@ -172,15 +122,58 @@ namespace xo::pp {
         }
     };
 
-    /** scalar leaf: render a float exactly as a double.
-     *
-     *  Deliberately not narrower: a float promoted and printed at 6
-     *  significant digits is what operator<< did, so this preserves it.
+    /** promote float -> double for printing.
+     *  Consistent with operator<< policy
      **/
     template <>
     struct Prettifier<float> {
         static void print(PpSink & sink, float x) {
             Prettifier<double>::print(sink, static_cast<double>(x));
+        }
+    };
+
+    namespace detail {
+        /** Use:
+         *    PpSink sink = ...;
+         *    const void *x = 0x1234;
+         *    detail::pp_put_pointer(sink, x);
+         * writes
+         *    "0x1234" to sink
+         *
+         * nullptr formatted as plain
+         *    "0"
+         **/
+        inline void pp_put_pointer(PpSink & sink, const void * p) {
+            if (!p) {
+                sink.put(std::string_view("0"));
+                return;
+            }
+
+            /* "0x" + two hex digits per byte; +1 keeps to_chars' end in range */
+            char buf[2 + (2 * sizeof(void *)) + 1];
+            buf[0] = '0';
+            buf[1] = 'x';
+
+            auto [ptr, ec] = std::to_chars(buf + 2, buf + sizeof(buf),
+                                           reinterpret_cast<std::uintptr_t>(p),
+                                           16);
+            (void)ec; /* cannot fail: buf holds every pointer width */
+
+            sink.put(std::string_view(buf,
+                                      static_cast<std::size_t>(ptr - buf)));
+        }
+    }
+
+    template <>
+    struct Prettifier<void *> {
+        static void print(PpSink & sink, const void * x) {
+            detail::pp_put_pointer(sink, x);
+        }
+    };
+    template <>
+    struct Prettifier<const void *> {
+        static void print(PpSink & sink, const void * x) {
+            detail::pp_put_pointer(sink, x);
         }
     };
 } /*namespace xo::pp*/
