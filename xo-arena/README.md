@@ -13,6 +13,10 @@ Features:
 Limitations:
 - requires =mmap=.
 
+## Documentation
+
+- [documentation](https://rconybea.us/xo-docs/xo-arena)
+
 ## Getting started
 
 ### Install dependencies
@@ -68,6 +72,4 @@ $ cmake --build xo-arena/.build-ccov
 $ cd xo-arena
 $ ln -s .build/compile_commands.json  # lsp will look for compile_commands.json in the root of the source tree
 ```
-
-
 
