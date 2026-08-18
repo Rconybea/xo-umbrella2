@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 252" width="960" height="252"
+     role="img" aria-labelledby="title desc">
+  <title id="title">An arena after some allocations</title>
+  <desc id="desc">A reserved address range from lo_ to hi_. Allocations fill it from the
+  left up to free_; committed memory extends further, to limit_, always a whole number of
+  superpages; the remainder to hi_ is reserved address space with no physical memory
+  behind it.</desc>
+
+  <!-- Palette matches the animated version in _static/arena-lifecycle.html -->
+  <defs>
+    <pattern id="hatch" width="8" height="8" patternTransform="rotate(45)"
+             patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#D6DCE4"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#C2CAD4" stroke-width="1.4"/>
+    </pattern>
+  </defs>
+
+  <rect width="960" height="252" fill="#FFFFFF"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+
+    <!-- span brackets -->
+    <g stroke="#7E8998" stroke-width="1" fill="none">
+      <path d="M60 24 v8 M60 28 H900 M900 24 v8"/>
+      <path d="M60 52 v8 M60 56 H540 M540 52 v8"/>
+      <path d="M540 52 v8 M540 56 H900 M900 52 v8"/>
+      <path d="M60 80 v8 M60 84 H270 M270 80 v8"/>
+      <path d="M270 80 v8 M270 84 H540 M540 80 v8"/>
+    </g>
+
+    <g fill="#55626F" text-anchor="middle">
+      <rect x="440" y="18" width="80" height="20" fill="#FFFFFF"/>
+      <text x="480" y="32">reserved</text>
+
+      <rect x="255" y="46" width="90" height="20" fill="#FFFFFF"/>
+      <text x="300" y="60">committed</text>
+
+      <rect x="672" y="46" width="96" height="20" fill="#FFFFFF"/>
+      <text x="720" y="60">uncommitted</text>
+
+      <rect x="128" y="74" width="84" height="20" fill="#FFFFFF"/>
+      <text x="165" y="88">allocated</text>
+
+      <rect x="366" y="74" width="78" height="20" fill="#FFFFFF"/>
+      <text x="405" y="88">available</text>
+    </g>
+
+    <!-- superpage ticks -->
+    <g stroke="#C7D0DB" stroke-width="1">
+      <path d="M60 96 v8 M120 96 v8 M180 96 v8 M240 96 v8 M300 96 v8 M360 96 v8
+               M420 96 v8 M480 96 v8 M540 96 v8 M600 96 v8 M660 96 v8 M720 96 v8
+               M780 96 v8 M840 96 v8 M900 96 v8"/>
+    </g>
+
+    <!-- the range -->
+    <rect x="540" y="104" width="360" height="56" fill="url(#hatch)"/>
+    <rect x="270" y="104" width="270" height="56" fill="#E7DCCE"/>
+
+    <!-- allocations: an 8-byte header (lighter) then payload, one block each -->
+    <g>
+      <rect x="60"  y="104" width="26" height="56" fill="#6FAAB0"/>
+      <rect x="62"  y="104" width="24" height="56" fill="#0F6E77"/>
+      <rect x="86"  y="104" width="18" height="56" fill="#6FAAB0"/>
+      <rect x="88"  y="104" width="16" height="56" fill="#0F6E77"/>
+      <rect x="104" y="104" width="34" height="56" fill="#6FAAB0"/>
+      <rect x="106" y="104" width="32" height="56" fill="#0F6E77"/>
+      <rect x="138" y="104" width="22" height="56" fill="#6FAAB0"/>
+      <rect x="140" y="104" width="20" height="56" fill="#0F6E77"/>
+      <rect x="160" y="104" width="14" height="56" fill="#6FAAB0"/>
+      <rect x="162" y="104" width="12" height="56" fill="#0F6E77"/>
+      <rect x="174" y="104" width="30" height="56" fill="#6FAAB0"/>
+      <rect x="176" y="104" width="28" height="56" fill="#0F6E77"/>
+      <rect x="204" y="104" width="20" height="56" fill="#6FAAB0"/>
+      <rect x="206" y="104" width="18" height="56" fill="#0F6E77"/>
+      <rect x="224" y="104" width="24" height="56" fill="#6FAAB0"/>
+      <rect x="226" y="104" width="22" height="56" fill="#0F6E77"/>
+      <rect x="248" y="104" width="22" height="56" fill="#6FAAB0"/>
+      <rect x="250" y="104" width="20" height="56" fill="#0F6E77"/>
+    </g>
+
+    <rect x="60" y="104" width="840" height="56" fill="none" stroke="#C7D0DB"/>
+
+    <!-- limit_: the commit frontier, always on a superpage boundary -->
+    <rect x="539" y="98" width="2" height="68" fill="#B25A0F"/>
+    <!-- free_: the bump pointer -->
+    <rect x="269.5" y="104" width="1" height="56" fill="#101720"/>
+
+    <!-- pointer labels -->
+    <g stroke="#7E8998" stroke-width="1">
+      <path d="M60 166 v10 M270 166 v10 M540 166 v10 M900 166 v10"/>
+    </g>
+    <g fill="#101720" font-size="13">
+      <text x="60"  y="192" text-anchor="start">lo_</text>
+      <text x="270" y="192" text-anchor="middle">free_</text>
+      <text x="540" y="192" text-anchor="middle">limit_</text>
+      <text x="900" y="192" text-anchor="end">hi_</text>
+    </g>
+
+    <!-- legend -->
+    <g font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="12.5"
+       fill="#55626F">
+      <rect x="60" y="216" width="13" height="13" fill="#0F6E77" stroke="#C7D0DB"/>
+      <text x="80" y="227">objects handed out</text>
+
+      <rect x="222" y="216" width="13" height="13" fill="#6FAAB0" stroke="#C7D0DB"/>
+      <text x="242" y="227">per-alloc header and padding</text>
+
+      <rect x="450" y="216" width="13" height="13" fill="#E7DCCE" stroke="#C7D0DB"/>
+      <text x="470" y="227">backed by memory, not yet handed out</text>
+
+      <rect x="756" y="216" width="13" height="13" fill="url(#hatch)" stroke="#C7D0DB"/>
+      <text x="776" y="227">addresses only</text>
+    </g>
+  </g>
+</svg>
