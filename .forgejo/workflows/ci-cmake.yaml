@@ -197,24 +197,6 @@ jobs:
           xo-build --install xo-reflectutil
           echo "::endgroup::"
 
-      - name: build xo-arena
-        run: |
-          echo "::group::xo-arena configure"
-          xo-build --configure --with-utests --with-examples xo-arena
-          echo "::endgroup::"
-
-          echo "::group::xo-arena build"
-          xo-build --build xo-arena
-          echo "::endgroup::"
-
-          echo "::group::xo-arena utest"
-          ctest --test-dir xo-arena/.build
-          echo "::endgroup::"
-
-          echo "::group::xo-arena install"
-          xo-build --install xo-arena
-          echo "::endgroup::"
-
       - name: build xo-testutil
         run: |
           echo "::group::xo-testutil configure"
@@ -226,11 +208,29 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::xo-testutil utest"
-          ctest --test-dir xo-testutil/.build
+          xo-build --utest xo-testutil
           echo "::endgroup::"
 
           echo "::group::xo-testutil install"
           xo-build --install xo-testutil
+          echo "::endgroup::"
+
+      - name: build xo-arena
+        run: |
+          echo "::group::xo-arena configure"
+          xo-build --configure --with-utests --with-examples xo-arena
+          echo "::endgroup::"
+
+          echo "::group::xo-arena build"
+          xo-build --build xo-arena
+          echo "::endgroup::"
+
+          echo "::group::xo-arena utest"
+          xo-build --utest xo-arena
+          echo "::endgroup::"
+
+          echo "::group::xo-arena install"
+          xo-build --install xo-arena
           echo "::endgroup::"
 
       - name: build xo-indentlog2
