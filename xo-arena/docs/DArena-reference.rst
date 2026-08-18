@@ -41,9 +41,12 @@ Arena memory layout
      ^               ^                  ^                         ^
      lo              free               limit                     hi
 
-      [X] allocated:   in use
-      [_] committed:   physical memory obtained
+      [X] allocated:   handed out; used bytes plus per-alloc overhead
+      [_] available:   committed, not yet handed out
       [.] uncommitted: mapped in virtual memory, not backed by memory
+
+      so: allocated + available = committed,
+          committed + uncommitted = reserved
 
 
 Representation for a single allocation

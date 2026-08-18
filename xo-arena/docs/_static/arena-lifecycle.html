@@ -41,10 +41,10 @@
 
     --used:      #0F6E77;
     --overhead:  #6FAAB0;
-    --unused:    #E7DCCE;
+    --available:  #E7DCCE;
     --commit:    #B25A0F;
     --commit-dim:#D9A473;
-    --reserve:   #D6DCE4;
+    --uncommitted:#D6DCE4;
     --hatch:     #C2CAD4;
 
     --shadow: 0 1px 2px rgba(16, 23, 32, .06), 0 8px 24px rgba(16, 23, 32, .06);
@@ -67,10 +67,10 @@
 
       --used:      #35BAB1;
       --overhead:  #1C6B6E;
-      --unused:    #302518;
+      --available:  #302518;
       --commit:    #E59547;
       --commit-dim:#7A5227;
-      --reserve:   #18202A;
+      --uncommitted:#18202A;
       --hatch:     #263140;
 
       --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .35);
@@ -89,10 +89,10 @@
 
     --used:      #35BAB1;
     --overhead:  #1C6B6E;
-    --unused:    #302518;
+    --available:  #302518;
     --commit:    #E59547;
     --commit-dim:#7A5227;
-    --reserve:   #18202A;
+    --uncommitted:#18202A;
     --hatch:     #263140;
 
     --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .35);
@@ -256,7 +256,7 @@
     position: relative;
     height: 84px;
     display: flex;
-    background: var(--reserve);
+    background: var(--uncommitted);
     background-image: repeating-linear-gradient(
       135deg,
       transparent 0 7px,
@@ -268,7 +268,7 @@
 
   .band { height: 100%; }
   .band-used     { background: var(--used); }
-  .band-unused   { background: var(--unused); }
+  .band-available   { background: var(--available); }
 
   /* Overhead is 8 bytes per allocation scattered through the allocated range, not a
      slab at the end of it.  Drawn as a stripe spanning that whole range whose HEIGHT is
@@ -385,9 +385,9 @@
 
   .sw-used     { background: var(--used); }
   .sw-overhead { background: var(--overhead); height: 4px; align-self: center; }
-  .sw-unused   { background: var(--unused); }
-  .sw-reserve  {
-    background: var(--reserve);
+  .sw-available   { background: var(--available); }
+  .sw-uncommitted  {
+    background: var(--uncommitted);
     background-image: repeating-linear-gradient(135deg, transparent 0 4px, var(--hatch) 4px 5px);
   }
   .sw-commit   { background: var(--commit); width: 3px; border: none; height: 15px; }
@@ -639,7 +639,7 @@
         <div class="strip" id="strip">
           <div class="band band-used" id="band-used"></div>
           <div class="band band-overhead" id="band-overhead"></div>
-          <div class="band band-unused" id="band-unused"></div>
+          <div class="band band-available" id="band-available"></div>
           <div class="commit-line" id="commit-line"></div>
         </div>
         <div class="viewport" id="viewport"></div>
@@ -654,8 +654,8 @@
     <div class="legend">
       <span><i class="swatch sw-used"></i>used — payload bytes</span>
       <span><i class="swatch sw-overhead"></i>overhead — header + padding, stripe height is its share</span>
-      <span><i class="swatch sw-unused"></i>unused — committed, not handed out</span>
-      <span><i class="swatch sw-reserve"></i>reserved — addresses only</span>
+      <span><i class="swatch sw-available"></i>available — committed, not handed out</span>
+      <span><i class="swatch sw-uncommitted"></i>uncommitted — addresses only</span>
       <span><i class="swatch sw-commit"></i>limit_ — commit frontier</span>
     </div>
 
@@ -677,8 +677,8 @@
         <span class="sub" id="s-commit">0 superpages</span>
       </div>
       <div class="stat">
-        <span class="k">unused</span><span class="v" id="v-avail">0 B</span>
-        <span class="sub">available()</span>
+        <span class="k">available</span><span class="v" id="v-avail">0 B</span>
+        <span class="sub">committed − allocated</span>
       </div>
       <div class="stat">
         <span class="k">reserved</span><span class="v" id="v-reserve">32.0 MB</span>
@@ -754,9 +754,9 @@
       <div>
         <dt>used</dt>
         <dd>
-          Payload only — what callers asked for. The gap up to <code>allocated()</code> is
-          bookkeeping, not waste; the gap from there to <code>committed()</code> is
-          <code>available()</code>, memory ready for the next allocation with no syscall.
+          Payload only — what callers asked for. Together with the per-allocation overhead
+          it makes up <code>allocated()</code>; the gap from there to <code>committed()</code>
+          is <code>available()</code>, memory ready for the next allocation with no syscall.
           <div class="src">MemorySizeInfo.hpp:47 &middot; DArena.hpp:120</div>
         </dd>
       </div>
@@ -817,9 +817,15 @@
 (function () {
   "use strict";
 
-  /* ?embed -- hosted inside a page that supplies its own prose; see the .embed rules */
+  /* ?embed -- hosted inside a page that supplies its own prose; see the .embed rules.
+   * Also pins the light palette: the host (sphinx_rtd_theme) is light-only, and the
+   * static snapshot figure beside this frame is fixed light, so following the viewer's
+   * dark mode would render the same four quantities in two different colours on one
+   * page.  Standalone, the page still follows the viewer.
+   */
   if (window.location.search.indexOf("embed") >= 0) {
     document.documentElement.className += " embed";
+    document.documentElement.setAttribute("data-theme", "light");
   }
 
   var KB = 1024, MB = 1024 * KB;
@@ -840,7 +846,7 @@
   var el = {
     used: document.getElementById("band-used"),
     overhead: document.getElementById("band-overhead"),
-    unused: document.getElementById("band-unused"),
+    available: document.getElementById("band-available"),
     line: document.getElementById("commit-line"),
     ticks: document.getElementById("ticks"),
     strip: document.getElementById("strip"),
@@ -1044,11 +1050,11 @@
     var span = RESERVE;
     var overBytes = Math.max(0, st.allocated - st.used);
     var pctAlloc = st.allocated / span * 100;
-    var pctUnused = Math.max(0, (st.committed - st.allocated)) / span * 100;
+    var pctAvailable = Math.max(0, (st.committed - st.allocated)) / span * 100;
 
     /* the block is the allocated range; the stripe inside it is the overhead share */
     el.used.style.width = pctAlloc + "%";
-    el.unused.style.width = pctUnused + "%";
+    el.available.style.width = pctAvailable + "%";
 
     el.overhead.style.width = pctAlloc + "%";
     el.overhead.style.height = (st.allocated > 0 ? overBytes / st.allocated * 100 : 0) + "%";
@@ -1121,13 +1127,13 @@
 
     var X = function (b) { return (b - win.w0) / win.g * w; };
 
-    /* ground: committed-but-unused inside this page, or bare reserve past limit_ */
-    zctx.fillStyle = css("--unused");
+    /* ground: available (committed, not handed out) here, uncommitted past limit_ */
+    zctx.fillStyle = css("--available");
     zctx.fillRect(0, 0, w, h);
 
     if (st.committed < win.w1) {
       var cx = Math.max(0, X(st.committed));
-      zctx.fillStyle = css("--reserve");
+      zctx.fillStyle = css("--uncommitted");
       zctx.fillRect(cx, 0, w - cx, h);
     }
 

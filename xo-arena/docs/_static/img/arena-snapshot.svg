@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 252" width="960" height="252"
      role="img" aria-labelledby="title desc">
   <title id="title">An arena after some allocations</title>
-  <desc id="desc">A reserved address range from lo_ to hi_. Allocations fill it from the
-  left up to free_; committed memory extends further, to limit_, always a whole number of
-  superpages; the remainder to hi_ is reserved address space with no physical memory
-  behind it.</desc>
+  <desc id="desc">A reserved address range from lo_ to hi_.  Allocated memory (used plus
+  per-allocation overhead) runs from lo_ to free_; available memory runs from free_ to
+  limit_; together they are the committed memory.  From limit_ to hi_ is uncommitted:
+  address space with no physical memory behind it.  Committed plus uncommitted is the
+  reserved range.</desc>
 
   <!-- Palette matches the animated version in _static/arena-lifecycle.html -->
   <defs>
@@ -100,16 +101,16 @@
     <g font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="12.5"
        fill="#55626F">
       <rect x="60" y="216" width="13" height="13" fill="#0F6E77" stroke="#C7D0DB"/>
-      <text x="80" y="227">objects handed out</text>
+      <text x="80" y="227">used — payload bytes</text>
 
       <rect x="222" y="216" width="13" height="13" fill="#6FAAB0" stroke="#C7D0DB"/>
-      <text x="242" y="227">per-alloc header and padding</text>
+      <text x="242" y="227">overhead — header + padding</text>
 
       <rect x="450" y="216" width="13" height="13" fill="#E7DCCE" stroke="#C7D0DB"/>
-      <text x="470" y="227">backed by memory, not yet handed out</text>
+      <text x="470" y="227">available — committed, not handed out</text>
 
       <rect x="756" y="216" width="13" height="13" fill="url(#hatch)" stroke="#C7D0DB"/>
-      <text x="776" y="227">addresses only</text>
+      <text x="776" y="227">uncommitted — addresses only</text>
     </g>
   </g>
 </svg>

@@ -22,9 +22,11 @@ Diagnostic features:
     :width: 100%
     :target: lifecycle.html
 
-    An arena after some allocations.  Objects fill it from ``lo_`` up to ``free_``;
-    physical memory reaches ``limit_``, always a whole number of superpages; the rest is
-    address space and nothing more.  See :doc:`lifecycle` to watch it move.
+    An arena after some allocations.  ``lo_`` to ``free_`` is allocated -- payload plus
+    per-allocation overhead; ``free_`` to ``limit_`` is available, committed but not yet
+    handed out.  Together they are the committed memory, which always ends on a superpage
+    boundary.  Past ``limit_`` the range is uncommitted: addresses and nothing more.
+    See :doc:`lifecycle` to watch it move.
 
 .. toctree::
     :maxdepth: 2
