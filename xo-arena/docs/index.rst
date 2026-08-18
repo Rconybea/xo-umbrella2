@@ -16,8 +16,7 @@ Diagnostic features:
 * configurable guard memory between allocations.
 
 .. figure:: _static/img/arena-snapshot.svg
-    :alt: Arena showing the allocated, available and
-          uncommitted regions.
+    :alt: Arena showing allocated, available and uncommitted regions.
     :align: center
     :width: 100%
     :target: lifecycle.html
