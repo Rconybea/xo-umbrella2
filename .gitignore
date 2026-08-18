@@ -1,4 +1,9 @@
+# generated diagrams (xo-deps.svg, xo-loc.svg, ..) are build output
 *.svg
+# .. but docs assets are source.  Without these, a figure committed in .rst with an
+# untracked .svg builds green and 404s on the published site: sphinx only warns.
+!**/docs/_static/img/*.svg
+!_static/img/*.svg
 compile_commands.json
 result
 .build*
