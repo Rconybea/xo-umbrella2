@@ -29,7 +29,6 @@ Diagnostic features:
 
 .. toctree::
     :maxdepth: 2
-    :caption: xo-arena contents
 
     examples
     lifecycle
