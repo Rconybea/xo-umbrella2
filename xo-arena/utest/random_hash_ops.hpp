@@ -1,5 +1,6 @@
 /* @file random_hash_ops.hpp **/
 
+#include <xo/testutil/UtestRehearser.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
@@ -13,7 +14,7 @@
 namespace utest {
     struct Util {
         /* generate vector with integers [0.. n-1] */
-        static std::vector<std::uint32_t> vector_upto(std::uint32_t n) {
+        [[nodiscard]] static std::vector<std::uint32_t> vector_upto(std::uint32_t n) {
             std::vector<std::uint32_t> u(n);
             for (std::uint32_t i = 0; i < n; ++i)
                 u[i] = i;
@@ -21,7 +22,7 @@ namespace utest {
             return u;
         } /*vector_upto*/
 
-        static std::map<std::uint32_t, std::uint32_t>
+        [[nodiscard]] static std::map<std::uint32_t, std::uint32_t>
         map_upto(std::uint32_t n)
         {
             std::map<std::uint32_t, std::uint32_t> m;
@@ -33,7 +34,7 @@ namespace utest {
         } /*map_upto*/
 
         /* generate random permutation of integers [0.. n-1] */
-        static std::vector<uint32_t>
+        [[nodiscard]] static std::vector<uint32_t>
         random_permutation(uint32_t n, xo::rng::xoshiro256ss *p_rgen) {
             /* vector [0 .. n-1] */
             std::vector<uint32_t> u = vector_upto(n);
@@ -45,65 +46,21 @@ namespace utest {
         } /*random_permutation*/
     }; /*Util*/
 
-    // TODO: move REQUIRE_OR_CAPTURE(), REQUIRE_ORFAIL() to new subsystem xo-utestutil
-
-/* note: trivial REQUIRE() call in else branch bc we still want
- *       catch2 to count assertions when verification succeeds
- */
-#  define REQUIRE_ORCAPTURE(ok_flag, catch_flag, expr) \
-    if (catch_flag) {                                  \
-        REQUIRE((expr));                               \
-    } else {                                           \
-        REQUIRE(true);                                 \
-        ok_flag &= (expr);                             \
-    }
-
-#  define REQUIRE_ORFAIL(ok_flag, catch_flag, expr)    \
-    REQUIRE_ORCAPTURE(ok_flag, catch_flag, expr);      \
-    if (!ok_flag)                                      \
-        return ok_flag
-
-    /** UtestTools
-     **/
-    struct UtestTools {
-        /** bimodal may run twice:
-         *  - first mode is silent, only determines success or failure.
-         *  - second mode skipped when first mode succeeds.
-         *    when first mode fails, second mode runs noisily with debug logging enabled
-         *
-         *  goal is to get detailed information from failing test;
-         *  more detailed than feasible from catch2 INFO()
-         *
-         *  test function should use REQUIRE_ORCAPTURE() / REQUIRE_ORFAIL().
-         *  It should *not* use REQUIRE() or CHECK().
-         *
-         *  @p test_name  banner for initial log message (only printed on 2nd pass)
-         *  @p test_fn    function to invoke test pass.
-         *  @p n          test size/id (cosmetic - printed in log messages)
-         **/
-        static inline bool bimodal_test(std::string test_name,
-                                        std::function<bool (bool dbg_flag, std::uint32_t n)> test_fn,
-                                        std::uint32_t n)
-        {
-            bool ok_flag = false;
-
-            for (std::uint32_t attention = 0; !ok_flag && (attention < 2); ++attention) {
-                bool debug_flag = (attention == 1);
-
-                xo::pp::scope log(XO_DEBUG2_(debug_flag, test_name));
-
-                ok_flag = test_fn(debug_flag, n);
-            }
-
-            return ok_flag;
-        }
-    };
+    /* REQUIRE_ORCAPTURE(), REQUIRE_ORFAIL(), REHEARSE() and UtestRehearser come from
+     * <xo/testutil/UtestRehearser.hpp>.  They used to be copied into this file; the
+     * copies were identical, which is the sort of drift that made them worth sharing.
+     *
+     * Note UtestTools::bimodal_test() is gone too: it took a std::function, so a test
+     * could -- and did -- capture the map and the random generator from the enclosing
+     * scope, leaving the diagnostic pass to run against mutated state.  xo::try_test_array()
+     * takes a plain function pointer, so the pass function can only see its test case.
+     */
 
     /* compare xo-ordinaltree/utest/random_tree_ops.hpp */
     template <typename HashMap>
     struct HashMapUtil : public Util {
 #ifdef NOT_YET
-        static bool
+        [[nodiscard]] static bool
         test_clear(bool catch_flag,
                    Tree * p_tree)
         {
@@ -121,7 +78,7 @@ namespace utest {
         } /*test_clear*/
 #endif
 
-        static bool
+        [[nodiscard]] static bool
         random_inserts(const std::vector<typename HashMap::key_type> & keys,
                        bool catch_flag,
                        xo::rng::xoshiro256ss * p_rgen,
@@ -186,7 +143,7 @@ namespace utest {
          * inserted keys will comprise the distinct values
          *   {lo, lo+k, lo+2k, ..., lo+n.k}
          */
-        static bool
+        [[nodiscard]] static bool
         random_inserts(std::uint32_t lo,
                        std::uint32_t hi,
                        std::uint32_t k,
@@ -247,7 +204,7 @@ namespace utest {
             return ok_flag;
         } /*random_inserts*/
 
-        static bool
+        [[nodiscard]] static bool
         random_inserts(std::uint32_t n,
                        bool catch_flag,
                        xo::rng::xoshiro256ss * p_rgen,
@@ -266,7 +223,7 @@ namespace utest {
          * corrupts it (see DArenaHashMap-grow) is otherwise invisible until
          * a later lookup misses.
          */
-        static bool
+        [[nodiscard]] static bool
         linear_inserts(std::uint32_t n,
                        bool catch_flag,
                        HashMap * p_map)
@@ -325,7 +282,7 @@ namespace utest {
          * Complements linear_inserts(): a table left with a capacity that is not a
          * power of 2 has slots no probe can reach, so keys go missing here.
          */
-        static bool
+        [[nodiscard]] static bool
         check_linear_inserts(std::uint32_t n,
                              bool catch_flag,
                              HashMap & map)
@@ -358,7 +315,7 @@ namespace utest {
         /* do n random removes (taken from *p_rgen) from *p_rbtree;
          * assumes *p_rbtree has keys [0 .. n-1] where n=p_rbtreẹsize
          */
-        static bool
+        [[nodiscard]] static bool
         random_removes(bool catch_flag, // dbg_flag
                        xo::rng::xoshiro256ss * p_rgen,
                        Tree * p_map)
@@ -435,7 +392,7 @@ namespace utest {
          * - map has keys [0..n-1], where n=map.size()
          * - for each key k, associated value is dvalue+10*k
          */
-        static bool
+        [[nodiscard]] static bool
         random_lookups(uint32_t dvalue,
                        bool catch_flag,
                        xo::rng::xoshiro256ss * p_rgen,
@@ -482,7 +439,7 @@ namespace utest {
          * - hash has keys [0..n-1] where n=map size
          * - hash value at key k is dvalue+10*k
          */
-        static bool
+        [[nodiscard]] static bool
         check_forward_iterator(uint32_t dvalue,
                                bool catch_flag,
                                HashMap & map)
@@ -549,7 +506,7 @@ namespace utest {
          * - hash has keys [0..n-1] where n=map size
          * - hash value at key k is dvalue+10*k
          */
-        static bool
+        [[nodiscard]] static bool
         check_backward_iterator(uint32_t dvalue,
                                 bool catch_flag,
                                 HashMap & map)
@@ -618,7 +575,7 @@ namespace utest {
          * catch_flag.  true -> log to console + interact with catch2
          *              false -> verify iteration behavior for return code
          */
-        static bool
+        [[nodiscard]] static bool
         check_bidirectional_iterator(uint32_t dvalue,
                                      bool catch_flag,
                                      Tree const & tree)
@@ -767,7 +724,7 @@ namespace utest {
          * Promise:
          * - for each key k,  associated value is dvalue + 10*k
          */
-        static bool
+        [[nodiscard]] static bool
         random_updates(uint32_t dvalue,
                        bool catch_flag,
                        Tree * p_rbtree,

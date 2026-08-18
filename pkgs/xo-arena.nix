@@ -17,6 +17,7 @@
   xo-reflectutil,
   xo-ppsink,
   xo-subsys,
+  xo-testutil,
   xo-cmake,
 
   doCheck ? true,
@@ -46,6 +47,9 @@ stdenv.mkDerivation (finalattrs:
       pkg-config
       xo-cmake
       xo-randomgen
+    ] ++ lib.optionals doCheck [
+      # UtestRehearser; used only by utest/
+      xo-testutil
     ] ++ lib.optionals buildDocs [
       doxygen
       sphinx

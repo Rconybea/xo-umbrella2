@@ -8,6 +8,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
+#include <xo/testutil/try_test_array.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <catch2/catch.hpp>
 
@@ -18,7 +19,8 @@ namespace xo {
     using xo::map::DArenaHashMap;
     using xo::rng::random_seed;
     using xo::rng::xoshiro256ss;
-    using utest::UtestTools;
+    using xo::UtestRehearser;
+    using xo::try_test_array;
     using utest::HashMapUtil;
 
     namespace ut {
@@ -191,98 +193,102 @@ namespace xo {
 
         }
 
-        /* This case drives try_insert() -> never grows the table. */
+        /** Initial state for a hashmap test case **/
+        struct TestCase_HashMap {
+            /* number of keys to insert */
+            std::uint32_t n_ = 0;
+            /* seed for this case; a case must be reproducible on its own */
+            std::uint64_t seed_ = 0;
+        };
+
+        /** vector of hashmap test cases from seed **/
+        static std::vector<TestCase_HashMap>
+        hashmap_scales(std::uint64_t seed)
+        {
+            std::vector<TestCase_HashMap> tc_v;
+
+            for (std::uint32_t n = 0; n <= 256; n = (n == 0) ? 1 : 2*n)
+                tc_v.push_back(TestCase_HashMap{.n_ = n, .seed_ = seed + n});
+
+            return tc_v;
+        }
+
+        /* try_insert() does not grow the table.
+         * It reports failure once load_factor() reaches c_max_load_factor.
+         * Scale therefore needs a capacity hint.
+         * Growth is covered by DArenaHashMap-grow below.
+         */
+        void
+        hashmap_try_insert_test_fn(const TestCase_HashMap & tc,
+                                   UtestRehearser * p_rh)
+        {
+            using HashMap = DArenaHashMap<int, int>;
+
+            bool dbg_flag = p_rh->enable_debug();
+            bool ok_flag = true;
+
+            /* fresh for each pass */
+            auto rgen = xoshiro256ss(tc.seed_);
+            HashMap hash_map("utest", 2 * tc.n_ + 1);
+
+            ok_flag &= HashMapUtil<HashMap>::random_inserts(tc.n_, dbg_flag, &rgen, &hash_map);
+
+            ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0 /*dvalue*/,
+                                                                   dbg_flag, hash_map);
+            /* regular forward iterator, but start at hash_map.end() and use operator-- */
+            ok_flag &= HashMapUtil<HashMap>::check_backward_iterator(0 /*dvalue*/,
+                                                                    dbg_flag, hash_map);
+
+            ok_flag &= HashMapUtil<HashMap>::random_lookups(0 /*dvalue*/,
+                                                            dbg_flag, &rgen, hash_map);
+
+            REHEARSE(*p_rh, ok_flag);
+        }
+
         TEST_CASE("DArenaHashMap-try-insert2", "[arena][DArenaHashMap]")
         {
-            using HashMap = DArenaHashMap<int, int>;
+            uint64_t seed = 17747889312058974961ul;
 
-            std::uint64_t seed = 17747889312058974961ul;
-            //random_seed(&seed); // to get new random seed
-            //log && log(xtag("seed", seed));
+            try_test_array(hashmap_scales(seed),
+                           &hashmap_try_insert_test_fn);
+        }
 
-            auto rgen = xoshiro256ss(seed);
-
-            /* 1. Perform series of tests with increasing scale
-             * 2. Each test may run in two modes:
-             *    a. silent fast fail. just report success.
-             *       In this mode avoid catch2 REQUIRE
-             *    b. noisy. run with logging enabled
-             *       This mode automatically invoked when silent mode
-             *       observes test failure
-             */
-
-            for (std::uint32_t n = 0; n <= 128; ) {
-                HashMap hash_map("utest", 2 * n + 1);
-
-                auto test_fn = [&rgen, &hash_map](bool dbg_flag,
-                                                  std::uint32_t n)
-                    {
-                        bool ok_flag = true;
-
-                        ok_flag &= HashMapUtil<HashMap>::random_inserts(n, dbg_flag, &rgen, &hash_map);
-
-                        ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0.0 /*dvalue*/,
-                                                                                dbg_flag, hash_map);
-                        /* regular forward iterator, but start at hash_map.end() and use operator-- */
-                        ok_flag &= HashMapUtil<HashMap>::check_backward_iterator(0.0 /*dvalue*/,
-                                                                                 dbg_flag, hash_map);
-
-                        ok_flag &= HashMapUtil<HashMap>::random_lookups(0.0 /*dvalue*/,
-                                                                        dbg_flag, &rgen, hash_map);
-
-                        return ok_flag;
-                    };
-
-                bool ok_flag = UtestTools::bimodal_test("DArenaHashMap-try-insert2", test_fn, n);
-
-                if (n == 0)
-                    n = 1;
-                else
-                    n = 2*n;
-            }
-        } /*DArenaHashMap-try-insert2*/
-
-        /* This case drives insert() -> grows the table.
-         * A default-constructed map holds one 16-slot group and doubles when
-         * load_factor() reaches 0.875, so the scales below climb
+        /* insert() grows the table.  A default-constructed map holds one 16-slot group
+         * and doubles when load_factor() reaches 0.875, so the scales here climb
          *   16 -> 32 -> 64 -> 128 -> 256 -> 512 slots.
          *
-         * Regression: until 2026-08-17 _try_grow() doubled the group *exponent*
-         * instead of the group count, so the third rung produced 6 groups rather
-         * than 8 -- a capacity that is not a power of 2, while every probe masks
-         * with capacity-1.  No test grew a table more than twice, so nothing caught
-         * it; scales here run to 256 for that reason.
+         * Regression: until 2026-08-17 _try_grow() doubled the group *exponent* instead
+         * of the group count, so the third rung produced 6 groups rather than 8 -- a
+         * capacity that is not a power of 2, while every probe masks with capacity-1.
+         * No test grew a table more than twice, so nothing caught it.
          */
-        TEST_CASE("DArenaHashMap-grow", "[arena][DArenaHashMap]")
+        void
+        hashmap_grow_test_fn(const TestCase_HashMap & tc,
+                             UtestRehearser * p_rh)
         {
             using HashMap = DArenaHashMap<int, int>;
 
-            for (std::uint32_t n = 0; n <= 256; ) {
-                HashMap hash_map("utest");
+            bool dbg_flag = p_rh->enable_debug();
+            bool ok_flag = true;
 
-                auto test_fn = [&hash_map](bool dbg_flag,
-                                           std::uint32_t n)
-                    {
-                        bool ok_flag = true;
+            /* no capacity hint: we want the growth path */
+            HashMap hash_map("utest");
 
-                        ok_flag &= HashMapUtil<HashMap>::linear_inserts(n, dbg_flag, &hash_map);
+            ok_flag &= HashMapUtil<HashMap>::linear_inserts(tc.n_, dbg_flag, &hash_map);
 
-                        ok_flag &= HashMapUtil<HashMap>::check_linear_inserts(n, dbg_flag, hash_map);
+            ok_flag &= HashMapUtil<HashMap>::check_linear_inserts(tc.n_, dbg_flag, hash_map);
 
-                        ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0 /*dvalue*/,
-                                                                               dbg_flag, hash_map);
+            ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0 /*dvalue*/,
+                                                                   dbg_flag, hash_map);
 
-                        return ok_flag;
-                    };
+            REHEARSE(*p_rh, ok_flag);
+        }
 
-                bool ok_flag = UtestTools::bimodal_test("DArenaHashMap-grow", test_fn, n);
-
-                if (n == 0)
-                    n = 1;
-                else
-                    n = 2*n;
-            }
-        } /*DArenaHashMap-grow*/
+        TEST_CASE("DArenaHashMap-grow", "[arena][DArenaHashMap]")
+        {
+            try_test_array(hashmap_scales(0 /*unused: linear_inserts is deterministic*/),
+                           &hashmap_grow_test_fn);
+        }
 
         TEST_CASE("DArenaHashMap-operator-bracket", "[arena][DArenaHashMap]")
         {

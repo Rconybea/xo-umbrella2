@@ -6,8 +6,8 @@ xo-indentlog
 xo-randomgen
 xo-flatstring
 xo-reflectutil
-xo-arena
 xo-testutil
+xo-arena
 xo-indentlog2
 xo-facet
 xo-printable2

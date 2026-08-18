@@ -18,6 +18,8 @@ if (ENABLE_TESTING)
     xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
     xo_self_dependency(${UTEST_EXE} xo_arena)
     xo_headeronly_dependency(${UTEST_EXE} randomgen)
+    # UtestRehearser + REQUIRE_ORCAPTURE/REQUIRE_ORFAIL; test-only
+    xo_dependency(${UTEST_EXE} xo_testutil)
 #    xo_headeronly_dependency(${UTEST_EXE} indentlog)
     xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)
 endif()
