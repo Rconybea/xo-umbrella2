@@ -11,6 +11,8 @@
 #include <xo/testutil/try_test_array.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <catch2/catch.hpp>
+#include <vector>
+#include <string>
 
 namespace xo {
     using xo::pp::scope;
@@ -288,6 +290,199 @@ namespace xo {
         {
             try_test_array(hashmap_scales(0 /*unused: linear_inserts is deterministic*/),
                            &hashmap_grow_test_fn);
+        }
+
+        /* ---------------------------------------------------------------------
+         * HashMapStore::_needs_tombstone(ix)
+         *
+         * Answers: after erasing the entry at slot ix, must the control byte become
+         * a tombstone rather than empty?  It must exactly when some 16-wide probe
+         * window containing ix is entirely non-empty -- i.e. when a probe could have
+         * walked past ix -- which is equivalent to: the maximal run of consecutive
+         * non-empty control bytes through ix is at least c_group_size long.
+         *
+         * The reference below computes that run directly, cyclically, and is the
+         * oracle; _needs_tombstone() computes it from two SIMD-shaped group loads
+         * and two bit counts.  The two must agree for every occupancy pattern.
+         *
+         * Note this test writes control bytes without touching size_, so the store
+         * does NOT satisfy the class invariants -- do not call verify_ok() here.
+         * ------------------------------------------------------------------------- */
+        struct TestCase_Tombstone {
+            /* number of 16-slot groups.  Must be a power of 2 (SM1.3), so 1, 2, 4 --
+             * there is no valid 3-group table to test.
+             */
+            std::uint32_t n_group_ = 1;
+            /* enumerate every occupancy pattern; only feasible for a single group */
+            bool exhaustive_ = false;
+            /* otherwise, this many pseudo-random patterns */
+            std::uint32_t n_random_ = 0;
+            std::uint64_t seed_ = 0;
+        };
+
+        using TombstoneStore = xo::map::detail::HashMapStore<int, int>;
+
+        /** the property, computed directly: length of the run of non-empty control
+         *  bytes through ix, walking both ways cyclically, capped at c_group_size
+         **/
+        static bool
+        tombstone_ref(const std::vector<std::uint8_t> & ctrl_v, std::size_t ix)
+        {
+            constexpr auto G = DArenaHashMapUtil::c_group_size;
+            const std::size_t N = ctrl_v.size();
+
+            std::size_t run = 1;                       /* ix itself, known occupied */
+
+            for (std::size_t k = 1; (k <= G) && (run < G); ++k) {
+                if (ctrl_v[(ix + N - k) % N] == DArenaHashMapUtil::c_empty_slot)
+                    break;
+                ++run;
+            }
+            for (std::size_t k = 1; (k <= G) && (run < G); ++k) {
+                if (ctrl_v[(ix + k) % N] == DArenaHashMapUtil::c_empty_slot)
+                    break;
+                ++run;
+            }
+
+            return run >= G;
+        }
+
+        /** install ctrl_v into the store (via _update_control, so the wrap copy is
+         *  refreshed), then compare _needs_tombstone() against the oracle at every
+         *  occupied slot.  On disagreement report the slot in *p_fail_ix.
+         **/
+        static bool
+        tombstone_check_pattern(TombstoneStore * p_store,
+                                const std::vector<std::uint8_t> & ctrl_v,
+                                std::size_t * p_fail_ix)
+        {
+            for (std::size_t i = 0, n = ctrl_v.size(); i < n; ++i)
+                p_store->_update_control(i, ctrl_v[i]);
+
+            for (std::size_t ix = 0, n = ctrl_v.size(); ix < n; ++ix) {
+                if (ctrl_v[ix] == DArenaHashMapUtil::c_empty_slot)
+                    continue;                          /* erase applies to occupied slots */
+
+                if (p_store->_needs_tombstone(ix) != tombstone_ref(ctrl_v, ix)) {
+                    *p_fail_ix = ix;
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        static std::string
+        tombstone_render(const std::vector<std::uint8_t> & ctrl_v)
+        {
+            std::string s;
+            for (auto c : ctrl_v) {
+                s += (c == DArenaHashMapUtil::c_empty_slot
+                      ? '.'
+                      : (c == DArenaHashMapUtil::c_tombstone ? 'x' : '#'));
+            }
+            return s;
+        }
+
+        void
+        needs_tombstone_test_fn(const TestCase_Tombstone & tc,
+                                UtestRehearser * p_rh)
+        {
+            using xo::rng::xoshiro256ss;
+
+            bool dbg_flag = p_rh->enable_debug();
+            scope log(XO_DEBUG2_(dbg_flag, "needs_tombstone"));
+
+            const std::size_t N = tc.n_group_ * DArenaHashMapUtil::c_group_size;
+            const std::uint8_t EMPTY = DArenaHashMapUtil::c_empty_slot;
+            const std::uint8_t TOMB = DArenaHashMapUtil::c_tombstone;
+
+            TombstoneStore store("utest", DArenaHashMapUtil::lub_exp2(tc.n_group_));
+
+            std::vector<std::vector<std::uint8_t>> pattern_v;
+
+            /* targeted: runs of exactly 15 (never a tombstone) and exactly 16 (always,
+             * for every slot in the run) at every start offset, so the runs that
+             * straddle the N-1 -> 0 boundary -- the wrap-copy path -- are all covered
+             */
+            for (std::size_t run : {DArenaHashMapUtil::c_group_size - 1,
+                                    DArenaHashMapUtil::c_group_size}) {
+                for (std::size_t start = 0; start < N; ++start) {
+                    std::vector<std::uint8_t> v(N, EMPTY);
+                    for (std::size_t k = 0; k < run; ++k)
+                        v[(start + k) % N] = static_cast<std::uint8_t>(k & 0x7f);
+                    pattern_v.push_back(v);
+                }
+            }
+
+            /* every slot occupied, and every slot occupied but one */
+            pattern_v.push_back(std::vector<std::uint8_t>(N, std::uint8_t(0x11)));
+            for (std::size_t hole = 0; hole < N; ++hole) {
+                std::vector<std::uint8_t> v(N, std::uint8_t(0x22));
+                v[hole] = EMPTY;
+                pattern_v.push_back(v);
+            }
+
+            if (tc.exhaustive_) {
+                /* N == 16: enumerate all 2^16 occupancy patterns */
+                for (std::uint32_t bits = 0; bits < (1u << N); ++bits) {
+                    std::vector<std::uint8_t> v(N, EMPTY);
+                    for (std::size_t i = 0; i < N; ++i) {
+                        if (bits & (1u << i))
+                            v[i] = static_cast<std::uint8_t>(i & 0x7f);
+                    }
+                    pattern_v.push_back(v);
+                }
+            } else {
+                /* random, across densities, with tombstones mixed in: they are
+                 * non-empty for this purpose and must lengthen a run
+                 */
+                auto rgen = xoshiro256ss(tc.seed_);
+                for (std::uint32_t i = 0; i < tc.n_random_; ++i) {
+                    std::uint32_t pct = 40 + (rgen() % 60);        /* 40..99 % full */
+                    std::vector<std::uint8_t> v(N, EMPTY);
+                    for (std::size_t j = 0; j < N; ++j) {
+                        if ((rgen() % 100) < pct) {
+                            v[j] = ((rgen() % 8) == 0)
+                                ? TOMB
+                                : static_cast<std::uint8_t>(rgen() & 0x7f);
+                        }
+                    }
+                    pattern_v.push_back(v);
+                }
+            }
+
+            log && log(xtag("n_group", tc.n_group_), xtag("N", N),
+                       xtag("patterns", pattern_v.size()));
+
+            bool ok_flag = true;
+            std::size_t fail_ix = 0;
+
+            for (const auto & ctrl_v : pattern_v) {
+                if (!tombstone_check_pattern(&store, ctrl_v, &fail_ix)) {
+                    ok_flag = false;
+                    log && log("mismatch",
+                               xtag("N", N),
+                               xtag("ix", fail_ix),
+                               xtag("expect", tombstone_ref(ctrl_v, fail_ix)),
+                               xtag("actual", store._needs_tombstone(fail_ix)),
+                               xtag("ctrl", tombstone_render(ctrl_v)));
+                    break;
+                }
+            }
+
+            REHEARSE(*p_rh, ok_flag);
+        }
+
+        TEST_CASE("HashMapStore-needs-tombstone", "[arena][DArenaHashMap]")
+        {
+            std::vector<TestCase_Tombstone> tc_v = {
+                TestCase_Tombstone{.n_group_ = 1, .exhaustive_ = true},
+                TestCase_Tombstone{.n_group_ = 2, .n_random_ = 20000, .seed_ = 8675309ul},
+                TestCase_Tombstone{.n_group_ = 4, .n_random_ = 20000, .seed_ = 20260819ul},
+            };
+
+            try_test_array(tc_v, &needs_tombstone_test_fn);
         }
 
         TEST_CASE("DArenaHashMap-operator-bracket", "[arena][DArenaHashMap]")

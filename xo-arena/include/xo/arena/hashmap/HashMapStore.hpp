@@ -7,11 +7,28 @@
 
 #include <xo/arena/hashmap/ControlGroup.hpp>
 #include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
+#include <xo/arena/DArenaVector.hpp>
 #include <cassert>
 
 namespace xo {
     namespace map {
         namespace detail {
+            /**
+             *  @code
+             *
+             *    lo stub                           hi stub
+             *    >    <                            >    <
+             *    .    .                       wrap .    .
+             *    .    .                       >    <    .
+             *    .    .                       .    .    .
+             *     xxxx 0000 1111 2222 ... ZZZZ 0000 xxxx
+             *     ^    ^                  ^    ^
+             *     0    16                      N (= 16*NG)
+             *          ^                  ^
+             *          group(0)           group(NG-1)
+             *
+             *  @endcode
+             **/
             template <typename Key,
                       typename Value>
             struct HashMapStore : DArenaHashMapUtil {
@@ -122,6 +139,62 @@ namespace xo {
                 /** load control group for slot range [ix .. ix+c_group_size) **/
                 group_type _load_group(size_type ix) const {
                     return group_type(&(control_[ix + c_control_stub]));
+                }
+
+                /** count consecutive non-empty control bytes in range
+                 *    [ix - g1, ..., ix, .., ix + g1)
+                 *  for 16-byte intervals that include position logical position ix.
+                 *  (actually shifted right by 16 to make room for lo_stub
+                 **/
+                bool _needs_tombstone(size_type ix) const {
+                    /* group before ix **/
+                    size_type g0_ix;
+
+                    if (ix >= c_group_size) {
+                        g0_ix = ix - c_group_size + 1;
+                    } else {
+                        /**
+                         *  Near beginning of control-group array,
+                         *  use the duplicate group at the end.
+                         *
+                         *    ix                      ix+N
+                         *    v                       v
+                         *   0000 1111 2222 ... ZZZZ 0000
+                         *                        < g0 >
+                         **/
+
+                        size_type N = this->capacity();
+
+                        // near beginning of array, use wrap group at the end
+                        g0_ix = ix - c_group_size + 1 + N;
+                    }
+
+                    /**
+                     *      <----- g0 ----->
+                     *      1111222233334444
+                     *                     1111222233334444
+                     *                     <------ g1 ---->
+                     *
+                     *                     ^
+                     *                    ix (counted twice)
+                     **/
+
+                    /* g0: 16 bytes before ix including ix itself */
+                    auto g0 = this->_load_group(g0_ix);
+                    /* g1: 16 bytes after ix including ix itself */
+                    auto g1 = this->_load_group(ix);
+
+                    /* 1 bits tell which members of groups g0,g1 are empty,
+                     * byte j goes into bit j -> lo address in *least significant* bit.
+                     */
+                    auto before = g0.empty_matches();
+                    auto after = g1.empty_matches();
+
+                    auto run_left = std::countl_zero(before);
+                    auto run_right = std::countr_zero(after);
+
+                    /* run_left, run_right count position ix twice -> subtract 1 */
+                    return (run_left + run_right) >= c_group_size + 1;
                 }
 
                 /** update control group for slot number @p ix, replace with @p h2 **/
