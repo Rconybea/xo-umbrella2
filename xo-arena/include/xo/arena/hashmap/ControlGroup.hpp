@@ -42,6 +42,26 @@ namespace xo {
                     return retval;
                 }
 
+                /** find all empty or tombstone sentinels in ctrl_[0..15].
+                 *  for each empty, set corresponding bit in return value.
+                 *  Bits {0x1, 0x2, 0x4, ...} set iff empty|tombstone spot
+                 *  {ctrl_[0], ctrl_[1], ctrl_[2], ...} respectively.
+                 **/
+                uint16_t sentinel_matches() const {
+                    uint16_t retval = 0;
+                    uint16_t bit = 1;
+
+                    for (auto xi : ctrl_) {
+                        if ((xi == DArenaHashMapUtil::c_empty_slot)
+                            || (xi == DArenaHashMapUtil::c_tombstone))
+                            retval |= bit;
+
+                        bit = bit << 1;
+                    }
+
+                    return retval;
+                }
+
                 /** find all empty sentinels in ctrl_[0..15].
                  *  for each empty, set corresponding bit in return value.
                  *  Bits {0x1, 0x2, 0x4, ...} set iff empty spot
@@ -54,6 +74,7 @@ namespace xo {
                     for (auto xi : ctrl_) {
                         if (xi == DArenaHashMapUtil::c_empty_slot)
                             retval |= bit;
+
                         bit = bit << 1;
                     }
 
@@ -68,6 +89,11 @@ namespace xo {
                     __m128i pattern = _mm_set1_epi8(h2);
                     __m128i result = _mm_cmpeq_epi8(ctrl, pattern);
                     return _mm_movemask_epi8(result);  // 16-bit mask
+                }
+
+                // Find all sentinel slots (0xFF)
+                uint16_t MatchEmpty() const {
+                    //return _mm_movemask_epi8(_mm_cmpeq_epi8(ctrl, _mm_set1_epi8(0xFF)));
                 }
 
                 // Find all empty slots (0xFF)

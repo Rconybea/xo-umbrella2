@@ -56,6 +56,26 @@ namespace utest {
      * takes a plain function pointer, so the pass function can only see its test case.
      */
 
+    /** what a random_ops() run actually exercised.
+     *
+     *  Coverage matters here more than usual: the tombstone paths in
+     *  _try_insert_aux()/_find()/_try_erase_aux() are unreachable unless a run
+     *  both creates tombstones and later inserts over one, and a test that
+     *  never reaches them passes just as green as one that does.
+     **/
+    struct HashMapOpStats {
+        /** #of insert operations attempted **/
+        std::uint32_t n_insert_ = 0;
+        /** #of erase operations that removed a pair **/
+        std::uint32_t n_erase_ = 0;
+        /** #of erases that left a tombstone (rather than an empty slot) **/
+        std::uint32_t n_tombstone_ = 0;
+        /** #of inserts that reused a tombstone instead of consuming an empty **/
+        std::uint32_t n_reuse_ = 0;
+        /** #of inserts that triggered table growth **/
+        std::uint32_t n_grow_ = 0;
+    };
+
     /* compare xo-ordinaltree/utest/random_tree_ops.hpp */
     template <typename HashMap>
     struct HashMapUtil : public Util {
@@ -277,6 +297,150 @@ namespace utest {
 
             return ok_flag;
         } /*linear_inserts*/
+
+        /** count tombstone control bytes in @p map **/
+        [[nodiscard]] static std::uint32_t
+        count_tombstones(HashMap * p_map)
+        {
+            std::uint32_t n = 0;
+            auto * p_store = p_map->_store();
+
+            for (std::size_t i = 0, N = p_map->capacity(); i < N; ++i) {
+                if (p_store->control_[HashMap::c_control_stub + i] == HashMap::c_tombstone)
+                    ++n;
+            }
+
+            return n;
+        } /*count_tombstones*/
+
+        /** Apply @p n_op random insert/erase operations, drawn from the key range
+         *  [0, key_space), with @p erase_pct percent of them erases.  Keeps a
+         *  std::map alongside as a reference model and checks the table against it.
+         *
+         *  Values follow the dvalue=0 convention (value = 10*key), so the
+         *  check_..._iterator() helpers compose with this.
+         *
+         *  Per operation: the affected key behaves (present after insert, absent
+         *  after erase), the erase return code matches the model, and size()
+         *  agrees.  Every c_sweep_period operations, and once at the end: every
+         *  model key is findable with the right value, and verify_ok() passes.
+         *  The periodic sweep is what catches a severed probe chain -- a key that
+         *  was inserted long ago and became unreachable later.
+         **/
+        [[nodiscard]] static bool
+        random_ops(std::uint32_t n_op,
+                   std::uint32_t key_space,
+                   std::uint32_t erase_pct,
+                   bool catch_flag,
+                   xo::rng::xoshiro256ss * p_rgen,
+                   HashMap * p_map,
+                   HashMapOpStats * p_stats)
+        {
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            constexpr std::uint32_t c_sweep_period = 64;
+
+            bool ok_flag = true;
+
+            scope log(XO_DEBUG_(catch_flag),
+                      xtag("n_op", n_op), xtag("key_space", key_space),
+                      xtag("erase_pct", erase_pct));
+
+            auto policy = (catch_flag
+                           ? xo::verify_policy::chatty()
+                           : xo::verify_policy());
+
+            /* reference model */
+            std::map<typename HashMap::key_type, typename HashMap::mapped_type> model;
+
+            for (std::uint32_t i_op = 0; i_op < n_op; ++i_op) {
+                auto key = static_cast<typename HashMap::key_type>((*p_rgen)() % key_space);
+                bool erase_op = (((*p_rgen)() % 100) < erase_pct);
+
+                std::size_t cap0 = p_map->capacity();
+                std::uint32_t tomb0 = count_tombstones(p_map);
+
+                if (erase_op) {
+                    bool present = (model.find(key) != model.end());
+
+                    std::size_t n_erased = p_map->erase(key);
+                    model.erase(key);
+
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, n_erased == (present ? 1u : 0u));
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->find(key) == p_map->end());
+
+                    if (present) {
+                        ++(p_stats->n_erase_);
+
+                        if (count_tombstones(p_map) > tomb0)
+                            ++(p_stats->n_tombstone_);
+                    }
+                } else {
+                    p_map->insert(typename HashMap::value_type(key, 10 * key));
+                    model[key] = 10 * key;
+
+                    ++(p_stats->n_insert_);
+
+                    if (p_map->capacity() != cap0) {
+                        ++(p_stats->n_grow_);
+                    } else if (count_tombstones(p_map) < tomb0) {
+                        /* size grew without consuming an empty slot:
+                         * _try_insert_aux() reused a tombstone
+                         */
+                        ++(p_stats->n_reuse_);
+                    }
+
+                    auto ix = p_map->find(key);
+
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, ix != p_map->end());
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, ix->second == 10 * key);
+                }
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->size() == model.size());
+
+                if (((i_op % c_sweep_period) == 0) || (i_op + 1 == n_op)) {
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->verify_ok(policy));
+
+                    /* every surviving key is still reachable.  This is what
+                     * catches a severed probe chain: an entry inserted long ago
+                     * that a later erase made unreachable.
+                     */
+                    for (const auto & kv : model) {
+                        auto jx = p_map->find(kv.first);
+
+                        REQUIRE_ORFAIL(ok_flag, catch_flag, jx != p_map->end());
+                        REQUIRE_ORFAIL(ok_flag, catch_flag, jx->second == kv.second);
+                    }
+
+                    /* iteration visits exactly the surviving keys -- i.e. it skips
+                     * tombstones as well as empty slots.  Cannot use
+                     * check_forward_iterator() here: that assumes keys are 0..n-1.
+                     */
+                    std::size_t n_visit = 0;
+
+                    for (const auto & kv : *p_map) {
+                        auto mx = model.find(kv.first);
+
+                        REQUIRE_ORFAIL(ok_flag, catch_flag, mx != model.end());
+                        REQUIRE_ORFAIL(ok_flag, catch_flag, mx->second == kv.second);
+
+                        ++n_visit;
+                    }
+
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, n_visit == model.size());
+                }
+            }
+
+            log && log("done",
+                       xtag("n_insert", p_stats->n_insert_),
+                       xtag("n_erase", p_stats->n_erase_),
+                       xtag("n_tombstone", p_stats->n_tombstone_),
+                       xtag("n_reuse", p_stats->n_reuse_),
+                       xtag("n_grow", p_stats->n_grow_));
+
+            return ok_flag;
+        } /*random_ops*/
 
         /* verify the keys {0, 1, .., n-1} are all present with value 10*key.
          * Complements linear_inserts(): a table left with a capacity that is not a

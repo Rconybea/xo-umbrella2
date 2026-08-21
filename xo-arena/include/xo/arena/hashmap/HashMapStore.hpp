@@ -8,6 +8,7 @@
 #include <xo/arena/hashmap/ControlGroup.hpp>
 #include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
 #include <xo/arena/DArenaVector.hpp>
+#include <cstdint>
 #include <cassert>
 
 namespace xo {
@@ -34,9 +35,10 @@ namespace xo {
             struct HashMapStore : DArenaHashMapUtil {
             public:
                 using value_type = std::pair<const Key, Value>;
+                using storage_type = std::pair<Key, Value>;
                 using group_type = detail::ControlGroup;
                 using control_vector_type = xo::mm::DArenaVector<uint8_t>;
-                using slot_vector_type = xo::mm::DArenaVector<value_type>;
+                using slot_vector_type = xo::mm::DArenaVector<storage_type>;
                 using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
                 using MemorySizeInfo = xo::mm::MemorySizeInfo;
 
@@ -65,7 +67,21 @@ namespace xo {
                     this->_init();
                 }
 
+                static_assert(sizeof(storage_type) == sizeof(value_type));
+                static_assert(alignof(storage_type) == alignof(value_type));
+
+                static value_type * to_value(storage_type * x) {
+                    return reinterpret_cast<value_type *>(x);
+                }
+
+                static const value_type * to_value(const storage_type * x) {
+                    return reinterpret_cast<const value_type *>(x);
+                }
+
                 size_type empty() const noexcept { return size_ == 0; }
+                /** current hash tabel capacity.
+                 *  Promise: always a power of 2
+                 **/
                 size_type capacity() const noexcept { return n_group_ * c_group_size; }
                 float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
 
@@ -195,7 +211,7 @@ namespace xo {
 
                     /* run_left, run_right count position ix twice -> subtract 1 */
                     return (run_left + run_right) >= c_group_size + 1;
-                }
+                } /*_need_tombstone*/
 
                 /** update control group for slot number @p ix, replace with @p h2 **/
                 void _update_control(size_type ix, uint8_t h2) {

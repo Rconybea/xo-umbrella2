@@ -49,6 +49,7 @@ namespace xo {
             using key_type = Key;
             using mapped_type = Value;
             using value_type = std::pair<const Key, Value>;
+            using storage_type = std::pair<Key, Value>;
             using key_hash = Hash;
             using key_equal = Equal;
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
@@ -93,6 +94,17 @@ namespace xo {
                 return store_.visit_pools(visitor);
             }
 
+            /** find element with key @p key.
+             *  @return iterator to element if found, end() otherwise
+             **/
+            const_iterator find(const key_type & key) const { return _find(key); }
+            iterator find(const key_type & key) { return _promote_iterator(_find(key)); }
+
+            /** insert @p kv_pair into hash map.
+             *  Increase table size if necessary
+             **/
+            bool insert(const value_type & kv_pair);
+
             /** insert @p kv_pair into hash map.
              *  Replaces any previous value stored under the same key.
              *
@@ -105,19 +117,13 @@ namespace xo {
              **/
             insert_value_type try_insert(const value_type & kv_pair);
 
-            /** insert @p kv_pair into hash map.
-             *  Increase table size if necessary
+            /** erase (key,value) pair @p key from hash map, if present.
+             *  @return 1 if such a pair was removed, 0 if key was not present.
              **/
-            bool insert(const value_type & kv_pair);
+            size_type erase(const key_type & key);
 
             /** reset to empty state **/
             void clear();
-
-            /** find element with key @p key.
-             *  @return iterator to element if found, end() otherwise
-             **/
-            const_iterator find(const key_type & key) const { return _find(key); }
-            iterator find(const key_type & key) { return _promote_iterator(_find(key)); }
 
             /** establish kv pair for @p key in this table; return address of value part **/
             mapped_type & operator[](const key_type & key);
@@ -130,7 +136,11 @@ namespace xo {
 
             store_type * _store() noexcept { return &store_; }
 
-            auto _hash(const key_type & key) const {
+            /** Compute hash value pair for @p key.
+             *  @return pair (h1, h2). h1 reports the high 57 bits,
+             *  h2 the low 7 bits.
+             **/
+            std::pair<size_type, size_type> _hash(const key_type & key) const {
                 size_type h = hash_(key);
                 size_type h1 = h >> 7;    // slot#
                 size_type h2 = h % 0x7f;  // fingerprint
@@ -145,7 +155,7 @@ namespace xo {
         private:
             iterator _promote_iterator(const_iterator ix) {
                 return iterator(const_cast<uint8_t *>(ix._ctrl()),
-                                const_cast<value_type *>(ix._pos()));
+                                const_cast<storage_type *>(ix._pos()));
             }
 
             const_iterator _begin_aux() const {
@@ -182,6 +192,15 @@ namespace xo {
             insert_value_type _try_insert_aux(size_type hash_value,
                                               const value_type & kv_pair,
                                               store_type * p_store);
+
+            /** erase @p key,
+             *  where key hashes to @p hash_value, from @p *store
+             *
+             *  Return true on success, false if key not present in hash table.
+             **/
+            bool _try_erase_aux(size_type hash_value,
+                                const Key & key,
+                                store_type * p_store);
 
             /** increase hash table size (invoke when max load factor reached) **/
             bool _try_grow();
@@ -238,6 +257,44 @@ namespace xo {
         {
         }
 
+        template <typename Key,
+                  typename Value,
+                  typename Hash,
+                  typename Equal>
+        bool
+        DArenaHashMap<Key,
+                      Value,
+                      Hash,
+                      Equal>::insert(const std::pair<const Key, Value> & kv_pair)
+        {
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            scope log(XO_DEBUG_(false));
+
+            auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
+
+            if (slot_addr) {
+                log && log("fast", xtag("slot_addr", (void*)slot_addr), xtag("ins_flag", ins_flag));
+
+                return ins_flag;
+            }
+
+            assert((store_.size_ + 1) / static_cast<float>(store_.n_slot_) >= c_max_load_factor);
+
+            if (this->_try_grow()) {
+                /* retry insert, with bigger table */
+                auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
+
+                return ins_flag;
+            } else {
+                assert(false);
+
+                // TODO: set last error.  Presumeably reached max size
+                return false;
+            }
+        }
+
         template <typename Key, typename Value, typename Hash, typename Equal>
         auto
         DArenaHashMap<Key,
@@ -285,8 +342,11 @@ namespace xo {
             // since N is power of 2
             size_type ix = h1 & (N - 1);
 
-            // will make series of probes
-            for (;;) {
+            // if in [0..N-1): location of 1st tombstone in scan order.
+            size_type tombstone_ix = N;
+
+            // will make series of probes.  probe_ix iterates over groups
+            for (size_type probe_ix = 0; probe_ix < p_store->n_group_; ++probe_ix) {
                 auto grp = p_store->_load_group(ix);
 
                 {
@@ -311,7 +371,7 @@ namespace xo {
                             slot.second = kv_pair.second;
 
                             // false: did not change table size
-                            return std::make_pair(&slot, false);
+                            return std::make_pair(store_type::to_value(&slot), false);
                         }
 
                         // e.g:
@@ -320,42 +380,76 @@ namespace xo {
                         //  m   = b01101000
                         //  m-1 = b01100111
                         //  &   = b01100000
-
+                        //
                         m &= (m - 1);
                     }
                 }
 
+                // invariant: no match for key in group starting at ix.
+
                 {
-                    // look for empty slot to insert
-                    uint16_t e = grp.empty_matches();
+                    // Look for empty slot to insert.
+                    // We cannot insert on a tombstone,
+                    // b/c key may be present at some later spot.
+
+                    uint16_t s = grp.sentinel_matches();
 
                     // process each empty slot
-                    if (e) {
-                        // check that table is below max load factor (0.875).
-                        // Check here so that table can stay at max load factor
-                        // indefinitely as long as updates only
-                        //
-                        if (p_store->load_factor() >= c_max_load_factor) {
-                            return std::make_pair(nullptr, false);
-                        }
-
-                        // zeroes: #of 0 before least significant 1 bit
-                        int skip = __builtin_ctz(e);
+                    while (s) {
+                        // skip: #of 0 before least significant 1 bit
+                        int skip = __builtin_ctz(s);
                         size_type slot_ix = (ix + skip) & (N - 1);
 
-                        // invariant: slot_ix in [0 .. N)
+                        // we've found either:
+                        // - a sentinel slot -> remember location if we don't already have one.
+                        // - an empty slot -> terminates scan.
 
-                        auto & slot = p_store->slots_[slot_ix];
+                        if (grp.ctrl_[skip] == DArenaHashMapUtil::c_empty_slot) {
+                            // search has terminated on empty slot
 
-                        // mark slot occupied in control space;
-                        // maintain copy-at-end for overflow
-                        p_store->_update_control(slot_ix, h2);
-                        new (&slot) value_type(kv_pair);
+                            // check that table is below max load factor (0.875).
+                            // Check here so that table can stay at max load factor
+                            // indefinitely as long as updates only
+                            //
+                            if (p_store->load_factor() >= c_max_load_factor) {
+                                return std::make_pair(nullptr, false);
+                            }
 
-                        ++(p_store->size_);
+                            if (tombstone_ix != N) {
+                                slot_ix = tombstone_ix;
+                            }
 
-                        // true: increased table size
-                        return std::make_pair(&slot, true);
+                            // We've found an empty slot at position slot_ix.
+                            // we can insert at stored tombstone_ix instead of at slot_ix
+
+                            auto & slot = p_store->slots_[slot_ix];
+
+                            // mark slot occupied in control space;
+                            // maintain copy-at-end for overflow
+                            p_store->_update_control(slot_ix, h2);
+                            slot = kv_pair;
+
+                            ++(p_store->size_);
+
+                            // true: increased table size
+                            return std::make_pair(store_type::to_value(&slot), true);
+                        } else if(grp.ctrl_[skip] == DArenaHashMapUtil::c_tombstone) {
+                            if (tombstone_ix == N) {
+                                // if we eventually find an empty slot,
+                                // then we can instead insert at tombstone_ix.
+
+                                tombstone_ix = slot_ix;
+                            }
+                        }
+
+                        // e.g:
+                        //             /-- lowest 1 bit gets cleared
+                        //             v
+                        //  s   = b01101000
+                        //  s-1 = b01100111
+                        //  &   = b01100000
+                        //
+                        s &= (s - 1);
                     }
                 }
 
@@ -368,7 +462,28 @@ namespace xo {
 
                 ix = (ix + c_group_size) & (N - 1);
             }
-        }
+
+            // invariant: no empty slot!
+            // but must have encountered tombstone (since max load factor < 1.0):
+            // insert there
+
+            if ((tombstone_ix == N)
+                && (p_store->load_factor() >= c_max_load_factor)) {
+
+                // table must be completely full.
+                return std::make_pair(nullptr, false);
+            } else {
+                size_type slot_ix = tombstone_ix;
+                auto & slot = p_store->slots_[slot_ix];
+
+                p_store->_update_control(slot_ix, h2);
+                slot = kv_pair;
+
+                ++(p_store->size_);
+
+                return std::make_pair(store_type::to_value(&slot), true);
+            }
+        } /* _try_insert_aux */
 
         template <typename Key, typename Value, typename Hash, typename Equal>
         bool
@@ -412,7 +527,7 @@ namespace xo {
 
                 for (size_type i = 0, n = store_.capacity(); i < n; ++i) {
                     uint8_t ctrl = store_.control_[c_control_stub + i];
-                    value_type & kv_pair = store_.slots_[i];
+                    storage_type & kv_pair = store_.slots_[i];
 
                     if (DArenaHashMapUtil::is_data(ctrl)) {
                         size_type h = hash_(kv_pair.first);
@@ -438,39 +553,134 @@ namespace xo {
                   typename Value,
                   typename Hash,
                   typename Equal>
-        bool
-        DArenaHashMap<Key,
-                      Value,
-                      Hash,
-                      Equal>::insert(const std::pair<const Key, Value> & kv_pair)
+        auto
+        DArenaHashMap<Key, Value, Hash, Equal>::erase(const key_type & key) -> size_type
         {
             using xo::pp::scope;
-            using xo::pp::xtag;
 
             scope log(XO_DEBUG_(false));
 
-            auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
+            size_type h = hash_(key);
 
-            if (slot_addr) {
-                log && log("fast", xtag("slot_addr", (void*)slot_addr), xtag("ins_flag", ins_flag));
+            bool x = this->_try_erase_aux(h, key, &store_);
 
-                return ins_flag;
-            }
+            // TODO: maybe want to count tombstones, drive table
+            //       growth
 
-            assert((store_.size_ + 1) / static_cast<float>(store_.n_slot_) >= c_max_load_factor);
+            return x ? 1 : 0;
+        }
 
-            if (this->_try_grow()) {
-                /* retry insert, with bigger table */
-                auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
+        template <typename Key,
+                  typename Value,
+                  typename Hash,
+                  typename Equal>
+        bool
+        DArenaHashMap<Key, Value, Hash, Equal>::_try_erase_aux(size_type hash_value,
+                                                               const Key & key,
+                                                               store_type * p_store)
+        {
+            using xo::pp::scope;
 
-                return ins_flag;
-            } else {
-                assert(false);
+            scope log(XO_DEBUG_(false));
 
-                // TODO: set last error.  Presumeably reached max size
+            size_type h = hash_value;
+            // h1: hi bits: probe sequence
+            size_type h1 = h >> 7;
+            // h2: lo bits: store in control byte
+            uint8_t h2 = h & 0x7f;
+
+            size_type N = p_store->capacity();
+
+            if (N == 0) [[unlikely]] {
                 return false;
             }
-        }
+
+            // same as:
+            //   ix = h1 % N
+            // since N is power of 2
+            size_type ix = h1 & (N - 1);
+
+            // will make series of probes
+            for (;;) {
+                auto grp = p_store->_load_group(ix);
+
+                {
+                    uint16_t m = grp.all_matches(h2);
+
+                    // process each match.
+                    // matches are encountered in the same order they
+                    // appear in ctrl_[]
+                    while (m) {
+                        // zeroes: #of 0 before least-significant 1 bit
+                        int skip = __builtin_ctz(m);
+                        size_type slot_ix = (ix + skip) & (N - 1);
+
+                        // invariant: slot_ix in [0 .. N)
+
+                        auto & slot = p_store->slots_[slot_ix];
+
+                        if (equal_(slot.first, key)) {
+                            // target key is located at slot_ix.
+
+                            uint8_t marker;
+
+                            if (p_store->_needs_tombstone(slot_ix))
+                                marker = DArenaHashMapUtil::c_tombstone;
+                            else
+                                marker = DArenaHashMapUtil::c_empty_slot;
+
+                            p_store->_update_control(slot_ix, marker);
+
+                            /* Reset unconditionally: SM4.2 requires an empty or
+                             * tombstone slot to hold a default key, and verify_ok()
+                             * enforces it.  Skipping the reset when nothing needs
+                             * destroying would save two stores per erase:
+                             *
+                             *   if constexpr (!std::is_trivially_destructible_v<storage_type>)
+                             *       [breaks SM4.2 hygiene]
+                             */
+                            slot = storage_type();
+
+                            --(p_store->size_);
+
+                            return true;
+                        }
+
+                        // e.g:
+                        //             /-- lowest 1 bit gets cleared
+                        //             v
+                        //  m   = b01101000
+                        //  m-1 = b01100111
+                        //  &   = b01100000
+                        //
+                        m &= (m - 1);
+                    }
+                }
+
+                // Invariant: key is not present in grp
+
+                {
+                    uint16_t m = grp.empty_matches();
+
+                    if (m) {
+                        // empty slot -> key not in hash table
+                        // 1. if it were in this group,
+                        //    previous stanza would have found it.
+                        // 2. if it were in some other group,
+                        //    then this group could not contain an empty slot
+                        return false;
+                    }
+                }
+
+                // slot range associated with grp
+                // contains non-matching values and/or tomstones.
+                // -> move on to next group
+
+                ix = (ix + c_group_size) & (N - 1);
+            }
+
+            return false;
+        } /*_try_erase_aux*/
 
         template <typename Key,
                   typename Value,
@@ -501,7 +711,7 @@ namespace xo {
 
             size_type ix = h1 & (N - 1);
 
-            for (;;) {
+            for (size_type probe_ix = 0; probe_ix < store_.n_group_; ++probe_ix) {
                 auto grp = store_._load_group(ix);
 
                 {
@@ -532,7 +742,16 @@ namespace xo {
 
                 ix = (ix + c_group_size) & (N - 1);
             }
-        }
+
+            /* Invariant:
+             * - hash table does not contain @c key
+             * - hash table has zero empty slots
+             *
+             * This is reachable since it's possible erase
+             * creates a tombstone but not an empty slot.
+             */
+            return this->end();
+        } /*_find*/
 
         template <typename Key,
                   typename Value,
@@ -736,25 +955,38 @@ namespace xo {
                 }
             }
 
-            /* SM4.1.2: if control_[i] is non-sentinel, all slots in range [h .. i] are non-empty,
-             *          where h = (hash_(slots_[i].first) >> 7) & (n_slot_ - 1)
+            /* SM4.1.2: an entry is reachable from its home position.
+             *
+             *  With h = (hash_(slots_[i].first) >> 7) & (n_slot_ - 1), a probe for that
+             *  key loads the c_group_size-wide windows h, h+16, h+32, ..  It matches h2
+             *  across a whole window at once, so a sentinel *within* the window holding i
+             *  does not hide i; and it advances to the next window only when the current
+             *  one has no empty slot.  So the requirement is:
+             *
+             *    For key with primary hash h (i.e. from top 57 bits), stored in slot i:
+             *    every window in [h, i) must be free of empty slots.
              */
             for (size_type i = 0; i < store_.n_slot_; ++i) {
                 uint8_t c = store_.control_[i + c_control_stub];
                 if (DArenaHashMapUtil::is_data(c)) {
                     size_type h = (hash_(store_.slots_[i].first) >> 7) & (store_.n_slot_ - 1);
-                    size_type j = h;
-                    while (j != i) {
-                        uint8_t cj = store_.control_[j + c_control_stub];
-                        if (DArenaHashMapUtil::is_sentinel(cj)) {
+
+                    /* #of probe steps to reach the window holding i */
+                    size_type d = (i + store_.n_slot_ - h) & (store_.n_slot_ - 1);
+                    size_type k = d / c_group_size;
+
+                    for (size_type m = 0; m < k; ++m) {
+                        size_type w = (h + m * c_group_size) & (store_.n_slot_ - 1);
+
+                        if (store_._load_group(w).empty_matches()) {
                             return policy.report_error(log,
-                                                       c_self, ": expect non-empty slot in probe range [h..i]",
+                                                       c_self, ": entry not reachable from home:"
+                                                       " empty slot in earlier probe window",
                                                        xtag("i", i),
                                                        xtag("h", h),
-                                                       xtag("j", j),
-                                                       xtag("control[j+stub]", cj));
+                                                       xtag("probe_step", m),
+                                                       xtag("window", w));
                         }
-                        j = (j + 1) & (store_.n_slot_ - 1);
                     }
                 }
             }

@@ -485,6 +485,103 @@ namespace xo {
             try_test_array(tc_v, &needs_tombstone_test_fn);
         }
 
+        /* ---------------------------------------------------------------------
+         * Randomized insert/erase/lookup against a std::map reference model.
+         *
+         * This is the only case that reaches the tombstone paths through the
+         * public API, so it also asserts COVERAGE: a run that never created a
+         * tombstone, or never reused one, proves nothing about the code it is
+         * meant to protect, and would otherwise pass silently.
+         *
+         * Two hash regimes, because they stress different things:
+         *  - std::hash<int> is the identity, so h1 = key >> 7 makes keys cluster
+         *    into few probe starts: long runs, many tombstones, deep probes.
+         *  - a mixing hash scatters keys: tombstones are sparser and reuse is
+         *    rarer, which is the ordinary case.
+         * ------------------------------------------------------------------------- */
+        struct MixHash {
+            std::size_t operator()(int k) const {
+                std::uint64_t x = static_cast<std::uint64_t>(k) + 0x9E3779B97F4A7C15ull;
+                x ^= (x >> 30); x *= 0xBF58476D1CE4E5B9ull;
+                x ^= (x >> 27); x *= 0x94D049BB133111EBull;
+                return static_cast<std::size_t>(x ^ (x >> 31));
+            }
+        };
+
+        struct TestCase_RandomOps {
+            std::uint32_t n_op_ = 0;
+            /** keys drawn from [0, key_space_) **/
+            std::uint32_t key_space_ = 0;
+            /** percent of operations that are erases **/
+            std::uint32_t erase_pct_ = 0;
+            /** true to use a mixing hash instead of std::hash<int> **/
+            bool mixed_hash_ = false;
+            std::uint64_t seed_ = 0;
+        };
+
+        template <typename HashMap>
+        static bool
+        run_random_ops(const TestCase_RandomOps & tc,
+                       bool dbg_flag,
+                       utest::HashMapOpStats * p_stats)
+        {
+            using xo::rng::xoshiro256ss;
+
+            bool ok_flag = true;
+
+            /* fresh for each pass -- see DArenaHashMap-try-insert2 */
+            auto rgen = xoshiro256ss(tc.seed_);
+            HashMap hash_map("utest");
+
+            ok_flag &= utest::HashMapUtil<HashMap>::random_ops(tc.n_op_, tc.key_space_,
+                                                               tc.erase_pct_, dbg_flag,
+                                                               &rgen, &hash_map, p_stats);
+
+            return ok_flag;
+        }
+
+        void
+        random_ops_test_fn(const TestCase_RandomOps & tc,
+                           UtestRehearser * p_rh)
+        {
+            bool dbg_flag = p_rh->enable_debug();
+            scope log(XO_DEBUG2_(dbg_flag, "random_ops"));
+
+            utest::HashMapOpStats stats;
+
+            bool ok_flag = (tc.mixed_hash_
+                            ? run_random_ops<DArenaHashMap<int, int, MixHash>>(tc, dbg_flag, &stats)
+                            : run_random_ops<DArenaHashMap<int, int>>(tc, dbg_flag, &stats));
+
+            log && log(xtag("n_insert", stats.n_insert_),
+                       xtag("n_erase", stats.n_erase_),
+                       xtag("n_tombstone", stats.n_tombstone_),
+                       xtag("n_reuse", stats.n_reuse_),
+                       xtag("n_grow", stats.n_grow_));
+
+            REHEARSE(*p_rh, ok_flag);
+
+            /* coverage: the run must have exercised what it exists to exercise */
+            REHEARSE(*p_rh, stats.n_erase_ > 0);
+            REHEARSE(*p_rh, stats.n_tombstone_ > 0);
+            REHEARSE(*p_rh, stats.n_reuse_ > 0);
+        }
+
+        TEST_CASE("DArenaHashMap-random-ops", "[arena][DArenaHashMap]")
+        {
+            std::vector<TestCase_RandomOps> tc_v = {
+                TestCase_RandomOps{.n_op_ = 2000, .key_space_ = 200, .erase_pct_ = 40,
+                                   .mixed_hash_ = false, .seed_ = 5150ul},
+                TestCase_RandomOps{.n_op_ = 2000, .key_space_ = 200, .erase_pct_ = 40,
+                                   .mixed_hash_ = true,  .seed_ = 90210ul},
+                /* erase-heavy: churns tombstones without growing much */
+                TestCase_RandomOps{.n_op_ = 2000, .key_space_ = 64, .erase_pct_ = 55,
+                                   .mixed_hash_ = false, .seed_ = 20260821ul},
+            };
+
+            try_test_array(tc_v, &random_ops_test_fn);
+        }
+
         TEST_CASE("DArenaHashMap-operator-bracket", "[arena][DArenaHashMap]")
         {
             scope log(XO_DEBUG_(false));
@@ -598,8 +695,55 @@ namespace xo {
             REQUIRE(map["world"] == 100);
         }
 
-        // TODO:
-        //  - let's try getting lcov to work in xo-umbrella2
+        TEST_CASE("DArenaHashMap-find-past-tombstone", "[arena][DArenaHashMap]")
+        {
+            using HashMap = DArenaHashMap<int, int>;
+
+            /* std::hash<int> is the identity, so h1 = key >> 7: keys 0..127 all
+             * probe from the same start, filling slots contiguously.
+             */
+            HashMap map("utest");
+
+            constexpr int c_n = 28;
+            for (int k = 0; k < c_n; ++k)
+                map.insert(std::make_pair(k, 10 * k));
+
+            REQUIRE(map.size() == c_n);
+
+            /* a key that lives beyond the first 16-slot probe window */
+            int far_key = 20;
+            REQUIRE(map.find(far_key) != map.end());
+
+            /* erase an early key.  The run of occupied slots through it is >= 16,
+             * so _needs_tombstone() must choose a tombstone rather than an empty.
+             *
+             * Asserted directly: if this ever became c_empty_slot, the far_key
+             * lookup below would fail for a confusing reason (its probe would
+             * stop at the empty) rather than pointing at the erase.
+             *
+             * Note the run exists because std::hash<int> is the identity in
+             * libstdc++, so keys 0..127 share a probe start and fill slots
+             * contiguously.  That is a libstdc++ property, not a guarantee --
+             * the control-byte check below is what keeps this test honest if
+             * it ever changes.
+             */
+            REQUIRE(map.erase(5) == 1);
+            REQUIRE(map._store()->control_[DArenaHashMapUtil::c_control_stub + 5]
+                    == DArenaHashMapUtil::c_tombstone);
+
+            /* the rest of erase's contract */
+            REQUIRE(map.size() == c_n - 1);
+            REQUIRE(map.find(5) == map.end());   /* erased key is gone */
+            REQUIRE(map.erase(5) == 0);          /* erasing it again is a no-op */
+            REQUIRE(map.erase(999) == 0);        /* key that was never present */
+
+            /* the far key is still present, and must still be findable:
+             * a probe has to walk *past* the tombstone to reach it
+             */
+            auto ix = map.find(far_key);
+            REQUIRE(ix != map.end());
+            REQUIRE(ix->second == 10 * far_key);
+        }
     }
 }
 

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "HashMapStore.hpp"
 #include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
 
 namespace xo {
@@ -14,17 +15,19 @@ namespace xo {
             template <typename Key,
                       typename Value>
             struct DArenaHashMapIterator : public DArenaHashMapUtil {
+                using store_type = HashMapStore<Key, Value>;
                 using value_type = std::pair<const Key, Value>;
+                using storage_type = std::pair<Key, Value>;
 
             public:
-                DArenaHashMapIterator(uint8_t * c, value_type * p)
+                DArenaHashMapIterator(uint8_t * c, storage_type * p)
                     : ctrl_{c}, pos_{p} {}
 
-                value_type & operator*() const { return *pos_; }
-                value_type * operator->() const { return pos_; }
+                value_type & operator*() const { return *store_type::to_value(pos_); }
+                value_type * operator->() const { return store_type::to_value(pos_); }
 
                 uint8_t * _ctrl() const { return ctrl_; }
-                value_type * _pos() const { return pos_; }
+                storage_type * _pos() const { return pos_; }
 
                 /** true iff iterator at sentinel position (not dereferencable state !) **/
                 bool _at_slot_sentinel() const { return is_sentinel(*ctrl_) && (*ctrl_ != c_iterator_bookend); }
@@ -75,23 +78,26 @@ namespace xo {
 
             private:
                 uint8_t * ctrl_ = nullptr;
-                value_type * pos_ = nullptr;
+                /** key,value pair under current iterator position **/
+                storage_type * pos_ = nullptr;
             };
 
             template <typename Key,
                       typename Value>
             struct DArenaHashMapConstIterator : public DArenaHashMapUtil {
                 using value_type = std::pair<const Key, Value>;
+                using storage_type = std::pair<Key, Value>;
+                using store_type = HashMapStore<Key, Value>;
 
             public:
-                DArenaHashMapConstIterator(const uint8_t * c, const value_type * p)
+                DArenaHashMapConstIterator(const uint8_t * c, const storage_type * p)
                     : ctrl_{c}, pos_{p} {}
 
-                const value_type & operator*() const { return *pos_; }
-                const value_type * operator->() const { return pos_; }
+                const value_type & operator*() const { return *store_type::to_value(pos_); }
+                const value_type * operator->() const { return store_type::to_value(pos_); }
 
                 const uint8_t * _ctrl() const { return ctrl_; }
-                const value_type * _pos() const { return pos_; }
+                const storage_type * _pos() const { return pos_; }
 
                 /** true iff iterator at sentinel position (not dereferencable state !) **/
                 bool _at_slot_sentinel() const {
@@ -143,10 +149,12 @@ namespace xo {
                 }
 
             private:
+                /** control byte under current iterator position **/
                 const uint8_t * ctrl_ = nullptr;
-                const value_type * pos_ = nullptr;
-            };
-        }
+                /** key,value pair under current iterator position **/
+                const storage_type * pos_ = nullptr;
+            }; /*DArenaHashMapConstIterator*/
+        } /*namespace detail*/
     } /*namespace map*/
 } /*namespace xo*/
 
