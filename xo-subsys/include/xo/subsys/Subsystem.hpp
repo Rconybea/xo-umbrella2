@@ -7,11 +7,11 @@
 
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tostr0.hpp>
 #include <cstddef>
 #include <functional>
-#include <iostream>
 #include <list>
 #include <string_view>
 
@@ -59,12 +59,6 @@ namespace xo {
          */
         std::uint64_t evidence_ = 0;
     }; /*InitEvidence*/
-
-    inline std::ostream &
-    operator<<(std::ostream & os, InitEvidence x) {
-        os << "<init-evidence " << x.evidence() << ">";
-        return os;
-    } /*operator<<*/
 
     /* Goals:
      * 1. provide for code that must run once (and only once)
@@ -314,5 +308,20 @@ namespace xo {
 
     using Subsystem = SubsystemImpl<class Subsystem_tag>;
 } /*namespace xo*/
+
+namespace xo::pp {
+    /* the hierarchy dispatches dynamically through the virtual
+     * GeneralizedExpression::pretty(); these just enter it.
+     */
+    template <>
+    struct Prettifier<InitEvidence> {
+        static void print(PpSink & sink, const InitEvidence & x) {
+            using xo::pp::field;
+
+            sink.pretty_struct("InitEvidence",
+                               field("e", x.evidence()));
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end Subsystem.hpp */
