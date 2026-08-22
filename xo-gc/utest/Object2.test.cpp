@@ -17,6 +17,7 @@
 #include <xo/ppsink/pretty_ostream.hpp> /* xo::pp::pp_to_stream */
 #include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 
 namespace ut {
     /* the ppsink logging vocabulary, for use below.  Converted from legacy

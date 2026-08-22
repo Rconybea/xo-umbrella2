@@ -24,6 +24,7 @@
 #include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 #include <unistd.h> // for getpagesize() on osx
+#include <iostream>
 
 namespace ut {
     /* the ppsink logging vocabulary, for use below.  Converted from legacy

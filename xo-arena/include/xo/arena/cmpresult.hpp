@@ -7,7 +7,6 @@
 
 #include <xo/ppsink/Prettifier.hpp>
 #include <cstdint>
-#include <iostream>
 
 namespace xo {
     namespace pp { class PpSink; }
@@ -20,12 +19,6 @@ namespace xo {
         };
 
         extern const char * comparison2str(comparison x);
-
-        inline std::ostream &
-        operator<<(std::ostream & os, comparison x) {
-            os << comparison2str(x);
-            return os;
-        }
 
         /** @brief result of a generic comparison operation
          **/
@@ -58,10 +51,7 @@ namespace xo {
             /** @defgroup mm-cmpresult-methods cmpresult methods **/
             ///@{
 
-#ifdef OBSOLETE
-            /** print to stream **/
-            void display(std::ostream & os) const;
-#endif
+            /** pretty print instance to @p sink **/
             void pretty(PpSink & sink) const;
 
             bool is_lesser() const {
@@ -84,18 +74,16 @@ namespace xo {
             ///@}
         };
 
-#ifdef OBSOLETE
-        inline std::ostream & operator<<(std::ostream & os,
-                                         const cmpresult & x)
-        {
-            x.display(os);
-            return os;
-        }
-#endif
-
     } /*namespace mm*/
 
     namespace pp {
+        template <>
+        struct Prettifier<xo::mm::comparison> {
+            static void print(PpSink & sink, const xo::mm::comparison & x) {
+                sink.put(xo::mm::comparison2str(x));
+            }
+        };
+
         /** pretty-print for cmpresult */
         template <>
         struct Prettifier<xo::mm::cmpresult> {

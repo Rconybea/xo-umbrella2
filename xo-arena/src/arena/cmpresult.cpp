@@ -37,17 +37,18 @@ namespace xo {
                                field("cmp", cmp_));
         }
 
-#ifdef OBSOLETE
-        void
-        cmpresult::display(std::ostream & os) const
-        {
-            os << "<cmpresult"
-               << xtag("err", err_)
-               << xtag("cmp", cmp_)
-               << ">";
-        }
-#endif
     } /*namespace mm*/
+
+#ifdef OBS
+    namespace pp {
+        template <>
+        void
+        Prettifier<xo::mm::comparison>::print(PpSink & sink, const xo::mm::comparison & x)
+        {
+            sink.put(comparison2str(x));
+        }
+    }
+#endif
 } /*namespace xo*/
 
 /* end cmpresult.cpp */
