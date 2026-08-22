@@ -11,7 +11,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/concat.hpp>
-//#include <sstream>                     /* std::ostringstream -- was via indentlog */
+#include <sstream>                     /* std::ostringstream -- was via indentlog */
 #include <stdexcept>                   /* std::runtime_error -- was via indentlog */
 
 namespace xo {
@@ -29,6 +29,8 @@ namespace xo {
         std::string
         FunctionTdxInfo::make_canonical_name() const
         {
+            // TODO: use scratch arena here.
+
             std::ostringstream ss;
 
             ss << retval_td_->canonical_name();

@@ -244,7 +244,7 @@ namespace xo {
 
             /** print table of reflected types to @p sink **/
             static void print_reflected_types(PpSink & sink);
-#ifdef NOTE_YET
+#ifdef NOT_YET
             /** print table of function types to @p sink **/
             static void print_function_types(PpSink & sink);
 #endif
