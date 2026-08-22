@@ -4,7 +4,6 @@
  **/
 
 #include "DCircularBuffer.hpp"
-#include <xo/arena/print.hpp>
 #include <catch2/catch.hpp>
 #include <unistd.h> // for getpagesize() on osx
 

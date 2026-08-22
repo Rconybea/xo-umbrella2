@@ -17,7 +17,6 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/backtrace.hpp>
-#include <xo/arena/print.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>

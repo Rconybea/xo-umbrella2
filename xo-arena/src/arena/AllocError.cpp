@@ -6,6 +6,9 @@
 #include "AllocError.hpp"
 
 namespace xo {
+    using xo::pp::PpSink;
+    using xo::pp::field;
+
     namespace mm {
 
         const char *
@@ -37,6 +40,18 @@ namespace xo {
             }
 
             return "?error";
+        }
+
+        void
+        AllocError::pretty(PpSink & sink) const
+        {
+            sink.pretty_struct("AllocError",
+                               field("error", error_),
+                               field("src_fn", src_fn_, src_fn_ != nullptr),
+                               field("seq", error_seq_),
+                               field("req_z", request_z_),
+                               field("commit_z", committed_z_),
+                               field("resv_z", reserved_z_));
         }
 
     } /*namespace mm*/

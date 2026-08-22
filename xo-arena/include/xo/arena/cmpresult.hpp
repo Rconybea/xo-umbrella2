@@ -5,10 +5,13 @@
 
 #pragma once
 
+#include <xo/ppsink/Prettifier.hpp>
 #include <cstdint>
 #include <iostream>
 
 namespace xo {
+    namespace pp { class PpSink; }
+
     namespace mm {
         enum class comparison : int32_t {
             invalid      = -1,
@@ -27,6 +30,10 @@ namespace xo {
         /** @brief result of a generic comparison operation
          **/
         struct cmpresult {
+        public:
+            using PpSink = xo::pp::PpSink;
+
+        public:
             /** @defgroup mm-cmpresult-ctors cmpresult ctors **/
             ///@{
             cmpresult() : err_{comparison::invalid}, cmp_{0} {}
@@ -51,8 +58,11 @@ namespace xo {
             /** @defgroup mm-cmpresult-methods cmpresult methods **/
             ///@{
 
+#ifdef OBSOLETE
             /** print to stream **/
             void display(std::ostream & os) const;
+#endif
+            void pretty(PpSink & sink) const;
 
             bool is_lesser() const {
                 return (err_ == comparison::comparable) && (cmp_ < 0);
@@ -74,14 +84,26 @@ namespace xo {
             ///@}
         };
 
+#ifdef OBSOLETE
         inline std::ostream & operator<<(std::ostream & os,
                                          const cmpresult & x)
         {
             x.display(os);
             return os;
         }
+#endif
 
     } /*namespace mm*/
+
+    namespace pp {
+        /** pretty-print for cmpresult */
+        template <>
+        struct Prettifier<xo::mm::cmpresult> {
+            static void print(PpSink & sink, const xo::mm::cmpresult & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end cmpresult.hpp */

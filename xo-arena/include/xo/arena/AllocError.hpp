@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/ppsink/pretty_struct.hpp>
 #include <cstddef>
 #include <cstdint>
 
@@ -61,6 +62,12 @@ namespace xo {
 
             static const char * error_description(error x);
 
+            /** print to @p sink as
+             *    <AllocError :error .. :src_fn .. :seq .. :req_z .. ..>
+             *  src_fn omitted when null.
+             **/
+            void pretty(xo::pp::PpSink & sink) const;
+
             /** error code **/
             error error_ = error::ok;
             /** source function. Typically injected with __PRETTY_FUNCTION__
@@ -80,5 +87,23 @@ namespace xo {
         };
     } /*namespace mm*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** render an error code by its description, e.g. "reserve-exhausted" **/
+    template <>
+    struct Prettifier<xo::mm::error> {
+        static void print(PpSink & sink, xo::mm::error x) {
+            sink.put(std::string_view(xo::mm::AllocError::error_description(x)));
+        }
+    };
+
+    /** pretty-print an AllocError */
+    template <>
+    struct Prettifier<xo::mm::AllocError> {
+        static void print(PpSink & sink, const xo::mm::AllocError & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end AllocError.hpp */

@@ -4,10 +4,13 @@
  **/
 
 #include "cmpresult.hpp"
+#include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <iostream>
 
 namespace xo {
+    using xo::pp::PpSink;
+    using xo::pp::field;
     using xo::pp::xtag;
 
     namespace mm {
@@ -27,6 +30,15 @@ namespace xo {
         }
 
         void
+        cmpresult::pretty(PpSink & sink) const
+        {
+            sink.pretty_struct("cmpresult",
+                               field("err", err_),
+                               field("cmp", cmp_));
+        }
+
+#ifdef OBSOLETE
+        void
         cmpresult::display(std::ostream & os) const
         {
             os << "<cmpresult"
@@ -34,6 +46,7 @@ namespace xo {
                << xtag("cmp", cmp_)
                << ">";
         }
+#endif
     } /*namespace mm*/
 } /*namespace xo*/
 

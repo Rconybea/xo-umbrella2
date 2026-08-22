@@ -4,8 +4,8 @@
  **/
 
 #include "DArena.hpp"
-#include <xo/arena/print.hpp>
 #include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp> /* Catch2 INFO() streams the tag to an ostream */
 #include <catch2/catch.hpp>
 
 namespace xo {
