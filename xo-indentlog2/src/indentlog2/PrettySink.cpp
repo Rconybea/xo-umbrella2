@@ -6,6 +6,7 @@
 #include "print/PrettySink.hpp"
 #include <xo/ppsink/LogState.hpp>
 #include <iostream>
+#include <cstdlib>
 
 namespace xo {
     using xo::mm::ArenaConfig;
@@ -146,6 +147,23 @@ namespace xo {
         bool
         ThreadPrettySink::thread_install_once(const PpConfig & cfg, std::streambuf * out)
         {
+            /** Default-constructed PpConfig has logbuf size 0,
+             *  because policy is to force app to make a deliberate choice.
+             *
+             *  PrettySink requires a non-zero buffer size
+             *  (simpler cousin FlatSink does not use logbuf)
+             **/
+            if (cfg.logbuf().logbuf_config().size_ == 0) {
+                std::cerr
+                    << "ThreadPrettySink::thread_install_once"
+                    << ": logbuf arena has size 0 -- a PrettySink cannot buffer a record."
+                    << "  Pass e.g. PpConfig().with_logbuf_config"
+                    << "(ArenaConfig().with_size(1024*1024))"
+                    << std::endl;
+
+                std::abort();
+            }
+
             if (ThreadLogState::thread_log_state().is_builtin_default()) {
                 // first call with explicit sink
 
