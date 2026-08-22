@@ -49,10 +49,7 @@ namespace xo {
 
         argv2_.push_back(argv[0]);
 
-        // note: keep this alive until after Catch::Session().run() below;
-        //       argv2 holds pointers into these strings.  (app.remaining()
-        //       returns a temporary vector by value.)
-        std::vector<std::string> remaining = app.remaining();
+        remaining_ = app.remaining();
 
         if (help_flag) {
             // actual help impl, falls through to Session below
@@ -64,7 +61,7 @@ namespace xo {
             argv2_.push_back("--help");
         } else {
             // keep program name
-            for (auto & x : remaining)
+            for (auto & x : remaining_)
                 argv2_.push_back(x.c_str());
         }
 

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 namespace xo {
@@ -32,7 +33,13 @@ namespace xo {
         int run();
 
     private:
+        /** Application name **/
         const char * app_name_ = "";
+        /** Owns the strings in argv2_[].
+         *  Necessary because argv2_ is constructed from cli11 app.remaining(),
+         *  which returns by value.
+         **/
+        std::vector<std::string> remaining_;
         /** args remaining after parsing --debug, --announce, --help|-h|-? **/
         std::vector<const char *> argv2_;
     };
