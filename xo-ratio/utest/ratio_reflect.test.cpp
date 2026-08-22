@@ -4,6 +4,7 @@
 #include <xo/reflect/reflect_struct.hpp>
 #include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 
 namespace xo::ut {
     using xo::pp::FlatSink;

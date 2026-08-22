@@ -9,7 +9,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <memory>
 #include <string_view>
 #include <typeinfo>
@@ -48,14 +47,6 @@ namespace xo {
              */
             std::uint32_t id_ = 0;
         }; /*TypeId*/
-
-#ifdef OBSOLETE
-        inline std::ostream &
-        operator<<(std::ostream & os, TypeId x) {
-            os << x.id();
-            return os;
-        } /*operator<<*/
-#endif
 
         /* runtime description of a struct/class instance variable */
         class StructMember;
@@ -422,9 +413,6 @@ namespace xo {
              **/
             void pretty(xo::pp::PpSink & sink) const;
 
-#ifdef OBSOLETE
-            void display(std::ostream & os) const;
-#endif
             std::string display_string() const;
 
             /* mark this TypeDescr complete;
@@ -581,19 +569,6 @@ namespace xo::pp {
     /** TypeDescr is a pointer (const TypeDescrBase *).
      *
      *  A null descriptor renders as "<nullptr>".
-     *
-     *  CHANGED 2026-08-22, deliberately and output-visibly.  This printed
-     *  NOTHING until the ostream conversion, preserving legacy
-     *  ppdetail<TypeDescr> (`return td ? td->pretty(ppii) : true`) -- and the
-     *  comment here said printing "<nullptr>" "belongs in its own commit".
-     *  That commit is this one: the legacy being preserved has now been
-     *  retired, and the ostream path that DID print "<nullptr>"
-     *  (operator<<(ostream&, const TypeDescrBase*)) is gone, so silence would
-     *  have become the only behaviour by default rather than by decision.
-     *
-     *  Silence is the worse default: inside a pretty_struct a null field
-     *  renders as ":canonical_name " with nothing after it, which reads as an
-     *  empty string rather than as a null.
      **/
     template <>
     struct Prettifier<xo::reflect::TypeDescr> {
@@ -608,34 +583,8 @@ namespace xo::pp {
 }
 
 namespace xo::reflect {
-
-#ifdef OBSOLETE
-    inline std::ostream &
-        operator<<(std::ostream & os, const TypeDescrBase & x) {
-        x.display(os);
-        return os;
-    } /*operator<<*/
-
-    inline std::ostream &
-        operator<<(std::ostream & os, const TypeDescrBase * p) {
-        if (p)
-            p->display(os);
-        else
-            os << "<nullptr>";
-        return os;
-    }
-#endif
-
     /* tag to drive overload resolution */
     struct reflected_types_printer {};
-
-#ifdef OBSOLETE
-    inline std::ostream &
-        operator<<(std::ostream & os, reflected_types_printer) {
-        TypeDescrBase::print_reflected_types(os);
-        return os;
-    }
-#endif
 }
 
 namespace xo::pp {

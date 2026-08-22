@@ -11,8 +11,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/concat.hpp>
-//#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) in display() */
-#include <sstream>                     /* std::ostringstream -- was via indentlog */
+//#include <sstream>                     /* std::ostringstream -- was via indentlog */
 #include <stdexcept>                   /* std::runtime_error -- was via indentlog */
 
 namespace xo {
@@ -314,15 +313,6 @@ namespace xo {
             return this->tdextra_->child_tp(i, object);
         } /*child_tp*/
 
-        /* DRIFT WARNING: the field list here is duplicated by the legacy
-         * ppdetail<> in TypeDescr_ppdetail.hpp.  Keep the two in step.
-         *
-         * id_ (TypeId), complete_flag_ (bool) have no Prettifier<>,
-         * so they render through pretty()'s operator<< fallback
-         * -- which needs <ostream> visible at the point of instantiation.
-         * scope.hpp / tostr.hpp above supply it; pretty_struct.hpp alone would
-         * not.
-         */
         void
         TypeDescrBase::pretty(xo::pp::PpSink & sink) const
         {

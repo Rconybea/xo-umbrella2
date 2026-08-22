@@ -5,6 +5,7 @@
 #include <xo/ppsink/scope.hpp>   /* scope -- was arriving via xo/reflect */
 #include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 
 namespace xo {
     using xo::reflect::TypeDescrBase;

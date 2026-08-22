@@ -10,6 +10,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 #include <cmath>
 
 namespace xo {
