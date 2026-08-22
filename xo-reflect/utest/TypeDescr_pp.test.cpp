@@ -66,8 +66,15 @@ namespace xo {
             REQUIRE(si != sd);
         }
 
-        TEST_CASE("TypeDescr_pp-null-prints-nothing", "[TypeDescr_pp]") {
-            /* preserves legacy ppdetail<TypeDescr>: `td ? td->pretty(..) : true` */
+        TEST_CASE("TypeDescr_pp-null-prints-nullptr", "[TypeDescr_pp]") {
+            /* CHANGED 2026-08-22: this pinned "prints nothing", preserving
+             * legacy ppdetail<TypeDescr> (`td ? td->pretty(..) : true`).  The
+             * ostream conversion retired that legacy along with
+             * operator<<(ostream&, const TypeDescrBase*), which DID print
+             * "<nullptr>" -- so Prettifier<TypeDescr> adopted "<nullptr>"
+             * rather than inheriting silence by default.  See the CHANGED note
+             * on that specialization in TypeDescr.hpp.
+             */
             TypeDescr td = nullptr;
 
             stringstream ss;
@@ -75,7 +82,7 @@ namespace xo {
             sink.pp(td);
             sink.complete();
 
-            REQUIRE(ss.str() == "\n");   /* nothing but complete()'s newline */
+            REQUIRE(ss.str() == "<nullptr>\n");   /* + complete()'s newline */
         }
     } /*namespace ut*/
 } /*namespace xo*/

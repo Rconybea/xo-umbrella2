@@ -2,53 +2,58 @@
 
 #include "xo/ratio/ratio_reflect.hpp"
 #include <xo/reflect/reflect_struct.hpp>
+#include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
 
-namespace xo {
-    namespace ut {
-        TEST_CASE("ratio_reflect", "[ratio][reflect]") {
-            using xo::reflect::reflect_struct;
-            using xo::reflect::TypeDescrBase;
-            using xo::reflect::TypeDescr;
-            using xo::ratio::ratio;
+namespace xo::ut {
+    using xo::pp::FlatSink;
+    using xo::pp::PpStyle;
 
-            /* verify ratio reflection */
+    TEST_CASE("ratio_reflect", "[ratio][reflect]")
+    {
+        using xo::reflect::reflect_struct;
+        using xo::reflect::TypeDescrBase;
+        using xo::reflect::TypeDescr;
+        using xo::ratio::ratio;
 
-            TypeDescr td = reflect_struct<ratio<std::int64_t>>();
+        /* verify ratio reflection */
 
-            REQUIRE(td->is_struct());
-            REQUIRE(td->metatype() == xo::reflect::Metatype::mt_struct);
-            REQUIRE(td->n_child(nullptr) == 2);
+        TypeDescr td = reflect_struct<ratio<std::int64_t>>();
 
-            {
-                REQUIRE(td->struct_member(0).member_name() == "num");
-                REQUIRE(td->struct_member(0).get_member_td()->is_i64());
-                REQUIRE(td->struct_member(0).get_member_td()->size() == sizeof(std::int64_t));
+        REQUIRE(td->is_struct());
+        REQUIRE(td->metatype() == xo::reflect::Metatype::mt_struct);
+        REQUIRE(td->n_child(nullptr) == 2);
+
+        {
+            REQUIRE(td->struct_member(0).member_name() == "num");
+            REQUIRE(td->struct_member(0).get_member_td()->is_i64());
+            REQUIRE(td->struct_member(0).get_member_td()->size() == sizeof(std::int64_t));
 #if defined(__APPLE__)
-                REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long long");
+            REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long long");
 #elif defined(__clang__)
-                REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long");
+            REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long");
 #else
-                REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long int");
+            REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long int");
 #endif
-            }
+        }
 
-            {
-                REQUIRE(td->struct_member(1).member_name() == "den");
-                REQUIRE(td->struct_member(0).get_member_td()->is_i64());
-                REQUIRE(td->struct_member(0).get_member_td()->size() == sizeof(std::int64_t));
+        {
+            REQUIRE(td->struct_member(1).member_name() == "den");
+            REQUIRE(td->struct_member(0).get_member_td()->is_i64());
+            REQUIRE(td->struct_member(0).get_member_td()->size() == sizeof(std::int64_t));
 #if defined(__APPLE__)
-                REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long long");
+            REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long long");
 #elif defined(__clang__)
-                REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long");
+            REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long");
 #else
-                REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long int");
+            REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long int");
 #endif
-            }
+        }
 
-            TypeDescrBase::print_reflected_types(std::cerr);
-    }
-    } /*namespace ut*/
+        FlatSink sink(PpStyle::colored(), std::cout.rdbuf());
+
+        TypeDescrBase::print_reflected_types(sink);
+    } /*namespace xo::ut*/
 } /*namespace xo*/
 
 /* end ratio_reflect.test.cpp */

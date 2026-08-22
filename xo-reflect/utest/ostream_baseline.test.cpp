@@ -1,39 +1,53 @@
 /* @file ostream_baseline.test.cpp
  *
- * Baseline pin for every rendering the xo-reflect ostream conversion will
- * touch: TypeDescrBase, TypeDescr, TypeId, Metatype, TaggedRcptr.
+ * Rendering pin for xo-reflect: TypeDescrBase, TypeDescr, TypeId, Metatype,
+ * TaggedRcptr.
  *
- * Written BEFORE the conversion, deliberately.  xo-reflect has 34 consumers and
- * almost none of its output was pinned -- TypeDescr_pp.test.cpp:48 asserted an
- * eleven-character prefix and nothing else -- so a rendering change would have
- * reached every one of them silently.  Per CONVENTIONS.md, every expectation
- * here was READ off the current build rather than predicted; two incidents on
- * this migration came from predicting layout.
+ * Written BEFORE the ostream conversion, deliberately.  xo-reflect has 34
+ * consumers and almost none of its output was pinned -- TypeDescr_pp.test.cpp:48
+ * asserted an eleven-character prefix and nothing else -- so a rendering change
+ * would have reached every one of them silently.  Per CONVENTIONS.md, every
+ * expectation here was READ off the current build rather than predicted; two
+ * incidents on this migration came from predicting layout.
  *
  * Milestone: ostream-containment.  See .xo-backlog/xo-ppsink/issues/15.
  *
- * WHAT THIS IS FOR
+ * WHAT THIS WAS FOR, AND WHAT IT IS NOW  (rewritten 2026-08-22, rule 6)
  *
- * xo-reflect renders TypeDescrBase two ways -- separate hand-maintained
- * implementations of the same four fields:
+ * Until the conversion, xo-reflect rendered TypeDescrBase two ways -- separate
+ * hand-maintained implementations of the same four fields:
  *
- *   TypeDescrBase::pretty(PpSink&)    TypeDescr.cpp:320   pretty_struct + field()
- *   TypeDescrBase::display(ostream&)  TypeDescr.cpp:337   os << xtag()
+ *   TypeDescrBase::pretty(PpSink&)     pretty_struct + field()
+ *   TypeDescrBase::display(ostream&)   os << xtag()
  *
- * Measured 2026-08-17: their TEXT is byte-identical.  They differ only in which
- * style slot colours the field names -- struct_tag_color (yellow) for field(),
- * tag_color (grey) for xtag() -- which is a deliberate distinction, not drift
- * (pretty_struct.hpp:106-109: "a struct field and a log tag" are different
- * things).  Under the utest harness's plain style neither emits colour at all,
- * so `reflect-baseline-colour-differs` forces a coloured style to see it.
+ * so this file held them side by side and asserted they agreed.  Measured
+ * 2026-08-17 their TEXT was byte-identical; they differed only in which style
+ * slot coloured the field names (struct_tag_color for field(), tag_color for
+ * xtag()), a deliberate distinction rather than drift.  Two tests existed for
+ * that comparison: `reflect-baseline-pretty-and-display-agree-on-content` and
+ * `reflect-baseline-colour-differs`.
  *
- * The conversion deletes display() and routes the ostream inserter through
- * pretty().  Text is unaffected; on a coloured terminal a TypeDescr's field
- * names move from log-tag grey to struct-field yellow, which is the correct
- * classification since a TypeDescr rendering IS a struct.  That is the only
- * output-visible consequence, and the colour test is where it is recorded --
- * when that test fails, the failure is the intended change and the test gets
- * updated rather than worked around.
+ * BOTH WERE DELETED 2026-08-22.  display() and every ostream inserter in
+ * xo-reflect are gone; PpSink is the only rendering path the subsystem offers,
+ * so there is no second implementation to compare against and the two tests
+ * had become, respectively, a tautology and an assertion about a colour slot
+ * nothing uses any more.
+ *
+ * WHAT THAT COSTS, stated rather than left implicit: nothing now pins
+ * xo-reflect's rendering against an independent implementation, because there
+ * isn't one.  The content pins below are absolute -- they assert exact strings
+ * read off the build -- which catches a change but cannot tell you whether the
+ * change was intended.  That is the normal situation for a rendering test and
+ * was NOT the situation while display() existed.
+ *
+ * The conversion turned out to be text-preserving: every content pin here
+ * passed unchanged through it.  The one output-visible change is null
+ * TypeDescr, which now renders "<nullptr>" -- see the CHANGED note on
+ * Prettifier<TypeDescr> in TypeDescr.hpp, and `reflect-baseline-typedescr-null`
+ * below.
+ *
+ * NOTE the filename is now a misnomer: there is no ostream and no baseline.
+ * Kept because it is what the milestone tickets refer to.
  */
 
 #include "xo/reflect/Reflect.hpp"
@@ -41,11 +55,9 @@
 #include "xo/reflect/TaggedRcptr.hpp"
 #include "xo/reflect/Metatype.hpp"
 #include <xo/ppsink/FlatSink.hpp>
-#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>
-#include <vector>
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -54,6 +66,7 @@ namespace xo {
     using xo::reflect::TaggedRcptr;
     using xo::reflect::Metatype;
     using xo::pp::FlatSink;
+    using xo::pp::tostr;
 
     namespace ut {
         namespace {
@@ -73,22 +86,6 @@ namespace xo {
                 return out;
             }
 
-            /** the SGR sequences, in order, as a vector of e.g. "33" **/
-            std::vector<std::string> ansi_codes(const std::string & s) {
-                std::vector<std::string> out;
-                for (std::size_t i = 0; i < s.size(); ++i) {
-                    if (s[i] != '\033' || i + 1 >= s.size() || s[i + 1] != '[')
-                        continue;
-                    std::size_t j = i + 2;
-                    std::string code;
-                    while (j < s.size() && s[j] != 'm')
-                        code.push_back(s[j++]);
-                    out.push_back(code);
-                    i = j;
-                }
-                return out;
-            }
-
             std::string via_pretty(const TypeDescrBase & x) {
                 std::stringstream ss;
                 FlatSink sink(ss.rdbuf());
@@ -102,9 +99,7 @@ namespace xo {
 
             template <typename T>
             std::string via_ostream(const T & x) {
-                std::stringstream ss;
-                ss << x;
-                return ss.str();
+                return tostr(x);
             }
 
             /** TypeDescr renders its own id, and ids are assigned in
@@ -135,56 +130,14 @@ namespace xo {
             REQUIRE(strip_ansi(via_ostream(*td_d)) == expected_typedescr(td_d, "double"));
         }
 
-        TEST_CASE("reflect-baseline-pretty-and-display-agree-on-content",
-                  "[reflect-baseline]") {
-            /* THE claim that makes deleting display() safe.  If this ever fails,
-             * the two hand-maintained renderings have drifted, and the deletion
-             * is an output change rather than a cleanup.
-             */
-            TypeDescr td = Reflect::require<int>();
-
-            REQUIRE(strip_ansi(via_pretty(*td)) == strip_ansi(via_ostream(*td)));
-        }
-
-        TEST_CASE("reflect-baseline-colour-differs", "[reflect-baseline]") {
-            /* EXPECTED TO FAIL when display() is deleted -- see the file header.
-             *
-             * The utest harness runs under a plain style, so neither path emits
-             * colour by default and the difference is invisible here.  Force a
-             * coloured style to see it.  default_style_guard rather than
-             * sink.with_style(): the ostream path goes through xtag's own
-             * internally-built FlatSink, which can only be styled through the
-             * defaults it copies (PpStyle.hpp:100-113).
-             */
-            xo::pp::default_style_guard colored(xo::pp::PpStyle::colored());
-
-            TypeDescr td = Reflect::require<int>();
-
-            auto pretty_codes = ansi_codes(via_pretty(*td));
-            auto ostream_codes = ansi_codes(via_ostream(*td));
-
-            REQUIRE(pretty_codes.size() == ostream_codes.size());
-            REQUIRE(!pretty_codes.empty());
-
-            /* NOT drift between two implementations -- a deliberate distinction.
-             * field() inside a pretty_struct uses struct_tag_color (yellow);
-             * xtag() uses tag_color (grey).  pretty_struct.hpp:106-109 spells out
-             * why: "a struct field and a log tag" are different things.
-             *
-             * So deleting display() reclassifies TypeDescr's field names from log
-             * tag to struct field, which is what they are.  The colour change is
-             * a consequence of that, and only visible on a coloured terminal.
-             */
-            REQUIRE(pretty_codes.front() == "33");           /* struct_tag_color */
-            REQUIRE(ostream_codes.front() == "38;5;245");    /* tag_color        */
-        }
-
         TEST_CASE("reflect-baseline-typedescr-null", "[reflect-baseline]") {
-            /* the two paths DISAGREE on null, and always have:
+            /* the two paths USED TO disagree on null:
              *   operator<<(ostream&, const TypeDescrBase *)  -> "<nullptr>"
              *   Prettifier<TypeDescr>                        -> nothing at all
-             * TypeDescr.hpp:566-572 records the second as deliberate.  Pinned so
-             * the conversion has to decide rather than drift.
+             * The inserter is gone, and Prettifier<TypeDescr> adopted its
+             * "<nullptr>" rather than inheriting silence by default -- see the
+             * CHANGED note at that specialization.  So there is one behaviour
+             * now, and this pins it.
              */
             REQUIRE(via_ostream((TypeDescr)nullptr) == "<nullptr>");
 
@@ -192,7 +145,7 @@ namespace xo {
             FlatSink sink(ss.rdbuf());
             sink.pp((TypeDescr)nullptr);
             sink.complete();
-            REQUIRE(ss.str() == "\n");
+            REQUIRE(ss.str() == "<nullptr>\n");
         }
 
         TEST_CASE("reflect-baseline-typeid", "[reflect-baseline]") {

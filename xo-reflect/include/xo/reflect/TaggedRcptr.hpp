@@ -73,16 +73,34 @@ namespace xo {
                 return *this;
             } /*operator=*/
 
+            /** pretty print to @p sink **/
+            void pretty(PpSink & sink) const;
+#ifdef OBSOLETE
             void display(std::ostream & os) const;
+#endif
+
             std::string display_string() const;
         }; /*TaggedRcptr*/
 
+#ifdef OBSOLETE
         inline std::ostream & operator<<(std::ostream & os, TaggedRcptr const & x) {
             x.display(os);
             return os;
         } /*operator<<*/
+#endif
 
     } /*namespace reflect*/
+
+    namespace pp {
+        template <>
+        class Prettifier<xo::reflect::TaggedRcptr> {
+        public:
+            static void print(PpSink & sink, const xo::reflect::TaggedRcptr & x) {
+                x.pretty(sink);
+            }
+        };
+    }
+
 } /*namespace xo*/
 
 /* end TaggedRcptr.hpp */

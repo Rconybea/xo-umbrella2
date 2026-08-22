@@ -10,8 +10,18 @@
 namespace xo {
     using xo::pp::xtag;
     using xo::pp::tostr;
+    using xo::pp::field;
 
     namespace reflect {
+        void
+        TaggedRcptr::pretty(PpSink & sink) const
+        {
+            sink.pretty_struct("TaggedRcptr",
+                               field("type", this->td()->canonical_name()),
+                               field("addr", this->rc_address()));
+        }
+
+#ifdef OBSOLETE
         void
         TaggedRcptr::display(std::ostream & os) const
         {
@@ -20,6 +30,7 @@ namespace xo {
             << xtag("addr", this->rc_address())
             << ">";
         } /*display*/
+#endif
 
         std::string
         TaggedRcptr::display_string() const {

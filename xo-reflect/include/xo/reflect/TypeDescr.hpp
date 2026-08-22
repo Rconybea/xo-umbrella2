@@ -17,6 +17,8 @@
 #include <vector>
 
 namespace xo {
+    using xo::pp::PpSink;
+
     namespace reflect {
         class TaggedPtr;  /* see [reflect/TaggedPtr.hpp] */
 
@@ -47,11 +49,13 @@ namespace xo {
             std::uint32_t id_ = 0;
         }; /*TypeId*/
 
+#ifdef OBSOLETE
         inline std::ostream &
         operator<<(std::ostream & os, TypeId x) {
             os << x.id();
             return os;
         } /*operator<<*/
+#endif
 
         /* runtime description of a struct/class instance variable */
         class StructMember;
@@ -247,10 +251,12 @@ namespace xo {
             /** lookup type by canonical name **/
             static TypeDescr lookup_by_name(const std::string & canonical_name);
 
-            /** print table of reflected types to os **/
-            static void print_reflected_types(std::ostream & os);
-            /** print table of function types to os **/
-            static void print_function_types(std::ostream & os);
+            /** print table of reflected types to @p sink **/
+            static void print_reflected_types(PpSink & sink);
+#ifdef NOTE_YET
+            /** print table of function types to @p sink **/
+            static void print_function_types(PpSink & sink);
+#endif
 
             TypeId id() const { return id_; }
             const std::type_info * native_typeinfo() const { return native_typeinfo_; }
@@ -416,7 +422,9 @@ namespace xo {
              **/
             void pretty(xo::pp::PpSink & sink) const;
 
+#ifdef OBSOLETE
             void display(std::ostream & os) const;
+#endif
             std::string display_string() const;
 
             /* mark this TypeDescr complete;
@@ -557,6 +565,13 @@ namespace xo {
 
 namespace xo::pp {
     template <>
+    struct Prettifier<xo::reflect::TypeId> {
+        static void print(PpSink & sink, const xo::reflect::TypeId & x) {
+            sink.pp(x.id());
+        }
+    };
+
+    template <>
     struct Prettifier<xo::reflect::TypeDescrBase> {
         static void print(PpSink & sink, const xo::reflect::TypeDescrBase & td) {
             td.pretty(sink);
@@ -565,21 +580,36 @@ namespace xo::pp {
 
     /** TypeDescr is a pointer (const TypeDescrBase *).
      *
-     *  A null descriptor prints nothing, preserving the legacy
-     *  ppdetail<TypeDescr> behaviour (`return td ? td->pretty(ppii) : true`).
-     *  Printing "<null>" instead would arguably be friendlier, but that is an
-     *  output-visible change and belongs in its own commit.
+     *  A null descriptor renders as "<nullptr>".
+     *
+     *  CHANGED 2026-08-22, deliberately and output-visibly.  This printed
+     *  NOTHING until the ostream conversion, preserving legacy
+     *  ppdetail<TypeDescr> (`return td ? td->pretty(ppii) : true`) -- and the
+     *  comment here said printing "<nullptr>" "belongs in its own commit".
+     *  That commit is this one: the legacy being preserved has now been
+     *  retired, and the ostream path that DID print "<nullptr>"
+     *  (operator<<(ostream&, const TypeDescrBase*)) is gone, so silence would
+     *  have become the only behaviour by default rather than by decision.
+     *
+     *  Silence is the worse default: inside a pretty_struct a null field
+     *  renders as ":canonical_name " with nothing after it, which reads as an
+     *  empty string rather than as a null.
      **/
     template <>
     struct Prettifier<xo::reflect::TypeDescr> {
         static void print(PpSink & sink, xo::reflect::TypeDescr td) {
             if (td)
                 td->pretty(sink);
+            else
+                sink.put("<nullptr>");
         }
     };
+
 }
 
 namespace xo::reflect {
+
+#ifdef OBSOLETE
     inline std::ostream &
         operator<<(std::ostream & os, const TypeDescrBase & x) {
         x.display(os);
@@ -594,16 +624,32 @@ namespace xo::reflect {
             os << "<nullptr>";
         return os;
     }
+#endif
 
     /* tag to drive overload resolution */
     struct reflected_types_printer {};
 
+#ifdef OBSOLETE
     inline std::ostream &
         operator<<(std::ostream & os, reflected_types_printer) {
         TypeDescrBase::print_reflected_types(os);
         return os;
     }
+#endif
+}
 
+namespace xo::pp {
+    template<>
+    struct Prettifier<xo::reflect::reflected_types_printer> {
+        static void print(PpSink & sink, const xo::reflect::reflected_types_printer &) {
+            using xo::reflect::TypeDescrBase;
+
+            TypeDescrBase::print_reflected_types(sink);
+        }
+    };
+}
+
+namespace xo::reflect {
     class TypeDescrTable {
     public:
         TypeDescrTable * instance() { return &s_instance; }

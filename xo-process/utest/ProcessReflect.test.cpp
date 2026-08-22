@@ -8,6 +8,8 @@
 
 namespace xo {
     using xo::reflect::TypeDescrBase;
+    using xo::pp::FlatSink;
+    using xo::pp::PpStyle;
     using xo::pp::scope;
 
     namespace ut {
@@ -24,7 +26,9 @@ namespace xo {
             // this ought to work but doesn't (too much output?)...
             //log && log(xo::reflect::reflected_types_printer());
 
-            xo::reflect::TypeDescrBase::print_reflected_types(std::cout);
+            FlatSink sink(PpStyle::colored(), std::cout.rdbuf());
+
+            xo::reflect::TypeDescrBase::print_reflected_types(sink);
         } /*TEST_CASE(process-reflect)*/
 
     } /*namespace ut*/

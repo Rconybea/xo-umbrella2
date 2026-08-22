@@ -10,13 +10,17 @@
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) in display() */
+#include <xo/ppsink/concat.hpp>
+//#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) in display() */
 #include <sstream>                     /* std::ostringstream -- was via indentlog */
 #include <stdexcept>                   /* std::runtime_error -- was via indentlog */
 
 namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
+    using xo::pp::tag;
+    using xo::pp::field;
+    using xo::pp::concat;
     using xo::pp::tostr;
 
     namespace reflect {
@@ -221,18 +225,21 @@ namespace xo {
         } /*lookup_by_name*/
 
         void
-        TypeDescrBase::print_reflected_types(std::ostream & os)
+        TypeDescrBase::print_reflected_types(PpSink & sink)
         {
-            os << "<type_table_v[" << s_type_table_v.size() << "]:";
+            const bool force_break = (s_type_table_v.size() > 1);
 
-            for (const auto & td : s_type_table_v) {
-                os << "\n ";
-                if (td) {
-                    td->display(os);
-                }
+            auto st = sink.struct_open("type_table_v", force_break);
+
+            st.item(tag("size", s_type_table_v.size()));
+
+            size_t i = 0;
+
+            for (const auto & tdp : s_type_table_v) {
+                if (tdp)
+                    st.item(field(concat('[',i,']'), *tdp));
+                ++i;
             }
-
-            os << ">\n";
         } /*print_reflected_types*/
 
         namespace {
@@ -310,8 +317,8 @@ namespace xo {
         /* DRIFT WARNING: the field list here is duplicated by the legacy
          * ppdetail<> in TypeDescr_ppdetail.hpp.  Keep the two in step.
          *
-         * id_ (TypeId), complete_flag_ (bool) and metatype (Metatype) have no
-         * Prettifier<>, so they render through pretty()'s operator<< fallback
+         * id_ (TypeId), complete_flag_ (bool) have no Prettifier<>,
+         * so they render through pretty()'s operator<< fallback
          * -- which needs <ostream> visible at the point of instantiation.
          * scope.hpp / tostr.hpp above supply it; pretty_struct.hpp alone would
          * not.
@@ -332,17 +339,6 @@ namespace xo {
                                field("complete", complete_flag_),
                                field("metatype", mt));
         }
-
-        void
-        TypeDescrBase::display(std::ostream & os) const
-        {
-            os << "<TypeDescr"
-               << xtag("id", id_)
-               << xtag("canonical_name", canonical_name_)
-               << xtag("complete", complete_flag_)
-               << xtag("metatype", this->metatype())
-               << ">";
-        } /*display*/
 
         std::string
         TypeDescrBase::display_string() const

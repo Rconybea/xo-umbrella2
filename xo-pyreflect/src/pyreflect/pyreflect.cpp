@@ -17,6 +17,8 @@
 namespace xo {
     using xo::time::utc_nanos;
     using xo::ref::unowned_ptr;
+    using xo::pp::FlatSink;
+    using xo::pp::PpStyle;
     using xo::rp;
     namespace py = pybind11;
 
@@ -49,7 +51,9 @@ namespace xo {
 
                 .def_static("lookup_by_name", &TypeDescrBase::lookup_by_name)
                 .def_static("print_reflected_types",
-                            [](){ TypeDescrBase::print_reflected_types(std::cout); })
+                            [](){
+                                FlatSink sink(PpStyle::colored(), std::cout.rdbuf());
+                                TypeDescrBase::print_reflected_types(sink); })
 
                 .def_property_readonly("canonical_name", &TypeDescrBase::canonical_name)
                 .def_property_readonly("short_name", &TypeDescrBase::short_name)
