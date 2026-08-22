@@ -18,6 +18,7 @@
 #include "FlatSink.hpp"
 #include "pad.hpp"
 #include "pretty.hpp" /* PpSink::pp */
+#include <ostream>
 
 namespace xo::pp {
     inline std::ostream &

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "PpSink.hpp"
-#include <ostream>
+#include <streambuf>
 
 namespace xo::pp {
     /** @brief Degenerate PpSink that writes flat (unstructured) output to a std::ostream

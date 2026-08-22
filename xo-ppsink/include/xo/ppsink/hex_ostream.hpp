@@ -32,6 +32,7 @@
 #include "FlatSink.hpp"
 #include "hex.hpp"
 #include "pretty.hpp" /* PpSink::pp */
+#include <ostream>
 
 namespace xo::pp {
     inline std::ostream &

@@ -25,6 +25,7 @@
 #include "FlatSink.hpp"
 #include "pretty.hpp" /* PpSink::pp */
 #include "quoted.hpp"
+#include <ostream>
 
 namespace xo::pp {
     template <quotestyle QuoteStyle>

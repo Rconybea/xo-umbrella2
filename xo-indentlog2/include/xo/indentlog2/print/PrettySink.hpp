@@ -93,10 +93,6 @@ namespace xo {
 
             /** stream buffer for writing into @ref pps_ (at the scan endpoint) **/
             PpTokenStreambuf sbuf_;
-#ifdef OBSOLETE
-            /** output stream bound to sbuf_; (for writing at scan endpoint) **/
-            std::ostream os_;
-#endif
 
             /** Buffer for pretty-printed output **/
             LogBuffer logbuf_;

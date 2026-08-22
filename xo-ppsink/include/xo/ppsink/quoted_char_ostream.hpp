@@ -20,6 +20,7 @@
 #include "FlatSink.hpp"
 #include "pretty.hpp" /* PpSink::pp */
 #include "quoted_char.hpp"
+#include <ostream>
 
 namespace xo::pp {
     inline std::ostream &
