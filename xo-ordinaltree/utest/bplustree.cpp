@@ -4,6 +4,7 @@
 
 #include "BplusTree.hpp"
 #include "random_tree_ops.hpp"
+#include <xo/ppsink/pretty_ostream.hpp>
 #include <xo/ppsink/pretty_array.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -21,6 +22,7 @@ namespace {
     using utest::TreeUtil;
 
     using xo::pp::scope;
+    using xo::pp::pp_to_stream;
     //using xo::scope_setup;
     using xo::pp::xtag;
 
@@ -638,8 +640,8 @@ namespace {
         }
 #endif
 
-        std::clog << "rng-seed=" << seed << "\n"
-                  << "opage16-branching-factor=" << c_ospage16_branching_factor << "\n"
+        pp_to_stream(std::clog, seed);
+        std::clog << "opage16-branching-factor=" << c_ospage16_branching_factor << "\n"
                   << "opage16-leaf-size=" << sizeof(BpTree::LeafNodeType) + c_ospage16_branching_factor * sizeof(BpTree::LeafNodeItemType) << "\n"
                   << "opage16-internal-size=" << sizeof(BpTree::InternalNodeType) + c_ospage16_branching_factor * sizeof(BpTree::InternalNodeItemType) << "\n"
                   << "opage8-branching-factor=" << c_ospage8_branching_factor << "\n"

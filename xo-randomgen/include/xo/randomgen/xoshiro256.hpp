@@ -3,9 +3,11 @@
 #pragma once
 
 #include "engine_concept.hpp"
+#include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/pretty_array.hpp>
 #include <array>
 #include <cstdint>
-#include <iostream>
 #include <limits>
 
 namespace xo {
@@ -128,23 +130,21 @@ namespace xo {
                 s[3] = s3;
             } /*jump*/
 
-            /* inverse of .load() */
-            void print(std::ostream & os) const {
-                os << "<xoshiro256ss " << s_[0] << " " << s_[1] << " " << s_[2] << " " << s_[3] << ">";
+            /** pretty output.
+             *  Can use:
+             *  @code
+             *    #include <xo/ppsink/pretty_ostream.hpp>
+             *    xoshiro256ss & rgen = ...;
+             *    ostream & os = ...;
+             *
+             *    xo::pp::pp_to_stream(os, rgen);
+             *  @endcode
+             *
+             *  to write on ostream
+             **/
+            void pretty(xo::pp::PpSink & sink) const {
+                sink.pretty_struct("xoshiro256ss", xo::pp::field("s", s_));
             }
-
-            /* inverse of .print() */
-            void load(std::istream & is) {
-                std::string header, trailer;
-                std::array<std::uint64_t, 4> sv;
-
-                is >> header >> sv[0] >> sv[1] >> sv[2] >> sv[3] >> trailer;
-
-                if ((header != "<xoshiro256ss") || trailer != ">")
-                    throw std::runtime_error("xoshiro256ss.load: bad input format, expecting input like <xoshiro256ss $s0 $s1 $s2 $s3>");
-
-                this->s_ = sv;
-            } /*load*/
 
             std::uint64_t operator()() { return generate(); }
 
@@ -165,5 +165,14 @@ namespace xo {
 
     } /*namespace rng*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    template <>
+    struct Prettifier<xo::rng::xoshiro256ss> {
+        static void print(PpSink & sink, const xo::rng::xoshiro256ss & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end xoshiro256.hpp */

@@ -4,6 +4,7 @@
 
   # xo dependencies
   xo-cmake,
+  xo-ppsink,
 
   buildExamples ? false,
 } :
@@ -22,5 +23,6 @@ stdenv.mkDerivation (finalattrs:
     doCheck = true;
 
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
-    propagatedBuildInputs = [ ];
+    # headers include <xo/ppsink/..>, so consumers need it too
+    propagatedBuildInputs = [ xo-ppsink ];
   })

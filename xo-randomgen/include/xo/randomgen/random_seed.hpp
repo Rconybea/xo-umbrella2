@@ -1,8 +1,9 @@
 /* @file random_seed.hpp */
 
+#include <xo/ppsink/pretty.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 #include <array>
 #include <cstdint>
-#include <iostream>
 #include <stdlib.h>
 #ifdef _BSD_SOURCE
 # include <bsd/stdlib.h>
@@ -51,51 +52,56 @@ namespace xo {
             return retval;
         } /*random_seed*/
 
-        /* RAII-style random-number seed
+        /** @brief RAII-style random-number seed
          *
          * Usage:
-         *
+         * @code
          *   Seed<xoshiro256ss> seed;
          *
          *   auto eng = xoshiro256ss(seed);
+         * @endcode
+         *
          * or
+         *
+         * @code
          *   auto rng = UnitIntervalGen<xoshiro256ss>::make(seed);
+         * @endcode
          */
-        template<typename Engine>
+        template <typename Engine>
         struct Seed {
+            using PpSink = xo::pp::PpSink;
+
             using seed_type = typename Engine::seed_type;
 
             Seed() { random_seed(&seed_); }
 
             operator seed_type const & () const { return seed_; }
 
+            void pretty(PpSink & ppsink) const;
+
             seed_type seed_;
         }; /*Seed*/
 
-        template<typename T>
-        inline std::ostream &
-        operator<<(std::ostream & os,
-                   Seed<T> const & x)
+        template <typename Engine>
+        void
+        Seed<Engine>::pretty(PpSink & sink) const
         {
-            /* Written out here rather than relying on an array inserter the
-             * caller happened to include.  Legacy xo-indentlog supplied one --
-             * declared inside namespace std, which is undefined behaviour --
-             * and this header carried a NOTE telling callers to include it.
-             * A six-line loop makes xo-randomgen self-contained and keeps the
-             * rendering identical: "[a b c d]".
-             */
-            os << "[";
-            for (std::size_t i = 0, n = x.seed_.size(); i < n; ++i) {
-                if (i > 0)
-                    os << " ";
-                os << x.seed_[i];
-            }
-            os << "]";
-
-            return os;
-        } /*operator<<*/
+            sink.pretty_struct("seed", xo::pp::field("s", seed_));
+        }
 
     } /*namespace rng*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /* pretty() dispatches Prettifier<T> first and has no member detection,
+     * so the member above is unreachable without this.
+     */
+    template <typename Engine>
+    struct Prettifier<xo::rng::Seed<Engine>> {
+        static void print(PpSink & sink, const xo::rng::Seed<Engine> & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end random_seed.hpp */

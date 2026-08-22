@@ -1,5 +1,9 @@
 @PACKAGE_INIT@
 
+include(CMakeFindDependencyMacro)
+
+@XO_FIND_DEPENDENCY_BLOCK@
+
 include("${CMAKE_CURRENT_LIST_DIR}/randomgenTargets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Share.cmake")
 check_required_components("@PROJECT_NAME@")
