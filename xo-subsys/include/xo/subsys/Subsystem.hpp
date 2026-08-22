@@ -310,9 +310,6 @@ namespace xo {
 } /*namespace xo*/
 
 namespace xo::pp {
-    /* the hierarchy dispatches dynamically through the virtual
-     * GeneralizedExpression::pretty(); these just enter it.
-     */
     template <>
     struct Prettifier<InitEvidence> {
         static void print(PpSink & sink, const InitEvidence & x) {
