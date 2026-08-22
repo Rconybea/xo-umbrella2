@@ -9,6 +9,9 @@
 
 #include "typeseq.hpp"
 #include <xo/arena/DArenaVector.hpp>
+#include <xo/ppsink/concat.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <utility>
 
 namespace xo {
@@ -76,15 +79,21 @@ namespace xo {
                 return false;
             }
 
-            void dump(std::ostream * p_out) const {
-                (*p_out) << std::endl;
-                (*p_out) << "<TypeRegistry" << std::endl;
-                for (const auto & item : registry_) {
-                    (*p_out)
-                        << "  [" << item.seqno() << "]"
-                        << " -> " << item.name() << std::endl;
+            /** pretty printer for TypeRegistry
+             **/
+            void pretty(xo::pp::PpSink & sink) const {
+                using xo::pp::concat;
+                using xo::pp::tag;
+
+                auto st = sink.struct_open("TypeRegistry", registry_.size() > 1);
+
+                for (std::size_t i = 0, n = registry_.size(); i < n; ++i) {
+                    /* tag(), not xtag(): struct_scope emits its own separator.
+                     * concat captures by reference, so build it here.
+                     */
+                    st.item(tag(concat("[", i, "]"),
+                                this->_id2name(typeseq(static_cast<int32_t>(i)))));
                 }
-                (*p_out) << ">" << std::endl;
             }
 
         private:
@@ -112,7 +121,10 @@ namespace xo {
                 if ((0 <= id.seqno())
                     && (static_cast<std::size_t>(id.seqno()) < registry_.size()))
                 {
-                    return registry_.at(id.seqno()).name();
+                    const typerecd & recd = registry_.at(id.seqno());
+
+                    if (recd.seqno() == id.seqno())
+                        return recd.name();
                 }
 
                 return typerecd::sentinel().name();
@@ -132,5 +144,15 @@ namespace xo {
 
     } /*namespace facet*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** pretty-printing dispatcher for TypeRegistry **/
+    template <>
+    struct Prettifier<xo::facet::TypeRegistry> {
+        static void print(PpSink & sink, const xo::facet::TypeRegistry & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end TypeRegistry.hpp */

@@ -14,6 +14,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/pretty_ostream.hpp> /* xo::pp::pp_to_stream */
 #include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 
@@ -41,6 +42,7 @@ namespace ut {
     using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::facet::typeseq;
+    using xo::pp::pp_to_stream;
     using xo::pp::toppstr;
     using xo::pp::PpConfig;
     using std::string;
@@ -113,7 +115,7 @@ namespace ut {
         bool ok = SetupObject2::register_facets();
         REQUIRE(ok);
 
-        FacetRegistry::instance().dump(&std::cerr);
+        xo::pp::pp_to_stream(std::cerr, FacetRegistry::instance());
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
             log && log("printable1 test:", xtag("i_tc", i_tc));

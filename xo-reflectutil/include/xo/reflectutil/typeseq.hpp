@@ -56,12 +56,12 @@ namespace xo {
 
             /** sentinel typerecd instance **/
             static typerecd sentinel() {
-                return typerecd(-1, "_%sentinel%_");
+                return typerecd();
             }
 
         private:
             int32_t seqno_ = -1;
-            std::string_view name_;
+            std::string_view name_ = "_%sentinel%_";
         };
 
         //template <typename Tag>

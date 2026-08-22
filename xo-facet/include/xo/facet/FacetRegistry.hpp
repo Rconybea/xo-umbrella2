@@ -12,6 +12,8 @@
 #include "obj.hpp"
 #include <xo/arena/DArenaHashMap.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/concat.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
@@ -194,18 +196,26 @@ namespace xo {
                     return obj<AFacet>();
             }
 
-            void dump(std::ostream * p_out) {
-                using xo::pp::tostr;
+            /** structured printer **/
+            void pretty(xo::pp::PpSink & sink) const {
+                using xo::pp::concat;
+                using xo::pp::tag;
 
-                (*p_out) << std::endl;
-                (*p_out) << "<FacetRegistry" << std::endl;
-                for (auto & kv : registry_) {
-                    (*p_out)
-                    << "  [" << tostr(kv.first.first)
-                    << "," << tostr(kv.first.second) << "]"
-                    << " -> " << kv.second << std::endl;
+                /* force_break once there is more than one entry, so the
+                 * registry reads as a table like dump() does; a 0- or 1-entry
+                 * registry stays on one line.
+                 */
+                auto st = sink.struct_open("FacetRegistry", registry_.size() > 1);
+
+                for (const auto & kv : registry_) {
+                    /* concat captures BY REFERENCE, so it must be built in the
+                     * expression that consumes it -- as here.
+                     */
+                    st.item(tag(concat("[", TypeRegistry::id2name(kv.first.first),
+                                       ",", TypeRegistry::id2name(kv.first.second),
+                                       "]"),
+                                kv.second));
                 }
-                (*p_out) << ">" << std::endl;
             }
 
         private:
@@ -300,5 +310,17 @@ namespace xo {
 
     } /*namespace facet*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /* pretty() dispatches Prettifier<T> first and has no member detection,
+     * so FacetRegistry::pretty() is unreachable via sink.pp() without this.
+     */
+    template <>
+    struct Prettifier<xo::facet::FacetRegistry> {
+        static void print(PpSink & sink, const xo::facet::FacetRegistry & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end FacetRegistry.hpp */
