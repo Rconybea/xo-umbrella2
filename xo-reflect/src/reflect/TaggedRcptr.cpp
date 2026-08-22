@@ -21,17 +21,6 @@ namespace xo {
                                field("addr", this->rc_address()));
         }
 
-#ifdef OBSOLETE
-        void
-        TaggedRcptr::display(std::ostream & os) const
-        {
-            os << "<TaggedRcptr"
-            << xtag("type", this->td()->canonical_name())
-            << xtag("addr", this->rc_address())
-            << ">";
-        } /*display*/
-#endif
-
         std::string
         TaggedRcptr::display_string() const {
             return tostr(*this);
