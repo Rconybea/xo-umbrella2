@@ -105,6 +105,13 @@ namespace xo {
         }
 
         PpSink &
+        PrettySink::begin_here(std::int32_t offset)
+        {
+            pps_.begin_here(offset);
+            return *this;
+        }
+
+        PpSink &
         PrettySink::split(std::uint32_t spaces, std::int32_t offset)
         {
             pps_.split(spaces, offset);

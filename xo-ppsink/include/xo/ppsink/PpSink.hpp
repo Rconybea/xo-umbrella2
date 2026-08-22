@@ -154,6 +154,13 @@ namespace xo::pp {
         virtual PpSink & begin() = 0;
         /** begin a group; @p offset adds to the running indent until end() **/
         virtual PpSink & begin(std::int32_t offset) = 0;
+        /** begin a group, use current output column for indent origin
+         *  (instead of running indent). @p offset then adds to that origin.
+         *
+         *  Requires a sink with output-column accounting (i.e. PrettySink).
+         *  Otherwise fallback to plain begin() (e.g. FlatSink).
+         **/
+        virtual PpSink & begin_here(std::int32_t offset) { return this->begin(offset); }
 
         /** optional line break.
          *  Group fits: emit @p spaces spaces.

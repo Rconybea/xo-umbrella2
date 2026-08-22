@@ -31,6 +31,11 @@ namespace xo {
              *  contains a forced break (see PpState::newline()).
              **/
             k_forced = 0x20,
+            /** set on a k_begin token that takes its indent origin from
+             *  current output column instead of official running indent.
+             *  See PpState::begin_here() vs PpState::begin().
+             **/
+            k_align_here = 0x40,
         };
     } /*namespace pp*/
 } /*namespace xo*/

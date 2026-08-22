@@ -29,9 +29,12 @@ namespace xo {
         uint32_t
         PpToken::alloc_size() const
         {
-            if ((tk_flags_ & k_type_mask) == k_string) {
+            switch (tk_flags_ & k_type_mask) {
+            case k_string:
                 return ((PpStringToken *)this)->alloc_size();
-            } else {
+            case k_begin:
+                return PpBeginToken::alloc_size();
+            default:
                 return sizeof(PpToken);
             }
         }

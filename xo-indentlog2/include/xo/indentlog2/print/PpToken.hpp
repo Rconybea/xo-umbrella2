@@ -84,6 +84,45 @@ namespace xo {
             int32_t tk_offset_ = 0;
         };
 
+        /** @brief a k_begin token, which carries indent state the other
+         *         token types do not need.
+         *
+         *  Same variable-size-token pattern as @ref PpStringToken: the type is
+         *  recovered from k_type_mask and the size from PpToken::alloc_size(),
+         *  so the flat token buffer stays walkable without a vtable.
+         **/
+        class PpBeginToken : public PpToken {
+        public:
+            PpBeginToken(int32_t tk_viz_len,
+                         int32_t tk_len,
+                         int32_t tk_offset,
+                         bool align_here)
+                : PpToken(static_cast<PpTokenFlags>(k_begin
+                                                    | (align_here ? k_align_here : 0)),
+                          tk_viz_len, tk_len, tk_offset)
+                {}
+
+            static uint32_t alloc_size() { return sizeof(PpBeginToken); }
+
+            /** indent origin is the output column at this begin, not the
+             *  running indent.  @see PpState::begin_here()
+             **/
+            bool is_align_here() const { return (this->tk_flags() & k_align_here) != 0; }
+
+            /** running indent as of this begin; end() restores it.
+             *
+             *  Restoring beats subtracting tk_offset(): an align-here begin
+             *  REPLACES the running indent rather than adding to it, so a
+             *  subtraction would leave the enclosing indent wrong once such a
+             *  group closes.
+             **/
+            int32_t saved_indent() const { return saved_indent_; }
+            void set_saved_indent(int32_t x) { saved_indent_ = x; }
+
+        private:
+            int32_t saved_indent_ = 0;
+        };
+
         class PpStringToken : public PpToken {
         public:
             using Span = xo::mm::span<const char>;

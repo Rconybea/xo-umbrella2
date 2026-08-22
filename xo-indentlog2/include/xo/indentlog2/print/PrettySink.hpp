@@ -72,6 +72,7 @@ namespace xo {
             virtual PpSink & put_with_escape(std::string_view x, bool quote_flag) override final;
             virtual PpSink & begin() override final;
             virtual PpSink & begin(std::int32_t offset) override final;
+            virtual PpSink & begin_here(std::int32_t offset) override final;
             virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) override final;
             virtual PpSink & newline(std::int32_t offset) override final;
             virtual PpSink & end() override final;

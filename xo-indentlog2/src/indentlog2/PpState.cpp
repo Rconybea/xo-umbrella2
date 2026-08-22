@@ -160,7 +160,19 @@ namespace xo {
         void
         PpState::begin(int32_t offset)
         {
-            void * mem = this->alloc(sizeof(PpToken));
+            this->_begin_aux(offset, false /*align_here*/);
+        }
+
+        void
+        PpState::begin_here(int32_t offset)
+        {
+            this->_begin_aux(offset, true /*align_here*/);
+        }
+
+        void
+        PpState::_begin_aux(int32_t offset, bool align_here)
+        {
+            void * mem = this->alloc(PpBeginToken::alloc_size());
 
             if (!mem) [[unlikely]] {
                 assert(false);
@@ -175,10 +187,10 @@ namespace xo {
             // and check_print_ready() stops at the first token whose size is not
             // established -- so nothing reads these as a *size* before end()
             // overwrites them.
-            PpToken * tk = new (mem) PpToken(k_begin,
-                                             (int32_t)scan_viz_total_ /*snapshot*/,
-                                             (int32_t)scan_total_ /*snapshot*/,
-                                             offset);
+            PpBeginToken * tk = new (mem) PpBeginToken((int32_t)scan_viz_total_ /*snapshot*/,
+                                                       (int32_t)scan_total_ /*snapshot*/,
+                                                       offset,
+                                                       align_here);
             uint32_t tk_ix = (std::byte *)mem - tk_buffer_.lo_;
 
             scan_stack_.push_back(tk_ix);
@@ -417,6 +429,14 @@ namespace xo {
                 {
                 case k_string:
                     {
+                        /* same discipline as k_end: PpStringToken has fields
+                         * (tk_mem_, tk_chars_[]) that a plain PpToken does not,
+                         * and alloc_size() trusts the type tag to walk the
+                         * buffer -- so a mistyped token here desynchronises the
+                         * whole token stream, not just this read.
+                         */
+                        assert(token->is_string());
+
                         PpStringToken * str = (PpStringToken *)token;
 
                         p_out_->write_span(str->span());
@@ -435,6 +455,22 @@ namespace xo {
 
                         token->set_fits_flag(f);
                         print_stack_.push_back(print_ix_);
+
+                        PpBeginToken * btk = (PpBeginToken *)token;
+
+                        /* end() restores this rather than subtracting the
+                         * offset: an align-here begin REPLACES the running
+                         * indent, so subtraction would not undo it.
+                         */
+                        btk->set_saved_indent(print_indent_);
+
+                        if (btk->is_align_here()) {
+                            /* origin = where this record actually starts.
+                             * `fits` above already measures from lpos.
+                             */
+                            print_indent_ = (int32_t)lpos;
+                        }
+
                         print_indent_ += token->tk_offset();
                     }
                     break;
@@ -472,7 +508,14 @@ namespace xo {
                         uint32_t begin_ix = print_stack_.back();
                         PpToken * begin_tk
                             = (PpToken *)((char *)tk_buffer_.lo_ + begin_ix);
-                        print_indent_ -= begin_tk->tk_offset();
+
+                        if (begin_tk->is_begin()) [[likely]] {
+                            print_indent_
+                                = ((PpBeginToken *)begin_tk)->saved_indent();
+                        } else {
+                            assert(false);
+                        }
+
                         print_stack_.pop_back();
                     }
                     break;
@@ -493,7 +536,7 @@ namespace xo {
                 extent_ = 0;
                 print_ix_ = 0;
             }
-        }
+        } /*check_print_ready*/
 
         uint32_t
         PpState::count_visible_chars(const char * lo, const char * hi) const

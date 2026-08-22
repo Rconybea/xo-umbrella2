@@ -91,6 +91,13 @@ namespace xo::pp {
          **/
         void begin(int32_t offset);
         void begin() { this->begin(layout_config_.indent_width()); }
+        /** begin a group whose indent ORIGIN is the current output column,
+         *  rather than the running indent.
+         **/
+        void begin_here(int32_t offset);
+        void begin_here() { this->begin_here(0); }
+
+    public:
         /** optional break.  Group fits: emit @p spaces spaces.
          *  Group breaks: newline + (running_indent + @p offset).
          **/
@@ -114,6 +121,10 @@ namespace xo::pp {
         Span open_string(uint32_t min_z);
         /** Finalize a string token initiated previously by @ref open_string(). **/
         void commit_string(Span str);
+
+    private:
+        /** common implementation of begin() / begin_here() **/
+        void _begin_aux(int32_t offset, bool align_here);
 
     private:
         /** count visible chars in range [lo, hi) **/

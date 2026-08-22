@@ -190,7 +190,7 @@ namespace xo::pp {
 
             emit_time(sink, false /*real_time: log() lines get a blank time pad*/);
             emit_indent(st);
-            sink.begin();
+            sink.begin_here(0);
             (xo::pp::pretty(sink, args), ...);
             sink.end();
             sink.complete();
@@ -233,7 +233,7 @@ namespace xo::pp {
                 sink.put(name2_);
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
-                sink.begin();
+                sink.begin_here(0);
                 (xo::pp::pretty(sink, args), ...);
                 sink.end();
             }
@@ -283,7 +283,7 @@ namespace xo::pp {
                 sink.put(name2_);
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
-                sink.begin();
+                sink.begin_here(0);
                 (xo::pp::pretty(sink, args), ...);
                 sink.end();
             }
