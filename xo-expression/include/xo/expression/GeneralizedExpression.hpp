@@ -7,7 +7,7 @@
 
 #include "exprtype.hpp"
 #include "typeinf/type_ref.hpp"
-#include <xo/refcnt/Refcounted.hpp>
+#include <xo/refcnt/Displayable.hpp>
 #include <xo/ppsink/pretty.hpp>
 #include <concepts>
 
@@ -20,7 +20,7 @@ namespace xo {
          *  Every macro expression automatically translates to an equivalent kernel expression.
          *  Kernel expressions are directly executable.
          **/
-        class GeneralizedExpression : public ref::Refcount {
+        class GeneralizedExpression : public ref::Displayable {
         public:
             using type_ref     = xo::scm::type_ref;
             using prefix_type  = xo::scm::prefix_type;
@@ -70,18 +70,5 @@ namespace xo {
         }
     } /*namespace scm*/
 } /*namespace xo*/
-
-namespace xo::pp {
-    /* the hierarchy dispatches dynamically through the virtual
-     * GeneralizedExpression::pretty(); these just enter it.
-     */
-    template <typename T>
-    requires std::derived_from<T, xo::scm::GeneralizedExpression>
-    struct Prettifier<T> {
-        static void print(PpSink & sink, const T & x) {
-            x.pretty(sink);
-        }
-    };
-} /*namespace xo::pp*/
 
 /* end GeneralizedExpression.hpp */
