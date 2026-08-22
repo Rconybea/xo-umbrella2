@@ -108,13 +108,6 @@ namespace xo::pp {
     PpSinkInserter
     FlatSink::stream_open(uint32_t /*min_z*/)
     {
-#ifdef OBSOLETE
-        /* no token to reserve: operator<< writes through os_ to sbuf_.
-         * os_ is ours and outlives each inserter, so a failure on a previous
-         * use would otherwise stick -- clear it (cf PrettySink::stream_open).
-         */
-        os_.clear();
-#endif
         return PpSinkInserter(this, sbuf_);
     }
 
