@@ -36,18 +36,7 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DString>();
             FacetRegistry::register_impl<APrintable, DString>();
 
-            /* the typeseq itself, not .seqno(): on ppsink xtag this renders
-             * through Prettifier<typeseq> (xo/reflectutil/typeseq_pp.hpp),
-             * which emits the bare seqno.  The .seqno() call was a workaround
-             * for LEGACY xtag, which renders via operator<< and typeseq has
-             * none.  Output unchanged either way.
-             *
-             * QUALIFIED xo::pp::xtag: typeseq's associated namespace still
-             * reaches a legacy xtag overload, and ADL cannot be suppressed by
-             * a using-declaration.  Same trap as the gp<Object> case recorded
-             * in .xo-backlog/xo-alloc/issues/01.
-             */
-            log && log(xo::pp::xtag("DString.tseq", typeseq::id<DString>()));
+            log && log(xtag("DString.tseq", typeseq::id<DString>()));
 
             return true;
         }

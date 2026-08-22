@@ -201,12 +201,6 @@ namespace xo {
                 (*p_out) << "<FacetRegistry" << std::endl;
                 for (auto & kv : registry_) {
                     (*p_out)
-                    /* tostr(), not `<< tseq`: typeseq has no inserter --
-                     * its rendering lives in Prettifier<typeseq>
-                     * (xo/reflectutil/typeseq_pp.hpp), so typeseq.hpp stays
-                     * free of <ostream>.  See
-                     * .xo-backlog/milestones/ostream-containment.md
-                     */
                     << "  [" << tostr(kv.first.first)
                     << "," << tostr(kv.first.second) << "]"
                     << " -> " << kv.second << std::endl;
