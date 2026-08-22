@@ -28,7 +28,6 @@ namespace xo {
 
     using xo::reflect::typeseq;
     using std::byte;
-    using std::endl;
     using std::size_t;
 
     namespace mm {

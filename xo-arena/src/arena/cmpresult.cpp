@@ -5,13 +5,10 @@
 
 #include "cmpresult.hpp"
 #include <xo/ppsink/pretty_struct.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
-#include <iostream>
 
 namespace xo {
     using xo::pp::PpSink;
     using xo::pp::field;
-    using xo::pp::xtag;
 
     namespace mm {
         const char *
@@ -39,16 +36,6 @@ namespace xo {
 
     } /*namespace mm*/
 
-#ifdef OBS
-    namespace pp {
-        template <>
-        void
-        Prettifier<xo::mm::comparison>::print(PpSink & sink, const xo::mm::comparison & x)
-        {
-            sink.put(comparison2str(x));
-        }
-    }
-#endif
 } /*namespace xo*/
 
 /* end cmpresult.cpp */
