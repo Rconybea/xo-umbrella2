@@ -5,7 +5,6 @@
 
 #include "TaggedRcptr.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
-#include <xo/ppsink/tag_ostream.hpp>   /* xtag + operator<<(ostream, tag) */
 
 namespace xo {
     using xo::pp::xtag;
@@ -18,7 +17,7 @@ namespace xo {
         {
             sink.pretty_struct("TaggedRcptr",
                                field("type", this->td()->canonical_name()),
-                               field("addr", this->rc_address()));
+                               field("addr", (void*)(this->rc_address())));
         }
 
         std::string
