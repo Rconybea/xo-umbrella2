@@ -4,11 +4,9 @@
  **/
 
 #include "typeinf/type_unifier.hpp"
-#include "typeinf/type_unifier_ostream.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag.hpp>
-//#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using xo::pp::xtag;
