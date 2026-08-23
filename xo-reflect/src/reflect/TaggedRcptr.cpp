@@ -5,9 +5,9 @@
 
 #include "TaggedRcptr.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     using xo::pp::tostr;
     using xo::pp::field;
 
