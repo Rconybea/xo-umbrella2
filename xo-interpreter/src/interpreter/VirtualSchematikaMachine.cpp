@@ -16,6 +16,7 @@
 #include <xo/expression/PrimitiveExprInterface.hpp>
 #include <xo/expression/Sequence.hpp>
 #include <xo/expression/Variable.hpp>
+#include <xo/expression/exprtype.hpp>
 #include <xo/alloc/GC.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 
@@ -262,7 +263,7 @@ namespace xo {
                         this->pc_ = nullptr;
                         this->value_ = nullptr;
                         this->error_ = SchematikaError(tostr("execute_vsm: not implemented",
-                                                             xtag("extype", expr_->extype())));
+                                                             xtag("extype", expr2str(expr_->extype()))));
                         this->cont_ = nullptr;
                         break;
                     }

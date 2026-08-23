@@ -1007,7 +1007,7 @@ namespace xo {
             }
 
             cerr << "MachPipeline::codegen: error: no handler for expression of type T"
-                 << xtag("T", expr->extype())
+                 << xtag("T", expr2str(expr->extype()))
                  << endl;
 
             return nullptr;

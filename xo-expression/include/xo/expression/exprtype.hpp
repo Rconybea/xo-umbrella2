@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/ppsink/Prettifier.hpp>
 #include <ostream>
 //#include <cstdint>
 
@@ -67,14 +68,19 @@ namespace xo {
         /** @brief number of built-in expression types,  repr convenient for array sizing **/
         static constexpr std::size_t n_exprtype = static_cast<std::size_t>(exprtype::n_expr);
 
-        inline std::ostream &
-        operator<<(std::ostream & os,
-                   exprtype x)
-        {
-            os << expr2str(x);
-            return os;
-        }
     } /*namespace scm*/
+
+    namespace pp {
+
+        template <>
+        class Prettifier<xo::scm::exprtype> {
+            static void print(PpSink & sink, xo::scm::exprtype x) {
+                sink.put(xo::scm::expr2str(x));
+            }
+        };
+
+    } /*namespace pp*/
+
 } /*namespace xo*/
 
 
