@@ -37,12 +37,6 @@ namespace xo {
             return "???ifexprstatetype";
         }
 
-        std::ostream &
-        operator<<(std::ostream & os, ifexprstatetype x) {
-            os << ifexprstatetype_descr(x);
-            return os;
-        }
-
         // ----- if_else_xs -----
 
         std::unique_ptr<if_else_xs>

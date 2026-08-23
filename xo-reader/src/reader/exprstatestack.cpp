@@ -7,10 +7,9 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
-#include <cstdint>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/concat.hpp>
+#include <cstdint>
 
 namespace xo {
     using xo::pp::scope;

@@ -10,7 +10,6 @@
 #include "parserstatemachine.hpp"
 #include <xo/expression/Variable.hpp>
 #include <xo/refcnt/Refcounted_ostream.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
 
 namespace xo {

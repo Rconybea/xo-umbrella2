@@ -7,7 +7,7 @@
 #include <xo/refcnt/Refcounted_ostream.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
 
@@ -30,12 +30,6 @@ namespace xo {
             }
 
             return "???applyexprstatetype";
-        }
-
-        std::ostream &
-        operator<<(std::ostream & os, applyexprstatetype x) {
-            os << applyexprstatetype_descr(x);
-            return os;
         }
 
         // ----- apply_xs -----

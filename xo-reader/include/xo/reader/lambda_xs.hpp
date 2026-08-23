@@ -43,12 +43,6 @@ namespace xo {
         extern const char *
         lambdastatetype_descr(lambdastatetype x);
 
-        inline std::ostream &
-        operator<< (std::ostream & os, lambdastatetype x) {
-            os << lambdastatetype_descr(x);
-            return os;
-        }
-
         /** @class lambda_xs
          *  @brief parsing state-machine for a lambda-expression
          *

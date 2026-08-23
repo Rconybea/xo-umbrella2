@@ -242,8 +242,6 @@ namespace xo {
              **/
             void reset_to_idle_toplevel();
 
-            /** print human-readable representation on stream @p os **/
-            void print(std::ostream & os) const;
             /** pretty-print to @p sink **/
             void pretty(PpSink & sink) const;
 

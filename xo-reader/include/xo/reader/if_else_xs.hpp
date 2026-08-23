@@ -42,9 +42,6 @@ namespace xo {
 
         extern const char * ifexprstatetype_descr(ifexprstatetype x);
 
-        std::ostream &
-        operator<<(std::ostream & os, ifexprstatetype x);
-
         /** @class if_else_xs
          *  @brief state to provide parsing of a conditional expression
          **/

@@ -58,12 +58,6 @@ namespace xo {
         extern int
         precedence(optype x);
 
-        inline std::ostream &
-        operator<< (std::ostream & os, optype x) {
-            os << optype_descr(x);
-            return os;
-        }
-
         /** @class progress_xs
          *  @brief state machine for parsing a schematica runtime-value-expression
          *
