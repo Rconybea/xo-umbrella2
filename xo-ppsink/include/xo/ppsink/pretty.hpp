@@ -4,11 +4,12 @@
  *
  *  pretty(sink, x): the dispatch verb for structured printing.
  *
- *  Kept separate from Prettifier.hpp (the customization *class*) so the two
- *  are easy to tell apart: specialize @c Prettifier<T> to teach a type how to
- *  print; include this header and call @c pretty() to actually print one.
+ *  Separate from Prettifier.hpp so the two
+ *  are easy to tell apart:
+ *  1. specialize @c Prettifier<T> to teach a type how to print;
+ *  2. include this header and call @c pretty() to actually print one.
  *
- *  Only the operator<< fallback needs <ostream>, and only at its point of
+ *  Only the fallback operator<< fallback needs <ostream>, and only at its point of
  *  instantiation -- so this header itself does not include <ostream>.
  **/
 
@@ -54,6 +55,8 @@ namespace xo::pp {
 
     template <typename T>
     void pretty(PpSink & sink, const T & x) {
+        static_assert(!prettifier_broken<T>, "Prettifier<T> specialized but Prettifier<T>::print() not callable");
+
         if constexpr (has_prettifier<T>) {
             Prettifier<T>::print(sink, x);
         } else if constexpr (std::is_convertible_v<T, std::string_view>) {

@@ -31,13 +31,25 @@ namespace xo::pp {
      *  PpSink::put, anything else via operator<<.
      **/
     template <typename T>
-    struct Prettifier {};
+    struct Prettifier {
+        /** identifies a type T for which Prettifier<T> has not been specialized **/
+        using pp_primary_template = void;
+    };
 
     /** true iff @c Prettifier<T> supplies @c print(PpSink&, const T&) **/
     template <typename T>
     concept has_prettifier = requires (PpSink & sink, const T & x) {
         Prettifier<T>::print(sink, x);
     };
+
+    template <typename T>
+    concept prettifier_not_specialized = requires { typename Prettifier<T>::pp_primary_template; };
+
+    template <typename T>
+    concept prettifier_specialized = !prettifier_not_specialized<T>;
+
+    template <typename T>
+    concept prettifier_broken = prettifier_specialized<T> && !has_prettifier<T>;
 
     /** Integer types that should render as NUMBERS.
      *  Takes all integral types except for bool and char-oriented types
