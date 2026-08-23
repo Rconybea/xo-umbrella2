@@ -51,6 +51,27 @@ namespace xo::pp {
     template <typename T>
     concept prettifier_broken = prettifier_specialized<T> && !has_prettifier<T>;
 
+#  define XO_PRETTIFIER_DECLARE(T)                     \
+    template <>                                        \
+    class Prettifier<T> {                              \
+    public:                                            \
+        static void print(PpSink & sink, const T & x); \
+    };                                                 \
+
+#  define XO_PRETTIFIER_VIA_PRETTY_METHOD(T)           \
+    void                                               \
+    Prettifier<T>::print(PpSink & sink, const T & x)   \
+    {                                                  \
+        x.pretty(sink);                                \
+    }
+
+#  define XO_PRETTIFIER_VIA_CONVERSION(T,FN)           \
+    void                                               \
+    Prettifier<T>::print(PpSink & sink, const T & x)   \
+    {                                                  \
+        sink.put((FN)(x));                             \
+    }
+
     /** Integer types that should render as NUMBERS.
      *  Takes all integral types except for bool and char-oriented types
      **/
