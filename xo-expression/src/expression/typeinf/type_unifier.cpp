@@ -28,12 +28,6 @@ namespace xo {
                 st.field("error_description", error_description_);
         }
 
-        void
-        unify_result::print(std::ostream & os) const
-        {
-            os << tostr(*this);
-        }
-
         unify_result
         type_unifier::occurs_error(const char * src_function,
                                    bp<TypeBlueprint> t1,

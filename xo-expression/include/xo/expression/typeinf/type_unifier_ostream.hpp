@@ -3,12 +3,15 @@
 #pragma once
 
 #include "type_unifier.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
 #include <ostream>
 
 namespace xo::scm {
     inline std::ostream &
     operator<< (std::ostream & os, const unify_result & x) {
-        x.print(os);
+        using xo::pp::tostr;
+
+        os << tostr(x);
         return os;
     }
 }

@@ -13,7 +13,6 @@ namespace xo::scm {
 
     public:
         void pretty(PpSink & pp) const;
-        void print(std::ostream & os) const;
 
     public:
         /** true iff unification success **/
