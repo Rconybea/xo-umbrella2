@@ -2,7 +2,7 @@
 
 #include "IfExpr.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {

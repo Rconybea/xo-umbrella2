@@ -2,7 +2,7 @@
 
 #include "Sequence.hpp"
 #include <cstddef>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/concat.hpp>
 
