@@ -53,9 +53,6 @@ namespace xo {
 
         extern const char * applyexprstatetype_descr(applyexprstatetype x);
 
-        std::ostream &
-        operator<<(std::ostream & os, applyexprstatetype x);
-
         /** @class DApplySsm
          *  @brief state machine for parsing a schematika function-call-expression
          **/
@@ -223,6 +220,10 @@ namespace xo {
             ///@}
         };
     } /*namespace scm */
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::applyexprstatetype);
+    }
 } /*namespace xo*/
 
 /* end DApplySsm.hpp */

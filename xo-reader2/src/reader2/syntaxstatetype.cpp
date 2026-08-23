@@ -61,6 +61,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::syntaxstatetype, xo::scm::syntaxstatetype_descr)
+    }
 } /*namespace xo*/
 
 /* end syntaxstatetype.cpp */

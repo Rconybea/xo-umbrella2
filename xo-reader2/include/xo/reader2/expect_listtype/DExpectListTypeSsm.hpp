@@ -38,16 +38,12 @@ namespace xo {
             /** @return string representation for enum @p x **/
             static const char * _descr(code x);
 
+            operator code() const noexcept { return code_; }
             code code() const noexcept { return code_; }
 
+        private:
             enum code code_;
         };
-
-        inline std::ostream &
-        operator<<(std::ostream & os, ListTypeXst x) {
-            os << ListTypeXst::_descr(x.code_);
-            return os;
-        }
 
         /** @class DExpectListTypeSsm
          *  @brief parser state-machine for a list type
@@ -154,6 +150,10 @@ namespace xo {
         };
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::ListTypeXst);
+    }
 } /*namespace xo*/
 
 /* end DExpectListTypeSsm.hpp */

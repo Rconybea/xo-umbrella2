@@ -43,12 +43,6 @@ namespace xo {
         extern const char *
         formalarglstatetype_descr(formalarglstatetype x);
 
-        inline std::ostream &
-        operator<< (std::ostream & os, formalarglstatetype x) {
-            os << formalarglstatetype_descr(x);
-            return os;
-        }
-
         /** @class expect_formal_arglist
          *  @brief parser state-machine for a formal parameter list
          **/
@@ -163,6 +157,10 @@ namespace xo {
             DArray * argl_ = nullptr;
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::formalarglstatetype);
+    }
 } /*namespace xo*/
 
 /* end DExpectFormalArglistSsm.hpp */

@@ -523,4 +523,8 @@ namespace xo {
             gc.visit_poly_child(reason, &if_expr_);
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::ifexprstatetype, xo::scm::ifexprstatetype_descr)
+    }
 } /*namespace xo*/

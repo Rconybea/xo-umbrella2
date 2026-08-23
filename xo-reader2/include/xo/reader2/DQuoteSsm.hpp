@@ -50,16 +50,12 @@ namespace xo {
             /** @return string representation for enum @p x **/
             static const char * _descr(code x);
 
+            operator code() const noexcept { return code_; }
             code code() const noexcept { return code_; }
 
+        private:
             enum code code_;
         };
-
-        inline std::ostream &
-        operator<<(std::ostream & os, QuoteXst x) {
-            os << QuoteXst::_descr(x.code_);
-            return os;
-        }
 
         class DQuoteSsm : public DSyntaxStateMachine<DQuoteSsm> {
         public:
@@ -168,6 +164,10 @@ namespace xo {
         };
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::QuoteXst);
+    }
 } /*namespace xo*/
 
 /* end DQuoteSsm.hpp */

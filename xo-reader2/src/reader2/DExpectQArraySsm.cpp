@@ -239,6 +239,10 @@ namespace xo {
         }
 
     }
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::QArrayXst, xo::scm::QArrayXst::_descr)
+    }
 }
 
 /* end DExpectQArraySsm.cpp */

@@ -46,12 +46,6 @@ namespace xo {
         extern const char *
         lambdastatetype_descr(lambdastatetype x);
 
-        inline std::ostream &
-        operator<< (std::ostream & os, lambdastatetype x) {
-            os << lambdastatetype_descr(x);
-            return os;
-        }
-
         /** @class DLambdaSsm
          *  @brief parsing state-machine for a lambda-expression
          **/
@@ -218,6 +212,10 @@ namespace xo {
         };
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::lambdastatetype);
+    }
 } /*namespace xo*/
 
 /* end DLambdaSsm.hpp */

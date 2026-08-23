@@ -24,11 +24,6 @@ namespace xo {
         /** @return string representation for enum @p x **/
         const char * parser_result_type_descr(parser_result_type x);
 
-        inline std::ostream & operator<<(std::ostream & os, parser_result_type x) {
-            os << parser_result_type_descr(x);
-            return os;
-        }
-
         class ParserResult {
         public:
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
@@ -62,9 +57,6 @@ namespace xo {
             bool is_expression() const { return result_type_ == parser_result_type::expression; }
             bool      is_error() const { return result_type_ == parser_result_type::error; }
 
-            /** ordinary not-pretty printer **/
-            void print(std::ostream & os) const;
-
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
 
@@ -95,31 +87,11 @@ namespace xo {
             const DString * error_description_ = nullptr;
         };
 
-        inline std::ostream & operator<<(std::ostream & os, const ParserResult & x) {
-            x.print(os);
-            return os;
-        }
-
     } /*namespace scm*/
 
     namespace pp {
-        /** ParserResult is NOT a facet type, so ppsink cannot reach it
-         *  through APrintable the way the D-types are reached.  Without this
-         *  specialization it falls through to ppsink's leaf FALLBACK to
-         *  operator<<, i.e. to ParserResult::print(std::ostream&) -- which
-         *  renders a DIFFERENT struct (always :expr and :src_fn, quoted
-         *  :error, and never wrapping).  Adding it is what makes .pretty()
-         *  reachable at all; the phase-B stub it replaced was dead code.
-         *
-         *  Two more printers in this subsystem are in the same position:
-         *  ParserStack* and DSchematikaParser*, both still on ppdetail only.
-         **/
-        template <>
-        struct Prettifier<xo::scm::ParserResult> {
-            static void print(PpSink & sink, const xo::scm::ParserResult & x) {
-                x.pretty(sink);
-            }
-        };
+        XO_PRETTIFIER_DECLARE(xo::scm::parser_result_type);
+        XO_PRETTIFIER_DECLARE(xo::scm::ParserResult)
     } /*namespace pp*/
 } /*namespace xo*/
 

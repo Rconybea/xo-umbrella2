@@ -285,9 +285,6 @@ namespace xo {
             /** @defgroup scm-schematikaparser-pretty-methods **/
             ///@{
 
-            /** print human-readable representation on stream @p os **/
-            void print(std::ostream & os) const;
-
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
 
@@ -313,18 +310,6 @@ namespace xo {
 
             ///@}
         }; /*DSchematikaParser*/
-
-        inline std::ostream &
-        operator<< (std::ostream & os,
-                    const DSchematikaParser * x) {
-            if (x) {
-                x->print(os);
-            } else {
-                os << "nullptr";
-            }
-            return os;
-        }
-
     } /*namespace scm*/
 
     namespace pp {

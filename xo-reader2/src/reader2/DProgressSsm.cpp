@@ -1255,6 +1255,10 @@ case optype::op_assign:
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::optype, xo::scm::optype_descr);
+    }
 } /*namespace xo*/
 
 /* end DProgressSsm.cpp */

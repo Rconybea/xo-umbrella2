@@ -477,6 +477,10 @@ namespace xo {
             gc.visit_poly_child(reason, &expr_);
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::parenexprstatetype, xo::scm::parenexprstatetype_descr)
+    }
 } /*namespace xo*/
 
 /* end DParenSsm.cpp */

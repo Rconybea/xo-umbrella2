@@ -44,12 +44,6 @@ namespace xo {
             return "???applyexprstatetype";
         }
 
-        std::ostream &
-        operator<<(std::ostream & os, applyexprstatetype x) {
-            os << applyexprstatetype_descr(x);
-            return os;
-        }
-
         // ----- DApplySsm -----
 
         DApplySsm::DApplySsm(applyexprstatetype applystate,
@@ -414,7 +408,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
-} /*namespace xo*/
 
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::applyexprstatetype, xo::scm::applyexprstatetype_descr)
+    }
+} /*namespace xo*/
 
 /* end DApplySsm.cpp */

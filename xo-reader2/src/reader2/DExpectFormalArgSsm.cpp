@@ -274,6 +274,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::formalstatetype, xo::scm::formalstatetype_descr)
+    }
 } /*namespace xo*/
 
 

@@ -527,6 +527,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::exprseqtype, xo::scm::exprseqtype_descr)
+    }
 } /*namespace xo*/
 
 /* end DToplevelSeqSsm.cpp */

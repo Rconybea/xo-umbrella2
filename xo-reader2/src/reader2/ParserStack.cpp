@@ -56,6 +56,7 @@ namespace xo {
             return stack->parent();
         }
 
+#ifdef OBSOLETE
         void
         ParserStack::print(std::ostream & os) const
         {
@@ -64,6 +65,7 @@ namespace xo {
             os << xo::pp::xtag("parent", "*placeholder*");
             os << ">";
         }
+#endif
 
         void
         ParserStack::pretty(xo::pp::PpSink & sink) const

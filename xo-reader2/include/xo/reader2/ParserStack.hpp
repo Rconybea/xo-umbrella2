@@ -51,8 +51,10 @@ namespace xo {
             obj<ASyntaxStateMachine> top() const noexcept { return ssm_; }
             ParserStack * parent() const noexcept { return parent_; }
 
+#ifdef OBSOLETE
             /** regular printing **/
             void print(std::ostream & os) const;
+#endif
 
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
@@ -68,15 +70,6 @@ namespace xo {
             /** remainder of parsing stack excluding top **/
             ParserStack * parent_ = nullptr;
         };
-
-        inline std::ostream & operator<< (std::ostream & os, const ParserStack * x) {
-            if (x) {
-                x->print(os);
-            } else {
-                os << "nullptr";
-            }
-            return os;
-        }
 
     } /*namespace scm*/
 

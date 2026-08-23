@@ -240,6 +240,10 @@ namespace xo {
         }
 
     }
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::QListXst, xo::scm::QListXst::_descr);
+    }
 }
 
 /* end DExpectQListSsm.cpp */

@@ -6,8 +6,6 @@
 #pragma once
 
 #include "xo/reader2/DSyntaxStateMachine.hpp"
-//#include <xo/arena/DArena.hpp>
-//#include "exprstate.hpp"
 
 namespace xo {
     namespace scm {
@@ -34,12 +32,6 @@ namespace xo {
 
         extern const char *
         formalstatetype_descr(formalstatetype x);
-
-        inline std::ostream &
-        operator<< (std::ostream & os, formalstatetype x) {
-            os << formalstatetype_descr(x);
-            return os;
-        }
 
         /** @class expect_formal_xs
          *  @brief parser state-machine for a typed formal parameter
@@ -146,6 +138,10 @@ namespace xo {
             const DUniqueString * name_ = nullptr;
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::formalstatetype);
+    }
 } /*namespace xo*/
 
 /* end DExpectFormalArgSsm.hpp */

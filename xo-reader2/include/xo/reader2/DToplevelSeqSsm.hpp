@@ -1,5 +1,5 @@
 /** @file DToplevelSeqSsm.hpp
-*
+ *
  *  @author Roland Conybeare, Jan 2026
  **/
 
@@ -25,11 +25,6 @@ namespace xo {
         };
 
         const char * exprseqtype_descr(exprseqtype x);
-
-        inline std::ostream & operator<<(std::ostream & os, exprseqtype x) {
-            os << exprseqtype_descr(x);
-            return os;
-        }
 
         /** @class DToplevelSeqSsm
          *  @brief state machine for parsing a sequence of expression
@@ -174,6 +169,10 @@ namespace xo {
             exprseqtype seqtype_;
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::exprseqtype);
+    }
 } /*namespace xo*/
 
 /* end DToplevelSeqSsm.hpp */

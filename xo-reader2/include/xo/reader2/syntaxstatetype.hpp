@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ostream>
+#include <xo/ppsink/Prettifier.hpp>
 
 namespace xo {
     namespace scm {
@@ -83,12 +83,10 @@ namespace xo {
         };
 
         const char * syntaxstatetype_descr(syntaxstatetype x);
+    }
 
-        inline std::ostream &
-        operator<< (std::ostream & os, syntaxstatetype x) {
-            os << syntaxstatetype_descr(x);
-            return os;
-        }
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::syntaxstatetype);
     }
 } /*namespace xo*/
 

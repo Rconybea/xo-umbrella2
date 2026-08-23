@@ -490,6 +490,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::lambdastatetype, xo::scm::lambdastatetype_descr);
+    }
 } /*namespace xo*/
 
 /* end DLambdaSsm.cpp */

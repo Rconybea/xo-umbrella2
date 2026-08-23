@@ -45,9 +45,6 @@ namespace xo {
 
         extern const char * ifexprstatetype_descr(ifexprstatetype x);
 
-        std::ostream &
-        operator<<(std::ostream & os, ifexprstatetype x);
-
         /** @class DIfElseSsm
          *  @brief syntax state machine for parsing a conditional expression
          **/
@@ -203,6 +200,10 @@ namespace xo {
 
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::ifexprstatetype);
+    }
 } /*namespace xo*/
 
 /* end DIfElseSsm.hpp */

@@ -291,6 +291,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::QDictXst, xo::scm::QDictXst::_descr)
+    }
 } /*namespace xo*/
 
 /* end DExpectQDictSsm.cpp */

@@ -63,9 +63,6 @@ namespace xo {
 
         extern const char * defexprstatetype_descr(defexprstatetype x);
 
-        std::ostream &
-        operator<<(std::ostream & os, defexprstatetype x);
-
         /** @class DDefineSsm
          *  @brief state machine for parsing a define expression
          **/
@@ -221,6 +218,10 @@ namespace xo {
             ///@}
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::defexprstatetype);
+    }
 } /*namespace xo*/
 
 /* end DDefineSsm.hpp */

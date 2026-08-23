@@ -222,6 +222,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::QuoteXst, xo::scm::QuoteXst::_descr)
+    }
 } /*namespace xo*/
 
 /* end DQuoteSsm.cpp */

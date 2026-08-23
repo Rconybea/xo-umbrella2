@@ -43,9 +43,6 @@ namespace xo {
 
         extern const char * parenexprstatetype_descr(parenexprstatetype x);
 
-        std::ostream &
-        operator<<(std::ostream & os, parenexprstatetype x);
-
         class DParenSsm : public DSyntaxStateMachine<DParenSsm> {
         public:
             using Super = DSyntaxStateMachine<DParenSsm>;
@@ -156,6 +153,10 @@ namespace xo {
         };
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::parenexprstatetype);
+    }
 } /*namespace xo*/
 
 /* end DParenSsm.hpp */

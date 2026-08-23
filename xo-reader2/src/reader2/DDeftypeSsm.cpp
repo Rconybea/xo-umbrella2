@@ -39,7 +39,7 @@ namespace xo {
         std::ostream &
         operator<<(std::ostream & os, DeftypeXst x)
         {
-            os << DeftypeXst::_descr(x.code());
+            os << DeftypeXst::_descr(x);
             return os;
         }
 
@@ -284,6 +284,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::DeftypeXst, xo::scm::DeftypeXst::_descr)
+    }
 } /*namespace xo*/
 
 /* end DDeftypeSsm.cpp */

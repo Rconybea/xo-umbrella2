@@ -212,6 +212,10 @@ namespace xo {
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::ListTypeXst, xo::scm::ListTypeXst::_descr)
+    }
 } /*namespace xo*/
 
 /* end DExpectListTypeSsm.cpp */

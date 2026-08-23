@@ -18,13 +18,13 @@
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
  namespace xo {
+     using xo::print::APrintable;
+     using xo::facet::FacetRegistry;
+     using xo::facet::with_facet;
+     using xo::facet::typeseq;
      using xo::pp::scope;
      using xo::pp::xtag;
-    using xo::pp::field;
- using xo::print::APrintable;
- using xo::facet::FacetRegistry;
- using xo::facet::with_facet;
- using xo::facet::typeseq;
+     using xo::pp::field;
 
  namespace scm {
  // ----- defexprstatetype -----
@@ -724,6 +724,10 @@
             gc.visit_child(reason, &def_expr_.data_);
         }
     } /*namespace scm*/
+
+     namespace pp {
+         XO_PRETTIFIER_VIA_CONVERSION(xo::scm::defexprstatetype, xo::scm::defexprstatetype_descr);
+     }
 } /*namespace xo*/
 
 /* end DDefineSsm.cpp */

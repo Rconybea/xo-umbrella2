@@ -66,18 +66,6 @@ namespace xo {
         }
 
         void
-        ParserResult::print(std::ostream & os) const
-        {
-            os << "<ParserResult" ;
-            os << xtag("type", result_type_);
-            os << xtag("expr", result_expr_);
-            os << xtag("src_fn", error_src_fn_);
-            if (error_description_)
-                os << xtag("error", error_description_);
-            os << ">";
-        }
-
-        void
         ParserResult::pretty(xo::pp::PpSink & sink) const
         {
             /* The switch STAYS.  Unlike DLambdaSsm's if/else, these three
@@ -127,6 +115,11 @@ namespace xo {
             gc.visit_child(reason, &error_description_);
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::parser_result_type, xo::scm::parser_result_type_descr)
+        XO_PRETTIFIER_VIA_PRETTY_METHOD(xo::scm::ParserResult);
+    }
 } /*namespace xo*/
 
 /* end ParserResult.cpp */

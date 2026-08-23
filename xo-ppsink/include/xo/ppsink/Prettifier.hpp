@@ -10,6 +10,7 @@
 #pragma once
 
 #include "PpSink.hpp"
+#include <cassert>   /* XO_PRETTIFIER_VIA_CONVERSION expands to assert(false) */
 #include <charconv>
 #include <cstdint>
 #include <concepts>

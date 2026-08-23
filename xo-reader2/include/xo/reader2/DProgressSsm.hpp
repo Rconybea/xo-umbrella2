@@ -64,12 +64,6 @@ namespace xo {
         extern int
         precedence(optype x);
 
-        inline std::ostream &
-        operator<< (std::ostream & os, optype x) {
-            os << optype_descr(x);
-            return os;
-        }
-
         /** @class DProgressSsm
          *  @brief syntax state machine for parsing a schematica rhs-value-expression
          *
@@ -242,6 +236,10 @@ namespace xo {
             obj<AExpression> rhs_;
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::optype);
+    }
 } /*namespace xo*/
 
 
