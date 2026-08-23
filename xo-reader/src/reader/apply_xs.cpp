@@ -4,7 +4,6 @@
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
-#include <xo/refcnt/Refcounted_ostream.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
