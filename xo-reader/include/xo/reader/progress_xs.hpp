@@ -7,8 +7,6 @@
 
 #include "exprstate.hpp"
 #include <xo/reflect/TypeDescr.hpp>
-#include <iostream>
-//#include <cstdint>
 
 namespace xo {
     namespace scm {
