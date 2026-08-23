@@ -129,6 +129,10 @@ namespace xo {
                                field("argl", argl_));
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::formalarglstatetype, xo::scm::formalarglstatetype_descr)
+    }
 } /*namespace xo*/
 
 

@@ -34,12 +34,6 @@ namespace xo {
         extern const char *
         formalstatetype_descr(formalstatetype x);
 
-        inline std::ostream &
-        operator<< (std::ostream & os, formalstatetype x) {
-            os << formalstatetype_descr(x);
-            return os;
-        }
-
         /** @class expect_formal_xs
          *  @brief parser state-machine for a typed formal parameter
          **/
@@ -80,6 +74,10 @@ namespace xo {
             formal_arg result_;
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::formalstatetype);
+    }
 } /*namespace xo*/
 
 /* end expect_formal_xs.hpp */

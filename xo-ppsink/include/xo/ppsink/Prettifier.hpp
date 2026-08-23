@@ -31,7 +31,8 @@ namespace xo::pp {
      *  PpSink::put, anything else via operator<<.
      **/
     template <typename T>
-    struct Prettifier {
+    class Prettifier {
+    public:
         /** identifies a type T for which Prettifier<T> has not been specialized **/
         using pp_primary_template = void;
     };
@@ -56,8 +57,9 @@ namespace xo::pp {
     class Prettifier<T> {                              \
     public:                                            \
         static void print(PpSink & sink, const T & x); \
-    };                                                 \
+    };
 
+    /** non-inline. Intended for .cpp files **/
 #  define XO_PRETTIFIER_VIA_PRETTY_METHOD(T)           \
     void                                               \
     Prettifier<T>::print(PpSink & sink, const T & x)   \
@@ -65,11 +67,16 @@ namespace xo::pp {
         x.pretty(sink);                                \
     }
 
+    /** non-inline. Intended for .cpp files **/
 #  define XO_PRETTIFIER_VIA_CONVERSION(T,FN)           \
     void                                               \
     Prettifier<T>::print(PpSink & sink, const T & x)   \
     {                                                  \
-        sink.put((FN)(x));                             \
+        auto _tmp = (FN)(x);                           \
+        if (_tmp)                                      \
+            sink.put(_tmp);                            \
+        else                                           \
+            assert(false);                             \
     }
 
     /** Integer types that should render as NUMBERS.
