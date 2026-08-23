@@ -136,9 +136,6 @@ namespace xo {
             virtual void on_formal_arglist(const std::vector<rp<Variable>> & argl,
                                            parserstatemachine * p_psm);
 
-            /** print human-readable representation on @p os **/
-            virtual void print(std::ostream & os) const;
-
             /** pretty-print using @p ppii **/
             virtual void pretty(xo::pp::PpSink & sink) const;
 

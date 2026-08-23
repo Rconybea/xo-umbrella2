@@ -573,14 +573,6 @@ namespace xo {
         }
 
         void
-        exprstate::print(std::ostream & os) const {
-            os << "<exprstate"
-               << xtag("this", (void*)this)
-               << xtag("type", exs_type_);
-            os << ">";
-        }
-
-        void
         exprstate::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("exprstate",

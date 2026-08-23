@@ -193,14 +193,6 @@ namespace xo {
         }
 
         void
-        parserstatemachine::print(std::ostream & os) const {
-            os << "<psm";
-            os << xtag("stack", &xs_stack_);
-            os << xtag("env_stack", &env_stack_);
-            os << ">";
-        }
-
-        void
         parserstatemachine::pretty(PpSink & sink) const
         {
             /* parserstatemachine is not part of the expression hierarchy, so there

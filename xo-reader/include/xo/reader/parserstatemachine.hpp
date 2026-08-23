@@ -86,9 +86,6 @@ namespace xo {
              **/
             void on_error(const char * self_name, std::string error_description);
 
-            /** write human-readable representation on @p os **/
-            void print(std::ostream & os) const;
-
             /** pretty-print current state to @p sink **/
             void pretty(PpSink & sink) const;
 
