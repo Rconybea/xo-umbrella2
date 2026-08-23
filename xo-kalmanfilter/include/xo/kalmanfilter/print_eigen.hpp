@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <cstdint>
 
-namespace logutil {
+namespace xo::pp {
     template<typename T>
     class matrix {
     public:
@@ -36,6 +36,6 @@ namespace logutil {
 
         return s;
     } /*operator<<*/
-} /*namespace logutil*/
+} /*namespace xo::pp*/
 
 /* end print_eigen.hpp */

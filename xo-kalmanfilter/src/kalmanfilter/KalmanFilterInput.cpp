@@ -14,7 +14,7 @@ namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::TaggedRcptr;
     using xo::reflect::StructReflector;
-    using logutil::matrix;
+    using xo::pp::matrix;
     using Eigen::MatrixXd;
     using Eigen::VectorXi;
     using std::uint32_t;

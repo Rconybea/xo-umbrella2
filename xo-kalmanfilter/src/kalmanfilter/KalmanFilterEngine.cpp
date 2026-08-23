@@ -13,7 +13,7 @@
 
 namespace xo {
     using xo::time::utc_nanos;
-    using logutil::matrix;
+    using xo::pp::matrix;
     using Eigen::LDLT;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;

@@ -19,8 +19,8 @@ namespace xo {
     using xo::reflect::StructReflector;
     using xo::time::utc_nanos;
     using xo::rp;
-    using logutil::matrix;
-    using logutil::vector;
+    using xo::pp::matrix;
+    using xo::pp::vector;
     //using xo::scope;
     //using Eigen::LDLT;
     using Eigen::MatrixXd;

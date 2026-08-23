@@ -31,8 +31,9 @@ namespace xo {
     using xo::time::utc_nanos;
     using xo::time::seconds;
     using xo::rp;
-    using logutil::matrix;
-        using Eigen::MatrixXd;
+    using xo::pp::matrix;
+    using xo::pp::vector;
+    using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
     namespace ut {

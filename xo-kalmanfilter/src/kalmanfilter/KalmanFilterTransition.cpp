@@ -9,7 +9,7 @@
 
 namespace xo {
     using xo::reflect::StructReflector;
-    using logutil::matrix;
+    using xo::pp::matrix;
 
     namespace kalman {
         /* one scope in from namespace xo: a using-decl at xo scope would be

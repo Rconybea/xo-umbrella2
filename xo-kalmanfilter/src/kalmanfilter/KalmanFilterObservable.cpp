@@ -7,7 +7,7 @@
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 
 namespace xo {
-  using logutil::matrix;
+    using xo::pp::matrix;
 
   namespace kalman {
         /* one scope in from namespace xo: a using-decl at xo scope would be
