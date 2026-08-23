@@ -5,7 +5,6 @@
 
 #include "GlobalSymtab.hpp"
 #include "Expression.hpp"
-#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {

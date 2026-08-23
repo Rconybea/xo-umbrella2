@@ -7,7 +7,7 @@
 
 #include "SymbolTable.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
-#include <iostream>
+#include <ostream>
 
 namespace xo::scm {
     inline std::ostream &

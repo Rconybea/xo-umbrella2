@@ -8,13 +8,12 @@
 #include <xo/ppsink/PrettyVector.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     using xo::pp::tostr;
     using xo::pp::scope;
+    using xo::pp::xtag;
 
     namespace scm {
         rp<LocalSymtab>
