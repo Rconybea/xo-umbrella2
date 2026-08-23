@@ -9,7 +9,6 @@
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     namespace scm {
         GlobalSymtab::GlobalSymtab() = default;
 
@@ -27,13 +26,6 @@ namespace xo {
             // in practice: paraphrase of .require_global()
 
             this->global_map_[target->name()] = target.promote();
-        }
-
-        void
-        GlobalSymtab::print(std::ostream & os) const {
-            os << "<GlobalEnv"
-               << xtag("size", global_map_.size())
-               << ">";
         }
 
         void

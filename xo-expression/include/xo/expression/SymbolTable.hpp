@@ -52,18 +52,10 @@ namespace xo {
              **/
             virtual void upsert_local(bp<Variable> target) = 0;
 
-            virtual void print(std::ostream & os) const = 0;
-
             virtual void pretty(xo::pp::PpSink & sink) const override = 0;
             virtual std::string display_string() const override;
         };
 
-        // TODO: move to SymbolTable_ostream.hpp
-        inline std::ostream &
-        operator<< (std::ostream & os, const SymbolTable & x) {
-            x.print(os);
-            return os;
-        }
     } /*namespace scm*/
 } /*namespace xo*/
 

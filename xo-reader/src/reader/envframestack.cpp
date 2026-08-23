@@ -5,6 +5,7 @@
 
 #include "envframestack.hpp"
 #include "pretty_envframestack.hpp"
+#include <xo/expression/SymbolTable_ostream.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/refcnt/Refcounted_ostream.hpp>
 #include <xo/ppsink/scope.hpp>

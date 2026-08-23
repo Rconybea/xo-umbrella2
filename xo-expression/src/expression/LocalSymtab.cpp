@@ -77,11 +77,13 @@ namespace xo {
         } /*lookup_binding*/
 
         void
-        LocalSymtab::assign_parent(bp<SymbolTable> p) {
+        LocalSymtab::assign_parent(bp<SymbolTable> p)
+        {
             if ((parent_env_.get() != nullptr) && (parent_env_.get() != p.get())) {
-                throw std::runtime_error(tostr("LocalSymtab::assign_parent(P2): already have established parent P1",
-                                               xtag("P1", parent_env_),
-                                               xtag("P2", p)));
+                throw std::runtime_error
+                          (tostr("LocalSymtab::assign_parent(P2): already have established parent P1",
+                                 xtag("P1", parent_env_),
+                                 xtag("P2", p)));
 
                 assert(false);
             }
@@ -105,14 +107,8 @@ namespace xo {
         }
 
         void
-        LocalSymtab::print(std::ostream& os) const {
-            os << "<LocalSymtab"
-               << xtag("argv", argv_)
-               << ">";
-        }
-
-        void
-        LocalSymtab::pretty(xo::pp::PpSink & sink) const {
+        LocalSymtab::pretty(xo::pp::PpSink & sink) const
+        {
             using xo::pp::field;
 
             /* NB `this` is printed.  The legacy two-pass version disagreed with
