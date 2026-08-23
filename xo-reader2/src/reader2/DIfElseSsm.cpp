@@ -45,12 +45,6 @@ namespace xo {
             return "ifexprstatetype?";
         }
 
-        std::ostream &
-        operator<<(std::ostream & os, ifexprstatetype x) {
-            os << ifexprstatetype_descr(x);
-            return os;
-        }
-
         // ----- DIfElseSsm -----
 
         DIfElseSsm::DIfElseSsm(DIfElseExpr * ifelse_expr) : ifstate_{ifexprstatetype::if_0},

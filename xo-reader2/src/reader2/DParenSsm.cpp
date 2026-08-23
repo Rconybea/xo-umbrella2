@@ -37,12 +37,6 @@ namespace xo {
             return "???parenexprstatetype";
         }
 
-        std::ostream &
-        operator<<(std::ostream & os, parenexprstatetype x) {
-            os << parenexprstatetype_descr(x);
-            return os;
-        }
-
         DParenSsm::DParenSsm()
             : parenstate_(parenexprstatetype::lparen_0),
               expr_{}

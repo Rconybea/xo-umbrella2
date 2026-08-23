@@ -11,8 +11,6 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
-/* os << xtag(..); see the ostream-containment milestone */
-#include <xo/ppsink/tag_ostream.hpp>
 #include <cstddef>
 #include <stdexcept>
 

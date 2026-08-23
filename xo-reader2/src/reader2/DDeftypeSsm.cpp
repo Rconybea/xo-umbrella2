@@ -36,13 +36,6 @@ namespace xo {
             return "?DeftypeXst";
         }
 
-        std::ostream &
-        operator<<(std::ostream & os, DeftypeXst x)
-        {
-            os << DeftypeXst::_descr(x);
-            return os;
-        }
-
         DDeftypeSsm::DDeftypeSsm()
             : deftype_xst_{DeftypeXst::code::def_0}
         {}
