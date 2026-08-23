@@ -68,24 +68,12 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void display(std::ostream & os) const override {
-                using xo::pp::xtag;
-
-                os << "<Constant";
-                if (value_td_)
-                    os << xtag("type", value_td_->short_name());
-                else
-                    os << xtag("type", "nullptr");
-                os << xtag("value", value_);
-                os << ">";
-            }
-
             virtual void pretty(xo::pp::PpSink & sink) const override {
                 using xo::pp::field;
 
                 sink.pretty_struct("Constant",
-                                                 field("type", xo::pp::quot(this->valuetype()->short_name())),
-                                                 field("value", value_));
+                                   field("type", xo::pp::quot(this->valuetype()->short_name())),
+                                   field("value", value_));
             }
 
         private:

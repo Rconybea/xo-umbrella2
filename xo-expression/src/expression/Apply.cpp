@@ -161,6 +161,7 @@ namespace xo {
                 arg->attach_envs(p);
         }
 
+#ifdef OBSOLETE
         void
         Apply::display(std::ostream & os) const {
             os << "<Apply"
@@ -168,37 +169,14 @@ namespace xo {
                << xtag("argv", argv_)
                << ">";
         }
+#endif
 
         void
         Apply::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("Apply",
-                                             field("fn", fn_),
-                                             field("argv", argv_));
-
-#ifdef OBSOLETE
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                if (!pps->print_upto("<Apply"))
-                    return false;
-
-                if (!pps->print_upto_tag("fn", fn_))
-                    return false;
-
-                if (!pps->print_upto_tag("argv", argv_))
-                    return false;
-
-                return true;
-            } else {
-                pps->write("<Apply");
-                pps->newline_pretty_tag(ppii.ci1(), "fn", fn_);
-                pps->newline_pretty_tag(ppii.ci1(), "argv", argv_);
-                pps->write(">");
-
-                return false;
-            }
-#endif
+                               field("fn", fn_),
+                               field("argv", argv_));
         }
 
     } /*namespace scm*/

@@ -41,8 +41,6 @@ namespace xo {
             const type_ref & valuetype_ref() const { return valuetype_ref_; }
             TypeDescr valuetype() const { return valuetype_ref_.td(); }
 
-            /** write human-readable representation to stream @p os **/
-            virtual void display(std::ostream & os) const = 0;
             /** human-readable string representation **/
             virtual std::string display_string() const;
             /** pretty-print to  sink.  Single-pass: the sink decides where groups
@@ -63,11 +61,6 @@ namespace xo {
             type_ref valuetype_ref_;
         };
 
-        inline std::ostream &
-        operator<<(std::ostream & os, const GeneralizedExpression & x) {
-            x.display(os);
-            return os;
-        }
     } /*namespace scm*/
 } /*namespace xo*/
 

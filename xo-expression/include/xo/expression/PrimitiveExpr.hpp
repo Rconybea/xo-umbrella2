@@ -85,16 +85,6 @@ namespace xo {
 
             // ----- Expression -----
 
-            virtual void display(std::ostream & os) const override {
-                using xo::pp::xtag;
-
-                os << "<PrimitiveExpr"
-                   << xtag("name", name_)
-                   << xtag("type", this->value_td()->short_name())
-                   << xtag("value", this->value())
-                   << ">";
-            }
-
             virtual void pretty(xo::pp::PpSink & sink) const override {
                 using xo::pp::field;
 
@@ -106,9 +96,9 @@ namespace xo {
                  *    + simplifies ppdetail_atomic
                  */
                 sink.pretty_struct("PrimitiveExpr",
-                                                 field("name", name_),
-                                                 field("type", xo::pp::quot(this->valuetype()->short_name())),
-                                                 field("value", (void*)(this->value())));
+                                   field("name", name_),
+                                   field("type", xo::pp::quot(this->valuetype()->short_name())),
+                                   field("value", (void*)(this->value())));
             }
 
         private:

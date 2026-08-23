@@ -1,6 +1,8 @@
 /** @file exprrepl.cpp **/
 
 #include <xo/reader/reader.hpp>
+#include <xo/indentlog2/print/PrettySink.hpp>
+#include <xo/indentlog2/print/PpConfig.hpp>
 #include <xo/refcnt/Refcounted_ostream.hpp>
 #include <iostream>
 #include <unistd.h> // for isatty
@@ -40,8 +42,11 @@ bool repl_getline(bool interactive, std::size_t parser_stack_size, std::istream&
 }
 
 int
-main() {
+main()
+{
     using namespace xo::scm;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
     using namespace std;
 
     using span_type = xo::scm::span<const char>;
@@ -61,6 +66,9 @@ main() {
     span_type input;
     std::size_t parser_stack_size = 0;
 
+    PpConfig sink_cfg = (PpConfig().with_logbuf_name("exprreplsink").with_logbuf_size(1024 * 1024));
+    PrettySink sink(sink_cfg, cout.rdbuf());
+
     while (repl_getline(interactive, parser_stack_size, cin, cout, input_str)) {
         input  = span_type::from_string(input_str);
 
@@ -68,7 +76,7 @@ main() {
             auto [expr, consumed, psz, error] = rdr.read_expr(input, eof);
 
             if (expr) {
-                cout << expr << endl;
+                sink.pp(expr).newline();
             } else if (error.is_error()) {
                 cout << "parsing error: " << endl;
                 error.report(cout);
@@ -84,7 +92,7 @@ main() {
     auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
 
     if (expr) {
-        cout << expr << endl;
+        sink.pp(expr).newline();
     } else if (error.is_error()) {
         cout << "parsing error: " << endl;
         error.report(cout);

@@ -85,6 +85,7 @@ namespace xo {
              rhs_->attach_envs(p);
          }
 
+#ifdef OBSOLETE
         void
         AssignExpr::display(std::ostream & os) const {
             os << "<Assign"
@@ -92,12 +93,13 @@ namespace xo {
                << xtag("rhs", rhs_)
                << ">";
         }
+#endif
 
         void
         AssignExpr::pretty(xo::pp::PpSink & sink) const {
             sink.pretty_struct("AssignExpr",
-                                             field("lhs", lhs_),
-                                             field("rhs", rhs_));
+                               field("lhs", lhs_),
+                               field("rhs", rhs_));
         }
     } /*namespace scm*/
 } /*namespace xo*/

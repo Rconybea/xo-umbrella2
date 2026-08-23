@@ -343,6 +343,7 @@ namespace xo {
             /** establish a binding path for each variable **/
         }
 
+#ifdef OBSOLETE
         void
         Lambda::display(std::ostream & os) const {
             os << "<Lambda"
@@ -351,14 +352,15 @@ namespace xo {
                << xtag("body", body_)
                << ">";
         } /*display*/
+#endif
 
         void
         Lambda::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("Lambda",
-                                             field("name", name_),
-                                             field("argv", local_env_->argv()),
-                                             field("body", body_));
+                               field("name", name_),
+                               field("argv", local_env_->argv()),
+                               field("body", body_));
         }
 
         // ----- Lambda Access -----

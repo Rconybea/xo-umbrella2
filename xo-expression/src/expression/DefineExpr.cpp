@@ -55,6 +55,7 @@ namespace xo {
             return retval;
         } /*calc_free_variables*/
 
+#ifdef OBSOLETE
         void
         DefineExpr::display(std::ostream & os) const {
             os << "<Define"
@@ -62,14 +63,15 @@ namespace xo {
                << xtag("rhs", rhs_)
                << ">";
         } /*display*/
+#endif
 
         void
         DefineExpr::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("Define",
-                                             //field("type", this->valuetype()), // need pretty
-                                             field("name", lhs_var_->name()),
-                                             field("rhs", rhs_));
+                               //field("type", this->valuetype()), // need pretty
+                               field("name", lhs_var_->name()),
+                               field("rhs", rhs_));
         }
 
         // ----- DefineExprAccess -----

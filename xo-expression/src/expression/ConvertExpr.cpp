@@ -28,6 +28,7 @@ namespace xo {
                 return std::set<std::string>();
         }
 
+#ifdef OBSOLETE
         void
         ConvertExpr::display(std::ostream & os) const {
             os << "<Convert"
@@ -35,12 +36,13 @@ namespace xo {
                << xtag("arg", arg_)
                << ">";
         }
+#endif
 
         void
         ConvertExpr::pretty(xo::pp::PpSink & sink) const {
             sink.pretty_struct("Convert",
-                                             field("dest_type", xo::pp::quot(this->valuetype()->short_name())),
-                                             field("arg", arg_));
+                               field("dest_type", xo::pp::quot(this->valuetype()->short_name())),
+                               field("arg", arg_));
         }
 
         // ----- ConvertExprAccess -----

@@ -134,7 +134,6 @@ namespace xo {
 
             virtual void attach_envs(bp<SymbolTable> p) override;
 
-            virtual void display(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
 
         protected:
@@ -193,7 +192,7 @@ namespace xo {
          *  e.g. see xo-parser
          **/
         class ApplyAccess : public Apply {
-        public:
+
             static rp<ApplyAccess> make_empty();
 
             /** assign function being called to @p fn **/

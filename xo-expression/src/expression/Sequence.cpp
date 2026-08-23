@@ -66,6 +66,7 @@ namespace xo {
                 x->attach_envs(p);
         }
 
+#ifdef OBSOLETE
         void
         Sequence::display(std::ostream & os) const {
             os << "<Sequence";
@@ -77,6 +78,7 @@ namespace xo {
 
             os << ">";
         }
+#endif
 
         void
         Sequence::pretty(xo::pp::PpSink & sink) const

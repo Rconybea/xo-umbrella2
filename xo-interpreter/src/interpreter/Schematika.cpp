@@ -235,14 +235,18 @@ namespace xo {
                         if (scm_error.is_error()) {
                             /* print error */
 
-                            cout << "scm error: " << scm_error.what() << endl;
-                            cout << "top-level expression: " << expr << endl;
+                            pps.put("scm error: ");
+                            pps.put(scm_error.what());
+                            pps.newline();
+
+                            pps.put("top-level expression: ");
+                            pps.pp(expr);
+                            pps.newline();
                         } else {
                             /* print value */
 
-                            cout << "scm result:" << endl;
-                            cout << value << endl;
-                            //pps.pretty(value);
+                            pps.put("scm result:").newline();
+                            pps.pp(value).newline();
                         }
 
                     } else if (error.is_error()) {

@@ -101,7 +101,6 @@ namespace xo {
             }
 #endif
 
-            virtual void display(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
 
         protected:

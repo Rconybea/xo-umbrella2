@@ -144,9 +144,10 @@ namespace xo::pp {
 
     /** member-convenience spelling of pretty(*this, x); see PpSink::pp **/
     template <typename T>
-    void
+    PpSink &
     PpSink::pp(const T & x) {
         pretty(*this, x);
+        return *this;
     }
 
     /** member-convenience spelling of dwim(*this, x); see PpSink::dwim.

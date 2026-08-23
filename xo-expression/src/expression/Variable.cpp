@@ -32,6 +32,7 @@ namespace xo {
             }
         } /*attach_envs*/
 
+#ifdef OBSOLETE
         void
         Variable::display(std::ostream & os) const {
             os << "<Variable"
@@ -42,6 +43,7 @@ namespace xo {
                 os << xtag("type", "nullptr");
             os << ">";
         } /*display*/
+#endif
 
         void
         Variable::pretty(xo::pp::PpSink & sink) const {
@@ -49,10 +51,10 @@ namespace xo {
              *    xo::pp::quot() is a temporary rvalue; lifetime ends before control enters pretty_struct()
              */
             sink.pretty_struct("Variable",
-                                             field("name", name_),
-                                             field("type", xo::pp::unq(this->valuetype()
-                                                                      ? this->valuetype()->short_name()
-                                                                      : "nullptr")));
+                               field("name", name_),
+                               field("type", xo::pp::unq(this->valuetype()
+                                                         ? this->valuetype()->short_name()
+                                                         : "nullptr")));
         }
     } /*namespace scm*/
 } /*namespace xo*/

@@ -51,6 +51,7 @@ namespace xo {
                               when_false);
         } /*make*/
 
+#ifdef OBSOLETE
         void
         IfExpr::display(std::ostream & os) const {
             os << "<IfExpr"
@@ -60,13 +61,14 @@ namespace xo {
                 os << xtag("when_false", when_false_);
             os << ">";
         } /*display*/
+#endif
 
         void
         IfExpr::pretty(xo::pp::PpSink & sink) const {
             sink.pretty_struct("IfExpr",
-                                             field("test", test_),
-                                             field("when_true", when_true_),
-                                             field("when_false", when_false_));
+                               field("test", test_),
+                               field("when_true", when_true_),
+                               field("when_false", when_false_));
         }
 
         rp<IfExprAccess>

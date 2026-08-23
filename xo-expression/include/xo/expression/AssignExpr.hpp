@@ -39,7 +39,6 @@ namespace xo {
             virtual rp<Expression> xform_layer(TransformFn xform_fn) override;
             virtual void attach_envs(bp<SymbolTable> p) override;
 
-            virtual void display(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:

@@ -64,7 +64,7 @@ namespace xo::pp {
          *  see pretty.hpp for implementation
          **/
         template <typename T>
-        void pp(const T & x);
+        PpSink & pp(const T & x);
 
         /** do-what-i-mean structuring convenience
          *  for custom-printer authors.

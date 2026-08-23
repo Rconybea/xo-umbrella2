@@ -79,7 +79,6 @@ namespace xo {
                 rhs_->attach_envs(p);
             }
 
-            virtual void display(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
 
         protected:
