@@ -6,8 +6,6 @@
 #pragma once
 
 #include <xo/ppsink/Prettifier.hpp>
-#include <ostream>
-//#include <cstdint>
 
 namespace xo {
     namespace scm {
