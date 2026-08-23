@@ -57,29 +57,17 @@ namespace xo {
                 return stack_[z - i - 1].get();
             }
 
-            void print (std::ostream & os) const;
             void pretty(xo::pp::PpSink & sink) const;
 
         private:
             std::vector<rp<SymbolTable>> stack_;
         };
 
-        inline std::ostream &
-        operator<< (std::ostream & os, const envframestack & x) {
-            x.print(os);
-            return os;
-        }
-
-        inline std::ostream &
-        operator<< (std::ostream & os, const envframestack * x) {
-            if (x)
-                x->print(os);
-            else
-                os << "nullptr";
-            return os;
-        }
     } /*namespace scm*/
-} /*namespace xo*/
 
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::envframestack);
+    }
+} /*namespace xo*/
 
 /* end envframestack.hpp */

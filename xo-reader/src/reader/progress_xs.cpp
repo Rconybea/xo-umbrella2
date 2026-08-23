@@ -5,7 +5,6 @@
 #include "expect_expr_xs.hpp"
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
-#include "pretty_exprstatestack.hpp"
 #include <xo/expression/Apply.hpp>
 #include <xo/expression/AssignExpr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
@@ -810,36 +809,22 @@ namespace xo {
         }
 
         void
-        progress_xs::print(std::ostream & os) const {
-            os << "<progress_xs"
-               << xtag("this", (void*)this)
-               << xtag("type", exs_type_);
-            if (lhs_)
-                os << xtag("lhs", lhs_);
-            if (op_type_ != optype::invalid)
-                os << xtag("op", op_type_);
-            if (rhs_)
-                os << xtag("rhs", rhs_);
-            os << ">";
-        }
-
-        void
         progress_xs::pretty(xo::pp::PpSink & sink) const
         {
             using xo::pp::field;
 
-            /* the legacy version guarded each field with an `if`, in both the
-             * fit pass and the print pass; field()'s present flag says the same
-             * thing once.  An absent field drops its separator too.
-             */
             sink.pretty_struct("progress_xs",
+                               //field("this", (void*)this),
                                field("lhs", lhs_, lhs_.get() != nullptr),
                                field("op", op_type_, op_type_ != optype::invalid),
                                field("rhs", rhs_, rhs_.get() != nullptr));
         }
 
     } /*namespace scm*/
-} /*namespace xo*/
 
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::optype, xo::scm::optype_descr);
+    }
+} /*namespace xo*/
 
 /* end progress_xs.cpp */

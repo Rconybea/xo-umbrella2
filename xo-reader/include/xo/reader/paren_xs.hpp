@@ -6,7 +6,6 @@
 #pragma once
 
 #include "exprstate.hpp"
-//#include <cstdint>
 
 namespace xo {
     namespace scm {
@@ -21,12 +20,6 @@ namespace xo {
 
         extern const char *
         parenexprstatetype_descr(parenexprstatetype x);
-
-        inline std::ostream &
-        operator<< (std::ostream & os, parenexprstatetype x) {
-            os << parenexprstatetype_descr(x);
-            return os;
-        }
 
         /** @class paren_xs
          *  @brief state machine for handling parentheses in expressions
@@ -69,7 +62,7 @@ namespace xo {
             virtual void on_f64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
 
-            virtual void print(std::ostream & os) const override;
+            virtual void pretty(PpSink & sink) const override;
 
         private:
             static std::unique_ptr<paren_xs> make();
@@ -86,7 +79,10 @@ namespace xo {
             rp<Expression> gen_expr_;
         };
     } /*namespace scm*/
-} /*namespace xo*/
 
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::parenexprstatetype);
+    }
+} /*namespace xo*/
 
 /** end paren_xs.hpp **/

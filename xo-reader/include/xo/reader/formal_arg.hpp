@@ -7,8 +7,8 @@
 
 #include "TypeDescr.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     namespace scm {
@@ -42,6 +42,8 @@ namespace xo {
                 os << ">";
             }
 
+            void pretty(PpSink & sink) const;
+
         private:
             /** formal parameter name **/
             std::string name_;
@@ -49,13 +51,11 @@ namespace xo {
             TypeDescr td_ = nullptr;
         };
 
-        inline std::ostream &
-        operator<< (std::ostream & os,
-                    const formal_arg & x) {
-            x.print(os);
-            return os;
-        }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::formal_arg);
+    }
 } /*namespace xo*/
 
 

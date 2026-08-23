@@ -80,7 +80,7 @@ namespace xo {
             virtual void on_expr_with_semicolon(bp<Expression> expr,
                                                 parserstatemachine * p_psm) override;
 
-            virtual void print(std::ostream & os) const override;
+            virtual void pretty(PpSink & sink) const override;
 
         private:
             static std::unique_ptr<if_else_xs> make();
@@ -98,7 +98,10 @@ namespace xo {
         };
     } /*namespace scm*/
 
-    namespace print {    }
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::ifexprstatetype);
+    }
+
 } /*namespace xo*/
 
 /* end if_else_xs.hpp */

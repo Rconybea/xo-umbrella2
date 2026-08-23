@@ -157,6 +157,7 @@ namespace xo {
         public:
             using Expression = xo::scm::Expression;
             using token_type = exprstate::token_type; // token<char>;
+            using PpSink = xo::pp::PpSink;
 
         public:
             /** create parser in initial state;
@@ -243,20 +244,19 @@ namespace xo {
 
             /** print human-readable representation on stream @p os **/
             void print(std::ostream & os) const;
+            /** pretty-print to @p sink **/
+            void pretty(PpSink & sink) const;
 
         private:
             /** state machine **/
             parserstatemachine psm_;
         }; /*parser*/
 
-        inline std::ostream &
-        operator<< (std::ostream & os,
-                    const parser & x) {
-            x.print(os);
-            return os;
-        }
-
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::parser);
+    }
 } /*namespace xo*/
 
 /* end parser.hpp */

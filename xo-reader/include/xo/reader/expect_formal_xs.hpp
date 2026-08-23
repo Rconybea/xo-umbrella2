@@ -66,7 +66,7 @@ namespace xo {
             virtual void on_typedescr(TypeDescr td,
                                       parserstatemachine * p_psm) override;
 
-            virtual void print(std::ostream & os) const override;
+            virtual void pretty(PpSink & sink) const override;
 
         private:
             static std::unique_ptr<expect_formal_xs> make();

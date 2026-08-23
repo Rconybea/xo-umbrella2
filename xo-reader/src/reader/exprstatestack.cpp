@@ -4,7 +4,6 @@
  */
 
 #include "exprstatestack.hpp"
-#include "pretty_exprstatestack.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -14,9 +13,11 @@
 #include <xo/ppsink/concat.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::scope;
+    using xo::pp::concat;
+
     namespace scm {
         exprstate &
         exprstatestack::top_exprstate() {
@@ -68,21 +69,6 @@ namespace xo {
         }
 
         void
-        exprstatestack::print(std::ostream & os) const {
-            os << "<exprstatestack"
-               << xtag("size", stack_.size())
-               << std::endl;
-
-            for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
-                os << "  [" << z-i-1 << "] "
-                   << stack_[i].get()
-                   << std::endl;
-            }
-
-            os << ">" << std::endl;
-        }
-
-        void
         exprstatestack::pretty(xo::pp::PpSink & sink) const
         {
             /* force_break preserves the legacy policy, which bailed out of the
@@ -96,9 +82,13 @@ namespace xo {
             st.field("size", z);
 
             for (std::size_t i = 0; i < z; ++i)
-                st.field(xo::pp::concat("[", z-i-1, "]"), stack_[i].get());
+                st.field(concat("[", z-i-1, "]"), stack_[i].get());
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_PRETTY_METHOD(xo::scm::exprstatestack)
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end exprstatestack.cpp */

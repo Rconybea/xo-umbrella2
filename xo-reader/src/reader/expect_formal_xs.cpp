@@ -9,12 +9,14 @@
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include <xo/expression/Variable.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     using xo::scm::Variable;
     using xo::reflect::TypeDescr;
+    using xo::pp::field;
+    using xo::pp::xtag;
 
     namespace scm{
         const char *
@@ -95,15 +97,13 @@ namespace xo {
         }
 
         void
-        expect_formal_xs::print(std::ostream & os) const {
-            os << "<expect_formal_xs"
-               << xtag("type", formalxs_type_);
-            if (!result_.name().empty())
-                os << xtag("result.name", result_.name());
-            if (result_.td())
-                os << xtag("result.td", result_.td());
-            os << ">";
+        expect_formal_xs::pretty(PpSink & sink) const {
+            sink.pretty_struct("expect_formal_xs",
+                               field("type", formalxs_type_),
+                               field("result.name", result_.name(), !result_.name().empty()),
+                               field("result.td", result_.td(), result_.td()));
         }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

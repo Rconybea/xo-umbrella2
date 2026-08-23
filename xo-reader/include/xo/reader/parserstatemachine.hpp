@@ -25,18 +25,13 @@ namespace xo {
             using Expression = xo::scm::Expression;
             using Variable = xo::scm::Variable;
             using LocalEnv = xo::scm::LocalSymtab;
+            using PpSink = xo::pp::PpSink;
             using token_type = token<char>;
 
         public:
             explicit parserstatemachine(bool debug_flag)
                 : debug_flag_{debug_flag}
                 {}
-
-            //const parser_result & result() const { return result_; }
-            //parser_result_state result_state() const { return result_state_; }
-            //const rp<Expression> & result_expr() const { return result_expr_; }
-            //const char * error_src_function() const { return error_src_function_; }
-            //const std::string & error_description() const { return error_description_; }
 
             std::unique_ptr<exprstate> pop_exprstate();
             exprstate & top_exprstate();
@@ -94,6 +89,9 @@ namespace xo {
             /** write human-readable representation on @p os **/
             void print(std::ostream & os) const;
 
+            /** pretty-print current state to @p sink **/
+            void pretty(PpSink & sink) const;
+
         public:
             /** state recording state associated with enclosing expressions.
              *
@@ -120,10 +118,9 @@ namespace xo {
             bool debug_flag_ = false;
         };
 
-        inline std::ostream &
-        operator<<(std::ostream & os, const parserstatemachine & x) {
-            x.print(os);
-            return os;
-        }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::parserstatemachine);
+    }
 } /*namespace xo*/

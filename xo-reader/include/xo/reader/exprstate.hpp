@@ -79,18 +79,12 @@ namespace xo {
         extern const char *
         exprstatetype_descr(exprstatetype x);
 
-        inline std::ostream &
-        operator<< (std::ostream & os, exprstatetype x) {
-            os << exprstatetype_descr(x);
-            return os;
-        }
-
         class parserstatemachine; /* see parserstatemachine.hpp */
         class exprstatestack; /* see exprstatestack.hpp */
 
         class formal_arg;
 
-        /** state associated with a partially-parsed expression.
+        /** @brief State associated with a partially-parsed expression.
          **/
         class exprstate {
         public:
@@ -289,21 +283,12 @@ namespace xo {
             exprstatetype exs_type_;
         }; /*exprstate*/
 
-        inline std::ostream &
-        operator<< (std::ostream & os, const exprstate & x) {
-            x.print(os);
-            return os;
-        }
-
-        inline std::ostream &
-        operator<< (std::ostream & os, const exprstate * x) {
-            if (x)
-                x->print(os);
-            else
-                os << "nullptr";
-            return os;
-        };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::exprstatetype);
+        XO_PRETTIFIER_DECLARE(xo::scm::exprstate);
+    }
 } /*namespace xo*/
 
 /** end exprstate.hpp **/

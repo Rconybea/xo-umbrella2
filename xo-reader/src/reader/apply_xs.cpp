@@ -175,25 +175,19 @@ namespace xo {
         }
 
         void
-        apply_xs::print(std::ostream & os) const
-        {
-            os << "<apply_xs"
-               << xtag("this", (void*)this)
-               << xtag("applyxs_type", applyxs_type_);
-            os << ">";
-        }
-
-        void
         apply_xs::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("apply_xs",
-                                             field("applyxs_type", applyxs_type_),
-                                             field("fn_expr", fn_expr_),
-                                             field("args_expr_v", args_expr_v_));
+                               field("applyxs_type", applyxs_type_),
+                               field("fn_expr", fn_expr_),
+                               field("args_expr_v", args_expr_v_));
         }
 
     } /*namespace scm*/
-} /*namespace xo*/
 
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::applyexprstatetype, xo::scm::applyexprstatetype_descr)
+    }
+} /*namespace xo*/
 
 /* end apply_xs.cpp */

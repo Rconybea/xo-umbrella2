@@ -8,11 +8,14 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     using xo::pp::scope;
+    using xo::pp::field;
+    using xo::pp::xtag;
+
     namespace scm {
         const char *
         parenexprstatetype_descr(parenexprstatetype x)
@@ -251,19 +254,21 @@ namespace xo {
         }
 
         void
-        paren_xs::print(std::ostream & os) const {
-            os << "<paren_xs"
-               << xtag("this", (void*)this)
-                //<< xtag("type", exs_type_);
-               << xtag("parenxs_type", parenxs_type_);
+        paren_xs::pretty(PpSink & sink) const
+        {
+            bool gen_expr_present(gen_expr_);
 
-            if (gen_expr_)
-                os << xtag("gen_expr", gen_expr_);
-
-            os << ">";
+            sink.pretty_struct("paren_xs",
+                               //field("this", (void*)this),
+                               field("parenxs_type", parenxs_type_),
+                               field("gen_expr", gen_expr_, gen_expr_present));
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::parenexprstatetype, xo::scm::parenexprstatetype_descr)
+    }
 } /*namespace xo*/
 
 

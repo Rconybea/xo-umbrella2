@@ -80,7 +80,6 @@ namespace xo {
             virtual void on_expr_with_semicolon(bp<Expression> expr,
                                                 parserstatemachine * p_psm) override;
 
-            virtual void print(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:

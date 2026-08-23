@@ -280,19 +280,11 @@ namespace xo {
         } /*on_expr_with_semicolon*/
 
         void
-        expect_expr_xs::print(std::ostream & os) const {
-            os << "<expect_expr_xs"
-               << xtag("allow_defs", allow_defs_)
-               << xtag("cxl_on_rightbrace", cxl_on_rightbrace_)
-               << ">";
-        }
-
-        void
         expect_expr_xs::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("expect_expr_xs",
-                                             field("allow_defs", allow_defs_),
-                                             field("cxl_on_rightbrace", cxl_on_rightbrace_));
+                               field("allow_defs", allow_defs_),
+                               field("cxl_on_rightbrace", cxl_on_rightbrace_));
         }
 
     } /*namespace scm*/

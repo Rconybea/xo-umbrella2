@@ -47,9 +47,6 @@ namespace xo {
 
         extern const char * applyexprstatetype_descr(applyexprstatetype x);
 
-        std::ostream &
-        operator<<(std::ostream & os, applyexprstatetype x);
-
         /** @class apply_xs
          *  @brief state machine for parsing a schematic function-call-expression
          *
@@ -92,7 +89,6 @@ namespace xo {
             virtual void on_rightparen_token(const token_type & tk,
                                              parserstatemachine * p_psm) override;
 
-            virtual void print(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const final override;
 
         private:
@@ -108,7 +104,10 @@ namespace xo {
         };
     } /*namespace scm */
 
-    namespace print {    }
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::applyexprstatetype);
+    }
+
 } /*namespace xo*/
 
 /* end apply_xs.hpp */

@@ -16,9 +16,9 @@
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::scope;
     using xo::scm::Lambda;
     using xo::scm::LocalSymtab;
 
@@ -301,21 +301,18 @@ namespace xo {
         // TODO: on_i64_token, on_bool token
 
         void
-        lambda_xs::print(std::ostream & os) const {
-            os << "<lambda_xs"
-               << xtag("lmxs_type", lmxs_type_)
-               << ">";
-        }
-
-        void
         lambda_xs::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("lambda_xs",
-                                             field("lmxs_type", lmxs_type_),
-                                             field("body", body_));
+                               field("type", lmxs_type_),
+                               field("body", body_));
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::lambdastatetype, xo::scm::lambdastatetype_descr)
+    }
 } /*namespace xo*/
 
 

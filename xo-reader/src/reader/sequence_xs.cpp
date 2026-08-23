@@ -9,12 +9,13 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     using xo::pp::scope;
+    using xo::pp::field;
+    using xo::pp::xtag;
     using xo::scm::DefineExpr;
 
     namespace scm {
@@ -121,15 +122,10 @@ namespace xo {
         }
 
         void
-        sequence_xs::print(std::ostream & os) const {
-            os << "<sequence_xs" << xtag("expr_v.size", expr_v_.size()) << ">";
-        }
-
-        void
         sequence_xs::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("sequence_xs",
-                                             xtag("expr_v.size", expr_v_.size()));
+                               field("expr_v.size", expr_v_.size()));
         }
 
     } /*namespace scm*/

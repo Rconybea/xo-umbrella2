@@ -12,9 +12,10 @@
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using xo::pp::field;
     using xo::pp::xtag;
-    using xo::pp::scope;
+
     namespace scm {
         // ----- defexprstatetype -----
 
@@ -356,20 +357,18 @@ namespace xo {
         }
 
         void
-        define_xs::print(std::ostream & os) const {
-            os << "<define_xs"
-               << xtag("defxs_type", defxs_type_);
-            os << ">";
-        }
-
-        void
         define_xs::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("define_xs",
-                                             field("defxs_type", defxs_type_));
+                               field("type", defxs_type_));
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::defexprstatetype, xo::scm::defexprstatetype_descr)
+    }
+
 } /*namespace xo*/
 
 /* end define_xs.cpp */

@@ -4,7 +4,6 @@
  */
 
 #include "envframestack.hpp"
-#include "pretty_envframestack.hpp"
 #include <xo/expression/SymbolTable_ostream.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/refcnt/Refcounted_ostream.hpp>
@@ -91,21 +90,6 @@ namespace xo {
         }
 
         void
-        envframestack::print(std::ostream & os) const {
-            os << "<envframestack"
-               << xtag("size", stack_.size())
-               << std::endl;
-
-            for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
-                os << "  [" << z-i-1 << "] "
-                   << stack_[i]
-                   << std::endl;
-            }
-
-            os << ">" << std::endl;
-        }
-
-        void
         envframestack::pretty(xo::pp::PpSink & sink) const
         {
             /* force_break preserves the legacy policy, which bailed out of the
@@ -122,6 +106,10 @@ namespace xo {
                 st.field(xo::pp::concat("[", z-i-1, "]"), stack_[i]);
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_PRETTY_METHOD(xo::scm::envframestack)
+    }
 } /*namespace xo*/
 
 /* end envframestack.cpp */

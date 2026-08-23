@@ -4,16 +4,19 @@
  **/
 
 #include "if_else_xs.hpp"
+#include "expect_expr_xs.hpp"
+#include "parserstatemachine.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
-#include "expect_expr_xs.hpp"
-#include "parserstatemachine.hpp"
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     using xo::pp::scope;
+    using xo::pp::field;
+    using xo::pp::xtag;
+
     namespace scm {
         // ----- ifexprstatetype -----
 
@@ -281,12 +284,16 @@ namespace xo {
         }
 
         void
-        if_else_xs::print(std::ostream & os) const {
-            os << "<if_else_xs"
-               << xtag("this", (void*)this)
-               << xtag("ifxs_type", ifxs_type_)
-               << ">";
+        if_else_xs::pretty(PpSink & sink) const
+        {
+            sink.pretty_struct("if_else_xs",
+                               //field("this", (void*)this),
+                               field("type", ifxs_type_));
         }
 
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::ifexprstatetype, xo::scm::ifexprstatetype_descr)
+    }
 } /*namespace xo*/

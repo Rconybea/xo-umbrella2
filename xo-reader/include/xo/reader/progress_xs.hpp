@@ -148,7 +148,6 @@ namespace xo {
             virtual void on_f64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
 
-            virtual void print(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
@@ -177,6 +176,10 @@ namespace xo {
             rp<Expression> rhs_;
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::optype);
+    }
 } /*namespace xo*/
 
 

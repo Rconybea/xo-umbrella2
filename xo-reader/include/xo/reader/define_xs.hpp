@@ -8,7 +8,6 @@
 #include "exprstate.hpp"
 #include <xo/expression/ConvertExpr.hpp>
 #include <xo/expression/DefineExpr.hpp>
-//#include <cstdint>
 
 namespace xo {
     namespace scm {
@@ -58,9 +57,6 @@ namespace xo {
 
         extern const char * defexprstatetype_descr(defexprstatetype x);
 
-        std::ostream &
-        operator<<(std::ostream & os, defexprstatetype x);
-
         /** @class define_xs
          *  @brief state to provide parsing of a define-expression
          **/
@@ -106,7 +102,6 @@ namespace xo {
             virtual void on_f64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
 
-            virtual void print(std::ostream & os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
@@ -122,6 +117,10 @@ namespace xo {
             rp<ConvertExprAccess> cvt_expr_;
         };
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::defexprstatetype);
+    }
 } /*namespace xo*/
 
 

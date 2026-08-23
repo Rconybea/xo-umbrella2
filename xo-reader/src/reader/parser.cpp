@@ -18,12 +18,13 @@
 #include <stdexcept>
 
 namespace xo {
-    using xo::pp::xtag;
-    using xo::pp::tostr;
-    using xo::pp::scope;
     using xo::scm::Expression;
     using xo::scm::LocalSymtab;
     using xo::reflect::TypeDescr;
+    using xo::pp::scope;
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
 
     namespace scm {
         // ----- parser -----
@@ -31,11 +32,6 @@ namespace xo {
         parser::parser(const rp<GlobalSymtab> & toplevel_symtab, bool debug_flag)
             : psm_{debug_flag}
         {
-#ifdef OBSOLETE
-            /* top-level environment.  initially empty */
-            rp<SymbolTable> toplevel_env = GlobalSymtab::make_empty();
-#endif
-
             this->psm_.env_stack_.push_envframe(toplevel_symtab);
         }
 
@@ -91,15 +87,16 @@ namespace xo {
         } /*discard_current_state*/
 
         void
-        parser::print(std::ostream & os) const {
-            os << "<parser"
-               << std::endl;
-
-            psm_.xs_stack_.print(os);
-
-            os << ">" << std::endl;
+        parser::pretty(PpSink & sink) const
+        {
+            sink.pretty_struct("parser",
+                               field("xs_stack", psm_.xs_stack_));
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_PRETTY_METHOD(xo::scm::parser)
+    }
 } /*namespace xo*/
 
 

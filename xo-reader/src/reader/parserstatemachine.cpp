@@ -5,16 +5,15 @@
 
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
-#include "pretty_envframestack.hpp"
-#include "pretty_parserstatemachine.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
-    using xo::pp::xtag;
     using xo::pp::scope;
+    using xo::pp::field;
+    using xo::pp::xtag;
     using xo::scm::LocalSymtab;
     using xo::scm::Variable;
 
@@ -200,7 +199,22 @@ namespace xo {
             os << xtag("env_stack", &env_stack_);
             os << ">";
         }
+
+        void
+        parserstatemachine::pretty(PpSink & sink) const
+        {
+            /* parserstatemachine is not part of the expression hierarchy, so there
+             * is no virtual involved -- this is a plain Prettifier.
+             */
+            sink.pretty_struct("psm",
+                               field("stack", xs_stack_),
+                               field("env_stack", env_stack_));
+        }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_PRETTY_METHOD(xo::scm::parserstatemachine)
+    }
 } /*namespace xo*/
 
 

@@ -65,7 +65,7 @@ namespace xo {
                                         parserstatemachine * p_psm) override;
             virtual void on_rightparen_token(const token_type & tk,
                                              parserstatemachine * p_psm) override;
-            virtual void print(std::ostream & os) const override;
+            virtual void pretty(PpSink & sink) const override;
 
         private:
             static std::unique_ptr<expect_formal_arglist_xs> make();

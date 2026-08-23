@@ -47,28 +47,17 @@ namespace xo {
                 return stack_[z - i - 1];
             }
 
-            void print (std::ostream & os) const;
             void pretty(xo::pp::PpSink & sink) const;
 
         private:
             std::vector<std::unique_ptr<exprstate>> stack_;
         };
 
-        inline std::ostream &
-        operator<< (std::ostream & os, const exprstatestack & x) {
-            x.print(os);
-            return os;
-        }
-
-        inline std::ostream &
-        operator<< (std::ostream & os, const exprstatestack * x) {
-            if (x)
-                x->print(os);
-            else
-                os << "nullptr";
-            return os;
-        }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::scm::exprstatestack);
+    }
 } /*namespace xo*/
 
 

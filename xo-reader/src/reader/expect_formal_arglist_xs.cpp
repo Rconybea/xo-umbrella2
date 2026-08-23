@@ -14,7 +14,9 @@
 #include <xo/ppsink/PrettyVector.hpp>
 
 namespace xo {
+    using xo::pp::field;
     using xo::pp::xtag;
+
     namespace scm {
         const char *
         formalarglstatetype_descr(formalarglstatetype x) {
@@ -120,12 +122,11 @@ namespace xo {
         }
 
         void
-        expect_formal_arglist_xs::print(std::ostream & os) const {
-            os << "<expect_formal_arglist_xs"
-               << xtag("type", farglxs_type_);
-            os << xtag("farglxs_type", farglxs_type_);
-            os << xtag("argl", argl_);
-            os << ">";
+        expect_formal_arglist_xs::pretty(PpSink & sink) const
+        {
+            sink.pretty_struct("expect_formal_arglist_xs",
+                               field("type", farglxs_type_),
+                               field("argl", argl_));
         }
     } /*namespace scm*/
 } /*namespace xo*/

@@ -3,22 +3,21 @@
 #include "exprstate.hpp"
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
-#include "pretty_parserstatemachine.hpp"
+#include <xo/expression/Variable.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
-#include <xo/expression/Variable.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
-#include <stdexcept>
 #include <xo/ppsink/pretty_struct.hpp>
+#include <stdexcept>
 
 namespace xo {
+    using xo::reflect::TypeDescr;
+    using xo::pp::scope;
     using xo::pp::field;
     using xo::pp::xtag;
     using xo::pp::tostr;
-    using xo::pp::scope;
-    using xo::reflect::TypeDescr;
 
     namespace scm {
         const char *
@@ -585,7 +584,7 @@ namespace xo {
         exprstate::pretty(xo::pp::PpSink & sink) const
         {
             sink.pretty_struct("exprstate",
-                                             field("type", exs_type_));
+                               field("type", exs_type_));
         }
 
         void
@@ -667,6 +666,11 @@ namespace xo {
             p_psm->on_error(self_name, std::move(errmsg));
         }
     } /*namespace scm*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::scm::exprstatetype, xo::scm::exprstatetype_descr)
+        XO_PRETTIFIER_VIA_PRETTY_METHOD(xo::scm::exprstate)
+    }
 } /*namespace xo*/
 
 /* end exprstate.cpp */
