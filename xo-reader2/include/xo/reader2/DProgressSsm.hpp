@@ -12,7 +12,6 @@
 #ifdef NOT_YET
 # include "exprstate.hpp"
 # include <xo/reflect/TypeDescr.hpp>
-# include <iostream>
 //#include <cstdint>
 #endif
 
@@ -207,7 +206,6 @@ namespace xo {
             void on_rightparen_token(const token_type & tk,
                                              parserstatemachine * p_psm) override;
 
-            void print(std::ostream & os) const override;
 #endif
 
             /** @defgroup scm-progressssm-gc-support gc support methods **/

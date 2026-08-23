@@ -51,11 +51,6 @@ namespace xo {
             obj<ASyntaxStateMachine> top() const noexcept { return ssm_; }
             ParserStack * parent() const noexcept { return parent_; }
 
-#ifdef OBSOLETE
-            /** regular printing **/
-            void print(std::ostream & os) const;
-#endif
-
             /** structured pretty-printing: render into @p sink **/
             void pretty(xo::pp::PpSink & sink) const;
 

@@ -167,8 +167,6 @@ namespace xo {
             virtual void on_f64_token(const token_type & tk,
                                       parserstatemachine * p_psm) final override;
 
-            virtual void print(std::ostream & os) const override;
-            virtual bool pretty_print(const print::ppindentinfo & ppii) const override;
 #endif
 
             ///@}

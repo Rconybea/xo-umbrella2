@@ -10,15 +10,8 @@
 #include <xo/ppsink/concat.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
-    /* ppsink xtag for print(ostream&), via the tag_ostream bridge.
-     * QUALIFIED at the call sites below: with const char[] arguments ADL
-     * still finds a legacy xtag overload, and a using-declaration cannot
-     * suppress ADL.
-     */
-
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::facet::typeseq;
@@ -55,17 +48,6 @@ namespace xo {
 
             return stack->parent();
         }
-
-#ifdef OBSOLETE
-        void
-        ParserStack::print(std::ostream & os) const
-        {
-            os << "<ParserStack>";
-            os << xo::pp::xtag("ssm", "*placeholder*");
-            os << xo::pp::xtag("parent", "*placeholder*");
-            os << ">";
-        }
-#endif
 
         void
         ParserStack::pretty(xo::pp::PpSink & sink) const

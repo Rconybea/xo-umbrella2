@@ -9,10 +9,8 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-/* os << xtag(..); see the ostream-containment milestone */
-#include <xo/ppsink/tag_ostream.hpp>
-#include <string_view>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <string_view>
 
 namespace xo {
     using xo::pp::scope;
@@ -435,19 +433,6 @@ namespace xo {
                 assert(false);
                 return;
             }
-        }
-
-        void
-        paren_xs::print(std::ostream & os) const {
-            os << "<paren_xs"
-               << xtag("this", (void*)this)
-                //<< xtag("type", exs_type_);
-               << xtag("parenxs_type", parenxs_type_);
-
-            if (gen_expr_)
-                os << xtag("gen_expr", gen_expr_);
-
-            os << ">";
         }
 #endif
 

@@ -24,8 +24,6 @@
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-/* os << xtag(..); see the ostream-containment milestone */
-#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 #ifdef NOT_YET
@@ -622,14 +620,6 @@ namespace xo {
 
             p_psm->on_expr_with_semicolon(expr);
         } /*on_expr_with_semicolon*/
-
-        void
-        expect_expr_xs::print(std::ostream & os) const {
-            os << "<expect_expr_xs"
-               << xtag("allow_defs", allow_defs_)
-               << xtag("cxl_on_rightbrace", cxl_on_rightbrace_)
-               << ">";
-        }
 #endif
 
         void
