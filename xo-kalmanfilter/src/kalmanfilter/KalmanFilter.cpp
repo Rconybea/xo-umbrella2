@@ -9,6 +9,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::time::utc_nanos;
@@ -66,6 +67,7 @@ namespace xo {
             //if (lscope.enabled()) { lscope.log(xtag("state_ext", this->state_ext_)); }
         } /*notify_input*/
 
+#ifdef OBSOLETE
         void
         KalmanFilter::display(std::ostream & os) const
         {
@@ -75,6 +77,17 @@ namespace xo {
             os << xtag("state_ext", state_ext_);
             os << ">";
         } /*display*/
+#endif
+
+        void
+        KalmanFilter::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            sink.pretty_struct("KalmanFilter",
+                               field("filter_spec", filter_spec_),
+                               field("state_ext", state_ext_));
+        }
 
         std::string
         KalmanFilter::display_string() const

@@ -9,6 +9,8 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <xo/indentlog2/print/tostr.hpp>  /* xo::pp::tostr */
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -102,6 +104,7 @@ namespace xo {
             return Reflect::make_rctp(this);
         } /*self_tp*/
 
+#ifdef OBSOLETE
         void
         KalmanFilterInput::display(std::ostream & os) const
         {
@@ -112,13 +115,24 @@ namespace xo {
                << xtag("Rd", matrix(Rd_))
                << ">";
         } /*display*/
+#endif
+
+        void
+        KalmanFilterInput::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            sink.pretty_struct("KalmanFilterInput",
+                               field("tkp1", tkp1_),
+                               field("z", matrix(z_)),
+                               field("presence", matrix(presence_)),
+                               field("Rd", matrix(Rd_)));
+        }
 
         std::string
         KalmanFilterInput::display_string() const
         {
-            std::stringstream ss;
-            this->display(ss);
-            return ss.str();
+            return xo::pp::tostr(*this);
         } /*display_string*/
     } /*namespace kalman*/
 } /*namespace xo*/

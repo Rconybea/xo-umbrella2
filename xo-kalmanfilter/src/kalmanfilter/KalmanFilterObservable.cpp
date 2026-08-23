@@ -5,6 +5,8 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <xo/indentlog2/print/tostr.hpp>  /* xo::pp::tostr */
 
 namespace xo {
     using xo::pp::matrix;
@@ -55,6 +57,7 @@ namespace xo {
         return KalmanFilterObservable(keep, Hp, Rp);
     } /*reindex*/
 
+#ifdef OBSOLETE
       void
       KalmanFilterObservable::display(std::ostream & os) const
       {
@@ -63,13 +66,22 @@ namespace xo {
              << xtag("R", matrix(R_))
              << ">";
       } /*display*/
+#endif
+
+        void
+        KalmanFilterObservable::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            sink.pretty_struct("KalmanFilterObservable",
+                               field("H", matrix(H_)),
+                               field("R", matrix(R_)));
+        }
 
       std::string
       KalmanFilterObservable::display_string() const
       {
-          std::stringstream ss;
-          this->display(ss);
-          return ss.str();
+          return xo::pp::tostr(*this);
       } /*display_string*/
 
   } /*namespace kalman*/

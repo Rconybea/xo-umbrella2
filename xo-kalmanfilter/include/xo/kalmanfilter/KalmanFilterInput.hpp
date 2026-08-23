@@ -3,9 +3,8 @@
 #pragma once
 
 #include <xo/reflect/SelfTagging.hpp>
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 #include <xo/timeutil/timeutil.hpp>
-// #include "time/Time.hpp"
-// #include "xo/refcnt/Refcounted.hpp"
 #include <Eigen/Dense>
 #include <cstdint>
 
@@ -62,7 +61,10 @@ namespace xo {
              */
             VectorXi make_kept_index() const;
 
+            virtual void pretty(xo::pp::PpSink & sink) const;
+#ifdef OBSOLETE
             virtual void display(std::ostream & os) const;
+#endif
             std::string display_string() const;
 
             // ----- inherited from SelfTagging -----
@@ -109,14 +111,25 @@ namespace xo {
 
         using KalmanFilterInputPtr = rp<KalmanFilterInput>;
 
+#ifdef OBSOLETE
         inline std::ostream &
         operator<<(std::ostream & os, KalmanFilterInput const & x)
         {
             x.display(os);
             return os;
         } /*operator<<*/
+#endif
 
     } /*namespace kalman*/
+
+    namespace pp {
+        template <>
+        struct Prettifier<xo::kalman::KalmanFilterInput> {
+            static void print(PpSink & sink, const xo::kalman::KalmanFilterInput & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end KalmanFilterInput.hpp */

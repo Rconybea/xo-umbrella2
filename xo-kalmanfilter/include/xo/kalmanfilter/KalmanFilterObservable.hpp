@@ -3,6 +3,7 @@
 #pragma once
 
 //#include "time/Time.hpp"
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 #include <Eigen/Dense>
 #include <cstdint>
 
@@ -70,7 +71,10 @@ namespace xo {
                 return keep_is_mx1 && keep_is_well_ordered && r_is_mxm;
             } /*check_ok*/
 
+            void pretty(xo::pp::PpSink & sink) const;
+#ifdef OBSOLETE
             void display(std::ostream & os) const;
+#endif
             std::string display_string() const;
 
         private:
@@ -97,13 +101,24 @@ namespace xo {
             MatrixXd R_;
         }; /*KalmanFilterObservable*/
 
+#ifdef OBSOLETE
         inline std::ostream &
         operator<<(std::ostream & os, KalmanFilterObservable const & x)
         {
             x.display(os);
             return os;
         } /*operator<<*/
+#endif
     } /*namespace kalman*/
+
+    namespace pp {
+        template <>
+        struct Prettifier<xo::kalman::KalmanFilterObservable> {
+            static void print(PpSink & sink, const xo::kalman::KalmanFilterObservable & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end KalmanFilterObservable.hpp */

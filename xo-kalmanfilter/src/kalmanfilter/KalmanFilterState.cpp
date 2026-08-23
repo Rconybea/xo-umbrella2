@@ -12,6 +12,7 @@
 #include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 #include <ostream>
 #include <string>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -178,6 +179,7 @@ namespace xo {
             }
         } /*ctor*/
 
+#ifdef OBSOLETE
         void
         KalmanFilterState::display(std::ostream & os) const
         {
@@ -188,13 +190,24 @@ namespace xo {
                << xtag("P", matrix(P_))
                << ">";
         } /*display*/
+#endif
+
+        void
+        KalmanFilterState::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            sink.pretty_struct("KalmanFilterState",
+                               field("k", k_),
+                               field("tk", tk_),
+                               field("x", matrix(x_)),
+                               field("P", matrix(P_)));
+        }
 
         std::string
         KalmanFilterState::display_string() const
         {
-            std::stringstream ss;
-            ss << *this;
-            return ss.str();
+            return xo::pp::tostr(*this);
         } /*display_string*/
 
         // ----- KalmanFilterStateExt -----
@@ -216,6 +229,7 @@ namespace xo {
                  nullptr /*zk - not defined for initial step*/);
         } /*initial*/
 
+#ifdef OBSOLETE
         void
         KalmanFilterStateExt::display(std::ostream & os) const
         {
@@ -228,6 +242,31 @@ namespace xo {
                << xtag("j", j_)
                << ">";
         } /*display*/
+#endif
+
+        void
+        KalmanFilterStateExt::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            /* field() captures BY REFERENCE and these accessors return BY
+             * VALUE, so each needs a named local -- see field_impl's lifetime
+             * rule in pretty_struct.hpp.  matrix() likewise refers to its
+             * argument, so the matrices need locals too.
+             */
+            const auto k = this->step_no();
+            const auto tk = this->tm();
+            const auto & x = this->state_v();
+            const auto & P = this->state_cov();
+
+            sink.pretty_struct("KalmanFilterStateExt",
+                               field("k", k),
+                               field("tk", tk),
+                               field("x", matrix(x)),
+                               field("P", matrix(P)),
+                               field("K", matrix(K_)),
+                               field("j", j_));
+        }
 
         TaggedRcptr
         KalmanFilterStateExt::self_tp()

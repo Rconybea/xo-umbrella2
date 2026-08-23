@@ -5,6 +5,7 @@ set(SELF_EXE utest.filter)
 set(SELF_SRCS
     KalmanFilter.test.cpp
     print_eigen.test.cpp
+    kalmanfilter_pretty.test.cpp
     filter_utest_main.cpp)
 
 xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})

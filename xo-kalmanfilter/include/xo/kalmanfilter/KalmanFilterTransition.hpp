@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 //#include "time/Time.hpp"
 #include <Eigen/Dense>
 #include <cstdint>
@@ -41,8 +42,12 @@ namespace xo {
                 return f_is_nxn && q_is_nxn;
             } /*check_ok*/
 
-            void display(std::ostream & os) const;
+            void pretty(xo::pp::PpSink & sink) const;
             std::string display_string() const;
+
+#ifdef OBSOLETE
+            void display(std::ostream & os) const;
+#endif
 
         private:
             /* [n x n] state transition matrix */
@@ -51,12 +56,23 @@ namespace xo {
             MatrixXd Q_;
         }; /*KalmanFilterTransition*/
 
+#ifdef OBSOLETE
         inline std::ostream &
         operator<<(std::ostream & os, KalmanFilterTransition const & x) {
             x.display(os);
             return os;
         } /*operator<<*/
+#endif
     } /*namespace kalman*/
+
+    namespace pp {
+        template <>
+        struct Prettifier<xo::kalman::KalmanFilterTransition> {
+            static void print(PpSink & sink, const xo::kalman::KalmanFilterTransition & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end KalmanFilterTransition.hpp */

@@ -3,9 +3,11 @@
 #include "KalmanFilterTransition.hpp"
 #include "print_eigen.hpp"
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog2/print/tostr.hpp>  /* xo::pp::tostr */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::reflect::StructReflector;
@@ -39,6 +41,7 @@ namespace xo {
             return F_.rows();
         } /*n_state*/
 
+#ifdef OBSOLETE
         void
         KalmanFilterTransition::display(std::ostream & os) const
         {
@@ -47,13 +50,22 @@ namespace xo {
                << xtag("Q", matrix(Q_))
                << ">";
         } /*display*/
+#endif
+
+        void
+        KalmanFilterTransition::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            sink.pretty_struct("KalmanFilterTransition",
+                               field("F", matrix(F_)),
+                               field("Q", matrix(Q_)));
+        }
 
         std::string
         KalmanFilterTransition::display_string() const
         {
-            std::stringstream ss;
-            this->display(ss);
-            return ss.str();
+            return xo::pp::tostr(*this);
         } /*display_string*/
 
     } /*namespace kalman*/

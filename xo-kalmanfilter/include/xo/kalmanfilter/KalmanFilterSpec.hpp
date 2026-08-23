@@ -3,6 +3,7 @@
 #pragma once
 
 #include "KalmanFilterStep.hpp"
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 
 namespace xo {
     namespace kalman {
@@ -61,7 +62,10 @@ namespace xo {
                 return this->mk_step_fn_(sk, zkp1);
             } /*make_step*/
 
+            void pretty(xo::pp::PpSink & sink) const;
+#ifdef OBSOLETE
             void display(std::ostream & os) const;
+#endif
             std::string display_string() const;
 
         private:
@@ -75,12 +79,23 @@ namespace xo {
             MkStepFn mk_step_fn_;
         }; /*KalmanFilterSpec*/
 
+#ifdef OBSOLETE
         inline std::ostream &
         operator<<(std::ostream & os, KalmanFilterSpec const & x) {
             x.display(os);
             return os;
         } /*operator<<*/
+#endif
     } /*namespace kalman*/
+
+    namespace pp {
+        template <>
+        struct Prettifier<xo::kalman::KalmanFilterSpec> {
+            static void print(PpSink & sink, const xo::kalman::KalmanFilterSpec & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end KalmanFilterSpec.hpp */

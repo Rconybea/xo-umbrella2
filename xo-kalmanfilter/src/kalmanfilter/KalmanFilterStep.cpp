@@ -7,6 +7,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using Eigen::MatrixXd;
@@ -64,6 +65,7 @@ namespace xo {
                                                 j);
         } /*correct1*/
 
+#ifdef OBSOLETE
         void
         KalmanFilterStep::display(std::ostream & os) const
         {
@@ -80,6 +82,26 @@ namespace xo {
             os << xtag("input", this->input());
             os << ">";
         } /*display*/
+#endif
+
+        void
+        KalmanFilterStep::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            /* model()/obs()/input() return by value; field() holds a
+             * reference, so bind locals first (pretty_struct.hpp lifetime rule)
+             */
+            const auto model = this->model();
+            const auto obs = this->obs();
+            const auto input = this->input();
+
+            sink.pretty_struct("KalmanFilterStep",
+                               field("state", state_),
+                               field("model", model),
+                               field("obs", obs),
+                               field("input", input));
+        }
 
         std::string
         KalmanFilterStep::display_string() const

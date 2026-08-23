@@ -5,6 +5,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
 
@@ -16,6 +17,7 @@ namespace xo {
         using xo::pp::tostr;
         using xo::pp::xtag;
 
+#ifdef OBSOLETE
         void
         KalmanFilterSpec::display(std::ostream & os) const
         {
@@ -23,6 +25,16 @@ namespace xo {
                << xtag("start_ext", start_ext_)
                << ">";
         } /*display*/
+#endif
+
+        void
+        KalmanFilterSpec::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            sink.pretty_struct("KalmanFilterSpec",
+                               field("start_ext", start_ext_));
+        }
 
         std::string
         KalmanFilterSpec::display_string() const

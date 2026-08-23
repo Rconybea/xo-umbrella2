@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 #include "KalmanFilterInput.hpp"
 #include "KalmanFilterObservable.hpp"
 #include "KalmanFilterState.hpp"
@@ -105,7 +106,10 @@ namespace xo {
             rp<KalmanFilterStateExt> correct1(rp<KalmanFilterState> const & skp1_ext,
                                                    uint32_t j);
 
+            void pretty(xo::pp::PpSink & sink) const;
+#ifdef OBSOLETE
             void display(std::ostream & os) const;
+#endif
             std::string display_string() const;
 
         private:
@@ -117,13 +121,24 @@ namespace xo {
             KalmanFilterInputPtr input_;
         }; /*KalmanFilterStep*/
 
+#ifdef OBSOLETE
         inline std::ostream &
         operator<<(std::ostream & os, KalmanFilterStep const & x) {
             x.display(os);
             return os;
         } /*operator<<*/
+#endif
 
     } /*namespace kalman*/
+
+    namespace pp {
+        template <>
+        struct Prettifier<xo::kalman::KalmanFilterStep> {
+            static void print(PpSink & sink, const xo::kalman::KalmanFilterStep & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end KalmanFilterStep.hpp */

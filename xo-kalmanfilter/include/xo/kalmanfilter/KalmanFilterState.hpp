@@ -5,8 +5,8 @@
 #include "KalmanFilterInput.hpp"
 #include "KalmanFilterTransition.hpp"
 #include <xo/reflect/SelfTagging.hpp>
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 #include <xo/timeutil/timeutil.hpp>
-// #include "time/Time.hpp"
 #include <Eigen/Dense>
 #include <cstdint>
 #include <functional>
@@ -48,7 +48,10 @@ namespace xo {
 
             KalmanFilterTransition const & transition() const { return transition_; }
 
+            virtual void pretty(xo::pp::PpSink & sink) const;
+#ifdef OBSOLETE
             virtual void display(std::ostream & os) const;
+#endif
             std::string display_string() const;
 
             // ----- inherited from SelfTagging -----
@@ -84,12 +87,14 @@ namespace xo {
             KalmanFilterTransition transition_;
         }; /*KalmanFilterState*/
 
+#ifdef OBSOLETE
         inline std::ostream & operator<<(std::ostream & os,
                                          KalmanFilterState const & s)
         {
             s.display(os);
             return os;
         } /*operator<<*/
+#endif
 
         /* KalmanFilterStateExt:
          * adds additional details from filter step to KalmanFilterState
@@ -123,7 +128,10 @@ namespace xo {
             MatrixXd const & gain() const { return K_; }
             rp<KalmanFilterInput> const & zk() const { return zk_; }
 
+            virtual void pretty(xo::pp::PpSink & sink) const override;
+#ifdef OBSOLETE
             virtual void display(std::ostream & os) const override;
+#endif
 
             // ----- inherited from SelfTagging -----
 
@@ -159,6 +167,21 @@ namespace xo {
             rp<KalmanFilterInput> zk_;
         }; /*KalamnFilterStateExt*/
     } /*namespace filter*/
+
+    namespace pp {
+        template <>
+        struct Prettifier<xo::kalman::KalmanFilterState> {
+            static void print(PpSink & sink, const xo::kalman::KalmanFilterState & x) {
+                x.pretty(sink);
+            }
+        };
+        template <>
+        struct Prettifier<xo::kalman::KalmanFilterStateExt> {
+            static void print(PpSink & sink, const xo::kalman::KalmanFilterStateExt & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end KalmanFilterState.hpp */

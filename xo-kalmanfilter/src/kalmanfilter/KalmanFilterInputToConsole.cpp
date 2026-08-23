@@ -2,6 +2,7 @@
 
 #include "KalmanFilterInputToConsole.hpp"
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
 
@@ -17,6 +18,7 @@ namespace xo {
       return new KalmanFilterInputToConsole();
     } /*make*/
 
+#ifdef OBSOLETE
     void
     KalmanFilterInputToConsole::display(std::ostream & os) const
     {
@@ -24,6 +26,16 @@ namespace xo {
      << xtag("this", (void*)this)
      << ">";
     } /*display*/
+#endif
+
+        void
+        KalmanFilterInputToConsole::pretty(xo::pp::PpSink & sink) const
+        {
+            using xo::pp::field;
+
+            sink.pretty_struct("KalmanFilterInputToConsole",
+                               field("this", (void*)this));
+        }
   } /*namespace kalman*/
 } /*namespace xo*/
 
