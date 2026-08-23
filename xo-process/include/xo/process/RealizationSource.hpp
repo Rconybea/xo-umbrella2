@@ -7,6 +7,7 @@
 #include <xo/reactor/ReactorSource.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 /* display() streams tags to an ostream */
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/callback/CallbackSet.hpp>
@@ -154,14 +155,16 @@ namespace xo {
                 assert(false);
             }
 
-            virtual void display(std::ostream & os) const override {
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
 
-                os << "<RealizationSourceBase"
-                   << xo::pp::xtag("name", this->name())
-                   << xo::pp::xtag("n_out_ev", this->n_out_ev())
-                    //<< xo::pp::xtag("ev_interval_dt", ev_interval_dt_)
-                   << ">";
-            } /*display*/
+                const auto nm = this->name();
+                const auto n = this->n_out_ev();
+
+                sink.pretty_struct("RealizationSourceBase",
+                                   field("name", nm),
+                                   field("n_out_ev", n));
+            }
 
             virtual void visit_direct_consumers(std::function<void (bp<xo::reactor::AbstractEventProcessor>)> const &) override {
                 assert(false);
@@ -277,14 +280,16 @@ namespace xo {
                 this->remove_callback(id);
             } /*detach_sink*/
 
-            virtual void display(std::ostream & os) const override {
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
 
-                os << "<RealizationSource"
-                   << xo::pp::xtag("name", this->name())
-                   << xo::pp::xtag("n_out_ev", this->n_out_ev())
-                    //<< xo::pp::xtag("ev_interval_dt", this->ev_interval_dt())
-                   << ">";
-            } /*display*/
+                const auto nm = this->name();
+                const auto n = this->n_out_ev();
+
+                sink.pretty_struct("RealizationSource",
+                                   field("name", nm),
+                                   field("n_out_ev", n));
+            }
 
             // ----- Inherited from AbstractEventProcessor -----
 

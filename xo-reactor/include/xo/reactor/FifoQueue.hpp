@@ -9,6 +9,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/callback/CallbackSet.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 #include <deque>
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
@@ -198,13 +199,18 @@ namespace xo {
             } /*visit_direct_consumers*/
 
             /* write human-readable representation to stream */
-            virtual void display(std::ostream & os) const override {
-                os << "<FifoQueue"
-                   << xo::pp::xtag("name", name_)
-                   << xo::pp::xtag("addr", (void *)this)
-                   << xo::pp::xtag("T", reflect::type_name<T>())
-                   << ">";
-            } /*display*/
+
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
+
+                const void * addr = this;
+                const auto tnm = reflect::type_name<T>();
+
+                sink.pretty_struct("FifoQueue",
+                                   field("name", name_),
+                                   field("addr", addr),
+                                   field("T", tnm));
+            }
 
         private:
             FifoQueue(EvTimeFn evtm_fn) : evtm_fn_{std::move(evtm_fn)} {}

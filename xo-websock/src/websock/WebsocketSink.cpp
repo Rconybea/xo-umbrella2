@@ -12,6 +12,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* ss << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::reactor::AbstractSource;
@@ -61,7 +62,7 @@ namespace xo {
             virtual void set_name(std::string const & x) override { this->name_ = x; }
             /* 0 consumers for websocket sink,  since it's not a source */
             virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor>)> const &) override {}
-            virtual void display(std::ostream & os) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
             virtual bool allow_polymorphic_source() const override { return true; }
             virtual TypeDescr sink_ev_type() const override;
@@ -133,15 +134,18 @@ namespace xo {
         } /*notify_ev_tp*/
 
         void
-        WebsocketSinkImpl::display(std::ostream & os) const
+        WebsocketSinkImpl::pretty(xo::pp::PpSink & sink) const
         {
-            os << "<WebsocketSinkImpl"
-               << xtag("addr", (void*)this)
-               << xtag("name", name_)
-               << xtag("n_in_ev", n_in_ev_)
-               << xtag("stream", stream_name_)
-               << ">";
-        } /*display*/
+            using xo::pp::field;
+
+            const void * addr = this;
+
+            sink.pretty_struct("WebsocketSinkImpl",
+                               field("addr", addr),
+                               field("name", name_),
+                               field("n_in_ev", n_in_ev_),
+                               field("stream", stream_name_));
+        }
 
         // ----- WebsocketSink -----
 

@@ -7,6 +7,7 @@
 
 #include "Sink.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
  * using-declarations.  Two reasons:
@@ -79,13 +80,18 @@ namespace xo {
             virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor> ep)> const & fn) override {
                 this->poly_sink_->visit_direct_consumers(fn);
             }
-            virtual void display(std::ostream & os) const override {
-                os << "<PolyAdapterSink"
-                   << xo::pp::xtag("addr", (void*)this)
-                   << xo::pp::xtag("T", reflect::type_name<T>())
-                   << xo::pp::xtag("poly", this->poly_sink_)
-                   << ">";
-            } /*display*/
+
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
+
+                const void * addr = this;
+                const auto tnm = reflect::type_name<T>();
+
+                sink.pretty_struct("PolyAdapterSink",
+                                   field("addr", addr),
+                                   field("T", tnm),
+                                   field("poly", this->poly_sink_));
+            }
 
         private:
             PolyAdapterSink(rp<AbstractSink> poly_sink) : poly_sink_{std::move(poly_sink)} {}

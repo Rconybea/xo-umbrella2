@@ -6,6 +6,8 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
+#include <concepts>   /* std::derived_from */
 
 namespace xo {
     namespace reactor {
@@ -32,19 +34,33 @@ namespace xo {
              */
             virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor> ep)> const & fn) = 0;
 
-            /* write representation to stream */
-            virtual void display(std::ostream & os) const = 0;
-            /* human-readable string identifying this source */
+            /** render self into @p sink **/
+            virtual void pretty(xo::pp::PpSink & sink) const = 0;
+            /** human-readable string identifying this source **/
             virtual std::string display_string() const;
         }; /*AbstractEventProcessor*/
 
-        inline std::ostream &
-        operator<<(std::ostream & os, AbstractEventProcessor const & src) {
-            src.display(os);
-            return os;
-        } /*operator<<*/
-
     } /*namespace reactor*/
+
+    namespace pp {
+        /** Anything in the AbstractEventProcessor hierarchy renders through
+         *  its virtual pretty().
+         *
+         *  CONSTRAINED PARTIAL specialization, not one exact specialization per
+         *  class: an rp<T> renders via Prettifier<intrusive_ptr<T>>, which
+         *  needs Prettifier<T> for the STATIC T -- and that T is routinely an
+         *  intermediate abstract class (ReactorSource, AbstractSink, Sink1<U>)
+         *  rather than the concrete sink.  Specializing per class would mean
+         *  chasing each intermediate as it turned up.
+         **/
+        template <typename T>
+            requires std::derived_from<T, xo::reactor::AbstractEventProcessor>
+        struct Prettifier<T> {
+            static void print(PpSink & sink, const T & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end AbstractEventProcessor.hpp */

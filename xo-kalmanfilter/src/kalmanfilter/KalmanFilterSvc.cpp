@@ -1,6 +1,7 @@
 /* @file KalmanFilterSvc.cpp */
 
 #include "KalmanFilterSvc.hpp"
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 /* xo::scope / xo::xtag -- were arriving via xo-reactor headers,
  * which are now ppsink-only.
  */
@@ -39,16 +40,21 @@ namespace xo {
     } /*notify_input*/
 
     void
-    KalmanFilterSvc::display(std::ostream & os) const
+    KalmanFilterSvc::pretty(xo::pp::PpSink & sink) const
     {
-      os << "<KalmanFilterSvc"
-     << xtag("name", this->name())
-     << xtag("n_in_ev", this->n_in_ev())
-     << xtag("n_queued_out_ev", this->n_queued_out_ev())
-     << xtag("n_out_ev", this->n_out_ev())
-    //<< xtag("filter", this->filter_)
-     << ">";
-    } /*display*/
+        using xo::pp::field;
+
+        const auto nm = this->name();
+        const auto n_in = this->n_in_ev();
+        const auto n_q = this->n_queued_out_ev();
+        const auto n_out = this->n_out_ev();
+
+        sink.pretty_struct("KalmanFilterSvc",
+                           field("name", nm),
+                           field("n_in_ev", n_in),
+                           field("n_queued_out_ev", n_q),
+                           field("n_out_ev", n_out));
+    }
   } /*namespace kalman*/
 } /*namespace xo*/
 

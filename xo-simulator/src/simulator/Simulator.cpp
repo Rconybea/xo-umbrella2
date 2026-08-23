@@ -7,11 +7,9 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/log_level.hpp>
-/* display() writes tags to an ostream; log_level_ostream.hpp supplies the
- * inserter for the log_level tag value.
- */
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 #include <xo/ppsink/log_level_ostream.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <algorithm>
 #include <string_view>
 #include <thread>
@@ -553,14 +551,18 @@ namespace xo {
         } /*run_throttled_until*/
 
         void
-        Simulator::display(std::ostream & os) const
+        Simulator::pretty(xo::pp::PpSink & sink) const
         {
-            os << "<Simulator"
-               << xtag("sim_heap.size", sim_heap_.size())
-               << xtag("n_event", n_event_)
-               << xtag("src_v.size", src_v_.size())
-               << ">";
-        } /*display*/
+            using xo::pp::field;
+
+            const auto nheap = sim_heap_.size();
+            const auto nsrc = src_v_.size();
+
+            sink.pretty_struct("Simulator",
+                               field("sim_heap.size", nheap),
+                               field("n_event", n_event_),
+                               field("src_v.size", nsrc));
+        }
 
     } /*namespace sim*/
 } /*namespace xo*/

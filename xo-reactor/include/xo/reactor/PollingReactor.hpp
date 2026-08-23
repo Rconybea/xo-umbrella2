@@ -22,7 +22,7 @@ namespace xo {
             virtual void notify_source_primed(bp<ReactorSource> src) override;
             virtual std::uint64_t run_one() override;
 
-            virtual void display(std::ostream & os) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             PollingReactor() = default;

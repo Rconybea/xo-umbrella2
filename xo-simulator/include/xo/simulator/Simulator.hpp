@@ -219,7 +219,7 @@ namespace xo {
             /* synonym for .advance_one_event() */
             virtual std::uint64_t run_one() override;
 
-            virtual void display(std::ostream & os) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             explicit Simulator(utc_nanos t0);

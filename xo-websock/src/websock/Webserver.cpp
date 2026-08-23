@@ -1992,6 +1992,10 @@ namespace xo {
             return tostr(rp<Webserver>(self));
         }
     } /*namespace web*/
+
+    namespace pp {
+        XO_PRETTIFIER_VIA_CONVERSION(xo::web::Runstate, xo::web::RunstateUtil::runstate_descr)
+    }
 } /*namespace xo*/
 
 /* end Webserver.cpp */

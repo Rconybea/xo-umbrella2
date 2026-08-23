@@ -12,8 +12,9 @@
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 #include <xo/timeutil/timeutil.hpp>
 #include <xo/cxxutil/demangle.hpp>
-#include <typeinfo>
 #include <xo/ppsink/pretty_pair.hpp>      /* Prettifier<std::pair<T,U>> */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <typeinfo>
 #include <iostream>                     /* for std::cout */
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
@@ -179,13 +180,16 @@ namespace xo {
                 fn_(ev);
             } /*notify_ev*/
 
-            virtual void display(std::ostream & os) const override {
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
 
-                os << "<SinkToFunction"
-                   << xo::pp::xtag("name", this->name())
-                   << xo::pp::xtag("n_in_ev", this->n_in_ev())
-                   << ">";
-            } /*display*/
+                const auto nm = this->name();
+                const auto n = this->n_in_ev();
+
+                sink.pretty_struct("SinkToFunction",
+                                   field("name", nm),
+                                   field("n_in_ev", n));
+            }
 
         private:
             Fn fn_;
@@ -215,13 +219,16 @@ namespace xo {
                 std::cout << std::endl;
             } /*notify_ev*/
 
-            virtual void display(std::ostream & os) const override {
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
 
-                os << "<SinkToConsole"
-                   << xo::pp::xtag("name", this->name())
-                   << xo::pp::xtag("n_in_ev", this->n_in_ev())
-                   << ">";
-            } /*display*/
+                const auto nm = this->name();
+                const auto n = this->n_in_ev();
+
+                sink.pretty_struct("SinkToConsole",
+                                   field("name", nm),
+                                   field("n_in_ev", n));
+            }
 
         private:
             /* reporting name for this sink */

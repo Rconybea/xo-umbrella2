@@ -11,6 +11,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 #include <xo/timeutil/timeutil.hpp>
 
 /* NB xo::pp names are QUALIFIED throughout this header, not brought in by
@@ -258,14 +259,16 @@ namespace xo {
 
             // ----- Inherited from AbstractSource -----
 
-            virtual void display(std::ostream & os) const override {
-                using xo::pp::xtag;
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
 
-                os << "<EventStoreImpl"
-                   << xtag("name", this->name())
-                   << xtag("n_in_ev", this->n_in_ev())
-                   << ">";
-            } /*display*/
+                const auto nm = this->name();
+                const auto n = this->n_in_ev();
+
+                sink.pretty_struct("EventStoreImpl",
+                                   field("name", nm),
+                                   field("n_in_ev", n));
+            }
 
             // ----- Inherited from AbstractEventProcessor -----
 

@@ -6,10 +6,11 @@
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
 #include <xo/refcnt/Displayable.hpp>
+#include <xo/ppsink/Prettifier.hpp>   /* Prettifier<>, XO_PRETTIFIER_DECLARE */
+#include <libwebsockets.h> // temporary,  while moving callbacks
 #include <memory>
 #include <thread>
 #include <vector>
-#include <libwebsockets.h> // temporary,  while moving callbacks
 
 namespace xo {
     namespace web {
@@ -19,11 +20,6 @@ namespace xo {
         public:
             static char const * runstate_descr(Runstate x);
         }; /*RunstateUtil*/
-
-        inline std::ostream & operator<<(std::ostream &os, Runstate x) {
-            os << RunstateUtil::runstate_descr(x);
-            return os;
-        } /*operator<<*/
 
         class WebserverConfig {
         public:
@@ -112,6 +108,10 @@ namespace xo {
             virtual std::string display_string() const override;
         }; /*Webserver*/
     } /*namespace web*/
+
+    namespace pp {
+        XO_PRETTIFIER_DECLARE(xo::web::Runstate);
+    }
 } /*namespace xo*/
 
 /* end Webserver.hpp */

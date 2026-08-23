@@ -3,7 +3,8 @@
 #include "PollingReactor.hpp"
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
     using std::size_t;
@@ -110,11 +111,14 @@ namespace xo {
         } /*run_one*/
 
         void
-        PollingReactor::display(std::ostream & os) const {
-            os << "<PollingReactor"
-               << xtag("next_ix", next_ix_)
-               << xtag("source_v.size", source_v_.size())
-               << ">";
+        PollingReactor::pretty(xo::pp::PpSink & sink) const {
+            using xo::pp::field;
+
+            const auto nsrc = source_v_.size();
+
+            sink.pretty_struct("PollingReactor",
+                               field("next_ix", next_ix_),
+                               field("source_v.size", nsrc));
         }
 
     } /*namespace reactor*/

@@ -4,7 +4,9 @@
 
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/ppsink/log_level.hpp>
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 #include <cstdint>
+#include <concepts>   /* std::derived_from */
 
 namespace xo {
     namespace reactor {
@@ -61,9 +63,8 @@ namespace xo {
              */
             void run() { this->run_n(-1); }
 
-            /** print self human-readably on stream @p os
-             **/
-            virtual void display(std::ostream & os) const = 0;
+            /** render self into @p sink **/
+            virtual void pretty(xo::pp::PpSink & sink) const = 0;
 
         protected:
             Reactor();
@@ -73,12 +74,20 @@ namespace xo {
             xo::pp::log_level loglevel_;
         }; /*Reactor*/
 
-        inline std::ostream &
-        operator<<(std::ostream & os, const Reactor & x) {
-            x.display(os);
-            return os;
-        }
     } /*namespace reactor*/
+
+    namespace pp {
+        /** see the note on Prettifier for the AbstractEventProcessor
+         *  hierarchy: same reason for constraining rather than specializing.
+         **/
+        template <typename T>
+            requires std::derived_from<T, xo::reactor::Reactor>
+        struct Prettifier<T> {
+            static void print(PpSink & sink, const T & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end Reactor.hpp */

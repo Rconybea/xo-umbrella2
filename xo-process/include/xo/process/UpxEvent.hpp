@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <xo/ppsink/Prettifier.hpp>   /* pretty(PpSink&), Prettifier<> */
 #include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
@@ -30,7 +31,7 @@ namespace xo {
             //double upx() const { return contents_.second; }
             double upx() const { return upx_; }
 
-            void display(std::ostream & os) const;
+            void pretty(xo::pp::PpSink & sink) const;
             std::string display_string() const;
 
         private:
@@ -42,13 +43,16 @@ namespace xo {
             //std::pair<utc_nanos, double> contents_;
         }; /*UpxEvent*/
 
-        inline std::ostream &
-        operator<<(std::ostream & os, UpxEvent const & x) {
-            x.display(os);
-            return os;
-        } /*operator<<*/
-
     } /*namespace process*/
+
+    namespace pp {
+        template <>
+        struct Prettifier<xo::process::UpxEvent> {
+            static void print(PpSink & sink, const xo::process::UpxEvent & x) {
+                x.pretty(sink);
+            }
+        };
+    }
 } /*namespace xo*/
 
 /* end UpxEvent.hpp */

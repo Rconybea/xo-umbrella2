@@ -2,7 +2,8 @@
 
 #include "AbstractEventProcessor.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
-#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+//#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 #include <map>
 #include <unordered_map>
 
@@ -15,7 +16,6 @@ namespace xo {
          * have not migrated) rather than shadowing it.
          */
         using xo::pp::tostr;
-        using xo::pp::xtag;
 
         namespace {
             /* search all event processors ep reachable (dowstream) from x,
@@ -81,10 +81,15 @@ namespace xo {
         } /*map_network*/
 
         void
-        AbstractEventProcessor::display(std::ostream & os) const
+        AbstractEventProcessor::pretty(xo::pp::PpSink & sink) const
         {
-            os << "<AbstractEventProcessor" << xtag("name", name()) << ">";
-        } /*display*/
+            using xo::pp::field;
+
+            /* name() returns by value; field() holds a reference */
+            const auto nm = this->name();
+
+            sink.pretty_struct("AbstractEventProcessor", field("name", nm));
+        }
 
         std::string
         AbstractEventProcessor::display_string() const

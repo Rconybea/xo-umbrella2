@@ -23,7 +23,7 @@ namespace xo {
             virtual uint32_t n_in_ev() const override { return 0; }
             virtual bool allow_volatile_source() const override { return true; }
             virtual void notify_ev(int const & ev) override {}
-            virtual void display(std::ostream & os) const override { os << "<TestSink>"; }
+            virtual void pretty(xo::pp::PpSink & sink) const override { sink.put("<TestSink>"); }
         }; /*TestSink*/
 
         class TestSink2 : public SinkEndpoint<utc_nanos> {
@@ -33,7 +33,7 @@ namespace xo {
             virtual uint32_t n_in_ev() const override { return 0; }
             virtual bool allow_volatile_source() const override { return true; }
             virtual void notify_ev(utc_nanos const & ev) override {}
-            virtual void display(std::ostream & os) const override { os << "<TestSink2>"; }
+            virtual void pretty(xo::pp::PpSink & sink) const override { sink.put("<TestSink2>"); }
         }; /*TestSink2*/
 
         using TestSink3 = SinkToConsole<std::pair<utc_nanos, double>>;

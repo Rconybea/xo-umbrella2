@@ -34,7 +34,7 @@ namespace xo {
             /* filter captures KF input pointer */
             virtual bool allow_volatile_source() const override { return false; }
             virtual uint32_t n_in_ev() const override { return n_in_ev_; }
-            virtual void display(std::ostream & os) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
             // ----- inherited from reactor::AbstractSource -----
 
