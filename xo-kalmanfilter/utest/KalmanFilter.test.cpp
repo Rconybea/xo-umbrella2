@@ -32,7 +32,7 @@ namespace xo {
     using xo::time::seconds;
     using xo::rp;
     using xo::pp::matrix;
-    using xo::pp::vector;
+    //using xo::pp::vector;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 

@@ -20,7 +20,7 @@ namespace xo {
     using xo::time::utc_nanos;
     using xo::rp;
     using xo::pp::matrix;
-    using xo::pp::vector;
+    //using xo::pp::vector;
     //using xo::scope;
     //using Eigen::LDLT;
     using Eigen::MatrixXd;
