@@ -31,6 +31,8 @@ namespace xo {
             void assign_name(const std::string & x) { name_ = x; }
             void assign_td(TypeDescr x) { td_ = x; }
 
+            // keeping until we're certain formal_arg::pretty() is implemented
+#ifdef OBSOLETE
             void print(std::ostream & os) const {
                 using xo::pp::xtag;
 
@@ -41,6 +43,7 @@ namespace xo {
                     os << xtag("td", td_);
                 os << ">";
             }
+#endif
 
             void pretty(PpSink & sink) const;
 
