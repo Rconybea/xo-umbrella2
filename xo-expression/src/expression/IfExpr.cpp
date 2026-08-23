@@ -51,18 +51,6 @@ namespace xo {
                               when_false);
         } /*make*/
 
-#ifdef OBSOLETE
-        void
-        IfExpr::display(std::ostream & os) const {
-            os << "<IfExpr"
-               << xtag("test", test_)
-               << xtag("when_true", when_true_);
-            if (when_false_)
-                os << xtag("when_false", when_false_);
-            os << ">";
-        } /*display*/
-#endif
-
         void
         IfExpr::pretty(xo::pp::PpSink & sink) const {
             sink.pretty_struct("IfExpr",

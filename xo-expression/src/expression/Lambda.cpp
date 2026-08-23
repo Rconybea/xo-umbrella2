@@ -267,18 +267,6 @@ namespace xo {
               body_{body},
               local_env_{local_env}
         {
-#ifdef OBSOLETE
-            stringstream ss;
-            ss << "double";
-            ss << "(";
-            for (std::size_t i = 0, n = this->n_arg(); i < n; ++i) {
-                if (i > 0)
-                    ss << ",";
-                ss << "double";
-            }
-            ss << ")";
-#endif
-
             if (lambda_td)
                 this->type_str_ = assemble_type_str(lambda_td);
 
@@ -342,17 +330,6 @@ namespace xo {
 
             /** establish a binding path for each variable **/
         }
-
-#ifdef OBSOLETE
-        void
-        Lambda::display(std::ostream & os) const {
-            os << "<Lambda"
-               << xtag("name", name_)
-               << xtag("argv", local_env_->argv())
-               << xtag("body", body_)
-               << ">";
-        } /*display*/
-#endif
 
         void
         Lambda::pretty(xo::pp::PpSink & sink) const

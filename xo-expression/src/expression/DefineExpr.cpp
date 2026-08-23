@@ -55,16 +55,6 @@ namespace xo {
             return retval;
         } /*calc_free_variables*/
 
-#ifdef OBSOLETE
-        void
-        DefineExpr::display(std::ostream & os) const {
-            os << "<Define"
-               << xtag("name", lhs_var_->name())
-               << xtag("rhs", rhs_)
-               << ">";
-        } /*display*/
-#endif
-
         void
         DefineExpr::pretty(xo::pp::PpSink & sink) const
         {

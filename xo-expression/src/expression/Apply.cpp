@@ -161,16 +161,6 @@ namespace xo {
                 arg->attach_envs(p);
         }
 
-#ifdef OBSOLETE
-        void
-        Apply::display(std::ostream & os) const {
-            os << "<Apply"
-               << xtag("fn", fn_)
-               << xtag("argv", argv_)
-               << ">";
-        }
-#endif
-
         void
         Apply::pretty(xo::pp::PpSink & sink) const
         {

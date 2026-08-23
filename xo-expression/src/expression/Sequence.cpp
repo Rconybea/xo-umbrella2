@@ -66,20 +66,6 @@ namespace xo {
                 x->attach_envs(p);
         }
 
-#ifdef OBSOLETE
-        void
-        Sequence::display(std::ostream & os) const {
-            os << "<Sequence";
-            std::size_t i = 0;
-            for (const auto & x : expr_v_) {
-                os << xtag(xo::pp::concat("[", i, "]"), x);
-                ++i;
-            }
-
-            os << ">";
-        }
-#endif
-
         void
         Sequence::pretty(xo::pp::PpSink & sink) const
         {
