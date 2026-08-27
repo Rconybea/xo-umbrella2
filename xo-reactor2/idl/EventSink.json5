@@ -1,0 +1,97 @@
+{
+	mode: "facet",
+	output_cpp_dir: "src/reactor2",
+	output_hpp_dir: "include/xo/reactor2",
+	output_impl_subdir: "detail",
+	includes: [
+		// "<xo/stringtable2/DString.hpp>"
+	],
+	user_hpp_includes: [
+	],
+	namespace1: "xo",
+	namespace2: "reactor",
+	pretext: [
+		"namespace xo::reflect { class TypeDescrBase; }",
+		"namespace xo::reflect { using TypeDescr = TypeDescrBase const *; }",
+		"namespace xo::reflect { class TaggedPtr; }",
+	],
+	facet: "EventSink",
+	detail_subdir: "detail",
+	brief: "typed event sink",
+	using_doxygen: true,
+	doc: [
+		"Trait for consuming a typed stream of events",
+	],
+	types: [
+		{
+			name: "TypeDescr",
+			doc: ["reflected type information"],
+			definition: "xo::reflect::TypeDescr",
+		},
+		{
+			name: "TaggedPtr",
+			doc: ["variant object"],
+			definition: "xo::reflect::TaggedPtr",
+		},
+	],
+	const_methods: [
+		{
+			// bool allow_polymorphic_source() const
+			name: "allow_polymorphic_source",
+			doc: ["if true, accept events of any time at runtime (via tagged variant)"],
+			return_type: "bool",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+		{
+			// TypeDescr sink_ev_type() const
+			name: "sink_ev_type",
+			doc: ["require incoming events satisfy this type (unless polymorphic source)"],
+			return_type: "TypeDescr",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+		{
+			// bool allow_volatile_events() const
+			name: "allow_volatile_source",
+			doc: ["if true, accept events that may be externally modified/destroyed after delivery"],
+			return_type: "bool",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+		{
+			// uint32_t n_in_ev() const
+			name: "n_in_ev",
+			doc: ["report lifetime number of incoming events at this sink"],
+			return_type: "uint32_t",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+	],
+	nonconst_methods: [
+		// void attach_source<obj<AEventSource>>
+
+		{
+			// void notify_ev_tp(const TaggedPtr & ev_tp)
+			name: "notify_ev_tp",
+			doc: ["report incoming event to this sink"],
+			return_type: "void",
+			args: [
+				{type: "const TaggedPtr &", name: "ev_tp"},
+			],
+			const: false,
+			noexcept: false,
+			attributes: [],
+		},
+	],
+	router_facet_explicit_content: [
+	],
+}

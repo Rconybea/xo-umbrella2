@@ -1,0 +1,114 @@
+{
+	mode: "facet",
+	output_cpp_dir: "src/reactor2",
+	output_hpp_dir: "include/xo/reactor2",
+	output_impl_subdir: "detail",
+	includes: [
+		// "<xo/stringtable2/DString.hpp>"
+	],
+	user_hpp_includes: [
+		// too late to be useful in AEventSource
+		// "<xo/reflect/TypeDescr.hpp>",
+	],
+	namespace1: "xo",
+	namespace2: "reactor",
+	pretext: [
+		"#include \"EventSink.hpp\"",
+		"#include <xo/callback/CallbackId.hpp>", 
+		"#include <xo/reflect/TypeDescr.hpp>",
+	],
+	facet: "EventSource",
+	detail_subdir: "detail",
+	brief: "typed event source",
+	using_doxygen: true,
+	doc: [
+		"Trait for producing a typed stream of events"
+	],
+	types: [
+		{
+			name: "CallbackId",
+			doc: ["identifies a source->sink connection"],
+			definition: "xo::fn::CallbackId",
+		},
+		{
+			name: "TypeDescr",
+			doc: ["reflected type information"],
+			definition: "xo::reflect::TypeDescr",
+		},
+	],
+	const_methods: [
+		{
+			// TypeDescr source_ev_type() const
+			name: "source_ev_type",
+			doc: ["promise produced events satisfy this type"],
+			return_type: "TypeDescr",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+		{
+			// bool is_volatile() const
+			name: "is_volatile",
+			doc: ["true if event objects may be overwritten between callbacks."],
+			return_type: "bool",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+		{
+			// uint32_t n_queued_out_ev() const
+			name: "n_queued_out_ev",
+			doc: ["counts outbound events ready for delivery, but not yet sent"],
+			return_type: "uint32_t",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+		{
+			// uint32_t n_out_ev() const
+			name: "n_out_ev",
+			doc: ["lifetime number of events produced by this source"],
+			return_type: "uint32_t",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+	],
+	nonconst_methods: [
+		{
+			name: "attach_sink",
+			doc: ["attach sink to this source. Return value can be used to detach later"],
+			return_type: "CallbackId",
+			args: [
+				{type: "obj<AEventSink>", name: "sink"},
+			],
+			const: false,
+			noexcept: false,
+			attributes: [],
+		},
+		{
+			name: "detach_sink",
+			doc: ["detach sink from this source"],
+			return_type: "void",
+			args: [
+				{type: "CallbackId", name: "id"},
+			],
+			const: false,
+			noexcept: false,
+			attributes: [],
+		},
+		{
+			name: "deliver_one",
+			doc: ["force delivery of one event. Returns number of events delivered. Prefer reactor"],
+			return_type: "uint64_t",
+			args: [],
+			const: false,
+			noexcept: false,
+			attributes: [],
+		}
+	],
+}

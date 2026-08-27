@@ -1,0 +1,62 @@
+{
+	mode: "facet",
+	output_cpp_dir: "src/reactor2",
+	output_hpp_dir: "include/xo/reactor2",
+	output_impl_subdir: "detail",
+	includes: [
+		"<xo/stringtable2/DString.hpp>"
+	],
+	user_hpp_includes: [
+	],
+	namespace1: "xo",
+	namespace2: "reactor",
+	pretext: [
+		"namespace xo::scm { class DString; }",
+	],
+	facet: "AbstractEventProcessor",
+	detail_subdir: "detail",
+	brief: "dataflow graph nodes",
+	using_doxygen: true,
+	doc: [
+		"Trait for data types representing nodes in a computational dataflow graph."
+	],
+	types: [
+		{
+			name: "obj_AAbstractEventProcessor",
+			doc: [],
+			definition: "xo::facet::obj<AAbstractEventProcessor>",
+		},
+		{
+			name: "DString",
+			doc: ["string representation"],
+			definition: "xo::scm::DString",
+		},
+	],
+	const_methods: [
+		{
+			// const DString & name() const noexcept
+			name: "name",
+			doc: ["Reporting name for this node.  Ideally (but not necessarily) unique"],
+			return_type: "const DString *",
+			args: [],
+			const: true,
+			noexcept: true,
+			attributes: [],
+		},
+	],
+	nonconst_methods: [
+		{
+			name: "set_name",
+			doc: ["Assign reporting name for this node."],
+			return_type: "void",
+			args: [
+				{type: "const DString *", name: "name"},
+			],
+			const: false,
+			noexcept: true,
+			attributes: [],
+		},
+	],
+	router_facet_explicit_content: [],
+}
+

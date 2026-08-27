@@ -112,6 +112,7 @@ add_subdirectory(xo-allocutil)    # xo-alloc api
 add_subdirectory(xo-ratio)
 add_subdirectory(xo-unit)         # constexpr dimension checking
 add_subdirectory(xo-callback)
+add_subdirectory(xo-reactor2)     # reactor (w/ fomo)
 add_subdirectory(xo-alloc)        # arena allocator + incremental gc
 add_subdirectory(xo-pyunit)
 #add_subdirectory(xo-reflect2)     # experiment w/ facet object model
