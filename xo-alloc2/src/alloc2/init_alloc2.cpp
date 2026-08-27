@@ -23,7 +23,7 @@ namespace xo {
     {
         InitEvidence retval;
 
-        /* direct subsystem deps for xo-alloc2/ (if/when) */
+        /* direct subsystem deps for xo-alloc2/ */
         retval ^= InitSubsys<S_indentlog2_tag>::require();
 
         /* xo-alloc2/'s own initialization code */
