@@ -9,98 +9,88 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
-/* NB xo::pp names are QUALIFIED throughout this header, not brought in by
- * using-declarations.  Two reasons:
- *   - a using-decl at namespace scope in a public header leaks into every
- *     consumer's scope;
- *   - a function-local one is not enough either: ADL adds legacy xo::xtag
- *     whenever an argument type lives in namespace xo, and merges it into
- *     the candidate set.  Only a qualified call avoids that.
- */
+namespace xo:reactor {
+    /* adapter between a source that delivers a particular event type T,
+     * and a sink that accepts arbitrarily-typed events via .notify_ev_tp()
+     * Use this to connect to a polymorphic sink.
+     *
+     * Require:
+     * - .poly_sink.allow_polymorphic_source()
+     *   (ofc.  otherwise no point in using PolyAdapterSink<T>)
+     * - .poly_sink.allow_volatile_source()
+     *   need this bc will be wrapping event with TaggedPtr,
+     *   which doesn't manage event lifetime
+     */
+    template<typename T>
+    class PolyAdapterSink : public reactor::Sink1<T> {
+    public:
+        using Reflect = reflect::Reflect;
+        using TaggedPtr = reflect::TaggedPtr;
+        using PpSink = xo::pp::PpSink;
 
-namespace xo {
-    namespace reactor {
-        /* adapter between a source that delivers a particular event type T,
-         * and a sink that accepts arbitrarily-typed events via .notify_ev_tp()
-         * Use this to connect to a polymorphic sink.
-         *
-         * Require:
-         * - .poly_sink.allow_polymorphic_source()
-         *   (ofc.  otherwise no point in using PolyAdapterSink<T>)
-         * - .poly_sink.allow_volatile_source()
-         *   need this bc will be wrapping event with TaggedPtr,
-         *   which doesn't manage event lifetime
+    public:
+        /* named ctor idiom */
+        static rp<PolyAdapterSink> make(rp<AbstractSink> poly_sink) {
+            //xo::scope lscope("PolyAdapterSink::make");
+
+            rp<PolyAdapterSink> retval(new PolyAdapterSink(poly_sink));
+
+            //lscope.log("adapter", (void*)retval.get());
+
+            return retval;
+        } /*make*/
+
+        // ----- Inherited from Sink1<T> -----
+
+        virtual void notify_ev(T const & ev) override {
+            //xo::scope lscope("PolyAdapterSink::notify_ev");
+            //lscope.log(xo::xtag("ev", ev));
+
+            TaggedPtr ev_tp = Reflect::make_tp(const_cast<T *>(&ev));
+
+            this->notify_ev_tp(ev_tp);
+        } /*notify_ev*/
+
+        // ----- Inherited from AbstractSink -----
+
+        virtual bool allow_volatile_source() const override { return true; }
+        virtual uint32_t n_in_ev() const override  { return this->poly_sink_->n_in_ev(); }
+        /* note: ok to do this,  however if expecting to use this entry point,
+         *       maybe don't need to interpose PolyAdapterSink<T> ahead of .poly_sink
          */
-        template<typename T>
-        class PolyAdapterSink : public reactor::Sink1<T> {
-        public:
-            using Reflect = reflect::Reflect;
-            using TaggedPtr = reflect::TaggedPtr;
+        virtual void notify_ev_tp(TaggedPtr const & ev_tp) override {
+            //xo::scope lscope("PolyAdapterSink::notify_ev_tp");
 
-        public:
-            /* named ctor idiom */
-            static rp<PolyAdapterSink> make(rp<AbstractSink> poly_sink) {
-                //xo::scope lscope("PolyAdapterSink::make");
+            return this->poly_sink_->notify_ev_tp(ev_tp);
+        }
 
-                rp<PolyAdapterSink> retval(new PolyAdapterSink(poly_sink));
+        // ----- Inherited from AbstractEventProcessor -----
 
-                //lscope.log("adapter", (void*)retval.get());
+        virtual std::string const & name() const override { return this->poly_sink_->name(); }
+        virtual void set_name(std::string const & x) override { this->poly_sink_->set_name(x); }
+        virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor> ep)> const & fn) override {
+            this->poly_sink_->visit_direct_consumers(fn);
+        }
 
-                return retval;
-            } /*make*/
+        virtual void pretty(PpSink & sink) const override {
+            using xo::pp::field;
 
-            // ----- Inherited from Sink1<T> -----
+            const void * addr = this;
+            const auto tnm = reflect::type_name<T>();
 
-            virtual void notify_ev(T const & ev) override {
-                //xo::scope lscope("PolyAdapterSink::notify_ev");
-                //lscope.log(xo::xtag("ev", ev));
+            sink.pretty_struct("PolyAdapterSink",
+                               field("addr", addr),
+                               field("T", tnm),
+                               field("poly", this->poly_sink_));
+        }
 
-                TaggedPtr ev_tp = Reflect::make_tp(const_cast<T *>(&ev));
+    private:
+        PolyAdapterSink(rp<AbstractSink> poly_sink) : poly_sink_{std::move(poly_sink)} {}
 
-                this->notify_ev_tp(ev_tp);
-            } /*notify_ev*/
-
-            // ----- Inherited from AbstractSink -----
-
-            virtual bool allow_volatile_source() const override { return true; }
-            virtual uint32_t n_in_ev() const override  { return this->poly_sink_->n_in_ev(); }
-            /* note: ok to do this,  however if expecting to use this entry point,
-             *       maybe don't need to interpose PolyAdapterSink<T> ahead of .poly_sink
-             */
-            virtual void notify_ev_tp(TaggedPtr const & ev_tp) override {
-                //xo::scope lscope("PolyAdapterSink::notify_ev_tp");
-
-                return this->poly_sink_->notify_ev_tp(ev_tp);
-            }
-
-            // ----- Inherited from AbstractEventProcessor -----
-
-            virtual std::string const & name() const override { return this->poly_sink_->name(); }
-            virtual void set_name(std::string const & x) override { this->poly_sink_->set_name(x); }
-            virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor> ep)> const & fn) override {
-                this->poly_sink_->visit_direct_consumers(fn);
-            }
-
-            virtual void pretty(xo::pp::PpSink & sink) const override {
-                using xo::pp::field;
-
-                const void * addr = this;
-                const auto tnm = reflect::type_name<T>();
-
-                sink.pretty_struct("PolyAdapterSink",
-                                   field("addr", addr),
-                                   field("T", tnm),
-                                   field("poly", this->poly_sink_));
-            }
-
-        private:
-            PolyAdapterSink(rp<AbstractSink> poly_sink) : poly_sink_{std::move(poly_sink)} {}
-
-        private:
-            /* mandate: .poly_sink.allow_polymorphic_source() is true */
-            rp<AbstractSink> poly_sink_;
-        }; /*PolyAdapterSink*/
-    } /*namespace reactor*/
-} /*namespace xo*/
+    private:
+        /* mandate: .poly_sink.allow_polymorphic_source() is true */
+        rp<AbstractSink> poly_sink_;
+    }; /*PolyAdapterSink*/
+} /*namespace xo::reactor*/
 
 /* end PolyAdapterSink.hpp */
