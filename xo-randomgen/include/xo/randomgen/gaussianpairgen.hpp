@@ -3,8 +3,8 @@
 #pragma once
 
 #include "generator.hpp"
+#include "normal_dist.hpp"
 #include <array>
-#include <random>
 
 namespace xo {
     namespace random {
@@ -84,8 +84,11 @@ namespace xo {
             /* q := sqrt(1-r^2) */
             FloatType q_;
 
-            /* state for generating indept normally-distributed r.v's */
-            std::normal_distribution<FloatType> ndist_;
+            /* state for generating indept normally-distributed r.v's.
+             * NB xo::rng::normal_dist, not std::normal_distribution: see
+             * normal_dist.hpp
+             */
+            xo::rng::normal_dist<FloatType> ndist_;
         }; /*gaussianpair_dist*/
 
         /* generate pairs of correlated gaussian random variables */

@@ -177,7 +177,7 @@ namespace xo {
             BrownianMotion(utc_nanos t0, double sdev, Seed const & seed)
                 : BrownianMotionBase(t0, sdev),
                   rng_{normalgen_type::make(RngEngine(seed),
-                                       std::normal_distribution(0.0 /*mean*/, 1.0 /*sdev*/))} {
+                                       xo::rng::normal_dist<double>(0.0 /*mean*/, 1.0 /*sdev*/))} {
                 BrownianMotion<RngEngine>::reflect_self();
             }
 

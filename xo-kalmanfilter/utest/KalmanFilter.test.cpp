@@ -105,7 +105,7 @@ namespace xo {
             auto normal_rng
                 = (normalgen<xoshiro256ss>::make
                    (seed,
-                    std::normal_distribution<double>(0.0 /*mean*/,
+                    xo::rng::normal_dist<double>(0.0 /*mean*/,
                                                      1.0 /*sdev*/)));
 
             /* accumulate statistics on 'measurements',
@@ -221,7 +221,7 @@ namespace xo {
             auto normal_rng
                 = (normalgen<xoshiro256ss>::make
                    (seed,
-                    std::normal_distribution(0.0 /*mean*/,
+                    xo::rng::normal_dist<double>(0.0 /*mean*/,
                                              1.0 /*sdev*/)));
 
             /* accumulate statistics on 'measurements',
@@ -365,7 +365,7 @@ namespace xo {
             auto normal_rng
                 = (normalgen<xoshiro256ss>::make
                    (seed,
-                    std::normal_distribution(0.0 /*mean*/,
+                    xo::rng::normal_dist<double>(0.0 /*mean*/,
                                              1.0 /*sdev*/)));
 
             /* accumulate statistics on 'measurements',
@@ -526,7 +526,7 @@ namespace xo {
             auto normal_rng
                 = (normalgen<xoshiro256ss>::make
                    (seed,
-                    std::normal_distribution(0.0 /*mean*/,
+                    xo::rng::normal_dist<double>(0.0 /*mean*/,
                                              1.0 /*sdev*/)));
 
             /* accumulate statistics on observations,
