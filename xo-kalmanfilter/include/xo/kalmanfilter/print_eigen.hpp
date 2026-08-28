@@ -8,7 +8,7 @@ namespace xo::pp {
     template<typename T>
     class matrix {
     public:
-        matrix(T x) : x_{std::move(x)} {}
+        matrix(T & x) : x_{x} {}
 
         /* print this value */
         const T & x_;
@@ -49,13 +49,13 @@ namespace xo::pp {
          */
         sink.begin_here(0);
 
-        for (auto i = 0, m = x.rows(); i < m; ++i) {
+        for (auto i = 0l, m = x.rows(); i < m; ++i) {
             if (i > 0) {
                 sink.put(";");
                 sink.split(1, 0);
             }
 
-            for (auto j = 0, n = x.cols(); j < n; ++j) {
+            for (auto j = 0l, n = x.cols(); j < n; ++j) {
                 if (j > 0)
                     sink.put(" ");
 

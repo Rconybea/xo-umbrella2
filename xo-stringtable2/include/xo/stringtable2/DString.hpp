@@ -26,7 +26,7 @@ namespace xo {
          *  with string contents in memory immediately
          *  following the DString itself
          **/
-        struct DString {
+        class DString {
         public:
             /** @defgroup dstring-types type traits **/
             ///@{

@@ -9,7 +9,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
-namespace xo:reactor {
+namespace xo::reactor {
     /* adapter between a source that delivers a particular event type T,
      * and a sink that accepts arbitrarily-typed events via .notify_ev_tp()
      * Use this to connect to a polymorphic sink.

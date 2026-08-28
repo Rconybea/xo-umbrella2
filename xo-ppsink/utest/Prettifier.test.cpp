@@ -126,11 +126,8 @@ TEST_CASE("prettifier-leaves-char-types-alone", "[pretty][scalar]") {
     CHECK(tostr0(static_cast<unsigned char>(65)) == "A");
 }
 
-/* Pointers: byte-identical to operator<<(std::ostream&, const void*).
- *
- * The null case is the one worth pinning: libstdc++ renders a null pointer as
- * a bare "0", not "0x0" -- so a naive "0x" + to_chars would have changed output
- * for every null pointer in the tree.
+/* Pointers: byte-identical to operator<<(std::ostream&, const void*),
+ * except null, which xo renders "null".
  *
  * void* and const void* are checked separately because Prettifier<T> matches
  * exactly: covering one does not cover the other.  They were 307 and 52 of the
@@ -142,8 +139,10 @@ TEST_CASE("prettifier-pointer", "[prettifier][pointer]") {
     static_assert(xo::pp::has_prettifier<const void *>);
 
     int v = 7;
-    void * cases[] = { nullptr,
-                       reinterpret_cast<void *>(1),
+    /* null is pinned below instead: xo renders it "null", so it is not
+     * expected to match operator<< on any host
+     */
+    void * cases[] = { reinterpret_cast<void *>(1),
                        reinterpret_cast<void *>(0xff),
                        static_cast<void *>(&v) };
 
@@ -161,6 +160,7 @@ TEST_CASE("prettifier-pointer", "[prettifier][pointer]") {
     }
 
     /* the shape, spelled out, so a change on either side is visible here */
-    CHECK(tostr0(static_cast<void *>(nullptr)) == "0");
+    CHECK(tostr0(static_cast<void *>(nullptr)) == "null");
+    CHECK(tostr0(static_cast<const void *>(nullptr)) == "null");
     CHECK(tostr0(reinterpret_cast<void *>(0xff)) == "0xff");
 }

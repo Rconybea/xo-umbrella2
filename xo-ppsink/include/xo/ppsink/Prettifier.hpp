@@ -181,12 +181,12 @@ namespace xo::pp {
          * writes
          *    "0x1234" to sink
          *
-         * nullptr formatted as plain
-         *    "0"
+         * nullptr formatted as
+         *    "null"
          **/
         inline void pp_put_pointer(PpSink & sink, const void * p) {
             if (!p) {
-                sink.put(std::string_view("0"));
+                sink.put(std::string_view("null"));
                 return;
             }
 

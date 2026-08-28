@@ -8,6 +8,7 @@
 #include <xo/arena/hashmap/ControlGroup.hpp>
 #include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
 #include <xo/arena/DArenaVector.hpp>
+#include <algorithm>
 #include <cstdint>
 #include <cassert>
 
