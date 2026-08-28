@@ -85,9 +85,10 @@ add_subdirectory(xo-ppsink)       # arena-free pretty-print front-end (PpSink/Fl
 add_subdirectory(xo-indentlog)
 add_subdirectory(xo-subsys)
 add_subdirectory(xo-flatstring)
-add_subdirectory(xo-randomgen)    # xoshiro256ss
 add_subdirectory(xo-reflectutil)  # header-only reflect support
 add_subdirectory(xo-testutil)     # unit test aux functions (UtestRehearser).
+add_subdirectory(xo-randomgen)    # xoshiro256ss.
+                                  # NB after xo-testutil: utest.randomgen uses it
 add_subdirectory(xo-arena)        # arena allocator (DArena)
 add_subdirectory(xo-indentlog2)   # arena-backed version of indentlog
 add_subdirectory(xo-facet)        # sep iface,data
