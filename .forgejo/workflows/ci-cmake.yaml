@@ -161,6 +161,24 @@ jobs:
           xo-build --install xo-flatstring
           echo "::endgroup::"
 
+      - name: build xo-testutil
+        run: |
+          echo "::group::xo-testutil configure"
+          xo-build --configure --with-utests --with-examples xo-testutil
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil build"
+          xo-build --build xo-testutil
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil utest"
+          xo-build --utest xo-testutil
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil install"
+          xo-build --install xo-testutil
+          echo "::endgroup::"
+
       - name: build xo-randomgen
         run: |
           echo "::group::xo-randomgen configure"
@@ -195,24 +213,6 @@ jobs:
 
           echo "::group::xo-reflectutil install"
           xo-build --install xo-reflectutil
-          echo "::endgroup::"
-
-      - name: build xo-testutil
-        run: |
-          echo "::group::xo-testutil configure"
-          xo-build --configure --with-utests --with-examples xo-testutil
-          echo "::endgroup::"
-
-          echo "::group::xo-testutil build"
-          xo-build --build xo-testutil
-          echo "::endgroup::"
-
-          echo "::group::xo-testutil utest"
-          xo-build --utest xo-testutil
-          echo "::endgroup::"
-
-          echo "::group::xo-testutil install"
-          xo-build --install xo-testutil
           echo "::endgroup::"
 
       - name: build xo-arena
