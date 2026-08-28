@@ -8,6 +8,7 @@
 #include "RRouter.hpp"
 // #include "FacetRegistry.hpp"  // nope, would create include cycle
 #include <cassert>
+#include <type_traits>
 #include <utility>
 
 namespace xo {
@@ -164,10 +165,28 @@ namespace xo {
             static obj<AFacet, DRepr> mkobj(DRepr * data) { obj<AFacet, DRepr> x(data); return x; }
         };
 
+        /** true iff @tp T is a faceted object, i.e. obj<AFacet,DRepr>.
+         *
+         *  Distinguishes a fomo type from an ordinary c++ type, so generic
+         *  code can select facet-aware behavior at compile time -- e.g.
+         *  pivoting to another facet via FacetRegistry::try_variant(), which
+         *  is only meaningful for a faceted object.
+         **/
+        template <typename T>
+        struct is_fomo : std::false_type {};
+
+        template <typename AFacet, typename DRepr>
+        struct is_fomo<obj<AFacet, DRepr>> : std::true_type {};
+
+        template <typename T>
+        inline constexpr bool is_fomo_v = is_fomo<T>::value;
+
     } /*namespace facet*/
 
     using facet::obj;
     using facet::vt;
+    using facet::is_fomo;
+    using facet::is_fomo_v;
 } /*namespace xo*/
 
 /* end obj.hpp */

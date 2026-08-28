@@ -113,6 +113,7 @@ add_subdirectory(xo-allocutil)    # xo-alloc api
 add_subdirectory(xo-ratio)
 add_subdirectory(xo-unit)         # constexpr dimension checking
 add_subdirectory(xo-callback)
+add_subdirectory(xo-callback2)    # callback set over explicit obj<AAllocator> (fomo)
 add_subdirectory(xo-reactor2)     # reactor (w/ fomo)
 add_subdirectory(xo-alloc)        # arena allocator + incremental gc
 add_subdirectory(xo-pyunit)

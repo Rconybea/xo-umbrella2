@@ -487,6 +487,35 @@ namespace xo {
 
             REQUIRE(impl == nullptr);
         }
+
+        /* is_fomo distinguishes a faceted object from an ordinary c++ type,
+         * so generic code can select facet-aware behavior at compile time
+         * (e.g. pivoting via FacetRegistry::try_variant, which is only
+         * meaningful for a faceted object).
+         */
+        TEST_CASE("is_fomo", "[objectmodel][is_fomo]") {
+            /* faceted: both the typed and the type-erased (variant) form */
+            static_assert(xo::facet::is_fomo_v<obj<AComplex, DRectCoords>>);
+            static_assert(xo::facet::is_fomo_v<obj<AComplex, DPolarCoords>>);
+            static_assert(xo::facet::is_fomo_v<obj<AComplex>>);
+            static_assert(xo::facet::is_fomo_v<xo::facet::vt<AComplex>>);
+
+            /* not faceted: the bare representation, and ordinary types */
+            static_assert(!xo::facet::is_fomo_v<DRectCoords>);
+            static_assert(!xo::facet::is_fomo_v<DRectCoords *>);
+            static_assert(!xo::facet::is_fomo_v<AComplex>);
+            static_assert(!xo::facet::is_fomo_v<int>);
+            static_assert(!xo::facet::is_fomo_v<void (*)(int)>);
+
+            /* exported into namespace xo as well */
+            static_assert(xo::is_fomo_v<obj<AComplex, DRectCoords>>);
+            static_assert(!xo::is_fomo_v<int>);
+
+            /* the trait is a real type, not just the _v alias */
+            static_assert(xo::facet::is_fomo<obj<AComplex>>::value);
+
+            SUCCEED("is_fomo static assertions hold");
+        }
     }
 }
 
