@@ -1,0 +1,18 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/reactor2",
+    output_hpp_dir: "include/xo/reactor2",
+    output_impl_subdir: "event",
+    includes: [
+//        "<xo/alloc2/GCObject.hpp>",
+//        "<xo/alloc2/Allocator.hpp>"
+    ],
+    local_types: [ ],
+    namespace1: "xo",
+    namespace2: "process",
+    facet_idl: "idl/GCObject.json5",
+    brief: "provide AGCObject interface for DObjectEvent",
+    using_doxygen: true,
+    repr: "DObjectEvent",
+    doc: [ "implement AGCObject for DObjectEvent" ],
+}

@@ -1,0 +1,16 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/reactor2",
+    output_hpp_dir: "include/xo/reactor2",
+    output_impl_subdir: "event",
+    includes: [ "<xo/printable2/Printable.hpp>",
+                "<xo/printable2/detail/IPrintable_Xfer.hpp>" ],
+    local_types: [ ],
+    namespace1: "xo",
+    namespace2: "process",
+    facet_idl: "idl/Printable.json5",
+    brief: "provide APrintable interface for DObjectEvent",
+    using_doxygen: true,
+    repr: "DObjectEvent",
+    doc: [ "implement APrintable for DObjectEvent" ],
+}

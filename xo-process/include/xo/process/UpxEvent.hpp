@@ -17,18 +17,14 @@ namespace xo {
 
         public:
             UpxEvent();
-            //UpxEvent(std::pair<utc_nanos, double> const & x) : contents_{x} {}
             UpxEvent(std::pair<utc_nanos, double> const & x) : tm_{x.first}, upx_{x.second} {}
-            //UpxEvent(utc_nanos tm, double x) : contents_{tm, x} {}
             UpxEvent(utc_nanos tm, double x) : tm_{tm}, upx_{x} {}
 
             /* reflect UpxEvent object representation */
             static void reflect_self();
 
             /* convenience -- e.g. so we can use with EventTimeFn */
-            //utc_nanos tm() const { return contents_.first; }
             utc_nanos tm() const { return tm_; }
-            //double upx() const { return contents_.second; }
             double upx() const { return upx_; }
 
             void pretty(xo::pp::PpSink & sink) const;
@@ -40,7 +36,6 @@ namespace xo {
              */
             utc_nanos tm_;
             double upx_;
-            //std::pair<utc_nanos, double> contents_;
         }; /*UpxEvent*/
 
     } /*namespace process*/

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 
 namespace xo::reactor {
@@ -21,6 +22,7 @@ namespace xo::reactor {
     public:
         using Reflect = xo::reflect::Reflect;
         using TypeDescr = xo::reflect::TypeDescr;
+        using TaggedPtr = xo::reflect::TaggedPtr;
 
     public:
         /** @defgroup reactor-eventsink-facet **/
@@ -41,6 +43,8 @@ namespace xo::reactor {
 
         /** consume variant event. Typed sink will accept only events of type T **/
         void notify_ev_tp(const TaggedPtr & ev_tp) {
+            using xo::pp::xtag;
+
             T * p_ev = ev_tp.recover_native<T>();
 
             if (p_ev) {

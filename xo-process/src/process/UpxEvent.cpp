@@ -20,7 +20,6 @@ namespace xo {
             StructReflector<UpxEvent> sr;
 
             if (sr.is_incomplete()) {
-                //REFLECT_MEMBER(sr, contents);
                 REFLECT_MEMBER(sr, tm);
                 REFLECT_MEMBER(sr, upx);
             }

@@ -4,6 +4,7 @@
  */
 
 #include "init_reactor2.hpp"
+#include "setup_reactor2.hpp"
 #include <xo/stringtable2/init_stringtable2.hpp>
 #include <xo/reflect/init_reflect.hpp>
 #include <xo/subsys/Subsystem.hpp>
@@ -12,7 +13,12 @@ namespace xo {
     void
     InitSubsys<S_reactor2_tag>::init()
     {
+        using xo::process::SetupReactor2;
+
         /* placeholder -- expecting there to be non-trivial content soon */
+
+        SetupReactor2::register_facets();
+
     } /*init*/
 
     InitEvidence
