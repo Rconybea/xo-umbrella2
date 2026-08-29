@@ -38,7 +38,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-list
     FACET_PKG xo_printable2
-#    REPR List
     INPUT idl/IPrintable_DList.json5
 )
 
@@ -46,7 +45,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-list
     FACET_PKG xo_alloc2
-#    REPR List
     INPUT idl/IGCObject_DList.json5
 )
 
@@ -56,7 +54,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-boolean
     FACET_PKG xo_printable2
-#    REPR Boolean
     INPUT idl/IPrintable_DBoolean.json5
 )
 
@@ -64,7 +61,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-boolean
     FACET_PKG xo_alloc2
-#    REPR Boolean
     INPUT idl/IGCObject_DBoolean.json5
 )
 
@@ -74,7 +70,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-float
     FACET_PKG xo_printable2
-#    REPR Float
     INPUT idl/IPrintable_DFloat.json5
 )
 
@@ -82,7 +77,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-float
     FACET_PKG xo_alloc2
-#    REPR Float
     INPUT idl/IGCObject_DFloat.json5
 )
 
@@ -92,7 +86,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-integer
     FACET_PKG xo_printable2
-#    REPR Integer
     INPUT idl/IPrintable_DInteger.json5
 )
 
@@ -100,7 +93,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-integer
     FACET_PKG xo_alloc2
-#    REPR Integer
     INPUT idl/IGCObject_DInteger.json5
 )
 
@@ -110,7 +102,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-sequence-array
     FACET_PKG xo_object2
-#    REPR Array
     INPUT idl/ISequence_DArray.json5
 )
 
@@ -118,7 +109,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-array
     FACET_PKG xo_printable2
-#    REPR Array
     INPUT idl/IPrintable_DArray.json5
 )
 
@@ -126,7 +116,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-array
     FACET_PKG xo_alloc2
-#    REPR Array
     INPUT idl/IGCObject_DArray.json5
 )
 
@@ -136,7 +125,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-dictionary
     FACET_PKG xo_printable2
-#    REPR Dictionary
     INPUT idl/IPrintable_DDictionary.json5
  )
 
@@ -144,7 +132,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-dictionary
     FACET_PKG xo_alloc2
-#    REPR Dictionary
     INPUT idl/IGCObject_DDictionary.json5
 )
 
@@ -154,7 +141,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-runtimeerror
     FACET_PKG xo_printable2
-#    REPR RuntimeError
     INPUT idl/IPrintable_DRuntimeError.json5
  )
 
@@ -162,7 +148,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-runtimeerror
     FACET_PKG xo_alloc2
-#    REPR RuntimeError
     INPUT idl/IGCObject_DRuntimeError.json5
 )
 
