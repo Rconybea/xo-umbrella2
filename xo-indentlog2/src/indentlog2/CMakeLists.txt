@@ -3,6 +3,7 @@
 set(SELF_LIB xo_indentlog2)
 set(SELF_SRCS
     init_indentlog2.cpp
+    appcx_indentlog2.cpp
     SetupIndentlog2.cpp
     TempArena.cpp
     LogStreambuf.cpp

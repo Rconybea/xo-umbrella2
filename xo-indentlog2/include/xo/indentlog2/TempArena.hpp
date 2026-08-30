@@ -25,6 +25,8 @@ namespace xo::mm {
         using uint32_t = std::uint32_t;
 
     public:
+        TempArena() = default;
+
         /** Initialize (just remembers @p cap).
          **/
         static void init(uint32_t cap);

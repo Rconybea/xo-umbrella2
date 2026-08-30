@@ -45,6 +45,68 @@
 #include <type_traits>
 
 namespace xo {
+    /** @brief a subsystem that needs no configuration gets this
+     **/
+    struct NoConfig {};
+
+    /** Subsystems with runtime configuration specialize this for their tag,
+     *  providing their own Type alias.  Configuration is data only: no
+     *  resources, no runtime state -- those belong in the subsystem's context.
+     *
+     *  Default is NoConfig rather than void, so every tag has a config type
+     *  and AppConfig can be composed uniformly.
+     **/
+    template <typename SubsystemTag>
+    class SubsystemConfig {
+    public:
+        using Type = NoConfig;
+    };
+
+    template <typename SubsystemTag>
+    using SubsystemConfigType = SubsystemConfig<SubsystemTag>::Type;
+
+    /** @brief holds configuration for one subsystem **/
+    template <typename SubsystemTag>
+    class SubsystemConfigHolder {
+    public:
+        using ConfigType = SubsystemConfig<SubsystemTag>::Type;
+
+        SubsystemConfigHolder() requires std::default_initializable<ConfigType>
+            = default;
+        explicit SubsystemConfigHolder(const ConfigType & cfg) : cfg_{cfg} {}
+
+        ConfigType cfg_;
+    };
+
+    /** @brief application configuration, composed per subsystem.
+     *
+     *  Flat, unlike AppContext: configuration is settled before any context is
+     *  built, so it has no construction-order constraint.  Supply it in the
+     *  same @tp Tags order as the AppContext it will build.
+     *
+     *  Nothing here is static or global -- an application constructs its
+     *  configuration at runtime and hands it to AppContext, which is what keeps
+     *  us clear of the static initialization order problem.
+     **/
+    template <typename... Tags>
+    class AppConfig : public SubsystemConfigHolder<Tags>... {
+    public:
+        AppConfig() requires (std::default_initializable<SubsystemConfigType<Tags>> && ...)
+            = default;
+
+        explicit AppConfig(const SubsystemConfigType<Tags> &... cfgs)
+            : SubsystemConfigHolder<Tags>{cfgs}... {}
+
+        template <typename Tag>
+        const SubsystemConfigType<Tag> & cfg() const noexcept {
+            static_assert((std::is_same_v<Tag, Tags> || ...),
+                          "xo::AppConfig: subsystem tag is not part of this"
+                          " composition");
+
+            return static_cast<const SubsystemConfigHolder<Tag> *>(this)->cfg_;
+        }
+    }; /*AppConfig*/
+
     /** Participating subsystems specialize this for their unique subsystem tag,
      *  providing their own Type alias
      **/
@@ -78,15 +140,46 @@ namespace xo {
                       " Specialize SubsystemContext<> for this tag,"
                       " or omit the tag from the AppContext composition");
 
-        /** dependent subsystem: hand it the contexts below it **/
-        template <typename Deps>
-            requires std::constructible_from<ContextType, Deps &>
-        explicit SubsystemContextHolder(Deps & deps) : cx_{deps} {}
+        /* A context is constructed from whichever of {deps, config} it
+         * actually asks for.  The four forms are mutually exclusive and tried
+         * in this order, so a context that wants both is not ambiguous with
+         * one that wants either.
+         */
 
-        /** leaf subsystem: nothing below it that it wants **/
-        template <typename Deps>
-            requires (!std::constructible_from<ContextType, Deps &>)
-        explicit SubsystemContextHolder(Deps &) : cx_{} {}
+        /** wants its dependencies AND its configuration **/
+        template <typename Deps, typename Cfg>
+            requires std::constructible_from<ContextType, Deps &, const Cfg &>
+        SubsystemContextHolder(Deps & deps, const Cfg & cfg) : cx_{deps, cfg} {}
+
+        /** wants its dependencies only.
+         *
+         *  NB tried BEFORE the config-only form.  A context whose constructor
+         *  is an unconstrained template -- FooCx(Deps&) for any Deps -- is
+         *  constructible from the config type too, so constructible_from alone
+         *  cannot tell the two apart.  Preferring deps makes the common case
+         *  (a context that wants its dependencies) work without the author
+         *  having to constrain the ctor.  A context that wants ONLY config
+         *  must therefore not be constructible from the deps type -- which is
+         *  automatic when it names its config type concretely.
+         **/
+        template <typename Deps, typename Cfg>
+            requires (!std::constructible_from<ContextType, Deps &, const Cfg &>
+                      && std::constructible_from<ContextType, Deps &>)
+        SubsystemContextHolder(Deps & deps, const Cfg &) : cx_{deps} {}
+
+        /** wants configuration only **/
+        template <typename Deps, typename Cfg>
+            requires (!std::constructible_from<ContextType, Deps &, const Cfg &>
+                      && !std::constructible_from<ContextType, Deps &>
+                      && std::constructible_from<ContextType, const Cfg &>)
+        SubsystemContextHolder(Deps &, const Cfg & cfg) : cx_{cfg} {}
+
+        /** leaf subsystem: wants neither **/
+        template <typename Deps, typename Cfg>
+            requires (!std::constructible_from<ContextType, Deps &, const Cfg &>
+                      && !std::constructible_from<ContextType, Deps &>
+                      && !std::constructible_from<ContextType, const Cfg &>)
+        SubsystemContextHolder(Deps &, const Cfg &) : cx_{} {}
 
         /** this subsystem's contribution to application state **/
         ContextType cx_;
@@ -122,6 +215,12 @@ namespace xo {
         template <>
         class ContextChain<> {
         public:
+            ContextChain() = default;
+
+            /** accepts the config and ignores it: nothing below to configure **/
+            template <typename Config>
+            explicit ContextChain(const Config &) noexcept {}
+
             /** bottom of the chain: every lookup here is a subsystem making
              *  forbidden attempt to ask for something outside its
              *  dependency set.
@@ -145,13 +244,19 @@ namespace xo {
             /** contexts of every subsystem below @tp Head **/
             using PrefixType = ContextChain<Tail...>;
 
-            ContextChain()
-                : PrefixType{},
+            /** @p config supplies each subsystem's configuration; it is
+             *  threaded down the chain unchanged, and each holder takes only
+             *  its own slice.
+             **/
+            template <typename Config>
+            explicit ContextChain(const Config & config)
+                : PrefixType{config},
                   /* legal: PrefixType is a base whose construction has
                    * completed, so converting `this` to it is well-defined
                    * ([class.cdtor]).  Verified clean under UBSan.
                    */
-                  SubsystemContextHolder<Head>{ static_cast<PrefixType &>(*this) }
+                  SubsystemContextHolder<Head>{ static_cast<PrefixType &>(*this),
+                                                config.template cfg<Head>() }
                 {}
 
             template <typename Tag>
@@ -202,7 +307,14 @@ namespace xo {
     public:
         using ChainType = detail::chain_for<Tags...>;
 
-        AppContext() = default;
+        using ConfigType = AppConfig<Tags...>;
+
+        /** build every subsystem context, bottom-up, from @p config **/
+        explicit AppContext(const ConfigType & config) : ChainType{config} {}
+
+        /** all subsystems default-configured **/
+        AppContext() requires std::default_initializable<ConfigType>
+            : ChainType{ConfigType{}} {}
 
         /** context for subsystem @tp Tag.
          *
