@@ -5,19 +5,23 @@
 
 #pragma once
 
+#include "init_indentlog2.hpp"
 #include <cstdint>
 
 namespace xo {
     /** @brief configuration for subsystem xo-indentlog2/ **/
     class Indentlog2_Config {
     public:
-        Indentlog2_Config(uint32_t cap) : temp_arena_capacity_{cap} {}
+        Indentlog2_Config(uint32_t cap);
 
         uint32_t temp_arena_capacity() const { return temp_arena_capacity_; }
 
     private:
+        /** ensures low-level subsystem initialization **/
+        InitEvidence init_evidence_;
+
         /** capacity for thread-local temporary arena (TempArena::local()) **/
-        uint32_t temp_arena_capacity_ = 4 * 1024;
+        uint32_t temp_arena_capacity_;
     };
 } /*namespace xo*/
 

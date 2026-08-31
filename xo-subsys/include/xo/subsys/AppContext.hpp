@@ -43,6 +43,7 @@
 
 #include <concepts>
 #include <type_traits>
+#include <utility>
 
 namespace xo {
     /** @brief a subsystem that needs no configuration gets this
@@ -140,46 +141,26 @@ namespace xo {
                       " Specialize SubsystemContext<> for this tag,"
                       " or omit the tag from the AppContext composition");
 
-        /* A context is constructed from whichever of {deps, config} it
-         * actually asks for.  The four forms are mutually exclusive and tried
-         * in this order, so a context that wants both is not ambiguous with
-         * one that wants either.
-         */
-
-        /** wants its dependencies AND its configuration **/
-        template <typename Deps, typename Cfg>
-            requires std::constructible_from<ContextType, Deps &, const Cfg &>
-        SubsystemContextHolder(Deps & deps, const Cfg & cfg) : cx_{deps, cfg} {}
-
-        /** wants its dependencies only.
+        /** Construct this subsystem's context, forwarding whatever the chain
+         *  supplies -- currently (deps, config).
          *
-         *  NB tried BEFORE the config-only form.  A context whose constructor
-         *  is an unconstrained template -- FooCx(Deps&) for any Deps -- is
-         *  constructible from the config type too, so constructible_from alone
-         *  cannot tell the two apart.  Preferring deps makes the common case
-         *  (a context that wants its dependencies) work without the author
-         *  having to constrain the ctor.  A context that wants ONLY config
-         *  must therefore not be constructible from the deps type -- which is
-         *  automatic when it names its config type concretely.
+         *  Every ContextType is expected to provide a matching constructor.
+         *  That is deliberately uniform rather than clever: an earlier version
+         *  selected among (deps,config)/(deps)/(config)/() by probing
+         *  constructible_from, which cannot distinguish a context that wants
+         *  its dependencies from one that wants its configuration when the
+         *  constructor is an unconstrained template -- both match.  Requiring
+         *  the signature puts the choice with the subsystem author, where it
+         *  is visible, at the cost of naming an argument you may ignore.
+         *
+         *  Because contexts are constructed bottom-up (see ContextChain), a
+         *  context constructor IS that subsystem's initialization: it can
+         *  allocate resources, size arenas, and register facets, with its
+         *  configuration and its dependencies both in hand.
          **/
-        template <typename Deps, typename Cfg>
-            requires (!std::constructible_from<ContextType, Deps &, const Cfg &>
-                      && std::constructible_from<ContextType, Deps &>)
-        SubsystemContextHolder(Deps & deps, const Cfg &) : cx_{deps} {}
-
-        /** wants configuration only **/
-        template <typename Deps, typename Cfg>
-            requires (!std::constructible_from<ContextType, Deps &, const Cfg &>
-                      && !std::constructible_from<ContextType, Deps &>
-                      && std::constructible_from<ContextType, const Cfg &>)
-        SubsystemContextHolder(Deps &, const Cfg & cfg) : cx_{cfg} {}
-
-        /** leaf subsystem: wants neither **/
-        template <typename Deps, typename Cfg>
-            requires (!std::constructible_from<ContextType, Deps &, const Cfg &>
-                      && !std::constructible_from<ContextType, Deps &>
-                      && !std::constructible_from<ContextType, const Cfg &>)
-        SubsystemContextHolder(Deps &, const Cfg &) : cx_{} {}
+        template <typename... Args>
+        explicit SubsystemContextHolder(Args &&... args)
+            : cx_(std::forward<Args>(args)...) {}
 
         /** this subsystem's contribution to application state **/
         ContextType cx_;
@@ -243,6 +224,20 @@ namespace xo {
         public:
             /** contexts of every subsystem below @tp Head **/
             using PrefixType = ContextChain<Tail...>;
+
+            /* Reported here because ContextChain knows both types; the holder
+             * only sees a forwarded pack, so a missing constructor would
+             * otherwise surface as whatever the failed initialization of cx_
+             * happened to say.
+             */
+            static_assert(std::constructible_from<SubsystemContextType<Head>,
+                                                  PrefixType &,
+                                                  const SubsystemConfigType<Head> &>,
+                          "xo::AppContext: subsystem context must provide a"
+                          " constructor taking (Deps & deps,"
+                          " const SubsystemConfigType<Tag> & config)."
+                          " Name both even if one is unused -- Deps is the"
+                          " context of the subsystems BELOW this one");
 
             /** @p config supplies each subsystem's configuration; it is
              *  threaded down the chain unchanged, and each holder takes only

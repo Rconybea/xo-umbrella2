@@ -7,11 +7,6 @@
 
 namespace xo {
 
-    Indentlog2_Appcx::Indentlog2_Appcx(const Indentlog2_Config & cfg)
-        : config_{cfg}
-    {
-        TempArena::init(config_.temp_arena_capacity());
-    }
 
 } /*namespace xo*/
 

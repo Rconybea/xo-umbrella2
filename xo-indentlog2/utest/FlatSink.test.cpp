@@ -3,9 +3,11 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
+#include "init_indentlog2.hpp"
 #include "print/PrettySink.hpp"
 #include <xo/testutil/try_test_array.hpp>
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/subsys/Subsystem.hpp>
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/pretty_ostream.hpp>
 #include <catch2/catch.hpp>
@@ -20,10 +22,19 @@ namespace ut {
     using xo::pp::PrettySink;
     using xo::pp::PpSink;
     using xo::pp::PpConfig;
-    using xo::mm::ArenaConfig;
+    using xo::S_indentlog2_tag;
+    using xo::InitSubsys;
+    using xo::InitEvidence;
     using xo::UtestRehearser;
     using std::string;
     using std::vector;
+
+    static InitEvidence s_init = InitSubsys<S_indentlog2_tag>::require();
+
+    TEST_CASE("DFlatSink-init", "[indentlog2][DFlatSink]")
+    {
+        REQUIRE(s_init.evidence());
+    }
 
     /** one action in a PpSink scenario **/
     struct Step_FlatSink {

@@ -19,7 +19,19 @@ namespace xo {
         using TempArena = xo::mm::TempArena;
 
     public:
-        Indentlog2_Appcx(const Indentlog2_Config & cfg);
+        /** @p deps  contexts of the subsystems below this one.  Unused:
+         *            xo-indentlog2 is at the bottom of the tower.
+         *  @p cfg   configuration for this subsystem
+         *
+         *  Constructing this context IS xo-indentlog2's initialization -- it
+         *  sizes the thread-local scratch arena from @p cfg.
+         **/
+        template <typename Deps>
+        Indentlog2_Appcx(Deps & /*deps*/, const Indentlog2_Config & cfg)
+            : config_{cfg}
+            {
+                TempArena::init(config_.temp_arena_capacity());
+            }
 
         TempArena & temp_arena() { return temp_arena_; }
 

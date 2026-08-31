@@ -14,9 +14,8 @@ namespace xo {
     void
     InitSubsys<S_indentlog2_tag>::init()
     {
-        // Runtime initialization for xo-indentlog2
-
-        SetupIndentlog2::configure_temp_arena(64 * 1024);
+        /* Runtime initialization for xo-indentlog2.
+         */
     }
 
     InitEvidence
