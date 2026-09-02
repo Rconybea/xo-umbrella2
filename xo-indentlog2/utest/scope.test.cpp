@@ -15,6 +15,7 @@
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>
+#include <memory>
 
 namespace ut {
     using xo::pp::scope;
@@ -35,9 +36,9 @@ namespace ut {
     template <typename Fn>
     static std::string scoped_pretty(std::uint32_t margin, Fn && fn) {
         std::ostringstream oss;
-        PrettySink pp(PpConfig::scratch_plain(margin), oss.rdbuf());
+        auto pp = std::make_unique<PrettySink>(PpConfig::scratch_plain(margin), oss.rdbuf());
 
-        ThreadLogState::log_set_sink(&pp);
+        ThreadLogState::log_set_sink(std::move(pp));
         fn();
         ThreadLogState::log_set_sink(nullptr);   /* restore default (clog) */
 

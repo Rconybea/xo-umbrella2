@@ -6,8 +6,13 @@
 #include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/interpreter2/init_interpreter2.hpp>
 #include <xo/alloc2/Arena.hpp>
-#include <xo/indentlog2/print/PrettySink.hpp>
+#include <xo/facet/init_facet.hpp>
+#include <xo/facet/cx/FacetAppcx.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog2/init_indentlog2.hpp>
+#include <xo/indentlog2/appcx_indentlog2.hpp>
+#include <xo/indentlog2/config_indentlog2.hpp>
+#include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <replxx.hxx>
@@ -20,7 +25,7 @@ namespace xo {
     using xo::pp::scope;
     using xo::scm::DVirtualSchematikaMachine;
     using xo::scm::VsmResultExt;
-    using xo::pp::ThreadPrettySink;
+    //using xo::pp::ThreadPrettySink;
     using xo::pp::PpConfig;
     using xo::mm::AAllocator;
     using xo::mm::ArenaConfig;
@@ -86,16 +91,16 @@ namespace xo {
         bool debug_flag_ = false;
     };
 
-    struct AppConfig {
+    struct MyAppConfig {
         using VsmConfig = xo::scm::VsmConfig;
 
         //using ReaderConfig = xo::scm::ReaderConfig;
         //using X1CollectorConfig = xo::mm::X1CollectorConfig;
         //using ArenaConfig = xo::mm::ArenaConfig;
 
-        AppConfig(const ReplConfig & repl_cfg = ReplConfig(),
-                  const ArenaConfig & app_arena_cfg = ArenaConfig().with_name("skreplxx").with_size(32 * 1024),
-                  const VsmConfig & vsm_cfg = VsmConfig().with_x1_config(VsmConfig::std_x1_config().with_debug_flag(true).with_sanitize_flag(true)))
+        MyAppConfig(const ReplConfig & repl_cfg = ReplConfig(),
+                    const ArenaConfig & app_arena_cfg = ArenaConfig().with_name("skreplxx").with_size(32 * 1024),
+                    const VsmConfig & vsm_cfg = VsmConfig().with_x1_config(VsmConfig::std_x1_config().with_debug_flag(true).with_sanitize_flag(true)))
         : repl_config_{repl_cfg}, app_arena_config_{app_arena_cfg}, vsm_config_{vsm_cfg}
         {
             //rdr_config_.reader_debug_flag_ = true;
@@ -111,7 +116,7 @@ namespace xo {
         //ArenaConfig fixed_config_ = (ArenaConfig().with_name("fixed").with_size(4*1024));
     };
 
-    struct App {
+    struct MyApp {
         //using AAllocator = xo::mm::AAllocator;
         //using DX1Collector = xo::mm::DX1Collector;
         //using X1CollectorConfig = xo::mm::X1CollectorConfig;
@@ -122,10 +127,10 @@ namespace xo {
         using Replxx = replxx::Replxx;
         using span_type = DVirtualSchematikaMachine::span_type;
 
-        App(const AppConfig & cfg = AppConfig())
-        : repl_config_{cfg.repl_config_},
-          app_arena_{cfg.app_arena_config_},
-          vsm_config_{cfg.vsm_config_}
+        MyApp(const MyAppConfig & cfg = MyAppConfig())
+            : repl_config_{cfg.repl_config_},
+              app_arena_{cfg.app_arena_config_},
+              vsm_config_{cfg.vsm_config_}
         {
             this->interactive_ = isatty(STDIN_FILENO);
 
@@ -163,7 +168,7 @@ namespace xo {
     };
 
     void
-    App::run()
+    MyApp::run()
     {
         this->_init();
         this->_start();
@@ -171,14 +176,34 @@ namespace xo {
     }
 
     void
-    App::_init()
+    MyApp::_init()
     {
+        using xo::S_facet_tag;
+        using xo::S_indentlog2_tag;
+        using xo::FacetConfig;
+        using xo::Indentlog2_Config;
+        using xo::AppContext;
+        using xo::AppConfig;
+        using ReplAppConfig = AppConfig<S_indentlog2_tag, S_facet_tag>;
+        using ReplAppContext = AppContext<S_indentlog2_tag, S_facet_tag>;
+
+        ReplAppConfig repl_config{
+            Indentlog2_Config(PpConfig().with_logbuf_config
+                              (ArenaConfig().with_size(1024 * 1024)),
+                              64 * 1024 /*c_temp_arena_capacity*/),
+            FacetConfig(1024 /*c_facet_registry_capacity*/,
+                        1024 /*c_type_registry_capacity*/)};
+        ReplAppContext utest_appcx{repl_config};
+
+
+#ifdef OBSOLETE
         ThreadPrettySink::thread_install_once(PpConfig().with_logbuf_config(ArenaConfig().with_size(1024*1024)),
                                               clog.rdbuf());
 
         // window to control size of registries ends as soon as we init other subsystems
         TypeRegistry::instance(1024);
         FacetRegistry::instance(1024);
+#endif
 
         InitEvidence init_evidence_ = (InitSubsys<S_interpreter2_tag>::require());
 
@@ -190,7 +215,7 @@ namespace xo {
     }
 
     void
-    App::_start()
+    MyApp::_start()
     {
         welcome(cerr);
 
@@ -198,7 +223,7 @@ namespace xo {
     }
 
     void
-    App::_repl()
+    MyApp::_repl()
     {
         bool eof = false;
         span_type input;
@@ -228,8 +253,8 @@ namespace xo {
      *  false -> reader encountered error
      **/
     bool
-    App::_read_eval_print(span_type * p_input,
-                          bool eof)
+    MyApp::_read_eval_print(span_type * p_input,
+                            bool eof)
     {
         scope log(XO_DEBUG_(repl_config_.debug_flag_));
 
@@ -244,7 +269,7 @@ namespace xo {
     }
 
     void
-    App::_stop()
+    MyApp::_stop()
     {
         vsm_._drop();
     }
@@ -254,15 +279,15 @@ namespace xo {
 int
 main (int argc, char * argv[])
 {
-    using xo::AppConfig;
-    using xo::App;
+    using xo::MyAppConfig;
+    using xo::MyApp;
 
-    AppConfig cfg;
+    MyAppConfig cfg;
     // [cmdline options here]
 
     cfg.vsm_config_.x1_config_.debug_flag_ = true;
 
-    App app(cfg);
+    MyApp app(cfg);
 
     app.run();
 } /*main*/

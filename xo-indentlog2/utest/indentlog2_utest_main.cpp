@@ -40,6 +40,8 @@ main(int argc, char* argv[])
 {
     using UtestAppConfig  = xo::AppConfig<xo::S_indentlog2_tag>;
     using UtestAppContext = xo::AppContext<xo::S_indentlog2_tag>;
+    using xo::Indentlog2_Config;
+    using xo::pp::PpConfig;
 
     /* Unit tests pin rendered TEXT, so they must not be handed color escapes.
      * PpStyle's defaults are the legacy ones -- grey tag names, yellow struct
@@ -55,7 +57,8 @@ main(int argc, char* argv[])
     if (retval)
         return retval;
 
-    UtestAppConfig utest_config{ xo::Indentlog2_Config(c_temp_arena_capacity) };
+    UtestAppConfig utest_config{ Indentlog2_Config(PpConfig::plain(),
+                                                   c_temp_arena_capacity) };
     UtestAppContext utest_appcx{ utest_config };
 
     app.setup();

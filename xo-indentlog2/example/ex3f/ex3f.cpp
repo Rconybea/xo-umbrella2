@@ -54,13 +54,13 @@ main(int argc, char ** argv) {
     scope_config::indent_width = 2;
     scope_config::nesting_level_enabled = true;                    /* show "(N)" depth (default light-blue color) */
 
-    PrettySink pp(PpConfig::colored(), nullptr /*out*/);
+    auto pp = std::make_unique<PrettySink>(PpConfig::colored(), nullptr /*out*/);
 
-    ThreadLogState::log_set_sink(&pp);
+    ThreadLogState::log_set_sink(std::move(pp));
     fib(3);
     ThreadLogState::log_set_sink(nullptr);   /* restore default (clog) */
 
-    std::cout << pp.output();
+    std::cout << pp->output();
 
     return 0;
 }

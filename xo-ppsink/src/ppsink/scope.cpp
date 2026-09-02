@@ -5,8 +5,13 @@
 #include <string>
 
 namespace xo::pp {
+    using xo::time::utc_nanos;
+    using xo::time::nanos;
+    using xo::time::timeutil;
+
     void
-    scope::emit_indent(xo::pp::LogState & st) {
+    scope::emit_indent(xo::pp::LogState & st)
+    {
         std::uint32_t n = st.nesting_level() * scope_config::indent_width;
         if (n > scope_config::max_indent_width)
             n = scope_config::max_indent_width;   /* cap deep nesting */
@@ -15,7 +20,8 @@ namespace xo::pp {
     }
 
     void
-    scope::emit_time(xo::pp::PpSink & sink, bool real_time) {
+    scope::emit_time(xo::pp::PpSink & sink, bool real_time)
+    {
         if (!scope_config::time_enabled)
             return;
 
@@ -23,13 +29,13 @@ namespace xo::pp {
         std::uint32_t width = (scope_config::time_usec_flag ? 16 : 13);
 
         if (real_time) {
-            xo::time::utc_nanos now = xo::time::timeutil::now();
+            utc_nanos now = timeutil::now();
 
             /* time-of-day since midnight, in local or UTC coords */
-            xo::time::nanos since_midnight =
+            nanos since_midnight =
                 (scope_config::time_local_flag
-                 ? xo::time::timeutil::local_split_vs_midnight(now).second
-                 : xo::time::timeutil::utc_split_vs_midnight(now).second);
+                 ? timeutil::local_split_vs_midnight(now).second
+                 : timeutil::utc_split_vs_midnight(now).second);
 
             /* PpSink-native (single put token, no ostream fallback) */
             if (scope_config::time_usec_flag)

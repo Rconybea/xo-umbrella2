@@ -11,6 +11,7 @@
 #pragma once
 
 #include "PpSink.hpp"
+#include <memory>
 #include <cstdint>
 
 namespace xo::pp {
@@ -32,17 +33,20 @@ namespace xo::pp {
         /** active sink for this thread (default: a FlatSink over std::clog) **/
         PpSink & sink();
         /** override the active sink (e.g. a capture sink in tests, or a
-         *  PrettySink once xo-indentlog2 is available).  nullptr restores default.
+         *  PrettySink once xo-indentlog2 is available).
+         *  nullptr restores default.
          **/
-        void set_sink(PpSink * s);
+        void set_sink(std::unique_ptr<PpSink> x);
 
     private:
         /** true unless .set_sink() used **/
         bool builtin_flag_ = true;
         /** current scope nesting depth for this thread; drives indentation **/
         std::uint32_t nesting_ = 0;
-        /** sink log output is written to; nullptr => the process default flat sink **/
-        PpSink * sink_ = nullptr;
+        /** sink log output is written to;
+         *  nullptr => the process default flat sink
+         **/
+        std::unique_ptr<PpSink> sink_;
     };
 
     /** @brief static accessors for the calling thread's @ref LogState **/
@@ -52,7 +56,7 @@ namespace xo::pp {
         static LogState & thread_log_state();
 
         /** set (or clear, with nullptr) the active sink for the calling thread **/
-        static void log_set_sink(PpSink * s);
+        static void log_set_sink(std::unique_ptr<PpSink> x);
     };
 } /*namespace xo::pp*/
 

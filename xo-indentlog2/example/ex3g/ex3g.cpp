@@ -44,20 +44,21 @@ fib(int n) {
 }
 
 int
-main(int argc, char ** argv) {
+main(int argc, char ** argv)
+{
     scope_config::min_log_level = log_level::info;
     scope_config::indent_width = 2;
     scope_config::location_enabled = true;   /* append [file:line] */
     scope_config::location_tab = 40;         /* right-align it at column 40 */
 
-    PrettySink pp(PpConfig::colored(),
-                  nullptr /*out*/);
+    auto pp = std::make_unique<PrettySink>(PpConfig::colored(),
+                                           nullptr /*out*/);
 
-    ThreadLogState::log_set_sink(&pp);
+    ThreadLogState::log_set_sink(std::move(pp));
     fib(3);
     ThreadLogState::log_set_sink(nullptr);   /* restore default (clog) */
 
-    std::cout << pp.output();
+    std::cout << pp->output();
 
     return 0;
 }

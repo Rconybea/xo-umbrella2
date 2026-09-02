@@ -39,6 +39,7 @@ namespace xo::pp {
         explicit FlatSink(std::streambuf * sbuf)
             : PpSink(PpStyle::default_style()), sbuf_{sbuf}
         {}
+        ~FlatSink() = default;
 
         // inherited from PpSink
 

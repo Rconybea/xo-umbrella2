@@ -60,13 +60,13 @@ static std::string
 render(FunctionStyle style) {
     scope_config::function_style = style;
 
-    PrettySink pp(PpConfig::colored(), nullptr /*out*/);
+    auto pp = std::make_unique<PrettySink>(PpConfig::colored(), nullptr /*out*/);
 
-    ThreadLogState::log_set_sink(&pp);
+    ThreadLogState::log_set_sink(std::move(pp));
     Quadratic{ 1, -3, 2 }.evaluate(4);
     ThreadLogState::log_set_sink(nullptr);   /* restore default (clog) */
 
-    return std::string(pp.output());
+    return std::string(pp->output());
 }
 
 int

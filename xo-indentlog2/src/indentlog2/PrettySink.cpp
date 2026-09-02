@@ -12,6 +12,13 @@ namespace xo {
     using xo::mm::ArenaConfig;
 
     namespace pp {
+        std::unique_ptr<PpSink>
+        PrettySinkFactory::create()
+        {
+            return std::make_unique<PrettySink>(pp_config_,
+                                                std::clog.rdbuf());
+        }
+
         PrettySink::PrettySink(const PpConfig & cfg,
                                std::streambuf * out)
         : PpSink(PpStyle::default_style()),
@@ -151,6 +158,7 @@ namespace xo {
             sbuf_.commit();
         }
 
+#ifdef OBSOLETE
         bool
         ThreadPrettySink::thread_install_once(const PpConfig & cfg, std::streambuf * out)
         {
@@ -187,6 +195,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
     } /*namespace pp*/
 } /*namespace xo*/

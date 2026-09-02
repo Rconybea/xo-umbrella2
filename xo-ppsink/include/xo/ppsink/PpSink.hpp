@@ -7,11 +7,7 @@
 
 #include "PpStyle.hpp"
 #include <string_view>
-// Deliberately not including <ostream> here.
-// This file pulled into satellites that need
-// to invoke PpSink methods.
-// We don't want to force code that supports
-// pretty-printing to #include <ostream>.
+#include <memory>
 #include <cstddef>
 #include <cstdint>
 #include <iosfwd>
@@ -19,6 +15,31 @@
 
 namespace xo::pp {
     class PpSink;
+
+    /** @brief specify default sink for logging.
+     *
+     *  In practice will be either FlatSink (simple, low-level)
+     *  or PrettySink (pretty-printing).
+     *
+     *  Design Note: using singleton pattern here because this feature
+     *  arrives at very low-level, before we have app context
+     **/
+    class SinkFactory {
+    public:
+        static SinkFactory & instance() { return *s_instance; }
+        /** establish factory instance **/
+        static SinkFactory & set_instance(SinkFactory * x);
+
+        /** FlatSinkFactory -> true; PrettySinkFactory -> false **/
+        virtual bool is_flat() const = 0;
+
+        /** create sink **/
+        virtual std::unique_ptr<PpSink> create() = 0;
+
+    private:
+        /** (singleton) default sink factory **/
+        static SinkFactory * s_instance;
+    };
 
     /** @brief RAII convenience class to ensure ppsink.stream_commit() invoked
      **/
@@ -59,6 +80,7 @@ namespace xo::pp {
 
     public:
         explicit PpSink(const PpStyle & style);
+        virtual ~PpSink();
 
         /** pretty-print @p x to this sink
          *  see pretty.hpp for implementation

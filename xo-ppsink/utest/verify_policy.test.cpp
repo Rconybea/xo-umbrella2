@@ -31,8 +31,10 @@ namespace ut {
 
     TEST_CASE("verify_policy-report-error", "[verify_policy]") {
         stringstream ss;
-        FlatSink sink(ss.rdbuf());
-        ThreadLogState::log_set_sink(&sink);
+        {
+            auto sink = std::make_unique<FlatSink>(ss.rdbuf());
+            ThreadLogState::log_set_sink(std::move(sink));
+        }
 
         scope log(XO_ENTER0_(always));
 

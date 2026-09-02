@@ -8,29 +8,40 @@ namespace xo::pp {
     /** process-wide default sink: flat output to std::clog.
      *  (POC: whole-program FlatSink; per-thread interleaving not yet addressed)
      **/
-    FlatSink *
-    require_default_sink() {
-        /** low-dependency fallback. No pretty-printing **/
-        static FlatSink s_default_sink(std::clog.rdbuf());
+    class FlatSinkFactory : public SinkFactory {
+    public:
+        /** fallback factory: creates flat sinks **/
+        virtual bool is_flat() const override { return true; }
+        /** create FlatSink instance **/
+        virtual std::unique_ptr<PpSink> create() override {
+            /** low-dependency fallback. No pretty-printing **/
+            return std::make_unique<FlatSink>(std::clog.rdbuf());
+        }
+    };
 
-        return &s_default_sink;
-    } /*namespace*/
+    FlatSinkFactory s_flatsink_factory;
+
+    SinkFactory *
+    SinkFactory::s_instance = &s_flatsink_factory;
+
+    // ----- LogState -----
 
     PpSink &
     LogState::sink()
     {
         if (!sink_) {
-            this->builtin_flag_ = true;
-            this->sink_ = require_default_sink();
+            this->builtin_flag_ = SinkFactory::instance().is_flat();
+            this->sink_ = SinkFactory::instance().create();
         }
 
         return *sink_;
     }
 
     void
-    LogState::set_sink(PpSink * s) {
-        builtin_flag_ = false;
-        sink_ = s;
+    LogState::set_sink(std::unique_ptr<PpSink> s)
+    {
+        this->builtin_flag_ = false;
+        this->sink_ = std::move(s);
     }
 
     LogState &
@@ -44,8 +55,8 @@ namespace xo::pp {
     }
 
     void
-    ThreadLogState::log_set_sink(PpSink * s) {
-        thread_log_state().set_sink(s);
+    ThreadLogState::log_set_sink(std::unique_ptr<PpSink> s) {
+        thread_log_state().set_sink(std::move(s));
     }
 } /*namespace xo::pp*/
 

@@ -7,6 +7,7 @@
 
 #include "FacetConfig.hpp"
 #include "FacetRegistry.hpp"
+#include "TypeRegistry.hpp"
 #include <xo/indentlog2/appcx_indentlog2.hpp>
 #include <xo/subsys/AppContext.hpp>
 
@@ -16,22 +17,28 @@ namespace xo {
     class FacetAppcx {
     public:
         using FacetRegistry = xo::facet::FacetRegistry;
+        using TypeRegistry = xo::facet::TypeRegistry;
 
     public:
         template <typename Deps>
         FacetAppcx(Deps & /*deps*/,
                    const FacetConfig & cfg) : config_{cfg},
-                                              registry_{FacetRegistry::instance(cfg.facet_registry_capacity())}
+                                              facet_registry_{FacetRegistry::instance(cfg.facet_registry_capacity())},
+                                              type_registry_{TypeRegistry::instance(cfg.type_registry_capacity())}
         {}
 
-        FacetRegistry & registry() { return registry_; }
+        FacetRegistry & facet_registry() { return facet_registry_; }
+        TypeRegistry & type_registry() { return type_registry_; }
 
     private:
         /** xo-facet/ configuration **/
         FacetConfig config_;
 
         /** cross-facet conversion table **/
-        FacetRegistry & registry_;
+        FacetRegistry & facet_registry_;
+
+        /** type table **/
+        TypeRegistry & type_registry_;
     };
 
     template <>

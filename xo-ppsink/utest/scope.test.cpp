@@ -7,6 +7,7 @@
 #include <catch2/catch.hpp>
 #include <cctype>
 #include <sstream>
+#include <memory>
 
 namespace ut {
 
@@ -27,10 +28,11 @@ namespace ut {
         scope_config::time_enabled = false;
 
         stringstream ss;
-        FlatSink sink(PpStyle::colored(), ss.rdbuf());
-
-        ThreadLogState::log_set_sink(&sink);
-        { scope outer("outer"); }
+        auto sink = std::make_unique<FlatSink>(PpStyle::colored(), ss.rdbuf());
+        ThreadLogState::log_set_sink(std::move(sink));
+        {
+            scope outer("outer");
+        }
         ThreadLogState::log_set_sink(nullptr);
 
         /* the "(N)" nesting level is colored (scope_config::nesting_level_color,
@@ -41,10 +43,12 @@ namespace ut {
         /* ... and with the gate off, byte-identical text without them */
         {
             stringstream plain_ss;
-            FlatSink plain_sink(plain_ss.rdbuf());
+            auto plain_sink = std::make_unique<FlatSink>(plain_ss.rdbuf());
 
-            ThreadLogState::log_set_sink(&plain_sink);
-            { scope outer("outer"); }
+            ThreadLogState::log_set_sink(std::move(plain_sink));
+            {
+                scope outer("outer");
+            }
             ThreadLogState::log_set_sink(nullptr);
 
             REQUIRE(plain_ss.str() == "+(0) outer\n-(0) outer\n");
@@ -57,9 +61,9 @@ namespace ut {
 
         /* capture scope output into a stringstream via a FlatSink */
         stringstream ss;
-        FlatSink sink(ss.rdbuf());
+        auto sink = std::make_unique<FlatSink>(ss.rdbuf());
 
-        ThreadLogState::log_set_sink(&sink);
+        ThreadLogState::log_set_sink(std::move(sink));
         {
             scope outer("outer");
             outer.log("hello");
@@ -88,8 +92,8 @@ namespace ut {
          * so we check the FORMAT/width only.
          */
         stringstream ss;
-        FlatSink sink(ss.rdbuf());
-        ThreadLogState::log_set_sink(&sink);
+        auto sink = std::make_unique<FlatSink>(ss.rdbuf());
+        ThreadLogState::log_set_sink(std::move(sink));
 
         scope_config::time_enabled = true;
         { scope s("foo"); }
@@ -117,8 +121,8 @@ namespace ut {
          * layout is deterministic; the line value itself is not asserted.)
          */
         stringstream ss;
-        FlatSink sink(ss.rdbuf());
-        ThreadLogState::log_set_sink(&sink);
+        auto sink = std::make_unique<FlatSink>(ss.rdbuf());
+        ThreadLogState::log_set_sink(std::move(sink));
 
         scope_config::location_enabled = true;
         { XO_SCOPE_(s, always); }   /* 'always' so it logs regardless of min_log_level */
@@ -140,8 +144,8 @@ namespace ut {
         scope_config::time_enabled = false;   /* deterministic output */
 
         stringstream ss;
-        FlatSink sink(ss.rdbuf());
-        ThreadLogState::log_set_sink(&sink);
+        auto sink = std::make_unique<FlatSink>(ss.rdbuf());
+        ThreadLogState::log_set_sink(std::move(sink));
 
         std::string before;
         {
@@ -167,8 +171,8 @@ namespace ut {
 
         auto run = [](bool flag) {
             stringstream ss;
-            FlatSink sink(ss.rdbuf());
-            ThreadLogState::log_set_sink(&sink);
+            auto sink = std::make_unique<FlatSink>(ss.rdbuf());
+            ThreadLogState::log_set_sink(std::move(sink));
             {
                 scope log(XO_DEBUG_(flag));
                 log && log("banner", flag);
@@ -196,9 +200,9 @@ namespace ut {
         scope_config::time_enabled = false;
 
         stringstream ss;
-        FlatSink sink(ss.rdbuf());
+        auto sink = std::make_unique<FlatSink>(ss.rdbuf());
 
-        ThreadLogState::log_set_sink(&sink);
+        ThreadLogState::log_set_sink(std::move(sink));
         {
             scope lscope(XO_LITERAL_(always, "Refcounted", "::ctor"));
         }
@@ -220,9 +224,9 @@ namespace ut {
         scope_config::time_enabled = false;
 
         stringstream ss;
-        FlatSink sink(ss.rdbuf());
+        auto sink = std::make_unique<FlatSink>(ss.rdbuf());
 
-        ThreadLogState::log_set_sink(&sink);
+        ThreadLogState::log_set_sink(std::move(sink));
         {
             scope lscope(XO_ENTER2_(always, true, "Refcounted"));
         }

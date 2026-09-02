@@ -11,6 +11,25 @@
 
 namespace xo {
     namespace pp {
+        /** @brief factory that creates pretty-printing sinks.
+         *
+         *  Would expect one per thread.
+         **/
+        class PrettySinkFactory : public xo::pp::SinkFactory {
+        public:
+            explicit PrettySinkFactory(const PpConfig & x) : pp_config_{x} {}
+
+            const PpConfig & pp_config() const { return pp_config_; }
+
+            virtual bool is_flat() const override { return false; }
+            /** create pretty-printing instance **/
+            virtual std::unique_ptr<PpSink> create() override;
+
+        private:
+            /** pretty-printing configuration **/
+            PpConfig pp_config_;
+        };
+
         /**
          *  Use:
          *  @code
@@ -98,6 +117,11 @@ namespace xo {
             LogBuffer logbuf_;
         };
 
+#ifdef OBSOLETE
+        /** DEPRECATED.  Prefer Indentlog2_Appcx mechanism
+         *
+         *  See alloc2_utest_main.cpp, facet_utest_main.cpp, skreplxx.cpp
+         **/
         class ThreadPrettySink {
         public:
             /** install PrettySink for the calling thread.
@@ -110,6 +134,7 @@ namespace xo {
                                             std::streambuf * out);
 
         };
+#endif
     } /*namespace pp*/
 } /*namespace xo*/
 

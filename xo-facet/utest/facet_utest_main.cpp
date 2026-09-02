@@ -17,10 +17,14 @@ namespace xo {
 }
 
 namespace {
+    using std::uint32_t;
+
     /** capacity for facet interface registry **/
-    constexpr std::uint32_t c_facet_registry_capacity = 1024;
+    constexpr uint32_t c_facet_registry_capacity = 1024;
+    /** capacity for type registry **/
+    constexpr uint32_t c_type_registry_capacity = 1024;
     /** capacity for thread-local scratch arena behind tostr()/toppstr() **/
-    constexpr std::uint32_t c_temp_arena_capacity = 64 * 1024;
+    constexpr uint32_t c_temp_arena_capacity = 64 * 1024;
 }
 
 int
@@ -34,7 +38,7 @@ main(int argc, char* argv[])
     using xo::AppContext;
     using xo::AppConfig;
     using xo::mm::ArenaConfig;
-    using xo::pp::ThreadPrettySink;
+    //using xo::pp::ThreadPrettySink;
     using xo::pp::PpConfig;
     using std::clog;
 
@@ -47,14 +51,21 @@ main(int argc, char* argv[])
     if (retval)
         return retval;
 
+#ifdef OBSOLETE
     {
         /* setup pretty-printing */
         ThreadPrettySink::thread_install_once(PpConfig().with_logbuf_config
                                                   (ArenaConfig().with_size(1024*1024)),
                                               clog.rdbuf());
     }
+#endif
 
-    UtestAppConfig utest_config{Indentlog2_Config(c_temp_arena_capacity), FacetConfig(c_facet_registry_capacity)};
+    UtestAppConfig utest_config{
+        Indentlog2_Config(PpConfig().with_logbuf_config
+                          (ArenaConfig().with_size(1024 * 1024)),
+                          c_temp_arena_capacity),
+        FacetConfig(c_facet_registry_capacity,
+                    c_type_registry_capacity)};
     UtestAppContext utest_appcx{utest_config};
 
     app.setup(); // calls Subsystem::initialize_all()
