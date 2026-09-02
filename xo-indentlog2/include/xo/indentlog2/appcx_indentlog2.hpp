@@ -7,6 +7,7 @@
 
 #include "config_indentlog2.hpp"
 #include "TempArena.hpp"
+#include <xo/subsys/AppContext.hpp>
 
 namespace xo {
     /** There's some configuration that logically belongs to indentlog2/,
@@ -41,6 +42,12 @@ namespace xo {
 
         /** temporary arena storage **/
         TempArena temp_arena_;
+    };
+
+    template <>
+    class SubsystemContext<S_indentlog2_tag> {
+    public:
+        using Type = Indentlog2_Appcx;
     };
 } /*namespace xo*/
 

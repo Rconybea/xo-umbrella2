@@ -6,6 +6,7 @@
 #pragma once
 
 #include "init_indentlog2.hpp"
+#include <xo/subsys/AppContext.hpp>
 #include <cstdint>
 
 namespace xo {
@@ -23,6 +24,14 @@ namespace xo {
         /** capacity for thread-local temporary arena (TempArena::local()) **/
         uint32_t temp_arena_capacity_;
     };
+
+    /** xo-indentlog2 contributes both a configuration and a context **/
+    template <>
+    class SubsystemConfig<S_indentlog2_tag> {
+    public:
+        using Type = Indentlog2_Config;
+    };
+
 } /*namespace xo*/
 
 /* end config_indentlog2.hpp */

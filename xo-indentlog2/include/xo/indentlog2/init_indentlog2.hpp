@@ -8,7 +8,7 @@
 #include <xo/subsys/Subsystem.hpp>
 
 namespace xo {
-    /* tag to represent the xo-arena/ subsystem within ordered initialization */
+    /* tag to represent the xo-indentlog2/ subsystem within ordered initialization */
     enum S_indentlog2_tag {};
 
     template <>

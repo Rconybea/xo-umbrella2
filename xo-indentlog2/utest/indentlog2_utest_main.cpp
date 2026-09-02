@@ -20,40 +20,27 @@
 #include <xo/indentlog2/config_indentlog2.hpp>
 #include <xo/indentlog2/init_indentlog2.hpp>
 #include <xo/ppsink/PpStyle.hpp>
-#include <xo/subsys/AppContext.hpp>
+//#include <xo/subsys/AppContext.hpp>
 #include <xo/testutil/UtestAppStart.hpp>
 #include <xo/testutil/UtestListener.hpp>
 
 namespace xo {
     CATCH_REGISTER_LISTENER(UtestListener);
-
-    /** xo-indentlog2 contributes both a configuration and a context **/
-    template <>
-    class SubsystemConfig<S_indentlog2_tag> {
-    public:
-        using Type = Indentlog2_Config;
-    };
-
-    template <>
-    class SubsystemContext<S_indentlog2_tag> {
-    public:
-        using Type = Indentlog2_Appcx;
-    };
 }
 
 namespace {
     /** capacity for the thread-local scratch arena behind tostr()/toppstr().
-     *  Settled here, at runtime, rather than baked into subsystem init.
      **/
     constexpr std::uint32_t c_temp_arena_capacity = 64 * 1024;
 
-    using UtestAppConfig  = xo::AppConfig<xo::S_indentlog2_tag>;
-    using UtestAppContext = xo::AppContext<xo::S_indentlog2_tag>;
 }
 
 int
 main(int argc, char* argv[])
 {
+    using UtestAppConfig  = xo::AppConfig<xo::S_indentlog2_tag>;
+    using UtestAppContext = xo::AppContext<xo::S_indentlog2_tag>;
+
     /* Unit tests pin rendered TEXT, so they must not be handed color escapes.
      * PpStyle's defaults are the legacy ones -- grey tag names, yellow struct
      * field names (xo/ppsink/PpStyle.hpp) -- right for a terminal, useless in
@@ -68,14 +55,6 @@ main(int argc, char* argv[])
     if (retval)
         return retval;
 
-    /* Application context for xo-indentlog2.
-     *
-     * Construction allocates this subsystem's resources -- here, the capacity
-     * of the thread-local scratch arena that tostr()/toppstr() draw on.
-     * Configuration is supplied at runtime; nothing is static or global.
-     *
-     * Outlives app.run(), since tests use the arena it configures.
-     */
     UtestAppConfig utest_config{ xo::Indentlog2_Config(c_temp_arena_capacity) };
     UtestAppContext utest_appcx{ utest_config };
 

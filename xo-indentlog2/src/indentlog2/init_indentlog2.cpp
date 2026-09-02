@@ -25,7 +25,7 @@ namespace xo {
 
         InitEvidence retval;
 
-        retval ^= Subsystem::provide<S_indentlog2_tag>("arena", &init);
+        retval ^= Subsystem::provide<S_indentlog2_tag>("indentlog2", &init);
 
         return retval;
     }

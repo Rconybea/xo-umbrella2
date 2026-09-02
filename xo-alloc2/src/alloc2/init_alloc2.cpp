@@ -5,7 +5,7 @@
 
 #include "init_alloc2.hpp"
 #include "SetupAlloc2.hpp"
-#include <xo/indentlog2/init_indentlog2.hpp>
+#include <xo/facet/init_facet.hpp>
 
 namespace xo {
     using xo::mm::SetupAlloc2;
@@ -24,7 +24,7 @@ namespace xo {
         InitEvidence retval;
 
         /* direct subsystem deps for xo-alloc2/ */
-        retval ^= InitSubsys<S_indentlog2_tag>::require();
+        retval ^= InitSubsys<S_facet_tag>::require();
 
         /* xo-alloc2/'s own initialization code */
         retval ^= Subsystem::provide<S_alloc2_tag>("alloc2", &init);
