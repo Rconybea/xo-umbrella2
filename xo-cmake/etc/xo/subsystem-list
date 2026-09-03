@@ -25,6 +25,7 @@ xo-equable2
 xo-hashable2
 xo-numeric
 xo-reactor2
+xo-pyreactor2
 xo-tokenizer2
 xo-expression2
 xo-reader2
