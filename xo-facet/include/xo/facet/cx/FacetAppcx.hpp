@@ -8,7 +8,7 @@
 #include "FacetConfig.hpp"
 #include "FacetRegistry.hpp"
 #include "TypeRegistry.hpp"
-#include <xo/indentlog2/appcx_indentlog2.hpp>
+//#include <xo/indentlog2/appcx_indentlog2.hpp>
 #include <xo/subsys/AppContext.hpp>
 
 namespace xo {

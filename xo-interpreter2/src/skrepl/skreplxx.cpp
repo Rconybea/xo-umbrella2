@@ -3,8 +3,9 @@
  *  @author Roland Conybeare, Feb 2026
  **/
 
-#include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/interpreter2/init_interpreter2.hpp>
+#include <xo/interpreter2/cx/Interpreter2Appcx.hpp>
+#include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/facet/init_facet.hpp>
 #include <xo/facet/cx/FacetAppcx.hpp>
@@ -184,28 +185,18 @@ namespace xo {
         using xo::Indentlog2_Config;
         using xo::AppContext;
         using xo::AppConfig;
-        using ReplAppConfig = AppConfig<S_indentlog2_tag, S_facet_tag>;
-        using ReplAppContext = AppContext<S_indentlog2_tag, S_facet_tag>;
+        using ReplAppConfig = AppConfig<S_indentlog2_tag, S_facet_tag, S_interpreter2_tag>;
+        using ReplAppContext = AppContext<S_indentlog2_tag, S_facet_tag, S_interpreter2_tag>;
 
         ReplAppConfig repl_config{
             Indentlog2_Config(PpConfig().with_logbuf_config
                               (ArenaConfig().with_size(1024 * 1024)),
                               64 * 1024 /*c_temp_arena_capacity*/),
             FacetConfig(1024 /*c_facet_registry_capacity*/,
-                        1024 /*c_type_registry_capacity*/)};
+                        1024 /*c_type_registry_capacity*/),
+            Interpreter2Config()
+        };
         ReplAppContext utest_appcx{repl_config};
-
-
-#ifdef OBSOLETE
-        ThreadPrettySink::thread_install_once(PpConfig().with_logbuf_config(ArenaConfig().with_size(1024*1024)),
-                                              clog.rdbuf());
-
-        // window to control size of registries ends as soon as we init other subsystems
-        TypeRegistry::instance(1024);
-        FacetRegistry::instance(1024);
-#endif
-
-        InitEvidence init_evidence_ = (InitSubsys<S_interpreter2_tag>::require());
 
         Subsystem::initialize_all();
 
