@@ -14,10 +14,11 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include "xo/procedure2/RuntimeContext.hpp"
+#include "RuntimeContext.hpp"
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/ATop.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
 
 namespace xo { namespace scm { class DArray; } }
@@ -31,7 +32,7 @@ using Opaque = void *;
 /**
 Abstraction for a schematika procedure
 **/
-class AProcedure {
+class AProcedure : public xo::facet::ATop {
 public:
     /** @defgroup scm-procedure-type-traits **/
     ///@{
@@ -47,15 +48,7 @@ public:
     /** @defgroup scm-procedure-methods **/
     ///@{
     // const methods
-    /** An uninitialized AProcedure instance will have zero vtable pointer (per {linux,osx} abi).
-     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
-     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
-     **/
-    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
-    /** RTTI: unique id# for actual runtime data representation **/
-    virtual typeseq _typeseq() const noexcept = 0;
-    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
-    virtual void _drop(Opaque d) const noexcept = 0;
+    /* _has_null_vptr(), _typeseq(), _drop(): inherited from xo::facet::ATop */
     /** true iff procedure takes n arguments **/
     virtual bool is_nary(Copaque data)  const  noexcept = 0;
     /** number of arguments. -1 for n-ary **/

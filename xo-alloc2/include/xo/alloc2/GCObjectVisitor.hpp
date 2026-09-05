@@ -17,6 +17,7 @@
 #include "gc/IGCObjectVisitor_Any.hpp"
 #include "gc/IGCObjectVisitor_Xfer.hpp"
 #include "gc/RGCObjectVisitor.hpp"
+
 #include "gc/RGCObjectVisitor_aux.hpp"
 
 /* end GCObjectVisitor.hpp */

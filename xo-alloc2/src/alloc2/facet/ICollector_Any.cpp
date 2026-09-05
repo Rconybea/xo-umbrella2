@@ -3,8 +3,8 @@
  **/
 
 #include "gc/ICollector_Any.hpp"
-#include <exception>
 #include <iostream>
+#include <exception>
 
 namespace xo {
 namespace mm {

@@ -14,8 +14,8 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/object2/DFloat.hpp"
 #include <xo/object2/number/GCObjectConversion_DFloat.hpp>
+#include "DFloat.hpp"
 
 namespace xo { namespace scm { class IGCObject_DFloat; } }
 

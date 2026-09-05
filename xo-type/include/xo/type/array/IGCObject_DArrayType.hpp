@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/type/DArrayType.hpp"
+#include "DArrayType.hpp"
 
 namespace xo { namespace scm { class IGCObject_DArrayType; } }
 

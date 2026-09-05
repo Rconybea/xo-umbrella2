@@ -14,7 +14,7 @@
 #pragma once
 
 #include "RuntimeContext.hpp"
-#include "xo/interpreter2/DVsmRcx.hpp"
+#include "DVsmRcx.hpp"
 
 namespace xo { namespace scm { class IRuntimeContext_DVsmRcx; } }
 

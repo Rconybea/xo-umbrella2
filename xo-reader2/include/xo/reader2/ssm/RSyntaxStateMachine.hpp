@@ -52,6 +52,7 @@ public:
     // explicit injected content
 
     // builtin methods
+    bool _has_null_vptr() const noexcept { return O::iface()->_has_null_vptr(); }
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
     void _drop() const noexcept { O::iface()->_drop(O::data()); }
 

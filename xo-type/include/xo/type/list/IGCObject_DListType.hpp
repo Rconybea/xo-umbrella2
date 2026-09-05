@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/type/DListType.hpp"
+#include "DListType.hpp"
 
 namespace xo { namespace scm { class IGCObject_DListType; } }
 

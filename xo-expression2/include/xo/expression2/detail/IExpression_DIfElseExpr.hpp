@@ -13,8 +13,9 @@
 
 #pragma once
 
-#include "xo/expression2/DIfElseExpr.hpp"
-#include "xo/expression2/Expression.hpp"
+#include "Expression.hpp"
+#include "Expression.hpp"
+#include "DIfElseExpr.hpp"
 
 namespace xo { namespace scm { class IExpression_DIfElseExpr; } }
 

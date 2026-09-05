@@ -16,8 +16,9 @@
 // includes (via {facet_includes})
 #include <xo/type/Metatype.hpp>
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/ATop.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
 
 // pretext if any
@@ -32,7 +33,7 @@ using Opaque = void *;
 1. Ability to compare types as members of partial order
 2. ...
 **/
-class AType {
+class AType : public xo::facet::ATop {
 public:
     /** @defgroup scm-type-type-traits **/
     ///@{
@@ -50,15 +51,7 @@ public:
     /** @defgroup scm-type-methods **/
     ///@{
     // const methods
-    /** An uninitialized AType instance will have zero vtable pointer (per {linux,osx} abi).
-     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
-     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
-     **/
-    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
-    /** RTTI: unique id# for actual runtime data representation **/
-    virtual typeseq _typeseq() const noexcept = 0;
-    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
-    virtual void _drop(Opaque d) const noexcept = 0;
+    /* _has_null_vptr(), _typeseq(), _drop(): inherited from xo::facet::ATop */
     /** category for this type **/
     virtual Metatype metatype(Copaque data)  const  noexcept = 0;
     /** reflected representation for instances of this type **/

@@ -11,7 +11,7 @@
     ],
     // extra includes in GCObject.hpp, if any
     user_hpp_includes: [
-//        "\"gc/RCollector_aux.hpp\"",
+        "\"gc/RGCObjectVisitor_aux.hpp\"",
     ],
     namespace1: "xo",
     namespace2: "mm",

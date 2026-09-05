@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "xo/expression2/DGlobalSymtab.hpp"
-#include "xo/expression2/SymbolTable.hpp"
+#include "SymbolTable.hpp"
+#include "DGlobalSymtab.hpp"
 
 namespace xo { namespace scm { class ISymbolTable_DGlobalSymtab; } }
 

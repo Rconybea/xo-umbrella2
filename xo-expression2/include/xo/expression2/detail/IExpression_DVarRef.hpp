@@ -13,8 +13,9 @@
 
 #pragma once
 
-#include "xo/expression2/DVarRef.hpp"
-#include "xo/expression2/Expression.hpp"
+#include "Expression.hpp"
+#include "Expression.hpp"
+#include "DVarRef.hpp"
 
 namespace xo { namespace scm { class IExpression_DVarRef; } }
 

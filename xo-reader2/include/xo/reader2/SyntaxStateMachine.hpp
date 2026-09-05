@@ -18,4 +18,5 @@
 #include "ssm/ISyntaxStateMachine_Xfer.hpp"
 #include "ssm/RSyntaxStateMachine.hpp"
 
+
 /* end SyntaxStateMachine.hpp */

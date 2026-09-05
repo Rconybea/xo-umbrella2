@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "xo/type/DAtomicType.hpp"
-#include "xo/type/Type.hpp"
+#include "Type.hpp"
+#include "DAtomicType.hpp"
 
 namespace xo { namespace scm { class IType_DAtomicType; } }
 

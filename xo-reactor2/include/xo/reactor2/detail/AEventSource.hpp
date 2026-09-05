@@ -14,6 +14,7 @@
 #pragma once
 
 // includes (via {facet_includes})
+#include <xo/facet/ATop.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
@@ -31,7 +32,7 @@ using Opaque = void *;
 /**
 Trait for producing a typed stream of events
 **/
-class AEventSource {
+class AEventSource : public xo::facet::ATop {
 public:
     /** @defgroup reactor-eventsource-type-traits **/
     ///@{
@@ -49,15 +50,7 @@ public:
     /** @defgroup reactor-eventsource-methods **/
     ///@{
     // const methods
-    /** An uninitialized AEventSource instance will have zero vtable pointer (per {linux,osx} abi).
-     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
-     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
-     **/
-    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
-    /** RTTI: unique id# for actual runtime data representation **/
-    virtual typeseq _typeseq() const noexcept = 0;
-    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
-    virtual void _drop(Opaque d) const noexcept = 0;
+    /* _has_null_vptr(), _typeseq(), _drop(): inherited from xo::facet::ATop */
     /** promise produced events satisfy this type **/
     virtual TypeDescr source_ev_type(Copaque data)  const  noexcept = 0;
     /** true if event objects may be overwritten between callbacks. **/

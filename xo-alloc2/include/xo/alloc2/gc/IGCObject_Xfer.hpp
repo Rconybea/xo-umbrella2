@@ -23,8 +23,8 @@
 #include "AGCObject.hpp"
 #include <xo/facet/Allocator_basic.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <cstddef>
 #include <cstdint>
+#include <cstddef>
 
 namespace xo {
 namespace mm {

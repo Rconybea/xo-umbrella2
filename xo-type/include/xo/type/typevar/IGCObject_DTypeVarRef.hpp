@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "DTypeVarRef.hpp"
 #include "GCObject.hpp"
+#include "DTypeVarRef.hpp"
 
 namespace xo { namespace scm { class IGCObject_DTypeVarRef; } }
 

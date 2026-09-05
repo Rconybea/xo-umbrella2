@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include "xo/object2/DList.hpp"
-#include "xo/object2/Sequence.hpp"
+#include "Sequence.hpp"
 #include <xo/printable2/Printable.hpp>
+#include "DList.hpp"
 
 namespace xo { namespace scm { class ISequence_DList; } }
 

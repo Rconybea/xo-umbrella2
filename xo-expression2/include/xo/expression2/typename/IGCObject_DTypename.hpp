@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/expression2/DTypename.hpp"
+#include "DTypename.hpp"
 
 namespace xo { namespace scm { class IGCObject_DTypename; } }
 

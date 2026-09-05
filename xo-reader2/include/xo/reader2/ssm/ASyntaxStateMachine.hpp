@@ -14,14 +14,15 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include "xo/reader2/ParserStateMachine.hpp"
-#include "xo/reader2/syntaxstatetype.hpp"
+#include "ParserStateMachine.hpp"
+#include "syntaxstatetype.hpp"
 #include <xo/type/Type.hpp>
 #include <xo/tokenizer2/Token.hpp>
-#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/facet/facet_implementation.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
+#include <xo/facet/ATop.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
 
 // {pretext} here
@@ -35,7 +36,7 @@ using Opaque = void *;
 /**
 Assistant to schematika parser dedicated to particular syntax
 **/
-class ASyntaxStateMachine {
+class ASyntaxStateMachine : public xo::facet::ATop {
 public:
     /** @defgroup scm-syntaxstatemachine-type-traits **/
     ///@{
@@ -57,15 +58,7 @@ public:
     /** @defgroup scm-syntaxstatemachine-methods **/
     ///@{
     // const methods
-    /** An uninitialized ASyntaxStateMachine instance will have zero vtable pointer (per {linux,osx} abi).
-     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
-     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
-     **/
-    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
-    /** RTTI: unique id# for actual runtime data representation **/
-    virtual typeseq _typeseq() const noexcept = 0;
-    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
-    virtual void _drop(Opaque d) const noexcept = 0;
+    /* _has_null_vptr(), _typeseq(), _drop(): inherited from xo::facet::ATop */
     /** identify a type of syntax state machine **/
     virtual syntaxstatetype ssm_type(Copaque data)  const  noexcept = 0;
     /** text describing expected/allowed input to this ssm in current state **/

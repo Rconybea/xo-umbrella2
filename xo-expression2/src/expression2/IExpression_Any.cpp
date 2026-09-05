@@ -3,8 +3,8 @@
  **/
 
 #include "detail/IExpression_Any.hpp"
-#include <exception>
 #include <iostream>
+#include <exception>
 
 namespace xo {
 namespace scm {

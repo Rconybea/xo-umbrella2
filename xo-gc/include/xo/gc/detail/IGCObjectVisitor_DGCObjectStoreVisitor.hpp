@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObjectVisitor.hpp"
-#include "xo/gc/DGCObjectStoreVisitor.hpp"
+#include "DGCObjectStoreVisitor.hpp"
 
 namespace xo { namespace mm { class IGCObjectVisitor_DGCObjectStoreVisitor; } }
 

@@ -14,7 +14,7 @@
 #pragma once
 
 #include "Collector.hpp"
-#include "xo/gc/DX1Collector.hpp"
+#include "DX1Collector.hpp"
 
 namespace xo { namespace mm { class ICollector_DX1Collector; } }
 

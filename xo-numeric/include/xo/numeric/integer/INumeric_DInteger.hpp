@@ -13,8 +13,8 @@
 
 #pragma once
 
+#include "Numeric.hpp"
 #include "DInteger.hpp"
-#include "xo/numeric/Numeric.hpp"
 
 namespace xo { namespace scm { class INumeric_DInteger; } }
 

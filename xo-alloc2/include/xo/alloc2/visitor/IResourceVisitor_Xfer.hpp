@@ -21,7 +21,7 @@
 #pragma once
 
 #include "AResourceVisitor.hpp"
-#include "xo/alloc2/Allocator.hpp"
+#include "Allocator.hpp"
 
 namespace xo {
 namespace mm {

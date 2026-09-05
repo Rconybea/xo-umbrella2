@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "xo/type/DArrayType.hpp"
-#include "xo/type/Type.hpp"
+#include "Type.hpp"
+#include "DArrayType.hpp"
 
 namespace xo { namespace scm { class IType_DArrayType; } }
 

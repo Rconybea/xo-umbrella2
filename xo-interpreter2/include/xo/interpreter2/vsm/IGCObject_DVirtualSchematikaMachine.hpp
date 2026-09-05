@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "DVirtualSchematikaMachine.hpp"
 #include "GCObject.hpp"
-#include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include "DVirtualSchematikaMachine.hpp"
 
 namespace xo { namespace scm { class IGCObject_DVirtualSchematikaMachine; } }
 

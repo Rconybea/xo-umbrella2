@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "xo/type/DListType.hpp"
-#include "xo/type/Type.hpp"
+#include "Type.hpp"
+#include "DListType.hpp"
 
 namespace xo { namespace scm { class IType_DListType; } }
 

@@ -16,11 +16,12 @@
 // includes (via {facet_includes})
 #include <xo/facet/Allocator_basic.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/facet/facet_implementation.hpp>
-#include <xo/facet/obj.hpp>
-#include <xo/facet/typeseq.hpp>
-#include <cstddef>
 #include <cstdint>
+#include <cstddef>
+#include <xo/facet/ATop.hpp>
+#include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/typeseq.hpp>
 
 namespace xo { namespace mm { class ACollector; }}
 
@@ -33,7 +34,7 @@ using Opaque = void *;
 /**
 GC hooks for collector-aware data
 **/
-class AGCObject {
+class AGCObject : public xo::facet::ATop {
 public:
     /** @defgroup mm-gcobject-type-traits **/
     ///@{
@@ -55,15 +56,7 @@ public:
     /** @defgroup mm-gcobject-methods **/
     ///@{
     // const methods
-    /** An uninitialized AGCObject instance will have zero vtable pointer (per {linux,osx} abi).
-     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
-     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
-     **/
-    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
-    /** RTTI: unique id# for actual runtime data representation **/
-    virtual typeseq _typeseq() const noexcept = 0;
-    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
-    virtual void _drop(Opaque d) const noexcept = 0;
+    /* _has_null_vptr(), _typeseq(), _drop(): inherited from xo::facet::ATop */
 
     // nonconst methods
     /** move instance using object visitor.

@@ -14,9 +14,9 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/expression2/DLambdaExpr.hpp"
-#include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include "DLambdaExpr.hpp"
 
 namespace xo { namespace scm { class IGCObject_DLambdaExpr; } }
 

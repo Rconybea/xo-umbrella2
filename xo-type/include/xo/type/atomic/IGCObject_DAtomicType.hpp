@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/type/DAtomicType.hpp"
+#include "DAtomicType.hpp"
 
 namespace xo { namespace scm { class IGCObject_DAtomicType; } }
 

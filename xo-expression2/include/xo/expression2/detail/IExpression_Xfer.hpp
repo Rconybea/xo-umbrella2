@@ -21,8 +21,8 @@
 #pragma once
 
 #include "AExpression.hpp"
-#include "xo/expression2/TypeRef.hpp"
-#include "xo/expression2/exprtype.hpp"
+#include "TypeRef.hpp"
+#include "exprtype.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 
 namespace xo {

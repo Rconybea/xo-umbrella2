@@ -14,9 +14,9 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/stringtable2/DString.hpp"
-#include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include "DString.hpp"
 
 namespace xo { namespace scm { class IGCObject_DString; } }
 

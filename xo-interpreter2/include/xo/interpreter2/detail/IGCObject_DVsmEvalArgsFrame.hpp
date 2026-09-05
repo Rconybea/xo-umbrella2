@@ -14,9 +14,9 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "xo/interpreter2/DVsmEvalArgsFrame.hpp"
-#include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include "DVsmEvalArgsFrame.hpp"
 
 namespace xo { namespace scm { class IGCObject_DVsmEvalArgsFrame; } }
 

@@ -18,4 +18,5 @@
 #include "visitor/IResourceVisitor_Xfer.hpp"
 #include "visitor/RResourceVisitor.hpp"
 
+
 /* end ResourceVisitor.hpp */
