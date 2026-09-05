@@ -2,8 +2,8 @@
 
 #define CATCH_CONFIG_EXTERNAL_INTERFACES // before UtestListener.hpp
 
-#include <xo/facet/init_facet.hpp>
-#include <xo/facet/cx/FacetAppcx.hpp>
+#include "xo/facet/init_facet.hpp"
+#include "xo/facet/cx/FacetAppcx.hpp"
 #include <xo/indentlog2/init_indentlog2.hpp>
 #include <xo/indentlog2/appcx_indentlog2.hpp>
 #include <xo/indentlog2/config_indentlog2.hpp>

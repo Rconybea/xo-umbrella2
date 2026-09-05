@@ -4,7 +4,7 @@
  **/
 
 #include "DX1CollectorIterator.hpp"
-#include "AllocIterator.hpp"
+#include <xo/facet/AllocIterator.hpp>
 #include "detail/IAllocIterator_DX1CollectorIterator.hpp"
 #include "detail/IAllocator_DX1Collector.hpp"
 #include "padding.hpp"

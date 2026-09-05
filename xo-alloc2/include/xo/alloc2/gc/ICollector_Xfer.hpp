@@ -21,7 +21,7 @@
 #pragma once
 
 #include "ACollector.hpp"
-#include <xo/alloc2/Allocator_basic.hpp>
+#include <xo/facet/Allocator_basic.hpp>
 #include <xo/alloc2/Generation.hpp>
 #include <xo/alloc2/role.hpp>
 

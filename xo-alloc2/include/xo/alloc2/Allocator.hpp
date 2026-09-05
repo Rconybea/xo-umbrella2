@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Allocator_basic.hpp"
+#include <xo/facet/Allocator_basic.hpp>
 #include "alloc/RAllocator_aux.hpp"
 
 /* end Allocator.hpp */

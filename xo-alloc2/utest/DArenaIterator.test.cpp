@@ -5,7 +5,7 @@
 
 #include "arena/IAllocIterator_DArenaIterator.hpp"
 #include "padding.hpp"
-#include <xo/alloc2/AllocIterator.hpp>
+#include <xo/facet/AllocIterator.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/ArenaIterator.hpp>

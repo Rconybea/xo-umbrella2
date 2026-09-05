@@ -16,7 +16,7 @@ if (ENABLE_TESTING)
     xo_self_headeronly_dependency(${SELF_EXE} xo_callback2)
     # need explicit header-only dependencies, at least in submodule build
     xo_headeronly_dependency(${SELF_EXE} callback)
-    xo_headeronly_dependency(${SELF_EXE} xo_facet)
+    xo_dependency(${SELF_EXE} xo_facet)
     xo_dependency(${SELF_EXE} xo_alloc2)
     xo_dependency(${SELF_EXE} xo_ppsink)
     # UtestAppStart/UtestListener: shared utest main

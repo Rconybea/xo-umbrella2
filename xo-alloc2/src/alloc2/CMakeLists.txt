@@ -14,11 +14,8 @@ set(SELF_SRCS
     IGCObject_Any.cpp
     facet/IGCObjectVisitor_Any.cpp
 
-    AAllocator.cpp
-    IAllocator_Any.cpp
     IAllocator_DArena.cpp
 
-    IAllocIterator_Any.cpp
     IAllocIterator_DArenaIterator.cpp
 
     IResourceVisitor_Any.cpp

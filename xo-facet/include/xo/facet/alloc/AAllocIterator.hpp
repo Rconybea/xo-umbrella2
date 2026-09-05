@@ -8,7 +8,7 @@
 #include "AllocInfo.hpp"
 #include "cmpresult.hpp"
 #include "typeseq.hpp"
-#include <xo/facet/obj.hpp>
+#include "xo/facet/obj.hpp"
 
 namespace xo {
     namespace mm {

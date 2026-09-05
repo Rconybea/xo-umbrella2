@@ -38,7 +38,7 @@ if (ENABLE_TESTING)
     # PrettySink (via toppstr) for the phase C new-protocol renderings
     xo_dependency(${UTEST_EXE} xo_indentlog2)
 #    xo_headeronly_dependency(${UTEST_EXE} indentlog)
-    xo_headeronly_dependency(${UTEST_EXE} xo_facet)
+    xo_dependency(${UTEST_EXE} xo_facet)
     xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)
 endif()
 

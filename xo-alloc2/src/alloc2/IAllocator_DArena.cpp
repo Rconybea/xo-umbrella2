@@ -4,7 +4,7 @@
  **/
 
 #include "arena/IAllocator_DArena.hpp"
-#include "AllocIterator.hpp"
+#include <xo/facet/AllocIterator.hpp>
 #include "GCObject.hpp"
 #include "arena/IAllocIterator_DArenaIterator.hpp" // for alloc_range
 #include <xo/facet/obj.hpp>

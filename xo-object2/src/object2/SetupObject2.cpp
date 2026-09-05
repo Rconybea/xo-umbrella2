@@ -12,7 +12,7 @@
 #include <xo/object2/Integer.hpp>
 #include <xo/object2/List.hpp>
 #include <xo/stringtable2/String.hpp>
-#include <xo/alloc2/alloc/AAllocator.hpp>
+#include <xo/facet/alloc/AAllocator.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/scope.hpp>

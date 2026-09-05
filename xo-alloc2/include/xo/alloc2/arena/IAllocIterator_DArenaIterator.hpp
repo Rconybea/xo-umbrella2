@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/alloc2/alloc/IAllocIterator_Xfer.hpp"
+#include <xo/facet/alloc/IAllocIterator_Xfer.hpp>
 #include <xo/arena/DArenaIterator.hpp>
 
 namespace xo {

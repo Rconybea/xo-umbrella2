@@ -7,8 +7,8 @@
 
 #include "AAllocator.hpp"
 #include "typeseq.hpp"
-#include "xo/alloc2/AllocIterator.hpp"
-#include <xo/facet/obj.hpp>
+#include "xo/facet/AllocIterator.hpp"
+#include "xo/facet/obj.hpp"
 
 namespace xo {
     namespace mm { struct IAllocator_Any; }

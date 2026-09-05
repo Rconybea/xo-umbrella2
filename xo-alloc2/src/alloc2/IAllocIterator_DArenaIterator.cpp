@@ -4,7 +4,7 @@
  **/
 
 #include "arena/IAllocIterator_DArenaIterator.hpp"
-#include "AllocIterator.hpp"
+#include <xo/facet/AllocIterator.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "RAllocator.hpp"
+#include <xo/facet/alloc/RAllocator.hpp>
 #include "xo/alloc2/GCObject.hpp"
 
 namespace xo {

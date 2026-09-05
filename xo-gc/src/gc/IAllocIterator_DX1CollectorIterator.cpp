@@ -4,7 +4,7 @@
  **/
 
 #include "xo/gc/detail/IAllocIterator_DX1CollectorIterator.hpp"
-#include "AllocIterator.hpp"
+#include <xo/facet/AllocIterator.hpp>
 //#include <cassert>
 
 namespace xo {

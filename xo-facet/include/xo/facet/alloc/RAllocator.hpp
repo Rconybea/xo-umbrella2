@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "xo/alloc2/AllocIterator.hpp"
-#include "xo/alloc2/Allocator_basic.hpp" // omits RAllocator_aux
-#include <xo/facet/RRouter.hpp>
+#include "xo/facet/AllocIterator.hpp"
+#include "xo/facet/Allocator_basic.hpp" // omits RAllocator_aux
+#include "xo/facet/RRouter.hpp"
 #include <string>
 
 namespace xo {
@@ -81,13 +81,15 @@ namespace xo {
                                                                                                                       lhs_iface, lhs_data,
                                                                                                                       rhs_iface, rhs_data); }
 
-            // see [RAllocator_aux.hpp] for implementation.
+            // See [xo-alloc2/ RAllocator_aux.hpp] for implementation.
+            //
             void barrier_assign(void * parent,
                                 obj<AGCObject> * p_lhs,
                                 obj<AGCObject> rhs) noexcept;
 
             // Need _drepr suffix to distinguish from .barrier_assign()
-            // see [RAllocator_aux.hpp] for implementation
+            // see [xo-alloc2/ RAllocator_aux.hpp] for implementation
+            //
             template <typename DRepr>
             void barrier_assign_drepr(void * parent,
                                       DRepr ** lhs_data,
