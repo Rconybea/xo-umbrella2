@@ -1652,7 +1652,7 @@ macro(xo_dependency target dep)
     #message("----------------------------------------------------------------")
 endmacro()
 
-# dependency of a header-only library on another header-only library
+# dependency of a header-only (INTERFACE) library on anything.
 #
 # WARNING: only valid in a LIBRARY target.
 #          For EXECUTABLE targets use xo_dependency()
