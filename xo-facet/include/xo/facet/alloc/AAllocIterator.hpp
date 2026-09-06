@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "AllocInfo.hpp"
-#include "cmpresult.hpp"
-#include "typeseq.hpp"
+#include "xo/facet/typeseq.hpp"
 #include "xo/facet/obj.hpp"
+#include <xo/arena/AllocInfo.hpp>
+#include <xo/arena/cmpresult.hpp>
 
 namespace xo {
     namespace mm {

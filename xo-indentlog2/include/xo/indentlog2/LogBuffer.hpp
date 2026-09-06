@@ -62,19 +62,17 @@ namespace xo {
          **/
         void set_dest_sbuf(std::streambuf * x) { dest_ = x; }
 
-        /** verify this adapter's internal invariants.
-         *
-         *  Open to any code -- assert(verify_ok()) in a mutator, or call it
-         *  directly from a test.  Throws std::runtime_error naming the broken
-         *  invariant when @p throw_flag, else returns false.
-         **/
+        /** verify this adapter's internal invariants. **/
         bool verify_ok(bool throw_flag = true) const;
 
-        /** drain the not-yet-flushed extent [@ref bpptr_, @ref pptr_) to
+        /** drain not-yet-flushed extent [@ref bpptr_, @ref pptr_) to
          *  @ref dest_ (if attached) and advance @ref bpptr_ to @ref pptr_.
+         *
          *  No-op when no dest_ is attached or nothing is pending.
-         *  Safe to call at any time: LogBuffer writes are irrevocable, so
-         *  drained bytes are never un-written.
+         *
+         *  Safe to call at any time.
+         *  LogBuffer writes are irrevocable,
+         *  so drained bytes are never un-written.
          **/
         void flush();
 
@@ -118,11 +116,11 @@ namespace xo {
         /** checkpoint for realloc **/
         DArena::Checkpoint buf_ckp_;
         /** pinned origin of usable buffered memory.
-         *  Unlike streambuf's pbase, this does NOT advance on flush:
+         *  Unlike streambuf's pbase, does not advance on flush:
          *  @ref lstate_ needs [porigin_, pptr_) to compute line position.
          **/
         char * porigin_ = nullptr;
-        /** begin of the not-yet-flushed put area (mirrors @ref epptr_).
+        /** beginning of not-yet-flushed put area (mirrors @ref epptr_).
          *  [porigin_, bpptr_) already drained to @ref dest_;
          *  [bpptr_, pptr_) written but not yet drained.
          *  This pointer plays the role streambuf calls pbase.
@@ -153,15 +151,7 @@ namespace xo {
         /** move ctor **/
         LogBuffer(LogBuffer && rhs) noexcept;
 
-        /** verify invariants: the adapter's, plus that @ref buf_v_ addresses
-         *  THIS object's own @ref arena_ rather than another LogBuffer's.
-         *
-         *  That last one is the move-ctor invariant.  It is checked here
-         *  rather than left to crash, because a stale buf_v_ is undefined
-         *  behaviour that in practice often does NOT fault in-process -- the
-         *  python binding segfaulted where an equivalent c++ case did not.
-         *  See PrettySink_move.test.cpp.
-         **/
+        /** verify internal consistency **/
         bool verify_ok(bool throw_flag = true) const;
 
     private:

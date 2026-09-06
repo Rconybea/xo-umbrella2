@@ -35,32 +35,16 @@ namespace xo::pp {
         virtual int_type overflow(int_type c) override;
         std::streamsize xsputn(const char * s, streamsize n) override;
 
-        /** re-point this streambuf at @p pps.
-         *
-         *  For PrettySink's move ctor ONLY: a PpTokenStreambuf refers to a
-         *  PpState that is its SIBLING member, so a memberwise move leaves
-         *  this pointer aimed at the moved-from object.  See
-         *  PrettySink(PrettySink&&).
-         *
-         *  Does not disturb the put area: those pointers address arena memory,
-         *  which a DArena move transfers without relocating.
-         **/
+        /** re-point this streambuf at @p pps. **/
         void reset_pps(PpState * pps) noexcept { pps_ = pps; }
 
-        /** the PpState this streambuf writes into.  Lets PrettySink assert the
-         *  sbuf_ -> pps_ link survived a move -- see PrettySink::verify_ok
+        /** streambuf writes to this PpState.
+         *  See PrettySink::verify_ok().
          **/
         const PpState * _pps() const noexcept { return pps_; }
 
     private:
-
-    private:
         PpState * pps_ = nullptr;
-
-#ifdef OBSOLETE
-        /** writeable span.  Same as pps_->current_open_string_->mem_span() **/
-        Span write_span_;
-#endif
     };
 } /*namespace xo::pp*/
 

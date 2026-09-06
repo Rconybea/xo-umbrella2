@@ -2,28 +2,7 @@
  *
  *  Pin PrettySink's move constructor.
  *
- *  WHY THIS EXISTS
- *
- *  PrettySink holds two INTERIOR pointers: sbuf_ refers to pps_, and pps_
- *  refers to logbuf_ -- each a sibling member of the same PrettySink.  The
- *  compiler-generated memberwise move left both aimed at the moved-FROM
- *  object, so a moved sink either rendered EMPTY or crashed inside
- *  LogBufferAdapter::write_span (memcpy with a null destination).
- *
- *  That defect was invisible for as long as it existed, for a specific
- *  reason: nothing in c++ ever moves a PrettySink.  make2str()/make2cout()
- *  return by value, but every such return is a prvalue, so guaranteed copy
- *  elision constructs directly into the destination and the move ctor is
- *  never called.  The first caller to actually invoke it was a pybind11
- *  binding (xo-pyindentlog2), which moves a factory's return value onto the
- *  heap -- and it segfaulted.
- *
- *  So these cases assert the property no other test can: that a sink still
- *  WORKS after being moved.  A failure here means the move ctor has stopped
- *  repairing something.  If a member that points at a sibling was recently
- *  added to PrettySink, that is where to look.
- *
- *  NB the interesting case is `moved mid-render` -- the state a memberwise
+ *  NOTE: the interesting case is `moved mid-render` -- the state a memberwise
  *  move most obviously corrupts is a partially-built record.
  **/
 
@@ -49,14 +28,7 @@ namespace ut {
 
         /** move @p src onto the heap, then DESTROY the source.
          *
-         *  This is precisely what a pybind11 factory binding does, and the
-         *  distinction matters: while the moved-from sink stays alive, a
-         *  stale interior pointer still addresses a live (if hollowed-out)
-         *  object and the damage can stay invisible.  Only once the source is
-         *  destroyed does a missed repair become a dangling pointer.
-         *
-         *  Tests that keep `src` in scope do NOT exercise that, which is why
-         *  the cases below hand ownership over instead.
+         *  Shadow what a pybind11 factory binding does.
          **/
         std::unique_ptr<PrettySink> moved_to_heap(PrettySink && src) {
             return std::make_unique<PrettySink>(std::move(src));
@@ -171,17 +143,6 @@ namespace ut {
         REQUIRE(moved.find('\n') != std::string::npos);
     }
     TEST_CASE("prettysink-move-with-dest-sbuf", "[PrettySink][move]") {
-        /* THE case that make2str could not reach.
-         *
-         * With a drain destination attached, complete() goes all the way
-         * through LogBufferAdapter into the arena -- via buf_v_, an interior
-         * pointer from the adapter BASE to LogBuffer's own arena_ member.
-         * That one is a third interior pointer, distinct from the two
-         * PrettySink repairs, and it used to be a reference (unrebindable).
-         * A moved sink therefore drained through the moved-FROM arena and
-         * segfaulted, while the make2str path -- dest_ == nullptr, so no
-         * drain -- appeared to work.
-         */
         std::stringstream dest;
 
         /* source destroyed at the end of this full expression */

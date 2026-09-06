@@ -6,7 +6,7 @@
 #pragma once
 
 #include "AAllocator.hpp"
-#include "typeseq.hpp"
+#include "xo/facet/typeseq.hpp"
 #include "xo/facet/AllocIterator.hpp"
 #include "xo/facet/obj.hpp"
 

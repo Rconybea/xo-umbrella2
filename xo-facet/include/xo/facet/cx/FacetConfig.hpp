@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "init_facet.hpp"
+#include "xo/facet/init_facet.hpp"
 #include <xo/subsys/AppContext.hpp>
 #include <cstdint>
 

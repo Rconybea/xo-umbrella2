@@ -4,6 +4,8 @@
  **/
 
 #include "xo/facet/FacetRegistry.hpp"
+#include "xo/facet/ObjectHandle.hpp"
+#include "xo/facet/Top.hpp"
 #include "xo/facet/OObject.hpp"
 #include "xo/facet/RRouter.hpp"
 #include "xo/facet/facet.hpp"
@@ -11,12 +13,15 @@
 #include "xo/facet/obj.hpp"
 #include "xo/facet/typeseq.hpp"
 #include <catch2/catch.hpp>
+#include <new>
 #include <cassert>
 #include <cmath>
 #include <cstring>
 #include <numbers>
 
 namespace xo {
+    using xo::facet::ATop;
+    using xo::facet::Opaque;
     using xo::facet::valid_abstract_facet;
     using xo::facet::valid_facet_implementation;
     using xo::facet::FacetImplementation;
@@ -31,12 +36,14 @@ namespace xo {
 
     // ------ AComplex -----
 
-    /** abstract interface for a complex number **/
-    struct AComplex {
+    /** abstract interface for a complex number.
+     *
+     *  Inherits ATop, like every facet: that is what lets obj<AComplex,DRepr>
+     *  narrow to the obj<ATop> a root slot holds.  ATop supplies _typeseq()
+     *  and _drop(); the latter is what destruct_data() below predates.
+     **/
+    struct AComplex : public ATop {
         using TypeErasedIface = struct IComplex_Any;
-
-        /** RTTI: reports unique id# for actual runtime data representation **/
-        virtual typeseq _typeseq() const = 0;
 
         virtual double xcoord(void * data) const = 0;
         virtual double ycoord(void * data) const = 0;
@@ -63,7 +70,8 @@ namespace xo {
 
         // from AComplex
 
-        virtual typeseq _typeseq() const final override { return s_typeseq; }
+        virtual typeseq _typeseq() const noexcept final override { return s_typeseq; }
+        virtual void _drop(Opaque data) const noexcept final override { Impl::destruct_data(*(DRepr*)data); }
 
         virtual double xcoord(void * data) const final override { return Impl::xcoord(*(DRepr*)data); }
         virtual double ycoord(void * data) const final override { return Impl::ycoord(*(DRepr*)data); }
@@ -98,7 +106,8 @@ namespace xo {
      *  such as IComplex_RectCoords or IComplex_PolarCoords.
      **/
     struct IComplex_Any : public AComplex {
-        virtual typeseq _typeseq() const final override { return s_typeseq; }
+        virtual typeseq _typeseq() const noexcept final override { return s_typeseq; }
+        virtual void _drop(Opaque) const noexcept final override { assert(false); }
 
         virtual double xcoord(void *) const final override { assert(false); return 0.0; }
         virtual double ycoord(void *) const final override { assert(false); return 0.0; }
@@ -515,6 +524,50 @@ namespace xo {
             static_assert(xo::facet::is_fomo<obj<AComplex>>::value);
 
             SUCCEED("is_fomo static assertions hold");
+        }
+
+        /** DObjectHandle over a facet OTHER than ATop.
+         *
+         *  The flywheel's root slot holds obj<ATop>, so a handle has to narrow
+         *  on the way in and recover the typed facet on the way out.  Nothing
+         *  instantiated DObjectHandle before this, so neither direction had
+         *  ever been compiled.
+         **/
+        TEST_CASE("objecthandle-nontop-facet", "[facet][objecthandle]")
+        {
+            using xo::mm::AllocFlywheel;
+            using xo::mm::ArenaConfig;
+            using xo::facet::DObjectHandle;
+
+            ArenaConfig storage_cfg{ .name_ = "utest.oh.storage", .size_ = 16*1024 };
+            ArenaConfig strong_cfg { .name_ = "utest.oh.strong",  .size_ =  4*1024 };
+            ArenaConfig weak_cfg   { .name_ = "utest.oh.weak",    .size_ =  4*1024 };
+
+            rp<AllocFlywheel> fw = AllocFlywheel::make_app(storage_cfg, strong_cfg, weak_cfg);
+
+            REQUIRE(fw.get() != nullptr);
+
+            /* allocate the representation from the flywheel's own arena,
+             * as make_strong_ref requires
+             */
+            auto * mem = fw->storage().alloc(typeseq::id<DRectCoords>(), sizeof(DRectCoords));
+
+            REQUIRE(mem != nullptr);
+
+            DRectCoords * p = new (mem) DRectCoords(3.0, 4.0);
+
+            auto h = DObjectHandle<AComplex, DRectCoords>::make_strong_ref
+                (fw, obj<AComplex, DRectCoords>(p));
+
+            /* recovered obj must address the same representation ... */
+            REQUIRE(h._native().data() == p);
+
+            /* ... and route AComplex methods to the DRectCoords implementation */
+            REQUIRE(h._native().xcoord() == 3.0);
+            REQUIRE(h._native().ycoord() == 4.0);
+
+            /* the narrowed slot kept the concrete runtime type */
+            REQUIRE(h._native()._typeseq() == typeseq::id<DRectCoords>());
         }
     }
 }

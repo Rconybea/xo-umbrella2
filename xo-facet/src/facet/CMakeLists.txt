@@ -5,6 +5,8 @@ set(SELF_SRCS
 	ITop_Any.cpp
     IAllocator_Any.cpp
     IAllocIterator_Any.cpp
+	AllocFlywheel.cpp
+	ObjectHandle.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
@@ -13,5 +15,6 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 xo_dependency(${SELF_LIB} xo_arena)
 xo_dependency(${SELF_LIB} xo_reflectutil)
 xo_dependency(${SELF_LIB} xo_indentlog2)
+xo_dependency(${SELF_LIB} refcnt)
 
 # end CMakeLists.txt

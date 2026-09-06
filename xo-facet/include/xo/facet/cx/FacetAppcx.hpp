@@ -6,8 +6,8 @@
 #pragma once
 
 #include "FacetConfig.hpp"
-#include "FacetRegistry.hpp"
-#include "TypeRegistry.hpp"
+#include "xo/facet/FacetRegistry.hpp"
+#include "xo/facet/TypeRegistry.hpp"
 //#include <xo/indentlog2/appcx_indentlog2.hpp>
 #include <xo/subsys/AppContext.hpp>
 
