@@ -11,29 +11,6 @@
  *    sink.pp(hex_view(s, hexstyle::with_char));     // [68(h) 65(e) 6c(l) ..]
  *  @endcode
  *
- *  Reach for this when inspecting memory layout -- what a buffer, a
- *  flatstring's capacity, or a struct's object representation actually
- *  contains.  It is deliberately easy to drop into a log line:
- *    log && log(xtag("buf", hex_view(buf)));
- *
- *  Differences from the legacy version, all deliberate:
- *
- *  1. Accepts any contiguous_range of 1-byte elements -- std::span,
- *     std::string_view, std::vector<char>, xo::mm::span, xo::scm::span --
- *     as well as the legacy (lo, hi) pointer pair.  Constraining on the
- *     standard concept rather than naming those types is what lets this
- *     header stay free of any xo dependency.
- *  2. A hexstyle enum instead of a bool, so call sites read as
- *     hexstyle::with_char rather than a bare `true`.
- *  3. Legacy printed one flat run, so a 4KB buffer became one 20,000-column
- *     line.  Here bytes are grouped into rows of c_bytes_per_row, with a
- *     split *between* rows only.  A range that fits the margin renders
- *     identically to legacy (a split emits one space when the group fits);
- *     a longer one wraps at row boundaries.
- *  4. Legacy's single-byte `hex` class is not ported.  Nothing used it, and
- *     its inserter took std::iostream& -- so `std::cout << hex(b)` never
- *     compiled.  Byte formatting lives in detail::put_hex_byte() instead.
- *
  *  Printable-character detection uses an explicit ASCII range test rather
  *  than std::isprint, so output does not vary with the active locale.  The
  *  two agree in the "C" locale.
@@ -59,6 +36,14 @@ namespace xo::pp {
         bare,
         /** hex digits plus the character:  @c [68(h) 65(e) 6c(l)] **/
         with_char,
+    };
+
+    /** @brief whether to qualify a byte with the @c 0x radix prefix. **/
+    enum class hexprefix {
+        /** just the digits:  @c fd **/
+        plain,
+        /** 0x-qualified:  @c 0xfd **/
+        qualified,
     };
 
     namespace detail {
@@ -135,6 +120,50 @@ namespace xo::pp {
         hexstyle style_;
     };
 
+    /** @brief a single byte, to print in hexadecimal.
+     *
+     *  @code
+     *    sink.pp(hex(0xfd));                          // fd
+     *    sink.pp(hex(0x4f, hexstyle::with_char));     // 4f(O)
+     *    sink.pp(hex(0xfd, hexprefix::qualified));    // 0xfd
+     *  @endcode
+     *
+     *  Defaults to unprefixed, matching hex_view (which renders [68 65 6c],
+     *  not [0x68 ..]) and legacy xo::hex.  Pass hexprefix::qualified where
+     *  the surrounding context does not already say "this is hex" -- a lone
+     *  field among decimal ones, say.
+     *
+     *  Unlike hex_view this owns its byte, so it has no lifetime constraint.
+     **/
+    class hex {
+    public:
+        /** print @p x in hexadecimal, annotated per @p style,
+         *  qualified per @p prefix
+         **/
+        constexpr explicit hex(std::uint8_t x,
+                               hexstyle style = hexstyle::bare,
+                               hexprefix prefix = hexprefix::plain) noexcept
+            : x_{x}, style_{style}, prefix_{prefix} {}
+
+        /** ctor with prefix-argument first **/
+        constexpr explicit hex(std::uint8_t x,
+                               hexprefix prefix,
+                               hexstyle style = hexstyle::bare) noexcept
+            : x_{x}, style_{style}, prefix_{prefix} {}
+
+        constexpr std::uint8_t value() const noexcept { return x_; }
+        constexpr hexstyle style() const noexcept { return style_; }
+        constexpr hexprefix prefix() const noexcept { return prefix_; }
+
+    private:
+        /** the byte to print **/
+        std::uint8_t x_;
+        /** whether to annotate with the ascii character **/
+        hexstyle style_;
+        /** whether to qualify with the 0x radix prefix **/
+        hexprefix prefix_;
+    };
+
     namespace detail {
         /** lowercase nibble -> hex digit **/
         inline constexpr char c_hex_digit[] = "0123456789abcdef";
@@ -148,12 +177,22 @@ namespace xo::pp {
             return (uc >= 0x20) && (uc < 0x7f);
         }
 
-        /** emit one byte as a single token: @c 6c , or @c 6c(l) with @p style **/
+        /** emit one byte as a single token: @c 6c , or @c 6c(l) with @p style,
+         *  or @c 0x6c(l) with @p prefix
+         **/
         inline void
-        put_hex_byte(PpSink & sink, std::uint8_t uc, hexstyle style) {
-            /* "ff(c)" is the widest form */
-            char buf[5];
+        put_hex_byte(PpSink & sink,
+                     std::uint8_t uc,
+                     hexstyle style,
+                     hexprefix prefix = hexprefix::plain) {
+            /* "0xff(c)" is the widest form */
+            char buf[7];
             std::size_t n = 0;
+
+            if (prefix == hexprefix::qualified) {
+                buf[n++] = '0';
+                buf[n++] = 'x';
+            }
 
             buf[n++] = c_hex_digit[(uc >> 4) & 0x0f];
             buf[n++] = c_hex_digit[uc & 0x0f];
@@ -170,6 +209,19 @@ namespace xo::pp {
             sink.put(std::string_view(buf, n));
         }
     } /*namespace detail*/
+
+    /** @brief render a hex into a PpSink.
+     *
+     *  One put(), no group: a byte is a single token and must never be split
+     *  across lines.  Shares detail::put_hex_byte() with Prettifier<hex_view>,
+     *  so a byte renders identically alone or inside a dump.
+     **/
+    template <>
+    struct Prettifier<hex> {
+        static void print(PpSink & sink, const hex & x) {
+            detail::put_hex_byte(sink, x.value(), x.style(), x.prefix());
+        }
+    };
 
     /** @brief render a hex_view into a PpSink.
      *
