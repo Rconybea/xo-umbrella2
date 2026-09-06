@@ -7,9 +7,12 @@
 
 #include "AllocHeader.hpp"
 #include "padding.hpp"
+#include <xo/ppsink/Prettifier.hpp>
 #include <utility>
 
 namespace xo {
+    namespace pp { class PpSink; }
+
     namespace mm {
         /**
          * @brief specifies alloc header layout
@@ -41,6 +44,7 @@ namespace xo {
          **/
         struct AllocHeaderConfig {
             using repr_type = AllocHeader;
+            using PpSink = xo::pp::PpSink;
             using span_type = std::pair<const std::byte *, const std::byte *>;
 
             AllocHeaderConfig() = default;
@@ -53,6 +57,9 @@ namespace xo {
                                                          tseq_bits_{t},
                                                          age_bits_{a},
                                                          size_bits_{z} {}
+
+            /** pretty print instance to @p sink **/
+            void pretty(PpSink & sink) const;
 
             /** create header tuple (@p t, @p a, @p z)
              *  with typeseq @p t, age @p a, size @p z
@@ -175,6 +182,16 @@ namespace xo {
             std::uint8_t size_bits_ = 32;
         };
     } /*namespace mm*/
+
+    namespace pp {
+        /** pretty-print for AllocHeaderConfig **/
+        template <>
+        struct Prettifier<xo::mm::AllocHeaderConfig> {
+            static void print(PpSink & sink, const xo::mm::AllocHeaderConfig & x) {
+                x.pretty(sink);
+            }
+        };
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end AllocHeaderConfig.hpp */

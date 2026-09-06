@@ -6,10 +6,13 @@
 #pragma once
 
 #include "AllocHeaderConfig.hpp"
+#include <xo/ppsink/Prettifier.hpp>
 #include <cstdint>
 #include <string>
 
 namespace xo {
+    namespace pp { class PpSink; }
+
     namespace mm {
 
         /** @class ArenaConfig
@@ -17,6 +20,8 @@ namespace xo {
          *  @brief configuration for a @ref DArena instance
          **/
         struct ArenaConfig {
+            using PpSink = xo::pp::PpSink;
+
             /** @defgroup mm-arenaconfig-ctors **/
             ///@{
 
@@ -39,6 +44,13 @@ namespace xo {
                 copy.store_header_flag_ = x;
                 return copy;
             }
+
+            ///@}
+            /** @defgroup mm-arenaconfig-methods ArenaConfig methods **/
+            ///@{
+
+            /** pretty print instance to @p sink **/
+            void pretty(PpSink & sink) const;
 
             ///@}
             /** @defgroup mm-arenaconfig-instance-vars ArenaConfig members **/
@@ -66,6 +78,16 @@ namespace xo {
         };
 
     } /*namespace mm*/
+
+    namespace pp {
+        /** pretty-print for ArenaConfig **/
+        template <>
+        struct Prettifier<xo::mm::ArenaConfig> {
+            static void print(PpSink & sink, const xo::mm::ArenaConfig & x) {
+                x.pretty(sink);
+            }
+        };
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end ArenaConfig.hpp */

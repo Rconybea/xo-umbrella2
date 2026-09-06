@@ -35,6 +35,8 @@ namespace xo {
 
             /** null ctor **/
             DArenaVector() = default;
+            /** create arena-backed vector from @p cfg.  Will reserve memory for allocation **/
+            DArenaVector(const ArenaConfig & cfg);
             /** ctor from already-mapped (but not committed) address range_type
              *  vector has size zero
              **/
@@ -103,8 +105,8 @@ namespace xo {
 
             void erase(size_type pos);
 
-            void push_back(T && x);
-            void push_back(const T & x);
+            T * push_back(T && x);
+            T * push_back(const T & x);
 
             void pop_back();
 
@@ -123,6 +125,12 @@ namespace xo {
             DArena store_;
             DArena::Checkpoint zero_ckp_;
         };
+
+        template <typename T>
+        DArenaVector<T>::DArenaVector(const ArenaConfig & cfg)
+        {
+            *this = map(cfg);
+        }
 
         template <typename T>
         DArenaVector<T>::DArenaVector(const ArenaConfig & cfg,
@@ -322,7 +330,7 @@ namespace xo {
         }
 
         template <typename T>
-        void
+        T *
         DArenaVector<T>::push_back(T && x) {
             size_type z = size_ + 1;
             size_type req_z = z * sizeof(T);
@@ -333,11 +341,15 @@ namespace xo {
                 new (addr) T{std::move(x)};
 
                 this->size_ = z;
+
+                return addr;
             }
+
+            return nullptr;
         }
 
         template <typename T>
-        void
+        T *
         DArenaVector<T>::push_back(const T & x) {
             size_type z = size_ + 1;
 
@@ -347,7 +359,11 @@ namespace xo {
                 new (addr) T{x};
 
                 this->size_ = z;
+
+                return addr;
             }
+
+            return nullptr;
         }
 
         template <typename T>

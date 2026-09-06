@@ -5,6 +5,8 @@ set(SELF_SRCS
     arena_streambuf.cpp
     ErrorArena.cpp
     cmpresult.cpp
+    ArenaConfig.cpp
+    AllocHeaderConfig.cpp
     mmap_util.cpp
     AllocError.cpp
     AllocInfo.cpp
