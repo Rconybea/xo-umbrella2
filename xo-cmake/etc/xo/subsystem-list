@@ -8,6 +8,7 @@ xo-flatstring
 xo-reflectutil
 xo-testutil
 xo-arena
+xo-pyarena
 xo-indentlog2
 xo-facet
 xo-printable2
