@@ -1,6 +1,6 @@
 # xo_pyunit/src/pyunit/CMakeLists.txt
 
-set(SELF_LIB pyunit)
+set(SELF_LIB xo_pyunit)
 set(SELF_SRCS pyunit.cpp)
 
 # ----------------------------------------------------------------

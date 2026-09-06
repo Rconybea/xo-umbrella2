@@ -18,7 +18,7 @@
 /* example:
  *   PYUNIT_IMPORT_MODULE()
  * replaces
- *   py::module_::import("pyunit")
+ *   py::module_::import("xo_pyunit")
  */
 #define PYUNIT_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
 
