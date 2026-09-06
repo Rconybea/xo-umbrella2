@@ -90,12 +90,14 @@ add_subdirectory(xo-testutil)     # unit test aux functions (UtestRehearser).
 add_subdirectory(xo-randomgen)    # xoshiro256ss.
                                   # NB after xo-testutil: utest.randomgen uses it
 add_subdirectory(xo-arena)        # arena allocator (DArena)
-add_subdirectory(xo-indentlog2)   # arena-backed version of indentlog
+add_subdirectory(xo-indentlog2)   # arena-backed pretty-printing
+add_subdirectory(xo-refcnt)
 add_subdirectory(xo-facet)        # sep iface,data
 add_subdirectory(xo-printable2)   # experiment w/ facet object model (fomo)
 add_subdirectory(xo-alloc2)       # arena api (fomo)
-add_subdirectory(xo-refcnt)
 add_subdirectory(xo-pyutil)
+add_subdirectory(xo-pyindentlog2) # python bindings for xo-indentlog2
+add_subdirectory(xo-pyfacet)      # python bindings for xo-facet
 add_subdirectory(xo-reflect)      # reflection library (pre-fomo)
 add_subdirectory(xo-pyreflect)
 add_subdirectory(xo-stringtable2) # experiment w/ facet object model
@@ -115,6 +117,7 @@ add_subdirectory(xo-unit)         # constexpr dimension checking
 add_subdirectory(xo-callback)
 add_subdirectory(xo-callback2)    # callback set over explicit obj<AAllocator> (fomo)
 add_subdirectory(xo-reactor2)     # reactor (w/ fomo)
+add_subdirectory(xo-pyreactor2)   # python bindings for xo-reactor2
 add_subdirectory(xo-alloc)        # arena allocator + incremental gc
 add_subdirectory(xo-pyunit)
 #add_subdirectory(xo-reflect2)     # experiment w/ facet object model
