@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "typeseq.hpp"
+#include "xo/facet/typeseq.hpp"
 
 namespace xo {
     namespace facet {

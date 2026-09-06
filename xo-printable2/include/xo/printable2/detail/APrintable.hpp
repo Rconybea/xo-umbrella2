@@ -15,7 +15,7 @@
 
 // includes (via {facet_includes})
 #include <xo/ppsink/PpSink.hpp>
-#include <xo/facet/ATop.hpp>
+#include <xo/facet/top/ATop.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>

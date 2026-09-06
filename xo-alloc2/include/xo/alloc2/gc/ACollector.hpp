@@ -17,7 +17,7 @@
 #include <xo/facet/Allocator_basic.hpp>
 #include <xo/alloc2/Generation.hpp>
 #include <xo/alloc2/role.hpp>
-#include <xo/facet/ATop.hpp>
+#include <xo/facet/top/ATop.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>

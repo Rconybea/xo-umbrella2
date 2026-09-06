@@ -2,6 +2,7 @@
 
 set(SELF_LIB xo_facet)
 set(SELF_SRCS
+	ITop_Any.cpp
     IAllocator_Any.cpp
     IAllocIterator_Any.cpp
 )
