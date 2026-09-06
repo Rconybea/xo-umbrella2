@@ -1,0 +1,25 @@
+#!/bin/sh
+# xo-python - python3 with the installed xo pybind11 modules on PYTHONPATH.
+#
+# Installed sibling of the generated ${CMAKE_BINARY_DIR}/xo-python that the
+# umbrella build emits (xo_emit_python_wrapper, xo_cxx.cmake).  This one needs
+# no collection: every xo pybind11 module installs to a single directory.
+#
+# That directory is spelled @CMAKE_INSTALL_PREFIX@/lib rather than
+# @CMAKE_INSTALL_FULL_LIBDIR@ deliberately.  xo_install_library4_noincludes()
+# hardcodes `LIBRARY DESTINATION lib`, so on a platform where GNUInstallDirs
+# resolves libdir to lib64 the two would disagree and this script would point at
+# an empty directory.  Move both together, or neither.
+#
+# Prepends, so an inherited PYTHONPATH still wins for anything xo does not ship.
+
+XO_PYTHONPATH='@CMAKE_INSTALL_PREFIX@/lib'
+
+if [ -n "${PYTHONPATH}" ]; then
+    PYTHONPATH="${XO_PYTHONPATH}:${PYTHONPATH}"
+else
+    PYTHONPATH="${XO_PYTHONPATH}"
+fi
+export PYTHONPATH
+
+exec python3 "$@"

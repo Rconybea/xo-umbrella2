@@ -200,6 +200,12 @@ xo_umbrella_sphinx_config(
 
 xo_emit_dependency_edges(${CMAKE_BINARY_DIR} XO_SUBSYSTEM_EDGES_FILE)
 
+# ${CMAKE_BINARY_DIR}/xo-python: python3 with every pybind11 module this build
+# produced on PYTHONPATH.  Must come after every add_subdirectory() above, since
+# it consumes what those registered.  Umbrella only -- a per-subsystem build
+# would emit a script covering just its own module; see xo_emit_python_wrapper.
+xo_emit_python_wrapper(${CMAKE_BINARY_DIR})
+
 # candidate .clang-format, whose xo include-ordering categories are derived
 # (descending topological order) from the same edge list.  Adopt with:
 #   cp ${CMAKE_BINARY_DIR}/dot-clang-format ${CMAKE_SOURCE_DIR}/.clang-format
