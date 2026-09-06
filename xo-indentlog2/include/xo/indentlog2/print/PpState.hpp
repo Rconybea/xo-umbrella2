@@ -70,6 +70,11 @@ namespace xo::pp {
         /** connect printer to output @p p_out **/
         void connect_output(LogBuffer * p_out);
 
+        /** the LogBuffer this state drains into.  Lets PrettySink assert the
+         *  pps_ -> logbuf_ link survived a move -- see PrettySink::verify_ok
+         **/
+        const LogBuffer * _out() const noexcept { return p_out_; }
+
         /** append @p str to pretty printer as a single token;
          *  triggers printing when at top level.
          **/

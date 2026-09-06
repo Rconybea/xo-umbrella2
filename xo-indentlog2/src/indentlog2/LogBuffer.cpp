@@ -4,6 +4,10 @@
  **/
 
 #include "LogBuffer.hpp"
+#include <xo/ppsink/tostr0.hpp>  /* not indentlog2 tostr: that includes LogBuffer.hpp */
+#include <xo/ppsink/tag.hpp>
+#include <stdexcept>
+#include <cassert>
 #include <cstring>
 #include <streambuf>
 
@@ -12,7 +16,7 @@ namespace xo {
     using std::size_t;
 
     LogBufferAdapter::LogBufferAdapter(DArena & x, bool debug_flag)
-        : buf_v_{x},
+        : buf_v_{&x},
           porigin_{nullptr},
           bpptr_{nullptr},
           pptr_{nullptr},
@@ -20,6 +24,40 @@ namespace xo {
           lstate_{},
           debug_flag_{debug_flag}
     {}
+
+    bool
+    LogBufferAdapter::verify_ok(bool throw_flag) const
+    {
+        using xo::pp::tostr0;
+        using xo::pp::xtag;
+
+        /* 1. buf_v_ is never null -- it is bound in the ctor and only ever
+         *    repointed (by LogBuffer's move ctor) to another live arena
+         */
+        if (!buf_v_) {
+            if (throw_flag)
+                throw std::runtime_error("LogBufferAdapter::verify_ok: null buf_v_");
+            return false;
+        }
+
+        /* 2. put area well-formed.  Also holds in the lazy state, where
+         *    porigin_ == bpptr_ == pptr_ == epptr_ == nullptr
+         */
+        if (!((porigin_ <= bpptr_) && (bpptr_ <= pptr_) && (pptr_ <= epptr_))) {
+            if (throw_flag) {
+                throw std::runtime_error
+                    (tostr0("LogBufferAdapter::verify_ok",
+                           ": put area not ordered",
+                           xtag("porigin", (const void *)porigin_),
+                           xtag("bpptr", (const void *)bpptr_),
+                           xtag("pptr", (const void *)pptr_),
+                           xtag("epptr", (const void *)epptr_)));
+            }
+            return false;
+        }
+
+        return true;
+    }
 
     auto
     LogBufferAdapter::committed_span() const -> Span
@@ -41,13 +79,13 @@ namespace xo {
 
     void
     LogBufferAdapter::visit_pools(const MemorySizeVisitor & fn) const {
-        buf_v_.visit_pools(fn);
+        buf_v_->visit_pools(fn);
     }
 
     bool
     LogBufferAdapter::expand_to(size_t new_z)
     {
-        bool ok = buf_v_.expand(new_z, "LogBuffer::expand_to");
+        bool ok = buf_v_->expand(new_z, "LogBuffer::expand_to");
 
         if (!ok)
             return false;
@@ -57,10 +95,10 @@ namespace xo {
             // (arena may prefix with guard bytes / alloc header
             // so possible that available < committed
 
-            auto z = buf_v_.available();
+            auto z = buf_v_->available();
 
-            buf_ckp_ = buf_v_.checkpoint();
-            porigin_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
+            buf_ckp_ = buf_v_->checkpoint();
+            porigin_ = (char *)buf_v_->alloc(reflect::typeseq::id<char[]>(), z);
 
             bpptr_ = porigin_;
             pptr_ = porigin_;
@@ -70,13 +108,13 @@ namespace xo {
              * This is workaround for missing DArena::realloc().
              * (+ only need checkpoint if DArena configured with object headers)
              */
-            buf_v_.restore(buf_ckp_);
+            buf_v_->restore(buf_ckp_);
 
-            auto z = buf_v_.available();
+            auto z = buf_v_->available();
 
             auto porigin0 = porigin_;
 
-            porigin_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
+            porigin_ = (char *)buf_v_->alloc(reflect::typeseq::id<char[]>(), z);
 
             ok = ok && (porigin_ == porigin0);
 
@@ -185,7 +223,7 @@ namespace xo {
         this->flush();
 
         if (porigin_) {
-            buf_v_.restore(buf_ckp_);
+            buf_v_->restore(buf_ckp_);
         }
         this->bpptr_ = porigin_;
         this->pptr_ = porigin_;
@@ -212,6 +250,45 @@ namespace xo {
     }
 
     // ----- LogBuffer -----
+
+    bool
+    LogBuffer::verify_ok(bool throw_flag) const
+    {
+        using xo::pp::tostr0;
+        using xo::pp::xtag;
+
+        if (!this->LogBufferAdapter::verify_ok(throw_flag))
+            return false;
+
+        /* the move-ctor invariant: the adapter must write through OUR arena,
+         * not some other LogBuffer's.  See LogBuffer(LogBuffer&&).
+         */
+        if (this->_buf_v() != &arena_) {
+            if (throw_flag) {
+                throw std::runtime_error
+                    (tostr0("LogBuffer::verify_ok",
+                           ": buf_v_ does not address this object's arena"
+                           " (missed a move-ctor repair?)",
+                           xtag("buf_v", (const void *)this->_buf_v()),
+                           xtag("expected", (const void *)&arena_)));
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    LogBuffer::LogBuffer(LogBuffer && rhs) noexcept
+        : LogBufferAdapter{std::move(rhs)},
+          arena_{std::move(rhs.arena_)}
+    {
+        /* repair the interior pointer: the base copied rhs's, which refers to
+         * rhs.arena_ rather than ours
+         */
+        this->reset_buf_v(&arena_);
+
+        assert(this->verify_ok(false /*!throw_flag*/));
+    }
 
     LogBuffer::LogBuffer(const ArenaConfig & config, bool debug_flag)
         : LogBufferAdapter{arena_, debug_flag},

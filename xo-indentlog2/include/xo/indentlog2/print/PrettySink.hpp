@@ -49,6 +49,37 @@ namespace xo {
              **/
             PrettySink(const PpConfig & cfg, std::streambuf * out);
 
+            /** move ctor.
+             *
+             *  Hand-written because PrettySink holds two INTERIOR pointers --
+             *  sbuf_ refers to pps_, and pps_ refers to logbuf_ -- so the
+             *  implicit memberwise move leaves both aimed at the moved-from
+             *  object.  That failed silently: a moved sink rendered EMPTY, or
+             *  crashed in LogBufferAdapter::write_span.  Nothing in c++ moved
+             *  one (make2str's return is elided), so it went unnoticed until a
+             *  pybind11 binding moved it.  See PrettySink_move.test.cpp.
+             *
+             *  Everything else survives untouched: the remaining interior
+             *  pointers (current_open_string_, the logbuf char pointers, the
+             *  streambuf put area) all address arena memory, and DArena's move
+             *  transfers the mapping without relocating it.
+             *
+             *  MAINTENANCE: adding a member that points at a sibling means
+             *  repairing it here too.
+             **/
+            PrettySink(PrettySink && rhs) noexcept;
+
+            /** no move assignment: nothing needs it, and it would have to
+             *  tear down the existing arenas first
+             **/
+            PrettySink & operator=(PrettySink &&) = delete;
+
+            /** create pretty sink that writes to string **/
+            static PrettySink make2str(const PpConfig & cfg);
+
+            /** create pretty sink that writes to cout **/
+            static PrettySink make2cout(const PpConfig & cfg);
+
             /** create temporary pretty sink, intended for a unit test **/
             static PrettySink scratch_plain(std::string basename,
                                             uint32_t logbuf_z,
@@ -58,6 +89,21 @@ namespace xo {
                                           uint32_t logbuf_z,
                                           uint32_t margin,
                                           const PpStyle & style);
+
+            /** verify this sink's internal invariants: that sbuf_ still writes
+             *  into OUR pps_, that pps_ still drains into OUR logbuf_, and
+             *  whatever logbuf_ checks of its own.
+             *
+             *  Open to any code -- assert(verify_ok()) in a mutator, or call
+             *  it directly from a test.  Throws std::runtime_error naming the
+             *  broken invariant when @p throw_flag, else returns false.
+             *
+             *  The first two are the move-ctor repairs.  They are checked
+             *  rather than left to crash because a stale interior pointer is
+             *  undefined behaviour that in practice often does NOT fault
+             *  in-process.  See PrettySink_move.test.cpp.
+             **/
+            bool verify_ok(bool throw_flag = true) const;
 
             /** attach (or detach, with nullptr) a streambuf that completed
              *  records are drained to (e.g. @c std::clog.rdbuf()).

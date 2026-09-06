@@ -39,7 +39,9 @@
 namespace ut {
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
+    using xo::pp::hex;
     using xo::pp::hex_view;
+    using xo::pp::hexprefix;
     using xo::pp::hexstyle;
     using xo::mm::ArenaConfig;
 
@@ -53,6 +55,16 @@ namespace ut {
          **/
         std::string
         render(std::uint32_t margin, const hex_view & x)
+        {
+            return toppstr(PpConfig::scratch_plain(margin), x);
+        }
+
+        /** render a single byte @p x -- same sink setup as the hex_view
+         *  overload above.  Margin is irrelevant for a scalar (it is one
+         *  unbreakable token), so callers pass a wide one.
+         **/
+        std::string
+        render(std::uint32_t margin, const hex & x)
         {
             return toppstr(PpConfig::scratch_plain(margin), x);
         }
@@ -135,6 +147,81 @@ namespace ut {
         xo::mm::span<char> s(raw, raw + 2);
 
         REQUIRE(render(200, hex_view(s)) == "[68 69]");
+    }
+    /* ---------------- hex (single byte) ---------------- */
+
+    TEST_CASE("hex-byte-bare", "[hex]") {
+        /* two lowercase digits, no "0x" prefix -- matching hex_view and
+         * legacy xo::hex.  Leading zero is preserved.
+         */
+        REQUIRE(render(200, hex(0xfd)) == "fd");
+        REQUIRE(render(200, hex(0x00)) == "00");
+        REQUIRE(render(200, hex(0x0f)) == "0f");
+        REQUIRE(render(200, hex(0xff)) == "ff");
+    }
+
+    TEST_CASE("hex-byte-with-char", "[hex]") {
+        /* printable codes show the character; non-printable show '?'.
+         * 0x4f is 'O' -- the example from legacy hex.hpp's docstring.
+         */
+        REQUIRE(render(200, hex(0x4f, hexstyle::with_char)) == "4f(O)");
+        REQUIRE(render(200, hex(0x20, hexstyle::with_char)) == "20( )");
+        REQUIRE(render(200, hex(0x1f, hexstyle::with_char)) == "1f(?)");
+        REQUIRE(render(200, hex(0x7f, hexstyle::with_char)) == "7f(?)");
+    }
+
+    TEST_CASE("hex-byte-agrees-with-hex-view", "[hex]") {
+        /* hex and hex_view share detail::put_hex_byte(), so a byte must
+         * render identically alone and inside a dump.  Pinned because the
+         * two have separate Prettifiers and could drift.
+         */
+        for (int i = 0; i < 256; ++i) {
+            auto uc = static_cast<std::uint8_t>(i);
+
+            /* a one-byte dump is just the byte in brackets */
+            REQUIRE(render(200, hex_view(&uc, &uc + 1))
+                    == "[" + render(200, hex(uc)) + "]");
+
+            REQUIRE(render(200, hex_view(&uc, &uc + 1, hexstyle::with_char))
+                    == "[" + render(200, hex(uc, hexstyle::with_char)) + "]");
+        }
+    }
+
+    TEST_CASE("hex-byte-qualified", "[hex]") {
+        /* hexprefix::qualified adds the 0x radix prefix.  Composes with
+         * with_char, and either argument order spells the same thing.
+         */
+        REQUIRE(render(200, hex(0xfd, hexprefix::qualified)) == "0xfd");
+        REQUIRE(render(200, hex(0x00, hexprefix::qualified)) == "0x00");
+
+        REQUIRE(render(200, hex(0x4f, hexprefix::qualified, hexstyle::with_char))
+                == "0x4f(O)");
+        REQUIRE(render(200, hex(0x4f, hexstyle::with_char, hexprefix::qualified))
+                == "0x4f(O)");
+
+        /* plain is the default, and stays the default */
+        REQUIRE(render(200, hex(0xfd)) == "fd");
+        REQUIRE(render(200, hex(0xfd, hexprefix::plain)) == "fd");
+    }
+
+    TEST_CASE("hex-view-never-qualifies", "[hex]") {
+        /* the prefix is scalar-only: a dump already says "these are bytes",
+         * so hex_view has no prefix option and must not grow one by accident
+         */
+        std::string_view s = "hi";
+
+        REQUIRE(render(200, hex_view(s)) == "[68 69]");
+    }
+
+    TEST_CASE("hex-byte-is-one-token", "[hex]") {
+        /* a byte must never be split across lines.  Even at an absurdly
+         * narrow margin the token stays intact -- same guarantee the
+         * row-atomicity case makes for hex_view.
+         */
+        REQUIRE(render(1, hex(0xab)) == "ab");
+        REQUIRE(render(1, hex(0x4f, hexstyle::with_char)) == "4f(O)");
+        REQUIRE(render(1, hex(0x4f, hexprefix::qualified, hexstyle::with_char))
+                == "0x4f(O)");
     }
 } /*namespace ut*/
 

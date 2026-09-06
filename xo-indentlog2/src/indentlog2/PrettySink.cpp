@@ -5,11 +5,16 @@
 
 #include "print/PrettySink.hpp"
 #include <xo/ppsink/LogState.hpp>
+#include <xo/ppsink/tostr0.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <iostream>
+#include <stdexcept>
+#include <cassert>
 #include <cstdlib>
 
 namespace xo {
     using xo::mm::ArenaConfig;
+    using std::cout;
 
     namespace pp {
         std::unique_ptr<PpSink>
@@ -37,6 +42,72 @@ namespace xo {
 
             /* ..and flush to out */
             logbuf_.set_dest_sbuf(out);
+        }
+
+        PrettySink::PrettySink(PrettySink && rhs) noexcept
+            : PpSink(std::move(rhs)),
+              pps_{std::move(rhs.pps_)},
+              sbuf_{std::move(rhs.sbuf_)},
+              logbuf_{std::move(rhs.logbuf_)}
+        {
+            /* repair the two interior pointers: after the memberwise move both
+             * still refer to rhs's members.  See the header for why nothing
+             * else needs fixing.
+             */
+            sbuf_.reset_pps(&pps_);
+            pps_.connect_output(&logbuf_);
+
+            assert(this->verify_ok(false /*!throw_flag*/));
+        }
+
+        bool
+        PrettySink::verify_ok(bool throw_flag) const
+        {
+            using xo::pp::tostr0;
+            using xo::pp::xtag;
+
+            /* 1. sbuf_ writes into OUR pps_ (move-ctor repair #1) */
+            if (sbuf_._pps() != &pps_) {
+                if (throw_flag) {
+                    throw std::runtime_error
+                        (tostr0("PrettySink::verify_ok",
+                                ": sbuf_ does not address this sink's pps_"
+                                " (missed a move-ctor repair?)",
+                                xtag("sbuf.pps", (const void *)sbuf_._pps()),
+                                xtag("expected", (const void *)&pps_)));
+                }
+                return false;
+            }
+
+            /* 2. pps_ drains into OUR logbuf_ (move-ctor repair #2) */
+            if (pps_._out() != &logbuf_) {
+                if (throw_flag) {
+                    throw std::runtime_error
+                        (tostr0("PrettySink::verify_ok",
+                                ": pps_ does not drain into this sink's logbuf_"
+                                " (missed a move-ctor repair?)",
+                                xtag("pps.out", (const void *)pps_._out()),
+                                xtag("expected", (const void *)&logbuf_)));
+                }
+                return false;
+            }
+
+            /* 3. and whatever logbuf_ checks of its own -- notably that ITS
+             *    interior pointer addresses its own arena
+             */
+            return logbuf_.verify_ok(throw_flag);
+        }
+
+        PrettySink
+        PrettySink::make2str(const PpConfig & cfg)
+        {
+            return PrettySink(cfg, nullptr);
+        }
+
+        PrettySink
+        PrettySink::make2cout(const PpConfig & cfg)
+        {
+            return PrettySink(cfg, cout.rdbuf());
         }
 
         PrettySink

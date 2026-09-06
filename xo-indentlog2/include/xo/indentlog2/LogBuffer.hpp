@@ -62,6 +62,14 @@ namespace xo {
          **/
         void set_dest_sbuf(std::streambuf * x) { dest_ = x; }
 
+        /** verify this adapter's internal invariants.
+         *
+         *  Open to any code -- assert(verify_ok()) in a mutator, or call it
+         *  directly from a test.  Throws std::runtime_error naming the broken
+         *  invariant when @p throw_flag, else returns false.
+         **/
+        bool verify_ok(bool throw_flag = true) const;
+
         /** drain the not-yet-flushed extent [@ref bpptr_, @ref pptr_) to
          *  @ref dest_ (if attached) and advance @ref bpptr_ to @ref pptr_.
          *  No-op when no dest_ is attached or nothing is pending.
@@ -97,7 +105,16 @@ namespace xo {
         ///@{
 
         /** buffer storage here **/
-        DArena & buf_v_;
+        DArena * buf_v_;
+
+    protected:
+        /** repoint at @p buf.  For LogBuffer's move ctor ONLY: see @ref buf_v_ **/
+        void reset_buf_v(DArena * buf) noexcept { buf_v_ = buf; }
+
+        /** the arena this adapter writes through **/
+        const DArena * _buf_v() const noexcept { return buf_v_; }
+
+    private:
         /** checkpoint for realloc **/
         DArena::Checkpoint buf_ckp_;
         /** pinned origin of usable buffered memory.
@@ -132,6 +149,20 @@ namespace xo {
     public:
         /** Create instance using @p config for @ref buf_v_ **/
         LogBuffer(const ArenaConfig & config, bool debug_flag);
+
+        /** move ctor **/
+        LogBuffer(LogBuffer && rhs) noexcept;
+
+        /** verify invariants: the adapter's, plus that @ref buf_v_ addresses
+         *  THIS object's own @ref arena_ rather than another LogBuffer's.
+         *
+         *  That last one is the move-ctor invariant.  It is checked here
+         *  rather than left to crash, because a stale buf_v_ is undefined
+         *  behaviour that in practice often does NOT fault in-process -- the
+         *  python binding segfaulted where an equivalent c++ case did not.
+         *  See PrettySink_move.test.cpp.
+         **/
+        bool verify_ok(bool throw_flag = true) const;
 
     private:
         /** character storage **/

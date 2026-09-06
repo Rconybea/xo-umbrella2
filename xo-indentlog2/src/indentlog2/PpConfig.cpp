@@ -103,7 +103,7 @@ namespace xo {
                               uint32_t margin,
                               const PpStyle & style)
         {
-            int s_ppconfig_seq{0};
+            static int s_ppconfig_seq{0};
 
             // its desirable for arena names to be unique,
             // so that they can be distinguished in MemorySizeVisitor pools

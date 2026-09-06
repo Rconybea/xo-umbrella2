@@ -10,6 +10,7 @@ set(SELF_SOURCE_FILES
     put_with_escape.test.cpp
     PpTokenStreambuf.test.cpp
     PrettySink.test.cpp
+    PrettySink_move.test.cpp
     FlatSink.test.cpp
     toppstr.test.cpp
     Prettifier.test.cpp
