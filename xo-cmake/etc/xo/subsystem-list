@@ -14,6 +14,7 @@ xo-printable2
 xo-alloc2
 xo-refcnt
 xo-pyutil
+xo-pyfacet
 xo-reflect
 xo-pyreflect
 xo-stringtable2
