@@ -4,6 +4,7 @@
 set(UTEST_EXE utest.facet)
 set(UTEST_SRCS
     facet_utest_main.cpp
+	FacetUtestAppcx.cpp
     objectmodel.test.cpp)
 
 if (ENABLE_TESTING)

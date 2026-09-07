@@ -22,8 +22,6 @@ namespace xo {
         static void init() {}
 
         static InitEvidence require() {
-            scope log(XO_DEBUG_(true));
-
             InitEvidence retval;
 
             /* direct subsystem deps fro xo-facet/ */

@@ -3,13 +3,15 @@
 set(SELF_LIB xo_indentlog2)
 set(SELF_SRCS
     init_indentlog2.cpp
-    appcx_indentlog2.cpp
-    config_indentlog2.cpp
+    Indentlog2Appcx.cpp
+    Indentlog2Config.cpp
     SetupIndentlog2.cpp
+	TempPrettySink.cpp
     TempArena.cpp
     LogStreambuf.cpp
     LogConfig.cpp
     LogBuffer.cpp
+	PrettySinkFactory.cpp
     PrettySink.cpp
     PpState.cpp
     LineState.cpp

@@ -23,10 +23,15 @@
 #include "pyindentlog2.hpp"
 #include <xo/pyarena/pyarena.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
+#include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
+#include <xo/indentlog2/cx/Indentlog2Config.hpp>
 #include <xo/indentlog2/print/PpConfig.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/pyutil/pyutil.hpp>
+#include <pybind11/stl.h>   /* std::optional <-> None, for PpSink::lpos */
+#include <memory>
+#include <stdexcept>
 #include <string>
 
 namespace xo {
@@ -35,6 +40,56 @@ namespace xo {
     using xo::mm::ArenaConfig;
 
     namespace pp {
+        namespace {
+            /** the Indentlog2Appcx for this python process.
+             *
+             *  Analogue of FacetUtestAppcx in xo-facet/utest: a python process
+             *  is a host that assembles a context, exactly as a c++ main() or a
+             *  test main() does.  It lives HERE rather than in xo-indentlog2 so
+             *  that a standalone c++ application never acquires a singleton.
+             *
+             *  NOT constructed at import.  An import carries no arguments, so
+             *  making it the trigger would force a default configuration and
+             *  leave python unable to choose what a main() chooses freely.
+             *  configure() is the trigger instead.
+             **/
+            struct PyIndentlog2Appcx {
+                static std::unique_ptr<Indentlog2Appcx> appcx_;
+
+                static Indentlog2Appcx & appcx() {
+                    if (!appcx_) {
+                        throw std::runtime_error
+                            ("xo_pyindentlog2.appcx: not configured;"
+                             " call xo_pyindentlog2.configure(cfg) first");
+                    }
+
+                    return *appcx_;
+                }
+
+                /** @return the context just established, so a caller can
+                 *  hand it to the subsystem above rather than leaving that one
+                 *  to reach back for it.
+                 **/
+                static Indentlog2Appcx & configure(const Indentlog2Config & cfg) {
+                    /* throws rather than silently ignoring cfg: capacities are
+                     * honored on first construction only, so a second
+                     * configure() could not deliver what it appears to promise
+                     */
+                    if (appcx_) {
+                        throw std::runtime_error
+                            ("xo_pyindentlog2.configure: already configured;"
+                             " capacities cannot be changed after the first call");
+                    }
+
+                    appcx_ = std::make_unique<Indentlog2Appcx>(cfg);
+
+                    return *appcx_;
+                }
+            };
+
+            std::unique_ptr<Indentlog2Appcx> PyIndentlog2Appcx::appcx_;
+        } /*namespace*/
+
         PYBIND11_MODULE(PYINDENTLOG2_MODULE_NAME(), m) {
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.indentlog2";
@@ -51,6 +106,59 @@ namespace xo {
             // PpStyle -- coloring, shared with FlatSink.
             // Opaque: the color_spec members would need their own bindings,
             // and the two factories cover what a caller chooses between.
+
+            // ----------------------------------------------------------------
+            // subsystem configuration and context.
+            //
+            // Import registers types and nothing else.  A context is built only
+            // by configure(), so python supplies capacities the same way a c++
+            // main() does -- see PyIndentlog2Appcx above.
+
+            py::class_<Indentlog2Config>(m, "Indentlog2Config")
+                .def(py::init<const PpConfig &, std::uint32_t>(),
+                     py::arg("pp_config"),
+                     py::arg("temp_arena_capacity"),
+                     "configuration for the xo-indentlog2 subsystem")
+                /* the defaults live in c++ (Indentlog2Config::make_default),
+                 * so python and a c++ main() get the same ones -- rather than
+                 * this binding inventing a second set that could drift
+                 */
+                .def_static("make_default", &Indentlog2Config::make_default,
+                            "default configuration")
+                .def("pp_config", &Indentlog2Config::pp_config,
+                     py::return_value_policy::reference_internal)
+                .def("temp_arena_capacity", &Indentlog2Config::temp_arena_capacity,
+                     "capacity of the thread-local scratch arena behind tostr()/toppstr()")
+                .def("__repr__",
+                     [](const Indentlog2Config & x) {
+                         return ("<Indentlog2Config temp_arena_capacity="
+                                 + std::to_string(x.temp_arena_capacity()) + ">");
+                     });
+
+            /* opaque: python holds it only to hand to the module above */
+            py::class_<Indentlog2Appcx>(m, "Indentlog2Appcx")
+                /* what this context was actually configured with.  Without it
+                 * configuration is write-only from python: a caller cannot
+                 * confirm the values it passed took effect, and a test cannot
+                 * assert it.
+                 */
+                .def("config", &Indentlog2Appcx::config,
+                     py::return_value_policy::reference_internal,
+                     "the Indentlog2Config this context was established with")
+                .def("__repr__", [](const Indentlog2Appcx &) {
+                        return std::string("<Indentlog2Appcx>"); });
+
+            m.def("configure", &PyIndentlog2Appcx::configure,
+                  py::arg("config"),
+                  py::return_value_policy::reference,
+                  "establish this process's xo-indentlog2 context, and return it."
+                  "  Pass the result to the configure() of a subsystem above."
+                  "  Throws if already configured.");
+
+            m.def("appcx", &PyIndentlog2Appcx::appcx,
+                  py::return_value_policy::reference,
+                  "this process's xo-indentlog2 context."
+                  "  Throws if configure() has not been called.");
 
             py::class_<PpStyle>(m, "PpStyle")
                 .def(py::init<>())
@@ -178,7 +286,13 @@ namespace xo {
             // against the protocol rather than against PrettySink.
             // Not constructible from python.
 
-            py::class_<PpSink>(m, "PpSink");
+            py::class_<PpSink>(m, "PpSink")
+                /* current visible output column, when the sink tracks one.
+                 * Diagnostic: distinguishes "nothing was written" from
+                 * "written but not yet flushed to the logbuf".
+                 */
+                .def("lpos", [](const PpSink & self) { return self.lpos(); },
+                     "current visible column, or None if the sink does not track one");
 
             // ----------------------------------------------------------------
             // PrettySink -- opaque handle; see SCOPE at the top of this file.

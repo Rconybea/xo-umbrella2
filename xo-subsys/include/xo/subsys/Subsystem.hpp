@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "InitEvidence.hpp"
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
@@ -31,34 +32,6 @@
 //#define VERIFY_SUBSYSTEM(tag) Subsystem::verify_present<tag>(STRINGIFY(tag))
 
 namespace xo {
-
-    /* evidence that one or more subsystems have been initialized.
-     * Used to prevent static linker stripping must-run initialization code
-     */
-    class InitEvidence {
-    public:
-        InitEvidence() = default;
-        InitEvidence(std::uint64_t x) : evidence_{x} {}
-
-        std::uint64_t evidence() const { return evidence_; }
-
-        InitEvidence operator^=(InitEvidence x) {
-            this->evidence_ ^= x.evidence_;
-
-            return *this;
-        } /*operator^=*/
-
-        InitEvidence operator^(InitEvidence x) {
-            return InitEvidence(this->evidence_ ^ x.evidence_);
-        }
-
-    private:
-        /* we don't care about the specific value computed here,
-         * purpose is to be sufficiently impenentrable to compiler such
-         * that static linker can't optimize it away
-         */
-        std::uint64_t evidence_ = 0;
-    }; /*InitEvidence*/
 
     /* Goals:
      * 1. provide for code that must run once (and only once)

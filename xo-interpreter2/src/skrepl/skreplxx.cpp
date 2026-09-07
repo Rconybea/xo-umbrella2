@@ -11,8 +11,8 @@
 #include <xo/facet/cx/FacetAppcx.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog2/init_indentlog2.hpp>
-#include <xo/indentlog2/appcx_indentlog2.hpp>
-#include <xo/indentlog2/config_indentlog2.hpp>
+#include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
+#include <xo/indentlog2/cx/Indentlog2Config.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -26,7 +26,6 @@ namespace xo {
     using xo::pp::scope;
     using xo::scm::DVirtualSchematikaMachine;
     using xo::scm::VsmResultExt;
-    //using xo::pp::ThreadPrettySink;
     using xo::pp::PpConfig;
     using xo::mm::AAllocator;
     using xo::mm::ArenaConfig;
@@ -152,7 +151,7 @@ namespace xo {
         void _stop();
 
     private:
-        InitEvidence init_evidence_ = 0;
+        InitEvidence init_evidence_;
         ReplConfig repl_config_;
         bool interactive_ = false;
         Replxx rx_;
@@ -182,16 +181,16 @@ namespace xo {
         using xo::S_facet_tag;
         using xo::S_indentlog2_tag;
         using xo::FacetConfig;
-        using xo::Indentlog2_Config;
+        using xo::Indentlog2Config;
         using xo::AppContext;
         using xo::AppConfig;
         using ReplAppConfig = AppConfig<S_indentlog2_tag, S_facet_tag, S_interpreter2_tag>;
         using ReplAppContext = AppContext<S_indentlog2_tag, S_facet_tag, S_interpreter2_tag>;
 
         ReplAppConfig repl_config{
-            Indentlog2_Config(PpConfig().with_logbuf_config
-                              (ArenaConfig().with_size(1024 * 1024)),
-                              64 * 1024 /*c_temp_arena_capacity*/),
+            Indentlog2Config(PpConfig().with_logbuf_config
+                                 (ArenaConfig().with_size(1024 * 1024)),
+                             64 * 1024 /*c_temp_arena_capacity*/),
             FacetConfig(1024 /*c_facet_registry_capacity*/,
                         1024 /*c_type_registry_capacity*/),
             Interpreter2Config()

@@ -85,6 +85,16 @@ namespace xo {
         /** require room for @p x chars **/
         bool _require_avail(uint32_t x);
 
+        /** report that @p fn could not obtain @p want bytes, and why.
+         *
+         *  Always throws.  The three callers of @ref _require_avail used to
+         *  assert(false) and return, which loses the reason, vanishes under
+         *  NDEBUG (CMAKE_CXX_FLAGS_RELEASE carries -DNDEBUG), and reaches the
+         *  caller as silently truncated output -- a rendered value that comes
+         *  back empty, with nothing to say why.
+         **/
+        [[noreturn]] void _fail_no_room(const char * fn, std::size_t want) const;
+
         /** synchronize line accountant @ref lstate_ when dirty
          *  (because chars possibly added to @ref buf_v_).
          *  Also refresh @ref pptr_
@@ -115,6 +125,10 @@ namespace xo {
     private:
         /** checkpoint for realloc **/
         DArena::Checkpoint buf_ckp_;
+        /** why the last @ref expand_to failed, for @ref _fail_no_room.
+         *  nullptr once an expand succeeds.  Static strings only.
+         **/
+        const char * expand_fail_ = nullptr;
         /** pinned origin of usable buffered memory.
          *  Unlike streambuf's pbase, does not advance on flush:
          *  @ref lstate_ needs [porigin_, pptr_) to compute line position.

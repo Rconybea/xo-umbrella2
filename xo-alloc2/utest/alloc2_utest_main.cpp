@@ -16,8 +16,8 @@
 #include <xo/facet/init_facet.hpp>
 #include <xo/facet/cx/FacetAppcx.hpp>
 #include <xo/indentlog2/init_indentlog2.hpp>
-#include <xo/indentlog2/appcx_indentlog2.hpp>
-#include <xo/indentlog2/config_indentlog2.hpp>
+#include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
+#include <xo/indentlog2/cx/Indentlog2Config.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/testutil/UtestAppStart.hpp>
 #include <xo/testutil/UtestListener.hpp>
@@ -33,7 +33,7 @@ main(int argc, char* argv[])
     using xo::S_facet_tag;
     using xo::S_indentlog2_tag;
     using xo::FacetConfig;
-    using xo::Indentlog2_Config;
+    using xo::Indentlog2Config;
     using xo::pp::PpConfig;
     using xo::AppContext;
     using xo::AppConfig;
@@ -60,9 +60,9 @@ main(int argc, char* argv[])
 #endif
 
     UtestAppConfig utest_config{
-        Indentlog2_Config(PpConfig().with_logbuf_config
-                          (ArenaConfig().with_size(1024 * 1024)),
-                          64 * 1024 /*c_temp_arena_capacity*/),
+        Indentlog2Config(PpConfig().with_logbuf_config
+                             (ArenaConfig().with_size(1024 * 1024)),
+                         64 * 1024 /*c_temp_arena_capacity*/),
         FacetConfig(1024 /*c_facet_registry_capacity*/,
                     1024 /*c_type_registry_capacity*/)};
     UtestAppContext utest_appcx{utest_config};

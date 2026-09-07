@@ -16,8 +16,8 @@
 //       needed by UtestListener.hpp, WITHOUT the runtime implementation.
 #define CATCH_CONFIG_EXTERNAL_INTERFACES // before UtestListener.hpp
 
-#include <xo/indentlog2/appcx_indentlog2.hpp>
-#include <xo/indentlog2/config_indentlog2.hpp>
+#include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
+#include <xo/indentlog2/cx/Indentlog2Config.hpp>
 #include <xo/indentlog2/init_indentlog2.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 //#include <xo/subsys/AppContext.hpp>
@@ -40,7 +40,7 @@ main(int argc, char* argv[])
 {
     using UtestAppConfig  = xo::AppConfig<xo::S_indentlog2_tag>;
     using UtestAppContext = xo::AppContext<xo::S_indentlog2_tag>;
-    using xo::Indentlog2_Config;
+    using xo::Indentlog2Config;
     using xo::pp::PpConfig;
 
     /* Unit tests pin rendered TEXT, so they must not be handed color escapes.
@@ -57,8 +57,8 @@ main(int argc, char* argv[])
     if (retval)
         return retval;
 
-    UtestAppConfig utest_config{ Indentlog2_Config(PpConfig::plain(),
-                                                   c_temp_arena_capacity) };
+    UtestAppConfig utest_config{ Indentlog2Config(PpConfig::plain(),
+                                                  c_temp_arena_capacity) };
     UtestAppContext utest_appcx{ utest_config };
 
     app.setup();

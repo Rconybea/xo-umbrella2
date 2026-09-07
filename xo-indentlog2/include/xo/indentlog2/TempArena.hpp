@@ -27,7 +27,7 @@ namespace xo::mm {
     public:
         TempArena() = default;
 
-        /** Initialize (just remembers @p cap).
+        /** Global initializion (just remembers @p cap).
          **/
         static void init(uint32_t cap);
 

@@ -13,11 +13,9 @@ namespace xo {
     /** @brief configuration for subsystem xo-interpreter2/ **/
     class Interpreter2Config {
     public:
-        explicit Interpreter2Config() : init_evidence_{InitSubsys<S_interpreter2_tag>::require()} {}
+        explicit Interpreter2Config() {}
 
     private:
-        /** ensures low-level subsystem init **/
-        InitEvidence init_evidence_;
     };
 
     /** xo-interpreter2 contributes a configuration and a context **/

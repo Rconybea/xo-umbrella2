@@ -8,20 +8,44 @@
 #include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo::mm {
-    AllocFlywheel::AllocFlywheel(DArena && storage,
+    AllocFlywheel::AllocFlywheel(const FacetAppcx & facet_appcx,
+                                 DArena && storage,
                                  DArenaVector<obj<ATop>> && strong,
                                  DArenaVector<obj<ATop>> && weak)
-    : store_{std::move(storage), std::move(strong), std::move(weak)}
-    {}
+      : facet_appcx_{facet_appcx},
+        store_{std::move(storage), std::move(strong), std::move(weak)}
+    {
+        // facet_appcx_: proof of work: facet,indentlog2 init performed;
+        // implies config-dependent globals setup, including:
+        // - FacetRegistry
+        // - TempArena
+        // - TempPrettySink
+        // - SinkFactory
+    }
 
     rp<AllocFlywheel>
-    AllocFlywheel::make_app(ArenaConfig & storage_cfg,
-                            ArenaConfig & strong_cfg,
-                            ArenaConfig & weak_cfg)
+    AllocFlywheel::make_app(const FacetAppcx & appcx,
+                            const ArenaConfig & storage_cfg,
+                            const ArenaConfig & strong_cfg,
+                            const ArenaConfig & weak_cfg)
     {
-        return new AllocFlywheel(DArena::map(storage_cfg),
+        return new AllocFlywheel(appcx,
+                                 DArena::map(storage_cfg),
                                  DArenaVector<obj<ATop>>::map(strong_cfg),
                                  DArenaVector<obj<ATop>>::map(weak_cfg));
+    }
+
+    rp<AllocFlywheel>
+    AllocFlywheel::make_default_app(const FacetAppcx & appcx)
+    {
+        ArenaConfig store_cfg = ArenaConfig().with_name("store").with_size(256 * 1024);
+        ArenaConfig strong_cfg = ArenaConfig().with_name("strong").with_size(4 * 1024);
+        ArenaConfig weak_cfg = ArenaConfig().with_name("weak").with_size(4 * 1024);
+
+        return make_app(appcx,
+                        store_cfg,
+                        strong_cfg,
+                        weak_cfg);
     }
 
     auto

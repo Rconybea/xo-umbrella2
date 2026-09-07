@@ -17,13 +17,6 @@ namespace xo {
     using std::cout;
 
     namespace pp {
-        std::unique_ptr<PpSink>
-        PrettySinkFactory::create()
-        {
-            return std::make_unique<PrettySink>(pp_config_,
-                                                std::clog.rdbuf());
-        }
-
         PrettySink::PrettySink(const PpConfig & cfg,
                                std::streambuf * out)
         : PpSink(PpStyle::default_style()),
@@ -31,6 +24,32 @@ namespace xo {
           sbuf_{&pps_},
           logbuf_{cfg.logbuf().logbuf_config(), cfg.logbuf().logbuf_debug_flag()}
         {
+            /* A logbuf that reserves nothing can never accept a byte: its
+             * first write reaches DArena::expand() and comes back
+             * reserve-exhausted.  Reject it here, where the offending config
+             * is in hand, rather than at that first write -- which is far from
+             * the mistake, and (before LogBufferAdapter::_fail_no_room) showed
+             * up as output that silently came back empty.
+             *
+             * NB a DEFAULT-constructed PpConfig reserves 0.  The named
+             * factories -- plain(), colored(), scratch_plain() -- reserve
+             * 64k.  So `Indentlog2Config{PpConfig(), n}` yields a
+             * PrettySinkFactory whose sinks cannot write, which is how a
+             * scope log ends up with nowhere to put its output.
+             */
+            if (cfg.logbuf().logbuf_config().size_ == 0) {
+                using xo::pp::tostr0;
+                using xo::pp::xtag;
+
+                throw std::runtime_error
+                    (tostr0("PrettySink: logbuf config reserves 0 bytes,"
+                            " so this sink could never accept output",
+                            xtag("logbuf_name", cfg.logbuf().logbuf_config().name_),
+                            xtag("hint",
+                                 "use PpConfig::plain()/colored()/scratch_plain(),"
+                                 " or PpConfig().with_logbuf_size(n)")));
+            }
+
             /* presentation style travels with the config (PpConfig::style()),
              * but is CONSUMED through PpSink::style() -- the Prettifiers that
              * read it are handed only a PpSink.  See PpStyle.hpp.

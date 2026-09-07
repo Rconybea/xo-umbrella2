@@ -100,7 +100,6 @@ namespace xo::pp {
         void begin_here(int32_t offset);
         void begin_here() { this->begin_here(0); }
 
-    public:
         /** optional break.  Group fits: emit @p spaces spaces.
          *  Group breaks: newline + (running_indent + @p offset).
          **/

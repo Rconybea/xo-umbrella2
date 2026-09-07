@@ -4,6 +4,7 @@ set(SELF_LIB xo_interpreter2)
 set(SELF_SRCS
     init_interpreter2.cpp
     SetupInterpreter2.cpp
+	Interpreter2Appcx.cpp
 
     VsmPrimitives.cpp
 

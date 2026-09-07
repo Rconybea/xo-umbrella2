@@ -21,8 +21,6 @@ namespace xo {
     InitEvidence
     InitSubsys<S_indentlog2_tag>::require()
     {
-        scope log(XO_DEBUG_(true));
-
         InitEvidence retval;
 
         retval ^= Subsystem::provide<S_indentlog2_tag>("indentlog2", &init);

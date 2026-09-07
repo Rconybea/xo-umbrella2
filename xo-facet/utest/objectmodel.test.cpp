@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "FacetUtestAppcx.hpp"
 #include "xo/facet/FacetRegistry.hpp"
 #include "xo/facet/ObjectHandle.hpp"
 #include "xo/facet/Top.hpp"
@@ -20,6 +21,7 @@
 #include <numbers>
 
 namespace xo {
+    using xo::FacetAppcx;
     using xo::facet::ATop;
     using xo::facet::Opaque;
     using xo::facet::valid_abstract_facet;
@@ -526,6 +528,43 @@ namespace xo {
             SUCCEED("is_fomo static assertions hold");
         }
 
+        /** The witness chain, checked at compile time.
+         *
+         *  Each of these types can hand over the context it was built from, so
+         *  holding one is evidence the corresponding subsystem was configured.
+         *  Asserted here rather than trusted, because the two python __repr__
+         *  bindings render unconditionally on exactly this reasoning.
+         *
+         *  The negative cases matter as much as the positive ones: a concept
+         *  that accidentally accepted everything, or that nothing satisfied,
+         *  would pass silently.
+         **/
+        TEST_CASE("witness-chain", "[facet][witness]")
+        {
+            using xo::carries_facet_appcx;
+            using xo::carries_indentlog2;
+            using xo::mm::AllocFlywheel;
+            using xo::facet::DObjectHandle;
+
+            /* the contexts themselves */
+            static_assert(carries_indentlog2<xo::FacetAppcx>);
+
+            /* a flywheel retains the context it was made with, and forwards */
+            static_assert(carries_facet_appcx<AllocFlywheel>);
+            static_assert(carries_indentlog2<AllocFlywheel>);
+
+            /* and a handle reaches both through its flywheel */
+            static_assert(carries_facet_appcx<DObjectHandle<AComplex, DRectCoords>>);
+            static_assert(carries_indentlog2<DObjectHandle<AComplex, DRectCoords>>);
+
+            /* not satisfied by types that cannot attest */
+            static_assert(!carries_facet_appcx<int>);
+            static_assert(!carries_indentlog2<int>);
+            static_assert(!carries_facet_appcx<DRectCoords>);
+
+            SUCCEED("witness chain holds");
+        }
+
         /** DObjectHandle over a facet OTHER than ATop.
          *
          *  The flywheel's root slot holds obj<ATop>, so a handle has to narrow
@@ -539,11 +578,12 @@ namespace xo {
             using xo::mm::ArenaConfig;
             using xo::facet::DObjectHandle;
 
+            FacetAppcx & facet_appcx = FacetUtestAppcx::appcx().cx<S_facet_tag>();
             ArenaConfig storage_cfg{ .name_ = "utest.oh.storage", .size_ = 16*1024 };
             ArenaConfig strong_cfg { .name_ = "utest.oh.strong",  .size_ =  4*1024 };
             ArenaConfig weak_cfg   { .name_ = "utest.oh.weak",    .size_ =  4*1024 };
 
-            rp<AllocFlywheel> fw = AllocFlywheel::make_app(storage_cfg, strong_cfg, weak_cfg);
+            rp<AllocFlywheel> fw = AllocFlywheel::make_app(facet_appcx, storage_cfg, strong_cfg, weak_cfg);
 
             REQUIRE(fw.get() != nullptr);
 

@@ -12,12 +12,19 @@ namespace xo {
     /** @brief application context for the xo-interpreter2 subsystem **/
     class Interpreter2Appcx {
     public:
+        /** driver **/
+        Interpreter2Appcx(const Interpreter2Config & cfg);
+
         template <typename Deps>
         Interpreter2Appcx(Deps & /*deps*/,
-                          const Interpreter2Config & cfg) : config_{cfg}
-        {}
+                          const Interpreter2Config & cfg) : Interpreter2Appcx(cfg) {}
+
+        const InitEvidence & init_evidence() const { return init_evidence_; }
 
     private:
+        /** ensures low-level subsystem init **/
+        InitEvidence init_evidence_;
+
         /** xo-interpreter2/ configuration **/
         Interpreter2Config config_;
     };

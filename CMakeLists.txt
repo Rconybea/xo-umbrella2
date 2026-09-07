@@ -103,6 +103,7 @@ add_subdirectory(xo-reflect)      # reflection library (pre-fomo)
 add_subdirectory(xo-pyreflect)
 add_subdirectory(xo-stringtable2) # experiment w/ facet object model
 add_subdirectory(xo-object2)      # experiment w/ facet object model
+add_subdirectory(xo-pyobject2)    # python bindings for xo-object2
 add_subdirectory(xo-gc)           # incremental gc + facet object model
 add_subdirectory(xo-type)         # experiment w/ facet object model
 add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)

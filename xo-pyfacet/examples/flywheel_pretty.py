@@ -16,14 +16,36 @@ import xo_pyindentlog2 as il
 import xo_pyfacet as f
 
 
-def make_flywheel():
+def configure():
+    """Establish this process's subsystem contexts, bottom-up.
+
+    Importing a module registers its types and nothing else; the context is
+    built here, from capacities chosen by the caller -- the same choice a c++
+    main() makes.
+
+    Each configure() returns its context and the next one takes it, mirroring
+    the c++ ctor FacetAppcx(cfg, const Indentlog2Appcx &).  The chain is
+    therefore visible as data flow: nothing reaches back for a context it was
+    not handed.
+    """
+    il_cx = il.configure(il.Indentlog2Config(il.PpConfig.plain(), 64 * 1024))
+
+    return f.configure(f.FacetConfig(1024, 1024), il_cx)
+
+
+def make_flywheel(facet_cx):
     """An AllocFlywheel: one primary arena plus two root sets.
 
     make_app() is a named factory, mirroring c++ -- an AllocFlywheel is
     heap-allocated and cannot be constructed any other way.  It is refcounted
     (it inherits Displayable -> Refcount), so python holds it through rp<>.
+
+    The appcx is passed explicitly rather than taken from the module: a
+    flywheel's dependence on configure() should be visible where the flywheel
+    is made, not implied.
     """
     return f.AllocFlywheel.make_app(
+        facet_cx,
         mm.ArenaConfig(name="flywheel-storage", size=256 * 1024),
         mm.ArenaConfig(name="flywheel-strong",  size=64 * 1024),
         mm.ArenaConfig(name="flywheel-weak",    size=64 * 1024))
@@ -49,7 +71,9 @@ def render_to_stdout(obj, margin=60):
 
 
 def main():
-    fw = make_flywheel()
+    facet_cx = configure()
+
+    fw = make_flywheel(facet_cx)
 
     print("1. render to a string")
     print("   ", repr(render_to_string(fw)))

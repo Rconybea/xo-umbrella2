@@ -59,6 +59,33 @@ namespace xo {
         return true;
     }
 
+    void
+    LogBufferAdapter::_fail_no_room(const char * fn, std::size_t want) const
+    {
+        using xo::pp::tostr0;
+        using xo::pp::xtag;
+
+        const auto & err = buf_v_->last_error();
+
+        throw std::runtime_error
+            (tostr0("LogBufferAdapter: out of room",
+                    xtag("fn", fn),
+                    xtag("want", want),
+                    xtag("why", expand_fail_ ? expand_fail_ : "expand_to not reached"),
+                    /* arena's own account of the last failure */
+                    xtag("arena_error", mm::AllocError::error_description(err.error_)),
+                    xtag("arena_src_fn", err.src_fn_ ? err.src_fn_ : "-"),
+                    xtag("arena_request_z", err.request_z_),
+                    xtag("arena_committed_z", err.committed_z_),
+                    xtag("arena_reserved_z", err.reserved_z_),
+                    /* and this adapter's own put area */
+                    xtag("buf_reserved", buf_v_->reserved()),
+                    xtag("buf_committed", buf_v_->committed()),
+                    xtag("buf_available", buf_v_->available()),
+                    xtag("used", (std::size_t)(pptr_ - porigin_)),
+                    xtag("capacity", (std::size_t)(epptr_ - porigin_))));
+    }
+
     auto
     LogBufferAdapter::committed_span() const -> Span
     {
@@ -87,8 +114,10 @@ namespace xo {
     {
         bool ok = buf_v_->expand(new_z, "LogBuffer::expand_to");
 
-        if (!ok)
+        if (!ok) {
+            expand_fail_ = "DArena::expand refused (see arena last_error)";
             return false;
+        }
 
         if (porigin_ == nullptr) [[unlikely]] {
             // first call -> establish porigin_,
@@ -99,6 +128,11 @@ namespace xo {
 
             buf_ckp_ = buf_v_->checkpoint();
             porigin_ = (char *)buf_v_->alloc(reflect::typeseq::id<char[]>(), z);
+
+            if (!porigin_) {
+                expand_fail_ = "first alloc from arena returned null";
+                return false;
+            }
 
             bpptr_ = porigin_;
             pptr_ = porigin_;
@@ -118,9 +152,23 @@ namespace xo {
 
             ok = ok && (porigin_ == porigin0);
 
+            if (!ok) {
+                /* the workaround for the missing DArena::realloc() assumes the
+                 * re-alloc lands where the old one did.  It does not when
+                 * something else allocated from this arena in between, so the
+                 * buffer would move under pointers we have already handed out.
+                 */
+                expand_fail_ = (porigin_
+                                ? "realloc moved the buffer"
+                                : "realloc from arena returned null");
+                return false;
+            }
+
             // keep bpptr_/pptr_, we reallocated in place
             epptr_ = porigin_ + z;
         }
+
+        expand_fail_ = nullptr;
 
         return ok;
     }
@@ -149,10 +197,8 @@ namespace xo {
     LogBufferAdapter::newline_indent(uint32_t indent)
     {
         // terminate the current line
-        if (!this->_require_avail(1)) {
-            assert(false);
-            return;
-        }
+        if (!this->_require_avail(1))
+            this->_fail_no_room("newline_indent", 1);
 
         {
             auto pptr = this->pptr_;
@@ -172,10 +218,8 @@ namespace xo {
             this->reclaim_line();
 
         // begin the next line with `indent` spaces
-        if (!this->_require_avail(indent)) {
-            assert(false);
-            return;
-        }
+        if (!this->_require_avail(indent))
+            this->_fail_no_room("newline_indent(indent)", indent);
 
         {
             auto pptr = this->pptr_;
@@ -188,10 +232,8 @@ namespace xo {
     void
     LogBufferAdapter::write_span(ConstSpan x)
     {
-        if (!this->_require_avail(x.size())) {
-            assert(false);
-            return;
-        }
+        if (!this->_require_avail(x.size()))
+            this->_fail_no_room("write_span", x.size());
 
         // here: buffer has enough room now
 
