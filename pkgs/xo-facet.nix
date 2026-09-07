@@ -7,6 +7,7 @@
   xo-reflectutil,
   xo-arena,
   xo-indentlog2,
+  xo-refcnt,
   xo-ppsink,
   # utest/ only: UtestAppStart owns the single catch2 runtime, and the suite
   # installs a ThreadPrettySink
@@ -38,6 +39,7 @@ stdenv.mkDerivation (finalattrs:
       xo-reflectutil
       xo-arena
       xo-indentlog2
+      xo-refcnt
       xo-ppsink
     ];
   })
