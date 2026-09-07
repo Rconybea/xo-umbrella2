@@ -21,6 +21,7 @@ xo-reflect
 xo-pyreflect
 xo-stringtable2
 xo-object2
+xo-pyobject2
 xo-gc
 xo-type
 xo-procedure2
