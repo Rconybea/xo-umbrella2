@@ -12,6 +12,8 @@ xo_pybind11_dependency(${SELF_LIB} xo_facet)
 # ArenaConfig + PpSink are registered by xo_pyindentlog2, which this module
 # imports at init.  header_dependency: we need its generated .hpp, not its lib
 xo_pybind11_header_dependency(${SELF_LIB} xo_pyindentlog2)
+# ArenaConfig is registered by xo_pyarena, which this module imports at init
+xo_pybind11_header_dependency(${SELF_LIB} xo_pyarena)
 # ArenaConfig / PpSink types are named directly by pyfacet.cpp
 xo_pybind11_dependency(${SELF_LIB} xo_arena)
 xo_pybind11_dependency(${SELF_LIB} xo_ppsink)

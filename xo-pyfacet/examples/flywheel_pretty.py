@@ -8,10 +8,10 @@ when the last reference drops.
 
 Run (from the umbrella build):
 
-    PYTHONPATH=.build/xo-pyindentlog2/src/pyindentlog2:.build/xo-pyfacet/src/pyfacet \
-        python3 xo-pyfacet/examples/flywheel_pretty.py
+    .build/xo-python xo-pyfacet/examples/flywheel_pretty.py
 """
 
+import xo_pyarena as mm
 import xo_pyindentlog2 as il
 import xo_pyfacet as f
 
@@ -24,9 +24,9 @@ def make_flywheel():
     (it inherits Displayable -> Refcount), so python holds it through rp<>.
     """
     return f.AllocFlywheel.make_app(
-        il.ArenaConfig(name="flywheel-storage", size=256 * 1024),
-        il.ArenaConfig(name="flywheel-strong",  size=64 * 1024),
-        il.ArenaConfig(name="flywheel-weak",    size=64 * 1024))
+        mm.ArenaConfig(name="flywheel-storage", size=256 * 1024),
+        mm.ArenaConfig(name="flywheel-strong",  size=64 * 1024),
+        mm.ArenaConfig(name="flywheel-weak",    size=64 * 1024))
 
 
 def render_to_string(obj, margin=60):
@@ -71,7 +71,7 @@ def main():
 
     print("5. the sink can be aimed at a named arena of your choosing")
     named = (il.PpConfig.scratch_plain(60)
-             .with_logbuf_config(il.ArenaConfig(name="from-python",
+             .with_logbuf_config(mm.ArenaConfig(name="from-python",
                                                 size=128 * 1024)))
     sink = il.PrettySink.make2str(named)
     fw.pretty(sink)

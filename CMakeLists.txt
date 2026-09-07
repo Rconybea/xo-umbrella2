@@ -92,6 +92,7 @@ add_subdirectory(xo-randomgen)    # xoshiro256ss.
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-arena)        # arena allocator (DArena)
+add_subdirectory(xo-pyarena)      # python bindings for xo-arena
 add_subdirectory(xo-indentlog2)   # arena-backed pretty-printing
 add_subdirectory(xo-pyindentlog2) # python bindings for xo-indentlog2
 add_subdirectory(xo-facet)        # sep iface,data

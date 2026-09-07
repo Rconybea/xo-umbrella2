@@ -9,8 +9,9 @@ xo_pybind11_dependency(${SELF_LIB} xo_pyutil)
 # target so its own deps do not reach us (cf. xo-pyunit, same pattern)
 xo_pybind11_dependency(${SELF_LIB} refcnt)
 xo_pybind11_dependency(${SELF_LIB} xo_indentlog2)
-# ArenaConfig/AllocHeaderConfig are xo-arena types, included directly here --
+# ArenaConfig is an xo-arena type, still NAMED here (PpLogbufConfig's ctor) --
 # declare the edge rather than leaning on xo_indentlog2 transitively
 xo_pybind11_dependency(${SELF_LIB} xo_arena)
+xo_pybind11_header_dependency(${SELF_LIB} xo_pyarena)
 
 # end CMakeLists.txt

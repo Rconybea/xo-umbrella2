@@ -4,6 +4,7 @@
  */
 
 #include "pyfacet.hpp"
+#include <xo/pyarena/pyarena.hpp>
 #include <xo/pyindentlog2/pyindentlog2.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/arena/ArenaConfig.hpp>
@@ -19,10 +20,13 @@ namespace xo {
 
     namespace facet {
         PYBIND11_MODULE(PYFACET_MODULE_NAME(), m) {
-            /* for ArenaConfig (make_app's arguments) and PpSink (pretty's).
-             * Both are registered there, and pybind11 permits exactly one
-             * registration per c++ type.
+            /* ArenaConfig (make_app's arguments) and PpSink (pretty's) are
+             * registered by these modules, and pybind11 permits exactly one
+             * registration per c++ type.  Imported separately rather than
+             * relying on xo_pyindentlog2 to pull xo_pyarena in transitively:
+             * this module names ArenaConfig itself.
              */
+            PYARENA_IMPORT_MODULE();
             PYINDENTLOG2_IMPORT_MODULE();
 
             /* module docstring */
