@@ -2133,6 +2133,20 @@ function(xo_emit_python_wrapper bindir)
     endif()
 
     list(REMOVE_DUPLICATES _dirs)
+
+    # A standalone build knows only the modules IT builds; everything below it
+    # comes from the install tree, where all xo python modules share one
+    # directory.  Append it, so a per-subsystem wrapper is usable.
+    #
+    # Deliberately NOT appended for the umbrella: there every module is built
+    # here, and an installed copy on the path could satisfy an import the build
+    # failed to produce -- masking the breakage this wrapper exists to expose.
+    xo_establish_submodule_build()
+
+    if(NOT XO_SUBMODULE_BUILD)
+        list(APPEND _dirs "${CMAKE_INSTALL_PREFIX}/lib")
+    endif()
+
     list(JOIN _dirs ":" _pythonpath)
 
     # NB the entries are $<TARGET_FILE_DIR:> generator expressions, so this has
@@ -2146,6 +2160,10 @@ function(xo_emit_python_wrapper bindir)
 #
 # python3 with this build tree's pybind11 modules on PYTHONPATH.  Prepended, so
 # an inherited PYTHONPATH still wins for anything this tree does not build.
+#
+# build dir: ${bindir}
+# A standalone subsystem build also carries its install prefix, where its
+# already-installed dependencies live; the umbrella build does not.
 
 XO_PYTHONPATH='${_pythonpath}'
 
