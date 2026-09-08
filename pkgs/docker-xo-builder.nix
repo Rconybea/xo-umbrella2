@@ -261,6 +261,14 @@ dockerTools.buildLayeredImage {
 
     Cmd = [ "/bin/bash" ];
     Env = [
+      # Declare PATH explicitly.  Docker supplies a default when an image omits
+      # it, but github's runner composes each step's environment from the image
+      # config plus $GITHUB_PATH -- so with no PATH here, one `echo >>
+      # $GITHUB_PATH` leaves PATH containing ONLY the added entry, and the next
+      # step dies with: exec: "sh": executable file not found in $PATH.
+      # (Cost: one red github run, 2026-09-08.)  forgejo's runner does not have
+      # this behaviour, which is why the same image worked there.
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
       "PKG_CONFIG_PATH=/lib/pkgconfig:/share/pkgconfig"
       "NIX_CFLAGS_COMPILE_${gcc.suffixSalt}=-isystem /include"
