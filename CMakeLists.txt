@@ -217,18 +217,38 @@ xo_emit_python_wrapper(${CMAKE_BINARY_DIR})
 #
 #     cmake --build .build --target xo-gen-ci
 #
-# xo-cmake is excluded: it is the bootstrap, built before xo-build exists.
+# Both pipelines render the SAME steps from the SAME list; only the template
+# head differs (runner, container, clone URL).  That is what keeps them from
+# drifting apart.
+#
+# EXCLUSIONS -- applied to both, since both run the same docker-xo-builder image:
+#
+#   xo-cmake  the bootstrap, built before xo-build exists (by the template's own
+#             `bootstrap xo-cmake` step).
+#
+#   xo-imgui  needs OpenGL, which reaches a workstation through the host driver
+#             bypass (/run/opengl-driver) rather than through the nix package
+#             set -- so it is absent in any container.  Observed 2026-09-08 at
+#             CONFIGURE time:
+#               Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY
+#                                               OPENGL_glx_LIBRARY
+#                                               OPENGL_INCLUDE_DIR)
+#             NB the guessed flags already carry XO_ENABLE_VULKAN=OFF but
+#             XO_ENABLE_OPENGL=ON.  Nothing runs those examples in CI, so adding
+#             mesa/libglvnd to a 2.6GB image to compile never-executed code was
+#             not worth it.  The old hand-written workflow never built xo-imgui
+#             either -- generating from subsystem-list is what surfaced it.
 
 add_custom_target(xo-gen-ci
     COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
             ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci-cmake.yaml.j2
             ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
-            --exclude xo-cmake
+            --exclude xo-cmake --exclude xo-imgui
             -o ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci-cmake.yaml
     COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
             ${CMAKE_SOURCE_DIR}/.github/workflows/ci-cmake.yaml.j2
             ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
-            --exclude xo-cmake
+            --exclude xo-cmake --exclude xo-imgui
             -o ${CMAKE_SOURCE_DIR}/.github/workflows/ci-cmake.yaml
     COMMENT "xo-gen-ci: regenerating forgejo + github cmake workflows"
     VERBATIM)

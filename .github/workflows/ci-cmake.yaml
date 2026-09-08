@@ -1314,24 +1314,6 @@ jobs:
           xo-build --install xo-pykalmanfilter
           echo "::endgroup::"
 
-#      - name: build xo-imgui
-#        run: |
-#          echo "::group::xo-imgui configure"
-#          xo-build --configure --with-utests --with-examples xo-imgui
-#          echo "::endgroup::"
-#
-#          echo "::group::xo-imgui build"
-#          xo-build --build xo-imgui
-#          echo "::endgroup::"
-#
-#          echo "::group::xo-imgui utest"
-#          xo-build --utest xo-imgui
-#          echo "::endgroup::"
-#
-#          echo "::group::xo-imgui install"
-#          xo-build --install xo-imgui
-#          echo "::endgroup::"
-
       # ---- end GENERATED ----
 
       - name: print install path
