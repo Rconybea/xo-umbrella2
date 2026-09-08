@@ -70,6 +70,15 @@ file(CHMOD ${PROJECT_BINARY_DIR}/xo-loc
                 GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 configure_file(
+    ${PROJECT_SOURCE_DIR}/bin/xo-gen-ci.in
+    ${PROJECT_BINARY_DIR}/xo-gen-ci
+    @ONLY
+    )
+file(CHMOD ${PROJECT_BINARY_DIR}/xo-gen-ci
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+configure_file(
     ${PROJECT_SOURCE_DIR}/bin/xo-python.in
     ${PROJECT_BINARY_DIR}/xo-python
     @ONLY
@@ -114,6 +123,7 @@ install(
     "${PROJECT_BINARY_DIR}/xo-docker-build"
     "${PROJECT_BINARY_DIR}/xo-deps"
     "${PROJECT_BINARY_DIR}/xo-loc"
+    "${PROJECT_BINARY_DIR}/xo-gen-ci"
     "${PROJECT_BINARY_DIR}/xo-python"
     "${PROJECT_BINARY_DIR}/xo-gen-clang-format"
     "${PROJECT_BINARY_DIR}/xo-clang-format-includes"

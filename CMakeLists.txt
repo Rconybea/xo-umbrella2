@@ -205,6 +205,30 @@ xo_emit_dependency_edges(${CMAKE_BINARY_DIR} XO_SUBSYSTEM_EDGES_FILE)
 # would emit a script covering just its own module; see xo_emit_python_wrapper.
 xo_emit_python_wrapper(${CMAKE_BINARY_DIR})
 
+# ----------------------------------------------------------------
+# .forgejo/workflows/ci-cmake.yaml: the per-subsystem steps are generated from
+# xo-cmake/etc/xo/subsystem-list, so adding a subsystem there is enough to have
+# CI build it.
+#
+# MANUAL target, and the output is committed to git -- same arrangement as
+# genfacet.  Regenerating on every configure would rewrite a tracked file as a
+# side effect of building, and make the diff appear without anyone asking for
+# it.  Run it when subsystem-list changes:
+#
+#     cmake --build .build --target xo-gen-ci
+#
+# xo-cmake is excluded: it is the bootstrap, built before xo-build exists.
+
+add_custom_target(xo-gen-ci
+    COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
+            ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci-cmake.yaml.j2
+            ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
+            --exclude xo-cmake
+            -o ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci-cmake.yaml
+    COMMENT "xo-gen-ci: regenerating .forgejo/workflows/ci-cmake.yaml"
+    VERBATIM)
+
+
 # candidate .clang-format, whose xo include-ordering categories are derived
 # (descending topological order) from the same edge list.  Adopt with:
 #   cp ${CMAKE_BINARY_DIR}/dot-clang-format ${CMAKE_SOURCE_DIR}/.clang-format
