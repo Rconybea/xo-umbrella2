@@ -35,6 +35,9 @@ namespace xo::facet {
 
         impl_handle_type * _impl_handle() const { return impl_handle_; }
 
+        //const AllocFlywheel & flywheel() const { return *memory_.get(); }
+        handle_index_type object_ix() const { return object_ix_; }
+
         /** @defgroup objecthandle-witness evidence carried by a handle
          *
          *  A handle cannot exist without a flywheel, which cannot exist without
@@ -44,7 +47,6 @@ namespace xo::facet {
          *  asserting it in a comment.
          **/
         ///@{
-        const AllocFlywheel & flywheel() const { return *memory_.get(); }
         const FacetAppcx & facet_appcx() const { return memory_->facet_appcx(); }
         const Indentlog2Appcx & indentlog2_appcx() const { return memory_->indentlog2_appcx(); }
         ///@}
