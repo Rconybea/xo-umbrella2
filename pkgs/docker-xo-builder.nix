@@ -11,12 +11,27 @@
 #    $ docker image prune -f   # optional hygiene
 #    $ nix-build -A xo.docker-xo-builder   # builds container
 #    $ docker load <$(readlink -f result)  # load into docker
-#    $ docker image tag docker-xo-builder:v2 conybeare.us/roland/docker-xo-builder:v2  #
-#    $ docker image push conybeare.us/roland/docker-xo-builder:v2   # push
-# Then on CI host:
+#
+#  ONE image, two registries -- tag it twice, push it twice.  Same image id in
+#  both, so forgejo and github CI run the identical builder.
+#
+#    # forgejo (vpn1).  The runner picks the image by label, see
+#    # /etc/forgejo-runner/config.yaml:
+#    #     labels: - "xo-builder:docker://conybeare.us/roland/docker-xo-builder:v2"
+#    $ docker image tag docker-xo-builder:v2 conybeare.us/roland/docker-xo-builder:v2
+#    $ docker image push conybeare.us/roland/docker-xo-builder:v2
+#
+#    # github.  Named in the workflow itself: container: image: ghcr.io/...
+#    # Needs a credential with write:packages:
+#    #     gh auth refresh -h github.com -s write:packages
+#    #     gh auth token | docker login ghcr.io -u rconybea --password-stdin
+#    $ docker image tag docker-xo-builder:v2 ghcr.io/rconybea/docker-xo-builder:v2
+#    $ docker image push ghcr.io/rconybea/docker-xo-builder:v2
+#
+# Then on the forgejo CI host:
 #    $ docker pull conybeare.us/roland/docker-xo-builder:v2
 #    $ docker image prune -f
-# Will be used on next CI build
+# Will be used on next CI build.  github runners pull ghcr per-run, no step needed.
 
 {
   dockerTools,
@@ -230,6 +245,20 @@ dockerTools.buildLayeredImage {
     #       1. uses .nix-profile/bin/bash for shell
     #       2. puts certs under /nix/var/nix/profiles/default/etc/...
     #
+    # Provenance travels WITH the image, rather than living only in a registry's
+    # database.  ghcr reads image.source to link a package to its repository,
+    # and that link governs package permissions -- so a stale one points access
+    # control at the wrong repo.  The package was linked to Rconybea/docker-xo-builder,
+    # which no longer builds it; this file does.
+    #
+    # `docker image inspect <image> --format '{{json .Config.Labels}}'` answers
+    # "where does this come from?" without asking a registry.
+    Labels = {
+      "org.opencontainers.image.source" = "https://github.com/Rconybea/xo-umbrella2";
+      "org.opencontainers.image.description" = "xo build environment: gcc, clang, cmake, nix, and the xo third-party deps";
+      "org.opencontainers.image.title" = "docker-xo-builder";
+    };
+
     Cmd = [ "/bin/bash" ];
     Env = [
       "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"

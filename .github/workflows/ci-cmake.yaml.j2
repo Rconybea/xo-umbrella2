@@ -1,0 +1,113 @@
+name: cmake-docker
+# - Verifies a plain (non-nix) cmake build works inside docker-xo-builder,
+#   on github-hosted runners.
+#
+# SHARED BUILDER.  The container is the SAME image the forgejo pipeline runs --
+# one build, tagged for two registries, identical image id.  See
+# xo-umbrella2/pkgs/docker-xo-builder.nix for the build+deploy recipe.
+#
+# NO JAVASCRIPT ACTIONS.  The image has no node (verified: `command -v node` is
+# empty), and github runs JS actions INSIDE the job container -- so
+# actions/checkout, actions/cache and actions/upload-artifact would all fail
+# here.  The checkout step below clones with plain git instead, exactly as the
+# forgejo pipeline does.  Adding nodejs to the image would lift this, at a size
+# cost on an image that is already 2.6GB.
+#
+# The per-subsystem steps are GENERATED; see .github/workflows/ci-cmake.yaml.j2
+# and `cmake --build .build --target xo-gen-ci-github`.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.nix'
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  cmake-build:
+    runs-on: ubuntu-latest
+
+    container:
+      # same image as forgejo's xo-builder runner label resolves to
+      image: ghcr.io/rconybea/docker-xo-builder:v2
+
+    strategy:
+      fail-fast: false          # a failure in one compiler must not cancel the other
+      max-parallel: 1           # run gcc, then clang -- never both at once
+      matrix:
+        include:
+          - { cc: gcc,   cxx: g++     }
+          - { cc: clang, cxx: clang++ }
+    env:
+      CC:  ${{matrix.cc}}
+      CXX: ${{matrix.cxx}}
+      PREFIX: ${{github.workspace}}/local-${{matrix.cc}}
+    steps:
+      - name: set PATH
+        run: |
+          echo "$PREFIX/bin" >> $GITHUB_PATH
+
+      - name: compiler
+        run: |
+          # print canonical choices
+          for c in c++ g++ clang++; do
+            p="$(command -v "$c" 2>/dev/null || true)"
+            printf '%-8s %s\n' "$c" "${p:+$(readlink -f "$p")}"
+          done
+          # cmake will use CXX, default to c++
+          choice=$(${CXX:-c++} --version | head -1)
+          echo "build with: ${choice}"
+
+      - name: checkout
+        run: |
+          echo PATH=${PATH}
+          # plain git, not actions/checkout: see NO JAVASCRIPT ACTIONS above.
+          # $GITHUB_SERVER_URL is https://github.com here.
+          git clone --quiet --depth=1 $GITHUB_SERVER_URL/${{github.repository}}.git .
+          mkdir -p "$PREFIX"
+
+      - name: bootstrap xo-cmake
+        run: |
+          echo "::group::xo-cmake configure"
+          cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
+          echo "::endgroup::"
+
+          echo "::group::xo-cmake build (no-op)"
+          cmake --build .build/xo-cmake
+          echo "::endgroup::"
+
+          echo "::group::xo-cmake install"
+          cmake --install .build/xo-cmake
+          echo "::endgroup::"
+
+      # ---- GENERATED from [[ template_name ]] by xo-gen-ci ----
+      # Do not edit these steps by hand.  Membership and order come from
+      # [[ subsystem_list ]]; regenerate with:
+      #     cmake --build .build --target xo-gen-ci
+
+<% for sub in subsystems %>
+      - name: build [[ sub ]]
+        run: |
+          echo "::group::[[ sub ]] configure"
+          xo-build --configure --with-utests --with-examples [[ sub ]]
+          echo "::endgroup::"
+
+          echo "::group::[[ sub ]] build"
+          xo-build --build [[ sub ]]
+          echo "::endgroup::"
+
+          echo "::group::[[ sub ]] utest"
+          xo-build --utest [[ sub ]]
+          echo "::endgroup::"
+
+          echo "::group::[[ sub ]] install"
+          xo-build --install [[ sub ]]
+          echo "::endgroup::"
+
+<% endfor %>
+      # ---- end GENERATED ----
+
+      - name: print install path
+        run: |
+          tree $PREFIX

@@ -1,0 +1,1335 @@
+name: cmake-docker
+# - Verifies a plain (non-nix) cmake build works inside docker-xo-builder,
+#   on github-hosted runners.
+#
+# SHARED BUILDER.  The container is the SAME image the forgejo pipeline runs --
+# one build, tagged for two registries, identical image id.  See
+# xo-umbrella2/pkgs/docker-xo-builder.nix for the build+deploy recipe.
+#
+# NO JAVASCRIPT ACTIONS.  The image has no node (verified: `command -v node` is
+# empty), and github runs JS actions INSIDE the job container -- so
+# actions/checkout, actions/cache and actions/upload-artifact would all fail
+# here.  The checkout step below clones with plain git instead, exactly as the
+# forgejo pipeline does.  Adding nodejs to the image would lift this, at a size
+# cost on an image that is already 2.6GB.
+#
+# The per-subsystem steps are GENERATED; see .github/workflows/ci-cmake.yaml.j2
+# and `cmake --build .build --target xo-gen-ci-github`.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.nix'
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  cmake-build:
+    runs-on: ubuntu-latest
+
+    container:
+      # same image as forgejo's xo-builder runner label resolves to
+      image: ghcr.io/rconybea/docker-xo-builder:v2
+
+    strategy:
+      fail-fast: false          # a failure in one compiler must not cancel the other
+      max-parallel: 1           # run gcc, then clang -- never both at once
+      matrix:
+        include:
+          - { cc: gcc,   cxx: g++     }
+          - { cc: clang, cxx: clang++ }
+    env:
+      CC:  ${{matrix.cc}}
+      CXX: ${{matrix.cxx}}
+      PREFIX: ${{github.workspace}}/local-${{matrix.cc}}
+    steps:
+      - name: set PATH
+        run: |
+          echo "$PREFIX/bin" >> $GITHUB_PATH
+
+      - name: compiler
+        run: |
+          # print canonical choices
+          for c in c++ g++ clang++; do
+            p="$(command -v "$c" 2>/dev/null || true)"
+            printf '%-8s %s\n' "$c" "${p:+$(readlink -f "$p")}"
+          done
+          # cmake will use CXX, default to c++
+          choice=$(${CXX:-c++} --version | head -1)
+          echo "build with: ${choice}"
+
+      - name: checkout
+        run: |
+          echo PATH=${PATH}
+          # plain git, not actions/checkout: see NO JAVASCRIPT ACTIONS above.
+          # $GITHUB_SERVER_URL is https://github.com here.
+          git clone --quiet --depth=1 $GITHUB_SERVER_URL/${{github.repository}}.git .
+          mkdir -p "$PREFIX"
+
+      - name: bootstrap xo-cmake
+        run: |
+          echo "::group::xo-cmake configure"
+          cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
+          echo "::endgroup::"
+
+          echo "::group::xo-cmake build (no-op)"
+          cmake --build .build/xo-cmake
+          echo "::endgroup::"
+
+          echo "::group::xo-cmake install"
+          cmake --install .build/xo-cmake
+          echo "::endgroup::"
+
+      # ---- GENERATED from ci-cmake.yaml.j2 by xo-gen-ci ----
+      # Do not edit these steps by hand.  Membership and order come from
+      # /home/roland/proj/xo-umbrella2/xo-cmake/etc/xo/subsystem-list; regenerate with:
+      #     cmake --build .build --target xo-gen-ci
+
+      - name: build xo-timeutil
+        run: |
+          echo "::group::xo-timeutil configure"
+          xo-build --configure --with-utests --with-examples xo-timeutil
+          echo "::endgroup::"
+
+          echo "::group::xo-timeutil build"
+          xo-build --build xo-timeutil
+          echo "::endgroup::"
+
+          echo "::group::xo-timeutil utest"
+          xo-build --utest xo-timeutil
+          echo "::endgroup::"
+
+          echo "::group::xo-timeutil install"
+          xo-build --install xo-timeutil
+          echo "::endgroup::"
+
+      - name: build xo-ppsink
+        run: |
+          echo "::group::xo-ppsink configure"
+          xo-build --configure --with-utests --with-examples xo-ppsink
+          echo "::endgroup::"
+
+          echo "::group::xo-ppsink build"
+          xo-build --build xo-ppsink
+          echo "::endgroup::"
+
+          echo "::group::xo-ppsink utest"
+          xo-build --utest xo-ppsink
+          echo "::endgroup::"
+
+          echo "::group::xo-ppsink install"
+          xo-build --install xo-ppsink
+          echo "::endgroup::"
+
+      - name: build xo-indentlog
+        run: |
+          echo "::group::xo-indentlog configure"
+          xo-build --configure --with-utests --with-examples xo-indentlog
+          echo "::endgroup::"
+
+          echo "::group::xo-indentlog build"
+          xo-build --build xo-indentlog
+          echo "::endgroup::"
+
+          echo "::group::xo-indentlog utest"
+          xo-build --utest xo-indentlog
+          echo "::endgroup::"
+
+          echo "::group::xo-indentlog install"
+          xo-build --install xo-indentlog
+          echo "::endgroup::"
+
+      - name: build xo-subsys
+        run: |
+          echo "::group::xo-subsys configure"
+          xo-build --configure --with-utests --with-examples xo-subsys
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys build"
+          xo-build --build xo-subsys
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys utest"
+          xo-build --utest xo-subsys
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys install"
+          xo-build --install xo-subsys
+          echo "::endgroup::"
+
+      - name: build xo-flatstring
+        run: |
+          echo "::group::xo-flatstring configure"
+          xo-build --configure --with-utests --with-examples xo-flatstring
+          echo "::endgroup::"
+
+          echo "::group::xo-flatstring build"
+          xo-build --build xo-flatstring
+          echo "::endgroup::"
+
+          echo "::group::xo-flatstring utest"
+          xo-build --utest xo-flatstring
+          echo "::endgroup::"
+
+          echo "::group::xo-flatstring install"
+          xo-build --install xo-flatstring
+          echo "::endgroup::"
+
+      - name: build xo-reflectutil
+        run: |
+          echo "::group::xo-reflectutil configure"
+          xo-build --configure --with-utests --with-examples xo-reflectutil
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectutil build"
+          xo-build --build xo-reflectutil
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectutil utest"
+          xo-build --utest xo-reflectutil
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectutil install"
+          xo-build --install xo-reflectutil
+          echo "::endgroup::"
+
+      - name: build xo-testutil
+        run: |
+          echo "::group::xo-testutil configure"
+          xo-build --configure --with-utests --with-examples xo-testutil
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil build"
+          xo-build --build xo-testutil
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil utest"
+          xo-build --utest xo-testutil
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil install"
+          xo-build --install xo-testutil
+          echo "::endgroup::"
+
+      - name: build xo-randomgen
+        run: |
+          echo "::group::xo-randomgen configure"
+          xo-build --configure --with-utests --with-examples xo-randomgen
+          echo "::endgroup::"
+
+          echo "::group::xo-randomgen build"
+          xo-build --build xo-randomgen
+          echo "::endgroup::"
+
+          echo "::group::xo-randomgen utest"
+          xo-build --utest xo-randomgen
+          echo "::endgroup::"
+
+          echo "::group::xo-randomgen install"
+          xo-build --install xo-randomgen
+          echo "::endgroup::"
+
+      - name: build xo-refcnt
+        run: |
+          echo "::group::xo-refcnt configure"
+          xo-build --configure --with-utests --with-examples xo-refcnt
+          echo "::endgroup::"
+
+          echo "::group::xo-refcnt build"
+          xo-build --build xo-refcnt
+          echo "::endgroup::"
+
+          echo "::group::xo-refcnt utest"
+          xo-build --utest xo-refcnt
+          echo "::endgroup::"
+
+          echo "::group::xo-refcnt install"
+          xo-build --install xo-refcnt
+          echo "::endgroup::"
+
+      - name: build xo-pyutil
+        run: |
+          echo "::group::xo-pyutil configure"
+          xo-build --configure --with-utests --with-examples xo-pyutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pyutil build"
+          xo-build --build xo-pyutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pyutil utest"
+          xo-build --utest xo-pyutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pyutil install"
+          xo-build --install xo-pyutil
+          echo "::endgroup::"
+
+      - name: build xo-arena
+        run: |
+          echo "::group::xo-arena configure"
+          xo-build --configure --with-utests --with-examples xo-arena
+          echo "::endgroup::"
+
+          echo "::group::xo-arena build"
+          xo-build --build xo-arena
+          echo "::endgroup::"
+
+          echo "::group::xo-arena utest"
+          xo-build --utest xo-arena
+          echo "::endgroup::"
+
+          echo "::group::xo-arena install"
+          xo-build --install xo-arena
+          echo "::endgroup::"
+
+      - name: build xo-pyarena
+        run: |
+          echo "::group::xo-pyarena configure"
+          xo-build --configure --with-utests --with-examples xo-pyarena
+          echo "::endgroup::"
+
+          echo "::group::xo-pyarena build"
+          xo-build --build xo-pyarena
+          echo "::endgroup::"
+
+          echo "::group::xo-pyarena utest"
+          xo-build --utest xo-pyarena
+          echo "::endgroup::"
+
+          echo "::group::xo-pyarena install"
+          xo-build --install xo-pyarena
+          echo "::endgroup::"
+
+      - name: build xo-indentlog2
+        run: |
+          echo "::group::xo-indentlog2 configure"
+          xo-build --configure --with-utests --with-examples xo-indentlog2
+          echo "::endgroup::"
+
+          echo "::group::xo-indentlog2 build"
+          xo-build --build xo-indentlog2
+          echo "::endgroup::"
+
+          echo "::group::xo-indentlog2 utest"
+          xo-build --utest xo-indentlog2
+          echo "::endgroup::"
+
+          echo "::group::xo-indentlog2 install"
+          xo-build --install xo-indentlog2
+          echo "::endgroup::"
+
+      - name: build xo-pyindentlog2
+        run: |
+          echo "::group::xo-pyindentlog2 configure"
+          xo-build --configure --with-utests --with-examples xo-pyindentlog2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyindentlog2 build"
+          xo-build --build xo-pyindentlog2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyindentlog2 utest"
+          xo-build --utest xo-pyindentlog2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyindentlog2 install"
+          xo-build --install xo-pyindentlog2
+          echo "::endgroup::"
+
+      - name: build xo-facet
+        run: |
+          echo "::group::xo-facet configure"
+          xo-build --configure --with-utests --with-examples xo-facet
+          echo "::endgroup::"
+
+          echo "::group::xo-facet build"
+          xo-build --build xo-facet
+          echo "::endgroup::"
+
+          echo "::group::xo-facet utest"
+          xo-build --utest xo-facet
+          echo "::endgroup::"
+
+          echo "::group::xo-facet install"
+          xo-build --install xo-facet
+          echo "::endgroup::"
+
+      - name: build xo-pyfacet
+        run: |
+          echo "::group::xo-pyfacet configure"
+          xo-build --configure --with-utests --with-examples xo-pyfacet
+          echo "::endgroup::"
+
+          echo "::group::xo-pyfacet build"
+          xo-build --build xo-pyfacet
+          echo "::endgroup::"
+
+          echo "::group::xo-pyfacet utest"
+          xo-build --utest xo-pyfacet
+          echo "::endgroup::"
+
+          echo "::group::xo-pyfacet install"
+          xo-build --install xo-pyfacet
+          echo "::endgroup::"
+
+      - name: build xo-printable2
+        run: |
+          echo "::group::xo-printable2 configure"
+          xo-build --configure --with-utests --with-examples xo-printable2
+          echo "::endgroup::"
+
+          echo "::group::xo-printable2 build"
+          xo-build --build xo-printable2
+          echo "::endgroup::"
+
+          echo "::group::xo-printable2 utest"
+          xo-build --utest xo-printable2
+          echo "::endgroup::"
+
+          echo "::group::xo-printable2 install"
+          xo-build --install xo-printable2
+          echo "::endgroup::"
+
+      - name: build xo-alloc2
+        run: |
+          echo "::group::xo-alloc2 configure"
+          xo-build --configure --with-utests --with-examples xo-alloc2
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc2 build"
+          xo-build --build xo-alloc2
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc2 utest"
+          xo-build --utest xo-alloc2
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc2 install"
+          xo-build --install xo-alloc2
+          echo "::endgroup::"
+
+      - name: build xo-reflect
+        run: |
+          echo "::group::xo-reflect configure"
+          xo-build --configure --with-utests --with-examples xo-reflect
+          echo "::endgroup::"
+
+          echo "::group::xo-reflect build"
+          xo-build --build xo-reflect
+          echo "::endgroup::"
+
+          echo "::group::xo-reflect utest"
+          xo-build --utest xo-reflect
+          echo "::endgroup::"
+
+          echo "::group::xo-reflect install"
+          xo-build --install xo-reflect
+          echo "::endgroup::"
+
+      - name: build xo-pyreflect
+        run: |
+          echo "::group::xo-pyreflect configure"
+          xo-build --configure --with-utests --with-examples xo-pyreflect
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreflect build"
+          xo-build --build xo-pyreflect
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreflect utest"
+          xo-build --utest xo-pyreflect
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreflect install"
+          xo-build --install xo-pyreflect
+          echo "::endgroup::"
+
+      - name: build xo-stringtable2
+        run: |
+          echo "::group::xo-stringtable2 configure"
+          xo-build --configure --with-utests --with-examples xo-stringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-stringtable2 build"
+          xo-build --build xo-stringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-stringtable2 utest"
+          xo-build --utest xo-stringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-stringtable2 install"
+          xo-build --install xo-stringtable2
+          echo "::endgroup::"
+
+      - name: build xo-object2
+        run: |
+          echo "::group::xo-object2 configure"
+          xo-build --configure --with-utests --with-examples xo-object2
+          echo "::endgroup::"
+
+          echo "::group::xo-object2 build"
+          xo-build --build xo-object2
+          echo "::endgroup::"
+
+          echo "::group::xo-object2 utest"
+          xo-build --utest xo-object2
+          echo "::endgroup::"
+
+          echo "::group::xo-object2 install"
+          xo-build --install xo-object2
+          echo "::endgroup::"
+
+      - name: build xo-pyobject2
+        run: |
+          echo "::group::xo-pyobject2 configure"
+          xo-build --configure --with-utests --with-examples xo-pyobject2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyobject2 build"
+          xo-build --build xo-pyobject2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyobject2 utest"
+          xo-build --utest xo-pyobject2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyobject2 install"
+          xo-build --install xo-pyobject2
+          echo "::endgroup::"
+
+      - name: build xo-gc
+        run: |
+          echo "::group::xo-gc configure"
+          xo-build --configure --with-utests --with-examples xo-gc
+          echo "::endgroup::"
+
+          echo "::group::xo-gc build"
+          xo-build --build xo-gc
+          echo "::endgroup::"
+
+          echo "::group::xo-gc utest"
+          xo-build --utest xo-gc
+          echo "::endgroup::"
+
+          echo "::group::xo-gc install"
+          xo-build --install xo-gc
+          echo "::endgroup::"
+
+      - name: build xo-type
+        run: |
+          echo "::group::xo-type configure"
+          xo-build --configure --with-utests --with-examples xo-type
+          echo "::endgroup::"
+
+          echo "::group::xo-type build"
+          xo-build --build xo-type
+          echo "::endgroup::"
+
+          echo "::group::xo-type utest"
+          xo-build --utest xo-type
+          echo "::endgroup::"
+
+          echo "::group::xo-type install"
+          xo-build --install xo-type
+          echo "::endgroup::"
+
+      - name: build xo-procedure2
+        run: |
+          echo "::group::xo-procedure2 configure"
+          xo-build --configure --with-utests --with-examples xo-procedure2
+          echo "::endgroup::"
+
+          echo "::group::xo-procedure2 build"
+          xo-build --build xo-procedure2
+          echo "::endgroup::"
+
+          echo "::group::xo-procedure2 utest"
+          xo-build --utest xo-procedure2
+          echo "::endgroup::"
+
+          echo "::group::xo-procedure2 install"
+          xo-build --install xo-procedure2
+          echo "::endgroup::"
+
+      - name: build xo-equable2
+        run: |
+          echo "::group::xo-equable2 configure"
+          xo-build --configure --with-utests --with-examples xo-equable2
+          echo "::endgroup::"
+
+          echo "::group::xo-equable2 build"
+          xo-build --build xo-equable2
+          echo "::endgroup::"
+
+          echo "::group::xo-equable2 utest"
+          xo-build --utest xo-equable2
+          echo "::endgroup::"
+
+          echo "::group::xo-equable2 install"
+          xo-build --install xo-equable2
+          echo "::endgroup::"
+
+      - name: build xo-hashable2
+        run: |
+          echo "::group::xo-hashable2 configure"
+          xo-build --configure --with-utests --with-examples xo-hashable2
+          echo "::endgroup::"
+
+          echo "::group::xo-hashable2 build"
+          xo-build --build xo-hashable2
+          echo "::endgroup::"
+
+          echo "::group::xo-hashable2 utest"
+          xo-build --utest xo-hashable2
+          echo "::endgroup::"
+
+          echo "::group::xo-hashable2 install"
+          xo-build --install xo-hashable2
+          echo "::endgroup::"
+
+      - name: build xo-numeric
+        run: |
+          echo "::group::xo-numeric configure"
+          xo-build --configure --with-utests --with-examples xo-numeric
+          echo "::endgroup::"
+
+          echo "::group::xo-numeric build"
+          xo-build --build xo-numeric
+          echo "::endgroup::"
+
+          echo "::group::xo-numeric utest"
+          xo-build --utest xo-numeric
+          echo "::endgroup::"
+
+          echo "::group::xo-numeric install"
+          xo-build --install xo-numeric
+          echo "::endgroup::"
+
+      - name: build xo-tokenizer2
+        run: |
+          echo "::group::xo-tokenizer2 configure"
+          xo-build --configure --with-utests --with-examples xo-tokenizer2
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer2 build"
+          xo-build --build xo-tokenizer2
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer2 utest"
+          xo-build --utest xo-tokenizer2
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer2 install"
+          xo-build --install xo-tokenizer2
+          echo "::endgroup::"
+
+      - name: build xo-expression2
+        run: |
+          echo "::group::xo-expression2 configure"
+          xo-build --configure --with-utests --with-examples xo-expression2
+          echo "::endgroup::"
+
+          echo "::group::xo-expression2 build"
+          xo-build --build xo-expression2
+          echo "::endgroup::"
+
+          echo "::group::xo-expression2 utest"
+          xo-build --utest xo-expression2
+          echo "::endgroup::"
+
+          echo "::group::xo-expression2 install"
+          xo-build --install xo-expression2
+          echo "::endgroup::"
+
+      - name: build xo-reader2
+        run: |
+          echo "::group::xo-reader2 configure"
+          xo-build --configure --with-utests --with-examples xo-reader2
+          echo "::endgroup::"
+
+          echo "::group::xo-reader2 build"
+          xo-build --build xo-reader2
+          echo "::endgroup::"
+
+          echo "::group::xo-reader2 utest"
+          xo-build --utest xo-reader2
+          echo "::endgroup::"
+
+          echo "::group::xo-reader2 install"
+          xo-build --install xo-reader2
+          echo "::endgroup::"
+
+      - name: build xo-interpreter2
+        run: |
+          echo "::group::xo-interpreter2 configure"
+          xo-build --configure --with-utests --with-examples xo-interpreter2
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter2 build"
+          xo-build --build xo-interpreter2
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter2 utest"
+          xo-build --utest xo-interpreter2
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter2 install"
+          xo-build --install xo-interpreter2
+          echo "::endgroup::"
+
+      - name: build xo-allocutil
+        run: |
+          echo "::group::xo-allocutil configure"
+          xo-build --configure --with-utests --with-examples xo-allocutil
+          echo "::endgroup::"
+
+          echo "::group::xo-allocutil build"
+          xo-build --build xo-allocutil
+          echo "::endgroup::"
+
+          echo "::group::xo-allocutil utest"
+          xo-build --utest xo-allocutil
+          echo "::endgroup::"
+
+          echo "::group::xo-allocutil install"
+          xo-build --install xo-allocutil
+          echo "::endgroup::"
+
+      - name: build xo-ratio
+        run: |
+          echo "::group::xo-ratio configure"
+          xo-build --configure --with-utests --with-examples xo-ratio
+          echo "::endgroup::"
+
+          echo "::group::xo-ratio build"
+          xo-build --build xo-ratio
+          echo "::endgroup::"
+
+          echo "::group::xo-ratio utest"
+          xo-build --utest xo-ratio
+          echo "::endgroup::"
+
+          echo "::group::xo-ratio install"
+          xo-build --install xo-ratio
+          echo "::endgroup::"
+
+      - name: build xo-unit
+        run: |
+          echo "::group::xo-unit configure"
+          xo-build --configure --with-utests --with-examples xo-unit
+          echo "::endgroup::"
+
+          echo "::group::xo-unit build"
+          xo-build --build xo-unit
+          echo "::endgroup::"
+
+          echo "::group::xo-unit utest"
+          xo-build --utest xo-unit
+          echo "::endgroup::"
+
+          echo "::group::xo-unit install"
+          xo-build --install xo-unit
+          echo "::endgroup::"
+
+      - name: build xo-pyunit
+        run: |
+          echo "::group::xo-pyunit configure"
+          xo-build --configure --with-utests --with-examples xo-pyunit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyunit build"
+          xo-build --build xo-pyunit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyunit utest"
+          xo-build --utest xo-pyunit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyunit install"
+          xo-build --install xo-pyunit
+          echo "::endgroup::"
+
+      - name: build xo-callback
+        run: |
+          echo "::group::xo-callback configure"
+          xo-build --configure --with-utests --with-examples xo-callback
+          echo "::endgroup::"
+
+          echo "::group::xo-callback build"
+          xo-build --build xo-callback
+          echo "::endgroup::"
+
+          echo "::group::xo-callback utest"
+          xo-build --utest xo-callback
+          echo "::endgroup::"
+
+          echo "::group::xo-callback install"
+          xo-build --install xo-callback
+          echo "::endgroup::"
+
+      - name: build xo-callback2
+        run: |
+          echo "::group::xo-callback2 configure"
+          xo-build --configure --with-utests --with-examples xo-callback2
+          echo "::endgroup::"
+
+          echo "::group::xo-callback2 build"
+          xo-build --build xo-callback2
+          echo "::endgroup::"
+
+          echo "::group::xo-callback2 utest"
+          xo-build --utest xo-callback2
+          echo "::endgroup::"
+
+          echo "::group::xo-callback2 install"
+          xo-build --install xo-callback2
+          echo "::endgroup::"
+
+      - name: build xo-reactor2
+        run: |
+          echo "::group::xo-reactor2 configure"
+          xo-build --configure --with-utests --with-examples xo-reactor2
+          echo "::endgroup::"
+
+          echo "::group::xo-reactor2 build"
+          xo-build --build xo-reactor2
+          echo "::endgroup::"
+
+          echo "::group::xo-reactor2 utest"
+          xo-build --utest xo-reactor2
+          echo "::endgroup::"
+
+          echo "::group::xo-reactor2 install"
+          xo-build --install xo-reactor2
+          echo "::endgroup::"
+
+      - name: build xo-pyreactor2
+        run: |
+          echo "::group::xo-pyreactor2 configure"
+          xo-build --configure --with-utests --with-examples xo-pyreactor2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor2 build"
+          xo-build --build xo-pyreactor2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor2 utest"
+          xo-build --utest xo-pyreactor2
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor2 install"
+          xo-build --install xo-pyreactor2
+          echo "::endgroup::"
+
+      - name: build xo-alloc
+        run: |
+          echo "::group::xo-alloc configure"
+          xo-build --configure --with-utests --with-examples xo-alloc
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc build"
+          xo-build --build xo-alloc
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc utest"
+          xo-build --utest xo-alloc
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc install"
+          xo-build --install xo-alloc
+          echo "::endgroup::"
+
+      - name: build xo-object
+        run: |
+          echo "::group::xo-object configure"
+          xo-build --configure --with-utests --with-examples xo-object
+          echo "::endgroup::"
+
+          echo "::group::xo-object build"
+          xo-build --build xo-object
+          echo "::endgroup::"
+
+          echo "::group::xo-object utest"
+          xo-build --utest xo-object
+          echo "::endgroup::"
+
+          echo "::group::xo-object install"
+          xo-build --install xo-object
+          echo "::endgroup::"
+
+      - name: build xo-ordinaltree
+        run: |
+          echo "::group::xo-ordinaltree configure"
+          xo-build --configure --with-utests --with-examples xo-ordinaltree
+          echo "::endgroup::"
+
+          echo "::group::xo-ordinaltree build"
+          xo-build --build xo-ordinaltree
+          echo "::endgroup::"
+
+          echo "::group::xo-ordinaltree utest"
+          xo-build --utest xo-ordinaltree
+          echo "::endgroup::"
+
+          echo "::group::xo-ordinaltree install"
+          xo-build --install xo-ordinaltree
+          echo "::endgroup::"
+
+      - name: build xo-expression
+        run: |
+          echo "::group::xo-expression configure"
+          xo-build --configure --with-utests --with-examples xo-expression
+          echo "::endgroup::"
+
+          echo "::group::xo-expression build"
+          xo-build --build xo-expression
+          echo "::endgroup::"
+
+          echo "::group::xo-expression utest"
+          xo-build --utest xo-expression
+          echo "::endgroup::"
+
+          echo "::group::xo-expression install"
+          xo-build --install xo-expression
+          echo "::endgroup::"
+
+      - name: build xo-pyexpression
+        run: |
+          echo "::group::xo-pyexpression configure"
+          xo-build --configure --with-utests --with-examples xo-pyexpression
+          echo "::endgroup::"
+
+          echo "::group::xo-pyexpression build"
+          xo-build --build xo-pyexpression
+          echo "::endgroup::"
+
+          echo "::group::xo-pyexpression utest"
+          xo-build --utest xo-pyexpression
+          echo "::endgroup::"
+
+          echo "::group::xo-pyexpression install"
+          xo-build --install xo-pyexpression
+          echo "::endgroup::"
+
+      - name: build xo-tokenizer
+        run: |
+          echo "::group::xo-tokenizer configure"
+          xo-build --configure --with-utests --with-examples xo-tokenizer
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer build"
+          xo-build --build xo-tokenizer
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer utest"
+          xo-build --utest xo-tokenizer
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer install"
+          xo-build --install xo-tokenizer
+          echo "::endgroup::"
+
+      - name: build xo-reader
+        run: |
+          echo "::group::xo-reader configure"
+          xo-build --configure --with-utests --with-examples xo-reader
+          echo "::endgroup::"
+
+          echo "::group::xo-reader build"
+          xo-build --build xo-reader
+          echo "::endgroup::"
+
+          echo "::group::xo-reader utest"
+          xo-build --utest xo-reader
+          echo "::endgroup::"
+
+          echo "::group::xo-reader install"
+          xo-build --install xo-reader
+          echo "::endgroup::"
+
+      - name: build xo-interpreter
+        run: |
+          echo "::group::xo-interpreter configure"
+          xo-build --configure --with-utests --with-examples xo-interpreter
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter build"
+          xo-build --build xo-interpreter
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter utest"
+          xo-build --utest xo-interpreter
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter install"
+          xo-build --install xo-interpreter
+          echo "::endgroup::"
+
+      - name: build xo-jit
+        run: |
+          echo "::group::xo-jit configure"
+          xo-build --configure --with-utests --with-examples xo-jit
+          echo "::endgroup::"
+
+          echo "::group::xo-jit build"
+          xo-build --build xo-jit
+          echo "::endgroup::"
+
+          echo "::group::xo-jit utest"
+          xo-build --utest xo-jit
+          echo "::endgroup::"
+
+          echo "::group::xo-jit install"
+          xo-build --install xo-jit
+          echo "::endgroup::"
+
+      - name: build xo-pyjit
+        run: |
+          echo "::group::xo-pyjit configure"
+          xo-build --configure --with-utests --with-examples xo-pyjit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyjit build"
+          xo-build --build xo-pyjit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyjit utest"
+          xo-build --utest xo-pyjit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyjit install"
+          xo-build --install xo-pyjit
+          echo "::endgroup::"
+
+      - name: build xo-webutil
+        run: |
+          echo "::group::xo-webutil configure"
+          xo-build --configure --with-utests --with-examples xo-webutil
+          echo "::endgroup::"
+
+          echo "::group::xo-webutil build"
+          xo-build --build xo-webutil
+          echo "::endgroup::"
+
+          echo "::group::xo-webutil utest"
+          xo-build --utest xo-webutil
+          echo "::endgroup::"
+
+          echo "::group::xo-webutil install"
+          xo-build --install xo-webutil
+          echo "::endgroup::"
+
+      - name: build xo-pywebutil
+        run: |
+          echo "::group::xo-pywebutil configure"
+          xo-build --configure --with-utests --with-examples xo-pywebutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pywebutil build"
+          xo-build --build xo-pywebutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pywebutil utest"
+          xo-build --utest xo-pywebutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pywebutil install"
+          xo-build --install xo-pywebutil
+          echo "::endgroup::"
+
+      - name: build xo-printjson
+        run: |
+          echo "::group::xo-printjson configure"
+          xo-build --configure --with-utests --with-examples xo-printjson
+          echo "::endgroup::"
+
+          echo "::group::xo-printjson build"
+          xo-build --build xo-printjson
+          echo "::endgroup::"
+
+          echo "::group::xo-printjson utest"
+          xo-build --utest xo-printjson
+          echo "::endgroup::"
+
+          echo "::group::xo-printjson install"
+          xo-build --install xo-printjson
+          echo "::endgroup::"
+
+      - name: build xo-pyprintjson
+        run: |
+          echo "::group::xo-pyprintjson configure"
+          xo-build --configure --with-utests --with-examples xo-pyprintjson
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprintjson build"
+          xo-build --build xo-pyprintjson
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprintjson utest"
+          xo-build --utest xo-pyprintjson
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprintjson install"
+          xo-build --install xo-pyprintjson
+          echo "::endgroup::"
+
+      - name: build xo-reactor
+        run: |
+          echo "::group::xo-reactor configure"
+          xo-build --configure --with-utests --with-examples xo-reactor
+          echo "::endgroup::"
+
+          echo "::group::xo-reactor build"
+          xo-build --build xo-reactor
+          echo "::endgroup::"
+
+          echo "::group::xo-reactor utest"
+          xo-build --utest xo-reactor
+          echo "::endgroup::"
+
+          echo "::group::xo-reactor install"
+          xo-build --install xo-reactor
+          echo "::endgroup::"
+
+      - name: build xo-pyreactor
+        run: |
+          echo "::group::xo-pyreactor configure"
+          xo-build --configure --with-utests --with-examples xo-pyreactor
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor build"
+          xo-build --build xo-pyreactor
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor utest"
+          xo-build --utest xo-pyreactor
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor install"
+          xo-build --install xo-pyreactor
+          echo "::endgroup::"
+
+      - name: build xo-websock
+        run: |
+          echo "::group::xo-websock configure"
+          xo-build --configure --with-utests --with-examples xo-websock
+          echo "::endgroup::"
+
+          echo "::group::xo-websock build"
+          xo-build --build xo-websock
+          echo "::endgroup::"
+
+          echo "::group::xo-websock utest"
+          xo-build --utest xo-websock
+          echo "::endgroup::"
+
+          echo "::group::xo-websock install"
+          xo-build --install xo-websock
+          echo "::endgroup::"
+
+      - name: build xo-pywebsock
+        run: |
+          echo "::group::xo-pywebsock configure"
+          xo-build --configure --with-utests --with-examples xo-pywebsock
+          echo "::endgroup::"
+
+          echo "::group::xo-pywebsock build"
+          xo-build --build xo-pywebsock
+          echo "::endgroup::"
+
+          echo "::group::xo-pywebsock utest"
+          xo-build --utest xo-pywebsock
+          echo "::endgroup::"
+
+          echo "::group::xo-pywebsock install"
+          xo-build --install xo-pywebsock
+          echo "::endgroup::"
+
+      - name: build xo-statistics
+        run: |
+          echo "::group::xo-statistics configure"
+          xo-build --configure --with-utests --with-examples xo-statistics
+          echo "::endgroup::"
+
+          echo "::group::xo-statistics build"
+          xo-build --build xo-statistics
+          echo "::endgroup::"
+
+          echo "::group::xo-statistics utest"
+          xo-build --utest xo-statistics
+          echo "::endgroup::"
+
+          echo "::group::xo-statistics install"
+          xo-build --install xo-statistics
+          echo "::endgroup::"
+
+      - name: build xo-distribution
+        run: |
+          echo "::group::xo-distribution configure"
+          xo-build --configure --with-utests --with-examples xo-distribution
+          echo "::endgroup::"
+
+          echo "::group::xo-distribution build"
+          xo-build --build xo-distribution
+          echo "::endgroup::"
+
+          echo "::group::xo-distribution utest"
+          xo-build --utest xo-distribution
+          echo "::endgroup::"
+
+          echo "::group::xo-distribution install"
+          xo-build --install xo-distribution
+          echo "::endgroup::"
+
+      - name: build xo-pydistribution
+        run: |
+          echo "::group::xo-pydistribution configure"
+          xo-build --configure --with-utests --with-examples xo-pydistribution
+          echo "::endgroup::"
+
+          echo "::group::xo-pydistribution build"
+          xo-build --build xo-pydistribution
+          echo "::endgroup::"
+
+          echo "::group::xo-pydistribution utest"
+          xo-build --utest xo-pydistribution
+          echo "::endgroup::"
+
+          echo "::group::xo-pydistribution install"
+          xo-build --install xo-pydistribution
+          echo "::endgroup::"
+
+      - name: build xo-simulator
+        run: |
+          echo "::group::xo-simulator configure"
+          xo-build --configure --with-utests --with-examples xo-simulator
+          echo "::endgroup::"
+
+          echo "::group::xo-simulator build"
+          xo-build --build xo-simulator
+          echo "::endgroup::"
+
+          echo "::group::xo-simulator utest"
+          xo-build --utest xo-simulator
+          echo "::endgroup::"
+
+          echo "::group::xo-simulator install"
+          xo-build --install xo-simulator
+          echo "::endgroup::"
+
+      - name: build xo-pysimulator
+        run: |
+          echo "::group::xo-pysimulator configure"
+          xo-build --configure --with-utests --with-examples xo-pysimulator
+          echo "::endgroup::"
+
+          echo "::group::xo-pysimulator build"
+          xo-build --build xo-pysimulator
+          echo "::endgroup::"
+
+          echo "::group::xo-pysimulator utest"
+          xo-build --utest xo-pysimulator
+          echo "::endgroup::"
+
+          echo "::group::xo-pysimulator install"
+          xo-build --install xo-pysimulator
+          echo "::endgroup::"
+
+      - name: build xo-process
+        run: |
+          echo "::group::xo-process configure"
+          xo-build --configure --with-utests --with-examples xo-process
+          echo "::endgroup::"
+
+          echo "::group::xo-process build"
+          xo-build --build xo-process
+          echo "::endgroup::"
+
+          echo "::group::xo-process utest"
+          xo-build --utest xo-process
+          echo "::endgroup::"
+
+          echo "::group::xo-process install"
+          xo-build --install xo-process
+          echo "::endgroup::"
+
+      - name: build xo-pyprocess
+        run: |
+          echo "::group::xo-pyprocess configure"
+          xo-build --configure --with-utests --with-examples xo-pyprocess
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprocess build"
+          xo-build --build xo-pyprocess
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprocess utest"
+          xo-build --utest xo-pyprocess
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprocess install"
+          xo-build --install xo-pyprocess
+          echo "::endgroup::"
+
+      - name: build xo-kalmanfilter
+        run: |
+          echo "::group::xo-kalmanfilter configure"
+          xo-build --configure --with-utests --with-examples xo-kalmanfilter
+          echo "::endgroup::"
+
+          echo "::group::xo-kalmanfilter build"
+          xo-build --build xo-kalmanfilter
+          echo "::endgroup::"
+
+          echo "::group::xo-kalmanfilter utest"
+          xo-build --utest xo-kalmanfilter
+          echo "::endgroup::"
+
+          echo "::group::xo-kalmanfilter install"
+          xo-build --install xo-kalmanfilter
+          echo "::endgroup::"
+
+      - name: build xo-pykalmanfilter
+        run: |
+          echo "::group::xo-pykalmanfilter configure"
+          xo-build --configure --with-utests --with-examples xo-pykalmanfilter
+          echo "::endgroup::"
+
+          echo "::group::xo-pykalmanfilter build"
+          xo-build --build xo-pykalmanfilter
+          echo "::endgroup::"
+
+          echo "::group::xo-pykalmanfilter utest"
+          xo-build --utest xo-pykalmanfilter
+          echo "::endgroup::"
+
+          echo "::group::xo-pykalmanfilter install"
+          xo-build --install xo-pykalmanfilter
+          echo "::endgroup::"
+
+      - name: build xo-imgui
+        run: |
+          echo "::group::xo-imgui configure"
+          xo-build --configure --with-utests --with-examples xo-imgui
+          echo "::endgroup::"
+
+          echo "::group::xo-imgui build"
+          xo-build --build xo-imgui
+          echo "::endgroup::"
+
+          echo "::group::xo-imgui utest"
+          xo-build --utest xo-imgui
+          echo "::endgroup::"
+
+          echo "::group::xo-imgui install"
+          xo-build --install xo-imgui
+          echo "::endgroup::"
+
+      # ---- end GENERATED ----
+
+      - name: print install path
+        run: |
+          tree $PREFIX

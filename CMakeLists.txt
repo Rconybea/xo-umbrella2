@@ -225,7 +225,12 @@ add_custom_target(xo-gen-ci
             ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
             --exclude xo-cmake
             -o ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci-cmake.yaml
-    COMMENT "xo-gen-ci: regenerating .forgejo/workflows/ci-cmake.yaml"
+    COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
+            ${CMAKE_SOURCE_DIR}/.github/workflows/ci-cmake.yaml.j2
+            ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
+            --exclude xo-cmake
+            -o ${CMAKE_SOURCE_DIR}/.github/workflows/ci-cmake.yaml
+    COMMENT "xo-gen-ci: regenerating forgejo + github cmake workflows"
     VERBATIM)
 
 
