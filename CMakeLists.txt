@@ -112,22 +112,28 @@ add_subdirectory(xo-hashable2)    # hashing facet -- scaffolded, no methods yet
 add_subdirectory(xo-numeric)      # schematika poly arithmetic w/ facet object model
 add_subdirectory(xo-tokenizer2)   # schematika tokenizer (w/ fomo)
 add_subdirectory(xo-expression2)  # schematika expressions (fomo)
+add_subdirectory(xo-reader2)      # schematika expression parser (fomo)
+add_subdirectory(xo-interpreter2) # schematika interpreter (fomo)
 #
 add_subdirectory(xo-allocutil)    # xo-alloc api
 add_subdirectory(xo-ratio)
 add_subdirectory(xo-unit)         # constexpr dimension checking
+add_subdirectory(xo-pyunit)
 add_subdirectory(xo-callback)
 add_subdirectory(xo-callback2)    # callback set over explicit obj<AAllocator> (fomo)
 add_subdirectory(xo-reactor2)     # reactor (w/ fomo)
 add_subdirectory(xo-pyreactor2)   # python bindings for xo-reactor2
 add_subdirectory(xo-alloc)        # arena allocator + incremental gc
-add_subdirectory(xo-pyunit)
 #add_subdirectory(xo-reflect2)     # experiment w/ facet object model
 add_subdirectory(xo-object)
 add_subdirectory(xo-ordinaltree)
-#
-add_subdirectory(xo-reader2)      # schematika expression parser (fomo)
-add_subdirectory(xo-interpreter2) # schematika interpreter (fomo)
+add_subdirectory(xo-expression)
+add_subdirectory(xo-pyexpression)
+add_subdirectory(xo-tokenizer)
+add_subdirectory(xo-reader)
+add_subdirectory(xo-interpreter)
+add_subdirectory(xo-jit)
+add_subdirectory(xo-pyjit)   
 #
 add_subdirectory(xo-webutil)
 add_subdirectory(xo-pywebutil)
@@ -147,15 +153,6 @@ add_subdirectory(xo-process)
 add_subdirectory(xo-pyprocess)
 add_subdirectory(xo-kalmanfilter)
 add_subdirectory(xo-pykalmanfilter)
-#
-add_subdirectory(xo-expression)
-add_subdirectory(xo-pyexpression)
-add_subdirectory(xo-tokenizer)
-add_subdirectory(xo-reader)
-#add_subdirectory(xo-symboltable)
-add_subdirectory(xo-interpreter)
-add_subdirectory(xo-jit)
-add_subdirectory(xo-pyjit)   
 #
 add_subdirectory(xo-imgui)
 
