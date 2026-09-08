@@ -57,7 +57,7 @@ namespace xo {
             /** stringtable for unique symbols **/
             static StringTable * stringtable(const DSimpleRcx & self) noexcept;
             /** invoke visitor for each distinct memory pool **/
-            static void visit_pools(const DSimpleRcx & self, MemorySizeVisitor visitor);
+            static void visit_pools(const DSimpleRcx & self, const MemorySizeVisitor & visitor);
 
             // non-const methods
             ///@}

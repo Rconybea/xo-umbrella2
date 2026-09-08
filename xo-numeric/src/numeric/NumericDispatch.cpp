@@ -18,7 +18,7 @@ namespace xo {
     namespace scm {
 
         void
-        NumericDispatch::visit_pools(const MemorySizeVisitor & visitor)
+        NumericDispatch::visit_pools(const MemorySizeVisitor & visitor) const
         {
             dispatch_.visit_pools(visitor);
         }

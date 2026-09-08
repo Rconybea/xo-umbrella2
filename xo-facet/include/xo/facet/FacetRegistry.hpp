@@ -101,8 +101,10 @@ namespace xo {
             /** Number of registered (facet, repr) pairs **/
             std::size_t size() const { return registry_.size(); }
 
-            /** visit memory pools owned by facet registry **/
-            void visit_pools(const MemorySizeVisitor & visitor) {
+            /** visit memory pools owned by facet registry.
+             *  const: reporting must not be able to disturb what it measures
+             **/
+            void visit_pools(const MemorySizeVisitor & visitor) const {
                 registry_.visit_pools(visitor);
             }
 

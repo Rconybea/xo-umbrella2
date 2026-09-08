@@ -40,7 +40,7 @@ namespace xo {
         }
 
         auto
-        IRuntimeContext_DSimpleRcx::visit_pools(const DSimpleRcx & self, MemorySizeVisitor visitor) -> void
+        IRuntimeContext_DSimpleRcx::visit_pools(const DSimpleRcx & self, const MemorySizeVisitor & visitor) -> void
         {
             self.visit_pools(visitor);
         }

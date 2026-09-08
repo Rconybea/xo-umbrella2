@@ -69,7 +69,7 @@ namespace scm {
         StringTable * stringtable(Copaque data)  const  noexcept override {
             return I::stringtable(_dcast(data));
         }
-        void visit_pools(Copaque data, MemorySizeVisitor visitor)  const override {
+        void visit_pools(Copaque data, const MemorySizeVisitor & visitor)  const override {
             return I::visit_pools(_dcast(data), visitor);
         }
 

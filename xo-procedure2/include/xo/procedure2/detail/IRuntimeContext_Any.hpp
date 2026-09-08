@@ -65,7 +65,7 @@ namespace scm {
         [[noreturn]] obj<ACollector> collector(Copaque)  const  noexcept override { _fatal(); }
         [[noreturn]] obj<AAllocator> error_allocator(Copaque)  const  noexcept override { _fatal(); }
         [[noreturn]] StringTable * stringtable(Copaque)  const  noexcept override { _fatal(); }
-        [[noreturn]] void visit_pools(Copaque, MemorySizeVisitor)  const override { _fatal(); }
+        [[noreturn]] void visit_pools(Copaque, const MemorySizeVisitor &)  const override { _fatal(); }
 
         // nonconst methods
 

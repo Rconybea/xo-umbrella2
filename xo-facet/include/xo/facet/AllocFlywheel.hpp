@@ -24,6 +24,7 @@ namespace xo::mm {
         using handle_type = typename HandleStore::handle_type;
         using handle_index_type = typename HandleStore::handle_index_type;
         using PpSink = xo::pp::PpSink;
+        using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
     public:
         AllocFlywheel(const FacetAppcx & appcx,
@@ -60,6 +61,20 @@ namespace xo::mm {
         }
 
         DArena & storage() { return store_.storage(); }
+
+        /** report memory consumption, one @ref MemorySizeInfo per pool.
+         *
+         *  Three pools, in the order @ref HandleStore visits them: the primary
+         *  arena objects are allocated from, then the strong root set, then the
+         *  weak one.  Const: reporting must not be able to disturb what it
+         *  measures.
+         *
+         *  NB reserved/committed/used are three different numbers here.  A root
+         *  set reserves its whole configured extent up front and commits as it
+         *  grows, so "reserved" says what a flywheel COULD consume and
+         *  "committed" what it currently does.
+         **/
+        void visit_pools(const MemorySizeVisitor & fn) const { store_.visit_pools(fn); }
 
         /** insert strong reference to @p x into this flywheel **/
         std::pair<handle_index_type, handle_type*> add_strong_ref(handle_type x);

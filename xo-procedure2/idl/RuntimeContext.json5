@@ -85,7 +85,11 @@
             doc: [ "invoke visitor for each distinct memory pool" ],
             return_type: "void",
             args: [
-                {type: "MemorySizeVisitor", name: "visitor"}
+                /* const &, not by value: MemorySizeVisitor is a std::function,
+                 * so by-value copies the closure on every call -- and every
+                 * other visit_pools in the tree takes it by const reference.
+                 */
+                {type: "const MemorySizeVisitor &", name: "visitor"}
             ],
             const: true,
             noexcept: false,

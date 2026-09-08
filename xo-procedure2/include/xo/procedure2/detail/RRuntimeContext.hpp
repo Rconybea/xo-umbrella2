@@ -68,7 +68,7 @@ public:
     StringTable * stringtable()  const  noexcept {
         return O::iface()->stringtable(O::data());
     }
-    void visit_pools(MemorySizeVisitor visitor)  const {
+    void visit_pools(const MemorySizeVisitor & visitor)  const {
         return O::iface()->visit_pools(O::data(), visitor);
     }
 

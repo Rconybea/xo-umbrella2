@@ -63,7 +63,7 @@ public:
     /** stringtable for unique symbols **/
     virtual StringTable * stringtable(Copaque data)  const  noexcept = 0;
     /** invoke visitor for each distinct memory pool **/
-    virtual void visit_pools(Copaque data, MemorySizeVisitor visitor)  const = 0;
+    virtual void visit_pools(Copaque data, const MemorySizeVisitor & visitor)  const = 0;
 
     // nonconst methods
     ///@}

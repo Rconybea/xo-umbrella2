@@ -124,7 +124,7 @@ namespace xo {
                                                  obj<AGCObject> y);
 
             /** report memory use for owned arenas to @p visitor **/
-            void visit_pools(const MemorySizeVisitor & visitor);
+            void visit_pools(const MemorySizeVisitor & visitor) const;
 
             /** Use:
              *  Need to have overload
