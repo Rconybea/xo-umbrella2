@@ -10,6 +10,8 @@ set(SELF_SRCS
     mmap_util.cpp
     AllocError.cpp
     AllocInfo.cpp
+    AllocHeader.cpp
+    MemorySizeInfo.cpp
     DArena.cpp
     DArenaIterator.cpp
     DCircularBuffer.cpp

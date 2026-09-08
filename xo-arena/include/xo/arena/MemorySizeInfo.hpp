@@ -6,15 +6,22 @@
 #pragma once
 
 #include <xo/reflectutil/typeseq.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 #include <cstddef>
 #include <functional>
 #include <string_view>
 
 namespace xo {
+    namespace pp { class PpSink; }
+
     namespace mm {
 
         struct MemorySizeDetail {
             using typeseq = xo::reflect::typeseq;
+            using PpSink = xo::pp::PpSink;
+
+            /** pretty print instance to @p sink **/
+            void pretty(PpSink & sink) const;
 
             /** identifies a c++ type T.  See xo/facet/TypeRegistry **/
             typeseq tseq_;
@@ -28,6 +35,7 @@ namespace xo {
          **/
         struct MemorySizeInfo {
             using size_type = std::size_t;
+            using PpSink = xo::pp::PpSink;
             using DetailArrayType = std::array<MemorySizeDetail, 32>;
 
             MemorySizeInfo() = default;
@@ -40,6 +48,12 @@ namespace xo {
             {}
 
             static MemorySizeInfo sentinel() { return MemorySizeInfo(); }
+
+            /** number of populated entries in @ref detail_ (0 when absent) **/
+            std::size_t n_detail() const noexcept;
+
+            /** pretty print instance to @p sink **/
+            void pretty(PpSink & sink) const;
 
             /** resource name **/
             std::string_view resource_name_;
@@ -67,7 +81,25 @@ namespace xo {
          *  size record @p info.
          **/
         using MemorySizeVisitor = std::function<void (const MemorySizeInfo & info)>;
-    }
+    } /*namespace mm*/
+
+    namespace pp {
+        /** pretty-print for MemorySizeDetail **/
+        template <>
+        struct Prettifier<xo::mm::MemorySizeDetail> {
+            static void print(PpSink & sink, const xo::mm::MemorySizeDetail & x) {
+                x.pretty(sink);
+            }
+        };
+
+        /** pretty-print for MemorySizeInfo **/
+        template <>
+        struct Prettifier<xo::mm::MemorySizeInfo> {
+            static void print(PpSink & sink, const xo::mm::MemorySizeInfo & x) {
+                x.pretty(sink);
+            }
+        };
+    } /*namespace pp*/
 }
 
 /* end MemorySizeInfo.hpp */

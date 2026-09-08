@@ -21,7 +21,11 @@
 #include <xo/pyarena/PoolInfo.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/pyutil/pyutil.hpp>
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
+#include <xo/ppsink/pretty.hpp>   /* PpSink::pp */
 #include <pybind11/stl.h>   /* std::vector, std::optional */
+#include <sstream>
 #include <string>
 
 namespace xo {
@@ -33,22 +37,34 @@ namespace xo {
     using xo::pyarena::PoolInfo;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
+    using xo::pp::FlatSink;
+    using xo::pp::PpStyle;
 
     namespace mm {
         namespace {
-            /** hex, for the bitfield-valued reprs.  Rendered by hand rather
-             *  than through a stringstream: xo is migrating off std::ostream
-             *  (see the ostream-containment milestone).  xo::pp::hex renders
-             *  a single BYTE into a sink; this is a 64-bit word into a str.
+            /** render @p x for __repr__, through its own Prettifier -- so
+             *  python shows the same text c++ does, and the two cannot drift.
+             *
+             *  FlatSink, not TempPrettySink::pp2str: that lives in
+             *  xo-indentlog2, which is ABOVE this module in the subsystem list
+             *  (xo-pyarena 13, xo-indentlog2 14), and it needs the indentlog2
+             *  context configured -- while `import xo_pyarena; repr(cfg)`
+             *  must keep working on its own.  A repr wants one line anyway,
+             *  which is exactly what FlatSink gives.
+             *
+             *  Spelled out rather than xo::pp::tostr0(), which is otherwise
+             *  the right tool for this tier: it takes the default PpStyle,
+             *  and that colors tag names.
              **/
-            std::string to_hex(std::uint64_t x) {
-                static const char * s_digits = "0123456789abcdef";
+            template <typename T>
+            std::string pp2str(const T & x) {
+                std::stringbuf buf;
+                {
+                    FlatSink sink(PpStyle::plain(), &buf);
 
-                std::string buf;
-                for (int shift = 60; shift >= 0; shift -= 4)
-                    buf.push_back(s_digits[(x >> shift) & 0xf]);
-
-                return "0x" + buf;
+                    sink.pp(x);
+                }
+                return buf.str();
             }
         } /*namespace*/
 
@@ -120,9 +136,7 @@ namespace xo {
                 .def(py::init<AllocHeader::repr_type>(), py::arg("repr"))
                 .def_readwrite("repr", &AllocHeader::repr_)
                 .def("__repr__",
-                     [](const AllocHeader & x) {
-                         return "<AllocHeader " + to_hex(x.repr_) + ">";
-                     });
+                     [](const AllocHeader & x) { return pp2str(x); });
 
             py::class_<AllocHeaderConfig>(m, "AllocHeaderConfig")
                 /* defaults mirror the c++ member initializers, so
@@ -163,14 +177,7 @@ namespace xo {
                      py::arg("hdr"))
 
                 .def("__repr__",
-                     [](const AllocHeaderConfig & x) {
-                         return ("<AllocHeaderConfig tseq_bits="
-                                 + std::to_string(x.tseq_bits_)
-                                 + " age_bits=" + std::to_string(x.age_bits_)
-                                 + " size_bits=" + std::to_string(x.size_bits_)
-                                 + " guard_z=" + std::to_string(x.guard_z_)
-                                 + ">");
-                     });
+                     [](const AllocHeaderConfig & x) { return pp2str(x); });
 
             py::class_<ArenaConfig>(m, "ArenaConfig")
                 /* NB a single keyword ctor, rather than this plus py::init<>():
@@ -218,16 +225,7 @@ namespace xo {
                      py::arg("flag"))
 
                 .def("__repr__",
-                     [](const ArenaConfig & x) {
-                         return ("<ArenaConfig name=\'" + x.name_
-                                 + "\' size=" + std::to_string(x.size_)
-                                 + " hugepage_z=" + std::to_string(x.hugepage_z_)
-                                 + " store_header_flag="
-                                 + (x.store_header_flag_ ? "True" : "False")
-                                 + " debug_flag="
-                                 + (x.debug_flag_ ? "True" : "False")
-                                 + ">");
-                     });
+                     [](const ArenaConfig & x) { return pp2str(x); });
         } /*PYBIND11_MODULE*/
     } /*namespace mm*/
 } /*namespace xo*/

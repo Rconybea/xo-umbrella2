@@ -7,6 +7,7 @@ set(UTEST_SRCS
 #    objectmodel.test.cpp
     span.test.cpp
     DArena.test.cpp
+    pretty.test.cpp
     DArenaVector.test.cpp
     DArenaHashMap.test.cpp
     DCircularBuffer.test.cpp
