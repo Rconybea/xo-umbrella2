@@ -10,4 +10,9 @@ xo_pybind11_dependency(${SELF_LIB} xo_pyutil)
 xo_pybind11_dependency(${SELF_LIB} refcnt)
 xo_pybind11_dependency(${SELF_LIB} xo_arena)
 
+# PoolInfo.hpp: hand-written public header, alongside the generated pyarena.hpp
+# that xo_pybind11_library() installs.  (Both land in include/xo/pyarena; that
+# is fine for a copying install, and XO_SYMLINK_INSTALL is off by default.)
+xo_install_include_tree3(include/xo/pyarena)
+
 # end CMakeLists.txt

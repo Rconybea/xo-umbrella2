@@ -35,6 +35,9 @@ namespace xo::pp {
          **/
         static void init(const PpConfig & cfg);
 
+        /** Return pretty sink for current thread, if established **/
+        static PrettySink * check_local();
+
         /** Thread-local temporary pretty sink.
          *  Allocated on demand, once per thread
          **/
@@ -62,6 +65,9 @@ namespace xo::pp {
          *  Note that this includes arena sizing.
          **/
         static PpConfig s_ppconfig;
+
+        /** thread-local instance, if local() has been called **/
+        static thread_local std::unique_ptr<PrettySink> s_ppsink;
     };
 } /*namespace include*/
 

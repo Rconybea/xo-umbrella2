@@ -533,6 +533,129 @@ namespace xo {
             // should have called dtor for all 3 elements
             REQUIRE(LifetimeTracker::dtor_count == dtors_before_clear + 3);
         }
+
+        /* The vector does not allocate through its arena -- it addresses
+         * store_.lo_ directly, and expand() moves committed_z_ but never
+         * free_.  So every mutator of size_ has to put the arena's free
+         * pointer back in step, or DArena::allocated() (and visit_pools(),
+         * which reports it as `used`) stays 0 no matter what the vector holds.
+         */
+
+        TEST_CASE("DArenaVector-allocated-tracks-size", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            REQUIRE(vec.store()->allocated() == 0);
+
+            for (std::size_t i = 1; i <= 4; ++i) {
+                vec.push_back(1.0 * i);
+
+                REQUIRE(vec.size() == i);
+                REQUIRE(vec.store()->allocated() == i * sizeof(double));
+            }
+
+            vec.pop_back();
+            REQUIRE(vec.store()->allocated() == 3 * sizeof(double));
+
+            vec.insert(0, 0.5);
+            REQUIRE(vec.size() == 4);
+            REQUIRE(vec.store()->allocated() == 4 * sizeof(double));
+
+            vec.erase(0);
+            REQUIRE(vec.size() == 3);
+            REQUIRE(vec.store()->allocated() == 3 * sizeof(double));
+
+            vec.resize(8);
+            REQUIRE(vec.store()->allocated() == 8 * sizeof(double));
+
+            vec.resize(2);
+            REQUIRE(vec.store()->allocated() == 2 * sizeof(double));
+
+            vec.clear();
+            REQUIRE(vec.store()->allocated() == 0);
+        }
+
+        TEST_CASE("DArenaVector-allocated-survives-move", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+
+            DArenaVector<double> moved = std::move(vec);
+
+            REQUIRE(moved.size() == 2);
+            REQUIRE(moved.store()->allocated() == 2 * sizeof(double));
+
+            /* the moved-from vector keeps no arena of its own to report on;
+             * what matters is that the count travelled with the storage
+             */
+            moved.push_back(3.0);
+            REQUIRE(moved.store()->allocated() == 3 * sizeof(double));
+        }
+
+        TEST_CASE("DArenaVector-allocated-follows-swap", "[arena][DArenaVector]")
+        {
+            /* swap() exchanges size_ and store_ together, so the free pointer
+             * travels with the arena it belongs to
+             */
+            ArenaConfig cfg1 { .name_ = "testarena1", .size_ = 4096 };
+            ArenaConfig cfg2 { .name_ = "testarena2", .size_ = 4096 };
+
+            DArenaVector<double> vec1 = DArenaVector<double>::map(cfg1);
+            DArenaVector<double> vec2 = DArenaVector<double>::map(cfg2);
+
+            vec1.push_back(1.0);
+            vec2.push_back(10.0);
+            vec2.push_back(20.0);
+            vec2.push_back(30.0);
+
+            vec1.swap(vec2);
+
+            REQUIRE(vec1.store()->allocated() == 3 * sizeof(double));
+            REQUIRE(vec2.store()->allocated() == 1 * sizeof(double));
+
+            /* and the swapped-in arenas still track correctly afterwards */
+            vec1.pop_back();
+            vec2.push_back(2.0);
+
+            REQUIRE(vec1.store()->allocated() == 2 * sizeof(double));
+            REQUIRE(vec2.store()->allocated() == 2 * sizeof(double));
+        }
+
+        TEST_CASE("DArenaVector-visit_pools-reports-use", "[arena][DArenaVector]")
+        {
+            /* what the python memory report reads, and what motivated this:
+             * a root set full of live handles used to report used=0
+             */
+            ArenaConfig cfg { .name_ = "roots",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            auto used_of = [&vec]() {
+                std::size_t retval = 0;
+                std::size_t n_pool = 0;
+
+                vec.visit_pools([&retval, &n_pool](const xo::mm::MemorySizeInfo & info) {
+                    retval = info.used_;
+                    ++n_pool;
+                });
+
+                REQUIRE(n_pool == 1);
+                return retval;
+            };
+
+            REQUIRE(used_of() == 0);
+
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+
+            REQUIRE(used_of() == 2 * sizeof(double));
+        }
     }
 }
 

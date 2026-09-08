@@ -22,6 +22,7 @@
 
 #include "pyindentlog2.hpp"
 #include <xo/pyarena/pyarena.hpp>
+#include <xo/pyarena/PoolInfo.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/indentlog2/cx/Indentlog2Config.hpp>
@@ -145,6 +146,19 @@ namespace xo {
                 .def("config", &Indentlog2Appcx::config,
                      py::return_value_policy::reference_internal,
                      "the Indentlog2Config this context was established with")
+                /* memory reporting.  Returns the pools rather than taking a
+                 * visitor: the snapshots have to be materialized either way
+                 * (see PoolInfo.hpp), so a list is the friendlier shape.
+                 *
+                 * CALLING-THREAD SCOPE, as in c++: what this context owns is
+                 * thread-local (the scratch arena behind tostr(), the temp
+                 * sink behind pp2str()), created per thread on first use.  A
+                 * thread that has never logged reports an empty list -- which
+                 * is the truth, not a failure to look.
+                 */
+                .def("visit_pools", &xo::pyarena::collect_pools<Indentlog2Appcx>,
+                     "this thread's xo-indentlog2 memory pools, as a list of"
+                     " MemorySizeInfo.  Empty until this thread has logged")
                 .def("__repr__", [](const Indentlog2Appcx &) {
                         return std::string("<Indentlog2Appcx>"); });
 

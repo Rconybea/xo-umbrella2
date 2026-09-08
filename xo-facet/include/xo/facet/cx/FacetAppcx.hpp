@@ -19,6 +19,7 @@ namespace xo {
     public:
         using FacetRegistry = xo::facet::FacetRegistry;
         using TypeRegistry = xo::facet::TypeRegistry;
+        using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
     public:
         /** non-template initialization, from @p cfg.
@@ -41,6 +42,26 @@ namespace xo {
 
         InitEvidence init_evidence() const { return init_evidence_; }
         const FacetConfig & config() const { return config_; }
+        /** report memory consumption, one @ref MemorySizeInfo per pool.
+         *
+         *  Two pools: the facet registry, then the type registry.
+         *
+         *  This subsystem's pools ONLY -- it does not descend into
+         *  @ref indentlog2_appcx_.  A caller that wants the whole stack walks
+         *  it explicitly:
+         *
+         *    cx.visit_pools(fn);
+         *    cx.indentlog2_appcx().visit_pools(fn);
+         *
+         *  Descending automatically would double-count for any caller that
+         *  already walks the chain, and there is no way for the visitor to tell
+         *  which subsystem a pool came from.
+         **/
+        void visit_pools(const MemorySizeVisitor & fn) const {
+            facet_registry_.visit_pools(fn);
+            type_registry_.visit_pools(fn);
+        }
+
         FacetRegistry & facet_registry() { return facet_registry_; }
         TypeRegistry & type_registry() { return type_registry_; }
 

@@ -120,10 +120,26 @@ namespace xo {
 
             void _check_valid_index(size_type i) const;
 
+            /** point the backing arena's free pointer at the end of the live
+             *  elements.  Call after any change to @ref size_.
+             *
+             *  Nothing else advances it: this vector addresses @c store_.lo_
+             *  directly, and uses @ref DArena::expand only to commit pages,
+             *  which moves committed_z_ and limit_ but not free_.  Without
+             *  this the arena reports allocated()==0 however many elements the
+             *  vector holds -- and visit_pools() reports used=0 with it.
+             *
+             *  Deliberately not routed through @ref DArena::alloc: that writes
+             *  an AllocHeader when ArenaConfig.store_header_flag_ is set,
+             *  which @ref _address_of does not account for.
+             **/
+            void _sync_store() noexcept {
+                store_.restore(DArena::Checkpoint(store_.lo_ + size_ * sizeof(T)));
+            }
+
         private:
             size_type size_ = 0;
             DArena store_;
-            DArena::Checkpoint zero_ckp_;
         };
 
         template <typename T>
@@ -138,16 +154,14 @@ namespace xo {
                                       size_type arena_align_z,
                                       DArena::value_type lo,
                                       DArena::value_type hi)
-        : store_{cfg, page_z, arena_align_z, lo, hi},
-          zero_ckp_{store_.checkpoint()}
+        : store_{cfg, page_z, arena_align_z, lo, hi}
         {}
 
         template <typename T>
         DArenaVector<T>::DArenaVector(DArenaVector && other)
-        : size_{other.size_}, store_{std::move(other.store_)}, zero_ckp_{std::move(other.zero_ckp_)}
+        : size_{other.size_}, store_{std::move(other.store_)}
         {
             other.size_ = 0;
-            other.zero_ckp_ = DArena::Checkpoint();
         }
 
         template <typename T>
@@ -171,10 +185,8 @@ namespace xo {
         {
             this->size_ = other.size_;
             this->store_ = std::move(other.store_);
-            this->zero_ckp_ = std::move(other.zero_ckp_);
 
             other.size_ = 0;
-            other.zero_ckp_ = DArena::Checkpoint();
 
             return *this;
         }
@@ -186,7 +198,6 @@ namespace xo {
             DArenaVector<T> retval;
 
             retval.store_ = DArena::map(cfg);
-            retval.zero_ckp_ = retval.store_.checkpoint();
 
             return retval;
         }
@@ -232,15 +243,8 @@ namespace xo {
                 }
             }
 
-            // rewind to checkpoint, then reallocate.
-            // This is for form's sake, so that DArena considers memory
-            // to be 'allocated'.  DArenaVector<T> doesn't care for itself,
-            // but this preserves expected behavior of visit_pools().
-            //
-            store_.restore(zero_ckp_);
-            store_.alloc(xo::reflect::typeseq::id<std::byte>(), req_z);
-
             this->size_ = z;
+            this->_sync_store();
 
             return true;
         }
@@ -285,6 +289,7 @@ namespace xo {
             new (addr) T{std::move(x)};
 
             this->size_ = size_ + 1;
+            this->_sync_store();
 
             return *addr;
         }
@@ -310,6 +315,7 @@ namespace xo {
             new (addr) T{x};
 
             this->size_ = size_ + 1;
+            this->_sync_store();
 
             return *addr;
         }
@@ -327,6 +333,7 @@ namespace xo {
             }
 
             --(this->size_);
+            this->_sync_store();
         }
 
         template <typename T>
@@ -341,6 +348,7 @@ namespace xo {
                 new (addr) T{std::move(x)};
 
                 this->size_ = z;
+                this->_sync_store();
 
                 return addr;
             }
@@ -359,6 +367,7 @@ namespace xo {
                 new (addr) T{x};
 
                 this->size_ = z;
+                this->_sync_store();
 
                 return addr;
             }
@@ -371,6 +380,7 @@ namespace xo {
         DArenaVector<T>::pop_back() {
             if (size_ > 0) [[likely]] {
                 --size_;
+                this->_sync_store();
 
                 if constexpr (std::is_trivially_destructible_v<T>) {
                     // nothing to do

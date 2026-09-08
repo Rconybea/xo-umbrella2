@@ -9,25 +9,31 @@ namespace xo::mm {
     uint32_t
     TempArena::s_cap = 4 * 1024;
 
+    thread_local std::unique_ptr<DArena>
+    TempArena::s_local;
+
     void
     TempArena::init(uint32_t cap)
     {
         s_cap = cap;
     }
 
+    DArena *
+    TempArena::check_local()
+    {
+        return s_local.get();
+    }
+
     DArena &
     TempArena::local()
     {
-        /** allocate temp arenas per thread **/
-        static thread_local DArena * s_local = nullptr;
-
         if (!s_local) {
             ArenaConfig cfg
                 = (ArenaConfig()
                    .with_name("scratch")
                    .with_size(s_cap));
 
-            s_local = new DArena(cfg);
+            s_local.reset(new DArena(cfg));
         }
 
         return *s_local;

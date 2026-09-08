@@ -31,6 +31,9 @@ namespace xo::mm {
          **/
         static void init(uint32_t cap);
 
+        /** Arena for current thread, if established. **/
+        static DArena * check_local();
+
         /** Thread-local temporary space.
          *  Allocated on demand, once per thread.
          **/
@@ -39,6 +42,9 @@ namespace xo::mm {
     private:
         /** capacity for thread-local arenas **/
         static uint32_t s_cap;
+
+        /** temporary arena for current thread, if established **/
+        static thread_local std::unique_ptr<DArena> s_local;
     };
 }
 

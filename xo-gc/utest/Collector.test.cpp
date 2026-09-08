@@ -468,7 +468,8 @@ namespace xo {
 
                 Generation g0 = Generation::g0();
 
-                // mm.allocated includes: { object-types, roots(=0), arenas(=0) }
+                // mm.allocated includes: { object-types, roots(=0 -- none added
+                // yet), arenas(=0) }
                 //
                 REQUIRE(gc.is_type_installed(typeseq::id<DUniqueString>()));
                 REQUIRE(gc.is_type_installed(typeseq::id<DString>()));
@@ -513,11 +514,16 @@ namespace xo {
                                   + sizeof(DInteger)
                                   + sizeof(DList)
                                   + sizeof(DArray) + sizeof(obj<AGCObject>));
+                        /* the add_gc_root() above; root_set_ is a
+                         * DArenaVector<GCRoot>, and its backing arena now counts
+                         * an element as allocated (see DArenaVector::_sync_store)
+                         */
+                        auto z_root = sizeof(xo::mm::GCRoot);
                         {
                             REQUIRE(z == 80);
                             // cf earlier assertion on mm.allocated();
-                            // now adding cost of 3 specific objects
-                            REQUIRE(mm.allocated() == alloc0 + z);
+                            // now adding cost of 3 specific objects, + 1 root
+                            REQUIRE(mm.allocated() == alloc0 + z + z_root);
                             REQUIRE(gc.allocated(g0, Role::to_space()) == z);
                             REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
                             REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
@@ -533,7 +539,7 @@ namespace xo {
                         REQUIRE(mm->contains(Role::from_space(), l1.data()));
                         REQUIRE(!mm->contains_allocated(Role::from_space(), l1.data()));
 
-                        REQUIRE(mm.allocated() == alloc0 + z);
+                        REQUIRE(mm.allocated() == alloc0 + z + z_root);
                         REQUIRE(gc.allocated(g0, Role::to_space()) == z);
                         REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
                         REQUIRE(gc.allocated(g0, Role::from_space()) == 0);

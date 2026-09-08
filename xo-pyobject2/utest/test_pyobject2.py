@@ -102,6 +102,108 @@ class FloatTestCase(unittest.TestCase):
         self.assertEqual(x.value(), 42.5)
 
 
+class VisitPoolsTestCase(unittest.TestCase):
+    """memory reporting through AllocFlywheel.visit_pools()"""
+
+    def setUp(self):
+        self.fw = f.AllocFlywheel.make_default_app(FACET_CX)
+
+    def pools(self, fw=None):
+        return (fw or self.fw).visit_pools()
+
+    def test_reports_the_three_pools_in_order(self):
+        pools = self.pools()
+        self.assertIsInstance(pools, list)
+        self.assertEqual([p.name for p in pools], ["store", "strong", "weak"])
+
+    def test_used_grows_with_allocation(self):
+        before = self.pools()[0].used
+        keep = [o.Float.make(self.fw, float(i)) for i in range(4)]
+        self.assertGreater(self.pools()[0].used, before)
+        self.assertEqual(len(keep), 4)
+
+    def test_reserved_is_at_least_committed(self):
+        for p in self.pools():
+            self.assertGreaterEqual(p.reserved, p.committed)
+            self.assertGreaterEqual(p.allocated, p.used)
+
+    def test_snapshot_survives_the_visit(self):
+        """the info is a snapshot: c++ MemorySizeInfo could not survive here
+
+        resource_name_ is a string_view and detail_ points into the visiting
+        frame, so a returned list of them would be a list of dangling reads.
+        Materializing is what makes this binding's shape possible at all.
+        """
+        store = self.pools()[0]
+        self.assertEqual(store.name, "store")
+        self.assertEqual(store.detail, [])
+
+    def test_detail_histogram_when_the_arena_keeps_headers(self):
+        """detail[0] totals; the remaining entries are per type"""
+        fw = f.AllocFlywheel.make_app(
+            FACET_CX,
+            mm.ArenaConfig(name="store", size=1 << 18, store_header_flag=True),
+            mm.ArenaConfig(name="strong", size=1 << 12),
+            mm.ArenaConfig(name="weak", size=1 << 12))
+        keep = [o.Float.make(fw, float(i)) for i in range(5)]
+
+        detail = self.pools(fw)[0].detail
+        self.assertEqual(len(detail), 2)
+        self.assertEqual(detail[0].tseq, -1)             # totals row
+        self.assertEqual(detail[0].n_alloc, len(keep))
+        self.assertNotEqual(detail[1].tseq, -1)          # DFloat
+        self.assertEqual(detail[1].n_alloc, len(keep))
+        self.assertEqual(detail[0].z_alloc, detail[1].z_alloc)
+
+
+class AppcxVisitPoolsTestCase(unittest.TestCase):
+    """FacetAppcx reports its own pools, and only its own"""
+
+    def test_returns_a_list_of_snapshots(self):
+        pools = FACET_CX.visit_pools()
+        self.assertIsInstance(pools, list)
+        self.assertEqual([p.name for p in pools],
+                         ["facets-ctl", "facets-slots", "types"])
+
+    def test_does_not_descend_into_indentlog2(self):
+        """descending automatically would double-count for a caller walking
+        the witness chain -- so the two lists must be disjoint"""
+        # indentlog2's pools are per-thread and made on first use, so give
+        # this thread something to log before asking (see the next case)
+        repr(o.Float.make(f.AllocFlywheel.make_default_app(FACET_CX), 1.0))
+
+        mine = {p.name for p in FACET_CX.visit_pools()}
+        theirs = {p.name for p in FACET_CX.indentlog2_appcx().visit_pools()}
+        self.assertTrue(mine)
+        self.assertTrue(theirs)
+        self.assertEqual(mine & theirs, set())
+
+    def test_indentlog2_pools_are_per_thread_and_lazy(self):
+        """reporting must not create what it claims to measure
+
+        Indentlog2Appcx uses check_local(), not local(): a thread that has
+        never logged owns no scratch arena, and says so.  Needs a fresh
+        interpreter -- any earlier case in this process would have made one.
+        """
+        body = ("import xo_pyfacet as f, xo_pyobject2 as o\n"
+                "cx = f.configure_all()\n"
+                "il = cx.indentlog2_appcx()\n"
+                "print('before', len(il.visit_pools()))\n"
+                "repr(o.Float.make(f.AllocFlywheel.make_default_app(cx), 1.0))\n"
+                "print('after', len(il.visit_pools()))\n")
+        r = subprocess.run([sys.executable, "-c", body],
+                           capture_output=True, text=True)
+        before, after = r.stdout.split()[1], r.stdout.split()[3]
+        self.assertEqual(int(before), 0, r.stderr)
+        # how many the sink and scratch arena add is not pinned here: it is
+        # structure, not contract (cf. the arena-name note in this module)
+        self.assertGreater(int(after), 0)
+
+    def test_capacity_is_reserved_up_front(self):
+        for p in FACET_CX.visit_pools():
+            self.assertGreater(p.reserved, 0)
+
+
 class ConfigurationContractTestCase(unittest.TestCase):
     """cases needing a pristine process -- configuration is one-shot"""
 

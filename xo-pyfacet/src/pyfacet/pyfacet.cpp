@@ -5,6 +5,7 @@
 
 #include "pyfacet.hpp"
 #include <xo/pyarena/pyarena.hpp>
+#include <xo/pyarena/PoolInfo.hpp>
 #include <xo/pyindentlog2/pyindentlog2.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/indentlog2/TempPrettySink.hpp>
@@ -23,6 +24,7 @@ namespace xo {
     namespace py = pybind11;
 
     using xo::mm::AllocFlywheel;
+    using xo::pyarena::collect_pools;
     using xo::mm::ArenaConfig;
     using xo::pp::PpSink;
 
@@ -178,6 +180,21 @@ namespace xo {
                 .def("indentlog2_appcx", &FacetAppcx::indentlog2_appcx,
                      py::return_value_policy::reference_internal,
                      "the xo-indentlog2 context this one stands on")
+                /* memory reporting.  Returns the pools rather than taking a
+                 * visitor: the snapshots have to be materialized either way
+                 * (see PoolInfo.hpp), so a list is the friendlier shape.
+                 *
+                 * Three pools: the facet registry is a hash map and reports
+                 * its control and slot arenas separately ("facets-ctl",
+                 * "facets-slots"); the type registry reports one ("types").
+                 *
+                 * As in c++ this does NOT descend into the
+                 * indentlog2 context -- ask that one separately and
+                 * concatenate, or a caller walking the chain double-counts.
+                 */
+                .def("visit_pools", &collect_pools<FacetAppcx>,
+                     "this context's memory pools, as a list of MemorySizeInfo."
+                     "  Does not include the indentlog2 context's pools")
                 .def("__repr__", [](const FacetAppcx &) {
                         return std::string("<FacetAppcx>"); });
 
@@ -222,19 +239,6 @@ namespace xo {
                  * movable -- Refcount's atomic member deletes both).
                  */
 
-                /* the appcx is passed by the caller, as in c++, NOT taken
-                 * from this module's context.
-                 *
-                 * Supplying it silently would read more concisely, but it
-                 * would put a dependency between configure() and every
-                 * flywheel out of the reader's sight: nothing at the call site
-                 * would say why configure() has to have run, or that it
-                 * governs this flywheel at all.  Few flywheels exist per
-                 * process, so the repetition is cheap and the visibility is
-                 * worth it -- and a missing configure() then fails at
-                 * xo_pyfacet.appcx(), naming itself, rather than inside a
-                 * factory the caller did not know consulted a singleton.
-                 */
                 .def_static("make_app",
                             &AllocFlywheel::make_app,
                             py::arg("appcx"),
@@ -249,21 +253,16 @@ namespace xo {
                             py::arg("appcx"),
                             "create a flywheel: with default config for arena storage")
 
-                /* renders through the per-thread temporary sink, so a
-                 * flywheel echoes readably at the REPL without the caller
-                 * building a sink.  Same renderer as pretty() below.
+                /* memory reporting.  Returns the pools rather than taking a
+                 * visitor, as FacetAppcx.visit_pools() does: the snapshots
+                 * have to be materialized either way (see PoolInfo.hpp).
+                 *
+                 * Three pools, in the order the handle store visits them: the
+                 * primary arena, then the strong and weak root sets.
                  */
-                .def("__repr__",
-                     [](const AllocFlywheel & self) {
-                         /* renders through the per-thread temp sink, which
-                          * requires xo-indentlog2 to have been configured.  A
-                          * flywheel carries that evidence, so this is safe
-                          * unconditionally -- and now says so.
-                          */
-                         static_assert(xo::carries_indentlog2<AllocFlywheel>);
-
-                         return xo::pp::TempPrettySink::pp2str(self);
-                     })
+                .def("visit_pools", &collect_pools<AllocFlywheel>,
+                     "this flywheel's memory pools, as a list of MemorySizeInfo:"
+                     " storage arena, strong root set, weak root set")
 
                 /* renders into a sink supplied by the caller -- typically an
                  * xo_pyindentlog2.PrettySink.  Declared as PpSink & so any
@@ -274,7 +273,15 @@ namespace xo {
                          self.pretty(sink);
                      },
                      py::arg("sink"),
-                     "pretty-print this flywheel into sink");
+                     "pretty-print this flywheel into sink")
+
+                .def("__repr__",
+                     [](const AllocFlywheel & self) {
+                         static_assert(xo::carries_indentlog2<AllocFlywheel>);
+
+                         return xo::pp::TempPrettySink::pp2str(self);
+                     });
+
         } /*pyfacet*/
     } /*namespace facet*/
 } /*namespace xo*/

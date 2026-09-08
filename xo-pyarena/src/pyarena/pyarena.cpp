@@ -18,13 +18,19 @@
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/arena/AllocHeaderConfig.hpp>
 #include <xo/arena/AllocHeader.hpp>
+#include <xo/pyarena/PoolInfo.hpp>
+#include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/pyutil/pyutil.hpp>
+#include <pybind11/stl.h>   /* std::vector, std::optional */
 #include <string>
 
 namespace xo {
     namespace py = pybind11;
 
     using xo::mm::AllocHeader;
+    using xo::mm::MemorySizeDetail;
+    using xo::mm::MemorySizeInfo;
+    using xo::pyarena::PoolInfo;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
 
@@ -49,6 +55,66 @@ namespace xo {
         PYBIND11_MODULE(PYARENA_MODULE_NAME(), m) {
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.arena";
+
+            // ----------------------------------------------------------------
+            // memory reporting.  Types that own arenas expose
+            //   visit_pools(fn) -> fn is called once per pool with one of these
+            //
+            // The python object is an owning snapshot (xo::pyarena::PoolInfo),
+            // not the c++ MemorySizeInfo it was taken from.  That type reports
+            // through a string_view and a bare pointer into the visiting
+            // frame, so it cannot outlive the callback -- a rule python code
+            // has no way to keep.  See PoolInfo.hpp.
+
+            py::class_<MemorySizeDetail>(m, "MemorySizeDetail")
+                .def(py::init<>())
+                .def_property_readonly("tseq",
+                                       [](const MemorySizeDetail & x) {
+                                           return x.tseq_.seqno();
+                                       },
+                                       "typeseq identifying the c++ type counted here"
+                                       " (-1 in the leading totals entry)")
+                .def_readonly("n_alloc", &MemorySizeDetail::n_alloc_,
+                              "number of instances")
+                .def_readonly("z_alloc", &MemorySizeDetail::z_alloc_,
+                              "bytes used by those instances")
+                .def("__repr__",
+                     [](const MemorySizeDetail & x) {
+                         return ("<MemorySizeDetail tseq=" + std::to_string(x.tseq_.seqno())
+                                 + " n_alloc=" + std::to_string(x.n_alloc_)
+                                 + " z_alloc=" + std::to_string(x.z_alloc_) + ">");
+                     });
+
+            py::class_<PoolInfo>(m, "MemorySizeInfo")
+                /* the empty report.  Instances normally arrive from a
+                 * visit_pools() callback rather than being built here.
+                 */
+                .def(py::init<>(), "an empty report -- all sizes zero")
+                .def_readonly("name", &PoolInfo::name_,
+                              "name of the pool being reported")
+                /* four numbers, and they mean four different things */
+                .def_readonly("used", &PoolInfo::used_,
+                              "bytes in use, excluding waste")
+                .def_readonly("allocated", &PoolInfo::allocated_,
+                              "bytes allocated, including waste (e.g. empty hash slots)")
+                .def_readonly("committed", &PoolInfo::committed_,
+                              "bytes backed by physical memory")
+                .def_readonly("reserved", &PoolInfo::reserved_,
+                              "address space obtained, whether or not committed")
+                .def_readonly("lo", &PoolInfo::lo_,
+                              "start address, or None")
+                .def_readonly("hi", &PoolInfo::hi_,
+                              "end address, or None")
+                .def_readonly("detail", &PoolInfo::detail_,
+                              "per-type histogram, empty when the pool keeps none."
+                              "  detail[0] is the total across types")
+                .def("__repr__",
+                     [](const PoolInfo & x) {
+                         return ("<MemorySizeInfo " + x.name_
+                                 + " used=" + std::to_string(x.used_)
+                                 + " committed=" + std::to_string(x.committed_)
+                                 + " reserved=" + std::to_string(x.reserved_) + ">");
+                     });
 
             py::class_<AllocHeader>(m, "AllocHeader")
                 .def(py::init<AllocHeader::repr_type>(), py::arg("repr"))
