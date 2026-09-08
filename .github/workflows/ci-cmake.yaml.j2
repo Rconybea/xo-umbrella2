@@ -43,10 +43,14 @@ jobs:
       CC:  ${{matrix.cc}}
       CXX: ${{matrix.cxx}}
       PREFIX: ${{github.workspace}}/local-${{matrix.cc}}
+      # Set PATH here rather than via $GITHUB_PATH.  The image declares no PATH
+      # of its own (fixed in pkgs/docker-xo-builder.nix, but only from the next
+      # image build), and github composes step environments from the image
+      # config plus $GITHUB_PATH -- so appending there would leave PATH holding
+      # ONLY $PREFIX/bin, and the next step fails with
+      #   exec: "sh": executable file not found in $PATH
+      PATH: ${{github.workspace}}/local-${{matrix.cc}}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
-      - name: set PATH
-        run: |
-          echo "$PREFIX/bin" >> $GITHUB_PATH
 
       - name: compiler
         run: |
