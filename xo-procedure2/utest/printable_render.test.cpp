@@ -119,7 +119,7 @@ namespace xo {
                                    " :td <TypeDescr :id N :canonical_name"
                                    " xo::facet::obj<xo::mm::AGCObject>"
                                    " (*)(xo::facet::obj<xo::scm::ARuntimeContext>)"
-                                   " :complete 1 :metatype function> :fn 1>"),
+                                   " :complete true :metatype function> :fn 1>"),
 
                 /* REVIEWED DIVERGENCE, two of them, both deliberate:
                  *
@@ -140,7 +140,7 @@ namespace xo {
                                    "    :canonical_name\n"
                                    "     xo::facet::obj<xo::mm::AGCObject>"
                                    " (*)(xo::facet::obj<xo::scm::ARuntimeContext>)\n"
-                                   "    :complete 1\n"
+                                   "    :complete true\n"
                                    "    :metatype function>\n"
                                    "  :fn 1>"),
 
@@ -160,7 +160,7 @@ namespace xo {
                                    "    :canonical_name\n"
                                    "     xo::facet::obj<xo::mm::AGCObject>"
                                    " (*)(xo::facet::obj<xo::scm::ARuntimeContext>)\n"
-                                   "    :complete 1\n"
+                                   "    :complete true\n"
                                    "    :metatype\n"
                                    "     function>\n"
                                    "  :fn 1>"),

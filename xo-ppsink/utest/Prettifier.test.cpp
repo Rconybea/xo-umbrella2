@@ -97,15 +97,16 @@ TEST_CASE("prettifier-integer-widths", "[pretty][scalar]") {
     CHECK(tostr0(std::numeric_limits<std::uint64_t>::max()) == "18446744073709551615");
 }
 
-TEST_CASE("prettifier-bool-stays-1-0", "[pretty][scalar]") {
+TEST_CASE("prettifier-bool-is-spelled-out", "[pretty][scalar]") {
     static_assert(has_prettifier<bool>);
 
-    /* NOT "true"/"false".  operator<< prints 1/0 without std::boolalpha, and
-     * renderings pinned across the tree already contain it -- e.g. TypeDescr's
-     * ":complete 1".  Prettifier<bool> removes the ostream, not the format.
+    /* NOT 1/0.  This departs from operator<< without std::boolalpha, which is
+     * where the digits came from: a bare 1 among neighbouring integer fields
+     * does not say which of them is a flag.  Renderings pinned across the tree
+     * moved with it -- e.g. TypeDescr's ":complete true" -- on 2026-09-08.
      */
-    CHECK(tostr0(true) == "1");
-    CHECK(tostr0(false) == "0");
+    CHECK(tostr0(true) == "true");
+    CHECK(tostr0(false) == "false");
 }
 
 TEST_CASE("prettifier-leaves-char-types-alone", "[pretty][scalar]") {

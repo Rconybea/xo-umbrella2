@@ -116,14 +116,18 @@ namespace xo::pp {
 
     /** Use:
      *    PpSink sink = ...;
-     *    Prettifier<double>::print(sink, true)
+     *    Prettifier<bool>::print(sink, true)
      *  writes
-     *    "1" to sink.
+     *    "true" to sink.
+     *
+     *  Spelled out rather than 1/0: a bare 1 among neighbouring integer fields
+     *  does not say which of them is a flag, and the digits are the one
+     *  rendering that cannot be told apart from a count.
      **/
     template <>
     struct Prettifier<bool> {
         static void print(PpSink & sink, bool x) {
-            sink.put(x ? std::string_view("1") : std::string_view("0"));
+            sink.put(x ? std::string_view("true") : std::string_view("false"));
         }
     };
 

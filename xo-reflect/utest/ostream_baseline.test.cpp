@@ -112,7 +112,7 @@ namespace xo {
             std::string expected_typedescr(TypeDescr td, const char * name) {
                 return std::string("<TypeDescr :id ") + std::to_string(td->id().id())
                     + " :canonical_name " + name
-                    + " :complete 1"
+                    + " :complete true"
                     + " :metatype atomic>";
             }
 

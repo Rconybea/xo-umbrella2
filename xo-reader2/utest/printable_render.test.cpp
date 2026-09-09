@@ -502,24 +502,24 @@ namespace xo {
                       "   leftparen|leftbracket|leftbrace|string|f64|i64|bool>");
 
                 check("DExpectExprSsm.fff", DExpectExprSsm::_make(mm, false, false, false), 200,
-                      "<DExpectExprSsm :allow_defs 0 :cxl_on_rightbrace 0 :cxl_on_rightparen 0 :expect if|lambda|lparen|lbrace|literal|var>");
+                      "<DExpectExprSsm :allow_defs false :cxl_on_rightbrace false :cxl_on_rightparen false :expect if|lambda|lparen|lbrace|literal|var>");
 
                 check("DExpectExprSsm.fff", DExpectExprSsm::_make(mm, false, false, false), 30,
                       "<DExpectExprSsm\n"
-                      "  :allow_defs 0\n"
-                      "  :cxl_on_rightbrace 0\n"
-                      "  :cxl_on_rightparen 0\n"
+                      "  :allow_defs false\n"
+                      "  :cxl_on_rightbrace false\n"
+                      "  :cxl_on_rightparen false\n"
                       "  :expect\n"
                       "   if|lambda|lparen|lbrace|literal|var>");
 
                 check("DExpectExprSsm.ttt", DExpectExprSsm::_make(mm, true, true, true), 200,
-                      "<DExpectExprSsm :allow_defs 1 :cxl_on_rightbrace 1 :cxl_on_rightparen 1 :expect def|if|lambda|lparen|lbrace|literal|var>");
+                      "<DExpectExprSsm :allow_defs true :cxl_on_rightbrace true :cxl_on_rightparen true :expect def|if|lambda|lparen|lbrace|literal|var>");
 
                 check("DExpectExprSsm.ttt", DExpectExprSsm::_make(mm, true, true, true), 30,
                       "<DExpectExprSsm\n"
-                      "  :allow_defs 1\n"
-                      "  :cxl_on_rightbrace 1\n"
-                      "  :cxl_on_rightparen 1\n"
+                      "  :allow_defs true\n"
+                      "  :cxl_on_rightbrace true\n"
+                      "  :cxl_on_rightparen true\n"
                       "  :expect\n"
                       "   def|if|lambda|lparen|lbrace|literal|var>");
 
@@ -919,7 +919,7 @@ namespace xo {
                            "<DDefineSsm\n"
                            "  :defstate def_4\n"
                            "  :expect singleassign\n"
-                           "  :def_expr <DDefineExpr :lhs <DVariable :name \"foo\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>>");
+                           "  :def_expr <DDefineExpr :lhs <DVariable :name \"foo\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete true :metatype atomic>>>>>");
 
                 check_step(define_v, "define", 3, 60,
                            "<DDefineSsm\n"
@@ -937,7 +937,7 @@ namespace xo {
                            "         <TypeDescr\n"
                            "          :id N\n"
                            "          :canonical_name double\n"
-                           "          :complete 1\n"
+                           "          :complete true\n"
                            "          :metatype atomic>>>>>");
 
                 check_step(qdict_v, "qdict", 2, 200,
@@ -989,7 +989,7 @@ namespace xo {
                            "  :fastate argl_1b\n"
                            "  :expect comma|rightparen\n"
                            "  :n_args 1\n"
-                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>");
+                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete true :metatype atomic>>>>");
 
                 check_step(arg2_v, "arg2", 4, 60,
                            "<DExpectFormalArglistSsm\n"
@@ -1006,7 +1006,7 @@ namespace xo {
                            "       <TypeDescr\n"
                            "        :id N\n"
                            "        :canonical_name double\n"
-                           "        :complete 1\n"
+                           "        :complete true\n"
                            "        :metatype atomic>>>>");
 
                 check_step(arg2_v, "arg2", 8, 200,
@@ -1014,8 +1014,8 @@ namespace xo {
                            "  :fastate argl_1b\n"
                            "  :expect comma|rightparen\n"
                            "  :n_args 2\n"
-                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>\n"
-                           "  :arg[1] <DVariable :name \"y\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>");
+                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete true :metatype atomic>>>\n"
+                           "  :arg[1] <DVariable :name \"y\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete true :metatype atomic>>>>");
 
                 check_step(arg2_v, "arg2", 8, 60,
                            "<DExpectFormalArglistSsm\n"
@@ -1032,7 +1032,7 @@ namespace xo {
                            "       <TypeDescr\n"
                            "        :id N\n"
                            "        :canonical_name double\n"
-                           "        :complete 1\n"
+                           "        :complete true\n"
                            "        :metatype atomic>>>\n"
                            "  :arg[1]\n"
                            "   <DVariable\n"
@@ -1044,7 +1044,7 @@ namespace xo {
                            "       <TypeDescr\n"
                            "        :id N\n"
                            "        :canonical_name double\n"
-                           "        :complete 1\n"
+                           "        :complete true\n"
                            "        :metatype atomic>>>>");
 
             }

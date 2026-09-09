@@ -344,7 +344,7 @@ namespace xo {
                  */
                 Testcase_TypeRef(Kind::resolved, 200,
                                  "<TypeRef :id \"\" :td <TypeDescr :id N"
-                                 " :canonical_name double :complete 1"
+                                 " :canonical_name double :complete true"
                                  " :metatype atomic>>"),
 
                 /* resolved: :td's value fits on its own line.  identical. */
@@ -352,7 +352,7 @@ namespace xo {
                                  "<TypeRef\n"
                                  "  :id \"t:2\"\n"
                                  "  :td <TypeDescr :id N :canonical_name double"
-                                 " :complete 1 :metatype atomic>>"),
+                                 " :complete true :metatype atomic>>"),
 
                 /* REVIEWED DIVERGENCE, both halves already settled by
                  * DPrimitive (xo-procedure2) and reappearing here because :td
@@ -372,7 +372,7 @@ namespace xo {
                                  "   <TypeDescr\n"
                                  "    :id N\n"
                                  "    :canonical_name double\n"
-                                 "    :complete 1\n"
+                                 "    :complete true\n"
                                  "    :metatype atomic>>"),
 
                 /* margin 20: legacy is UNCHANGED from margin 40, having nothing
@@ -387,7 +387,7 @@ namespace xo {
                                  "    :id N\n"
                                  "    :canonical_name\n"
                                  "     double\n"
-                                 "    :complete 1\n"
+                                 "    :complete true\n"
                                  "    :metatype\n"
                                  "     atomic>>"),
             };
@@ -727,7 +727,7 @@ namespace xo {
                 Testcase_DVariable("myvar", Kind::resolved, 200, "res200",
                                    "<DVariable :name \"myvar\" :typeref"
                                    " <TypeRef :id \"\" :td <TypeDescr :id N"
-                                   " :canonical_name double :complete 1"
+                                   " :canonical_name double :complete true"
                                    " :metatype atomic>>>"),
 
                 /* REVIEWED DIVERGENCE, the same one TypeRef pinned, now visible
@@ -736,14 +736,19 @@ namespace xo {
                  * (ppsink, 1).  So the nested <TypeRef begins at column 4 vs 3,
                  * and its own fields at 6 vs 4.  Layout only; same tokens.
                  */
+                /* NB :td breaks here, where it used to fit.  Spelling bools
+                 * out (2026-09-08) added 3 columns to ":complete true", which
+                 * pushed this line to 82 against a margin of 80.  Layout only.
+                 */
                 Testcase_DVariable("myvar", Kind::resolved, 80, "res80",
                                    "<DVariable\n"
                                    "  :name \"myvar\"\n"
                                    "  :typeref\n"
                                    "   <TypeRef\n"
                                    "    :id \"\"\n"
-                                   "    :td <TypeDescr :id N :canonical_name"
-                                   " double :complete 1 :metatype atomic>>>"),
+                                   "    :td\n"
+                                   "     <TypeDescr :id N :canonical_name"
+                                   " double :complete true :metatype atomic>>>"),
 
                 /* the second half of that divergence: legacy's TypeDescr is a
                  * FlatSink render with no break points to offer, so it stays on
@@ -759,7 +764,7 @@ namespace xo {
                                    "     <TypeDescr\n"
                                    "      :id N\n"
                                    "      :canonical_name double\n"
-                                   "      :complete 1\n"
+                                   "      :complete true\n"
                                    "      :metatype atomic>>>"),
 
                 /* unresolved typeref: short enough to stay flat at 200 ... */
