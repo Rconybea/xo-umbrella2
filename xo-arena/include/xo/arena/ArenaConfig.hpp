@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AllocHeaderConfig.hpp"
+#include "MemoryNameStr.hpp"
 #include <xo/flatstring/flatstring.hpp>
 #include <xo/ppsink/Prettifier.hpp>
 #include <cstdint>
@@ -16,7 +17,7 @@ namespace xo {
 
     namespace mm {
 
-        using ArenaNameStr = flatstring<48>;
+        using ArenaNameStr = MemoryNameStr;
 
         /** @class ArenaConfig
          *
@@ -52,7 +53,7 @@ namespace xo {
             /** @defgroup mm-arenaconfig-access-methods ArenaConfig access methods **/
             ///@{
 
-            const ArenaNameStr & name() const { return name_; }
+            const MemoryNameStr & name() const { return name_; }
 
             ///@}
             /** @defgroup mm-arenaconfig-methods ArenaConfig methods **/
@@ -66,7 +67,7 @@ namespace xo {
             ///@{
 
             /** optional name, for diagnostics **/
-            ArenaNameStr name_;
+            MemoryNameStr name_;
             /** desired arena size -- hard max = reserved virtual memory **/
             std::size_t size_ = 0;
             /** hugepage size -- using huge pages relieves some TLB pressure

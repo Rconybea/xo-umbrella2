@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <algorithm>
 #include <cstdarg>
 #include <cstdio>
@@ -12,6 +13,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace xo {
     /** @class flatstring
@@ -647,6 +649,23 @@ namespace xo {
     all_same_v = std::conjunction_v< std::is_same<First, Rest>... >;
 #endif
 
+    /** @defgroup flatstring-traits **/
+    ///@{
+
+    template <typename T>
+    struct is_flatstring : std::false_type {};
+
+    template <std::size_t N>
+    struct is_flatstring<flatstring<N>> : std::true_type {};
+
+    /** @brief true iff @tp T is flatstring<N> for some N **/
+    template <typename T>
+    constexpr bool is_flatstring_v = is_flatstring<T>::value;
+
+    ///@}
+    /** @defgrouop flatstring-concat **/
+    ///@{
+
     /** @brief Concatenate flatstrings, possibly mixed with C-style char arrays
      *
      *  Example:
@@ -709,6 +728,10 @@ namespace xo {
         return result;
     }
 
+    ///@}
+    /** @defgroup flatstring-3way-compare 3way-compare **/
+    ///@{
+
     /** @brief compare two flatstrings lexicographically.
      *
      *  Example:
@@ -726,8 +749,6 @@ namespace xo {
         return (std::string_view(s1.value_) <=> std::string_view(s2.value_));
     }
 
-    /** @defgroup flatstring-3way-compare 3way-compare **/
-    ///@{
     /** @brief 3-way compare for two flatstrings
      *
      *  Example
@@ -764,6 +785,41 @@ namespace xo {
     {
         return ((s1 <=> s2) == std::strong_ordering::equal);
     }
+
+    /** @brief 3-way compare between flatstring and string-like
+     *
+     *  Example
+     *  @code
+     *  constexpr auto cmp = (flatstring("foo") <=> "foo");
+     *  static_assert(cmp != 0);
+     *  @endcode
+     **/
+    template <std::size_t N, typename S>
+    requires (!is_flatstring_v<std::remove_cvref_t<S>>)
+              && std::convertible_to<const S &, std::string_view>
+    constexpr auto
+    operator<=>(const flatstring<N> & s1, const S & s2) noexcept
+    {
+        return (std::string_view(s1) <=> std::string_view(s2));
+    }
+
+    /** @brief equality comparison between flatstring and string-like
+     *
+     *  Example
+     *  @code
+     *  constexpr bool cmp = (flatstring("foo") == "foo");
+     *  static_assert(cmp == true);
+     *  @endcode
+     **/
+    template <std::size_t N, typename S>
+    requires ((!is_flatstring_v<std::remove_cvref_t<S>>)
+              && std::convertible_to<const S &, std::string_view>)
+    constexpr bool
+    operator==(const flatstring<N> & s1, const S & s2) noexcept
+    {
+        return (std::string_view(s1) == std::string_view(s2));
+    }
+
     ///@}
 
 } /*namespace xo*/

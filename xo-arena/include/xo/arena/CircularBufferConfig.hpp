@@ -5,13 +5,11 @@
 
 #pragma once
 
-#include <xo/flatstring/flatstring.hpp>
+#include "MemoryNameStr.hpp"
 #include <string>
 
 namespace xo {
     namespace mm {
-        using BufferNameStr = flatstring<48>;
-
         /** @class CircularBufferConfig
          *
          *  @brief configuration for a @ref DCircularBuffer instance
@@ -21,7 +19,7 @@ namespace xo {
             ///@{
 
             /** optional name, for diagnostics **/
-            BufferNameStr name_;
+            MemoryNameStr name_;
             /** hard maximum buffer size = reserved virtual memory.
              *  However actual max will be this value rounded up to at least page size.
              *  Buffer will generally map much less than this amount of memory

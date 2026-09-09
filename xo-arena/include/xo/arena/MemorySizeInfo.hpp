@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "MemoryNameStr.hpp"
 #include <xo/reflectutil/typeseq.hpp>
 #include <xo/ppsink/Prettifier.hpp>
 #include <cstddef>
@@ -39,7 +40,7 @@ namespace xo {
             using DetailArrayType = std::array<MemorySizeDetail, 32>;
 
             MemorySizeInfo() = default;
-            MemorySizeInfo(std::string_view name,
+            MemorySizeInfo(const MemoryNameStr & name,
                            std::size_t u, std::size_t a, std::size_t c, std::size_t r,
                            const void * lo, const void * hi,
                            DetailArrayType * detail)
@@ -56,7 +57,7 @@ namespace xo {
             void pretty(PpSink & sink) const;
 
             /** resource name **/
-            std::string_view resource_name_;
+            MemoryNameStr resource_name_;
             /** memory used (excluding wasted space) **/
             std::size_t used_  = 0;
             /** memory allocated (including wasted space e.g. empty slots in hash tables **/

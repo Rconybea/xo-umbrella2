@@ -207,11 +207,11 @@ namespace ut {
                             &unexpected]
                 (const MemorySizeInfo & info)
                 {
-                    if (info.resource_name_ == "pp-tk-buffer") {
+                    if (info.resource_name_ == flatstring("pp-tk-buffer")) {
                         tk_buffer_info = info;
-                    } else if (info.resource_name_ == "pp-scan-stack") {
+                    } else if (info.resource_name_ == flatstring("pp-scan-stack")) {
                         scan_stack_info = info;
-                    } else if (info.resource_name_ == "pp-print-stack") {
+                    } else if (info.resource_name_ == flatstring("pp-print-stack")) {
                         print_stack_info = info;
                     } else {
                         unexpected = true;

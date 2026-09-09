@@ -29,6 +29,7 @@ namespace ut {
     using xo::mm::ArenaNameStr;
     using xo::mm::AllocHeaderConfig;
     using xo::reflect::typeseq;
+    using xo::flatstring;
     using std::string;
 
     namespace {
@@ -80,7 +81,7 @@ namespace ut {
 
         std::byte lo{}, hi{};
 
-        MemorySizeInfo info("store",
+        MemorySizeInfo info(flatstring("store"),
                             40 /*used*/, 48 /*allocated*/,
                             4096 /*committed*/, 262144 /*reserved*/,
                             &lo, &hi, &detail);
@@ -105,7 +106,7 @@ namespace ut {
         /* the common case: nothing wasted, so the second number would only
          * repeat the first
          */
-        MemorySizeInfo info("store", 40, 40, 4096, 262144, nullptr, nullptr, nullptr);
+        MemorySizeInfo info(flatstring("store"), 40, 40, 4096, 262144, nullptr, nullptr, nullptr);
 
         string s = render(info);
 
@@ -119,7 +120,7 @@ namespace ut {
     {
         MemorySizeInfo::DetailArrayType detail{};
 
-        MemorySizeInfo info("store", 0, 0, 0, 0, nullptr, nullptr, &detail);
+        MemorySizeInfo info(flatstring("store"), 0, 0, 0, 0, nullptr, nullptr, &detail);
 
         /* an all-sentinel array is 32 empty rows, not 32 rows */
         REQUIRE(info.n_detail() == 0);
@@ -142,7 +143,7 @@ namespace ut {
         /* pre-existing Prettifier; asserted here so the four xo-arena
          * renderings are pinned in one place
          */
-        string s = render(ArenaConfig{ .name_ = ArenaNameStr::from_cstr("store"), .size_ = 4096 });
+        string s = render(ArenaConfig{ .name_ = flatstring("store"), .size_ = 4096 });
 
         REQUIRE(s.starts_with("<ArenaConfig :name store :size 4096"));
         /* name is optional, and elided when empty */
