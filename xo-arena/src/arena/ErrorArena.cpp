@@ -13,7 +13,7 @@ namespace xo {
         ArenaConfig
         ErrorArena::default_config()
         {
-            return ArenaConfig().with_name("error-arena").with_size(16 * 1024);
+            return ArenaConfig().with_name(ArenaNameStr::from_chars("error-arena")).with_size(16 * 1024);
         }
 
         namespace  {

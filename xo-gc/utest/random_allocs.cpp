@@ -29,6 +29,8 @@ namespace utest {
     using xo::mm::padding;
     using xo::rng::xoshiro256ss;
     using xo::facet::obj;
+    using xo::flatstring;
+
     using std::uint32_t;
     using std::byte;
 
@@ -182,7 +184,7 @@ namespace utest {
             }
 
             /** scratch arena for iterators **/
-            DArena scratch_mm = DArena::map(ArenaConfig{.name_ = "scratch",
+            DArena scratch_mm = DArena::map(ArenaConfig{.name_ = flatstring("scratch"),
                                                         .size_ = 4*1024,
                                                         .hugepage_z_ = 4*1024 });
             auto range = mm.alloc_range(scratch_mm);

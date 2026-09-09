@@ -44,6 +44,7 @@ namespace xo {
     using xo::facet::TypeRegistry;
     using xo::reflect::typeseq;
     using span_type = xo::scm::DVirtualSchematikaMachine::span_type;
+    using xo::flatstring;
     using Catch::Matchers::WithinAbs;
 
     using std::cout;
@@ -53,8 +54,8 @@ namespace xo {
 
     namespace ut {
         struct ArenaShim {
-            explicit ArenaShim(const std::string & name, std::size_t size = 16*1024)
-            : arena_(ArenaConfig().with_name(name).with_size(size))
+            explicit ArenaShim(std::string_view name, std::size_t size = 16*1024)
+            : arena_(ArenaConfig().with_name(ArenaNameStr::concat(name)).with_size(size))
             {
             }
 
@@ -64,7 +65,7 @@ namespace xo {
         };
 
         struct VsmFixture {
-            explicit VsmFixture(const std::string & testname,
+            explicit VsmFixture(std::string_view testname,
                                 bool debug_flag,
                                 const VsmConfig & cfg = VsmConfig())
             : aux_mm_{testname}
@@ -132,7 +133,7 @@ namespace xo {
         };
 
         void vsm_std_utest_pattern(bool debug_flag,
-                                   const std::string & testname,
+                                   std::string_view testname,
                                    const char * input,
                                    std::function<bool (const VsmResultExt & x)> verify_fn,
                                    const VsmConfig & cfg = VsmConfig())
@@ -157,7 +158,7 @@ namespace xo {
         /** input comprises N expressions, with verify_fns.size() = N.
          **/
         void vsm_multi_utest_pattern(bool debug_flag,
-                                     const std::string & testname,
+                                     const ArenaNameStr & testname,
                                      const char * input,
                                      std::vector<std::function<bool (const VsmResultExt &)>> verify_fns,
                                      bool eof_flag = false,
@@ -194,7 +195,7 @@ namespace xo {
             bool c_debug_flag = true;
             scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
-            VsmFixture vsm_fixture(testname, c_debug_flag);
+            VsmFixture vsm_fixture(ArenaNameStr::from_cstr(testname.c_str()), c_debug_flag);
 
             log && vsm_fixture.log_memory_layout(&log);
         }
@@ -214,7 +215,7 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname, "3.1415926535;", verify_fn);
+            vsm_std_utest_pattern(c_debug_flag, ArenaNameStr::from_cstr(testname.c_str()), "3.1415926535;", verify_fn);
         }
 
         TEST_CASE("VirtualSchematikaMachine-const2", "[interpreter2][VSM]")
@@ -232,7 +233,7 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname, "1011;", verify_fn);
+            vsm_std_utest_pattern(c_debug_flag, ArenaNameStr::from_cstr(testname.c_str()), "1011;", verify_fn);
         }
 
         TEST_CASE("VirtualSchematikaMachine-arith1", "[interpreter2][VSM]")
@@ -250,7 +251,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "3.14159265 * 0.5;",
                                   verify_fn);
         }
@@ -269,7 +271,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "3.14159265 / 0.5;", verify_fn);
         }
 
@@ -287,7 +290,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "123 == 123;",
                                   verify_fn);
         }
@@ -306,7 +310,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "if 123 == 123 then \"equal\" else \"notequal\";",
                                   verify_fn);
         }
@@ -324,7 +329,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "lambda (x : i64) -> i64 { x * x; }",
                                   verify_fn);
         }
@@ -343,7 +349,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "(lambda (x : i64, y : i64) { x * y; })(13, 15);",
                                   verify_fn);
         }
@@ -362,7 +369,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "def foo = 3.14159;",
                                   verify_fn);
         }
@@ -372,9 +380,9 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
             constexpr bool c_debug_flag = true;
 
-            vsm_multi_utest_pattern(
-                c_debug_flag, testname,
-                "def foo = 3.14159; foo;",
+            vsm_multi_utest_pattern(c_debug_flag,
+                                    ArenaNameStr::from_cstr(testname.c_str()),
+                                    "def foo = 3.14159; foo;",
                 {
                     [](const VsmResultExt & res) {
                         auto x = obj<AGCObject,DUniqueString>::from(*res.value());
@@ -396,8 +404,8 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
             constexpr bool c_debug_flag = true;
 
-            vsm_multi_utest_pattern(
-                c_debug_flag, testname,
+            vsm_multi_utest_pattern(c_debug_flag,
+                                    ArenaNameStr::from_cstr(testname.c_str()),
                 "def fact = lambda (n) { if (n == 0) then 1 else n * fact(n - 1) };",
                 {
                     [](const VsmResultExt & res) {
@@ -416,7 +424,8 @@ namespace xo {
             constexpr bool c_debug_flag = true;
 
             vsm_multi_utest_pattern(
-                c_debug_flag, testname,
+                                    c_debug_flag,
+                                    ArenaNameStr::from_cstr(testname.c_str()),
                 "def n = 4; if (n == 4) then n * 3 else n * 5;",
                 {
                     [](const VsmResultExt & res) {
@@ -441,7 +450,8 @@ namespace xo {
             constexpr bool c_debug_flag = false;
 
             vsm_multi_utest_pattern(
-                c_debug_flag, testname,
+                                    c_debug_flag,
+                                    ArenaNameStr::from_cstr(testname.c_str()),
                 "def fact = lambda (n) { if (n == 0) then 1 else n * fact(n - 1) }; fact(4);",
                 {
                     [](const VsmResultExt & res) {
@@ -474,7 +484,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "#q{ 4.5 };",
                                   verify_fn,
                                   VsmConfig().with_parser_debug_flag(c_debug_flag));
@@ -501,7 +512,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "#q{ (4.5 7.2) };",
                                   verify_fn,
                                   VsmConfig().with_parser_debug_flag(c_debug_flag));
@@ -528,7 +540,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  testname,
                                   "#q{ [4.5 7.2] };",
                                   verify_fn,
                                   VsmConfig().with_parser_debug_flag(c_debug_flag));
@@ -548,7 +561,8 @@ namespace xo {
                 return true;
             };
 
-            vsm_std_utest_pattern(c_debug_flag, testname,
+            vsm_std_utest_pattern(c_debug_flag,
+                                  ArenaNameStr::from_cstr(testname.c_str()),
                                   "report-memory-use();",
                                   verify_fn,
                                   VsmConfig().with_parser_debug_flag(c_debug_flag));

@@ -37,6 +37,7 @@ namespace xo {
     using xo::pyarena::PoolInfo;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
     using xo::pp::FlatSink;
     using xo::pp::PpStyle;
 
@@ -194,7 +195,7 @@ namespace xo {
                                  bool debug_flag)
                     {
                         ArenaConfig cfg;
-                        cfg.name_ = std::move(name);
+                        cfg.name_ = ArenaNameStr::from_cstr(name.c_str());
                         cfg.size_ = size;
                         cfg.hugepage_z_ = hugepage_z;
                         cfg.store_header_flag_ = store_header_flag;

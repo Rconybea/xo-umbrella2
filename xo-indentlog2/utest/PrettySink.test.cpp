@@ -20,6 +20,7 @@ namespace ut {
     using xo::pp::PpConfig;
     using xo::mm::ArenaConfig;
     using xo::UtestRehearser;
+    using xo::flatstring;
     using std::string;
     using std::vector;
 
@@ -112,7 +113,7 @@ namespace ut {
     prettyprinter_test_fn(const TestCase_PrettySink & tc,
                           UtestRehearser * p_rh)
     {
-        ArenaConfig logbuf_cfg { .name_ = "utest.PrettySink",
+        ArenaConfig logbuf_cfg { .name_ = flatstring("utest.PrettySink"),
                                  .size_ = 256*1024 };
 
         PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg);

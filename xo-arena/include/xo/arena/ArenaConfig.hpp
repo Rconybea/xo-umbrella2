@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AllocHeaderConfig.hpp"
+#include <xo/flatstring/flatstring.hpp>
 #include <xo/ppsink/Prettifier.hpp>
 #include <cstdint>
 #include <string>
@@ -14,6 +15,8 @@ namespace xo {
     namespace pp { class PpSink; }
 
     namespace mm {
+
+        using ArenaNameStr = flatstring<48>;
 
         /** @class ArenaConfig
          *
@@ -27,7 +30,7 @@ namespace xo {
 
             /** NOTE: not providing explicit ctors so we can use designated initializers **/
 
-            ArenaConfig with_name(std::string name) const {
+            ArenaConfig with_name(const ArenaNameStr & name) const {
                 ArenaConfig copy(*this);
                 copy.name_ = name;
                 return copy;
@@ -46,6 +49,12 @@ namespace xo {
             }
 
             ///@}
+            /** @defgroup mm-arenaconfig-access-methods ArenaConfig access methods **/
+            ///@{
+
+            const ArenaNameStr & name() const { return name_; }
+
+            ///@}
             /** @defgroup mm-arenaconfig-methods ArenaConfig methods **/
             ///@{
 
@@ -57,7 +66,7 @@ namespace xo {
             ///@{
 
             /** optional name, for diagnostics **/
-            std::string name_;
+            ArenaNameStr name_;
             /** desired arena size -- hard max = reserved virtual memory **/
             std::size_t size_ = 0;
             /** hugepage size -- using huge pages relieves some TLB pressure

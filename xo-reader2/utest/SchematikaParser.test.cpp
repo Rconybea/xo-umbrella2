@@ -61,13 +61,14 @@ namespace xo {
     using xo::mm::X1CollectorConfig;
     using xo::mm::CollectorTypeRegistry;
     using xo::mm::MemorySizeInfo;
+    using xo::flatstring;
 
     static InitEvidence s_init = (InitSubsys<S_reader2_tag>::require()
                                   ^ InitSubsys<S_gc_tag>::require());
 
     namespace ut {
         struct ParserFixture {
-            ParserFixture(const std::string & testname,
+            ParserFixture(const ArenaNameStr & testname,
                           bool gc_flag,
                           bool debug_flag)
             {
@@ -97,7 +98,7 @@ namespace xo {
                     CollectorTypeRegistry::instance().install_types(gc);
                 } else {
                     ArenaConfig arena_config
-                        = (ArenaConfig().with_name("expr")
+                        = (ArenaConfig().with_name(flatstring("expr"))
                                     .with_size(16 * 1024)
                                     .with_store_header_flag(true));
 
@@ -259,7 +260,7 @@ namespace xo {
             constexpr bool c_debug_flag = false;
             scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
-            ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
+            ParserFixture fixture(ArenaNameStr::concat(testname), false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
 
             REQUIRE(parser->debug_flag() == false);
@@ -290,7 +291,7 @@ namespace xo {
             constexpr bool c_debug_flag = false;
             scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
-            ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
+            ParserFixture fixture(ArenaNameStr::concat(testname), false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
 
             parser->begin_interactive_session();
@@ -309,7 +310,7 @@ namespace xo {
             constexpr bool c_debug_flag = false;
             scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
-            ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
+            ParserFixture fixture(ArenaNameStr::concat(testname), false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
 
             parser->begin_batch_session();
@@ -373,7 +374,7 @@ namespace xo {
                     {
                         log && log(xtag("phase", phase));
 
-                        ParserFixture fixture(testname, phase == 1 /*gc*/, debug_flag_v[phase]);
+                        ParserFixture fixture(ArenaNameStr::concat(testname), phase == 1 /*gc*/, debug_flag_v[phase]);
 
                         test_subject(&fixture);
                     }
@@ -1140,7 +1141,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
-            ParserFixture fixture(testname, false /*!gc*/, c_debug_flag);
+            ParserFixture fixture(ArenaNameStr::concat(testname), false /*!gc*/, c_debug_flag);
             auto parser = fixture.parser_;
 
             parser->begin_interactive_session();

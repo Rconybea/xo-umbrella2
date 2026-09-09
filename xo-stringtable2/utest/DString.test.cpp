@@ -33,7 +33,7 @@ namespace xo {
 
         TEST_CASE("DString-empty", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -48,7 +48,7 @@ namespace xo {
 
         TEST_CASE("DString-from_cstr", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -64,7 +64,7 @@ namespace xo {
 
         TEST_CASE("DString-from_view", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -89,7 +89,7 @@ namespace xo {
 
         TEST_CASE("DString-assign", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -105,7 +105,7 @@ namespace xo {
 
         TEST_CASE("DString-assign-truncate", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -121,7 +121,7 @@ namespace xo {
 
         TEST_CASE("DString-data", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -137,7 +137,7 @@ namespace xo {
 
         TEST_CASE("DString-operator-bracket", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -153,7 +153,7 @@ namespace xo {
 
         TEST_CASE("DString-clear", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -170,7 +170,7 @@ namespace xo {
 
         TEST_CASE("DString-fixup_size", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -192,7 +192,7 @@ namespace xo {
 
         TEST_CASE("DString-string_view", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -206,7 +206,7 @@ namespace xo {
 
         TEST_CASE("DString-cstr-conversion", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -219,7 +219,7 @@ namespace xo {
 
         TEST_CASE("DString-begin-end", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -236,7 +236,7 @@ namespace xo {
 
         TEST_CASE("DString-cbegin-cend", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -250,7 +250,7 @@ namespace xo {
 
         TEST_CASE("DString-range-for", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -267,7 +267,7 @@ namespace xo {
 
         TEST_CASE("DString-iterator-modify", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -283,7 +283,7 @@ namespace xo {
 
         TEST_CASE("DString-clone", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -300,7 +300,7 @@ namespace xo {
 
         TEST_CASE("DString-sprintf", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -316,7 +316,7 @@ namespace xo {
 
         TEST_CASE("DString-sprintf-truncate", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -332,7 +332,7 @@ namespace xo {
 
         TEST_CASE("DString-compare", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -351,7 +351,7 @@ namespace xo {
 
         TEST_CASE("DString-comparison-operators", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -398,7 +398,7 @@ namespace xo {
 
         TEST_CASE("DString-hash", "[object2][DString]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);

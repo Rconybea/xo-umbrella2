@@ -64,6 +64,7 @@ namespace ut {
     using xo::Subsystem;
     using xo::InitEvidence;
     using xo::InitSubsys;
+    using xo::flatstring;
 
     namespace {
         struct testcase_x1 {
@@ -173,12 +174,12 @@ namespace ut {
 
                 // secondary allocator for reporting
                 DArena report_arena(ArenaConfig()
-                                    .with_name("x1_test_report_arena")
+                                    .with_name(flatstring("x1_test_report_arena"))
                                     .with_size(64 * 1024));
                 auto report_mm = obj<AAllocator,DArena>(&report_arena);
 
                 DArena error_arena(ArenaConfig()
-                                   .with_name("x1_test_error_arena")
+                                   .with_name(flatstring("x1_test_error_arena"))
                                    .with_size(16 * 1024));
                 auto error_mm = obj<AAllocator,DArena>(&error_arena);
 

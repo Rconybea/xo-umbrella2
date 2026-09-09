@@ -13,6 +13,7 @@
   sphinx, graphviz,
 
   # xo dependencies
+  xo-flatstring,
   xo-randomgen,
   xo-reflectutil,
   xo-ppsink,
@@ -61,6 +62,7 @@ stdenv.mkDerivation (finalattrs:
       python3Packages.pillow
     ];
     propagatedBuildInputs = [
+      xo-flatstring
       xo-reflectutil
       xo-ppsink
       xo-subsys

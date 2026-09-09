@@ -9,12 +9,13 @@
 namespace xo {
     using xo::mm::DArenaVector;
     using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
     using std::byte;
 
     namespace ut {
         TEST_CASE("DArenaVector-tiny", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_chars("testarena"),
                               .size_ = 1 };
             DArenaVector<double> arenavec = DArenaVector<double>::map(cfg);
 
@@ -23,7 +24,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-push_back-rvalue", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -47,7 +48,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-push_back-lvalue", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -71,7 +72,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-at-valid", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -90,7 +91,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-at-throws", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -113,7 +114,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-resize-expand", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -146,7 +147,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-resize-shrink", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -178,7 +179,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-resize-same", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -200,7 +201,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-clear", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -224,7 +225,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-iterators", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -253,7 +254,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-const-iterators", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -275,7 +276,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-range-for", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -301,7 +302,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-reserve", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -336,9 +337,9 @@ namespace xo {
 
         TEST_CASE("DArenaVector-swap", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg1 { .name_ = "testarena1",
+            ArenaConfig cfg1 { .name_ = flatstring("testarena1"),
                                .size_ = 4096 };
-            ArenaConfig cfg2 { .name_ = "testarena2",
+            ArenaConfig cfg2 { .name_ = flatstring("testarena2"),
                                .size_ = 4096 };
 
             DArenaVector<double> vec1 = DArenaVector<double>::map(cfg1);
@@ -371,7 +372,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-data", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -403,7 +404,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-move-ctor", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec1 = DArenaVector<double>::map(cfg);
 
@@ -459,7 +460,7 @@ namespace xo {
             LifetimeTracker::reset();
 
             {
-                ArenaConfig cfg { .name_ = "testarena",
+                ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                                   .size_ = 4096 };
                 DArenaVector<LifetimeTracker> vec = DArenaVector<LifetimeTracker>::map(cfg);
 
@@ -486,7 +487,7 @@ namespace xo {
         {
             LifetimeTracker::reset();
 
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<LifetimeTracker> vec = DArenaVector<LifetimeTracker>::map(cfg);
 
@@ -515,7 +516,7 @@ namespace xo {
         {
             LifetimeTracker::reset();
 
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<LifetimeTracker> vec = DArenaVector<LifetimeTracker>::map(cfg);
 
@@ -543,7 +544,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-allocated-tracks-size", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -579,7 +580,7 @@ namespace xo {
 
         TEST_CASE("DArenaVector-allocated-survives-move", "[arena][DArenaVector]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 
@@ -603,8 +604,8 @@ namespace xo {
             /* swap() exchanges size_ and store_ together, so the free pointer
              * travels with the arena it belongs to
              */
-            ArenaConfig cfg1 { .name_ = "testarena1", .size_ = 4096 };
-            ArenaConfig cfg2 { .name_ = "testarena2", .size_ = 4096 };
+            ArenaConfig cfg1 { .name_ = flatstring("testarena1"), .size_ = 4096 };
+            ArenaConfig cfg2 { .name_ = flatstring("testarena2"), .size_ = 4096 };
 
             DArenaVector<double> vec1 = DArenaVector<double>::map(cfg1);
             DArenaVector<double> vec2 = DArenaVector<double>::map(cfg2);
@@ -632,7 +633,7 @@ namespace xo {
             /* what the python memory report reads, and what motivated this:
              * a root set full of live handles used to report used=0
              */
-            ArenaConfig cfg { .name_ = "roots",
+            ArenaConfig cfg { .name_ = flatstring("roots"),
                               .size_ = 4096 };
             DArenaVector<double> vec = DArenaVector<double>::map(cfg);
 

@@ -32,7 +32,7 @@ namespace xo {
             scope log(XO_DEBUG_(true), "GCObjectConversion-1");
 
             ArenaConfig cfg {
-                .name_ = "testarena",
+                .name_ = flatstring("testarena"),
                 .size_ = 128
             };
             DArena arena = DArena::map(cfg);
@@ -64,7 +64,7 @@ namespace xo {
             scope log(XO_DEBUG_(true), "GCObjectConversion-2");
 
             ArenaConfig cfg {
-                .name_ = "testarena",
+                .name_ = flatstring("testarena"),
                 .size_ = 128
             };
             DArena arena = DArena::map(cfg);

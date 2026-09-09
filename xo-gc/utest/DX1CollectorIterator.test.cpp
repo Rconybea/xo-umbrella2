@@ -57,7 +57,7 @@ namespace xo {
 
         TEST_CASE("DX1CollectorIterator-1", "[alloc2][gc][DX1Collector]")
         {
-            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+            ArenaConfig arena_cfg = { .name_ = flatstring("_test_unused"),
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
                                       .header_ = AllocHeaderConfig(0 /*guard_z*/,
@@ -104,7 +104,7 @@ namespace xo {
         {
             scope log(XO_DEBUG_(false),  "DX1CollectorIterator test");
 
-            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+            ArenaConfig arena_cfg = { .name_ = flatstring("_test_unused"),
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
                                       .header_ = AllocHeaderConfig(0 /*guard_z*/,

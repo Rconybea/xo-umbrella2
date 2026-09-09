@@ -54,6 +54,7 @@ main() {
     using xo::mm::span;
     using xo::pp::scope;
     using xo::pp::xtag;
+    using xo::flatstring;
     using replxx::Replxx;
 
     using namespace std;
@@ -71,7 +72,7 @@ main() {
     constexpr bool c_debug_flag = true;
     scope log(XO_DEBUG_(c_debug_flag));
 
-    Tokenizer tkz(CircularBufferConfig{.name_ = "tokenrepl-input",
+    Tokenizer tkz(CircularBufferConfig{.name_ = flatstring("tokenrepl-input"),
                                        .max_capacity_ = 4*1024,
                                        .max_captured_span_ = 128},
                   c_debug_flag);

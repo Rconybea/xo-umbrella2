@@ -15,6 +15,8 @@
 #include <utility>
 
 namespace xo {
+    using xo::mm::ArenaNameStr;
+
     namespace facet {
 
         /** @class TypeRegistry
@@ -135,7 +137,7 @@ namespace xo {
         private:
             TypeRegistry(uint32_t hint_max_capacity)
                 : registry_(ReprType::map(ArenaConfig()
-                                          .with_name("types")
+                                          .with_name(ArenaNameStr::from_chars("types"))
                                           .with_size(hint_max_capacity
                                                      * sizeof(typerecd))))
                 {}

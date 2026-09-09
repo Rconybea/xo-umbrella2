@@ -181,7 +181,9 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_primitive_v.size(); i_tc < n_tc; ++i_tc) {
                     const auto & tc = s_primitive_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "utest.primitive." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("utest.primitive.%ld", i_tc);
+
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 64*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);

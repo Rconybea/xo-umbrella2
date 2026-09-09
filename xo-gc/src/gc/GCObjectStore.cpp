@@ -61,7 +61,7 @@ namespace xo {
              * likely << .size/8
              */
             this->object_types_
-                = ObjectTypeTable::map(ArenaConfig{.name_ = "x1-object-types",
+                = ObjectTypeTable::map(ArenaConfig{.name_ = flatstring("x1-object-types"),
                                                    .size_ = config_.object_types_z_,
                                                    .hugepage_z_ = page_z,
                                                    .store_header_flag_ = false});
@@ -75,18 +75,16 @@ namespace xo {
             for (uint32_t igen = 0, ngen = config_.n_generation_; igen < ngen; ++igen) {
                 if (igen < c_max_generation) {
                     {
-                        char buf[40];
-                        snprintf(buf, sizeof(buf), "x1-space-G%u-a", igen);
+                        auto buf = ArenaNameStr::sprintf("x1-space-G%u-a", igen);
 
                         this->space_storage_[0][igen]
-                            = DArena::map(config_.arena_config_.with_name(std::string(buf)));
+                            = DArena::map(config_.arena_config_.with_name(buf));
                     }
                     {
-                        char buf[40];
-                        snprintf(buf, sizeof(buf), "x1-space-G%u-b", igen);
+                        auto buf = ArenaNameStr::sprintf("x1-space-G%u-b", igen);
 
                         this->space_storage_[1][igen]
-                            = DArena::map(config_.arena_config_.with_name(std::string(buf)));
+                            = DArena::map(config_.arena_config_.with_name(buf));
                     }
 
                     this->space_[Role::to_space()][igen] = &space_storage_[0][igen];

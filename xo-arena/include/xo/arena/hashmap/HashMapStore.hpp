@@ -13,6 +13,8 @@
 #include <cassert>
 
 namespace xo {
+    using xo::mm::ArenaNameStr;
+
     namespace map {
         namespace detail {
             /**
@@ -54,12 +56,12 @@ namespace xo {
                   n_slot_{group_exp2.second * c_group_size},
                   control_{control_vector_type::map
                     (xo::mm::ArenaConfig{
-                        .name_ = name + "-ctl",
+                        .name_ = ArenaNameStr::from_cstr((name + "-ctl").c_str()),
                         .size_ = control_size(n_slot_),
                         .store_header_flag_ = false})},
                   slots_{slot_vector_type::map
                     (xo::mm::ArenaConfig{
-                        .name_ = name + "-slots",
+                        .name_ = ArenaNameStr::from_cstr((name + "-slots").c_str()),
                         .size_ = n_slot_ * sizeof(value_type),
                         .store_header_flag_ = false})}
                 {

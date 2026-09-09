@@ -23,6 +23,7 @@ namespace ut {
     using xo::pp::PpTokenStreambuf;
     using xo::LogBuffer;
     using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
     using xo::UtestRehearser;
     using std::string;
     using std::vector;
@@ -127,7 +128,7 @@ namespace ut {
         PpLayoutConfig cfg;
         PpState pps(cfg);
 
-        ArenaConfig buf_cfg { .name_ = "utest.PpTokenStreambuf",
+        ArenaConfig buf_cfg { .name_ = ArenaNameStr::from_chars("utest.PpTokenStreambuf"),
                               .size_ = 256*1024 };
         LogBuffer logbuf(buf_cfg, p_rh->enable_debug());
 
@@ -176,7 +177,7 @@ namespace ut {
         PpLayoutConfig cfg;
         PpState pps(cfg);
 
-        ArenaConfig buf_cfg { .name_ = "utest.PpTokenStreambuf.numeric",
+        ArenaConfig buf_cfg { .name_ = ArenaNameStr::from_chars("utest.PpTokenStreambuf.numeric"),
                               .size_ = 64*1024 };
         LogBuffer logbuf(buf_cfg, false /*debug*/);
 

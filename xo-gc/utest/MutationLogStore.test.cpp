@@ -49,6 +49,7 @@ namespace ut {
     using xo::rng::xoshiro256ss;
     using xo::rng::random_seed;
     using xo::reflect::typeseq;
+    using xo::flatstring;
 
     namespace {
         struct Testcase {
@@ -401,7 +402,7 @@ namespace ut {
 
         MlsFixture::MlsFixture(const Testcase & tc)
             : gcos_config_{(ArenaConfig()
-                            .with_name("mlog-fixture-arena-name-notused")
+                            .with_name(flatstring("mlog-fixture-arena-name-notused"))
                             .with_size(tc.gc_size_)
                             .with_store_header_flag(true)),
                             tc.n_gen_,
@@ -412,7 +413,7 @@ namespace ut {
                           tc.mutation_log_z_,
                           tc.mlog_enabled_flag_,
                           tc.debug_flag_},
-              arena2_{DArena::map(ArenaConfig().with_name("arena2-ref")
+              arena2_{DArena::map(ArenaConfig().with_name(flatstring("arena2-ref"))
                                   .with_size(tc.gc_size_ * tc.n_gen_)
                                   .with_store_header_flag(true))},
               gcos_{gcos_config_, &verify_stats_},

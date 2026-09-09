@@ -99,7 +99,7 @@ namespace xo {
              *  ArenaShim in VirtualSchematikaMachine.test.cpp.
              **/
             struct ArenaFixture {
-                explicit ArenaFixture(const std::string & name,
+                explicit ArenaFixture(const ArenaNameStr & name,
                                       std::size_t size = 16*1024)
                     : arena_(ArenaConfig().with_name(name).with_size(size)) {}
 
@@ -140,8 +140,9 @@ namespace xo {
                     (const char * label, std::uint32_t n_args,
                      std::uint32_t margin, const char * expect_pretty)
                 {
-                    ArenaFixture fx(std::string(label) + "."
-                                    + std::to_string(margin));
+                    auto tmp = ArenaNameStr::sprintf("%s.%ud", label, margin);
+
+                    ArenaFixture fx(tmp);
                     auto mm = fx.mm();
 
                     DLocalSymtab * symtab = DLocalSymtab::_make_empty(mm, nullptr,
@@ -240,7 +241,7 @@ namespace xo {
                     REHEARSE(rh, pretty == std::string(expect_pretty));
                 };
 
-                ArenaFixture fx("vsmframe");
+                ArenaFixture fx(flatstring("vsmframe"));
                 auto mm = fx.mm();
                 obj<AGCObject> no_parent;
 
@@ -371,7 +372,7 @@ namespace xo {
                     REHEARSE(rh, pretty == std::string(expect_pretty));
                 };
 
-                ArenaFixture fx("closure");
+                ArenaFixture fx(flatstring("closure"));
                 auto mm = fx.mm();
 
                 DLocalSymtab * symtab = DLocalSymtab::_make_empty(mm, nullptr, 2, 0);
@@ -464,7 +465,7 @@ namespace xo {
                     REHEARSE(rh, pretty == std::string(expect_pretty));
                 };
 
-                ArenaFixture fx("applyclosure");
+                ArenaFixture fx(flatstring("applyclosure"));
                 auto mm = fx.mm();
                 obj<AGCObject> no_parent;
 

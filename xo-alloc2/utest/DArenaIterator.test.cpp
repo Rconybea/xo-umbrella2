@@ -73,7 +73,7 @@ namespace xo {
 
             /* verify iteration over empty arena */
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_       = "testarena",
+            ArenaConfig cfg { .name_       = flatstring("testarena"),
                               .size_       = 64*1024,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
@@ -111,7 +111,7 @@ namespace xo {
 
             /* verify iteration over empty arena */
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_              = "testarena",
+            ArenaConfig cfg { .name_              = flatstring("testarena"),
                               .size_              = 64*1024,
                               .store_header_flag_ = true,
                               .debug_flag_        = false };
@@ -167,7 +167,7 @@ namespace xo {
         {
             auto log = Utest::ut_scope();
 
-            ArenaConfig cfg { .name_              = "testarena",
+            ArenaConfig cfg { .name_              = flatstring("testarena"),
                               .size_              = 64*1024,
                               .store_header_flag_ = true,
                               .debug_flag_        = false };

@@ -26,7 +26,7 @@ namespace xo {
 
         namespace {
             struct Fixture {
-                explicit Fixture(const std::string & testname,
+                explicit Fixture(const ArenaNameStr & testname,
                                  std::size_t aux_arena_size = 16 * 1024)
                     : aux_arena_(
                         ArenaConfig().with_name(testname).with_size(aux_arena_size))
@@ -63,7 +63,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
-            Fixture fixture(testname);
+            Fixture fixture(ArenaNameStr::from_cstr(testname.c_str()));
             {
                 // real purpose: ensure s_init sutvives static linking
                 REQUIRE(s_init.evidence());

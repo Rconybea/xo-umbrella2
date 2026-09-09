@@ -20,7 +20,7 @@ namespace xo {
     namespace scm {
         StringTable::StringTable(size_type hint_max_capacity,
                                  bool debug_flag)
-        : strings_{DArena::map(ArenaConfig{.name_ = "strings",
+        : strings_{DArena::map(ArenaConfig{.name_ = flatstring("strings"),
                                            .size_ = hint_max_capacity})},
           map_{"stringkeys", hint_max_capacity}
         {

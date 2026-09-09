@@ -30,7 +30,7 @@ namespace xo {
 
         TEST_CASE("DSimpleRcx-construct", "[procedure2][DSimpleRcx]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
 
             DArena arena = DArena::map(cfg);
@@ -47,7 +47,7 @@ namespace xo {
 
         TEST_CASE("DSimpleRcx-as-ARuntimeContext", "[procedure2][DSimpleRcx]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);

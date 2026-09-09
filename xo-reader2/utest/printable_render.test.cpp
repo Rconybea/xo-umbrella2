@@ -270,7 +270,7 @@ namespace xo {
             struct SsmFixture {
                 explicit SsmFixture(const std::string & testname)
                     : parser_arena_{ArenaConfig()
-                                    .with_name("printable_render." + testname)
+                                    .with_name(ArenaNameStr::concat("printable_render.", testname))
                                     .with_size(64 * 1024)
                                     .with_store_header_flag(true)},
                       gc_{X1CollectorConfig{
@@ -330,7 +330,7 @@ namespace xo {
             struct ParseFixture {
                 explicit ParseFixture(const std::string & testname) {
                     aux_arena_ = std::move(DArena(ArenaConfig()
-                                                  .with_name(testname)
+                                                  .with_name(ArenaNameStr::concat(testname))
                                                   .with_size(64 * 1024)
                                                   .with_store_header_flag(true)));
                     obj<AAllocator,DArena> aux_mm(&aux_arena_);

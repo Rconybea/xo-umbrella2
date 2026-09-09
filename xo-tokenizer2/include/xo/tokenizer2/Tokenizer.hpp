@@ -72,7 +72,7 @@ namespace xo {
              *  @p config     gives configuration for circular input buffer
              *  @p debug_flag enables tokenizer debug output
              **/
-            Tokenizer(const CircularBufferConfig & config = CircularBufferConfig{.name_ = "tkz-input",
+            Tokenizer(const CircularBufferConfig & config = CircularBufferConfig{.name_ = flatstring("tkz-input"),
                                                                                  .max_capacity_ = 4*1024,
                                                                                  .max_captured_span_ = 128},
                       bool debug_flag = false);

@@ -42,7 +42,7 @@ namespace xo {
 
         TEST_CASE("DArray-empty", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -59,7 +59,7 @@ namespace xo {
 
         TEST_CASE("DArray-push_back", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -85,7 +85,7 @@ namespace xo {
 
         TEST_CASE("DArray-push_back-multiple", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -112,7 +112,7 @@ namespace xo {
 
         TEST_CASE("DArray-push_back-overflow", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -139,7 +139,7 @@ namespace xo {
 
         TEST_CASE("DArray-at", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -168,7 +168,7 @@ namespace xo {
 
         TEST_CASE("DArray-array", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -191,7 +191,7 @@ namespace xo {
 
         TEST_CASE("DArray-array-empty", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -224,7 +224,7 @@ namespace xo {
          **/
         TEST_CASE("DArray-at-out-of-range", "[object2][DArray]")
         {
-            ArenaConfig cfg { .name_ = "atmsg", .size_ = 8*1024 };
+            ArenaConfig cfg { .name_ = flatstring("atmsg"), .size_ = 8*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 

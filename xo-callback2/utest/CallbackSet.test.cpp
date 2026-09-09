@@ -15,6 +15,7 @@ namespace ut {
     using xo::mm::ArenaConfig;
     using xo::facet::with_facet;
     using xo::facet::obj;
+    using xo::flatstring;
 
     namespace {
         using PlainSet = CallbackSet<void (*)(int)>;
@@ -52,7 +53,7 @@ namespace ut {
     static_assert(CallbackSet<obj<AAllocator>>::is_traced == true);
 
     TEST_CASE("cbset2-empty", "[callback2]") {
-        ArenaConfig cfg { .name_ = "cbset-arena", .size_ = 4*1024 };
+    ArenaConfig cfg { .name_ = flatstring("cbset-arena"), .size_ = 4*1024 };
         DArena arena = DArena::map(cfg);
         auto mm = with_facet<AAllocator>::mkobj(&arena);
 
@@ -69,7 +70,7 @@ namespace ut {
     TEST_CASE("cbset2-add-invoke", "[callback2]") {
         reset();
 
-        ArenaConfig cfg { .name_ = "cbset-arena", .size_ = 4*1024 };
+        ArenaConfig cfg { .name_ = flatstring("cbset-arena"), .size_ = 4*1024 };
         DArena arena = DArena::map(cfg);
         auto mm = with_facet<AAllocator>::mkobj(&arena);
 
@@ -93,7 +94,7 @@ namespace ut {
     TEST_CASE("cbset2-remove", "[callback2]") {
         reset();
 
-        ArenaConfig cfg { .name_ = "cbset-arena", .size_ = 4*1024 };
+        ArenaConfig cfg { .name_ = flatstring("cbset-arena"), .size_ = 4*1024 };
         DArena arena = DArena::map(cfg);
         auto mm = with_facet<AAllocator>::mkobj(&arena);
 
@@ -115,7 +116,7 @@ namespace ut {
     }
 
     TEST_CASE("cbset2-full", "[callback2]") {
-        ArenaConfig cfg { .name_ = "cbset-arena", .size_ = 4*1024 };
+    ArenaConfig cfg { .name_ = flatstring("cbset-arena"), .size_ = 4*1024 };
         DArena arena = DArena::map(cfg);
         auto mm = with_facet<AAllocator>::mkobj(&arena);
 
@@ -133,7 +134,7 @@ namespace ut {
     TEST_CASE("cbset2-copy-grow", "[callback2]") {
         reset();
 
-        ArenaConfig cfg { .name_ = "cbset-arena", .size_ = 8*1024 };
+        ArenaConfig cfg { .name_ = flatstring("cbset-arena"), .size_ = 8*1024 };
         DArena arena = DArena::map(cfg);
         auto mm = with_facet<AAllocator>::mkobj(&arena);
 
@@ -161,7 +162,7 @@ namespace ut {
     TEST_CASE("cbset2-reentrant-remove", "[callback2]") {
         reset();
 
-        ArenaConfig cfg { .name_ = "cbset-arena", .size_ = 4*1024 };
+        ArenaConfig cfg { .name_ = flatstring("cbset-arena"), .size_ = 4*1024 };
         DArena arena = DArena::map(cfg);
         auto mm = with_facet<AAllocator>::mkobj(&arena);
 
@@ -194,7 +195,7 @@ namespace ut {
     TEST_CASE("cbset2-reentrant-add", "[callback2]") {
         reset();
 
-        ArenaConfig cfg { .name_ = "cbset-arena", .size_ = 4*1024 };
+        ArenaConfig cfg { .name_ = flatstring("cbset-arena"), .size_ = 4*1024 };
         DArena arena = DArena::map(cfg);
         auto mm = with_facet<AAllocator>::mkobj(&arena);
 

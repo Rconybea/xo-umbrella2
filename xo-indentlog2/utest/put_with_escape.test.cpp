@@ -19,13 +19,14 @@ namespace ut {
     using xo::pp::PpConfig;
     using xo::pp::Escape;
     using xo::mm::ArenaConfig;
+    using xo::flatstring;
     using std::string;
     using std::string_view;
 
     namespace {
         PpConfig
         escape_test_config(std::uint32_t soft_right_margin) {
-            ArenaConfig logbuf_cfg { .name_ = "utest.put_with_escape",
+            ArenaConfig logbuf_cfg { .name_ = flatstring("utest.put_with_escape"),
                                      .size_ = 256*1024 };
 
             PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg);

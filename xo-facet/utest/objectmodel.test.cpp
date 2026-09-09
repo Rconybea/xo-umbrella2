@@ -579,9 +579,9 @@ namespace xo {
             using xo::facet::DObjectHandle;
 
             FacetAppcx & facet_appcx = FacetUtestAppcx::appcx().cx<S_facet_tag>();
-            ArenaConfig storage_cfg{ .name_ = "utest.oh.storage", .size_ = 16*1024 };
-            ArenaConfig strong_cfg { .name_ = "utest.oh.strong",  .size_ =  4*1024 };
-            ArenaConfig weak_cfg   { .name_ = "utest.oh.weak",    .size_ =  4*1024 };
+            ArenaConfig storage_cfg{ .name_ = flatstring("utest.oh.storage"), .size_ = 16*1024 };
+            ArenaConfig strong_cfg { .name_ = flatstring("utest.oh.strong"),  .size_ =  4*1024 };
+            ArenaConfig weak_cfg   { .name_ = flatstring("utest.oh.weak"),    .size_ =  4*1024 };
 
             rp<AllocFlywheel> fw = AllocFlywheel::make_app(facet_appcx, storage_cfg, strong_cfg, weak_cfg);
 

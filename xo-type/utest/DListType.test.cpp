@@ -27,7 +27,7 @@ namespace xo {
 
         TEST_CASE("DListType-make", "[type][DListType]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = obj<AAllocator,DArena>(&arena);

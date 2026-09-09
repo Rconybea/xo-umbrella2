@@ -121,7 +121,7 @@ namespace xo {
 
         TEST_CASE("DObjectEvent-ctor", "[reactor2][DObjectEvent]")
         {
-            ArenaConfig cfg { .name_ = "testarena", .size_ = 4*1024 };
+            ArenaConfig cfg { .name_ = flatstring("testarena"), .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
@@ -157,7 +157,9 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
                     const Testcase_Render & tc = s_testcase_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "testarena." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("testarena.%ld", i_tc);
+
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 4*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);

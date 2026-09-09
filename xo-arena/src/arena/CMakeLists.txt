@@ -24,12 +24,15 @@ xo_install_include_tree3(include/xo/arena)
 # ----------------------------------------------------------------
 # input dependencies
 #
-# NOTE: dependency set here must be kept consistent with
-#       xo-arena/cmake/xo_arenaConfig.cmake.in
+# NB find_dependency() calls in xo_arenaConfig.cmake.in are GENERATED from the
+# xo_deps property these calls build up (@XO_FIND_DEPENDENCY_BLOCK@), so the
+# two cannot drift -- nothing to keep in step by hand.
 
 xo_dependency(${SELF_LIB} subsys)
 xo_dependency(${SELF_LIB} xo_reflectutil)
 xo_dependency(${SELF_LIB} xo_ppsink)
+# header-only (xo_add_headeronly_library), so no link edge -- include path only
+xo_headeronly_dependency(${SELF_LIB} xo_flatstring)
 
 if (NOT APPLE)
 xo_external_pkgconfig_dependency(${SELF_LIB} LIBUNWIND libunwind-generic)

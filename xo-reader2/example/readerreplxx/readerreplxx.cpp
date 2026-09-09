@@ -74,6 +74,8 @@ namespace {
      */
     using xo::pp::xtag;
     using xo::pp::scope;
+    using xo::flatstring;
+
     using std::cout;
     using std::endl;
 
@@ -158,7 +160,7 @@ struct AppConfig {
     std::string repl_history_fname_ = "repl_history.txt";;
     ReaderConfig rdr_config_;
     X1CollectorConfig x1_config_ = (X1CollectorConfig().with_name("gc").with_size(4*1024*1024));
-    ArenaConfig fixed_config_ = (ArenaConfig().with_name("fixed").with_size(4*1024));
+    ArenaConfig fixed_config_ = (ArenaConfig().with_name(flatstring("fixed")).with_size(4*1024));
 };
 
 struct AppContext {

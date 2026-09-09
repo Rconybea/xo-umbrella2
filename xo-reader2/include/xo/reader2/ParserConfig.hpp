@@ -18,7 +18,7 @@ namespace xo {
             using ArenaConfig = xo::mm::ArenaConfig;
 
             /** arena configuration for parser stack **/
-            ArenaConfig parser_arena_config_ { .name_ = "parser-arena",
+            ArenaConfig parser_arena_config_ { .name_ = flatstring("parser-arena"),
                                                .size_ = 2*1024*1024,
                                                .hugepage_z_ = 2*1024*1024,
                                                .store_header_flag_ = true,

@@ -29,15 +29,17 @@ namespace xo {
                         return power_abbrev_type::from_chars("");
                     } else {
                         /* e.g. "^-1", "^2" */
-                        return (power_abbrev_type::from_flatstring
-                                (flatstring_concat(flatstring("^"),
-                                                   power_abbrev_type::from_int(power.num()))));
+                        return power_abbrev_type::concat("^",
+                                                         power_abbrev_type::from_int(power.num()));
+
+                        // clean, but not constexpr
+                        //return power_abbrev_type::sprintf("^%ld", power.num());
                     }
                 } else {
                     /* e.g. "^1/2", "^-1/2" */
-                    return (power_abbrev_type::from_flatstring
-                            (flatstring_concat(flatstring("^"),
-                                               power.to_str<power_abbrev_type::fixed_capacity>())));
+                    return power_abbrev_type::concat
+                               ("^",
+                                power.to_str<power_abbrev_type::fixed_capacity>());
                 }
             }
 
@@ -47,10 +49,9 @@ namespace xo {
                        const scalefactor_ratio_type & scalefactor,
                        const power_ratio_type & power)
             {
-                return (bpu_abbrev_type::from_flatstring
-                        (flatstring_concat
-                         (bu_abbrev(basis_unit(native_dim, scalefactor)),
-                          flatstring_from_exponent(power))));
+                return bpu_abbrev_type::concat
+                           (bu_abbrev(basis_unit(native_dim, scalefactor)),
+                            flatstring_from_exponent(power));
             }
             ///@}
         }

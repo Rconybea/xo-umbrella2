@@ -11,6 +11,7 @@
 
 namespace xo {
     using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
     using std::max;
     using std::min;
 
@@ -18,14 +19,14 @@ namespace xo {
         PpState::PpState(const PpLayoutConfig & layout)
             : layout_config_{layout},
               tk_buffer_{DArena::map(ArenaConfig()
-                                     .with_name("pp-tk-buffer")
+                                     .with_name(ArenaNameStr::from_chars("pp-tk-buffer"))
                                      .with_size((sizeof(PpStringToken) + 18)
                                                 * layout.hard_right_margin()))},
               scan_stack_{ScanStack::map(ArenaConfig()
-                                         .with_name("pp-scan-stack")
+                                         .with_name(ArenaNameStr::from_chars("pp-scan-stack"))
                                          .with_size(layout.hard_max_nesting()))},
               print_stack_{PrintStack::map(ArenaConfig()
-                                           .with_name("pp-print-stack")
+                                           .with_name(ArenaNameStr::from_chars("pp-print-stack"))
                                            .with_size(layout.hard_max_nesting()))}
         {
             // We reserve virtual memmory for worst-case tk_buffer size.

@@ -87,7 +87,7 @@ namespace xo {
 
         TEST_CASE("DX1Collector-1", "[alloc2][gc][DX1Collector]")
         {
-            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+            ArenaConfig arena_cfg = { .name_ = flatstring("_test_unused"),
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
                                       .header_ = AllocHeaderConfig(0 /*guard_z*/,
@@ -147,7 +147,7 @@ namespace xo {
 
         TEST_CASE("collector-x1-obj", "[alloc2][gc]")
         {
-            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+            ArenaConfig arena_cfg = { .name_ = flatstring("_test_unused"),
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
                                       .header_ = AllocHeaderConfig(0 /*guard_z*/,
@@ -183,7 +183,7 @@ namespace xo {
 
         TEST_CASE("collector-x1-facet-mkobj", "[alloc2][gc]")
         {
-            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+            ArenaConfig arena_cfg = { .name_ = flatstring("_test_unused"),
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
                                       .header_ = AllocHeaderConfig(0 /*guard_z*/,
@@ -229,7 +229,7 @@ namespace xo {
             static_assert(c_max_alloc > 0);
             static_assert(c_max_alloc_payload < c_max_alloc);
 
-            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+            ArenaConfig arena_cfg = { .name_ = flatstring("_test_unused"),
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
                                       .header_ = AllocHeaderConfig(0 /*guard_z*/,
@@ -290,7 +290,7 @@ namespace xo {
             constexpr uint32_t c_max_alloc_payload = c_max_alloc - 32;
 
             ArenaConfig arena_cfg = {
-                .name_ = "_test_unused",
+                .name_ = flatstring("_test_unused"),
                 .size_ = c_reserved_z,
                 .store_header_flag_ = true,
                 .header_ = AllocHeaderConfig(8    /*guard_z*/,

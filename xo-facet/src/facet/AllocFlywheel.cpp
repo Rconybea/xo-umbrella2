@@ -38,9 +38,9 @@ namespace xo::mm {
     rp<AllocFlywheel>
     AllocFlywheel::make_default_app(const FacetAppcx & appcx)
     {
-        ArenaConfig store_cfg = ArenaConfig().with_name("store").with_size(256 * 1024);
-        ArenaConfig strong_cfg = ArenaConfig().with_name("strong").with_size(4 * 1024);
-        ArenaConfig weak_cfg = ArenaConfig().with_name("weak").with_size(4 * 1024);
+        ArenaConfig store_cfg = ArenaConfig().with_name(ArenaNameStr::from_chars("store")).with_size(256 * 1024);
+        ArenaConfig strong_cfg = ArenaConfig().with_name(ArenaNameStr::from_chars("strong")).with_size(4 * 1024);
+        ArenaConfig weak_cfg = ArenaConfig().with_name(ArenaNameStr::from_chars("weak")).with_size(4 * 1024);
 
         return make_app(appcx,
                         store_cfg,

@@ -47,6 +47,7 @@ main()
     using namespace xo::scm;
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
+    using xo::flatstring;
     using namespace std;
 
     using span_type = xo::scm::span<const char>;
@@ -66,7 +67,8 @@ main()
     span_type input;
     std::size_t parser_stack_size = 0;
 
-    PpConfig sink_cfg = (PpConfig().with_logbuf_name("exprreplsink").with_logbuf_size(1024 * 1024));
+    PpConfig sink_cfg = (PpConfig().with_logbuf_name
+                             (flatstring("exprreplsink")).with_logbuf_size(1024 * 1024));
     PrettySink sink(sink_cfg, cout.rdbuf());
 
     while (repl_getline(interactive, parser_stack_size, cin, cout, input_str)) {

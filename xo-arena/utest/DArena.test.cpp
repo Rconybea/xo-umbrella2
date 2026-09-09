@@ -13,6 +13,7 @@ namespace xo {
     using xo::mm::AllocHeader;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
     using xo::mm::padding;
     using xo::mm::error;
     using xo::reflect::typeseq;
@@ -22,7 +23,7 @@ namespace xo {
     namespace ut {
         TEST_CASE("DArena-tiny", "[arena][DArena]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_chars("testarena"),
                               .size_ = 1 };
             DArena arena = DArena::map(cfg);
 
@@ -65,7 +66,7 @@ namespace xo {
 
         TEST_CASE("DArena-medium", "[arena][DArena]")
         {
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_chars("testarena"),
                               .size_ = 10*1024*1024 };
             DArena arena = DArena::map(cfg);
 
@@ -109,7 +110,7 @@ namespace xo {
         TEST_CASE("DArena-expand-1", "[arena][DArena]")
         {
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 1,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
@@ -136,7 +137,7 @@ namespace xo {
         TEST_CASE("arena-alloc-1", "[arena][DArena]")
         {
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 64*1024,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
@@ -176,7 +177,7 @@ namespace xo {
             using header_type = AllocHeader;
 
             /* typed allocator a1o, with object header */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = ArenaNameStr::from_cstr("testarena"),
                               .size_ = 64*1024,
                               .store_header_flag_ = true,
                               /* up to 4GB */

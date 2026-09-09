@@ -510,6 +510,168 @@ namespace xo {
             REQUIRE(std::string(dest.c_str()) == "cdefg");
         }
 
+
+        TEST_CASE("flatstring_append_cstr_count", "[flatstring][append]") {
+            /* Same shape of bug as flatstring_append_flatstring_repeated, in
+             * the sibling overload, which never got the same treatment:
+             * append(cstr, count) bounded the DESTINATION index z+i by
+             * std::min(N-1, count), where count is a SOURCE length.  Onto a
+             * non-empty destination that stops after count - z characters,
+             * silently dropping the rest.  z == 0 hides it, which is the only
+             * case the 1-arg coverage above exercises.
+             */
+            flatstring<32> s;
+
+            s.append("abc", 3);
+            REQUIRE(std::string(s.c_str()) == "abc");
+
+            /* the append that used to under-copy: z == 3, count == 5 */
+            s.append("defgh", 5);
+            REQUIRE(s.size() == 8);
+            REQUIRE(std::string(s.c_str()) == "abcdefgh");
+        }
+
+        TEST_CASE("flatstring_append_cstr_count_truncates", "[flatstring][append]") {
+            /* capacity 8 => 7 chars; the fix must not lose the truncation */
+            flatstring<8> s;
+
+            s.append("abc", 3);
+            s.append("defghijkl", 9);
+
+            REQUIRE(s.size() == 7);
+            REQUIRE(std::string(s.c_str()) == "abcdefg");
+        }
+
+
+        TEST_CASE("flatstring_ctor_from_smaller_flatstring", "[flatstring][ctor]") {
+            /* The converting ctor copies N2 chars into an N-char buffer, so
+             * value_[N2 .. N) has to be zeroed.  Left indeterminate, size()
+             * scans past the copied text into garbage, and any constexpr use is
+             * ill-formed: "refers to an incompletely initialized variable".
+             * Asserted at compile time because the runtime symptom is UB and
+             * can pass by luck on a zeroed stack.
+             */
+            constexpr flatstring<8> src("abcdefg");
+            constexpr flatstring<32> dest(src);
+
+            static_assert(dest.size() == 7);
+
+            REQUIRE(dest.size() == 7);
+            REQUIRE(std::string(dest.c_str()) == "abcdefg");
+        }
+
+
+        TEST_CASE("flatstring_concat", "[flatstring][concat]") {
+            /* the named-ctor form: result type is fixed by the class, so this
+             * truncates at capacity() rather than summing capacities the way
+             * the free flatstring_concat() does
+             */
+            using name_type = flatstring<32>;
+
+            /* from_chars, not the ctor: flatstring(const char(&)[N]) still
+             * requires an exactly-sized array
+             */
+            const name_type name = name_type::from_chars("hashmap");
+
+            REQUIRE(std::string(name_type::concat(name, "-ctl").c_str()) == "hashmap-ctl");
+        }
+
+        TEST_CASE("flatstring_concat_mixed_sources", "[flatstring][concat]") {
+            const std::string a("alpha");
+            const std::string_view b("beta");
+            const flatstring<8> c = flatstring<8>::from_chars("gamma");
+
+            const auto s = flatstring<32>::concat(a, "-", b, "-", c);
+
+            REQUIRE(std::string(s.c_str()) == "alpha-beta-gamma");
+        }
+
+        TEST_CASE("flatstring_concat_truncates", "[flatstring][concat]") {
+            /* capacity 8 => 7 chars */
+            const auto s = flatstring<8>::concat("abcde", "fghij");
+
+            REQUIRE(s.size() == 7);
+            REQUIRE(std::string(s.c_str()) == "abcdefg");
+        }
+
+        TEST_CASE("flatstring_concat_empty", "[flatstring][concat]") {
+            /* nullary: the only fold here is over comma, so an empty pack is
+             * well-formed -- unlike the arithmetic fold in flatstring_concat()
+             */
+            const auto s = flatstring<8>::concat();
+
+            REQUIRE(s.empty());
+            REQUIRE(s.size() == 0);
+        }
+
+        TEST_CASE("flatstring_concat_constexpr", "[flatstring][concat]") {
+            constexpr auto s = flatstring<16>::concat(flatstring<8>("abcdefg"), "-x");
+
+            static_assert(s.size() == 9);
+
+            REQUIRE(std::string(s.c_str()) == "abcdefg-x");
+        }
+
+
+        TEST_CASE("flatstring_from_int_large_N", "[flatstring][from_int]") {
+            /* from_int's scratch buffer is a fixed 64 bytes, but it zero-filled
+             * N of them, so flatstring<128>::from_int() wrote 128 bytes into
+             * char buf[64].  ASan: "stack-buffer-overflow, WRITE of size 128".
+             * Asserted at compile time because that is deterministic -- gcc's
+             * own -Wstringop-overflow only fires at the instantiation, so
+             * nothing sees it until someone picks a large N.
+             */
+            constexpr auto s = flatstring<128>::from_int(12345);
+
+            static_assert(s.size() == 5);
+
+            REQUIRE(std::string(s.c_str()) == "12345");
+        }
+
+        TEST_CASE("flatstring_from_int_truncates", "[flatstring][from_int]") {
+            /* The other end of the same function: copy_n(buf+i, buf_z-i, retv)
+             * bounded the copy by the DIGIT COUNT and not by N, so an integer
+             * too long for the target overran retv[N].  ASan: "WRITE of size 7"
+             * into a 4-byte buffer.  Truncating at capacity() matches append()
+             * and concat().
+             */
+            constexpr auto s = flatstring<4>::from_int(123456);
+
+            static_assert(s.size() == 3);
+
+            REQUIRE(std::string(s.c_str()) == "123");
+        }
+
+
+        TEST_CASE("flatstring_from_sprintf", "[flatstring][from_sprintf]") {
+            const auto s = flatstring<16>::sprintf("%d-%s", 42, "xy");
+
+            REQUIRE(s.size() == 5);
+            REQUIRE(std::string(s.c_str()) == "42-xy");
+        }
+
+        TEST_CASE("flatstring_from_sprintf_short_into_large", "[flatstring][from_sprintf]") {
+            /* THE invariant guard.  size() scans BACKWARD from value_[N-1] for
+             * the last non-null (see last()), so the whole tail must be zero --
+             * a lone terminator is not enough.  vsnprintf writes only up to its
+             * own null and leaves the rest of the buffer untouched, so this
+             * only works because the flatstring is zero-filled first.  Drop
+             * that and size() reports the buffer's stale tail instead of 1.
+             */
+            const auto s = flatstring<64>::sprintf("%d", 7);
+
+            REQUIRE(s.size() == 1);
+            REQUIRE(std::string(s.c_str()) == "7");
+        }
+
+        TEST_CASE("flatstring_from_sprintf_truncates", "[flatstring][from_sprintf]") {
+            /* capacity 8 => 7 chars, matching append()/concat()/from_int() */
+            const auto s = flatstring<8>::sprintf("%s", "abcdefghij");
+
+            REQUIRE(s.size() == 7);
+            REQUIRE(std::string(s.c_str()) == "abcdefg");
+        }
+
     } /*namespace ut*/
 } /*namespace xo*/
 

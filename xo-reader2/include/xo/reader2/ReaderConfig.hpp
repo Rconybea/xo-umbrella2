@@ -22,7 +22,7 @@ namespace xo {
             using size_t = std::size_t;
 
             /** tokenizer circular buffer config **/
-            CircularBufferConfig tk_buffer_config_ {.name_ = "tk-buffer",
+            CircularBufferConfig tk_buffer_config_ {.name_ = flatstring("tk-buffer"),
                                                     .max_capacity_ = 2*1024*1024,
                                                     .hugepage_z_ = 2*1024*1024,
                                                     .threshold_move_efficiency_ = 50.0,
@@ -31,7 +31,7 @@ namespace xo {
             bool tk_debug_flag_ = false;
 
             /** arena configuration for parser stack **/
-            ArenaConfig parser_arena_config_ { .name_ = "parser-arena",
+            ArenaConfig parser_arena_config_ { .name_ = flatstring("parser-arena"),
                                                .size_ = 2*1024*1024,
                                                .hugepage_z_ = 2*1024*1024,
                                                .store_header_flag_ = false,

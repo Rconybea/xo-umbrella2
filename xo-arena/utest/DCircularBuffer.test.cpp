@@ -18,7 +18,7 @@ namespace xo {
         {
             // buffer works with bytes, not chars
 
-            CircularBufferConfig cfg { .name_ = "testcbuf",
+            CircularBufferConfig cfg { .name_ = flatstring("testcbuf"),
                                        .max_capacity_ = 1 };
             DCircularBuffer buf = DCircularBuffer::map(cfg);
 

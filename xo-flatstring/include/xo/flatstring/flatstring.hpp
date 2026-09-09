@@ -6,8 +6,11 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdarg>
+#include <cstdio>
 #include <memory>
 #include <sstream>
+#include <string>
 #include <string_view>
 
 namespace xo {
@@ -166,6 +169,18 @@ namespace xo {
         constexpr flatstring(const char (&str)[N]) noexcept {
             std::copy_n(str, N, value_);
         }
+
+        /** @brief create string literal from a flatstring, as long as it's not larger **/
+        template <std::size_t N2>
+        requires (N2 <= N)
+        constexpr flatstring(const flatstring<N2> & str) noexcept {
+            std::copy_n(str.c_str(), N2, value_);
+            /* value_[N2..N) is otherwise indeterminate -- size() would scan
+             * past the copied text, and constexpr use would be ill-formed
+             */
+            std::fill_n(value_ + N2, N - N2, '\0');
+        }
+
         ///@}
 
         /** @brief construct from another flatstring **/
@@ -173,7 +188,7 @@ namespace xo {
         static constexpr flatstring from_flatstring(const flatstring<N2> & str) noexcept {
             flatstring retval;
 
-            retval.assign(str);
+            retval.assign(str.c_str());
 
             return retval;
         }
@@ -184,6 +199,78 @@ namespace xo {
             flatstring retval;
 
             retval.assign(str);
+
+            return retval;
+        }
+
+        /** @brief construct from const char* **/
+        static constexpr flatstring from_cstr(const char * str) noexcept {
+            flatstring retval;
+
+            retval.assign(str);
+
+            return retval;
+        }
+
+        /** @brief construct by concatenating string-like arguments
+         *
+         *  Accepts any mix of @c flatstring<N2>, string literals, @c const @c char *,
+         *  @c std::string_view and @c std::string.
+         *
+         *  The result type is fixed at @c flatstring<N>, so contents are
+         *  truncated at @c capacity() the same way @ref append does.
+         *
+         *  Example:
+         *  @code
+         *    using NameStr = flatstring<32>;
+         *    auto ctl = NameStr::concat(name, "-ctl");
+         *  @endcode
+         **/
+        template <typename... Ts>
+        static constexpr flatstring concat(Ts && ... args) noexcept {
+            flatstring retval;
+
+            (retval.append_string_view(args), ...);
+
+            return retval;
+        }
+
+        /** @brief construct from a printf-style format string
+         *
+         *  NB the only named constructor here that is NOT constexpr: vsnprintf
+         *  is a runtime function.  (@ref from_int hand-rolls digit conversion
+         *  precisely to avoid that.)  Use it for diagnostics, not for anything
+         *  that has to survive into a constant expression.
+         *
+         *  Truncates at @c capacity(), like @ref append and @ref concat.
+         *
+         *  NB C-style varargs rather than a parameter pack, deliberately: the
+         *  arguments end up in vsnprintf either way, so a pack buys no type
+         *  safety -- it only forfeits the format attribute below, and with it
+         *  every -Wformat diagnostic.  Note flatstring's own
+         *  @c operator @c const @c char * does NOT apply through varargs, so
+         *  passing a flatstring to %s is an error the attribute now catches.
+         *
+         *  Example:
+         *  @code
+         *    auto s = flatstring<16>::sprintf("%d-%s", 42, "xy");
+         *  @endcode
+         **/
+        __attribute__((format(printf, 1, 2)))
+        static flatstring sprintf(const char * fmt, ...) noexcept {
+            /* zero-fills all N -- required, because size() scans backward from
+             * value_[N-1] for the last non-null, while vsnprintf writes only up
+             * to its own terminator and leaves the rest of the buffer alone
+             */
+            flatstring retval;
+
+            std::va_list ap;
+            va_start(ap, fmt);
+            /* writes at most N-1 chars plus the terminator;
+             * return value (length we would have needed) discarded here
+             */
+            std::vsnprintf(retval.value_, N, fmt, ap);
+            va_end(ap);
 
             return retval;
         }
@@ -201,7 +288,8 @@ namespace xo {
             bool negative_flag = (x < 0);
             std::size_t i = buf_z;
             char buf[buf_z];
-            std::fill_n(buf, N, '\0');
+            /* buf_z, not N: this buffer is buf_z bytes regardless of N */
+            std::fill_n(buf, buf_z, '\0');
 
             if (negative_flag)
                 x = -x;
@@ -221,7 +309,11 @@ namespace xo {
 
             char retv[N];
             std::fill_n(retv, N, '\0');
-            std::copy_n(buf + i, buf_z - i, retv);
+            /* bound by the DESTINATION as well as the digit count: an integer
+             * too long for flatstring<N> truncates at capacity(), the way
+             * append() and concat() do, rather than overrunning retv
+             */
+            std::copy_n(buf + i, std::min(buf_z - i, N - 1), retv);
 
             return retv;
         }
@@ -391,7 +483,13 @@ namespace xo {
         constexpr flatstring & append(const value_type * cstr, size_type count) {
             std::size_t z = this->size();
             std::size_t i = 0;
-            for (; z+i < std::min(N-1, count); ++i)
+            /* NB two separate bounds: count is a SOURCE length, N-1 a
+             * DESTINATION capacity.  Folding them into min(N-1, count) and
+             * testing z+i against it stops after count-z chars whenever the
+             * destination is non-empty.  Same bug as append(flatstring,pos,count)
+             * below, which already carries the corresponding note.
+             */
+            for (; (i < count) && (z+i < N-1); ++i)
                 value_[z+i] = cstr[i];
             for (; z+i < N; ++i)
                 value_[z+i] = '\0';
@@ -471,6 +569,22 @@ namespace xo {
         ///@}
 
     private:
+        /** @brief append the contents of @p sv.
+         *
+         *  The implicit conversion to @c std::string_view is what lets
+         *  @ref concat take a mix of flatstring, string literal,
+         *  @c const @c char *, @c std::string and @c std::string_view without
+         *  an overload set of its own.
+         *
+         *  Note not spelled append(std::string_view); that would
+         *  join the append() overload set and make append(some_flatstring)
+         *  ambiguous, since flatstring converts to @c std::string_view and to
+         *  @c const @c char * equally well.
+         **/
+        constexpr flatstring & append_string_view(std::string_view sv) noexcept {
+            return this->append(sv.data(), sv.size());
+        }
+
         constexpr value_type & at_aux(size_type pos) {
             if (pos >= N) {
 #ifdef NOT_USING

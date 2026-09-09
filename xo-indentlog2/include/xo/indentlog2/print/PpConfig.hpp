@@ -59,6 +59,7 @@ namespace xo {
         class PpLogbufConfig {
         public:
             using ArenaConfig = xo::mm::ArenaConfig;
+            using ArenaNameStr = xo::mm::ArenaNameStr;
 
         public:
             PpLogbufConfig() = default;
@@ -70,7 +71,7 @@ namespace xo {
             PpLogbufConfig with_logbuf_config(const ArenaConfig & x);
             PpLogbufConfig with_logbuf_debug_flag(bool x);
 
-            PpLogbufConfig with_name(const std::string & name);
+            PpLogbufConfig with_name(const ArenaNameStr & name);
 
             friend class PpConfig;
 
@@ -87,6 +88,7 @@ namespace xo {
         class PpConfig {
         public:
             using ArenaConfig = xo::mm::ArenaConfig;
+            using ArenaNameStr = xo::mm::ArenaNameStr;
             using size_t = std::size_t;
             using uint32_t = std::uint32_t;
 
@@ -123,7 +125,7 @@ namespace xo {
 
             /** hard max arena size **/
             PpConfig with_logbuf_size(size_t);
-            PpConfig with_logbuf_name(const std::string & x);
+            PpConfig with_logbuf_name(const ArenaNameStr & x);
 
         private:
             /** configuration for layout (no color) **/

@@ -68,10 +68,9 @@ namespace xo {
         MutationLogStore::_make_mlog(uint32_t igen, char tag_char,
                                      size_t mlog_z, size_t page_z) -> MutationLog
         {
-            char buf[40];
-            snprintf(buf, sizeof(buf), "x1-mlog-G%u-%c", igen, tag_char);
+            auto buf = ArenaNameStr::sprintf("x1-mlog-G%u-%c", igen, tag_char);
 
-            return MutationLog::map(ArenaConfig{.name_ = std::string(buf),
+            return MutationLog::map(ArenaConfig{.name_ = buf,
                                                 .size_ = mlog_z,
                                                 .hugepage_z_ = page_z,
                                                 .store_header_flag_ = false});

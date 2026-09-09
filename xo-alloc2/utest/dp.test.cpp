@@ -84,7 +84,8 @@ namespace xo {
         {
             auto log = Utest::ut_scope();
 
-            ArenaConfig cfg { .name_ = "testarena", .size_ = 1024 };
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
+                              .size_ = 1024 };
             DArena arena = DArena::map(cfg);
             //auto mm = obj<AAllocator,DArena>(&arena);
 

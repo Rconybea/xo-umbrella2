@@ -30,7 +30,7 @@ namespace xo::mm {
         if (!s_local) {
             ArenaConfig cfg
                 = (ArenaConfig()
-                   .with_name("scratch")
+                   .with_name(ArenaNameStr::from_chars("scratch"))
                    .with_size(s_cap));
 
             s_local.reset(new DArena(cfg));

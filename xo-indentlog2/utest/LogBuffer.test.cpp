@@ -16,6 +16,7 @@ namespace ut {
     using xo::LogBuffer;
     using xo::mm::ArenaConfig;
     using xo::UtestRehearser;
+    using xo::flatstring;
     using std::vector;
     using std::size_t;
 
@@ -73,7 +74,7 @@ namespace ut {
     logbuffer_test_fn(const TestCase_LogBuffer & tc,
                       UtestRehearser * p_rh)
     {
-        ArenaConfig cfg { .name_ = "utest.LogBuffer",
+        ArenaConfig cfg { .name_ = flatstring("utest.LogBuffer"),
                           .size_ = 64*1024 };
 
         LogBuffer buf(cfg, p_rh->enable_debug());
@@ -143,7 +144,8 @@ namespace ut {
      **/
     TEST_CASE("LogBuffer-drain", "[LogBuffer]")
     {
-        ArenaConfig cfg { .name_ = "utest.LogBuffer.drain", .size_ = 64*1024 };
+        ArenaConfig cfg { .name_ = flatstring("utest.LogBuffer.drain"),
+                          .size_ = 64*1024 };
 
         auto wr = [](LogBuffer & b, const char * s) {
             b.write_span(LogBuffer::ConstSpan::from_cstr(s));

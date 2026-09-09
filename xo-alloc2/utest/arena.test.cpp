@@ -46,7 +46,7 @@ namespace xo {
         {
             auto log = Utest::ut_scope();
 
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 10*1024*1024 };
             DArena arena = DArena::map(cfg);
 
@@ -99,7 +99,7 @@ namespace xo {
             REQUIRE(alloc1.data() == nullptr);
 
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 1 };
             DArena arena = DArena::map(cfg);
             //obj<AAllocator, DArena> a1o{&arena};
@@ -133,7 +133,7 @@ namespace xo {
             auto log = Utest::ut_scope();
 
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 1,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
@@ -173,7 +173,7 @@ namespace xo {
             auto log = Utest::ut_scope();
 
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 64*1024,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
@@ -224,7 +224,7 @@ namespace xo {
             using header_type = AllocHeader;
 
             /* typed allocator a1o, with object header */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 64*1024,
                               .store_header_flag_ = true,
                               /* up to 4GB */
@@ -312,7 +312,7 @@ namespace xo {
             using header_type = AllocHeader;
 
             /* typed allocator a1o, with object header + guard bytes */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 64*1024,
                               .store_header_flag_ = true,
                               /* up to 4GB */
@@ -382,7 +382,7 @@ namespace xo {
             auto log = Utest::ut_scope();
 
             /* typed allocator a1o */
-            ArenaConfig cfg { .name_ = "testarena",
+            ArenaConfig cfg { .name_ = flatstring("testarena"),
                               .size_ = 64*1024,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);

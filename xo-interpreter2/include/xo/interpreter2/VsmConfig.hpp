@@ -62,11 +62,11 @@ namespace xo {
             /** Configuration for handful of non-moveable high-level objects
              *  e.g. DArenaHashMap in global symtab
              **/
-            ArenaConfig fixed_config_ = ArenaConfig().with_name("fixed").with_size(4*1024);
+            ArenaConfig fixed_config_ = ArenaConfig().with_name(flatstring("fixed")).with_size(4*1024);
             /** Configuration for error allocator
              *  TODO: may want to make ArenaConfig polymorphic
              **/
-            ArenaConfig error_config_ = ArenaConfig().with_name("error-reserve").with_size(64*1024);
+            ArenaConfig error_config_ = ArenaConfig().with_name(flatstring("error-reserve")).with_size(64*1024);
         };
     } /*namespace scm*/
 } /*namespace xo*/

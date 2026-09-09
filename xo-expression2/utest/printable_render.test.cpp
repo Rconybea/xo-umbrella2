@@ -97,12 +97,13 @@ namespace xo {
     using xo::facet::with_facet;
     using xo::map::ArenaHashMapConfig;
     using xo::reflect::Reflect;
+    using xo::flatstring;
+    using xo::pp::PpConfig;
+    using xo::pp::toppstr;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
     namespace ut {
-        using xo::pp::PpConfig;
-        using xo::pp::toppstr;
-        using xo::pp::scope;
-        using xo::pp::xtag;
 
         /** DVariable's APrintable facet is registered by SetupExpression2; the
          *  TypeRef cases do not need this, but obj<APrintable,DVariable> does.
@@ -691,7 +692,7 @@ namespace xo {
 
                 DX1Collector gc_;
                 /** non-GC memory for the symbol table's hash maps **/
-                DArena aux_ = DArena::map(ArenaConfig{ .name_ = "printable_render.aux",
+                DArena aux_ = DArena::map(ArenaConfig{ .name_ = flatstring("printable_render.aux"),
                                                        .size_ = 256*1024 });
                 StringTable table_;
             };

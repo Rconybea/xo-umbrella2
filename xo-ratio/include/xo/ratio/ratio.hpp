@@ -280,16 +280,11 @@ namespace xo {
                     auto num_str = flatstring<N>::from_int(num_);
                     auto den_str = flatstring<N>::from_int(den_);
 
-                    /* tmp capacity will be about 2N+3 */
-                    auto tmp = flatstring_concat(flatstring("("),
-                                                 num_str,
-                                                 flatstring("/"),
-                                                 den_str,
-                                                 flatstring(")"));
-
-                    flatstring<N> retval;
-                    retval.assign(tmp);
-
+                    auto retval = flatstring<N>::concat(flatstring("("),
+                                                        num_str,
+                                                        flatstring("/"),
+                                                        den_str,
+                                                        flatstring(")"));
                     return retval;
                 }
             }

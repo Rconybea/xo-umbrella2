@@ -60,6 +60,7 @@ namespace ut {
     using xo::facet::impl_for;
     using xo::rng::xoshiro256ss;
     using xo::rng::random_seed;
+    using xo::flatstring;
     using std::size_t;
     using std::uint32_t;
 
@@ -217,20 +218,20 @@ namespace ut {
 
         GcosFixture::GcosFixture(const Testcase & tc)
         : gcos_config_{ArenaConfig()
-                       .with_name("gcos-fixture-arena-name-notused")
+                       .with_name(flatstring("gcos-fixture-arena-name-notused"))
                        .with_size(tc.gc_size_)
                        .with_store_header_flag(true),
                        tc.n_gen_,
                        tc.n_survive_,
                        tc.object_type_z_,
                        tc.debug_flag_},
-          arena2_{DArena::map(ArenaConfig().with_name("arena2-ref")
+          arena2_{DArena::map(ArenaConfig().with_name(flatstring("arena2-ref"))
                               .with_size(tc.gc_size_ * tc.n_gen_)
                               .with_store_header_flag(true))},
-          report_arena_{DArena::map(ArenaConfig().with_name("report-arena")
+          report_arena_{DArena::map(ArenaConfig().with_name(flatstring("report-arena"))
                                     .with_size(tc.report_size_)
                                     .with_store_header_flag(true))},
-          error_arena_{DArena::map(ArenaConfig().with_name("error-arena")
+          error_arena_{DArena::map(ArenaConfig().with_name(flatstring("error-arena"))
                                    .with_size(tc.error_size_)
                                    .with_store_header_flag(true))},
           gcos_{gcos_config_, &verify_stats_}

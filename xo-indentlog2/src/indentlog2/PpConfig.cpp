@@ -6,6 +6,7 @@
 #include "print/PpConfig.hpp"
 
 namespace xo {
+    using xo::mm::ArenaNameStr;
     using std::uint32_t;
 
     namespace pp {
@@ -83,7 +84,7 @@ namespace xo {
         }
 
         PpLogbufConfig
-        PpLogbufConfig::with_name(const std::string & x)
+        PpLogbufConfig::with_name(const ArenaNameStr & x)
         {
             PpLogbufConfig retval = *this;
 
@@ -108,7 +109,9 @@ namespace xo {
             // its desirable for arena names to be unique,
             // so that they can be distinguished in MemorySizeVisitor pools
 
-            ArenaConfig logbuf_cfg { .name_ = basename + std::to_string(++s_ppconfig_seq),
+            auto tmp = ArenaNameStr::sprintf("%s%d", basename.c_str(), ++s_ppconfig_seq);
+
+            ArenaConfig logbuf_cfg { .name_ = tmp,
                                      .size_ = 64*1024 };
 
             return PpConfig()
@@ -242,7 +245,7 @@ namespace xo {
         }
 
         PpConfig
-        PpConfig::with_logbuf_name(const std::string & x)
+        PpConfig::with_logbuf_name(const ArenaNameStr & x)
         {
             PpConfig retval = *this;
 

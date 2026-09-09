@@ -94,10 +94,10 @@ namespace xo {
         DX1Collector::_init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z)
         {
             this->root_set_
-                = RootSet::map(ArenaConfig{.name_ = "x1-object-roots",
-                                          .size_ = cfg.object_roots_z_,
-                                          .hugepage_z_ = page_z,
-                                          .store_header_flag_ = false});
+                = RootSet::map(ArenaConfig{.name_ = flatstring("x1-object-roots"),
+                                           .size_ = cfg.object_roots_z_,
+                                           .hugepage_z_ = page_z,
+                                           .store_header_flag_ = false});
         }
 
         void
@@ -305,7 +305,7 @@ namespace xo {
                         ok &= arena_d->upsert_cstr(mm, "d-limit", DInteger::box(mm, limit - lo));
                         ok &= arena_d->upsert_cstr(mm, "d-hi", DInteger::box(mm, hi - lo));
 
-                        const DString * key = DString::from_str(mm, arena->config_.name_);
+                        const DString * key = DString::from_str(mm, arena->config_.name_.c_str());
 
                         rpt->upsert(mm, std::make_pair(key, obj<AGCObject,DDictionary>(arena_d)));
                     }

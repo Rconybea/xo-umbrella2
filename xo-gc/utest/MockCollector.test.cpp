@@ -26,6 +26,7 @@ namespace ut {
     using xo::mm::ArenaConfig;
     using xo::mm::DArena;
     using xo::facet::obj;
+    using xo::flatstring;
 
     // Gilding the lily here.
     // The only reason to 'test' MockCollector is to suppress
@@ -42,17 +43,17 @@ namespace ut {
         constexpr uint32_t c_n_survive = 1;
         X1VerifyStats verify_stats;
         GCObjectStoreConfig gcos_config{ArenaConfig()
-            .with_name("gcos-arena-name-notused")
+            .with_name(flatstring("gcos-arena-name-notused"))
             .with_size(c_space_z)
             .with_store_header_flag(true),
             c_n_gen,
             c_n_survive,
             64*1024 /*object_type_z*/,
             false /*debug_flag*/};
-        DArena report_arena{ArenaConfig().with_name("report-arena")
+        DArena report_arena{ArenaConfig().with_name(flatstring("report-arena"))
             .with_size(64*1024)
             .with_store_header_flag(true)};
-        DArena error_arena{ArenaConfig().with_name("error-arena")
+        DArena error_arena{ArenaConfig().with_name(flatstring("error-arena"))
             .with_size(64*1024)
             .with_store_header_flag(true)};
         MutationLogConfig mls_config{c_n_gen,

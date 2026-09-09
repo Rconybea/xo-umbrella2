@@ -62,13 +62,13 @@ namespace xo {
     using xo::mm::AGCObject;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
     using xo::facet::with_facet;
+    using xo::pp::PpConfig;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
     namespace ut {
-        using xo::pp::PpConfig;
-        using xo::pp::scope;
-        using xo::pp::xtag;
-
         namespace {
             /** render @p x through pretty(PpSink&) **/
             template <typename T>
@@ -307,7 +307,9 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_integer_v.size(); i_tc < n_tc; ++i_tc) {
                     const auto & tc = s_integer_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "utest.int." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("utest.int.%ld", i_tc);
+
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 4*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -334,7 +336,9 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_boolean_v.size(); i_tc < n_tc; ++i_tc) {
                     const auto & tc = s_boolean_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "utest.bool." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("utest.bool.%ld", i_tc);
+
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 4*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -361,7 +365,8 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_float_v.size(); i_tc < n_tc; ++i_tc) {
                     const auto & tc = s_float_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "utest.float." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("utest.float.%ld", i_tc);
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 4*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -387,7 +392,9 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_error_v.size(); i_tc < n_tc; ++i_tc) {
                     const auto & tc = s_error_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "utest.error." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("utest.error.%ld", i_tc);
+
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 4*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -419,7 +426,9 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_array_v.size(); i_tc < n_tc; ++i_tc) {
                     const auto & tc = s_array_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "utest.array." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("utest.array.%ld", i_tc);
+
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 4*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -453,7 +462,9 @@ namespace xo {
                 for (std::size_t i_tc = 0, n_tc = s_dict_v.size(); i_tc < n_tc; ++i_tc) {
                     const auto & tc = s_dict_v[i_tc];
 
-                    ArenaConfig cfg { .name_ = "utest.dict." + std::to_string(i_tc),
+                    auto tmp = ArenaNameStr::sprintf("utest.dict.%ld", i_tc);
+
+                    ArenaConfig cfg { .name_ = tmp,
                                       .size_ = 4*1024 };
                     DArena arena = DArena::map(cfg);
                     auto alloc = with_facet<AAllocator>::mkobj(&arena);
@@ -487,7 +498,7 @@ namespace xo {
         {
             REQUIRE(xo::scm::SetupObject2::register_facets());
 
-            ArenaConfig cfg { .name_ = "utest.dict.nested", .size_ = 4*1024 };
+            ArenaConfig cfg { .name_ = flatstring("utest.dict.nested"), .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
@@ -548,7 +559,7 @@ namespace xo {
         {
             REQUIRE(xo::scm::SetupObject2::register_facets());
 
-            ArenaConfig cfg { .name_ = "utest.array.nested", .size_ = 4*1024 };
+            ArenaConfig cfg { .name_ = flatstring("utest.array.nested"), .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 

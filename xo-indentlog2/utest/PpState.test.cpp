@@ -25,9 +25,10 @@ namespace ut {
     using xo::pp::k_begin;
     using xo::pp::k_split;
     using xo::pp::k_end;
-    using xo::LogBuffer;
     using xo::mm::MemorySizeInfo;
     using xo::mm::ArenaConfig;
+    using xo::LogBuffer;
+    using xo::flatstring;
     using xo::UtestRehearser;
     using std::cout;
     using std::endl;
@@ -160,7 +161,7 @@ namespace ut {
 
         PpState pps(cfg);
 
-        ArenaConfig buf_cfg { .name_ = "utest.PpState",
+        ArenaConfig buf_cfg { .name_ = flatstring("utest.PpState"),
                               .size_ = 64*1024 };
         LogBuffer logbuf(buf_cfg, p_rh->enable_debug());
 

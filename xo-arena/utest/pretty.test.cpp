@@ -26,6 +26,7 @@ namespace ut {
     using xo::mm::MemorySizeDetail;
     using xo::mm::AllocHeader;
     using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
     using xo::mm::AllocHeaderConfig;
     using xo::reflect::typeseq;
     using std::string;
@@ -141,7 +142,7 @@ namespace ut {
         /* pre-existing Prettifier; asserted here so the four xo-arena
          * renderings are pinned in one place
          */
-        string s = render(ArenaConfig{ .name_ = "store", .size_ = 4096 });
+        string s = render(ArenaConfig{ .name_ = ArenaNameStr::from_cstr("store"), .size_ = 4096 });
 
         REQUIRE(s.starts_with("<ArenaConfig :name store :size 4096"));
         /* name is optional, and elided when empty */
