@@ -22,7 +22,7 @@
 
 #include "pyindentlog2.hpp"
 #include <xo/pyarena/pyarena.hpp>
-#include <xo/pyarena/PoolInfo.hpp>
+#include <xo/pyarena/CollectPools.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/indentlog2/cx/Indentlog2Config.hpp>
@@ -148,7 +148,7 @@ namespace xo {
                      "the Indentlog2Config this context was established with")
                 /* memory reporting.  Returns the pools rather than taking a
                  * visitor: the snapshots have to be materialized either way
-                 * (see PoolInfo.hpp), so a list is the friendlier shape.
+                 * (see CollectPools.hpp), so a list is the friendlier shape.
                  *
                  * CALLING-THREAD SCOPE, as in c++: what this context owns is
                  * thread-local (the scratch arena behind tostr(), the temp

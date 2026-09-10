@@ -128,32 +128,36 @@ class VisitPoolsTestCase(unittest.TestCase):
             self.assertGreaterEqual(p.allocated, p.used)
 
     def test_snapshot_survives_the_visit(self):
-        """the info is a snapshot: c++ MemorySizeInfo could not survive here
+        """the list outlives the visit that produced it
 
-        resource_name_ is a string_view and detail_ points into the visiting
-        frame, so a returned list of them would be a list of dangling reads.
-        Materializing is what makes this binding's shape possible at all.
+        A c++ MemorySizeInfo cannot: detail_ points into the visiting frame.
+        The binding hands python a copy with detail_ nulled, which is also why
+        the per-type histogram is not reachable from here -- ask c++ for it.
         """
         store = self.pools()[0]
         self.assertEqual(store.name, "store")
-        self.assertEqual(store.detail, [])
+        self.assertFalse(hasattr(store, "detail"))
 
-    def test_detail_histogram_when_the_arena_keeps_headers(self):
-        """detail[0] totals; the remaining entries are per type"""
+    def test_repr_is_safe_for_a_header_keeping_arena(self):
+        """the case where a retained detail_ would dangle
+
+        An arena configured with store_header_flag reports a histogram, and
+        visit_pools() assembles it in a stack local.  repr() goes through the
+        c++ pretty(), which counts the histogram's rows -- so this reads freed
+        stack unless the copy nulled the pointer.  It reports no rows because
+        python's copy has none, which is what makes the read safe.
+        """
         fw = f.AllocFlywheel.make_app(
             FACET_CX,
             mm.ArenaConfig(name="store", size=1 << 18, store_header_flag=True),
             mm.ArenaConfig(name="strong", size=1 << 12),
             mm.ArenaConfig(name="weak", size=1 << 12))
         keep = [o.Float.make(fw, float(i)) for i in range(5)]
+        self.assertEqual(len(keep), 5)
 
-        detail = self.pools(fw)[0].detail
-        self.assertEqual(len(detail), 2)
-        self.assertEqual(detail[0].tseq, -1)             # totals row
-        self.assertEqual(detail[0].n_alloc, len(keep))
-        self.assertNotEqual(detail[1].tseq, -1)          # DFloat
-        self.assertEqual(detail[1].n_alloc, len(keep))
-        self.assertEqual(detail[0].z_alloc, detail[1].z_alloc)
+        text = repr(self.pools(fw)[0])
+        self.assertIn("store", text)
+        self.assertNotIn("n_detail", text)
 
 
 class AppcxVisitPoolsTestCase(unittest.TestCase):

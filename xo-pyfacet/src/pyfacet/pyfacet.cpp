@@ -5,7 +5,7 @@
 
 #include "pyfacet.hpp"
 #include <xo/pyarena/pyarena.hpp>
-#include <xo/pyarena/PoolInfo.hpp>
+#include <xo/pyarena/CollectPools.hpp>
 #include <xo/pyindentlog2/pyindentlog2.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/indentlog2/TempPrettySink.hpp>
@@ -182,7 +182,7 @@ namespace xo {
                      "the xo-indentlog2 context this one stands on")
                 /* memory reporting.  Returns the pools rather than taking a
                  * visitor: the snapshots have to be materialized either way
-                 * (see PoolInfo.hpp), so a list is the friendlier shape.
+                 * (see CollectPools.hpp), so a list is the friendlier shape.
                  *
                  * Three pools: the facet registry is a hash map and reports
                  * its control and slot arenas separately ("facets-ctl",
@@ -255,7 +255,7 @@ namespace xo {
 
                 /* memory reporting.  Returns the pools rather than taking a
                  * visitor, as FacetAppcx.visit_pools() does: the snapshots
-                 * have to be materialized either way (see PoolInfo.hpp).
+                 * have to be materialized either way (see CollectPools.hpp).
                  *
                  * Three pools, in the order the handle store visits them: the
                  * primary arena, then the strong and weak root sets.

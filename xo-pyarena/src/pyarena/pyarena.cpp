@@ -1,11 +1,12 @@
 /* @file pyarena.cpp
  *
- * python bindings for xo-arena's configuration types.
+ * python bindings for xo-arena's configuration and reporting types.
  *
- * SCOPE.  Configuration only: ArenaConfig, AllocHeaderConfig and the
- * AllocHeader word they describe.  DArena itself is not bound -- an arena is
- * handed to c++ code that allocates from it, and python has no use for a
- * handle it cannot allocate through.
+ * SCOPE.  Configuration -- ArenaConfig, AllocHeaderConfig and the AllocHeader
+ * word they describe -- plus MemorySizeInfo, which every visit_pools() in the
+ * tree reports through.  DArena itself is not bound: an arena is handed to c++
+ * code that allocates from it, and python has no use for a handle it cannot
+ * allocate through.
  *
  * These types were originally registered by xo-pyindentlog2, because pybind11
  * permits exactly one registration per c++ type and that was the lowest python
@@ -18,7 +19,7 @@
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/arena/AllocHeaderConfig.hpp>
 #include <xo/arena/AllocHeader.hpp>
-#include <xo/pyarena/PoolInfo.hpp>
+#include <xo/pyarena/CollectPools.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/pyutil/pyutil.hpp>
 #include <xo/ppsink/FlatSink.hpp>
@@ -27,14 +28,14 @@
 #include <pybind11/stl.h>   /* std::vector, std::optional */
 #include <sstream>
 #include <string>
+#include <optional>
+#include <cstdint>
 
 namespace xo {
     namespace py = pybind11;
 
     using xo::mm::AllocHeader;
-    using xo::mm::MemorySizeDetail;
     using xo::mm::MemorySizeInfo;
-    using xo::pyarena::PoolInfo;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::ArenaNameStr;
@@ -67,6 +68,17 @@ namespace xo {
                 }
                 return buf.str();
             }
+
+            /** @p p as an int python can use, or None when the pool has no
+             *  address range.  A bound `const void *` would arrive in python
+             *  as a capsule, which is no use for arithmetic or for printing.
+             **/
+            std::optional<std::uintptr_t> addr_of(const void * p) {
+                if (p)
+                    return reinterpret_cast<std::uintptr_t>(p);
+
+                return std::nullopt;
+            }
         } /*namespace*/
 
         PYBIND11_MODULE(PYARENA_MODULE_NAME(), m) {
@@ -77,61 +89,49 @@ namespace xo {
             // memory reporting.  Types that own arenas expose
             //   visit_pools(fn) -> fn is called once per pool with one of these
             //
-            // The python object is an owning snapshot (xo::pyarena::PoolInfo),
-            // not the c++ MemorySizeInfo it was taken from.  That type reports
-            // through a string_view and a bare pointer into the visiting
-            // frame, so it cannot outlive the callback -- a rule python code
-            // has no way to keep.  See PoolInfo.hpp.
+            // python is handed the c++ MemorySizeInfo itself, by value: every
+            // member exposed below is owned (resource_name_ is a flatstring;
+            // lo_/hi_ are addresses nothing dereferences).  The one member
+            // that could not survive the callback -- detail_, the per-type
+            // histogram, which points into the visiting frame -- is therefore
+            // not exposed, and xo::pyarena::collect_pools() nulls it.  See
+            // CollectPools.hpp.
 
-            py::class_<MemorySizeDetail>(m, "MemorySizeDetail")
-                .def(py::init<>())
-                .def_property_readonly("tseq",
-                                       [](const MemorySizeDetail & x) {
-                                           return x.tseq_.seqno();
-                                       },
-                                       "typeseq identifying the c++ type counted here"
-                                       " (-1 in the leading totals entry)")
-                .def_readonly("n_alloc", &MemorySizeDetail::n_alloc_,
-                              "number of instances")
-                .def_readonly("z_alloc", &MemorySizeDetail::z_alloc_,
-                              "bytes used by those instances")
-                .def("__repr__",
-                     [](const MemorySizeDetail & x) {
-                         return ("<MemorySizeDetail tseq=" + std::to_string(x.tseq_.seqno())
-                                 + " n_alloc=" + std::to_string(x.n_alloc_)
-                                 + " z_alloc=" + std::to_string(x.z_alloc_) + ">");
-                     });
-
-            py::class_<PoolInfo>(m, "MemorySizeInfo")
+            py::class_<MemorySizeInfo>(m, "MemorySizeInfo")
                 /* the empty report.  Instances normally arrive from a
                  * visit_pools() callback rather than being built here.
                  */
                 .def(py::init<>(), "an empty report -- all sizes zero")
-                .def_readonly("name", &PoolInfo::name_,
-                              "name of the pool being reported")
+                /* flatstring, so not directly convertible: python wants str */
+                .def_property_readonly("name",
+                                       [](const MemorySizeInfo & x) {
+                                           return std::string(x.resource_name_.c_str());
+                                       },
+                                       "name of the pool being reported")
                 /* four numbers, and they mean four different things */
-                .def_readonly("used", &PoolInfo::used_,
+                .def_readonly("used", &MemorySizeInfo::used_,
                               "bytes in use, excluding waste")
-                .def_readonly("allocated", &PoolInfo::allocated_,
+                .def_readonly("allocated", &MemorySizeInfo::allocated_,
                               "bytes allocated, including waste (e.g. empty hash slots)")
-                .def_readonly("committed", &PoolInfo::committed_,
+                .def_readonly("committed", &MemorySizeInfo::committed_,
                               "bytes backed by physical memory")
-                .def_readonly("reserved", &PoolInfo::reserved_,
+                .def_readonly("reserved", &MemorySizeInfo::reserved_,
                               "address space obtained, whether or not committed")
-                .def_readonly("lo", &PoolInfo::lo_,
-                              "start address, or None")
-                .def_readonly("hi", &PoolInfo::hi_,
-                              "end address, or None")
-                .def_readonly("detail", &PoolInfo::detail_,
-                              "per-type histogram, empty when the pool keeps none."
-                              "  detail[0] is the total across types")
+                .def_property_readonly("lo",
+                                       [](const MemorySizeInfo & x) {
+                                           return addr_of(x.lo_);
+                                       },
+                                       "start address, or None")
+                .def_property_readonly("hi",
+                                       [](const MemorySizeInfo & x) {
+                                           return addr_of(x.hi_);
+                                       },
+                                       "end address, or None")
+                /* through the type's own Prettifier, like the config types
+                 * below -- so python shows the text c++ does
+                 */
                 .def("__repr__",
-                     [](const PoolInfo & x) {
-                         return ("<MemorySizeInfo " + x.name_
-                                 + " used=" + std::to_string(x.used_)
-                                 + " committed=" + std::to_string(x.committed_)
-                                 + " reserved=" + std::to_string(x.reserved_) + ">");
-                     });
+                     [](const MemorySizeInfo & x) { return pp2str(x); });
 
             py::class_<AllocHeader>(m, "AllocHeader")
                 .def(py::init<AllocHeader::repr_type>(), py::arg("repr"))
