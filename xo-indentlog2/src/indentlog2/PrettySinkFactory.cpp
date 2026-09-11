@@ -4,6 +4,7 @@
  **/
 
 #include "print/PrettySinkFactory.hpp"
+#include "print/PrettySink.hpp"
 #include <iostream>
 
 namespace xo::pp {

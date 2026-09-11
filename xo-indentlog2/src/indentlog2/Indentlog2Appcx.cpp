@@ -6,20 +6,19 @@
 #include "cx/Indentlog2Appcx.hpp"
 
 namespace xo {
+    using xo::pp::PpSinkFactory;
+    using xo::pp::ThreadLogState;
 
     Indentlog2Appcx::Indentlog2Appcx(const Indentlog2Config & cfg)
     : init_evidence_{InitSubsys<S_indentlog2_tag>::require()},
       config_{cfg},
       sink_factory_{cfg.pp_config()}
     {
-        using xo::pp::SinkFactory;
-        using xo::pp::ThreadLogState;
-
         // Upgrade to pretty-printing logger in new threads.
-        SinkFactory::set_instance(&sink_factory_);
+        PpSinkFactory::set_instance(&sink_factory_);
 
         // Upgrade to pretty-printing logger for calling (main) thread.
-        ThreadLogState::log_set_sink(SinkFactory::instance().create());
+        ThreadLogState::log_set_sink(PpSinkFactory::instance().create());
 
         // scratch arena (per thread)
         TempArena::init(config_.temp_arena_capacity());

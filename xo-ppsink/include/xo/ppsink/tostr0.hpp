@@ -28,10 +28,10 @@ namespace xo::pp {
     template <typename... Ts>
     std::string
     tostr0(const Ts &... args) {
-        std::stringstream ss;
-        FlatSink sink(ss.rdbuf());
+        std::stringbuf sbuf;
+        FlatSink sink(&sbuf);
         (sink.pp(args), ...);
-        return ss.str();
+        return sbuf.str();
     }
 } /*namespace xo::pp*/
 

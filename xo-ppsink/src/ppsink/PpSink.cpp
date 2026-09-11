@@ -6,13 +6,6 @@
 #include <xo/ppsink/PpSink.hpp>
 
 namespace xo::pp {
-    SinkFactory &
-    SinkFactory::set_instance(SinkFactory * x)
-    {
-        s_instance = x;
-        return *s_instance;
-    }
-
     PpSinkInserter::PpSinkInserter(PpSink * ppsink, std::streambuf * sbuf)
       : ppsink_{ppsink}, sbuf_{sbuf}
     {

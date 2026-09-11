@@ -16,31 +16,6 @@
 namespace xo::pp {
     class PpSink;
 
-    /** @brief specify default sink for logging.
-     *
-     *  In practice will be either FlatSink (simple, low-level)
-     *  or PrettySink (pretty-printing).
-     *
-     *  Design Note: using singleton pattern here because this feature
-     *  arrives at very low-level, before we have app context
-     **/
-    class SinkFactory {
-    public:
-        static SinkFactory & instance() { return *s_instance; }
-        /** establish factory instance **/
-        static SinkFactory & set_instance(SinkFactory * x);
-
-        /** FlatSinkFactory -> true; PrettySinkFactory -> false **/
-        virtual bool is_flat() const = 0;
-
-        /** create sink **/
-        virtual std::unique_ptr<PpSink> create() = 0;
-
-    private:
-        /** (singleton) default sink factory **/
-        static SinkFactory * s_instance;
-    };
-
     /** @brief RAII convenience class to ensure ppsink.stream_commit() invoked
      **/
     class PpSinkInserter {
