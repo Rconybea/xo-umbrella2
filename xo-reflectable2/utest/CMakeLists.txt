@@ -12,6 +12,8 @@ if (ENABLE_TESTING)
     xo_dependency(${UTEST_EXE} xo_testutil)
     xo_dependency(${UTEST_EXE} reflect)
     xo_dependency(${UTEST_EXE} xo_facet)
+    # a D-type that is printable but NOT reflectable, for the throw case
+    xo_dependency(${UTEST_EXE} xo_printable2)
     xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)
     xo_external_target_dependency(${UTEST_EXE} CLI11 CLI11::CLI11)
 endif()

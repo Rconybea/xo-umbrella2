@@ -56,6 +56,9 @@ public:
     // const methods
 
     // non-const methods (still const in router!)
+    TaggedPtr self_tp()  {
+        return O::iface()->self_tp(O::data());
+    }
 
     ///@}
     /** @defgroup reflect-reflectable-member-vars **/

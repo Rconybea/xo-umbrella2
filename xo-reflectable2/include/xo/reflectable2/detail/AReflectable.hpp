@@ -14,6 +14,7 @@
 #pragma once
 
 // includes (via {facet_includes})
+#include <xo/reflect/TaggedPtr.hpp>
 #include <xo/facet/top/ATop.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
@@ -30,10 +31,13 @@ using Opaque = void *;
 Opt-in capability for faceted objects that can be interrogated at runtime.
 Counterpart to xo::reflect::SelfTagging, which solves the same
 get-me-the-real-type-at-runtime problem for non-fomo objects.
-SCAFFOLD: const_methods below is deliberately empty, so AReflectable
-presently has no methods.  The method -- self_tp(), returning a
-TaggedPtr for the object's concrete representation -- arrives with
-the rotation through FacetRegistry.  See .xo-backlog/reflectable2/.
+A representation opts in by implementing IReflectable_DRepr, whose
+self_tp() hands back a TaggedPtr for itself.  FopTdx rotates an
+erased obj<AFacet> here through FacetRegistry to recover it.
+NOTE the TaggedPtr does not keep the object alive: fomo objects are
+arena-allocated rather than refcounted, so validity belongs to the
+owning flywheel.  Fine for synchronous traversal; a caller must not
+retain one past the arena.
 **/
 class AReflectable : public xo::facet::ATop {
 public:
@@ -54,6 +58,8 @@ public:
     /* _has_null_vptr(), _typeseq(), _drop(): inherited from xo::facet::ATop */
 
     // nonconst methods
+    /** TaggedPtr for this object's concrete representation **/
+    virtual TaggedPtr self_tp(Opaque data)  = 0;
     ///@}
 }; /*AReflectable*/
 

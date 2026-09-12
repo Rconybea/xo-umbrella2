@@ -5,8 +5,10 @@
 
 #pragma once
 
+#include "detail/AReflectable.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/pointer/PointerTdx.hpp>
+#include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <stdexcept>
@@ -27,9 +29,10 @@ namespace xo {
          *  compile time:
          *  - @c DRepr concrete: the child's TypeDescr is @c Reflect::require<DRepr>().
          *  - @c DRepr = @c DVariantPlaceholder (i.e. @c vt<AFacet>): erased.
-         *    Reports ZERO children for now, rather than guessing.  Recovering
-         *    the representation needs a rotation through @c FacetRegistry to an
-         *    @c AReflectable facet; see .xo-backlog/reflectable2/issues/03.
+         *    Recovered at runtime by rotating through @c FacetRegistry to
+         *    @c AReflectable and asking it for @c self_tp().  A representation
+         *    that has NOT opted in throws -- that is a programming error, not
+         *    a data-dependent condition, so it must not render as empty.
          *
          *  Note which case is routine: D-types hold erased fop members as a
          *  matter of course (@c DDictionary, @c DList, @c DArray), so the
@@ -51,18 +54,32 @@ namespace xo {
             // ----- Inherited from PointerTdx -----
 
             virtual uint32_t n_child(void * object) const override {
+                /* same in both cases: a fop has a child exactly when its data
+                 * pointer is non-null.  Counting needs no rotation.
+                 */
+                target_t * p = reinterpret_cast<target_t *>(object);
+
+                return (p->data() ? 1 : 0);
+            } /*n_child*/
+
+            /** Resolve an ERASED fop to its representation.
+             *
+             *  @c PrintJson::print_tp does NOT call @c most_derived_self_tp --
+             *  it goes straight to the metatype switch -- so the pointer path
+             *  below must rotate as well, or a directly-handed erased fop
+             *  prints as {} while a nested one prints correctly.
+             **/
+            virtual TaggedPtr most_derived_self_tp(TypeDescrBase const * object_td,
+                                                   void * object) const override {
                 if constexpr (c_erased) {
-                    /* see issues/03: rotating to AReflectable is what makes
-                     * the representation reachable.  Until then an erased
-                     * object prints as {} rather than as a wrong answer.
-                     */
-                    return 0;
-                } else {
                     target_t * p = reinterpret_cast<target_t *>(object);
 
-                    return (p->data() ? 1 : 0);
+                    if (p->data())
+                        return repr_tp(p);
                 }
-            } /*n_child*/
+
+                return TypeDescrExtra::most_derived_self_tp(object_td, object);
+            } /*most_derived_self_tp*/
 
             virtual const TypeDescrBase * fixed_child_td(uint32_t /*i*/) const override {
                 if constexpr (c_erased) {
@@ -85,15 +102,31 @@ namespace xo {
                                xtag("n", this->n_child(object))));
                 }
 
-                if constexpr (c_erased) {
-                    /* unreachable: n_child() is 0, so the guard above threw */
-                    return TaggedPtr::universal_null();
-                } else {
-                    target_t * p = reinterpret_cast<target_t *>(object);
+                target_t * p = reinterpret_cast<target_t *>(object);
 
+                if constexpr (c_erased) {
+                    return repr_tp(p);
+                } else {
                     return establish_most_derived_tp(p->data());
                 }
             } /*child_tp*/
+
+        private:
+            /** Rotate an erased fop to @c AReflectable and take its
+             *  @c self_tp().  Only instantiated for the erased case.
+             *
+             *  Uses the THROWING @c variant(), not @c try_variant(): a
+             *  representation that has not opted in is a programming error.
+             *  The thrown message names the representation, so a reader is not
+             *  handed a bare typeseq number to go look up.
+             **/
+            static TaggedPtr repr_tp(target_t * p) {
+                auto reflectable
+                    = xo::facet::FacetRegistry::instance()
+                          .template variant<AReflectable>(*p);
+
+                return reflectable.self_tp();
+            } /*repr_tp*/
         }; /*FopTdx*/
 
         // ----- xo::facet::obj<AFacet, DRepr> -----

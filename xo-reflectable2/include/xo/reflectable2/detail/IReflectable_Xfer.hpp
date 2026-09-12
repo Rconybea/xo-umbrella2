@@ -21,6 +21,7 @@
 #pragma once
 
 #include "AReflectable.hpp"
+#include <xo/reflect/TaggedPtr.hpp>
 
 namespace xo {
 namespace reflect {
@@ -53,6 +54,9 @@ namespace reflect {
         // const methods
 
         // non-const methods
+        TaggedPtr self_tp(Opaque data)  override {
+            return I::self_tp(_dcast(data));
+        }
 
         ///@}
 

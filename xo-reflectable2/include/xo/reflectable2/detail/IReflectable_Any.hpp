@@ -61,6 +61,7 @@ namespace reflect {
         // const methods
 
         // nonconst methods
+        [[noreturn]] TaggedPtr self_tp(Opaque)  override;
 
         ///@}
 

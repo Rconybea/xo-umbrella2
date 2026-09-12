@@ -3,8 +3,7 @@
     output_cpp_dir: "src/reflectable2",
     output_hpp_dir: "include/xo/reflectable2",
     output_impl_subdir: "detail",
-    includes: [
-    ],
+    includes: ["<xo/reflect/TaggedPtr.hpp>"],
     user_hpp_includes: [
     ],
     namespace1: "xo",
@@ -18,10 +17,13 @@
         "Opt-in capability for faceted objects that can be interrogated at runtime.",
         "Counterpart to xo::reflect::SelfTagging, which solves the same",
         "get-me-the-real-type-at-runtime problem for non-fomo objects.",
-        "SCAFFOLD: const_methods below is deliberately empty, so AReflectable",
-        "presently has no methods.  The method -- self_tp(), returning a",
-        "TaggedPtr for the object's concrete representation -- arrives with",
-        "the rotation through FacetRegistry.  See .xo-backlog/reflectable2/."
+        "A representation opts in by implementing IReflectable_DRepr, whose",
+        "self_tp() hands back a TaggedPtr for itself.  FopTdx rotates an",
+        "erased obj<AFacet> here through FacetRegistry to recover it.",
+        "NOTE the TaggedPtr does not keep the object alive: fomo objects are",
+        "arena-allocated rather than refcounted, so validity belongs to the",
+        "owning flywheel.  Fine for synchronous traversal; a caller must not",
+        "retain one past the arena."
     ],
     types: [
         {
@@ -30,11 +32,22 @@
             definition: "xo::facet::obj<AReflectable>",
         }
     ],
-    const_methods: [
-        // TODO: self_tp(), see .xo-backlog/reflectable2/issues/03.
-        // Deliberately absent here: 01 settles levelization only, so that
-        // the subsystem builds and is swept before anything depends on it.
+    const_methods: [],
+    nonconst_methods: [
+        // TaggedPtr self_tp()
+        //
+        // NONCONST, matching xo::reflect::SelfTagging::self_tp(): a TaggedPtr
+        // holds a non-const void*, so a const method -- which sees only
+        // `const DRepr &` -- could not produce one.
+        {
+            name: "self_tp",
+            doc: ["TaggedPtr for this object's concrete representation"],
+            return_type: "TaggedPtr",
+            args: [],
+            const: false,
+            noexcept: false,
+            attributes: [],
+        },
     ],
-    nonconst_methods: [],
     router_facet_explicit_content: [],
 }

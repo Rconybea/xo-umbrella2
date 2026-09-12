@@ -35,6 +35,12 @@ IReflectable_Any::_valid
 
 // nonconst methods
 
+auto
+IReflectable_Any::self_tp(Opaque)  -> TaggedPtr
+{
+    _fatal();
+}
+
 
 } /*namespace reflect*/
 } /*namespace xo*/
