@@ -19,6 +19,7 @@ xo-printable2
 xo-alloc2
 xo-reflect
 xo-pyreflect
+xo-reflectable2
 xo-stringtable2
 xo-object2
 xo-pyobject2

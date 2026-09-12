@@ -101,6 +101,7 @@ add_subdirectory(xo-printable2)   # experiment w/ facet object model (fomo)
 add_subdirectory(xo-alloc2)       # arena api (fomo)
 add_subdirectory(xo-reflect)      # reflection library (pre-fomo)
 add_subdirectory(xo-pyreflect)
+add_subdirectory(xo-reflectable2) # reflection for fomo objects
 add_subdirectory(xo-stringtable2) # experiment w/ facet object model
 add_subdirectory(xo-object2)      # experiment w/ facet object model
 add_subdirectory(xo-pyobject2)    # python bindings for xo-object2
