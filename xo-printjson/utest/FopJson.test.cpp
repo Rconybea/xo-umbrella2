@@ -6,6 +6,7 @@
 #include "xo/printjson/PrintJson.hpp"
 #include "xo/printjson/init_printjson.hpp"
 #include <xo/reflectable2/FopTdx.hpp>
+#include <xo/facet/FacetRegistry.hpp>
 #include <xo/reflectable2/Reflectable.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
@@ -30,7 +31,12 @@ namespace xo {
                 double y_;
             };
 
-            class IReflectable_DFopPoint {};
+            class IReflectable_DFopPoint {
+            public:
+                static TaggedPtr self_tp(DFopPoint & self) {
+                    return Reflect::make_tp(&self);
+                }
+            };
         }
     } /*namespace ut*/
 
@@ -50,6 +56,12 @@ namespace xo {
         namespace {
             void require_foppoint_reflected() {
                 static bool s_once = []() {
+                    /* the rotation is a runtime lookup: a FacetImplementation
+                     * specialization alone does not register the pair
+                     */
+                    xo::facet::FacetRegistry::register_impl<AReflectable,
+                                                            DFopPoint>();
+
                     StructReflector<DFopPoint> sr;
                     REFLECT_MEMBER(sr, x);
                     REFLECT_MEMBER(sr, y);
@@ -84,6 +96,27 @@ namespace xo {
             REQUIRE(via_fop.str().find("\"x\"") != std::string::npos);
             REQUIRE(via_fop.str().find("1.5") != std::string::npos);
         } /*TEST_CASE(print-json-fop-object)*/
+
+        TEST_CASE("print-json-erased-fop-object", "[printjson]") {
+            /* the routine case: D-types hold erased fop members as a matter of
+             * course, so this is the shape that matters, not the typed one
+             */
+            require_foppoint_reflected();
+
+            DFopPoint pt{1.5, -2.5};
+            obj<AReflectable, DFopPoint> typed{&pt};
+            obj<AReflectable> erased{typed};
+
+            PrintJson print_json;
+
+            std::stringstream via_erased;
+            print_json.print(Reflect::make_tp(&erased), &via_erased);
+
+            std::stringstream via_repr;
+            print_json.print(Reflect::make_tp(&pt), &via_repr);
+
+            REQUIRE(via_erased.str() == via_repr.str());
+        } /*TEST_CASE(print-json-erased-fop-object)*/
 
         TEST_CASE("print-json-empty-fop-object", "[printjson]") {
             require_foppoint_reflected();
