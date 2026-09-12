@@ -5,6 +5,7 @@
 
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/escape.hpp>
+#include <sstream>
 
 namespace xo::pp {
     using std::uint32_t;
@@ -12,10 +13,19 @@ namespace xo::pp {
 
     FlatSink::FlatSink(const PpStyle & style, std::streambuf * sbuf)
             : PpSink(style), sbuf_{sbuf}
-#ifdef OBSOLETE
-, os_{sbuf}
-#endif
     {}
+
+    std::pair<bool, std::string>
+    FlatSink::copy_output()
+    {
+        std::stringbuf * string_sbuf = dynamic_cast<std::stringbuf *>(sbuf_);
+
+        if (string_sbuf) {
+            return std::make_pair(true, string_sbuf->str());
+        } else {
+            return std::make_pair(false, std::string());
+        }
+    }
 
     PpSink &
     FlatSink::put(std::string_view x)

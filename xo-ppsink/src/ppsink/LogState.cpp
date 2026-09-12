@@ -10,11 +10,15 @@ namespace xo::pp {
     PpSink &
     LogState::sink()
     {
+        using ColorSelect = PpSinkFactory::ColorSelect;
+        using SinkOutput = PpSinkFactory::SinkOutput;
+
         if (!sink_) {
             auto & f = PpSinkFactory::instance();
 
             this->builtin_flag_ = f.is_flat();
-            this->sink_ = f.create();
+            this->sink_ = f.create(ColorSelect::k_colored,
+                                   SinkOutput::k_clog);
         }
 
         return *sink_;

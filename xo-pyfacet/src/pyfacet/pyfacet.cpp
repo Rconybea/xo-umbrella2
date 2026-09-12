@@ -8,12 +8,12 @@
 #include <xo/pyarena/CollectPools.hpp>
 #include <xo/pyindentlog2/pyindentlog2.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
-#include <xo/indentlog2/TempPrettySink.hpp>
 #include <xo/facet/cx/FacetAppcx.hpp>
 #include <xo/facet/cx/FacetConfig.hpp>
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
 #include <xo/pyutil/pyutil.hpp>
 #include <pybind11/stl.h>   /* std::optional <-> None */
 #include <memory>
@@ -26,6 +26,7 @@ namespace xo {
     using xo::mm::AllocFlywheel;
     using xo::pyarena::collect_pools;
     using xo::mm::ArenaConfig;
+    using xo::pp::TempPpSink;
     using xo::pp::PpSink;
 
     namespace facet {
@@ -279,7 +280,7 @@ namespace xo {
                      [](const AllocFlywheel & self) {
                          static_assert(xo::carries_indentlog2<AllocFlywheel>);
 
-                         return xo::pp::TempPrettySink::pp2str(self);
+                         return TempPpSink::pp2str(self);
                      });
 
         } /*pyfacet*/

@@ -47,6 +47,7 @@ namespace xo::pp {
          * convenience overloads visible alongside the overrides below
          */
 
+        virtual std::pair<bool, std::string> copy_output() override final;
         virtual PpSink & put(std::string_view x) override final;
         virtual PpSink & put_with_escape(std::string_view x, bool quote_flag) override final;
         virtual PpSink & begin() override final;

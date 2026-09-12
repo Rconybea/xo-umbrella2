@@ -18,6 +18,7 @@ set(SELF_SOURCE_FILES
     tostr.test.cpp
     verify_policy.test.cpp
     PpStyle.test.cpp
+    TempPpSink.test.cpp
     scope.test.cpp)
 
 if (ENABLE_TESTING)

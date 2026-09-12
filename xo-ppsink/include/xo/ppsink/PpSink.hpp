@@ -57,6 +57,9 @@ namespace xo::pp {
         explicit PpSink(const PpStyle & style);
         virtual ~PpSink();
 
+        /** @defgroup pp-sink-api-methods **/
+        ///@{
+
         /** pretty-print @p x to this sink
          *  see pretty.hpp for implementation
          **/
@@ -102,18 +105,28 @@ namespace xo::pp {
         template <typename... Fields>
         void pretty_struct(std::string_view name, const Fields &... fields);
 
+        /** copy of sink output, if available **/
+        virtual std::pair<bool, std::string> copy_output() = 0;
+
+        ///@}
+
+        /** @defgroup pp-sink-plugin-methods **/
+        ///@{
+
         /** open a struct whose fields are added one at a time, for a field
          *  count that is only known at runtime:
          *
+         *  @code
          *    {
          *        auto st = sink.struct_open("stack", stack.size() > 1);
          *        st.field("size", stack.size());
          *        for (std::size_t i = 0; i < stack.size(); ++i)
          *            st.field(concat("[", i, "]"), stack[i]);
          *    }   // ">" and end() emitted here
+         *  @endcode
          *
-         *  pretty_struct() is this with a compile-time field list; reach for
-         *  struct_open() only when a loop contributes fields.
+         *  @c pretty_struct() is this with a compile-time field list;
+         *  @c reach for struct_open() only when a loop contributes fields.
          *
          *  @p force_break: separate fields with a forced break rather than an
          *  optional one, so the struct always renders multi-line even where it
@@ -209,6 +222,7 @@ namespace xo::pp {
         /** complete string started by stream_open() **/
         virtual void stream_commit() = 0;
 
+        ///@}
         /** @defgroup ppsink-style presentation style **/
         ///@{
 

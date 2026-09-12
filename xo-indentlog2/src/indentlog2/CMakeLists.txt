@@ -6,7 +6,6 @@ set(SELF_SRCS
     Indentlog2Appcx.cpp
     Indentlog2Config.cpp
     SetupIndentlog2.cpp
-	TempPrettySink.cpp
     TempArena.cpp
     LogStreambuf.cpp
     LogConfig.cpp

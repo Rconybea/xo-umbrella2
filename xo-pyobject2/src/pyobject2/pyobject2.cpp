@@ -22,7 +22,6 @@
 #include <xo/facet/ObjectHandle.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/printable2/Printable.hpp>
-#include <xo/indentlog2/TempPrettySink.hpp>
 #include <xo/ppsink/PpSink.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/pyutil/pyutil.hpp>
@@ -34,6 +33,7 @@ namespace xo {
     using xo::facet::with_facet;
     using xo::mm::AAllocator;
     using xo::mm::AllocFlywheel;
+    using xo::pp::TempPpSink;
     using xo::pp::PpSink;
     using xo::print::APrintable;
 
@@ -105,7 +105,7 @@ namespace xo {
                          /** proves TempPrettySink is available **/
                          static_assert(xo::carries_indentlog2<HFloat>);
 
-                         return xo::pp::TempPrettySink::pp2str(self._native());
+                         return TempPpSink::pp2str(self._native());
                      });
 
         } /*PYBIND11_MODULE*/

@@ -3,6 +3,7 @@
 set(SELF_LIB xo_ppsink)
 set(SELF_SRCS
 	pretty.cpp
+	TempPpSink.cpp
 	PpSinkFactory.cpp
     PpSink.cpp
     FlatSink.cpp

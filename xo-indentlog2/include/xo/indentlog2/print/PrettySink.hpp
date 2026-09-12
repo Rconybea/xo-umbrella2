@@ -86,6 +86,7 @@ namespace xo {
             using PpSink::split;
             using PpSink::newline;
 
+            virtual std::pair<bool, std::string> copy_output() override final;
             virtual PpSink & put(std::string_view x) override final;
             virtual PpSink & put_with_escape(std::string_view x, bool quote_flag) override final;
             virtual PpSink & begin() override final;
@@ -115,25 +116,6 @@ namespace xo {
             /** Buffer for pretty-printed output **/
             LogBuffer logbuf_;
         };
-
-#ifdef OBSOLETE
-        /** DEPRECATED.  Prefer Indentlog2_Appcx mechanism
-         *
-         *  See alloc2_utest_main.cpp, facet_utest_main.cpp, skreplxx.cpp
-         **/
-        class ThreadPrettySink {
-        public:
-            /** install PrettySink for the calling thread.
-             *  Modifies @code ThreadLogState::thread_log_state().sink() @endcode,
-             *  the first time it is called.  Noop on subsequent calls.
-             *
-             *  @return true iff set output stream; false otherwise.
-             **/
-            static bool thread_install_once(const PpConfig & cfg,
-                                            std::streambuf * out);
-
-        };
-#endif
     } /*namespace pp*/
 } /*namespace xo*/
 

@@ -11,7 +11,7 @@
 namespace xo::pp {
     /** @brief factory that creates pretty-printing sinks for logging.
      *
-     *  Sinks created by this factory forward to clog's streambuf
+     *  Sinks created by this factory forward to clog's streambuf.
      **/
     class PrettySinkFactory : public PpSinkFactory {
     public:
@@ -20,8 +20,13 @@ namespace xo::pp {
         const PpConfig & pp_config() const { return pp_config_; }
 
         virtual bool is_flat() const override { return false; }
-        /** create pretty-printing instance **/
-        virtual std::unique_ptr<PpSink> create() override;
+        /** Create pretty-printing instance.
+         *
+         *  @p c controls where to get PpStyle:
+         *  @c ColorSelect::k_plain always uses @c PpStyle::plain()
+         *  @c ColorSelect::k_colored falls through to @c pp_config_.style_
+         **/
+        virtual std::unique_ptr<PpSink> create(ColorSelect c, SinkOutput d) override;
 
     private:
         /** pretty-printing configuration **/

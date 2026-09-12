@@ -7,9 +7,9 @@
 
 #include "Indentlog2Config.hpp"
 #include "xo/indentlog2/TempArena.hpp"
-#include "xo/indentlog2/TempPrettySink.hpp"
 #include "xo/indentlog2/print/PrettySinkFactory.hpp"
 #include "xo/indentlog2/print/PrettySink.hpp"
+#include "xo/ppsink/TempPpSink.hpp"
 #include <xo/subsys/AppContext.hpp>
 #include <concepts>
 #include <xo/ppsink/LogState.hpp>
@@ -22,7 +22,7 @@ namespace xo {
      **/
     class Indentlog2Appcx {
     public:
-        using TempPrettySink = xo::pp::TempPrettySink;
+        using TempPpSink = xo::pp::TempPpSink;
         using TempArena = xo::mm::TempArena;
         using PrettySinkFactory = xo::pp::PrettySinkFactory;
         using PrettySink = xo::pp::PrettySink;
@@ -49,31 +49,12 @@ namespace xo {
         InitEvidence init_evidence() const { return init_evidence_; }
         const Indentlog2Config & config() const { return config_; }
         /** report memory consumption, one @ref MemorySizeInfo per pool.
-         *
-         *  CALLING-THREAD SCOPE.  What xo-indentlog2 owns is thread-local: a
-         *  scratch arena behind tostr()/toppstr(), and a temporary pretty sink
-         *  behind TempPrettySink::pp2str().  Both are created per thread on
-         *  first use, so this reports THIS thread's, and says nothing about any
-         *  other.  Reporting every thread would need a registry of them.
-         *
-         *  Uses the check_local() accessors, not local(): local() CREATES the
-         *  arena/sink when a thread has none, so reporting would allocate what
-         *  it claims to measure.  A thread that has never logged reports no
-         *  pools, which is the truth.
-         *
-         *  Does not descend into sinks handed out by @ref sink_factory_ -- those
-         *  belong to each thread's log state, not to this context.
+         *  Only for pools owned by current thread.
          **/
-        void visit_pools(const MemorySizeVisitor & fn) const {
-            if (const DArena * arena = TempArena::check_local())
-                arena->visit_pools(fn);
-
-            if (const PrettySink * sink = TempPrettySink::check_local())
-                sink->visit_pools(fn);
-        }
+        void visit_pools(const MemorySizeVisitor & fn) const;
 
         TempArena & temp_arena() { return temp_arena_; }
-        TempPrettySink & temp_ppsink() { return temp_ppsink_; }
+        TempPpSink & temp_ppsink() { return temp_ppsink_; }
 
     private:
         /** ensures low-level subsystem initialization **/
@@ -91,7 +72,7 @@ namespace xo {
         TempArena temp_arena_;
 
         /** temporary pretty sink **/
-        TempPrettySink temp_ppsink_;
+        TempPpSink temp_ppsink_;
     };
 
     template <>

@@ -34,6 +34,7 @@ namespace ut {
         using PpSink::split;
         using PpSink::newline;
 
+        std::pair<bool, std::string> copy_output() override { return std::make_pair(false, std::string()); }
         PpSink & put(std::string_view s) override { os_ << s; return *this; }
         PpSink & put_with_escape(std::string_view s, bool quote_flag) override {
             if (quote_flag) os_ << '"';

@@ -155,6 +155,12 @@ namespace xo {
             logbuf_.visit_pools(fn);
         }
 
+        std::pair<bool, std::string>
+        PrettySink::copy_output()
+        {
+            return std::make_pair(true, std::string(this->output()));
+        }
+
         PpSink &
         PrettySink::put(std::string_view x)
         {
