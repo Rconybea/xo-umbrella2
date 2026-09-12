@@ -2185,3 +2185,72 @@ exec python3 \"$@\"
     message(STATUS "xo_emit_python_wrapper: wrote ${bindir}/xo-python"
                    " (${_n} pybind11 module directories)")
 endfunction()
+
+# ----------------------------------------------------------------
+# xo_add_python_utest(name srcdir)
+#
+# Register python unit tests living in ${srcdir} as the ctest test ${name},
+# and write ${CMAKE_CURRENT_BINARY_DIR}/${name} -- an executable script that
+# runs them, from the share/xo-macros/python-utest.in template.
+#
+# ctest invokes the script rather than spelling out an interpreter command, so
+# that the by-hand invocation and the ctest one cannot drift.  That is the
+# point of the script: a c++ utest is a binary you can run, filter and debug
+# directly, and before this a python utest was reachable only through ctest.
+#
+# NB deliberately NOT added to all_utest_executables_${PROJECT_NAME} or the
+# global xo_all_utest_executables.  Both are consumed via $<TARGET_FILE:...>
+# -- the coverage manifest (xo_umbrella_coverage_config) and doxygen deps --
+# and a script is not a target, so joining them would break the coverage build
+# rather than integrate with it.
+#
+# Skips rather than aborts when python3 is missing, matching xo-cmake/utest: a
+# missing interpreter must not break configure for the library itself.
+#
+function(xo_add_python_utest name srcdir)
+    find_program(XO_PYTHON3_EXECUTABLE NAMES python3)
+
+    if(NOT XO_PYTHON3_EXECUTABLE)
+        message(WARNING "xo_add_python_utest: python3 not found;"
+                        " skipping ${name}")
+        return()
+    endif()
+
+    set(_script ${CMAKE_CURRENT_BINARY_DIR}/${name})
+
+    # Locate template, as xo_generate_reconfigure_script() does
+    if(XO_SUBMODULE_BUILD)
+        set(_template "${XO_UMBRELLA_SOURCE_DIR}/xo-cmake/share/xo-macros/python-utest.in")
+    else()
+        execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --python-utest-template
+            OUTPUT_VARIABLE _template
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
+    if(NOT EXISTS "${_template}")
+        message(WARNING "xo_add_python_utest: template not found: ${_template}")
+        return()
+    endif()
+
+    # read by python-utest.in
+    set(XO_UTEST_NAME ${name})
+    set(XO_UTEST_SRCDIR ${srcdir})
+    # CMAKE_BINARY_DIR is the top of the build tree either way -- the
+    # umbrella's wrapper in an umbrella build, this subsystem's own in a
+    # standalone one -- so no branch is needed here.
+    set(XO_UTEST_PYTHON ${CMAKE_BINARY_DIR}/xo-python)
+
+    # @ONLY: the template is a shell script, so ${...} must survive verbatim
+    configure_file(
+        ${_template}
+        ${_script}
+        @ONLY
+        )
+    file(CHMOD ${_script}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+    add_test(NAME ${name} COMMAND ${_script})
+
+    message(STATUS "xo_add_python_utest: wrote ${_script}")
+endfunction()

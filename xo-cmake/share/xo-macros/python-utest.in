@@ -1,0 +1,33 @@
+#!/bin/sh
+# GENERATED from python-utest.in by xo_add_python_utest() -- edits will be
+# overwritten.
+#
+# python unit tests for @XO_UTEST_NAME@, run through this build tree's
+# xo-python wrapper, which is what puts the pybind11 modules on PYTHONPATH.
+# Running the tests therefore exercises that wiring too.
+#
+# Runnable by hand, as a c++ utest binary is.  Everything, which is what ctest
+# runs:
+#   ./@XO_UTEST_NAME@
+# a single case, or a single test:
+#   ./@XO_UTEST_NAME@ <module>.<TestCase>
+#   ./@XO_UTEST_NAME@ <module>.<TestCase>.<test>
+#
+# The two branches are not interchangeable: `unittest discover` SCANS a
+# directory, while `unittest <name>` IMPORTS it -- hence srcdir on PYTHONPATH
+# below.  xo-python prepends its own module dirs to an inherited PYTHONPATH,
+# so the two compose.
+
+XO_PYTHON='@XO_UTEST_PYTHON@'
+XO_UTEST_SRCDIR='@XO_UTEST_SRCDIR@'
+
+if [ $# -eq 0 ]; then
+    exec "${XO_PYTHON}" -m unittest discover -s "${XO_UTEST_SRCDIR}" -p 'test_*.py' -v
+else
+    PYTHONPATH="${XO_UTEST_SRCDIR}${PYTHONPATH:+:${PYTHONPATH}}"
+    export PYTHONPATH
+
+    exec "${XO_PYTHON}" -m unittest "$@"
+fi
+
+# end python-utest.in
