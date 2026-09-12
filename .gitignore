@@ -4,6 +4,7 @@
 # untracked .svg builds green and 404s on the published site: sphinx only warns.
 !**/docs/_static/img/*.svg
 !_static/img/*.svg
+**/utest/__pycache__
 compile_commands.json
 result
 .build*
