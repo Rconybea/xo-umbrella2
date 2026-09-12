@@ -12,12 +12,16 @@ namespace xo::pp {
     using std::int32_t;
 
     FlatSink::FlatSink(const PpStyle & style, std::streambuf * sbuf)
-            : PpSink(style), sbuf_{sbuf}
+            : PpSink(style), sbuf_{sbuf ? sbuf : &own_sbuf_}
     {}
 
     std::pair<bool, std::string>
     FlatSink::copy_output()
     {
+        /* an in-memory sink always reports; so does a caller-supplied
+         * stringbuf.  Anything else (a console streambuf, say) has nothing to
+         * read back, and says so rather than inventing an empty string.
+         */
         std::stringbuf * string_sbuf = dynamic_cast<std::stringbuf *>(sbuf_);
 
         if (string_sbuf) {
@@ -25,6 +29,24 @@ namespace xo::pp {
         } else {
             return std::make_pair(false, std::string());
         }
+    }
+
+    PpSink &
+    FlatSink::complete()
+    {
+        this->put("\n");
+
+        /* Reclaim, as PrettySink::complete() does with logbuf_.reset_buffer().
+         * The sink outlives the record -- TempPpSink caches one per thread --
+         * so a record left here would be prefixed to the next one.
+         *
+         * Only for the buffer we own: a caller who supplied a streambuf is
+         * accumulating deliberately, and it is not ours to clear.
+         */
+        if (this->is_memory_sink())
+            own_sbuf_.str(std::string());
+
+        return *this;
     }
 
     PpSink &

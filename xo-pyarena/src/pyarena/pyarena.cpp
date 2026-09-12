@@ -8,6 +8,15 @@
  * code that allocates from it, and python has no use for a handle it cannot
  * allocate through.
  *
+ * REPR.  Every __repr__ here goes through xo::pp::TempPpSink::pp2str(), so
+ * python shows the text the type's own Prettifier produces and the two
+ * cannot drift.  That sink is this thread's scratch sink: plain by
+ * construction (it asks the factory for ColorSelect::k_plain, which is what a
+ * repr wants -- no ansi escapes), and backed by the low-level fallback until
+ * an application installs a factory, so `import xo_pyarena; repr(cfg)` works
+ * with nothing configured.  Reaching for xo::pp::tostr0() instead would take
+ * the DEFAULT PpStyle, and that colors tag names.
+ *
  * These types were originally registered by xo-pyindentlog2, because pybind11
  * permits exactly one registration per c++ type and that was the lowest python
  * module needing them (a PpConfig's logbuf is an ArenaConfig).  They live here
@@ -22,11 +31,9 @@
 #include <xo/pyarena/CollectPools.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/pyutil/pyutil.hpp>
-#include <xo/ppsink/FlatSink.hpp>
-#include <xo/ppsink/PpStyle.hpp>
+#include <xo/ppsink/TempPpSink.hpp>
 #include <xo/ppsink/pretty.hpp>   /* PpSink::pp */
 #include <pybind11/stl.h>   /* std::vector, std::optional */
-#include <sstream>
 #include <string>
 #include <optional>
 #include <cstdint>
@@ -39,36 +46,10 @@ namespace xo {
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::ArenaNameStr;
-    using xo::pp::FlatSink;
-    using xo::pp::PpStyle;
+    using xo::pp::TempPpSink;
 
     namespace mm {
         namespace {
-            /** render @p x for __repr__, through its own Prettifier -- so
-             *  python shows the same text c++ does, and the two cannot drift.
-             *
-             *  FlatSink, not TempPrettySink::pp2str: that lives in
-             *  xo-indentlog2, which is ABOVE this module in the subsystem list
-             *  (xo-pyarena 13, xo-indentlog2 14), and it needs the indentlog2
-             *  context configured -- while `import xo_pyarena; repr(cfg)`
-             *  must keep working on its own.  A repr wants one line anyway,
-             *  which is exactly what FlatSink gives.
-             *
-             *  Spelled out rather than xo::pp::tostr0(), which is otherwise
-             *  the right tool for this tier: it takes the default PpStyle,
-             *  and that colors tag names.
-             **/
-            template <typename T>
-            std::string pp2str(const T & x) {
-                std::stringbuf buf;
-                {
-                    FlatSink sink(PpStyle::plain(), &buf);
-
-                    sink.pp(x);
-                }
-                return buf.str();
-            }
-
             /** @p p as an int python can use, or None when the pool has no
              *  address range.  A bound `const void *` would arrive in python
              *  as a capsule, which is no use for arithmetic or for printing.
@@ -131,13 +112,13 @@ namespace xo {
                  * below -- so python shows the text c++ does
                  */
                 .def("__repr__",
-                     [](const MemorySizeInfo & x) { return pp2str(x); });
+                     [](const MemorySizeInfo & x) { return TempPpSink::pp2str(x); });
 
             py::class_<AllocHeader>(m, "AllocHeader")
                 .def(py::init<AllocHeader::repr_type>(), py::arg("repr"))
                 .def_readwrite("repr", &AllocHeader::repr_)
                 .def("__repr__",
-                     [](const AllocHeader & x) { return pp2str(x); });
+                     [](const AllocHeader & x) { return TempPpSink::pp2str(x); });
 
             py::class_<AllocHeaderConfig>(m, "AllocHeaderConfig")
                 /* defaults mirror the c++ member initializers, so
@@ -178,7 +159,7 @@ namespace xo {
                      py::arg("hdr"))
 
                 .def("__repr__",
-                     [](const AllocHeaderConfig & x) { return pp2str(x); });
+                     [](const AllocHeaderConfig & x) { return TempPpSink::pp2str(x); });
 
             py::class_<ArenaConfig>(m, "ArenaConfig")
                 /* NB a single keyword ctor, rather than this plus py::init<>():
@@ -226,7 +207,7 @@ namespace xo {
                      py::arg("flag"))
 
                 .def("__repr__",
-                     [](const ArenaConfig & x) { return pp2str(x); });
+                     [](const ArenaConfig & x) { return TempPpSink::pp2str(x); });
         } /*PYBIND11_MODULE*/
     } /*namespace mm*/
 } /*namespace xo*/

@@ -16,8 +16,10 @@
 #include "MarkSink.hpp"
 #include <xo/ppsink/TempPpSink.hpp>
 #include <xo/ppsink/PpSinkFactory.hpp>
+#include <xo/ppsink/pretty.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
+#include <string>
 
 namespace {
     using xo::pp::PpSink;
@@ -87,6 +89,39 @@ TEST_CASE("TempPpSink-follows-a-change-of-factory", "[ppsink][TempPpSink]")
     /* the cached fallback must not outlive the factory that produced it */
     TempPpSink::local();
     REQUIRE(!TempPpSink::is_flat());
+}
+
+TEST_CASE("TempPpSink-renders-through-the-fallback", "[ppsink][TempPpSink]")
+{
+    factory_guard guard;
+
+    TempPpSink::reset_local(nullptr);
+
+    /* the fallback answers before an application installs its factory, so
+     * pp2str() has to WORK there -- not merely not crash.  SinkOutput::
+     * k_memory is what TempPpSink asks for, and a sink that honours it has
+     * somewhere to put the bytes.
+     */
+    REQUIRE(TempPpSink::is_flat() == false);   /* nothing built yet */
+
+    std::string s = TempPpSink::pp2str(42);
+
+    REQUIRE(TempPpSink::is_flat());
+    REQUIRE(s == "42");
+}
+
+TEST_CASE("TempPpSink-does-not-accumulate-across-calls", "[ppsink][TempPpSink]")
+{
+    factory_guard guard;
+
+    TempPpSink::reset_local(nullptr);
+
+    /* the sink is reused, so each render must start empty: complete() has to
+     * reclaim the buffer, or the second call returns the first's text too
+     */
+    REQUIRE(TempPpSink::pp2str(42) == "42");
+    REQUIRE(TempPpSink::pp2str(43) == "43");
+    REQUIRE(TempPpSink::pp2str(44) == "44");
 }
 
 TEST_CASE("TempPpSink-reset-local-survives-until-the-factory-changes",

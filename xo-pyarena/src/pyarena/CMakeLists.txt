@@ -9,8 +9,6 @@ xo_pybind11_dependency(${SELF_LIB} xo_pyutil)
 # target so its own deps do not reach us (cf. xo-pyindentlog2, same pattern)
 xo_pybind11_dependency(${SELF_LIB} refcnt)
 xo_pybind11_dependency(${SELF_LIB} xo_arena)
-# FlatSink / PpStyle are named directly by pyarena.cpp, to render __repr__
-# through each type's own Prettifier
 xo_pybind11_dependency(${SELF_LIB} xo_ppsink)
 
 # CollectPools.hpp: hand-written public header, alongside the generated pyarena.hpp
