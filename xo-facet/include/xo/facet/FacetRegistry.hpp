@@ -154,7 +154,9 @@ namespace xo {
                                                    xtag("AFrom.tname", typerecd::recd<AFrom>().name()),
                                                    xtag("ATo.tseq", typeseq::id<ATo>()),
                                                    xtag("ATo.tname", typerecd::recd<ATo>().name()),
-                                                   xtag("DRepr", from._typeseq())));
+                                                   xtag("DRepr.tseq", from._typeseq()),
+                                                   xtag("DRepr.tname",
+                                                        TypeRegistry::id2name(from._typeseq()))));
                 }
 
                 return retval;
