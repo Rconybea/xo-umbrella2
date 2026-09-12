@@ -43,6 +43,7 @@ let
     xo-pyutil         = callPackage pkgs/xo-pyutil.nix         { stdenv = jitStdenv; };
     xo-reflect        = callPackage pkgs/xo-reflect.nix        { stdenv = jitStdenv; };
     xo-pyreflect      = callPackage pkgs/xo-pyreflect.nix      { stdenv = jitStdenv; };
+    xo-reflectable2   = callPackage pkgs/xo-reflectable2.nix   { stdenv = jitStdenv; };
     xo-stringtable2   = callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
     xo-object2        = callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };

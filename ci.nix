@@ -32,6 +32,7 @@ in
       xo-pyutil
       xo-reflect
       xo-pyreflect
+      xo-reflectable2
       xo-stringtable2
       xo-object2
       xo-gc
