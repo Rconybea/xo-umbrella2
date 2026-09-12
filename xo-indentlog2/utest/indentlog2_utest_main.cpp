@@ -20,7 +20,6 @@
 #include <xo/indentlog2/cx/Indentlog2Config.hpp>
 #include <xo/indentlog2/init_indentlog2.hpp>
 #include <xo/ppsink/PpStyle.hpp>
-//#include <xo/subsys/AppContext.hpp>
 #include <xo/testutil/UtestAppStart.hpp>
 #include <xo/testutil/UtestListener.hpp>
 
@@ -61,7 +60,7 @@ main(int argc, char* argv[])
                                                   c_temp_arena_capacity) };
     UtestAppContext utest_appcx{ utest_config };
 
-    app.setup();
+    app.setup(); // calls Subsystem::initialize_all()
 
     return app.run();
 }
