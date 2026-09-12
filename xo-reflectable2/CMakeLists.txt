@@ -36,7 +36,7 @@ install(DIRECTORY idl/
 # output targets
 
 add_subdirectory(src/reflectable2)
-#add_subdirectory(utest)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # cmake export
