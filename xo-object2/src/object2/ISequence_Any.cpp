@@ -16,7 +16,7 @@ using xo::facet::valid_facet_implementation;
 void
 ISequence_Any::_fatal()
 {
-    /* control here on uninitialized IAllocator_Any.
+    /* control here on uninitialized ISequence_Any.
      * Initialized instance will have specific implementation type
      */
     std::cerr << "fatal"

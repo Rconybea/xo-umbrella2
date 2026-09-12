@@ -16,7 +16,7 @@ using xo::facet::valid_facet_implementation;
 void
 IEquable_Any::_fatal()
 {
-    /* control here on uninitialized IAllocator_Any.
+    /* control here on uninitialized IEquable_Any.
      * Initialized instance will have specific implementation type
      */
     std::cerr << "fatal"
