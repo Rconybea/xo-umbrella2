@@ -6,6 +6,9 @@
   xo-facet,
   xo-reflect,
   xo-testutil,
+  # test-only: a D-type that is printable but NOT reflectable, for the
+  # has-not-opted-in case
+  xo-printable2,
   xo-cmake,
 
   doCheck ? true,
