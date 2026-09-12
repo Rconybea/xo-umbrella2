@@ -30,6 +30,7 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
     ] ++ lib.optionals doCheck [
       xo-testutil
+      xo-printable2
     ];
     propagatedBuildInputs = [
       xo-facet
