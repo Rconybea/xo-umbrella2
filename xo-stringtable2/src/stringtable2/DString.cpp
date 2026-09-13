@@ -5,11 +5,14 @@
 
 #include "DString.hpp"
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <algorithm>
 #include <cstring>
 
 namespace xo {
     using xo::reflect::typeseq;
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
 
     namespace scm {
         DString *
@@ -181,6 +184,12 @@ namespace xo {
         DString::pretty(xo::pp::PpSink & sink) const
         {
             sink.pp(&(chars_[0]));
+        }
+
+        TaggedPtr
+        DString::self_tp()
+        {
+            return Reflect::make_tp(this);
         }
 
     } /*namespace scm*/

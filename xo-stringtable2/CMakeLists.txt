@@ -33,6 +33,13 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DString.json5
 )
 
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-stringtable2-facetimpl-reflectable-string
+    FACET_PKG xo_reflectable2
+    INPUT idl/IReflectable_DString.json5
+)
+
 # ----------------------------------------------------------------
 
 # note: manual target; generated code committed to git

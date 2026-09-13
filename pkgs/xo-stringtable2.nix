@@ -6,6 +6,12 @@
   xo-testutil,
   xo-alloc2,
   xo-printable2,
+  # AReflectable for DString, + the TaggedPtr it hands back
+  xo-reflect,
+  xo-reflectable2,
+  # SetupStringtable2 registers DString's json printer; possible because
+  # xo-printjson is levelled below xo-stringtable2
+  xo-printjson,
   xo-arena,
   xo-cmake,
   xo-subsys,
@@ -21,7 +27,7 @@ stdenv.mkDerivation (finalattrs:
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                  ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
-    doCheck = true;
+    inherit doCheck;
     nativeBuildInputs = [
       cmake catch2 xo-cmake
     ]
@@ -33,6 +39,9 @@ stdenv.mkDerivation (finalattrs:
       xo-subsys
       xo-alloc2
       xo-printable2
+      xo-reflect
+      xo-reflectable2
+      xo-printjson
       xo-arena
     ];
   })

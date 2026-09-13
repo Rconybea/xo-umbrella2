@@ -38,6 +38,7 @@ namespace xo {
     using xo::mm::ArenaConfig;
     using xo::mm::ArenaNameStr;
     using xo::facet::with_facet;
+    using xo::facet::vt;
 
     namespace ut {
         namespace {
@@ -102,7 +103,14 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
-            auto gco = with_facet<AGCObject>::mkobj(DFloat::_box(alloc, 1.5));
+            /* vt<>, NOT with_facet<>::mkobj -- mkobj hands back a TYPED
+             * obj<AGCObject,DFloat> (obj.hpp:165), which FopTdx resolves at
+             * compile time and which therefore never reaches the rotation.
+             * The conversion below is what erases it.  Corrected 2026-09-13:
+             * this case passed with register_impl<AReflectable,DFloat>()
+             * commented out, i.e. it was green without testing its subject.
+             */
+            vt<AGCObject> gco = with_facet<AGCObject>::mkobj(DFloat::_box(alloc, 1.5));
 
             std::stringstream ss;
             print_json.print_obj(gco, &ss);

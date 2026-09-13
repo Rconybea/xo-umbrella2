@@ -7,6 +7,7 @@ set(UTEST_SRCS
     DString.test.cpp
     StringOps.test.cpp
     printable_render.test.cpp
+    json_render.test.cpp
 )
 
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
@@ -15,5 +16,7 @@ xo_self_dependency(${UTEST_EXE} xo_stringtable2)
 xo_dependency(${UTEST_EXE} xo_testutil)
 # PrettySink (via toppstr) for the new-protocol renderings
 xo_dependency(${UTEST_EXE} xo_indentlog2)
+# PrintJson -- json_render.test.cpp
+xo_dependency(${UTEST_EXE} printjson)
 #xo_dependency(${UTEST_EXE} randomgen)
 xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)

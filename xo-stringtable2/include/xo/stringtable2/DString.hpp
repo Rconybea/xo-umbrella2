@@ -8,6 +8,7 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/reflect/TaggedPtr.hpp>
 #include <cstdint>
 #include <functional>
 #include <string_view>
@@ -236,6 +237,32 @@ namespace xo {
 
 
             void pretty(xo::pp::PpSink & sink) const;
+
+            ///@}
+            /** @defgroup dstring-reflectable-methods reflectable facet methods **/
+            ///@{
+
+            /** reflection: hand back a TaggedPtr for this DString.
+             *
+             *  There is deliberately no @c reflect_self() counterpart here,
+             *  and the difference from DFloat is @ref chars_ .  A flexible
+             *  array member has an incomplete type, so @c StructReflector
+             *  cannot take @c &DString::chars_ ; the most a member-wise
+             *  description could say is {capacity_, size_}, which describes
+             *  the header and omits the entire payload.
+             *
+             *  So DString reflects as the unreflected default -- @c AtomicTdx,
+             *  hence @c mt_atomic (xo-reflect/include/xo/reflect/Reflect.hpp).
+             *  A leaf, which is what a string is, and what std::string already
+             *  reflects as.  That makes the json printer load-bearing rather
+             *  than cosmetic: for DFloat a printer merely overrode a faithful
+             *  struct rendering, here it is the only thing that carries the
+             *  characters.  See SetupStringtable2::provide_json_printers.
+             *
+             *  Borrowed, like every fop TaggedPtr: valid while the arena
+             *  holding this DString is.
+             **/
+            xo::reflect::TaggedPtr self_tp();
 
             ///@}
             /** @defgroup dstring-gcobject-methods gcobject facet methods **/
