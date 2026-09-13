@@ -24,7 +24,7 @@ namespace xo {
          *  Primary driver for printjson init
          **/
         PrintJsonAppcx(const PrintJsonConfig & cfg,
-                       ReflectAppcx & reflect_appcx);
+                       const ReflectAppcx & reflect_appcx);
 
         /** Template for printjson init. Works with AppConfig, AppContext
          *
@@ -40,7 +40,11 @@ namespace xo {
         const PrintJsonConfig & config() const { return config_; }
         PrintJson * print_json() const { return print_json_.get(); }
         /** report memory consumption, one @ref MemorySizeInfo per pool.
-         *  (placeholder. enable when PrintJson refactored to use DArena)
+         *
+         *  Placeholder: reports nothing, because PrintJson has no pools to
+         *  report yet.  Becomes meaningful when PrintJson is refactored to use
+         *  a DArena.  Present now so the shape matches every other Appcx -- a
+         *  caller walking the stack need not special-case this one.
          **/
         void visit_pools(const MemorySizeVisitor &) const {}
 
@@ -53,6 +57,9 @@ namespace xo {
 
         /** json printers, indexed by type **/
         rp<PrintJson> print_json_;
+
+        /** xo-reflect/ context **/
+        const ReflectAppcx & reflect_appcx_;
     };
 
     template <>
