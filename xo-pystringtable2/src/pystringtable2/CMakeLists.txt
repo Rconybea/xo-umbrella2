@@ -14,6 +14,10 @@ xo_pybind11_dependency(${SELF_LIB} xo_stringtable2)
 # header_dependency: we need its generated .hpp, not its lib
 xo_pybind11_header_dependency(${SELF_LIB} xo_pyfacet)
 xo_pybind11_dependency(${SELF_LIB} xo_facet)
+xo_pybind11_dependency(${SELF_LIB} xo_printable2)
+xo_pybind11_dependency(${SELF_LIB} xo_alloc2)
+xo_pybind11_dependency(${SELF_LIB} xo_ppsink)
+xo_pybind11_header_dependency(${SELF_LIB} xo_pyindentlog2)
 # MemorySizeInfo, the element type collect_pools() returns, is registered by
 # xo_pyarena; CollectPools.hpp comes from the same subsystem
 xo_pybind11_header_dependency(${SELF_LIB} xo_pyarena)

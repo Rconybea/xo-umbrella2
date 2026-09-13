@@ -1,4 +1,4 @@
-"""Unit tests for xo.stringtable2's subsystem-configuration contract.
+"""Unit tests for xo.stringtable2: subsystem configuration, and String.
 
 Run by ctest through the generated xo-python wrapper, which is what puts the
 extension modules on PYTHONPATH -- so a failure here is equally a failure of
@@ -38,6 +38,18 @@ class ImportTestCase(unittest.TestCase):
     def test_expected_types_are_registered(self):
         self.assertTrue(hasattr(st, "Stringtable2Config"))
         self.assertTrue(hasattr(st, "Stringtable2Appcx"))
+        self.assertTrue(hasattr(st, "String"))
+
+    def test_imported_types_are_reachable(self):
+        """String.make and String.pretty name types this module does not own
+
+        AllocFlywheel comes from xo.facet, PpSink from xo.indentlog2, and
+        pybind permits one registration per c++ type -- so pystringtable2
+        imports both at init rather than registering them.  Without those
+        imports the signatures below would not resolve.
+        """
+        self.assertTrue(hasattr(f, "AllocFlywheel"))
+        self.assertTrue(hasattr(il, "PrettySink"))
 
 
 class ConfigurationTestCase(unittest.TestCase):
@@ -67,6 +79,91 @@ class ConfigurationTestCase(unittest.TestCase):
         stops being empty, something has taken ownership it was not meant to.
         """
         self.assertEqual(STRINGTABLE2_CX.visit_pools(), [])
+
+
+
+class StringTestCase(unittest.TestCase):
+    """copying a string into an arena, and getting it back out
+
+    Mirrors FloatTestCase in xo-pyobject2/utest, which is the reference for how
+    a representation is bound (.xo-backlog/pyobject2/spec.md).
+    """
+
+    def setUp(self):
+        self.fw = f.AllocFlywheel.make_default_app(FACET_CX)
+
+    def test_value_round_trips(self):
+        for v in ("", "a", "hello", "x" * 200):
+            self.assertEqual(st.String.make(self.fw, v).value(), v)
+
+    def test_str_agrees_with_value(self):
+        s = st.String.make(self.fw, "hello")
+        self.assertEqual(str(s), s.value())
+
+    def test_repr(self):
+        """unquoted, like Float's -- __repr__ is the pretty rendering
+
+        Worth pinning because it is the surprising half: repr() of a python str
+        would quote.  This one goes through TempPpSink, so it reports what the
+        object prints as, not what it would be typed as.
+        """
+        self.assertEqual(repr(st.String.make(self.fw, "hello")), "hello")
+
+    def test_pretty_into_a_sink(self):
+        sink = il.PrettySink.make2str(il.PpConfig.scratch_plain(80))
+        st.String.make(self.fw, "hello").pretty(sink)
+        self.assertEqual(sink.output(), "hello")
+
+    def test_a_sink_accumulates(self):
+        """pretty() must not complete the record, or composition breaks"""
+        sink = il.PrettySink.make2str(il.PpConfig.scratch_plain(80))
+        for v in ("ab", "cd", "ef"):
+            st.String.make(self.fw, v).pretty(sink)
+        self.fw.pretty(sink)
+        self.assertEqual(sink.output(), "abcdef<AllocFlywheel>")
+
+    def test_capacity_is_len_plus_nul(self):
+        """DString reserves size+1 chars: the null terminator is real storage
+
+        _from_view_aux sets capacity_ = len + 1 (DString.cpp).  So for anything
+        make() produces this accessor is derivable, and it only becomes
+        interesting against DString::empty(mm, cap), which python cannot reach.
+        """
+        for v in ("", "a", "hello"):
+            self.assertEqual(st.String.make(self.fw, v).capacity(), len(v) + 1)
+
+    def test_len_is_bytes_not_characters(self):
+        """the one place this wrapper can mislead
+
+        __len__ reports DString's byte extent; len(s.value()) counts python
+        codepoints.  They agree for ascii and diverge for anything else, so a
+        case with both is the only way to keep the distinction honest.
+        """
+        ascii_s = st.String.make(self.fw, "hello")
+        self.assertEqual(len(ascii_s), len(ascii_s.value()))
+
+        multi = st.String.make(self.fw, "\u00e9\u4e2d")
+        self.assertEqual(len(multi.value()), 2)    # codepoints
+        self.assertEqual(len(multi), 5)            # utf-8 bytes
+
+    def test_embedded_nul_survives(self):
+        """size_ is the authority on extent, not the null terminator
+
+        The python half of what xo-stringtable2/utest/json_render.test.cpp pins
+        for the json printer: an accessor reading through
+        operator std::string_view() would truncate to "a" here.
+        """
+        s = st.String.make(self.fw, "a\x00b")
+        self.assertEqual(s.value(), "a\x00b")
+        self.assertEqual(len(s), 3)
+
+    def test_handle_keeps_the_flywheel_alive(self):
+        """the object outlives every other reference to its arena"""
+        import gc
+        x = st.String.make(self.fw, "survives")
+        self.fw = None
+        gc.collect()
+        self.assertEqual(x.value(), "survives")
 
 
 class ConfigurationContractTestCase(unittest.TestCase):

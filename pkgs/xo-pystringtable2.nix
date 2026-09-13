@@ -12,9 +12,14 @@
   # FacetAppcx is configure()'s second argument; xo-pyfacet registers it with
   # pybind11 and this module imports that at init
   xo-facet, xo-pyfacet,
+  # String's bindings: APrintable (the facet its handle is keyed on),
+  # IAllocator_DArena (obj<AAllocator> over the flywheel's arena), and PpSink
+  # (String.pretty's argument type)
+  xo-printable2, xo-alloc2, xo-ppsink,
   # MemorySizeInfo, the element type visit_pools() returns
   xo-arena, xo-pyarena,
-  # xo.facet's configure_all() reaches xo.indentlog2, which the tests use
+  # PpSink is REGISTERED by xo-pyindentlog2, which this module imports at init;
+  # xo.facet's configure_all() reaches xo.indentlog2 as well
   xo-pyindentlog2,
 
   doCheck ? true,
@@ -56,6 +61,9 @@ stdenv.mkDerivation (finalattrs:
       xo-stringtable2
       xo-facet
       xo-pyfacet
+      xo-printable2
+      xo-alloc2
+      xo-ppsink
       xo-arena
       xo-pyarena
       xo-pyindentlog2
