@@ -34,8 +34,11 @@ let
     xo-randomgen      = callPackage pkgs/xo-randomgen.nix      { stdenv = jitStdenv;                   buildExamples = true; };
     xo-reflectutil    = callPackage pkgs/xo-reflectutil.nix    { stdenv = jitStdenv; };
     xo-arena          = callPackage pkgs/xo-arena.nix          { stdenv = jitStdenv; buildDocs = true; };
+    xo-pyarena        = callPackage pkgs/xo-pyarena.nix        { stdenv = jitStdenv; };
     xo-indentlog2     = callPackage pkgs/xo-indentlog2.nix     { stdenv = jitStdenv; buildDocs = false; buildExamples = false; };
+    xo-pyindentlog2   = callPackage pkgs/xo-pyindentlog2.nix   { stdenv = jitStdenv; };
     xo-facet          = callPackage pkgs/xo-facet.nix          { stdenv = jitStdenv; };
+    xo-pyfacet        = callPackage pkgs/xo-pyfacet.nix        { stdenv = jitStdenv; };
     xo-printable2     = callPackage pkgs/xo-printable2.nix     { stdenv = jitStdenv; };
     xo-testutil       = callPackage pkgs/xo-testutil.nix       { stdenv = jitStdenv; };
     xo-alloc2         = callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
@@ -48,6 +51,7 @@ let
     xo-pyprintjson    = callPackage pkgs/xo-pyprintjson.nix    { stdenv = jitStdenv; };
     xo-stringtable2   = callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
     xo-object2        = callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
+    xo-pyobject2      = callPackage pkgs/xo-pyobject2.nix      { stdenv = jitStdenv; };
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
     xo-type           = callPackage pkgs/xo-type.nix           { stdenv = jitStdenv; };
     xo-procedure2     = callPackage pkgs/xo-procedure2.nix     { stdenv = jitStdenv; };
@@ -59,6 +63,9 @@ let
     xo-reader2        = callPackage pkgs/xo-reader2.nix        { stdenv = jitStdenv; };
     xo-interpreter2   = callPackage pkgs/xo-interpreter2.nix   { stdenv = jitStdenv; };
     xo-allocutil      = callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
+    xo-callback2      = callPackage pkgs/xo-callback2.nix      { stdenv = jitStdenv; };
+    xo-reactor2       = callPackage pkgs/xo-reactor2.nix       { stdenv = jitStdenv; };
+    xo-pyreactor2     = callPackage pkgs/xo-pyreactor2.nix     { stdenv = jitStdenv; };
     xo-alloc          = callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-ratio          = callPackage pkgs/xo-ratio.nix          { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-unit           = callPackage pkgs/xo-unit.nix           { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };

@@ -23,9 +23,12 @@ in
       xo-flatstring
       xo-reflectutil
       xo-arena
+      xo-pyindentlog2
       xo-facet
+      xo-pyfacet
       xo-printable2
       xo-testutil
+      xo-pyarena
       xo-indentlog2
       xo-alloc2
       xo-refcnt
@@ -37,6 +40,7 @@ in
       xo-pyprintjson
       xo-stringtable2
       xo-object2
+      xo-pyobject2
       xo-gc
       xo-type
       xo-procedure2
@@ -52,6 +56,9 @@ in
       xo-unit
       xo-pyunit
       xo-callback
+      xo-callback2
+      xo-reactor2
+      xo-pyreactor2
       xo-alloc
       xo-object
       xo-ordinaltree
