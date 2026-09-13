@@ -1824,8 +1824,11 @@ endmacro()
 # use this for a subdir that builds a python library using pybind11
 #
 # expecting the following
-# 1. a directory pyfoo/ -> library pyfoo
-# 2. pyfoo/pyfoo.hpp.in -> pyfoo/pyfoo.hpp
+# 1. a directory pyfoo/ -> cmake target xo_pyfoo -> python module xo.foo
+# 2. the module's name macros generated into
+#      <bindir>/include/xo/pyfoo/pyfoo.hpp
+#    from the ONE shared template share/xo-macros/pymodule-hpp.in.  The
+#    subsystem supplies no template of its own.
 #
 macro(xo_pybind11_library target projectTargets source_files)
     xo_strip_xo_prefix(${target} _nxo_target)
@@ -1841,7 +1844,7 @@ macro(xo_pybind11_library target projectTargets source_files)
     # SELF_MODULE, not SELF_QUALNAME, is what PYBIND11_MODULE() takes: CPython
     # looks for PyInit_<last dotted component>, so the init symbol must be
     # `facet`.  The `xo.` prefix comes entirely from the directory the .so sits
-    # in.  Both are substituted into ${_nxo_target}.hpp.in.
+    # in.  Both are substituted into the shared pymodule-hpp.in template.
     string(REGEX REPLACE "^py" "" SELF_MODULE ${_nxo_target})
     set(SELF_QUALNAME "${PROJECT_INCLUDE_STEM_DIR}.${SELF_MODULE}")
 
