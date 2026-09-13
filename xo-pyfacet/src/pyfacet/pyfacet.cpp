@@ -31,51 +31,38 @@ namespace xo {
 
     namespace facet {
         namespace {
-            /** the FacetAppcx for this python process.
+            /** Enforce at most one FacetAppcx per python instance.
+             *  Desirable because context sets up global singletons
+             *  (FacetRegistry, TypeRegistry).
              *
-             *  Owned here rather than in xo-facet, so that a standalone c++
-             *  application never acquires a singleton.  See the equivalent in
-             *  xo-pyindentlog2 for why an import cannot be the trigger.
+             *  @p il_appcx  Context for xo-indentlog2.
+             *  (see xo-pyindentlog2.configure()).
+             *
+             *  @return facet appcx, to be owned by python.
              **/
-            struct PyFacetAppcx {
-                static std::unique_ptr<FacetAppcx> appcx_;
+            std::unique_ptr<FacetAppcx>
+            configure_once(const FacetConfig & cfg,
+                           const Indentlog2Appcx & il_appcx)
+            {
+                /** true once this function has run **/
+                static bool s_configured = false;
 
-                static FacetAppcx & appcx() {
-                    if (!appcx_) {
-                        throw std::runtime_error
-                            ("xo_pyfacet.appcx: not configured;"
-                             " call xo_pyfacet.configure(cfg) first");
-                    }
-
-                    return *appcx_;
+                /* throws rather than silently ignoring cfg: capacities are
+                 * honored on first construction only, so a second
+                 * configure() could not deliver what it appears to promise
+                 */
+                if (s_configured) {
+                    throw std::runtime_error
+                        ("xo_pyfacet.configure: already configured;"
+                         " capacities cannot be changed after the first call");
                 }
 
-                /** @p il_appcx  the context this one is built on, as
-                 *  returned by xo_pyindentlog2.configure().
-                 *
-                 *  Taken as an argument rather than fetched from that module:
-                 *  xo-facet's dependence on xo-indentlog2 is then visible in
-                 *  the call, and mirrors the c++ ctor, which asks for the same
-                 *  thing (FacetAppcx(cfg, const Indentlog2Appcx &)).
-                 *
-                 *  @return the context just established.
-                 **/
-                static FacetAppcx & configure(const FacetConfig & cfg,
-                                              const Indentlog2Appcx & il_appcx)
-                {
-                    if (appcx_) {
-                        throw std::runtime_error
-                            ("xo_pyfacet.configure: already configured;"
-                             " capacities cannot be changed after the first call");
-                    }
+                auto retval = std::make_unique<FacetAppcx>(cfg, il_appcx);
 
-                    appcx_ = std::make_unique<FacetAppcx>(cfg, il_appcx);
+                s_configured = true;
 
-                    return *appcx_;
-                }
-            };
-
-            std::unique_ptr<FacetAppcx> PyFacetAppcx::appcx_;
+                return retval;
+            }
 
             /** configure xo-facet and everything below it, in one call.
              *
@@ -108,21 +95,40 @@ namespace xo {
              *  InitEvidence out of configs), but pinning the default at import
              *  time would quietly depend on it staying that way.
              **/
-            FacetAppcx & configure_all(std::optional<FacetConfig> f_cfg,
-                                       std::optional<Indentlog2Config> il_cfg)
+            py::object configure_all(std::optional<FacetConfig> f_cfg,
+                                     std::optional<Indentlog2Config> il_cfg)
             {
                 /* through the module object, not by linkage: xo_pyindentlog2
                  * owns its own context, and python loads modules RTLD_LOCAL
                  */
                 auto il_module = py::module_::import(PYINDENTLOG2_MODULE_NAME_STR);
 
-                auto & il_appcx
+                /* HELD, not cast from a temporary.  xo_pyindentlog2.configure()
+                 * now hands ownership to its caller, so the returned python
+                 * object IS the context's owner: casting a temporary to
+                 * Indentlog2Appcx & would destroy it at the end of the full
+                 * expression and leave the FacetAppcx below holding a dangling
+                 * reference.
+                 */
+                py::object il_obj
                     = il_module.attr("configure")
-                          (il_cfg.value_or(Indentlog2Config::make_default()))
-                          .cast<Indentlog2Appcx &>();
+                          (il_cfg.value_or(Indentlog2Config::make_default()));
 
-                return PyFacetAppcx::configure(f_cfg.value_or(FacetConfig::make_default()),
-                                               il_appcx);
+                auto & il_appcx = il_obj.cast<Indentlog2Appcx &>();
+
+                py::object f_obj
+                    = py::cast(configure_once(f_cfg.value_or(FacetConfig::make_default()),
+                                              il_appcx));
+
+                /* the same edge py::keep_alive<0,2> declares on configure(),
+                 * established by hand because here the patient is a local
+                 * rather than an argument: the returned context holds a
+                 * reference into il_obj, so il_obj must outlive it.  Without
+                 * this the indentlog2 context dies when this function returns.
+                 */
+                py::detail::keep_alive_impl(f_obj, il_obj);
+
+                return f_obj;
             }
         } /*namespace*/
 
@@ -199,19 +205,27 @@ namespace xo {
                 .def("__repr__", [](const FacetAppcx &) {
                         return std::string("<FacetAppcx>"); });
 
-            m.def("configure", &PyFacetAppcx::configure,
+            /* keep_alive<0,2>: the returned context holds a reference to the
+             * indentlog2 context (argument 2), so python must not collect that
+             * one first.  This is what makes the stack safe to build a level at
+             * a time -- the dependency edge becomes a python reference.
+             */
+            m.def("configure", &configure_once,
                   py::arg("config"),
                   py::arg("indentlog2_appcx"),
-                  py::return_value_policy::reference,
-                  "establish this process's xo-facet context, and return it."
+                  py::keep_alive<0, 2>(),
+                  "establish an xo-facet context, and return it."
+                  "  The caller owns it; when the last python reference goes,"
+                  " so does the context."
                   "  Takes the context returned by xo_pyindentlog2.configure(),"
                   " which xo-facet is built on."
-                  "  Throws if already configured.");
+                  "  Throws if already configured: FacetRegistry and"
+                  " TypeRegistry are process-wide, so a second context could"
+                  " not honour a different config.");
 
             m.def("configure_all", &configure_all,
                   py::arg("facet_config") = py::none(),
                   py::arg("indentlog2_config") = py::none(),
-                  py::return_value_policy::reference,
                   "configure xo-facet and the xo-indentlog2 it stands on,"
                   " and return the xo-facet context."
                   "  Either config may be omitted, meaning that subsystem's"
@@ -219,11 +233,6 @@ namespace xo {
                   "  Equivalent to configure(facet_config,"
                   " xo_pyindentlog2.configure(indentlog2_config))."
                   "  Throws if either is already configured.");
-
-            m.def("appcx", &PyFacetAppcx::appcx,
-                  py::return_value_policy::reference,
-                  "this process's xo-facet context."
-                  "  Throws if configure() has not been called.");
 
             // ----------------------------------------------------------------
             // AllocFlywheel -- consolidated arena + root set, the thing that
@@ -240,18 +249,26 @@ namespace xo {
                  * movable -- Refcount's atomic member deletes both).
                  */
 
+                /* keep_alive<0,1>: AllocFlywheel stores `const FacetAppcx &`
+                 * (facet_appcx_), so the flywheel must not outlive the context
+                 * it was made from.  Load-bearing since appcx-config/04: while
+                 * the module owned the context, it outlived everything by
+                 * construction.
+                 */
                 .def_static("make_app",
                             &AllocFlywheel::make_app,
                             py::arg("appcx"),
                             py::arg("storage_cfg"),
                             py::arg("strong_root_cfg"),
                             py::arg("weak_root_cfg"),
+                            py::keep_alive<0, 1>(),
                             "create a flywheel: primary arena, strong root set,"
                             " weak root set")
 
                 .def_static("make_default_app",
                             &AllocFlywheel::make_default_app,
                             py::arg("appcx"),
+                            py::keep_alive<0, 1>(),
                             "create a flywheel: with default config for arena storage")
 
                 /* memory reporting.  Returns the pools rather than taking a

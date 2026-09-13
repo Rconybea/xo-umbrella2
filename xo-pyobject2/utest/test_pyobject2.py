@@ -215,15 +215,77 @@ class ConfigurationContractTestCase(unittest.TestCase):
         return subprocess.run([sys.executable, "-c", body],
                               capture_output=True, text=True)
 
-    def test_appcx_before_configure_raises(self):
+    def test_context_is_owned_by_the_caller(self):
+        """configure() hands ownership to python; the module keeps nothing
+
+        Neither module offers an appcx() accessor any more: each used to own
+        the context and hand out a reference, and now the caller owns it.  What
+        is left of the one-shot is a flag, not storage -- see
+        test_second_configure_raises.
+        """
         r = self.run_in_fresh_interpreter(
-            "import xo_pyfacet as f\n"
-            "try:\n"
-            "    f.appcx()\n"
-            "except RuntimeError as e:\n"
-            "    print('RAISED', e)\n")
-        self.assertIn("RAISED", r.stdout)
-        self.assertIn("not configured", r.stdout)
+            "import xo_pyindentlog2 as il, xo_pyfacet as f\n"
+            "print('F_ACCESSOR', hasattr(f, 'appcx'))\n"
+            "print('IL_ACCESSOR', hasattr(il, 'appcx'))\n"
+            "cx = f.configure_all()\n"
+            "print('OWNED', type(cx).__name__)\n")
+        self.assertIn("F_ACCESSOR False", r.stdout)
+        self.assertIn("IL_ACCESSOR False", r.stdout)
+        self.assertIn("OWNED FacetAppcx", r.stdout)
+
+    def test_context_keeps_its_dependency_alive(self):
+        """keep_alive<0,2>: the facet context holds a reference into the
+        indentlog2 one, so dropping the caller's handle must not collect it
+
+        Observed through a weakref, NOT by reading the context afterwards:
+        without the keep_alive the c++ object is freed, and reading it is a
+        use-after-free that happens to return the right bytes -- checked, and
+        it passes either way.  pybind holds the patient in its own internals
+        map, which python's gc cannot see (gc.get_referents is empty), so a
+        weakref on the python object is the observable that discriminates.
+
+        It also only discriminates because xo_pyindentlog2.configure() hands
+        ownership to its caller too.  While that module owned its context in a
+        module static, this passed with the keep_alive removed.
+        """
+        r = self.run_in_fresh_interpreter(
+            "import gc, weakref, xo_pyindentlog2 as il, xo_pyfacet as f\n"
+            "il_cx = il.configure(il.Indentlog2Config.make_default())\n"
+            "ref = weakref.ref(il_cx)\n"
+            "cx = f.configure(f.FacetConfig.make_default(), il_cx)\n"
+            "del il_cx\n"
+            "gc.collect()\n"
+            "print('ALIVE', ref() is not None)\n")
+        self.assertIn("ALIVE True", r.stdout)
+
+    def test_flywheel_keeps_its_context_alive(self):
+        """keep_alive<0,1> on make_app: AllocFlywheel stores a reference to the
+        FacetAppcx, so a flywheel must not outlive the context it came from
+
+        Load-bearing only since python started owning the context: while the
+        module owned it, it outlived everything by construction.
+        """
+        r = self.run_in_fresh_interpreter(
+            "import gc, weakref, xo_pyfacet as f\n"
+            "cx = f.configure_all()\n"
+            "fw = f.AllocFlywheel.make_default_app(cx)\n"
+            "ref = weakref.ref(cx)\n"
+            "del cx\n"
+            "gc.collect()\n"
+            "print('ALIVE', ref() is not None)\n")
+        self.assertIn("ALIVE True", r.stdout)
+
+    def test_configure_all_keeps_the_stack_alive(self):
+        """configure_all() builds the indentlog2 context as a local, so its
+        keep_alive is established by hand -- easy to omit, hence pinned
+        """
+        r = self.run_in_fresh_interpreter(
+            "import gc, weakref, xo_pyfacet as f\n"
+            "cx = f.configure_all()\n"
+            "ref = weakref.ref(cx.indentlog2_appcx())\n"
+            "gc.collect()\n"
+            "print('ALIVE', ref() is not None)\n")
+        self.assertIn("ALIVE True", r.stdout)
 
     def test_second_configure_raises(self):
         r = self.run_in_fresh_interpreter(

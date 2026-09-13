@@ -42,53 +42,34 @@ namespace xo {
 
     namespace pp {
         namespace {
-            /** the Indentlog2Appcx for this python process.
+            /** Enforce at most one Indentlog2Appcx per python instance.
+             *  Desirable because context sets up global singletons
+             *  (PpSinkFactory, TempArena).
              *
-             *  Analogue of FacetUtestAppcx in xo-facet/utest: a python process
-             *  is a host that assembles a context, exactly as a c++ main() or a
-             *  test main() does.  It lives HERE rather than in xo-indentlog2 so
-             *  that a standalone c++ application never acquires a singleton.
-             *
-             *  NOT constructed at import.  An import carries no arguments, so
-             *  making it the trigger would force a default configuration and
-             *  leave python unable to choose what a main() chooses freely.
-             *  configure() is the trigger instead.
+             *  @return indentlog2 appcx, to be owned by python.
              **/
-            struct PyIndentlog2Appcx {
-                static std::unique_ptr<Indentlog2Appcx> appcx_;
+            std::unique_ptr<Indentlog2Appcx>
+            configure_once(const Indentlog2Config & cfg)
+            {
+                /** true once this function has run **/
+                static bool s_configured = false;
 
-                static Indentlog2Appcx & appcx() {
-                    if (!appcx_) {
-                        throw std::runtime_error
-                            ("xo_pyindentlog2.appcx: not configured;"
-                             " call xo_pyindentlog2.configure(cfg) first");
-                    }
-
-                    return *appcx_;
+                /* throws rather than silently ignoring cfg: capacities are
+                 * honored on first construction only, so a second
+                 * configure() could not deliver what it appears to promise
+                 */
+                if (s_configured) {
+                    throw std::runtime_error
+                        ("xo_pyindentlog2.configure: already configured;"
+                         " capacities cannot be changed after the first call");
                 }
 
-                /** @return the context just established, so a caller can
-                 *  hand it to the subsystem above rather than leaving that one
-                 *  to reach back for it.
-                 **/
-                static Indentlog2Appcx & configure(const Indentlog2Config & cfg) {
-                    /* throws rather than silently ignoring cfg: capacities are
-                     * honored on first construction only, so a second
-                     * configure() could not deliver what it appears to promise
-                     */
-                    if (appcx_) {
-                        throw std::runtime_error
-                            ("xo_pyindentlog2.configure: already configured;"
-                             " capacities cannot be changed after the first call");
-                    }
+                auto retval = std::make_unique<Indentlog2Appcx>(cfg);
 
-                    appcx_ = std::make_unique<Indentlog2Appcx>(cfg);
+                s_configured = true;
 
-                    return *appcx_;
-                }
-            };
-
-            std::unique_ptr<Indentlog2Appcx> PyIndentlog2Appcx::appcx_;
+                return retval;
+            }
         } /*namespace*/
 
         PYBIND11_MODULE(PYINDENTLOG2_MODULE_NAME(), m) {
@@ -162,17 +143,14 @@ namespace xo {
                 .def("__repr__", [](const Indentlog2Appcx &) {
                         return std::string("<Indentlog2Appcx>"); });
 
-            m.def("configure", &PyIndentlog2Appcx::configure,
+            m.def("configure", &configure_once,
                   py::arg("config"),
-                  py::return_value_policy::reference,
-                  "establish this process's xo-indentlog2 context, and return it."
-                  "  Pass the result to the configure() of a subsystem above."
+                  "establish an xo-indentlog2 context, and return it."
+                  "  The caller owns it; when the last python reference goes,"
+                  " so does the context."
+                  "  Pass the result to the configure() of a subsystem above,"
+                  " which will keep it alive for as long as it needs it."
                   "  Throws if already configured.");
-
-            m.def("appcx", &PyIndentlog2Appcx::appcx,
-                  py::return_value_policy::reference,
-                  "this process's xo-indentlog2 context."
-                  "  Throws if configure() has not been called.");
 
             py::class_<PpStyle>(m, "PpStyle")
                 .def(py::init<>())
