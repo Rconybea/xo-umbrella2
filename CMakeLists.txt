@@ -105,6 +105,7 @@ add_subdirectory(xo-reflectable2) # reflection for fomo objects
 add_subdirectory(xo-printjson)    # json serialization; levelled here so the
 add_subdirectory(xo-pyprintjson)  #   types below can register their own printers
 add_subdirectory(xo-stringtable2) # experiment w/ facet object model
+add_subdirectory(xo-pystringtable2) # python bindings for xo-stringtable2
 add_subdirectory(xo-object2)      # experiment w/ facet object model
 add_subdirectory(xo-pyobject2)    # python bindings for xo-object2
 add_subdirectory(xo-gc)           # incremental gc + facet object model

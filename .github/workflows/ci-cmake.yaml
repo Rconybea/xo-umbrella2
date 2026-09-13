@@ -523,6 +523,24 @@ jobs:
           xo-build --install xo-stringtable2
           echo "::endgroup::"
 
+      - name: build xo-pystringtable2
+        run: |
+          echo "::group::xo-pystringtable2 configure"
+          xo-build --configure --with-utests --with-examples xo-pystringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-pystringtable2 build"
+          xo-build --build xo-pystringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-pystringtable2 utest"
+          xo-build --utest xo-pystringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-pystringtable2 install"
+          xo-build --install xo-pystringtable2
+          echo "::endgroup::"
+
       - name: build xo-object2
         run: |
           echo "::group::xo-object2 configure"

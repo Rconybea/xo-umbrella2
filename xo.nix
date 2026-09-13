@@ -50,6 +50,7 @@ let
     xo-printjson      = callPackage pkgs/xo-printjson.nix      { stdenv = jitStdenv; };
     xo-pyprintjson    = callPackage pkgs/xo-pyprintjson.nix    { stdenv = jitStdenv; };
     xo-stringtable2   = callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
+    xo-pystringtable2 = callPackage pkgs/xo-pystringtable2.nix { stdenv = jitStdenv; };
     xo-object2        = callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
     xo-pyobject2      = callPackage pkgs/xo-pyobject2.nix      { stdenv = jitStdenv; };
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };

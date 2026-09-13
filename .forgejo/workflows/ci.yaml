@@ -238,6 +238,12 @@ jobs:
           nix-build ci.nix -A xo-stringtable2 -o "$XO_GCROOTS/xo-stringtable2"
           ls -l "$XO_GCROOTS/xo-stringtable2"
 
+      - name: build xo-pystringtable2
+        run: |
+          echo nix-build ci.nix -A xo-pystringtable2 -o "$XO_GCROOTS/xo-pystringtable2"
+          nix-build ci.nix -A xo-pystringtable2 -o "$XO_GCROOTS/xo-pystringtable2"
+          ls -l "$XO_GCROOTS/xo-pystringtable2"
+
       - name: build xo-object2
         run: |
           echo nix-build ci.nix -A xo-object2 -o "$XO_GCROOTS/xo-object2"

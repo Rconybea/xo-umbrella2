@@ -39,6 +39,7 @@ in
       xo-printjson
       xo-pyprintjson
       xo-stringtable2
+      xo-pystringtable2
       xo-object2
       xo-pyobject2
       xo-gc
