@@ -13,6 +13,7 @@
 
   buildDocs ? false,
   buildExamples ? false,
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -23,18 +24,16 @@ stdenv.mkDerivation (finalattrs:
     src = ../xo-reader;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"]
                  ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
                  ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
 
     inherit buildDocs;
     inherit buildExamples;
 
-    doCheck = true;
+    inherit doCheck;
 
-    # PUBLIC deps: xo_readerConfig.cmake does find_dependency() on these, so a
-    # consumer must be able to resolve them -- nativeBuildInputs would satisfy
-    # xo-reader's own build but propagate nothing.  Latent until xo-interpreter
-    # was packaged (2026-08-08) and became xo-reader's first nix consumer.
+    # PUBLIC deps, since exported xo_readerConfig.cmake does find_dependency() on them.
     propagatedBuildInputs = [ xo-expression
                               xo-tokenizer
                               xo-ppsink

@@ -27,7 +27,20 @@ namespace xo {
                 {"def foo = lambda (x : f64, y : f64) 3.1415965;"},
                 {"def foo = lambda (x : f64) x;"},
                 {"def foo = lambda (x : f64) { def y = x * x; y; };"},
-                //TEMP {"add(1,2);"},
+                /* NOT a gap: exprseq_xs::on_symbol_token rejects a toplevel
+                 * variable reference unless the session is interactive --
+                 * "policy: don't allow variable references as toplevel
+                 * expressions unless interactive session"
+                 * (xo-reader/src/reader/exprseq_xs.cpp:113).  These cases are
+                 * read with begin_translation_unit(), so the policy applies;
+                 * and `add' is undefined in this empty GlobalSymtab anyway, so
+                 * even an interactive reader would raise unknown_variable_error.
+                 *
+                 * Testing it properly needs begin_interactive_session() and a
+                 * symtab with `add' in it -- a different fixture, not another
+                 * line in this vector.
+                 */
+                //{"add(1,2);"},
             };
         }
 
