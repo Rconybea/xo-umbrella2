@@ -22,7 +22,9 @@ namespace xo {
     {
         SetupObject2::register_facets();
         SetupObject2::reflect_types();
-        SetupObject2::provide_json_printers(PrintJsonSingleton::instance().get());
+
+        // using Object2Appcx for json printers
+        //SetupObject2::provide_json_printers(PrintJsonSingleton::instance().get());
 
         CollectorTypeRegistry::instance().register_types(&SetupObject2::register_types);
     }

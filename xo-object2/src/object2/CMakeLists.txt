@@ -3,6 +3,7 @@
 set(SELF_LIB xo_object2)
 set(SELF_SRCS
     init_object2.cpp
+	Object2Appcx.cpp
     SetupObject2.cpp
 
     GCObjectConversion_DFloat.cpp

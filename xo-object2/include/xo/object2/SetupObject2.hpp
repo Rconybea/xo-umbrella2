@@ -35,4 +35,4 @@ namespace xo {
     }
 }
 
-/* end object2_register_facets.hpp */
+/* end SetupObject2.hpp */
