@@ -14,6 +14,8 @@
 #include <xo/stringtable2/String.hpp>
 #include <xo/facet/alloc/AAllocator.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
+#include <xo/object2/number/IReflectable_DFloat.hpp>
+#include <xo/printjson/PrintJson.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -24,6 +26,7 @@ namespace xo {
     using xo::pp::scope;
 
     using xo::print::APrintable;
+    using xo::reflect::AReflectable;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
@@ -38,6 +41,50 @@ namespace xo {
     using xo::facet::typeseq;
 
     namespace scm {
+        namespace {
+            /** DFloat is a BOX.  Reflection describes the box faithfully -- a
+             *  struct with a value member, see DFloat::reflect_self -- and
+             *  this printer is where the decision to render it as a bare
+             *  number instead lives.  Keeping the two apart means reflection
+             *  never has to lie about the layout to get readable JSON.
+             **/
+            class DFloatJsonPrinter : public xo::json::JsonPrinter {
+            public:
+                DFloatJsonPrinter(const xo::json::PrintJson * pjson)
+                    : xo::json::JsonPrinter(pjson) {}
+
+                virtual void print_json(TaggedPtr tp,
+                                        std::ostream * p_os) const override
+                {
+                    DFloat * x = this->check_recover_native<DFloat>(tp, p_os);
+
+                    if (x) {
+                        /* through the json printer for double, not <<:
+                         * non-finite values get special treatment there
+                         */
+                        this->pjson()->print(x->value(), p_os);
+                    }
+                } /*print_json*/
+            }; /*DFloatJsonPrinter*/
+        }
+
+        void
+        SetupObject2::reflect_types()
+        {
+            DFloat::reflect_self();
+        } /*reflect_types*/
+
+        void
+        SetupObject2::provide_json_printers(xo::json::PrintJson * p_pjson)
+        {
+            assert(p_pjson);
+
+            p_pjson->provide_printer
+                (xo::reflect::Reflect::require<DFloat>(),
+                 std::unique_ptr<xo::json::JsonPrinter>
+                     (new DFloatJsonPrinter(p_pjson)));
+        } /*provide_json_printers*/
+
         bool
         SetupObject2::register_facets()
         {
@@ -48,6 +95,7 @@ namespace xo {
 
             FacetRegistry::register_impl<AGCObject, DFloat>();
             FacetRegistry::register_impl<APrintable, DFloat>();
+            FacetRegistry::register_impl<AReflectable, DFloat>();
 
             FacetRegistry::register_impl<AGCObject, DInteger>();
             FacetRegistry::register_impl<APrintable, DInteger>();

@@ -1,0 +1,16 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/object2",
+    output_hpp_dir: "include/xo/object2",
+    output_impl_subdir: "number",
+    includes: [ "<xo/reflectable2/Reflectable.hpp>",
+                "<xo/reflectable2/detail/IReflectable_Xfer.hpp>" ],
+    local_types: [ ],
+    namespace1: "xo",
+    namespace2: "scm",
+    facet_idl: "idl/Reflectable.json5",
+    brief: "provide AReflectable interface for DFloat",
+    using_doxygen: true,
+    repr: "DFloat",
+    doc: [ "implement AReflectable for DFloat" ],
+}

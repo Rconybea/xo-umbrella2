@@ -30,6 +30,13 @@
             name: "obj_AReflectable",
             doc: [],
             definition: "xo::facet::obj<AReflectable>",
+        },
+        // NB an implementation's generated header aliases only the types
+        // listed here, so self_tp()'s return type must appear.
+        {
+            name: "TaggedPtr",
+            doc: ["reflect's (TypeDescr, address) pair"],
+            definition: "xo::reflect::TaggedPtr",
         }
     ],
     const_methods: [],

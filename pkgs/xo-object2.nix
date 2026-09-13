@@ -8,6 +8,10 @@
   xo-reflect,
   xo-alloc2,
   xo-printable2,
+  xo-reflectable2,
+  # SetupObject2 registers object2's json printers; possible because
+  # xo-printjson is levelled below xo-object2
+  xo-printjson,
   xo-facet,
   xo-subsys,
   xo-cmake,
@@ -37,6 +41,8 @@ stdenv.mkDerivation (finalattrs:
       xo-alloc2
       xo-stringtable2
       xo-printable2
+      xo-reflectable2
+      xo-printjson
       xo-subsys
       xo-facet
     ];

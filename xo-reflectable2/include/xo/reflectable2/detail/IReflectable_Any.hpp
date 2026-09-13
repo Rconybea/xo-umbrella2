@@ -45,6 +45,7 @@ namespace reflect {
         /** integer identifying a type **/
         using typeseq = xo::facet::typeseq;
         using obj_AReflectable = AReflectable::obj_AReflectable;
+        using TaggedPtr = AReflectable::TaggedPtr;
 
         ///@}
         /** @defgroup reflect-reflectable-any-methods **/

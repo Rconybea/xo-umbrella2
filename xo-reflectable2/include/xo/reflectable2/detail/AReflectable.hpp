@@ -50,6 +50,8 @@ public:
     using Opaque = void *;
     /**  **/
     using obj_AReflectable = xo::facet::obj<AReflectable>;
+    /** reflect's (TypeDescr, address) pair **/
+    using TaggedPtr = xo::reflect::TaggedPtr;
     ///@}
 
     /** @defgroup reflect-reflectable-methods **/

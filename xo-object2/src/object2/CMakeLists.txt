@@ -23,6 +23,7 @@ set(SELF_SRCS
     DFloat.cpp
     IGCObject_DFloat.cpp
     IPrintable_DFloat.cpp
+    IReflectable_DFloat.cpp
 
     DInteger.cpp
     IGCObject_DInteger.cpp
@@ -47,4 +48,8 @@ xo_dependency(${SELF_LIB} reflect)
 xo_dependency(${SELF_LIB} xo_stringtable2)
 xo_dependency(${SELF_LIB} xo_alloc2)
 xo_dependency(${SELF_LIB} xo_printable2)
+xo_dependency(${SELF_LIB} xo_reflectable2)
+# SetupObject2 registers object2's json printers; possible because
+# xo-printjson is levelled below xo-object2.
+xo_dependency(${SELF_LIB} printjson)
 xo_dependency(${SELF_LIB} subsys)

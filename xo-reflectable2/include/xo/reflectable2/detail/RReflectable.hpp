@@ -32,6 +32,7 @@ public:
     using DataPtr = Object::DataPtr;
     using typeseq = xo::reflect::typeseq;
     using obj_AReflectable = AReflectable::obj_AReflectable;
+    using TaggedPtr = AReflectable::TaggedPtr;
     ///@}
 
     /** @defgroup reflect-reflectable-router-ctors **/

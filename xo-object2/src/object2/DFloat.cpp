@@ -4,6 +4,8 @@
  **/
 
 #include "DFloat.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/StructReflector.hpp>
 
 namespace xo {
     using xo::facet::typeseq;
@@ -31,6 +33,22 @@ namespace xo {
              * assumed equal.
              */
             sink.pp(value_);
+        }
+
+        void
+        DFloat::reflect_self()
+        {
+            xo::reflect::StructReflector<DFloat> sr;
+
+            REFLECT_MEMBER(sr, value);
+
+            sr.require_complete();
+        }
+
+        xo::reflect::TaggedPtr
+        DFloat::self_tp()
+        {
+            return xo::reflect::Reflect::make_tp(this);
         }
 
         DFloat *

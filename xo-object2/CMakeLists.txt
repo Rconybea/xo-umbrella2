@@ -43,6 +43,13 @@ xo_add_genfacetimpl(
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-reflectable-float
+    FACET_PKG xo_reflectable2
+    INPUT idl/IReflectable_DFloat.json5
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-list
     FACET_PKG xo_alloc2
     INPUT idl/IGCObject_DList.json5
