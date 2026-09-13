@@ -5,6 +5,8 @@ set(SELF_SRCS
     init_stringtable2.cpp
     SetupStringtable2.cpp
 
+    Stringtable2Appcx.cpp
+
     StringTable.cpp
 
     DString.cpp
@@ -28,6 +30,7 @@ xo_install_include_tree3(include/xo/stringtable2)
 
 xo_dependency(${SELF_LIB} xo_alloc2)
 xo_dependency(${SELF_LIB} xo_printable2)
+xo_dependency(${SELF_LIB} xo_facet)
 xo_dependency(${SELF_LIB} subsys)
 
 # end src/stringtable2/CMakeLists.txt

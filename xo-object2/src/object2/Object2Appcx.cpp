@@ -10,9 +10,12 @@ namespace xo {
     using xo::scm::SetupObject2;
 
     Object2Appcx::Object2Appcx(const Object2Config & cfg,
-                               PrintJsonAppcx & pjson_appcx)
+                               const PrintJsonAppcx & pjson_appcx,
+                               const Stringtable2Appcx & stringtable2_appcx)
     : init_evidence_{InitSubsys<S_object2_tag>::require()},
-      config_{cfg}
+      config_{cfg},
+      printjson_appcx_{pjson_appcx},
+      stringtable2_appcx_{stringtable2_appcx}
     {
         //SetupObject2::reflect_types();
 

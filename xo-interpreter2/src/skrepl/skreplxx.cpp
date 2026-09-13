@@ -7,6 +7,7 @@
 #include <xo/interpreter2/cx/Interpreter2Appcx.hpp>
 #include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/object2/cx/Object2Appcx.hpp>
+#include <xo/stringtable2/cx/Stringtable2Appcx.hpp>
 #include <xo/printjson/cx/PrintJsonAppcx.hpp>
 #include <xo/reflect/cx/ReflectAppcx.hpp>
 #include <xo/alloc2/Arena.hpp>
@@ -182,9 +183,11 @@ namespace xo {
     MyApp::_init()
     {
         using xo::S_object2_tag;
+        using xo::S_stringtable2_tag;
         using xo::S_facet_tag;
         using xo::S_indentlog2_tag;
         using xo::Object2Config;
+        using xo::Stringtable2Config;
         using xo::PrintJsonConfig;
         using xo::ReflectConfig;
         using xo::FacetConfig;
@@ -196,12 +199,14 @@ namespace xo {
                                         S_facet_tag,
                                         S_reflect_tag,
                                         S_printjson_tag,
+                                        S_stringtable2_tag,
                                         S_object2_tag,
                                         S_interpreter2_tag>;
         using ReplAppContext = AppContext<S_indentlog2_tag,
                                           S_facet_tag,
                                           S_reflect_tag,
                                           S_printjson_tag,
+                                          S_stringtable2_tag,
                                           S_object2_tag,
                                           S_interpreter2_tag>;
 
@@ -213,6 +218,7 @@ namespace xo {
                         1024 /*c_type_registry_capacity*/),
             ReflectConfig(),
             PrintJsonConfig(),
+            Stringtable2Config(),
             Object2Config(),
             Interpreter2Config()
         };
