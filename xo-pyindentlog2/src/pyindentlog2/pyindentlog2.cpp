@@ -72,7 +72,7 @@ namespace xo {
             }
         } /*namespace*/
 
-        PYBIND11_MODULE(PYINDENTLOG2_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYINDENTLOG2_MODULE_NAME(), m) {
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.indentlog2";
 
@@ -81,7 +81,7 @@ namespace xo {
              * exactly one registration per c++ type, so we import rather than
              * re-register: without this the signatures do not resolve.
              */
-            PYARENA_IMPORT_MODULE();
+            XO_PYARENA_IMPORT_MODULE();
 
 
             // ----------------------------------------------------------------

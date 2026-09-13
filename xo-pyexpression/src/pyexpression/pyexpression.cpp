@@ -38,7 +38,7 @@ namespace xo {
 
         PYBIND11_MODULE(XO_PYEXPRESSION_MODULE_NAME(), m) {
             // e.g. for xo::reflect::TypeDescr
-            PYREFLECT_IMPORT_MODULE(); // py::module_::import("pyreflect");
+            XO_PYREFLECT_IMPORT_MODULE(); // py::module_::import("pyreflect");
 
             m.doc() = "pybind11 plugin for xo.expression";
 

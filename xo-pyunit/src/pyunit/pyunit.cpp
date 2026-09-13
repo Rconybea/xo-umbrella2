@@ -15,7 +15,7 @@ namespace xo {
     using XoQuantity = xo::qty::xquantity<double, std::int64_t>;
 
     namespace qty {
-        PYBIND11_MODULE(PYUNIT_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYUNIT_MODULE_NAME(), m) {
 
             m.doc() = "pybind11 plugin for xo.unit";
 

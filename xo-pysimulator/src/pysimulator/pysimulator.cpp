@@ -19,9 +19,9 @@ namespace xo {
     namespace py = pybind11;
 
     namespace sim {
-        PYBIND11_MODULE(PYSIMULATOR_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYSIMULATOR_MODULE_NAME(), m) {
             /* e.g. for Reactor */
-            PYREACTOR_IMPORT_MODULE(); //py::module_::import("pyreactor")
+            XO_PYREACTOR_IMPORT_MODULE();
 
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.simulator";

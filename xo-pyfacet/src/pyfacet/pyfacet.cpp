@@ -101,7 +101,7 @@ namespace xo {
                 /* through the module object, not by linkage: xo_pyindentlog2
                  * owns its own context, and python loads modules RTLD_LOCAL
                  */
-                auto il_module = py::module_::import(PYINDENTLOG2_MODULE_NAME_STR);
+                auto il_module = py::module_::import(XO_PYINDENTLOG2_MODULE_NAME_STR);
 
                 /* HELD, not cast from a temporary.  xo_pyindentlog2.configure()
                  * now hands ownership to its caller, so the returned python
@@ -132,15 +132,15 @@ namespace xo {
             }
         } /*namespace*/
 
-        PYBIND11_MODULE(PYFACET_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYFACET_MODULE_NAME(), m) {
             /* ArenaConfig (make_app's arguments) and PpSink (pretty's) are
              * registered by these modules, and pybind11 permits exactly one
              * registration per c++ type.  Imported separately rather than
              * relying on xo_pyindentlog2 to pull xo_pyarena in transitively:
              * this module names ArenaConfig itself.
              */
-            PYARENA_IMPORT_MODULE();
-            PYINDENTLOG2_IMPORT_MODULE();
+            XO_PYARENA_IMPORT_MODULE();
+            XO_PYINDENTLOG2_IMPORT_MODULE();
 
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.facet";

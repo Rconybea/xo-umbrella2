@@ -51,12 +51,12 @@ namespace xo {
             using HFloat = DObjectHandle<APrintable, DFloat>;
         } /*namespace*/
 
-        PYBIND11_MODULE(PYOBJECT2_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYOBJECT2_MODULE_NAME(), m) {
             /* AllocFlywheel and PpSink are registered by these modules, and
              * pybind11 permits exactly one registration per c++ type
              */
-            PYFACET_IMPORT_MODULE();
-            PYINDENTLOG2_IMPORT_MODULE();
+            XO_PYFACET_IMPORT_MODULE();
+            XO_PYINDENTLOG2_IMPORT_MODULE();
 
             /* facet implementations for the object2 representations.
              * Unnecessary: guaranteed by HFloat

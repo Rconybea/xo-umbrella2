@@ -24,7 +24,7 @@ namespace xo {
     namespace py = pybind11;
 
     namespace reflect {
-        PYBIND11_MODULE(PYREFLECT_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYREFLECT_MODULE_NAME(), m) {
 
             m.doc() = "pybind11 plugin for xo.reflect";
 

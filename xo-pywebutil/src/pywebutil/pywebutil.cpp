@@ -14,7 +14,7 @@ namespace xo {
     namespace py = pybind11;
 
     namespace web {
-        PYBIND11_MODULE(PYWEBUTIL_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYWEBUTIL_MODULE_NAME(), m) {
             //PYxxx_IMPORT_MODULE();
 
             /* module docstring */

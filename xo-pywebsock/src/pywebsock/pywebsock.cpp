@@ -16,8 +16,8 @@ namespace xo {
     namespace py = pybind11;
 
     namespace web {
-        PYBIND11_MODULE(PYWEBSOCK_MODULE_NAME(), m) {
-            PYWEBUTIL_IMPORT_MODULE(); // = py::module_::import("pywebutil")
+        PYBIND11_MODULE(XO_PYWEBSOCK_MODULE_NAME(), m) {
+            XO_PYWEBUTIL_IMPORT_MODULE(); // = py::module_::import("pywebutil")
 
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.websock";

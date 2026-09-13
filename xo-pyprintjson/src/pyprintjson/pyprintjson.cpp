@@ -15,8 +15,8 @@ namespace xo {
         using xo::reflect::TaggedRcptr;
         using xo::ref::unowned_ptr;
 
-        PYBIND11_MODULE(PYPRINTJSON_MODULE_NAME(), m) {
-            PYREFLECT_IMPORT_MODULE();
+        PYBIND11_MODULE(XO_PYPRINTJSON_MODULE_NAME(), m) {
+            XO_PYREFLECT_IMPORT_MODULE();
 
             py::class_<PrintJson, rp<PrintJson>>(m, "PrintJson")
                 .def_static("instance", &PrintJsonSingleton::instance)

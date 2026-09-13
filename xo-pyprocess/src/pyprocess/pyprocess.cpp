@@ -38,16 +38,16 @@ namespace xo {
     namespace py = pybind11;
 
     namespace process {
-        PYBIND11_MODULE(PYPROCESS_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYPROCESS_MODULE_NAME(), m) {
             /* ensure process/ will be initialized */
             InitSubsys<S_process_tag>::require();
             /* ..and immediately perform init steps */
             Subsystem::initialize_all();
 
             /* e.g. py wrapper for xo::reactor::ReactorSource */
-            PYREACTOR_IMPORT_MODULE();
+            XO_PYREACTOR_IMPORT_MODULE();
             /* e.g. py wrapper for xo::web::EndpointDescr */
-            PYWEBUTIL_IMPORT_MODULE();
+            XO_PYWEBUTIL_IMPORT_MODULE();
 
             m.doc() = "pybind11 plugin for xo.process";
 

@@ -54,7 +54,7 @@ namespace xo {
     namespace py = pybind11;
 
     namespace filter {
-        PYBIND11_MODULE(PYKALMANFILTER_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYKALMANFILTER_MODULE_NAME(), m) {
             /* ensure filter/ will be initialized */
             InitSubsys<S_kalmanfilter_tag>::require();
             /* ..and immediately perform init steps
@@ -65,7 +65,7 @@ namespace xo {
 
             /* e.g. need python wrapper for for xo::reactor::AbstractSource
              */
-            PYREACTOR_IMPORT_MODULE();
+            XO_PYREACTOR_IMPORT_MODULE();
 
             m.doc() = "pybind11 plugin for xo.kalmanfilter";
 

@@ -20,10 +20,10 @@ namespace xo {
     using xo::mm::AGCObject;
 
     namespace reactor {
-        PYBIND11_MODULE(PYREACTOR2_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYREACTOR2_MODULE_NAME(), m) {
             /* e.g. for TypeDescr */
-            //PYREFLECT_IMPORT_MODULE(); //py::module_::import("pyreflect");
-            //PYPRINTJSON_IMPORT_MODULE(); //py::module_::import("pyprintjson");
+            //XO_PYREFLECT_IMPORT_MODULE();
+            //XO_PYPRINTJSON_IMPORT_MODULE();
 
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.reactor2";

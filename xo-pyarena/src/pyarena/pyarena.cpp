@@ -21,7 +21,7 @@
  * permits exactly one registration per c++ type and that was the lowest python
  * module needing them (a PpConfig's logbuf is an ArenaConfig).  They live here
  * now; consumers reach them by importing this module, which is what
- * PYARENA_IMPORT_MODULE() is for.
+ * XO_PYARENA_IMPORT_MODULE() is for.
  */
 
 #include "pyarena.hpp"
@@ -62,7 +62,7 @@ namespace xo {
             }
         } /*namespace*/
 
-        PYBIND11_MODULE(PYARENA_MODULE_NAME(), m) {
+        PYBIND11_MODULE(XO_PYARENA_MODULE_NAME(), m) {
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.arena";
 

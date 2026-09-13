@@ -1845,12 +1845,44 @@ macro(xo_pybind11_library target projectTargets source_files)
     string(REGEX REPLACE "^py" "" SELF_MODULE ${_nxo_target})
     set(SELF_QUALNAME "${PROJECT_INCLUDE_STEM_DIR}.${SELF_MODULE}")
 
+    # Macro namespace for the generated header: xo_pyfacet -> XO_PYFACET_.
+    string(TOUPPER ${PROJECT_INCLUDE_STEM_DIR} _stem_upper)
+    string(TOUPPER ${_nxo_target} _self_upper)
+    set(SELF_MACRO_PREFIX "${_stem_upper}_${_self_upper}")
+
+    # read by pymodule-hpp.in, for its provenance comment only
+    set(SELF_HEADER ${_nxo_target}.hpp)
+    set(SELF_CMAKELISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt)
+
     file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target})
 
+    # ONE template for every module, in xo-cmake, rather than a near-identical
+    # ${_nxo_target}.hpp.in beside each one.  There were 18 copies, and they had
+    # drifted -- xo-pyexpression's named a source path that never existed, and
+    # three of the 18 used a different macro prefix from the other fifteen.
+    #
+    # Located the way xo_add_python_utest() locates python-utest.in.
+    xo_establish_submodule_build()
+
+    if(XO_SUBMODULE_BUILD)
+        set(_pymodule_template
+            "${XO_UMBRELLA_SOURCE_DIR}/xo-cmake/share/xo-macros/pymodule-hpp.in")
+    else()
+        execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --pymodule-template
+            OUTPUT_VARIABLE _pymodule_template
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
+    if(NOT EXISTS "${_pymodule_template}")
+        message(FATAL_ERROR
+            "xo_pybind11_library: template not found: ${_pymodule_template}"
+            " (install xo-cmake first)")
+    endif()
+
     configure_file(
-        ${_nxo_target}.hpp.in
-        ${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}/${_nxo_target}.hpp)
-    # was ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
+        ${_pymodule_template}
+        ${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}/${_nxo_target}.hpp
+        @ONLY)
 
     xo_establish_symlink_install()
 
