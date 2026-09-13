@@ -69,6 +69,25 @@ jobs:
           # What survived the last gc, and therefore what this run can reuse.
           echo "retained from previous runs: $(ls "$XO_GCROOTS" | wc -l) subsystems"
 
+      # ---- GENERATED from ci.yaml.j2 by xo-gen-ci ----
+      # Do not edit these steps by hand.  Membership and order come from
+      # /home/roland/proj/xo-umbrella2/xo-cmake/etc/xo/subsystem-list; regenerate with:
+      #     cmake --build .build --target xo-gen-ci
+      #
+      # Generated for the same reason ci-cmake.yaml is: this file was
+      # hand-maintained, so a subsystem added to subsystem-list reached the
+      # cmake pipeline at the next regeneration and this one only if someone
+      # remembered.  It had drifted to 61 of 71 while reporting green -- see
+      # .xo-backlog/nix-packaging/issues/03.
+      #
+      # NO exclusions, unlike ci-cmake.yaml: this job runs on `host', which has
+      # the OpenGL driver bypass xo-imgui needs, and nix builds xo-cmake as an
+      # ordinary derivation rather than bootstrapping it.
+      #
+      # Steps that are NOT per-subsystem stay outside this block -- see the
+      # publish docs step below, whose target is a nix attribute with no entry
+      # in subsystem-list.
+
       - name: build xo-cmake
         run: |
           echo nix-build ci.nix -A xo-cmake -o "$XO_GCROOTS/xo-cmake"
@@ -87,17 +106,17 @@ jobs:
           nix-build ci.nix -A xo-ppsink -o "$XO_GCROOTS/xo-ppsink"
           ls -l "$XO_GCROOTS/xo-ppsink"
 
-      - name: build xo-subsys
-        run: |
-          echo nix-build ci.nix -A xo-subsys -o "$XO_GCROOTS/xo-subsys"
-          nix-build ci.nix -A xo-subsys -o "$XO_GCROOTS/xo-subsys"
-          ls -l "$XO_GCROOTS/xo-subsys"
-
       - name: build xo-indentlog
         run: |
           echo nix-build ci.nix -A xo-indentlog -o "$XO_GCROOTS/xo-indentlog"
           nix-build ci.nix -A xo-indentlog -o "$XO_GCROOTS/xo-indentlog"
           ls -l "$XO_GCROOTS/xo-indentlog"
+
+      - name: build xo-subsys
+        run: |
+          echo nix-build ci.nix -A xo-subsys -o "$XO_GCROOTS/xo-subsys"
+          nix-build ci.nix -A xo-subsys -o "$XO_GCROOTS/xo-subsys"
+          ls -l "$XO_GCROOTS/xo-subsys"
 
       - name: build xo-flatstring
         run: |
@@ -105,23 +124,11 @@ jobs:
           nix-build ci.nix -A xo-flatstring -o "$XO_GCROOTS/xo-flatstring"
           ls -l "$XO_GCROOTS/xo-flatstring"
 
-      - name: build xo-randomgen
-        run: |
-          echo nix-build ci.nix -A xo-randomgen -o "$XO_GCROOTS/xo-randomgen"
-          nix-build ci.nix -A xo-randomgen -o "$XO_GCROOTS/xo-randomgen"
-          ls -l "$XO_GCROOTS/xo-randomgen"
-
       - name: build xo-reflectutil
         run: |
           echo nix-build ci.nix -A xo-reflectutil -o "$XO_GCROOTS/xo-reflectutil"
           nix-build ci.nix -A xo-reflectutil -o "$XO_GCROOTS/xo-reflectutil"
           ls -l "$XO_GCROOTS/xo-reflectutil"
-
-      - name: build xo-arena
-        run: |
-          echo nix-build ci.nix -A xo-arena -o "$XO_GCROOTS/xo-arena"
-          nix-build ci.nix -A xo-arena -o "$XO_GCROOTS/xo-arena"
-          ls -l "$XO_GCROOTS/xo-arena"
 
       - name: build xo-testutil
         run: |
@@ -129,29 +136,11 @@ jobs:
           nix-build ci.nix -A xo-testutil -o "$XO_GCROOTS/xo-testutil"
           ls -l "$XO_GCROOTS/xo-testutil"
 
-      - name: build xo-indentlog2
+      - name: build xo-randomgen
         run: |
-          echo nix-build ci.nix -A xo-indentlog2 -o "$XO_GCROOTS/xo-indentlog2"
-          nix-build ci.nix -A xo-indentlog2 -o "$XO_GCROOTS/xo-indentlog2"
-          ls -l "$XO_GCROOTS/xo-indentlog2"
-          
-      - name: build xo-facet
-        run: |
-          echo nix-build ci.nix -A xo-facet -o "$XO_GCROOTS/xo-facet"
-          nix-build ci.nix -A xo-facet -o "$XO_GCROOTS/xo-facet"
-          ls -l "$XO_GCROOTS/xo-facet"
-
-      - name: build xo-printable2
-        run: |
-          echo nix-build ci.nix -A xo-printable2 -o "$XO_GCROOTS/xo-printable2"
-          nix-build ci.nix -A xo-printable2 -o "$XO_GCROOTS/xo-printable2"
-          ls -l "$XO_GCROOTS/xo-printable2"
-
-      - name: build xo-alloc2
-        run: |
-          echo nix-build ci.nix -A xo-alloc2 -o "$XO_GCROOTS/xo-alloc2"
-          nix-build ci.nix -A xo-alloc2 -o "$XO_GCROOTS/xo-alloc2"
-          ls -l "$XO_GCROOTS/xo-alloc2"
+          echo nix-build ci.nix -A xo-randomgen -o "$XO_GCROOTS/xo-randomgen"
+          nix-build ci.nix -A xo-randomgen -o "$XO_GCROOTS/xo-randomgen"
+          ls -l "$XO_GCROOTS/xo-randomgen"
 
       - name: build xo-refcnt
         run: |
@@ -165,6 +154,54 @@ jobs:
           nix-build ci.nix -A xo-pyutil -o "$XO_GCROOTS/xo-pyutil"
           ls -l "$XO_GCROOTS/xo-pyutil"
 
+      - name: build xo-arena
+        run: |
+          echo nix-build ci.nix -A xo-arena -o "$XO_GCROOTS/xo-arena"
+          nix-build ci.nix -A xo-arena -o "$XO_GCROOTS/xo-arena"
+          ls -l "$XO_GCROOTS/xo-arena"
+
+      - name: build xo-pyarena
+        run: |
+          echo nix-build ci.nix -A xo-pyarena -o "$XO_GCROOTS/xo-pyarena"
+          nix-build ci.nix -A xo-pyarena -o "$XO_GCROOTS/xo-pyarena"
+          ls -l "$XO_GCROOTS/xo-pyarena"
+
+      - name: build xo-indentlog2
+        run: |
+          echo nix-build ci.nix -A xo-indentlog2 -o "$XO_GCROOTS/xo-indentlog2"
+          nix-build ci.nix -A xo-indentlog2 -o "$XO_GCROOTS/xo-indentlog2"
+          ls -l "$XO_GCROOTS/xo-indentlog2"
+
+      - name: build xo-pyindentlog2
+        run: |
+          echo nix-build ci.nix -A xo-pyindentlog2 -o "$XO_GCROOTS/xo-pyindentlog2"
+          nix-build ci.nix -A xo-pyindentlog2 -o "$XO_GCROOTS/xo-pyindentlog2"
+          ls -l "$XO_GCROOTS/xo-pyindentlog2"
+
+      - name: build xo-facet
+        run: |
+          echo nix-build ci.nix -A xo-facet -o "$XO_GCROOTS/xo-facet"
+          nix-build ci.nix -A xo-facet -o "$XO_GCROOTS/xo-facet"
+          ls -l "$XO_GCROOTS/xo-facet"
+
+      - name: build xo-pyfacet
+        run: |
+          echo nix-build ci.nix -A xo-pyfacet -o "$XO_GCROOTS/xo-pyfacet"
+          nix-build ci.nix -A xo-pyfacet -o "$XO_GCROOTS/xo-pyfacet"
+          ls -l "$XO_GCROOTS/xo-pyfacet"
+
+      - name: build xo-printable2
+        run: |
+          echo nix-build ci.nix -A xo-printable2 -o "$XO_GCROOTS/xo-printable2"
+          nix-build ci.nix -A xo-printable2 -o "$XO_GCROOTS/xo-printable2"
+          ls -l "$XO_GCROOTS/xo-printable2"
+
+      - name: build xo-alloc2
+        run: |
+          echo nix-build ci.nix -A xo-alloc2 -o "$XO_GCROOTS/xo-alloc2"
+          nix-build ci.nix -A xo-alloc2 -o "$XO_GCROOTS/xo-alloc2"
+          ls -l "$XO_GCROOTS/xo-alloc2"
+
       - name: build xo-reflect
         run: |
           echo nix-build ci.nix -A xo-reflect -o "$XO_GCROOTS/xo-reflect"
@@ -177,6 +214,24 @@ jobs:
           nix-build ci.nix -A xo-pyreflect -o "$XO_GCROOTS/xo-pyreflect"
           ls -l "$XO_GCROOTS/xo-pyreflect"
 
+      - name: build xo-reflectable2
+        run: |
+          echo nix-build ci.nix -A xo-reflectable2 -o "$XO_GCROOTS/xo-reflectable2"
+          nix-build ci.nix -A xo-reflectable2 -o "$XO_GCROOTS/xo-reflectable2"
+          ls -l "$XO_GCROOTS/xo-reflectable2"
+
+      - name: build xo-printjson
+        run: |
+          echo nix-build ci.nix -A xo-printjson -o "$XO_GCROOTS/xo-printjson"
+          nix-build ci.nix -A xo-printjson -o "$XO_GCROOTS/xo-printjson"
+          ls -l "$XO_GCROOTS/xo-printjson"
+
+      - name: build xo-pyprintjson
+        run: |
+          echo nix-build ci.nix -A xo-pyprintjson -o "$XO_GCROOTS/xo-pyprintjson"
+          nix-build ci.nix -A xo-pyprintjson -o "$XO_GCROOTS/xo-pyprintjson"
+          ls -l "$XO_GCROOTS/xo-pyprintjson"
+
       - name: build xo-stringtable2
         run: |
           echo nix-build ci.nix -A xo-stringtable2 -o "$XO_GCROOTS/xo-stringtable2"
@@ -188,6 +243,12 @@ jobs:
           echo nix-build ci.nix -A xo-object2 -o "$XO_GCROOTS/xo-object2"
           nix-build ci.nix -A xo-object2 -o "$XO_GCROOTS/xo-object2"
           ls -l "$XO_GCROOTS/xo-object2"
+
+      - name: build xo-pyobject2
+        run: |
+          echo nix-build ci.nix -A xo-pyobject2 -o "$XO_GCROOTS/xo-pyobject2"
+          nix-build ci.nix -A xo-pyobject2 -o "$XO_GCROOTS/xo-pyobject2"
+          ls -l "$XO_GCROOTS/xo-pyobject2"
 
       - name: build xo-gc
         run: |
@@ -206,6 +267,18 @@ jobs:
           echo nix-build ci.nix -A xo-procedure2 -o "$XO_GCROOTS/xo-procedure2"
           nix-build ci.nix -A xo-procedure2 -o "$XO_GCROOTS/xo-procedure2"
           ls -l "$XO_GCROOTS/xo-procedure2"
+
+      - name: build xo-equable2
+        run: |
+          echo nix-build ci.nix -A xo-equable2 -o "$XO_GCROOTS/xo-equable2"
+          nix-build ci.nix -A xo-equable2 -o "$XO_GCROOTS/xo-equable2"
+          ls -l "$XO_GCROOTS/xo-equable2"
+
+      - name: build xo-hashable2
+        run: |
+          echo nix-build ci.nix -A xo-hashable2 -o "$XO_GCROOTS/xo-hashable2"
+          nix-build ci.nix -A xo-hashable2 -o "$XO_GCROOTS/xo-hashable2"
+          ls -l "$XO_GCROOTS/xo-hashable2"
 
       - name: build xo-numeric
         run: |
@@ -266,6 +339,24 @@ jobs:
           echo nix-build ci.nix -A xo-callback -o "$XO_GCROOTS/xo-callback"
           nix-build ci.nix -A xo-callback -o "$XO_GCROOTS/xo-callback"
           ls -l "$XO_GCROOTS/xo-callback"
+
+      - name: build xo-callback2
+        run: |
+          echo nix-build ci.nix -A xo-callback2 -o "$XO_GCROOTS/xo-callback2"
+          nix-build ci.nix -A xo-callback2 -o "$XO_GCROOTS/xo-callback2"
+          ls -l "$XO_GCROOTS/xo-callback2"
+
+      - name: build xo-reactor2
+        run: |
+          echo nix-build ci.nix -A xo-reactor2 -o "$XO_GCROOTS/xo-reactor2"
+          nix-build ci.nix -A xo-reactor2 -o "$XO_GCROOTS/xo-reactor2"
+          ls -l "$XO_GCROOTS/xo-reactor2"
+
+      - name: build xo-pyreactor2
+        run: |
+          echo nix-build ci.nix -A xo-pyreactor2 -o "$XO_GCROOTS/xo-pyreactor2"
+          nix-build ci.nix -A xo-pyreactor2 -o "$XO_GCROOTS/xo-pyreactor2"
+          ls -l "$XO_GCROOTS/xo-pyreactor2"
 
       - name: build xo-alloc
         run: |
@@ -339,18 +430,6 @@ jobs:
           nix-build ci.nix -A xo-pywebutil -o "$XO_GCROOTS/xo-pywebutil"
           ls -l "$XO_GCROOTS/xo-pywebutil"
 
-      - name: build xo-printjson
-        run: |
-          echo nix-build ci.nix -A xo-printjson -o "$XO_GCROOTS/xo-printjson"
-          nix-build ci.nix -A xo-printjson -o "$XO_GCROOTS/xo-printjson"
-          ls -l "$XO_GCROOTS/xo-printjson"
-
-      - name: build xo-pyprintjson
-        run: |
-          echo nix-build ci.nix -A xo-pyprintjson -o "$XO_GCROOTS/xo-pyprintjson"
-          nix-build ci.nix -A xo-pyprintjson -o "$XO_GCROOTS/xo-pyprintjson"
-          ls -l "$XO_GCROOTS/xo-pyprintjson"
-
       - name: build xo-reactor
         run: |
           echo nix-build ci.nix -A xo-reactor -o "$XO_GCROOTS/xo-reactor"
@@ -375,6 +454,24 @@ jobs:
           nix-build ci.nix -A xo-pywebsock -o "$XO_GCROOTS/xo-pywebsock"
           ls -l "$XO_GCROOTS/xo-pywebsock"
 
+      - name: build xo-statistics
+        run: |
+          echo nix-build ci.nix -A xo-statistics -o "$XO_GCROOTS/xo-statistics"
+          nix-build ci.nix -A xo-statistics -o "$XO_GCROOTS/xo-statistics"
+          ls -l "$XO_GCROOTS/xo-statistics"
+
+      - name: build xo-distribution
+        run: |
+          echo nix-build ci.nix -A xo-distribution -o "$XO_GCROOTS/xo-distribution"
+          nix-build ci.nix -A xo-distribution -o "$XO_GCROOTS/xo-distribution"
+          ls -l "$XO_GCROOTS/xo-distribution"
+
+      - name: build xo-pydistribution
+        run: |
+          echo nix-build ci.nix -A xo-pydistribution -o "$XO_GCROOTS/xo-pydistribution"
+          nix-build ci.nix -A xo-pydistribution -o "$XO_GCROOTS/xo-pydistribution"
+          ls -l "$XO_GCROOTS/xo-pydistribution"
+
       - name: build xo-simulator
         run: |
           echo nix-build ci.nix -A xo-simulator -o "$XO_GCROOTS/xo-simulator"
@@ -398,24 +495,6 @@ jobs:
           echo nix-build ci.nix -A xo-pyprocess -o "$XO_GCROOTS/xo-pyprocess"
           nix-build ci.nix -A xo-pyprocess -o "$XO_GCROOTS/xo-pyprocess"
           ls -l "$XO_GCROOTS/xo-pyprocess"
-
-      - name: build xo-statistics
-        run: |
-          echo nix-build ci.nix -A xo-statistics -o "$XO_GCROOTS/xo-statistics"
-          nix-build ci.nix -A xo-statistics -o "$XO_GCROOTS/xo-statistics"
-          ls -l "$XO_GCROOTS/xo-statistics"
-
-      - name: build xo-distribution
-        run: |
-          echo nix-build ci.nix -A xo-distribution -o "$XO_GCROOTS/xo-distribution"
-          nix-build ci.nix -A xo-distribution -o "$XO_GCROOTS/xo-distribution"
-          ls -l "$XO_GCROOTS/xo-distribution"
-
-      - name: build xo-pydistribution
-        run: |
-          echo nix-build ci.nix -A xo-pydistribution -o "$XO_GCROOTS/xo-pydistribution"
-          nix-build ci.nix -A xo-pydistribution -o "$XO_GCROOTS/xo-pydistribution"
-          ls -l "$XO_GCROOTS/xo-pydistribution"
 
       - name: build xo-kalmanfilter
         run: |

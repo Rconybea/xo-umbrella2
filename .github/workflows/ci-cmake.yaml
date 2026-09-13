@@ -450,6 +450,60 @@ jobs:
           xo-build --install xo-pyreflect
           echo "::endgroup::"
 
+      - name: build xo-reflectable2
+        run: |
+          echo "::group::xo-reflectable2 configure"
+          xo-build --configure --with-utests --with-examples xo-reflectable2
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectable2 build"
+          xo-build --build xo-reflectable2
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectable2 utest"
+          xo-build --utest xo-reflectable2
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectable2 install"
+          xo-build --install xo-reflectable2
+          echo "::endgroup::"
+
+      - name: build xo-printjson
+        run: |
+          echo "::group::xo-printjson configure"
+          xo-build --configure --with-utests --with-examples xo-printjson
+          echo "::endgroup::"
+
+          echo "::group::xo-printjson build"
+          xo-build --build xo-printjson
+          echo "::endgroup::"
+
+          echo "::group::xo-printjson utest"
+          xo-build --utest xo-printjson
+          echo "::endgroup::"
+
+          echo "::group::xo-printjson install"
+          xo-build --install xo-printjson
+          echo "::endgroup::"
+
+      - name: build xo-pyprintjson
+        run: |
+          echo "::group::xo-pyprintjson configure"
+          xo-build --configure --with-utests --with-examples xo-pyprintjson
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprintjson build"
+          xo-build --build xo-pyprintjson
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprintjson utest"
+          xo-build --utest xo-pyprintjson
+          echo "::endgroup::"
+
+          echo "::group::xo-pyprintjson install"
+          xo-build --install xo-pyprintjson
+          echo "::endgroup::"
+
       - name: build xo-stringtable2
         run: |
           echo "::group::xo-stringtable2 configure"
@@ -1042,42 +1096,6 @@ jobs:
 
           echo "::group::xo-pywebutil install"
           xo-build --install xo-pywebutil
-          echo "::endgroup::"
-
-      - name: build xo-printjson
-        run: |
-          echo "::group::xo-printjson configure"
-          xo-build --configure --with-utests --with-examples xo-printjson
-          echo "::endgroup::"
-
-          echo "::group::xo-printjson build"
-          xo-build --build xo-printjson
-          echo "::endgroup::"
-
-          echo "::group::xo-printjson utest"
-          xo-build --utest xo-printjson
-          echo "::endgroup::"
-
-          echo "::group::xo-printjson install"
-          xo-build --install xo-printjson
-          echo "::endgroup::"
-
-      - name: build xo-pyprintjson
-        run: |
-          echo "::group::xo-pyprintjson configure"
-          xo-build --configure --with-utests --with-examples xo-pyprintjson
-          echo "::endgroup::"
-
-          echo "::group::xo-pyprintjson build"
-          xo-build --build xo-pyprintjson
-          echo "::endgroup::"
-
-          echo "::group::xo-pyprintjson utest"
-          xo-build --utest xo-pyprintjson
-          echo "::endgroup::"
-
-          echo "::group::xo-pyprintjson install"
-          xo-build --install xo-pyprintjson
           echo "::endgroup::"
 
       - name: build xo-reactor

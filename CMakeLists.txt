@@ -207,9 +207,10 @@ xo_emit_dependency_edges(${CMAKE_BINARY_DIR} XO_SUBSYSTEM_EDGES_FILE)
 xo_emit_python_wrapper(${CMAKE_BINARY_DIR})
 
 # ----------------------------------------------------------------
-# .forgejo/workflows/ci-cmake.yaml: the per-subsystem steps are generated from
+# The per-subsystem steps of EVERY workflow are generated from
 # xo-cmake/etc/xo/subsystem-list, so adding a subsystem there is enough to have
-# CI build it.
+# CI build it.  Three outputs: the forgejo and github cmake pipelines, and the
+# forgejo nix pipeline.
 #
 # MANUAL target, and the output is committed to git -- same arrangement as
 # genfacet.  Regenerating on every configure would rewrite a tracked file as a
@@ -218,11 +219,19 @@ xo_emit_python_wrapper(${CMAKE_BINARY_DIR})
 #
 #     cmake --build .build --target xo-gen-ci
 #
-# Both pipelines render the SAME steps from the SAME list; only the template
-# head differs (runner, container, clone URL).  That is what keeps them from
-# drifting apart.
+# Every pipeline renders its steps from the SAME list; only the template head
+# differs (runner, container, clone URL).  That is what keeps them from drifting
+# apart.
 #
-# EXCLUSIONS -- applied to both, since both run the same docker-xo-builder image:
+# .forgejo/workflows/ci.yaml -- the nix pipeline -- was hand-maintained until
+# 2026-09-13 and was the counter-example: it had drifted to 61 of 70 subsystems
+# while reporting green, because a new subsystem reached the generated files
+# automatically and this one only if someone remembered.  See
+# .xo-backlog/nix-packaging/issues/03.
+#
+# EXCLUSIONS -- applied to the two CMAKE pipelines, which share the
+# docker-xo-builder image.  The nix pipeline takes NONE: it runs on `host', and
+# nix builds xo-cmake like any other derivation rather than bootstrapping it.
 #
 #   xo-cmake  the bootstrap, built before xo-build exists (by the template's own
 #             `bootstrap xo-cmake` step).
@@ -251,7 +260,11 @@ add_custom_target(xo-gen-ci
             ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
             --exclude xo-cmake --exclude xo-imgui
             -o ${CMAKE_SOURCE_DIR}/.github/workflows/ci-cmake.yaml
-    COMMENT "xo-gen-ci: regenerating forgejo + github cmake workflows"
+    COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
+            ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci.yaml.j2
+            ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
+            -o ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci.yaml
+    COMMENT "xo-gen-ci: regenerating forgejo + github cmake workflows, forgejo nix workflow"
     VERBATIM)
 
 

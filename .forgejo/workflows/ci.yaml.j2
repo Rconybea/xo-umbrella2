@@ -1,0 +1,123 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  smoke-test:
+    runs-on: host
+
+    # One persistent gc root per subsystem, kept OUTSIDE the per-run workspace.
+    #
+    # Each build step used to write ./result in the workspace, which act recreates for
+    # every run, and each step overwrote the previous one's symlink.  So between runs
+    # exactly one output stayed rooted -- whichever subsystem happened to run last --
+    # and a nix-collect-garbage evicted all the others, making the next run rebuild the
+    # whole set from source.
+    #
+    # Rooting each subsystem separately keeps unchanged subsystems cached across a GC.
+    # A run replaces its own symlinks, so at most one closure per subsystem is retained.
+    # Deleting this directory is safe: it costs a rebuild, nothing else.
+    #
+    # Location: the runner's own state dir.  It survives between runs, the runner owns
+    # it (no root, no fleet-repo provisioning), and the repo-named subdirectory leaves
+    # room for other repos to do the same.
+    env:
+      XO_GCROOTS: /var/lib/forgejo-runner/gcroots/xo-umbrella2
+
+    steps:
+
+      - name: debug env
+        run:
+          env | sort
+
+      - name: Setup PATH
+        run: |
+          echo "/nix/var/nix/profiles/default/bin" >> $GITHUB_PATH
+          echo "/var/lib/forgejo-runner/.nix-profile/bin" >> $GITHUB_PATH
+
+      - name: Check PATH
+        run:
+          echo $PATH
+
+      - name: Check cwd
+        run:
+          pwd
+
+      - name: Check nix version
+        run:
+          echo $(nix --version)
+
+      - name: nix store ping
+        run:
+          nix store info
+
+      - name: checkout
+        run: |
+          # 1. actions/checkout@v4 stumbles b/c install is at conybeare.us/git
+          #    checkout manually instead.
+          # 2. could clone from /var/lib/forgejo/gitea-repositories/roland/xo-umbrella2.git
+          # 3. instead rely on $GITHUB_SERVER_URL
+
+          git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
+
+      - name: prepare gc roots
+        run: |
+          mkdir -p "$XO_GCROOTS"
+          # What survived the last gc, and therefore what this run can reuse.
+          echo "retained from previous runs: $(ls "$XO_GCROOTS" | wc -l) subsystems"
+
+      # ---- GENERATED from [[ template_name ]] by xo-gen-ci ----
+      # Do not edit these steps by hand.  Membership and order come from
+      # [[ subsystem_list ]]; regenerate with:
+      #     cmake --build .build --target xo-gen-ci
+      #
+      # Generated for the same reason ci-cmake.yaml is: this file was
+      # hand-maintained, so a subsystem added to subsystem-list reached the
+      # cmake pipeline at the next regeneration and this one only if someone
+      # remembered.  It had drifted to 61 of 71 while reporting green -- see
+      # .xo-backlog/nix-packaging/issues/03.
+      #
+      # NO exclusions, unlike ci-cmake.yaml: this job runs on `host', which has
+      # the OpenGL driver bypass xo-imgui needs, and nix builds xo-cmake as an
+      # ordinary derivation rather than bootstrapping it.
+      #
+      # Steps that are NOT per-subsystem stay outside this block -- see the
+      # publish docs step below, whose target is a nix attribute with no entry
+      # in subsystem-list.
+
+<% for sub in subsystems %>
+      - name: build [[ sub ]]
+        run: |
+          echo nix-build ci.nix -A [[ sub ]] -o "$XO_GCROOTS/[[ sub ]]"
+          nix-build ci.nix -A [[ sub ]] -o "$XO_GCROOTS/[[ sub ]]"
+          ls -l "$XO_GCROOTS/[[ sub ]]"
+
+<% endfor %>
+      # Publish subsystem documentation to https://conybeare.us/xo-docs/.
+      #
+      # Nothing is rendered here: every subsystem with buildDocs = true already
+      # installed its html tree during the builds above, and xo-docs-site just gathers
+      # them behind stable per-subsystem URLs.
+      #
+      # -o makes 'current' a gc root, so nix-collect-garbage cannot collect the trees
+      # nginx is serving.  Replacing the symlink releases the previous revision, so
+      # exactly one is retained.
+      #
+      # /var/www/xo-docs is created, owned by this runner, by the vpn1 fleet repo's
+      # activate.sh -- which also carries the matching nginx location.
+      - name: publish docs
+        run: |
+          echo nix-build ci.nix -A xo-docs-site -o /var/www/xo-docs/current
+          nix-build ci.nix -A xo-docs-site -o /var/www/xo-docs/current
+          ls -l /var/www/xo-docs/current/
+
+          # Check from outside rather than trusting the build: a site nginx cannot
+          # read, or a location block that never got installed, fails silently.
+          # --resolve avoids depending on hairpin NAT back to our own public address.
+          # This also means an expired TLS cert turns CI red, which is deliberate --
+          # vpn1 has no other alerting path yet.
+          curl -sS --fail --resolve conybeare.us:443:127.0.0.1 \
+               -o /dev/null https://conybeare.us/xo-docs/

@@ -2,14 +2,16 @@
   # nixpkgs dependencies
   lib, stdenv, cmake, catch2, cli11,
 
-  # xo dependencies
-  xo-facet,
-  xo-alloc2,
+  # xo dependencies -- the four named by
+  # xo-reactor2/src/reactor2/CMakeLists.txt:23-26
   xo-callback,
+  xo-stringtable2,
   xo-reflect,
+  xo-facet,
+  # utest only
+  xo-alloc2,
   xo-indentlog2,
   xo-printable2,
-  xo-stringtable2,
   xo-testutil,
   xo-cmake,
 
@@ -31,15 +33,15 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 cli11
       xo-cmake
     ] ++ lib.optionals doCheck [
+      xo-alloc2
+      xo-indentlog2
+      xo-printable2
       xo-testutil
     ];
     propagatedBuildInputs = [
-      xo-facet
-      xo-alloc2
       xo-callback
-      xo-reflect
-      xo-indentlog2
-      xo-printable2
       xo-stringtable2
+      xo-reflect
+      xo-facet
     ];
   })
