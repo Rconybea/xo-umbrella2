@@ -6,6 +6,7 @@
 #pragma once
 
 #include "PpSink.hpp"
+#include <string>
 
 namespace xo::pp {
 
@@ -74,6 +75,7 @@ namespace xo::pp {
          **/
         static PpSink & local();
 
+        /** create pretty-printed string representation for @p x **/
         template <typename T>
         static std::string pp2str(const T & x) {
             auto & sink = local();
