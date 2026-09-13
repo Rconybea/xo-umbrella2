@@ -7,14 +7,13 @@
   xo-ppsink,
 #  xo-refcnt,
   xo-reflect,
-  # test-only: utest/FopJson.test.cpp reflects a faceted object pointer.  The
-  # library edge printjson -> xo-reflectable2 arrives with the entry point in
-  # .xo-backlog/reflectable2/issues/04.
   xo-reflectable2,
   # test-only: UtestAppStart/UtestListener, see utest/printjson_utest_main.cpp
   xo-testutil,
   # test-only: that same main builds an Indentlog2Appcx directly
   xo-indentlog2,
+  # test-only: a D-type that is printable but NOT reflectable
+  xo-printable2,
 
   doCheck ? true,
 } :
@@ -32,13 +31,14 @@ stdenv.mkDerivation (finalattrs:
     nativeBuildInputs = [
       cmake catch2 xo-cmake
     ] ++ lib.optionals doCheck [
-      xo-reflectable2
       xo-testutil
       xo-indentlog2
+      xo-printable2
       cli11
     ];
     propagatedBuildInputs = [
       xo-ppsink
       xo-reflect
+      xo-reflectable2
     ];
   })

@@ -198,6 +198,17 @@ namespace xo {
             this->print_tp(obj->self_tp(), p_os);
         } /*print_obj*/
 
+        void
+        PrintJson::validate_tp(TaggedPtr tp) const
+        {
+            /* the throw comes from n_child()/get_child(), which is where
+             * xo-reflectable2 rotates an erased fop to AReflectable.  Nothing
+             * to do per node, so the visitor is empty: this is a reuse of
+             * reflect's walker, not a second traversal implementation.
+             */
+            TaggedPtr::visit_tree_preorder(tp, [](TaggedPtr) {});
+        } /*validate_tp*/
+
         /* Consider:
          *   TaggedPtr tp = ...;
          *   std::ostream * p_os = ...;
