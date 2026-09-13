@@ -8,6 +8,9 @@
 #include <xo/reflect/StructReflector.hpp>
 
 namespace xo {
+    using xo::reflect::StructReflector;
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
     using xo::facet::typeseq;
     using std::size_t;
 
@@ -38,17 +41,17 @@ namespace xo {
         void
         DFloat::reflect_self()
         {
-            xo::reflect::StructReflector<DFloat> sr;
+            StructReflector<DFloat> sr;
 
             REFLECT_MEMBER(sr, value);
 
             sr.require_complete();
         }
 
-        xo::reflect::TaggedPtr
+        TaggedPtr
         DFloat::self_tp()
         {
-            return xo::reflect::Reflect::make_tp(this);
+            return Reflect::make_tp(this);
         }
 
         DFloat *
