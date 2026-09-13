@@ -49,6 +49,12 @@ namespace xo {
         /** xo-printjson/ configuration **/
         Object2Config config_;
     };
+
+    template <>
+    class SubsystemContext<S_object2_tag> {
+    public:
+        using Type = Object2Appcx;
+    };
 } /*namespace xo*/
 
 /* end Object2Appcx.hpp */

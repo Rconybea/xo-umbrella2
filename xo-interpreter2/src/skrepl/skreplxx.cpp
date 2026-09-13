@@ -6,6 +6,9 @@
 #include <xo/interpreter2/init_interpreter2.hpp>
 #include <xo/interpreter2/cx/Interpreter2Appcx.hpp>
 #include <xo/interpreter2/VirtualSchematikaMachine.hpp>
+#include <xo/object2/cx/Object2Appcx.hpp>
+#include <xo/printjson/cx/PrintJsonAppcx.hpp>
+#include <xo/reflect/cx/ReflectAppcx.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/facet/init_facet.hpp>
 #include <xo/facet/cx/FacetAppcx.hpp>
@@ -178,14 +181,29 @@ namespace xo {
     void
     MyApp::_init()
     {
+        using xo::S_object2_tag;
         using xo::S_facet_tag;
         using xo::S_indentlog2_tag;
+        using xo::Object2Config;
+        using xo::PrintJsonConfig;
+        using xo::ReflectConfig;
         using xo::FacetConfig;
         using xo::Indentlog2Config;
         using xo::AppContext;
         using xo::AppConfig;
-        using ReplAppConfig = AppConfig<S_indentlog2_tag, S_facet_tag, S_interpreter2_tag>;
-        using ReplAppContext = AppContext<S_indentlog2_tag, S_facet_tag, S_interpreter2_tag>;
+
+        using ReplAppConfig = AppConfig<S_indentlog2_tag,
+                                        S_facet_tag,
+                                        S_reflect_tag,
+                                        S_printjson_tag,
+                                        S_object2_tag,
+                                        S_interpreter2_tag>;
+        using ReplAppContext = AppContext<S_indentlog2_tag,
+                                          S_facet_tag,
+                                          S_reflect_tag,
+                                          S_printjson_tag,
+                                          S_object2_tag,
+                                          S_interpreter2_tag>;
 
         ReplAppConfig repl_config{
             Indentlog2Config(PpConfig().with_logbuf_config
@@ -193,6 +211,9 @@ namespace xo {
                              64 * 1024 /*c_temp_arena_capacity*/),
             FacetConfig(1024 /*c_facet_registry_capacity*/,
                         1024 /*c_type_registry_capacity*/),
+            ReflectConfig(),
+            PrintJsonConfig(),
+            Object2Config(),
             Interpreter2Config()
         };
         ReplAppContext utest_appcx{repl_config};

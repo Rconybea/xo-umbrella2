@@ -56,6 +56,11 @@ namespace xo {
         TypeDescrTable * type_table_ = nullptr;
     };
 
+    template <>
+    class SubsystemContext<S_reflect_tag> {
+    public:
+        using Type = ReflectAppcx;
+    };
 } /*namespace xo*/
 
 /* end ReflectAppcx.hpp */

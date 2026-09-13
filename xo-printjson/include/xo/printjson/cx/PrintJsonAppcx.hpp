@@ -54,6 +54,12 @@ namespace xo {
         /** json printers, indexed by type **/
         rp<PrintJson> print_json_;
     };
+
+    template <>
+    class SubsystemContext<S_printjson_tag> {
+    public:
+        using Type = PrintJsonAppcx;
+    };
 } /*namespace xo*/
 
 /* end PrintJsonAppcx.hpp */
