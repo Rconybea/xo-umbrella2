@@ -71,7 +71,7 @@ jobs:
 
       # ---- GENERATED from ci.yaml.j2 by xo-gen-ci ----
       # Do not edit these steps by hand.  Membership and order come from
-      # /home/roland/proj/xo-umbrella2/xo-cmake/etc/xo/subsystem-list; regenerate with:
+      # xo-cmake/etc/xo/subsystem-list; regenerate with:
       #     cmake --build .build --target xo-gen-ci
       #
       # Generated for the same reason ci-cmake.yaml is: this file was

@@ -14,7 +14,8 @@ name: cmake-docker
 # cost on an image that is already 2.6GB.
 #
 # The per-subsystem steps are GENERATED; see .github/workflows/ci-cmake.yaml.j2
-# and `cmake --build .build --target xo-gen-ci-github`.
+# and `cmake --build .build --target xo-gen-ci`, which writes all three
+# workflows (forgejo cmake, github cmake, forgejo nix) from one subsystem-list.
 
 on:
   push:

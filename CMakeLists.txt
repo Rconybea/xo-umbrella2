@@ -249,21 +249,26 @@ xo_emit_python_wrapper(${CMAKE_BINARY_DIR})
 #             not worth it.  The old hand-written workflow never built xo-imgui
 #             either -- generating from subsystem-list is what surfaced it.
 
+# Paths are REPO-RELATIVE, with WORKING_DIRECTORY set: xo-gen-ci renders the
+# subsystem-list path into a provenance comment in each output, so an absolute
+# path would bake the generating machine's home directory into a committed file
+# -- and would make any "regenerate and diff" check fail everywhere but there.
 add_custom_target(xo-gen-ci
     COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
-            ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci-cmake.yaml.j2
-            ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
+            .forgejo/workflows/ci-cmake.yaml.j2
+            xo-cmake/etc/xo/subsystem-list
             --exclude xo-cmake --exclude xo-imgui
-            -o ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci-cmake.yaml
+            -o .forgejo/workflows/ci-cmake.yaml
     COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
-            ${CMAKE_SOURCE_DIR}/.github/workflows/ci-cmake.yaml.j2
-            ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
+            .github/workflows/ci-cmake.yaml.j2
+            xo-cmake/etc/xo/subsystem-list
             --exclude xo-cmake --exclude xo-imgui
-            -o ${CMAKE_SOURCE_DIR}/.github/workflows/ci-cmake.yaml
+            -o .github/workflows/ci-cmake.yaml
     COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-ci
-            ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci.yaml.j2
-            ${CMAKE_SOURCE_DIR}/xo-cmake/etc/xo/subsystem-list
-            -o ${CMAKE_SOURCE_DIR}/.forgejo/workflows/ci.yaml
+            .forgejo/workflows/ci.yaml.j2
+            xo-cmake/etc/xo/subsystem-list
+            -o .forgejo/workflows/ci.yaml
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "xo-gen-ci: regenerating forgejo + github cmake workflows, forgejo nix workflow"
     VERBATIM)
 
