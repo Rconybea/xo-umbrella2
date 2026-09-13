@@ -3,8 +3,7 @@
 #include "pywebsock.hpp"
 #include <xo/websock/Webserver.hpp>
 #include <xo/pywebutil/pywebutil.hpp>
-#include <xo/printjson/PrintJson.hpp>
-// #include "web_util/EndpointDescr.hpp"
+#include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/pyutil/pyutil.hpp>
 #include <pybind11/chrono.h>
 

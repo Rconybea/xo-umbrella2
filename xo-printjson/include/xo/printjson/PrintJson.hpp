@@ -15,6 +15,11 @@
 
 namespace xo {
     namespace json {
+        /** @brief json printer for an ensemble of types
+         *
+         *  Expect to need at most one of these in an application.
+         *  See also PrintJsonSingleton
+         **/
         class PrintJson : public reflect::SelfTagging {
         public:
             using AReflectable = xo::reflect::AReflectable;
@@ -130,22 +135,6 @@ namespace xo {
             /* map contains specialized printers for specific c++ types */
             TypeDrivenMap printer_map_;
         }; /*PrintJson*/
-
-        /* Using singleton here to collect type-specific json printers,
-         * collected during program initialization.
-         *
-         * Could relabel as PrintJsonInitContext if desired
-         */
-        class PrintJsonSingleton {
-        public:
-            static rp<PrintJson> instance();
-
-        private:
-            /* we don't need this to be stored as pointer.
-             * memory burned if unused will be one empty std::vector<>
-             */
-            static rp<PrintJson> s_instance;
-        }; /*PrintJsonSingleton*/
 
     } /*namespace json*/
 

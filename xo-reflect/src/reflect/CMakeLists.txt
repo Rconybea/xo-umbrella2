@@ -2,9 +2,10 @@
 
 set(SELF_LIB reflect)
 set(SELF_SRCS
-	init_reflect.cpp
+    init_reflect.cpp
+    ReflectAppcx.cpp
     TypeDescr.cpp TypeDescrExtra.cpp TaggedRcptr.cpp
-	Metatype.cpp
+    Metatype.cpp
     atomic/AtomicTdx.cpp
     pointer/PointerTdx.cpp
     vector/VectorTdx.cpp

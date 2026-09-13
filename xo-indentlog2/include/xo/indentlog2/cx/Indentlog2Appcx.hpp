@@ -15,7 +15,7 @@
 #include <xo/ppsink/LogState.hpp>
 
 namespace xo {
-    /** There's some configuration that logically belongs to indentlog2/,
+    /** NOTE: there's some configuration that logically belongs to indentlog2/,
      *  but is stored in thread-local storage.
      *
      *  This is _not_ a model to use as a general-purpose pattern.

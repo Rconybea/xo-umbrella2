@@ -3,16 +3,9 @@
 // note: need pyreflect/ here bc pyreflect.hpp is generated, located in build directory
 #include "pyprintjson.hpp"
 #include <xo/pyreflect/pyreflect.hpp>
-#include <xo/printjson/PrintJson.hpp>
+#include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/reflect/TaggedRcptr.hpp>
-// #include "reflect/SelfTagging.hpp"
-// #include "refcnt/Refcounted.hpp"
-// #include "refcnt/Unowned.hpp"
 #include <xo/pyutil/pyutil.hpp>
-//#include <pybind11/pybind11.h>
-//#include <pybind11/stl.h>
-//#include <pybind11/chrono.h>
-//#include <pybind11/operators.h>
 
 namespace xo {
     namespace py = pybind11;

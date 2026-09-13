@@ -6,6 +6,7 @@
 #include <xo/reactor/ReactorSource.hpp>
 #include <xo/reactor/Sink.hpp>
 #include <xo/pyprintjson/pyprintjson.hpp>
+#include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/pyreflect/pyreflect.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>

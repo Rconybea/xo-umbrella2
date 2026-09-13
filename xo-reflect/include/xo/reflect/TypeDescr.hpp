@@ -601,7 +601,7 @@ namespace xo::pp {
 namespace xo::reflect {
     class TypeDescrTable {
     public:
-        TypeDescrTable * instance() { return &s_instance; }
+        static TypeDescrTable * instance() { return &s_instance; }
 
     private:
         /** initialize with builtin atomic types:

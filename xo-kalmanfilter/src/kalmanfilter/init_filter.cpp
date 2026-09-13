@@ -7,7 +7,7 @@
 #include "EigenUtil.hpp"
 #include "KalmanFilterState.hpp"
 #include <xo/reactor/init_reactor.hpp>
-#include <xo/printjson/PrintJson.hpp>
+#include <xo/printjson/PrintJsonSingleton.hpp>
 
 namespace xo {
     using xo::kalman::KalmanFilterInput;

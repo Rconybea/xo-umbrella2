@@ -36,7 +36,8 @@ namespace xo {
          **/
         template <typename Deps>
         FacetAppcx(Deps & deps,
-                   const FacetConfig & cfg) : FacetAppcx(cfg, deps.template cx<S_indentlog2_tag>()) {}
+                   const FacetConfig & cfg)
+            : FacetAppcx(cfg, deps.template cx<S_indentlog2_tag>()) {}
 
         const Indentlog2Appcx & indentlog2_appcx() const { return indentlog2_appcx_; }
 

@@ -448,18 +448,6 @@ namespace xo {
             provide_utc_nanos_printer(this);
         } /*provide_std_printers*/
 
-        rp<PrintJson>
-        PrintJsonSingleton::s_instance;
-
-        rp<PrintJson>
-        PrintJsonSingleton::instance()
-        {
-            if (!s_instance)
-                s_instance = new PrintJson();
-
-            return s_instance;
-        } /*instance*/
-
     } /*namespace json*/
 } /*namespace xo*/
 

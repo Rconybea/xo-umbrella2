@@ -11,6 +11,7 @@
 #include <xo/pyreactor/pyreactor.hpp>
 #include <xo/reactor/EventStore.hpp>
 #include <xo/reactor/PolyAdapterSink.hpp>
+#include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/pywebutil/pywebutil.hpp>
 #include <xo/timeutil/timeutil.hpp>
 #include <xo/randomgen/random_seed.hpp>

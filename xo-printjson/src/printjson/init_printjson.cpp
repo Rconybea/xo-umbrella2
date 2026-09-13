@@ -4,7 +4,7 @@
  */
 
 #include "init_printjson.hpp"
-#include "PrintJson.hpp"
+#include "PrintJsonSingleton.hpp"
 #include <xo/reflect/init_reflect.hpp>
 #include <xo/subsys/Subsystem.hpp>
 

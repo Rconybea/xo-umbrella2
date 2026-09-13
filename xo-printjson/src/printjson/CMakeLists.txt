@@ -1,7 +1,11 @@
 # xo-printjson/src/printjson/CMakeLists.txt
 
 set(SELF_LIB printjson)
-set(SELF_SRCS PrintJson.cpp init_printjson.cpp)
+set(SELF_SRCS
+    PrintJsonAppcx.cpp
+    PrintJsonSingleton.cpp
+    PrintJson.cpp
+    init_printjson.cpp)
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 

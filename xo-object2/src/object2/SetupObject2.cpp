@@ -42,12 +42,7 @@ namespace xo {
 
     namespace scm {
         namespace {
-            /** DFloat is a BOX.  Reflection describes the box faithfully -- a
-             *  struct with a value member, see DFloat::reflect_self -- and
-             *  this printer is where the decision to render it as a bare
-             *  number instead lives.  Keeping the two apart means reflection
-             *  never has to lie about the layout to get readable JSON.
-             **/
+            /** json printing for DFloat **/
             class DFloatJsonPrinter : public xo::json::JsonPrinter {
             public:
                 DFloatJsonPrinter(const xo::json::PrintJson * pjson)
