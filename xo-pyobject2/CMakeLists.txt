@@ -20,7 +20,6 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 add_subdirectory(src/pyobject2)
 add_subdirectory(utest)
-#add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # provide find_package() support
