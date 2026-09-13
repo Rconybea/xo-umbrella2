@@ -7,6 +7,7 @@
 
 #include "xo/reflect/cx/ReflectConfig.hpp"
 #include "xo/reflect/TypeDescr.hpp"
+#include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 
 namespace xo {
@@ -22,7 +23,8 @@ namespace xo {
          *
          *  Primary driver for reflect init
          **/
-        ReflectAppcx(const ReflectConfig & cfg);
+        ReflectAppcx(const ReflectConfig & cfg,
+                     const Indentlog2Appcx & indentlog2_cx);
 
         /** Template for reflect init. Works with AppConfig, AppContext
          *
@@ -30,14 +32,18 @@ namespace xo {
          *  @p cfg   configuration for this subsystem
          **/
         template <typename Deps>
-        ReflectAppcx(Deps & /*deps*/,
-                     const ReflectConfig & cfg) : ReflectAppcx(cfg) {}
+        ReflectAppcx(Deps & deps,
+                     const ReflectConfig & cfg) : ReflectAppcx(cfg, deps.template cx<S_indentlog2_tag>()) {}
 
         InitEvidence init_evidence() const { return init_evidence_; }
         const ReflectConfig & config() const { return config_; }
         TypeDescrTable * type_table() const { return type_table_; }
         /** report memory consumption, one @ref MemorySizeInfo per pool.
-         *  (placeholder, enable when reflect/ refactored to use DArena)
+         *
+         *  Placeholder: reports nothing, because reflect/ has no pools to
+         *  report yet.  Becomes meaningful when TypeDescrTable is represented
+         *  with a DArena.  Present now so the shape matches every other
+         *  Appcx -- a caller walking the stack need not special-case this one.
          **/
         void visit_pools(const MemorySizeVisitor &) const {}
 
@@ -54,6 +60,9 @@ namespace xo {
          *  forced by Reflect::reflect<T>() interface
          **/
         TypeDescrTable * type_table_ = nullptr;
+
+        /** xo-indentlog2/ context **/
+        const Indentlog2Appcx & indentlog2_appcx_;
     };
 
     template <>

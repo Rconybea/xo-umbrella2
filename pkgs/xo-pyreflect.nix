@@ -1,11 +1,16 @@
 {
   # nixpkgs dependencies
-  stdenv, cmake, catch2, # ... other deps here
+  lib, stdenv, cmake, catch2, # ... other deps here
 
   python3Packages,
 
   # xo dependencies
   xo-cmake, xo-refcnt, xo-pyutil, xo-reflect,
+  # Indentlog2Appcx is configure()'s second argument; xo-pyindentlog2 registers
+  # it with pybind11 and this module imports that at init
+  xo-indentlog2, xo-pyindentlog2,
+  # MemorySizeInfo, the element type visit_pools() returns
+  xo-arena, xo-pyarena,
 
   # args
 
@@ -19,6 +24,8 @@
   #cmake-examples-ex1-path
 
   # someconfigurationoption ? false
+
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -32,11 +39,22 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-pyreflect;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
+
+    inherit doCheck;
+
+    preCheck = ''
+      export PYTHONPATH=${xo-pyindentlog2}/lib/python:${xo-pyarena}/lib/python
+    '';
 
     propagatedBuildInputs = [
       xo-pyutil
       xo-reflect
+      xo-indentlog2
+      xo-arena
+      xo-pyindentlog2
+      xo-pyarena
     ];
 
     nativeBuildInputs = [
