@@ -186,6 +186,17 @@ namespace xo {
         }
 
         void
+        parserstatemachine::on_symbol_token(const token_type & tk)
+        {
+            scope log(XO_DEBUG_(debug_flag_));
+
+            log && log(xtag("tk", tk),
+                       xtag("psm", this));
+
+            this->xs_stack_.top_exprstate().on_symbol_token(tk, this);
+        }
+
+        void
         parserstatemachine::on_error(const char * self_name, std::string errmsg)
         {
             this->result_ = parser_result::error(self_name, std::move(errmsg));

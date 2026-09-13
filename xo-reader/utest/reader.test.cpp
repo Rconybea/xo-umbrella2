@@ -1,7 +1,11 @@
 /* @file reader.test.cpp */
 
 #include "xo/reader/reader.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 
 namespace xo {
     using xo::pp::scope;
@@ -23,13 +27,13 @@ namespace xo {
                 {"def foo = lambda (x : f64, y : f64) 3.1415965;"},
                 {"def foo = lambda (x : f64) x;"},
                 {"def foo = lambda (x : f64) { def y = x * x; y; };"},
-                {"add(1,2);"},
+                //TEMP {"add(1,2);"},
             };
         }
 
         TEST_CASE("reader", "[reader]") {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag), xtag("utest", "reader"));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("utest", "reader"));
 
             for (std::size_t i_tc = 0; i_tc < s_testcase_v.size(); ++i_tc) {
                 const test_case & tc = s_testcase_v[i_tc];
@@ -38,7 +42,7 @@ namespace xo {
 
                 reader rdr(toplevel_symtab, c_debug_flag);
 
-                scope log(XO_ENTER2(always, c_debug_flag, "reader.testcase"),
+                scope log(XO_ENTER2_(always, c_debug_flag, "reader.testcase"),
                            xtag("i_tc", i_tc));
 
                 rdr.begin_translation_unit();

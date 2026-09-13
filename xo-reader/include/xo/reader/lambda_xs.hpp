@@ -77,6 +77,8 @@ namespace xo {
                                             parserstatemachine * p_psm) override;
             virtual void on_f64_token(const token_type & tk,
                                       parserstatemachine * p_psm) final override;
+            virtual void on_symbol_token(const token_type & tk,
+                                         parserstatemachine * p_psm) final override;
 
             virtual void pretty(xo::pp::PpSink & sink) const override;
 

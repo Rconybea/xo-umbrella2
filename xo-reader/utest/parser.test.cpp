@@ -5,7 +5,11 @@
 
 #include "xo/reader/parser.hpp"
 #include "xo/reader/define_xs.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 
 namespace xo {
     using xo::pp::scope;
@@ -30,7 +34,7 @@ namespace xo {
 
                 parser_type parser(toplevel_symtab, c_debug_flag);
 
-                scope log(XO_DEBUG(c_debug_flag), xtag("i_tc", i_tc));
+                scope log(XO_DEBUG_(c_debug_flag), xtag("i_tc", i_tc));
 
                 parser.begin_translation_unit();
 
@@ -76,8 +80,14 @@ namespace xo {
                 {
                     auto r2 = parser.include_token(token_type::symbol_token("foo"));
 
-                    cerr << "parser state after [def foo]" << endl;
-                    cerr << parser << endl;
+                    /* Diagnostics, commented out rather than deleted: parser
+                     * has pretty(PpSink&) but no Prettifier<parser>, so
+                     * `cerr << parser' no longer compiles after
+                     * ostream-containment.  Restore by specializing
+                     * Prettifier<parser> in xo-reader.
+                     */
+                    //cerr << "parser state after [def foo]" << endl;
+                    //cerr << parser << endl;
 
                     REQUIRE(r2.is_none());
                     REQUIRE(r2.result_expr().get() == nullptr);
@@ -112,8 +122,8 @@ namespace xo {
                     {
                         auto r3 = parser.include_token(token_type::colon());
 
-                        cerr << "parser state after [def foo :]" << endl;
-                        cerr << parser << endl;
+                        //cerr << "parser state after [def foo :]" << endl;
+                        //cerr << parser << endl;
 
                         REQUIRE(r3.is_none());
                         REQUIRE(r3.result_expr().get() == nullptr);
@@ -147,8 +157,8 @@ namespace xo {
                     {
                         auto r4 = parser.include_token(token_type::symbol_token("f64"));
 
-                        cerr << "parser state after [def foo : f64]" << endl;
-                        cerr << parser << endl;
+                        //cerr << "parser state after [def foo : f64]" << endl;
+                        //cerr << parser << endl;
 
                         REQUIRE(r4.is_none());
                         REQUIRE(r4.result_expr().get() == nullptr);
@@ -194,8 +204,8 @@ namespace xo {
                 {
                     auto r5 = parser.include_token(token_type::singleassign());
 
-                    cerr << "parser state after [def foo : f64 =]" << endl;
-                    cerr << parser << endl;
+                    //cerr << "parser state after [def foo : f64 =]" << endl;
+                    //cerr << parser << endl;
 
                     REQUIRE(r5.is_none());
                     REQUIRE(r5.result_expr().get() == nullptr);
@@ -238,8 +248,8 @@ namespace xo {
                 {
                     auto r6 = parser.include_token(token_type::f64_token("3.14159265"));
 
-                    cerr << "parser state after [def foo : f64 = 3.14159265]" << endl;
-                    cerr << parser << endl;
+                    //cerr << "parser state after [def foo : f64 = 3.14159265]" << endl;
+                    //cerr << parser << endl;
 
                     REQUIRE(r6.is_none());
                     REQUIRE(r6.result_expr().get() == nullptr);
@@ -280,8 +290,8 @@ namespace xo {
                 {
                     auto r7 = parser.include_token(token_type::semicolon());
 
-                    cerr << "parser state after [def foo : f64 = 3.14159265;]" << endl;
-                    cerr << parser << endl;
+                    //cerr << "parser state after [def foo : f64 = 3.14159265;]" << endl;
+                    //cerr << parser << endl;
 
                     REQUIRE(r7.is_expression());
                     REQUIRE(r7.result_expr().get() != nullptr);

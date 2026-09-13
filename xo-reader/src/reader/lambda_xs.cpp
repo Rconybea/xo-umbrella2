@@ -297,6 +297,34 @@ namespace xo {
             }
         }
 
+        void
+        lambda_xs::on_symbol_token(const token_type & tk,
+                                   parserstatemachine * p_psm)
+        {
+            constexpr const char * c_self_name = "lambda_xs::on_symbol_token";
+
+            /* a symbol can begin an unbraced lambda body -- typically a
+             * reference to one of the formals.  for example:
+             *   def foo = lambda (x : f64) x;
+             *
+             * Same shape as on_f64_token: from lm_2 we are still choosing
+             * between a return-type annotation (`:'), a braced body (`{') and
+             * an unbraced body.  A symbol settles it as the third, so adopt
+             * lm_4, push the expression state, and re-deliver the token to it.
+             */
+            if (lmxs_type_ == lambdastatetype::lm_2) {
+                /* omitting return type.
+                 * omitting left brace.
+                 */
+                this->lmxs_type_ = lambdastatetype::lm_4;
+
+                expect_expr_xs::start(p_psm);
+                p_psm->on_symbol_token(tk);
+            } else {
+                this->illegal_input_on_token(c_self_name, tk, this->get_expect_str(), p_psm);
+            }
+        }
+
         // TODO: on_i64_token, on_bool token
 
         void
