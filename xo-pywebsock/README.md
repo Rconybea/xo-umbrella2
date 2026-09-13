@@ -26,11 +26,11 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pywebsock` installed to `~/local2/lib`
+Assumes `xo-pywebsock` installed to `~/local2/lib/python`
 ```
-PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> import xo_pywebsock
->>> dir(xo_pywebsock)
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.websock
+>>> dir(xo.websock)
 ['Runstate', 'Webserver', 'WebserverConfig', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'make_webserver']
 >>>
 ```

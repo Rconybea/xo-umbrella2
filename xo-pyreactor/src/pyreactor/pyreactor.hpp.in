@@ -1,25 +1,30 @@
 /* @file pyreactor.hpp
  *
- * automatically generated from src/pyreflect/pyreactor.hpp.in
+ * automatically generated from src/pyreactor/pyreactor.hpp.in
  * see src/pyreactor/CMakeLists.txt
  */
 
-/* python requires module name = library name
+/* The module's python name is xo.reactor, but its init symbol is NOT: CPython
+ * looks for PyInit_<last dotted component>, so PYBIND11_MODULE() takes the
+ * bare name.  The `xo.` prefix comes from the directory the .so is emitted
+ * into -- see xo_pybind11_library() in xo-cmake.
+ *
  * example:
  *   PYBIND11_MODULE(PYREACTOR_MODULE_NAME(), m) { ... }
  */
-#define PYREACTOR_MODULE_NAME() @SELF_LIB@
+#define PYREACTOR_MODULE_NAME() @SELF_MODULE@
 
-/* example:
+/* the qualified name, for importing.
+ * example:
  *   py::module_::import(PYREACTOR_MODULE_NAME_STR)
  */
-#define PYREACTOR_MODULE_NAME_STR "@SELF_LIB@"
+#define PYREACTOR_MODULE_NAME_STR "@SELF_QUALNAME@"
 
 /* example:
  *   PYREACTOR_IMPORT_MODULE()
  * replaces
- *   py::module_::import("pyreactor")
+ *   py::module_::import("xo.reactor")
  */
-#define PYREACTOR_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+#define PYREACTOR_IMPORT_MODULE() py::module_::import("@SELF_QUALNAME@")
 
 /* end pyreactor.hpp */

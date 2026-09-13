@@ -24,14 +24,14 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pyreflect` installed to `~/local2/lib`
+Assumes `xo-pyreflect` installed to `~/local2/lib/python`
 
 ```
-PYTHONPATH=~/local2/lib python
->>> import xo_pyreflect
->>> dir(xo_pyreflect)
+PYTHONPATH=~/local2/lib/python python
+>>> import xo.reflect
+>>> dir(xo.reflect)
 ['SelfTagging', 'TaggedRcptr', 'TypeDescr', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
->>> xo_pyreflect.TypeDescr.print_reflected_types()
+>>> xo.reflect.TypeDescr.print_reflected_types()
 <type_table_v[0]:>
 ```
 (Not _immediately_ interesting:  no reflected types in `pyreflect` itself)

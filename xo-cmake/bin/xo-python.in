@@ -3,17 +3,24 @@
 #
 # Installed sibling of the generated ${CMAKE_BINARY_DIR}/xo-python that the
 # umbrella build emits (xo_emit_python_wrapper, xo_cxx.cmake).  This one needs
-# no collection: every xo pybind11 module installs to a single directory.
+# no collection: every xo pybind11 module installs into one directory.
 #
-# That directory is spelled @CMAKE_INSTALL_PREFIX@/lib rather than
-# @CMAKE_INSTALL_FULL_LIBDIR@ deliberately.  xo_install_library4_noincludes()
-# hardcodes `LIBRARY DESTINATION lib`, so on a platform where GNUInstallDirs
-# resolves libdir to lib64 the two would disagree and this script would point at
-# an empty directory.  Move both together, or neither.
+# That directory is lib/python, and it holds the PEP 420 namespace package xo/
+# -- so PYTHONPATH names lib/python, the directory the package LIVES in, and
+# `import xo.facet' finds lib/python/xo/facet.cpython-*.so.  Modules used to
+# install flat into lib/ beside the C++ shared libraries, which made
+# `import xo_pyfacet' work only by putting a C++ library directory on
+# PYTHONPATH.
+#
+# Spelled @CMAKE_INSTALL_PREFIX@/lib/python rather than
+# @CMAKE_INSTALL_FULL_LIBDIR@/python deliberately.  xo_pybind11_library()
+# hardcodes `LIBRARY DESTINATION lib/python/xo', so on a platform where
+# GNUInstallDirs resolves libdir to lib64 the two would disagree and this script
+# would point at an empty directory.  Move both together, or neither.
 #
 # Prepends, so an inherited PYTHONPATH still wins for anything xo does not ship.
 
-XO_PYTHONPATH='@CMAKE_INSTALL_PREFIX@/lib'
+XO_PYTHONPATH='@CMAKE_INSTALL_PREFIX@/lib/python'
 
 if [ -n "${PYTHONPATH}" ]; then
     PYTHONPATH="${XO_PYTHONPATH}:${PYTHONPATH}"

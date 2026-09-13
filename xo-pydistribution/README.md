@@ -46,14 +46,14 @@ $ ln -s build/compile_commands.json  # supply compile commands to LSP
 
 ## Examples
 
-Assumes `xo-pydistribution` installed to `~/local2/lib`
+Assumes `xo-pydistribution` installed to `~/local2/lib/python`
 
 ```
-PYTHONPATH=~/local2/lib python
->>> import xo_pydistribution
->>> dir(xo_pydistribution)
+PYTHONPATH=~/local2/lib/python python
+>>> import xo.distribution
+>>> dir(xo.distribution)
 ['Distribution', 'ExplicitDist', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'normalcdf']
->>> from xo_pydistribution import *
+>>> from xo.distribution import *
 ```
 
 normal distribution

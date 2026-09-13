@@ -25,11 +25,11 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pykalmanfilter` installed to `~/local2/lib`
+Assumes `xo-pykalmanfilter` installed to `~/local2/lib/python`
 ```
-PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> import xo_pykalmanfilter
->>> dir(xo_pykalmanfilter)
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.kalmanfilter
+>>> dir(xo.kalmanfilter)
 ['KalmanFilter', 'KalmanFilterInput', 'KalmanFilterInputToConsole', 'KalmanFilterObservable', 'KalmanFilterSpec', 'KalmanFilterState', 'KalmanFilterStateEventStore', 'KalmanFilterStateExt', 'KalmanFilterStateToConsole', 'KalmanFilterStep', 'KalmanFilterSvc', 'KalmanFilterTransition', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'kf_engine_correct', 'kf_engine_correct1', 'kf_engine_extrapolate', 'kf_engine_gain', 'kf_engine_gain1', 'make_kalman_filter', 'make_kalman_filter_input', 'make_kalman_filter_input_printer', 'make_kalman_filter_state_printer', 'print_matrix', 'print_vector']
 >>>
 ```

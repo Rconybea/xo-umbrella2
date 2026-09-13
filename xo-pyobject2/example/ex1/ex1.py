@@ -21,10 +21,10 @@ or from a standalone subsystem build:
 
 import gc
 
-import xo_pyarena as mm
-import xo_pyindentlog2 as il
-import xo_pyfacet as f
-import xo_pyobject2 as o
+import xo.arena as mm
+import xo.indentlog2 as il
+import xo.facet as f
+import xo.object2 as o
 
 
 def main():

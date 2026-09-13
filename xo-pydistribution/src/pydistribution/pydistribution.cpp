@@ -17,7 +17,7 @@ namespace xo {
         namespace py = pybind11;
 
         PYBIND11_MODULE(PYDISTRIBUTION_MODULE_NAME(), m) {
-            m.doc() = "pybind11 distribution plugin"; // optional module docstring
+            m.doc() = "pybind11 plugin for xo.distribution"; // optional module docstring
 
             m.def("normalcdf",
                   &Normal::cdf_impl,

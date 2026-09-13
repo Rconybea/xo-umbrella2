@@ -25,13 +25,13 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pywebutil` installed to `~/local2/lib`
+Assumes `xo-pywebutil` installed to `~/local2/lib/python`
 ```
-$ PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> import xo_pywebutil
->>> dir(xo_pywebutil)
+$ PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.webutil
+>>> dir(xo.webutil)
 ['EndpointDescr', 'StreamEndpointDescr', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
->>> from xo_pywebutil import *
+>>> from xo.webutil import *
 ```
 
 ## Development

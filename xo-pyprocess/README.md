@@ -28,11 +28,11 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pyprocess` installed to `~/local2/lib`
+Assumes `xo-pyprocess` installed to `~/local2/lib/python`
 ```
-PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> import xo_pyprocess
->>> dir(xo_pyprocess)
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.process
+>>> dir(xo.process)
 ['BrownianMotion', 'ExpProcess', 'RealizationSource', 'RealizationTracer', 'StochasticProcess', 'UpxAdapterSink', 'UpxEvent', 'UpxEventStore', 'UpxToConsole', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'make_brownian_motion', 'make_exponential_brownian_motion', 'make_realization_printer', 'make_realization_source', 'make_tracer']
 >>>
 ```
@@ -63,10 +63,10 @@ $ ln -s build/compile_commands.json  # supply compile commands to LSP
 
 # Examples
 
-Assumes `xo-pyprocess` installed to `~/local2/lib`
+Assumes `xo-pyprocess` installed to `~/local2/lib/python`
 
 ```
-PYTHONPATH=~/local2/lib python
+PYTHONPATH=~/local2/lib/python python
 >>> import pyprocess
 >>> dir(pyprocess)
 ```

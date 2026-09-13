@@ -1,10 +1,10 @@
-"""Unit tests for the xo python extension stack, up to xo_pyobject2.
+"""Unit tests for the xo python extension stack, up to xo.object2.
 
 Run by ctest through the generated xo-python wrapper, which is what puts the
 extension modules on PYTHONPATH -- so a failure here is equally a failure of
 that wrapper.  See xo_emit_python_wrapper() in xo-cmake.
 
-NB configuration is process-global and one-shot: xo_pyfacet.configure_all()
+NB configuration is process-global and one-shot: xo.facet.configure_all()
 throws on a second call.  So every case that needs a DIFFERENT configuration
 runs in its own interpreter (see ConfigurationContractTestCase, which spawns
 subprocesses); everything else shares the one established in setUpModule.
@@ -18,10 +18,10 @@ import subprocess
 import sys
 import unittest
 
-import xo_pyarena as mm
-import xo_pyindentlog2 as il
-import xo_pyfacet as f
-import xo_pyobject2 as o
+import xo.arena as mm
+import xo.indentlog2 as il
+import xo.facet as f
+import xo.object2 as o
 
 FACET_CX = None
 
@@ -189,7 +189,7 @@ class AppcxVisitPoolsTestCase(unittest.TestCase):
         never logged owns no scratch arena, and says so.  Needs a fresh
         interpreter -- any earlier case in this process would have made one.
         """
-        body = ("import xo_pyfacet as f, xo_pyobject2 as o\n"
+        body = ("import xo.facet as f, xo.object2 as o\n"
                 "cx = f.configure_all()\n"
                 "il = cx.indentlog2_appcx()\n"
                 "print('before', len(il.visit_pools()))\n"
@@ -224,7 +224,7 @@ class ConfigurationContractTestCase(unittest.TestCase):
         test_second_configure_raises.
         """
         r = self.run_in_fresh_interpreter(
-            "import xo_pyindentlog2 as il, xo_pyfacet as f\n"
+            "import xo.indentlog2 as il, xo.facet as f\n"
             "print('F_ACCESSOR', hasattr(f, 'appcx'))\n"
             "print('IL_ACCESSOR', hasattr(il, 'appcx'))\n"
             "cx = f.configure_all()\n"
@@ -244,12 +244,12 @@ class ConfigurationContractTestCase(unittest.TestCase):
         map, which python's gc cannot see (gc.get_referents is empty), so a
         weakref on the python object is the observable that discriminates.
 
-        It also only discriminates because xo_pyindentlog2.configure() hands
+        It also only discriminates because xo.indentlog2.configure() hands
         ownership to its caller too.  While that module owned its context in a
         module static, this passed with the keep_alive removed.
         """
         r = self.run_in_fresh_interpreter(
-            "import gc, weakref, xo_pyindentlog2 as il, xo_pyfacet as f\n"
+            "import gc, weakref, xo.indentlog2 as il, xo.facet as f\n"
             "il_cx = il.configure(il.Indentlog2Config.make_default())\n"
             "ref = weakref.ref(il_cx)\n"
             "cx = f.configure(f.FacetConfig.make_default(), il_cx)\n"
@@ -266,7 +266,7 @@ class ConfigurationContractTestCase(unittest.TestCase):
         module owned it, it outlived everything by construction.
         """
         r = self.run_in_fresh_interpreter(
-            "import gc, weakref, xo_pyfacet as f\n"
+            "import gc, weakref, xo.facet as f\n"
             "cx = f.configure_all()\n"
             "fw = f.AllocFlywheel.make_default_app(cx)\n"
             "ref = weakref.ref(cx)\n"
@@ -280,7 +280,7 @@ class ConfigurationContractTestCase(unittest.TestCase):
         keep_alive is established by hand -- easy to omit, hence pinned
         """
         r = self.run_in_fresh_interpreter(
-            "import gc, weakref, xo_pyfacet as f\n"
+            "import gc, weakref, xo.facet as f\n"
             "cx = f.configure_all()\n"
             "ref = weakref.ref(cx.indentlog2_appcx())\n"
             "gc.collect()\n"
@@ -289,7 +289,7 @@ class ConfigurationContractTestCase(unittest.TestCase):
 
     def test_second_configure_raises(self):
         r = self.run_in_fresh_interpreter(
-            "import xo_pyfacet as f\n"
+            "import xo.facet as f\n"
             "f.configure_all()\n"
             "try:\n"
             "    f.configure_all()\n"
@@ -300,7 +300,7 @@ class ConfigurationContractTestCase(unittest.TestCase):
 
     def test_supplied_config_is_honored(self):
         r = self.run_in_fresh_interpreter(
-            "import xo_pyindentlog2 as il, xo_pyfacet as f\n"
+            "import xo.indentlog2 as il, xo.facet as f\n"
             "cx = f.configure_all(f.FacetConfig(4096, 8192),\n"
             "                     il.Indentlog2Config(il.PpConfig.plain(), 32*1024))\n"
             "c = cx.config()\n"
@@ -311,7 +311,7 @@ class ConfigurationContractTestCase(unittest.TestCase):
     def test_zero_reservation_config_is_rejected(self):
         """a sink that could never accept a byte is refused at construction"""
         r = self.run_in_fresh_interpreter(
-            "import xo_pyindentlog2 as il, xo_pyfacet as f\n"
+            "import xo.indentlog2 as il, xo.facet as f\n"
             "f.configure_all()\n"
             "try:\n"
             "    il.PrettySink.make2str(il.PpConfig())\n"

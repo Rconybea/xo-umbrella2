@@ -11,9 +11,9 @@ Run (from the umbrella build):
     .build/xo-python xo-pyfacet/examples/flywheel_pretty.py
 """
 
-import xo_pyarena as mm
-import xo_pyindentlog2 as il
-import xo_pyfacet as f
+import xo.arena as mm
+import xo.indentlog2 as il
+import xo.facet as f
 
 
 def configure():

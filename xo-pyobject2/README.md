@@ -56,7 +56,7 @@ From an umbrella build, `xo-python` puts every xo pybind module on `PYTHONPATH`:
 
 ```
 $ .build/xo-python
->>> import xo_pyobject2
->>> xo_pyobject2.__doc__
+>>> import xo.object2
+>>> xo.object2.__doc__
 'pybind11 plugin for xo.object2'
 ```

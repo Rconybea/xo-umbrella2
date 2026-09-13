@@ -26,7 +26,7 @@ namespace xo {
     namespace reflect {
         PYBIND11_MODULE(PYREFLECT_MODULE_NAME(), m) {
 
-            m.doc() = "pybind11 plugin for xo-reflect";
+            m.doc() = "pybind11 plugin for xo.reflect";
 
             py::enum_<Metatype>(m, "Metatype")
                 .value("invalid", Metatype::mt_invalid)

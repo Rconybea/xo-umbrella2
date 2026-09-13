@@ -46,23 +46,23 @@ $ cmake --install xo-pyexpression/.build
 
 ## Examples
 
-Assumes `xo-pyexpression` installed to `~/local2/lib`,
+Assumes `xo-pyexpression` installed to `~/local2/lib/python`,
 i.e. built with `PREFIX=~/local2`.
 ```
-PYTHONPATH=~/locasl2/lib:$PYTHONPATH python
->>> import xo_pyexpression
->>> dir(xo_pyexpression)
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.expression
+>>> dir(xo.expression)
 ['Expression', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'exprtype']
 ```
 
 ## Development
 
 ### use from build tree
-Requires that supporting libraries (e.g. `xo_pyreflect`) appear in PYTHONPATH
+Requires that supporting libraries (e.g. `xo.reflect`) appear in PYTHONPATH
 ```
 $ cd xo-pyexpression/.build/src/pyexpression
 $ python
->>> import xo_pyexpression
+>>> import xo.expression
 ```
 
 ### build for unit test coverage

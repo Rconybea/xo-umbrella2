@@ -1,25 +1,30 @@
 /* @file pyjit.hpp
  *
- * automatically generated from src/xo_pyjit/pyjit.hpp.in
- * see src/xo_pyjit/CMakeLists.txt
+ * automatically generated from src/pyjit/pyjit.hpp.in
+ * see src/pyjit/CMakeLists.txt
  */
 
-/* python requires module name = library name
+/* The module's python name is xo.jit, but its init symbol is NOT: CPython
+ * looks for PyInit_<last dotted component>, so PYBIND11_MODULE() takes the
+ * bare name.  The `xo.` prefix comes from the directory the .so is emitted
+ * into -- see xo_pybind11_library() in xo-cmake.
+ *
  * example:
  *   PYBIND11_MODULE(XO_PYJIT_MODULE_NAME(), m) { ... }
  */
-#define XO_PYJIT_MODULE_NAME() @SELF_LIB@
+#define XO_PYJIT_MODULE_NAME() @SELF_MODULE@
 
-/* example:
+/* the qualified name, for importing.
+ * example:
  *   py::module_::import(XO_PYJIT_MODULE_NAME_STR)
  */
-#define XO_PYJIT_MODULE_NAME_STR "@SELF_LIB@"
+#define XO_PYJIT_MODULE_NAME_STR "@SELF_QUALNAME@"
 
 /* example:
  *   XO_PYJIT_IMPORT_MODULE()
  * replaces
- *   py::module_::import("pyjit")
+ *   py::module_::import("xo.jit")
  */
-#define XO_PYJIT_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+#define XO_PYJIT_IMPORT_MODULE() py::module_::import("@SELF_QUALNAME@")
 
 /* end pyjit.hpp */

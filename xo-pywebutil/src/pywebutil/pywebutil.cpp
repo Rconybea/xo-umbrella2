@@ -18,7 +18,7 @@ namespace xo {
             //PYxxx_IMPORT_MODULE();
 
             /* module docstring */
-            m.doc() = "pybind11 plugin for xo.web_util";
+            m.doc() = "pybind11 plugin for xo.webutil";
 
             py::class_<HttpEndpointDescr>(m, "EndpointDescr")
                 .def_property_readonly("uri_pattern", &HttpEndpointDescr::uri_pattern)

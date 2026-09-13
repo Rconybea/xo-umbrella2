@@ -52,13 +52,13 @@ $ cmake --install xo-pyjit/.build
 
 ## Examples
 
-Assumes `xo-pyjit` installed to `~/local2/lib`,
+Assumes `xo-pyjit` installed to `~/local2/lib/python`,
 i.e. built with `PREFIX=~/local2`.
 ```
-PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> from xo_pyreflect import *
->>> from xo_pyjit import *
->>> from xo_pyexpression import *
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> from xo.reflect import *
+>>> from xo.jit import *
+>>> from xo.expression import *
 ```
 
 create a jit from within python
@@ -124,11 +124,11 @@ invoke just-compiled code!
 
 ### use from build tree
 
-Limited utility: requires that supporting libraries (e.g. `xo_pyexpression`) appear in PYTHONPATH
+Limited utility: requires that supporting libraries (e.g. `xo.expression`) appear in PYTHONPATH
 ```
 $ cd xo-pyjit/.build/src/pyjit
 $ python
->>> import xo_pyjit
+>>> import xo.jit
 ```
 
 ### build for unit test coverage

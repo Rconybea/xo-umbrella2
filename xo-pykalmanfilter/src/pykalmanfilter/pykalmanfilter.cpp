@@ -67,7 +67,7 @@ namespace xo {
              */
             PYREACTOR_IMPORT_MODULE();
 
-            m.doc() = "pybind11 plugin for xo.filter";
+            m.doc() = "pybind11 plugin for xo.kalmanfilter";
 
             m.def("print_matrix",
                   [](MatrixXd const & m) {

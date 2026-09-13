@@ -27,11 +27,11 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pysimulator` installed to `~/local2/lib`
+Assumes `xo-pysimulator` installed to `~/local2/lib/python`
 ```
-PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> import xo_pysimulator
->>> dir(xo_pysimulator)
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.simulator
+>>> dir(xo.simulator)
 ['Simulator', 'SourceTimestamp', 'TimeSlip', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'make_simulator']
 >>>
 
@@ -61,10 +61,10 @@ $ ln -s build/compile_commands.json  # supply compile commands to LSP
 
 ## Examples
 
-Assumes `xo-pysimulator` installed to `~/local2/lib`
+Assumes `xo-pysimulator` installed to `~/local2/lib/python`
 
 ```
-PYTHONPATH=~/local2/lib python
+PYTHONPATH=~/local2/lib/python python
 >>> import pysimulator
 >>> dir(pysimulator)
 ```

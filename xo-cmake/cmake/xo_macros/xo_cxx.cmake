@@ -1830,6 +1830,21 @@ endmacro()
 macro(xo_pybind11_library target projectTargets source_files)
     xo_strip_xo_prefix(${target} _nxo_target)
 
+    # The python-visible name, derived from the cmake target:
+    #
+    #   xo_pyfacet -> pyfacet (_nxo_target) -> facet (SELF_MODULE) -> xo.facet
+    #
+    # The cmake TARGET keeps its xo_pyfoo spelling -- it has to be globally
+    # unique and xo_pybind11_dependency() keys on it.  That name is a BUILD
+    # identifier and does not belong in the import namespace.
+    #
+    # SELF_MODULE, not SELF_QUALNAME, is what PYBIND11_MODULE() takes: CPython
+    # looks for PyInit_<last dotted component>, so the init symbol must be
+    # `facet`.  The `xo.` prefix comes entirely from the directory the .so sits
+    # in.  Both are substituted into ${_nxo_target}.hpp.in.
+    string(REGEX REPLACE "^py" "" SELF_MODULE ${_nxo_target})
+    set(SELF_QUALNAME "${PROJECT_INCLUDE_STEM_DIR}.${SELF_MODULE}")
+
     file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target})
 
     configure_file(
@@ -1872,14 +1887,44 @@ macro(xo_pybind11_library target projectTargets source_files)
     #
     pybind11_add_module(${target} MODULE ${source_files})
 
+    # Emit as python/xo/<module>.<ext> so the import is `xo.<module>`.
+    #
+    # OUTPUT_NAME is free to use: pybind11 sets only PREFIX, DEBUG_POSTFIX and
+    # SUFFIX on the target (pybind11Tools.cmake / pybind11NewTools.cmake, in
+    # pybind11_extension()), so the two never contend.
+    #
+    # CMAKE_BINARY_DIR, not PROJECT_BINARY_DIR: in the umbrella that collapses
+    # every module into ONE xo/ directory, which is what makes a single
+    # PYTHONPATH entry enough.  In a standalone build it is that subsystem's
+    # build root, giving an xo/ holding just this module -- see
+    # xo_emit_python_wrapper() for why that is the right shape there.
+    set(_xo_pydir ${CMAKE_BINARY_DIR}/python)
+
+    set_target_properties(
+        ${target} PROPERTIES
+        OUTPUT_NAME ${SELF_MODULE}
+        LIBRARY_OUTPUT_DIRECTORY ${_xo_pydir}/${PROJECT_INCLUDE_STEM_DIR})
+
+    # A multi-config generator appends /$<CONFIG> to LIBRARY_OUTPUT_DIRECTORY
+    # unless the per-config variant is set, which would scatter the modules
+    # into sibling xo/ directories -- one portion per config, none complete.
+    # CMAKE_CONFIGURATION_TYPES is empty under a single-config generator, so
+    # this loop costs nothing there.
+    foreach(_cfg IN LISTS CMAKE_CONFIGURATION_TYPES)
+        string(TOUPPER "${_cfg}" _CFG)
+        set_target_properties(
+            ${target} PROPERTIES
+            LIBRARY_OUTPUT_DIRECTORY_${_CFG} ${_xo_pydir}/${PROJECT_INCLUDE_STEM_DIR})
+    endforeach()
+
     # collected by xo_emit_python_wrapper(), below.
     #
-    # $<TARGET_FILE_DIR:> rather than ${CMAKE_CURRENT_BINARY_DIR}: identical
-    # under a single-config generator, but multi-config puts the .so in a
-    # per-config subdirectory.
+    # The PARENT of xo/ -- PYTHONPATH names the directory a package lives in,
+    # not the package itself.  Pinned by the loop above in every generator, so
+    # unlike the old $<TARGET_FILE_DIR:> this needs no generator expression.
     set_property(
         GLOBAL APPEND
-        PROPERTY xo_pybind11_module_dirs $<TARGET_FILE_DIR:${target}>)
+        PROPERTY xo_pybind11_module_dirs ${_xo_pydir})
 
     set_property(
         TARGET all_libraries_${PROJECT_NAME}
@@ -1899,9 +1944,32 @@ macro(xo_pybind11_library target projectTargets source_files)
 
     xo_pybind11_link_flags()
     xo_include_options2(${target})
-    # don't want to symlink include tree,  because lives in build dir.
-    # see install for generated .hpp above
-    xo_install_library4_noincludes(${target} ${projectTargets})
+
+    # Install into lib/python/xo/, NOT lib/ -- these are python extension
+    # modules, and lib/ is where C++ shared libraries live.  Before this they
+    # shared a directory, so `import xo_pyfacet` worked only because the
+    # xo-python wrapper put a C++ library directory on PYTHONPATH.
+    #
+    # Version-agnostic (lib/python, not lib/python3.N/site-packages): the ABI
+    # tag is already in each filename and CPython accepts only the running
+    # interpreter's, so builds for different pythons coexist safely; and
+    # nothing here relies on site-packages auto-discovery, since xo-python
+    # sets PYTHONPATH explicitly.
+    #
+    # Inline rather than xo_install_library4_noincludes(): that one installs to
+    # lib/, and the destination is the point.  Kept otherwise identical to it,
+    # including EXPORT -- the target is still exported.
+    #
+    # Like that macro, this installs no include tree: the generated .hpp lives
+    # in the build dir and is installed separately above, so there is nothing
+    # here to symlink.
+    install(
+        TARGETS ${target}
+        EXPORT ${projectTargets}
+        LIBRARY DESTINATION lib/python/${PROJECT_INCLUDE_STEM_DIR} COMPONENT Runtime
+        ARCHIVE DESTINATION lib/python/${PROJECT_INCLUDE_STEM_DIR} COMPONENT Development
+        RUNTIME DESTINATION lib/python/${PROJECT_INCLUDE_STEM_DIR} COMPONENT Runtime
+    )
 endmacro()
 
 # ----------------------------------------------------------------
@@ -2116,12 +2184,19 @@ endfunction()
 # modules all live in one directory.
 #
 # Why completeness matters.  A pybind11 module's init can import a sibling
-# module -- xo_pyfacet imports xo_pyindentlog2, to reach the single permitted
+# module -- xo.facet imports xo.indentlog2, to reach the single permitted
 # pybind11 registration of ArenaConfig and PpSink.  So a partial PYTHONPATH does
 # not buy partial capability, it fails outright:
 #
-#   $ PYTHONPATH=.build/xo-pyfacet/src/pyfacet python3 -c 'import xo_pyfacet'
+#   $ PYTHONPATH=.build/xo-pyfacet/python python3 -c 'import xo.facet'
 #   ImportError: initialization failed
+#
+# NB xo is a PEP 420 namespace package (no __init__.py, deliberately: see
+# .xo-backlog/python-packaging/issues/01).  That is what lets a standalone
+# build's xo/ -- holding the one module it builds -- and the install tree's
+# xo/ -- holding the rest -- merge into one package across two PYTHONPATH
+# entries.  With an __init__.py the first would win and the second would be
+# invisible, which is this function's whole job undone.
 #
 function(xo_emit_python_wrapper bindir)
     get_property(_dirs GLOBAL PROPERTY xo_pybind11_module_dirs)
@@ -2144,7 +2219,7 @@ function(xo_emit_python_wrapper bindir)
     xo_establish_submodule_build()
 
     if(NOT XO_SUBMODULE_BUILD)
-        list(APPEND _dirs "${CMAKE_INSTALL_PREFIX}/lib")
+        list(APPEND _dirs "${CMAKE_INSTALL_PREFIX}/lib/python")
     endif()
 
     list(JOIN _dirs ":" _pythonpath)

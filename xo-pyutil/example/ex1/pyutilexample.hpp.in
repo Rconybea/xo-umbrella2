@@ -1,21 +1,30 @@
-/* @file pyutilexample.hpp */
+/* @file pyutilexample.hpp
+ *
+ * automatically generated from example/ex1/pyutilexample.hpp.in
+ * see example/ex1/CMakeLists.txt
+ */
 
-/* python requires module name = library name
+/* The module's python name is xo.utilexample, but its init symbol is NOT: CPython
+ * looks for PyInit_<last dotted component>, so PYBIND11_MODULE() takes the
+ * bare name.  The `xo.` prefix comes from the directory the .so is emitted
+ * into -- see xo_pybind11_library() in xo-cmake.
+ *
  * example:
  *   PYBIND11_MODULE(XO_PYUTILEXAMPLE_MODULE_NAME(), m) { ... }
  */
-#define XO_PYUTILEXAMPLE_MODULE_NAME() @SELF_LIB@
+#define XO_PYUTILEXAMPLE_MODULE_NAME() @SELF_MODULE@
 
-/* example:
+/* the qualified name, for importing.
+ * example:
  *   py::module_::import(XO_PYUTILEXAMPLE_MODULE_NAME_STR)
  */
-#define XO_PYUTILEXAMPLE_MODULE_NAME_STR "@SELF_LIB@"
+#define XO_PYUTILEXAMPLE_MODULE_NAME_STR "@SELF_QUALNAME@"
 
 /* example:
  *   XO_PYUTILEXAMPLE_IMPORT_MODULE()
  * replaces
- *   py::module_::import("xo_pyexpression")
+ *   py::module_::import("xo.utilexample")
  */
-#define XO_PYUTILEXAMPLE_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+#define XO_PYUTILEXAMPLE_IMPORT_MODULE() py::module_::import("@SELF_QUALNAME@")
 
 /* end pyutilexample.hpp */

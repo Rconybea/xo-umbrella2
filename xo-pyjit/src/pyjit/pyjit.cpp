@@ -114,7 +114,7 @@ namespace xo {
             // e.g. for xo::scm::Expression
             XO_PYEXPRESSION_IMPORT_MODULE(); // py::module_::import("pyexpression");
 
-            m.doc() = "pybind11 plugin for xo-jit";
+            m.doc() = "pybind11 plugin for xo.jit";
 
             /* reminder: prototype_str must be valid python class name */
             pycaller_store::instance()

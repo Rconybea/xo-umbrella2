@@ -32,7 +32,7 @@ From an umbrella build, `xo-python` puts every xo pybind module on `PYTHONPATH`:
 
 ```
 $ .build/xo-python
->>> import xo_pyarena as mm
+>>> import xo.arena as mm
 >>> mm.ArenaConfig(name="scratch", size=64*1024)
 <ArenaConfig name='scratch' size=65536 hugepage_z=2097152 store_header_flag=False debug_flag=False>
 >>> mm.AllocHeaderConfig()

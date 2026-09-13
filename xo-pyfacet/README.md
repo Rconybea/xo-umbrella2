@@ -32,11 +32,11 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pyfacet` installed to `~/local2/lib`
+Assumes `xo-pyfacet` installed to `~/local2/lib/python`
 ```
-PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> import xo_pyfacet
->>> dir(xo_pyfacet)
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.facet
+>>> dir(xo.facet)
 ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
 >>>
 ```

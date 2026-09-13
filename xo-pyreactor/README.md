@@ -27,11 +27,11 @@ $ make install
 
 ## Examples
 
-Assumes `xo-pyreactor` installed to `~/local2/lib`
+Assumes `xo-pyreactor` installed to `~/local2/lib/python`
 ```
-PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> import xo_pyreactor
->>> dir(xo_pyreactor)
+PYTHONPATH=~/local2/lib/python:$PYTHONPATH python
+>>> import xo.reactor
+>>> dir(xo.reactor)
 ['AbstractEventProcessor', 'AbstractEventStore', 'AbstractSink', 'AbstractSource', 'CallbackId', 'Reactor', 'ReactorSource', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'time2str']
 >>>
 ```

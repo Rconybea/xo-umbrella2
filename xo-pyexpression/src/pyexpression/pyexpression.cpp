@@ -40,7 +40,7 @@ namespace xo {
             // e.g. for xo::reflect::TypeDescr
             PYREFLECT_IMPORT_MODULE(); // py::module_::import("pyreflect");
 
-            m.doc() = "pybind11 plugin for xo-expression";
+            m.doc() = "pybind11 plugin for xo.expression";
 
             py::enum_<exprtype>(m, "exprtype")
                 .value("invalid", exprtype::invalid)
