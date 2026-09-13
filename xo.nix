@@ -44,6 +44,8 @@ let
     xo-reflect        = callPackage pkgs/xo-reflect.nix        { stdenv = jitStdenv; };
     xo-pyreflect      = callPackage pkgs/xo-pyreflect.nix      { stdenv = jitStdenv; };
     xo-reflectable2   = callPackage pkgs/xo-reflectable2.nix   { stdenv = jitStdenv; };
+    xo-printjson      = callPackage pkgs/xo-printjson.nix      { stdenv = jitStdenv; };
+    xo-pyprintjson    = callPackage pkgs/xo-pyprintjson.nix    { stdenv = jitStdenv; };
     xo-stringtable2   = callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
     xo-object2        = callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
@@ -73,8 +75,6 @@ let
     xo-pyjit          = callPackage pkgs/xo-pyjit.nix          { stdenv = jitStdenv; };
     xo-webutil        = callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
     xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      { stdenv = jitStdenv; };
-    xo-printjson      = callPackage pkgs/xo-printjson.nix      { stdenv = jitStdenv; };
-    xo-pyprintjson    = callPackage pkgs/xo-pyprintjson.nix    { stdenv = jitStdenv; };
     xo-reactor        = callPackage pkgs/xo-reactor.nix        { stdenv = jitStdenv; };
     xo-pyreactor      = callPackage pkgs/xo-pyreactor.nix      { stdenv = jitStdenv; };
     xo-simulator      = callPackage pkgs/xo-simulator.nix      { stdenv = jitStdenv; };

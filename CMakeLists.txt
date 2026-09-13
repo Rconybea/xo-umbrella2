@@ -102,6 +102,8 @@ add_subdirectory(xo-alloc2)       # arena api (fomo)
 add_subdirectory(xo-reflect)      # reflection library (pre-fomo)
 add_subdirectory(xo-pyreflect)
 add_subdirectory(xo-reflectable2) # reflection for fomo objects
+add_subdirectory(xo-printjson)    # json serialization; levelled here so the
+add_subdirectory(xo-pyprintjson)  #   types below can register their own printers
 add_subdirectory(xo-stringtable2) # experiment w/ facet object model
 add_subdirectory(xo-object2)      # experiment w/ facet object model
 add_subdirectory(xo-pyobject2)    # python bindings for xo-object2
@@ -138,8 +140,6 @@ add_subdirectory(xo-pyjit)
 #
 add_subdirectory(xo-webutil)
 add_subdirectory(xo-pywebutil)
-add_subdirectory(xo-printjson)
-add_subdirectory(xo-pyprintjson)
 add_subdirectory(xo-reactor)
 add_subdirectory(xo-pyreactor)
 add_subdirectory(xo-websock)

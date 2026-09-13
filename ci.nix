@@ -33,6 +33,8 @@ in
       xo-reflect
       xo-pyreflect
       xo-reflectable2
+      xo-printjson
+      xo-pyprintjson
       xo-stringtable2
       xo-object2
       xo-gc
@@ -62,8 +64,6 @@ in
       xo-pyjit
       xo-webutil
       xo-pywebutil
-      xo-printjson
-      xo-pyprintjson
       xo-reactor
       xo-pyreactor
       xo-websock

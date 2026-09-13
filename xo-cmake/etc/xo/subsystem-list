@@ -20,6 +20,8 @@ xo-alloc2
 xo-reflect
 xo-pyreflect
 xo-reflectable2
+xo-printjson
+xo-pyprintjson
 xo-stringtable2
 xo-object2
 xo-pyobject2
@@ -53,8 +55,6 @@ xo-jit
 xo-pyjit
 xo-webutil
 xo-pywebutil
-xo-printjson
-xo-pyprintjson
 xo-reactor
 xo-pyreactor
 xo-websock
