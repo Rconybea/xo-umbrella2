@@ -5,12 +5,11 @@ set(SELF_SRCS
     init_indentlog2.cpp
     Indentlog2Appcx.cpp
     Indentlog2Config.cpp
-    SetupIndentlog2.cpp
     TempArena.cpp
     LogStreambuf.cpp
     LogConfig.cpp
     LogBuffer.cpp
-	PrettySinkFactory.cpp
+    PrettySinkFactory.cpp
     PrettySink.cpp
     PpState.cpp
     LineState.cpp

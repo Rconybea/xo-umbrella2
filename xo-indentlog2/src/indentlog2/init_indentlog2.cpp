@@ -4,13 +4,9 @@
  **/
 
 #include "init_indentlog2.hpp"
-#include "SetupIndentlog2.hpp"
 #include <xo/ppsink/scope.hpp>
 
 namespace xo {
-    using xo::SetupIndentlog2;
-    using xo::pp::scope;
-
     void
     InitSubsys<S_indentlog2_tag>::init()
     {
