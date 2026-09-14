@@ -16,7 +16,10 @@ namespace xo::mm {
      *  Require:
      *  - Storage provides full RAllocator method suite.
      *    Not sure what to do about RAllocator::barrier_assign_aux though
-     *  - Handle provides .clear()
+     *  - Handle provides .reset(), putting it into the empty state
+     *  - Handle is contextually convertible to bool, false iff empty.
+     *    Slot integrity depends on this. It is how release distinguishes
+     *    {occupied, empty} slots.
      **/
     template <typename Storage,
               typename Handle>
@@ -37,12 +40,20 @@ namespace xo::mm {
         ///@{
 
         DHandleStore() = default;
+        /** @p strong_freelist and @p weak_freelist hold the index positions of
+         *  empty slots in @p strong / @p weak respectively;
+         *  in no particular order.
+         **/
         DHandleStore(Storage && storage,
                      DArenaVector<Handle> && strong,
-                     DArenaVector<Handle> && weak)
+                     DArenaVector<handle_index_type> && strong_freelist,
+                     DArenaVector<Handle> && weak,
+                     DArenaVector<handle_index_type> && weak_freelist)
         : storage_{std::move(storage)},
           strong_refs_{std::move(strong)},
-          weak_refs_{std::move(weak)} {}
+          strong_freelist_{std::move(strong_freelist)},
+          weak_refs_{std::move(weak)},
+          weak_freelist_{std::move(weak_freelist)} {}
 
         /** move-assignment **/
         DHandleStore & operator=(DHandleStore && other) = default;
@@ -61,13 +72,19 @@ namespace xo::mm {
         size_type committed() const noexcept { return storage_.committed(); }
         size_type available() const noexcept { return storage_.available(); }
         size_type allocated() const noexcept { return storage_.allocated(); }
+        /** one entry per pool, in the order below. **/
         void visit_pools(const MemorySizeVisitor & fn) const {
             storage_.visit_pools(fn);
             strong_refs_.visit_pools(fn);
+            strong_freelist_.visit_pools(fn);
             weak_refs_.visit_pools(fn);
+            weak_freelist_.visit_pools(fn);
         }
+        /** enumerates the same vectors as visit_pools() **/
         bool contains(const void * p) const noexcept {
-            return storage_.contains(p) || strong_refs_.contains(p) || weak_refs_.contains(p);
+            return (storage_.contains(p)
+                    || strong_refs_.contains(p) || strong_freelist_.contains(p)
+                    || weak_refs_.contains(p) || weak_freelist_.contains(p));
         }
         AllocError last_error() const noexcept { return storage_.last_error(); }
         AllocInfo alloc_info(value_type mem) const noexcept { return storage_.alloc_info(mem); }
@@ -93,11 +110,7 @@ namespace xo::mm {
          *  Require: @p x refers to memory owned by @ref storage_
          **/
         std::pair<handle_index_type, Handle*> add_strong_ref(Handle x) {
-            auto ix = strong_refs_.size();
-
-            Handle * ref = strong_refs_.push_back(x);
-
-            return std::make_pair(ix, ref);
+            return _add_ref(strong_refs_, strong_freelist_, x);
         }
 
         /** copy handle @p x into weak reference set.
@@ -107,31 +120,91 @@ namespace xo::mm {
          *  Require: @p x refers to memory owned by @ref storage_
          **/
         std::pair<handle_index_type, Handle*> add_weak_ref(Handle x) {
-            auto ix = weak_refs_.size();
+            return _add_ref(weak_refs_, weak_freelist_, x);
+        }
 
-            Handle * ref = weak_refs_.push_back(x);
+        /** release the strong slot at @p ix, returning it to the free list.
+         *  Idempotent.
+         **/
+        void remove_strong_ref(size_type ix) {
+            _remove_ref(strong_refs_, strong_freelist_, ix);
+        }
+
+        void remove_weak_ref(size_type ix) {
+            _remove_ref(weak_refs_, weak_freelist_, ix);
+        }
+
+        /** counts non-empty strong slots **/
+        handle_index_type strong_root_count() const {
+            return strong_refs_.size() - strong_freelist_.size();
+        }
+
+        /** counts non-empty weak slots **/
+        handle_index_type weak_root_count() const {
+            return weak_refs_.size() - weak_freelist_.size();
+        }
+
+        void clear() {
+            // 1. clears refs + freelists.
+            strong_refs_.clear();
+            strong_freelist_.clear();
+            weak_refs_.clear();
+            weak_freelist_.clear();
+            // 2. clear storage
+            storage_.clear();
+        }
+
+        ///@}
+
+    private:
+        /** @defgroup mm-handlestore-impl-methods **/
+        ///@{
+
+        /** reuse a released slot if there is one, else grow the vector **/
+        static std::pair<handle_index_type, Handle*>
+        _add_ref(DArenaVector<Handle> & refs,
+                 DArenaVector<handle_index_type> & freelist,
+                 Handle x)
+        {
+            if (!freelist.empty()) {
+                handle_index_type ix = freelist.back();
+
+                freelist.pop_back();
+                refs[ix] = x;
+
+                return std::make_pair(ix, &refs[ix]);
+            }
+
+            auto ix = refs.size();
+
+            /* nullptr when the vector is full: a DArenaVector fixes capacity at
+             * construction, so this is how root-set exhaustion reaches a caller
+             */
+            Handle * ref = refs.push_back(x);
 
             return std::make_pair(ix, ref);
         }
 
-        void remove_strong_ref(size_type ix) {
-            if (ix < strong_refs_.size()) {
-                strong_refs_[ix].clear();
-            }
-        }
+        /** reset a slot, and if it was non-empty return to freelist **/
+        static void _remove_ref(DArenaVector<Handle> & refs,
+                                DArenaVector<handle_index_type> & freelist,
+                                size_type ix)
+        {
+            if (ix >= refs.size())
+                return;
 
-        void remove_weak_ref(size_type ix) {
-            if (ix < weak_refs_.size()) {
-                weak_refs_[ix].clear();
-            }
-        }
+            if (refs[ix]) {
+                refs[ix].reset();
 
-        void clear() {
-            // 1. clear refs
-            strong_refs_.clear();
-            weak_refs_.clear();
-            // 2. clear storage
-            storage_.clear();
+                /* cannot fail: freelist capacity >= refs capacity, and at most
+                 * every slot is free at once
+                 */
+                freelist.push_back(ix);
+            } else {
+                /* already released.  See remove_strong_ref's note on what this
+                 * does and does not protect
+                 */
+            }
         }
 
         ///@}
@@ -151,6 +224,9 @@ namespace xo::mm {
          **/
         DArenaVector<Handle> strong_refs_;
 
+        /** Index positions of empty slots in @ref strong_refs_ **/
+        DArenaVector<handle_index_type> strong_freelist_;
+
         /** Weak references.
          *
          *  Promise: these do not keep @ref storage_ alive,
@@ -158,6 +234,9 @@ namespace xo::mm {
          *  whenever @ref storage_ is reclaimed/cleared.
          **/
         DArenaVector<Handle> weak_refs_;
+
+        /** Index positions of released slots in @ref weak_refs_ **/
+        DArenaVector<handle_index_type> weak_freelist_;
 
         ///@}
     };

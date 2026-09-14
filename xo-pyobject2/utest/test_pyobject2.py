@@ -102,6 +102,71 @@ class FloatTestCase(unittest.TestCase):
         self.assertEqual(x.value(), 42.5)
 
 
+class RootReleaseTestCase(unittest.TestCase):
+    """dropping a handle unpins its object, and the slot comes back
+
+    Before 2026-09-13 ~ObjectHandleBase was `= default', so a flywheel's root
+    set only ever grew and python refcounting had no effect on rootedness --
+    which defeated the harness's main purpose.
+
+    Read the COUNT, not the object: a released object keeps reading correctly
+    until something overwrites it, so "is it still pinned" cannot be answered by
+    reading through the handle.
+    """
+
+    def setUp(self):
+        self.fw = f.AllocFlywheel.make_default_app(FACET_CX)
+
+    def test_a_fresh_flywheel_holds_nothing(self):
+        self.assertEqual(self.fw.strong_root_count(), 0)
+
+    def test_count_rises_and_falls(self):
+        import gc
+        x = o.Float.make(self.fw, 1.5)
+        y = o.Float.make(self.fw, 2.5)
+        self.assertEqual(self.fw.strong_root_count(), 2)
+
+        del x
+        gc.collect()
+        self.assertEqual(self.fw.strong_root_count(), 1)
+
+        del y
+        gc.collect()
+        self.assertEqual(self.fw.strong_root_count(), 0)
+
+    def test_a_long_loop_does_not_exhaust_the_root_set(self):
+        """the REPL case the ticket was filed for
+
+        The default strong set holds a few hundred slots; without reuse this
+        loop would run it dry and add_strong_ref would start handing back null.
+        The iteration count is deliberately far above that capacity.
+        """
+        import gc
+        for i in range(20000):
+            t = o.Float.make(self.fw, float(i))
+            self.assertEqual(t.value(), float(i))
+            del t
+
+        gc.collect()
+        self.assertEqual(self.fw.strong_root_count(), 0)
+
+    def test_reuse_keeps_the_root_set_small(self):
+        """committed memory tracks live roots, not roots ever created"""
+        def strong_used():
+            return [p for p in self.fw.visit_pools() if p.name == "strong"][0].used
+
+        for i in range(5000):
+            t = o.Float.make(self.fw, float(i))
+            del t
+
+        keep = o.Float.make(self.fw, 1.0)
+
+        # one live slot, so the vector never grew past one element
+        self.assertEqual(self.fw.strong_root_count(), 1)
+        self.assertLessEqual(strong_used(), 64)
+        self.assertEqual(keep.value(), 1.0)
+
+
 class VisitPoolsTestCase(unittest.TestCase):
     """memory reporting through AllocFlywheel.visit_pools()"""
 
@@ -111,10 +176,18 @@ class VisitPoolsTestCase(unittest.TestCase):
     def pools(self, fw=None):
         return (fw or self.fw).visit_pools()
 
-    def test_reports_the_three_pools_in_order(self):
+    def test_reports_the_five_pools_in_order(self):
+        """each root set is followed by the free list serving it
+
+        Three until 2026-09-13, when slot reuse added a free list per root set
+        (.xo-backlog/pyobject2/issues/02).  The free lists' names are DERIVED
+        from the sets they serve -- "<name>-free" -- so a caller that named its
+        root sets gets matching names here without having to be told the rule.
+        """
         pools = self.pools()
         self.assertIsInstance(pools, list)
-        self.assertEqual([p.name for p in pools], ["store", "strong", "weak"])
+        self.assertEqual([p.name for p in pools],
+                         ["store", "strong", "strong-free", "weak", "weak-free"])
 
     def test_used_grows_with_allocation(self):
         before = self.pools()[0].used

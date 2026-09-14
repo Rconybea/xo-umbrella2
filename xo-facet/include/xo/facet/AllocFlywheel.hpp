@@ -30,16 +30,21 @@ namespace xo::mm {
         AllocFlywheel(const FacetAppcx & appcx,
                       DArena && storage,
                       DArenaVector<obj<ATop>> && strong,
-                      DArenaVector<obj<ATop>> && weak);
+                      DArenaVector<handle_index_type> && strong_freelist,
+                      DArenaVector<obj<ATop>> && weak,
+                      DArenaVector<handle_index_type> && weak_freelist);
 
         /** Create new instance from configuration.
-         *  We don't ussually heap-allocate. Exception here because
-         *  AllocFlywheel may be a global entry point for python bindings.
+         *  We don't ussually heap-allocate.
+         *  Exception here because AllocFlywheel may be a
+         *  global entry point for python bindings.
          *
          *  @p appcx.  Proof of work (as of Sep2026: facet+indentlog2)
          *  @p storage_cfg.  Configures primary arena.
          *  @p strong_root_cfg.  Configures strong root set.
          *  @p weak_root_cfg.  Configures weak root set.
+         *
+         *  Free-list arenas are derived from the corresponding root-set configs.
          **/
         static rp<AllocFlywheel> make_app(const FacetAppcx & appcx,
                                           const ArenaConfig & storage_cfg,
@@ -64,20 +69,26 @@ namespace xo::mm {
 
         /** report memory consumption, one @ref MemorySizeInfo per pool.
          *
-         *  Three pools, in the order @ref HandleStore visits them: the primary
-         *  arena objects are allocated from, then the strong root set, then the
-         *  weak one.  Const: reporting must not be able to disturb what it
-         *  measures.
-         *
-         *  NB reserved/committed/used are three different numbers here.  A root
-         *  set reserves its whole configured extent up front and commits as it
-         *  grows, so "reserved" says what a flywheel COULD consume and
-         *  "committed" what it currently does.
+         *  Memory pools pools owned by this flyswheel.
          **/
         void visit_pools(const MemorySizeVisitor & fn) const { store_.visit_pools(fn); }
 
         /** insert strong reference to @p x into this flywheel **/
         std::pair<handle_index_type, handle_type*> add_strong_ref(handle_type x);
+
+        /** release the strong slot at @p ix, returning it for reuse.
+         *
+         *  Called by ~ObjectHandleBase, so dropping the last python reference
+         *  to a handle unpins its object.  Idempotent per index; see
+         *  DHandleStore::remove_strong_ref for what that does and does not
+         *  protect.
+         **/
+        void remove_strong_ref(handle_index_type ix);
+        void remove_weak_ref(handle_index_type ix);
+
+        /** count number of non-empty root slots. **/
+        handle_index_type strong_root_count() const;
+        handle_index_type weak_root_count() const;
 
         // from Displayable
 

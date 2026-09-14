@@ -271,16 +271,21 @@ namespace xo {
                             py::keep_alive<0, 1>(),
                             "create a flywheel: with default config for arena storage")
 
-                /* memory reporting.  Returns the pools rather than taking a
-                 * visitor, as FacetAppcx.visit_pools() does: the snapshots
-                 * have to be materialized either way (see CollectPools.hpp).
-                 *
-                 * Three pools, in the order the handle store visits them: the
-                 * primary arena, then the strong and weak root sets.
-                 */
+                /* memory reporting.  Returns owne memory pools. */
                 .def("visit_pools", &collect_pools<AllocFlywheel>,
                      "this flywheel's memory pools, as a list of MemorySizeInfo:"
-                     " storage arena, strong root set, weak root set")
+                     " storage arena, strong root set and its free list, weak"
+                     " root set and its free list")
+
+                /* how many in-use roots are currently held.
+                 */
+                .def("strong_root_count", &AllocFlywheel::strong_root_count,
+                     "occupied strong slots.  Released slots are deducted, so"
+                     " this falls when a handle is dropped -- it is not the"
+                     " high-water mark")
+
+                .def("weak_root_count", &AllocFlywheel::weak_root_count,
+                     "occupied weak slots")
 
                 /* renders into a sink supplied by the caller -- typically an
                  * xo_pyindentlog2.PrettySink.  Declared as PpSink & so any

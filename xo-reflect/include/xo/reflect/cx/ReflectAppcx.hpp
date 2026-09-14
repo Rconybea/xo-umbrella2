@@ -38,6 +38,8 @@ namespace xo {
         InitEvidence init_evidence() const { return init_evidence_; }
         const ReflectConfig & config() const { return config_; }
         TypeDescrTable * type_table() const { return type_table_; }
+        const Indentlog2Appcx & indentlog2_appcx() const { return indentlog2_appcx_; }
+
         /** report memory consumption, one @ref MemorySizeInfo per pool.
          *
          *  Placeholder: reports nothing, because reflect/ has no pools to

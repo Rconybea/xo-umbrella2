@@ -29,9 +29,20 @@ namespace xo::facet {
         using handle_index_type = AllocFlywheel::handle_index_type;
 
     public:
+        /** @defgroup objecthandle-ctors **/
+        ///@{
         ObjectHandleBase(rp<AllocFlywheel> mem,
                          std::pair<handle_index_type, impl_handle_type *> obj_info);
+
+        ObjectHandleBase(ObjectHandleBase && other) noexcept;
+        /** not copyable **/
+        ObjectHandleBase(const ObjectHandleBase &) = delete;
+
         ~ObjectHandleBase();
+        ///@}
+
+        /** not assignable **/
+        ObjectHandleBase & operator=(const ObjectHandleBase &) = delete;
 
         impl_handle_type * _impl_handle() const { return impl_handle_; }
 
@@ -72,6 +83,9 @@ namespace xo::facet {
                       std::pair<handle_index_type, impl_handle_type *> obj_info)
         : ObjectHandleBase(mem, obj_info) {}
 
+        /** move-only **/
+        DObjectHandle(DObjectHandle &&) noexcept = default;
+
         /** Attach instance to flywheel @p mem to keep its backing memory alive.
          *
          *  Require: @p x was allocated from flywheel @p mem
@@ -79,14 +93,11 @@ namespace xo::facet {
         static DObjectHandle make_strong_ref(bp<AllocFlywheel> mem, obj<AFacet, DRepr> x) {
             /* Type-erased version of x.
              *
-             * Not `obj<ATop> impl_obj = x`: obj's converting constructors keep
-             * AFacet fixed and vary DRepr, so they cannot change facet.  Going
-             * through the variant constructor instead relies on the invariant
-             * that every facet inherits ATop and nothing else -- one non-virtual
-             * chain, vptr at offset 0 -- so x's interface pointer IS an ATop
-             * pointer, and the impl it names stays the CONCRETE one
-             * (IFacet_DRepr).  That is what makes _typeseq()/_drop() still
-             * dispatch to DRepr once the facet is forgotten.
+             * Not @code obj<ATop> impl_obj = x @endcode.
+             * Relying on: flywheel slots are obj<ATop, ..>,
+             * and AFacet inherits ATop.
+             *
+             * Necessary so polymorphic methods reach the right DRepr.
              */
             obj<ATop> impl_obj(static_cast<const ATop *>(x.iface()), x.opaque_data());
 
@@ -96,22 +107,7 @@ namespace xo::facet {
         }
 
     public:
-        /** recover the typed obj for this handle's target.
-         *
-         *  Rebuilt from the slot's data pointer on every call, NOT cached: the
-         *  slot is where a moving collector would record a relocation, so a
-         *  data pointer held across an allocating call may be stale.
-         *
-         *  Not a reinterpret_cast of the slot: the slot holds obj<ATop>, whose
-         *  stored interface bytes name whichever facet the object was handed to
-         *  make_strong_ref() as.  Reading those bytes as AFacet would route
-         *  through the wrong vtable whenever the two differ.  Constructing from
-         *  the data pointer instead materializes FacetImplType<AFacet,DRepr> at
-         *  compile time, so this is both correct and free -- no registry lookup.
-         *
-         *  Requires the IFacet_DRepr header in the calling TU; OObject's
-         *  has_facet_impl static_assert says so if it is missing.
-         **/
+        /** recover the typed obj for this handle's target. **/
         object_type _native() const {
             return object_type(static_cast<DRepr *>(this->_impl_handle()->opaque_data()));
         }

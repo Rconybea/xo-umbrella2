@@ -14,6 +14,7 @@
 #include "xo/facet/obj.hpp"
 #include "xo/facet/typeseq.hpp"
 #include <catch2/catch.hpp>
+#include <vector>
 #include <new>
 #include <cassert>
 #include <cmath>
@@ -608,6 +609,190 @@ namespace xo {
 
             /* the narrowed slot kept the concrete runtime type */
             REQUIRE(h._native()._typeseq() == typeseq::id<DRectCoords>());
+        }
+
+        namespace {
+            /** flywheel with a DELIBERATELY small strong set, so a loop can
+             *  outrun it in a test-sized number of iterations.
+             *
+             *  4*1024 would hold 256 obj<ATop>, which is too many to exhaust
+             *  legibly; this holds far fewer, and the tests below derive the
+             *  actual number rather than assuming one.
+             **/
+            rp<xo::mm::AllocFlywheel> make_small_flywheel(const char * tag) {
+                using xo::mm::AllocFlywheel;
+                using xo::mm::ArenaConfig;
+                using xo::mm::ArenaNameStr;
+
+                FacetAppcx & facet_appcx = FacetUtestAppcx::appcx().cx<S_facet_tag>();
+
+                ArenaConfig storage_cfg{ .name_ = ArenaNameStr::sprintf("%s.storage", tag),
+                                         .size_ = 64*1024 };
+                ArenaConfig strong_cfg { .name_ = ArenaNameStr::sprintf("%s.strong", tag),
+                                         .size_ = 64 };
+                ArenaConfig weak_cfg   { .name_ = ArenaNameStr::sprintf("%s.weak", tag),
+                                         .size_ = 64 };
+
+                return AllocFlywheel::make_app(facet_appcx, storage_cfg, strong_cfg, weak_cfg);
+            }
+
+            /** a DRectCoords in @p fw's arena, as make_strong_ref requires **/
+            DRectCoords * alloc_rect(rp<xo::mm::AllocFlywheel> & fw, double x, double y) {
+                auto * mem = fw->storage().alloc(typeseq::id<DRectCoords>(),
+                                                 sizeof(DRectCoords));
+                REQUIRE(mem != nullptr);
+
+                return new (mem) DRectCoords(x, y);
+            }
+        }
+
+        TEST_CASE("objecthandle-releases-its-root", "[facet][objecthandle][freelist]")
+        {
+            using xo::facet::DObjectHandle;
+            using H = DObjectHandle<AComplex, DRectCoords>;
+
+            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.rel");
+
+            REQUIRE(fw->strong_root_count() == 0);
+
+            {
+                auto h = H::make_strong_ref(fw, obj<AComplex, DRectCoords>
+                                                (alloc_rect(fw, 3.0, 4.0)));
+
+                REQUIRE(fw->strong_root_count() == 1);
+
+                /* silence the unused-variable warning without reading through
+                 * the handle after the scope closes
+                 */
+                REQUIRE(h._native().xcoord() == 3.0);
+            }
+
+            /* ~ObjectHandleBase returned the slot.  Before 2026-09-13 the dtor
+             * was `= default' and this stayed 1 for the life of the flywheel,
+             * which is what made python refcounting unobservable.
+             */
+            REQUIRE(fw->strong_root_count() == 0);
+        }
+
+        TEST_CASE("objecthandle-move-does-not-double-release",
+                  "[facet][objecthandle][freelist]")
+        {
+            using xo::facet::DObjectHandle;
+            using H = DObjectHandle<AComplex, DRectCoords>;
+
+            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.mv");
+
+            {
+                auto h = H::make_strong_ref(fw, obj<AComplex, DRectCoords>
+                                                (alloc_rect(fw, 1.0, 2.0)));
+                REQUIRE(fw->strong_root_count() == 1);
+
+                /* one slot, one owner: the moved-from handle must not release
+                 * when it dies at the end of this scope
+                 */
+                auto h2 = std::move(h);
+
+                REQUIRE(fw->strong_root_count() == 1);
+                REQUIRE(h2._native().xcoord() == 1.0);
+            }
+
+            REQUIRE(fw->strong_root_count() == 0);
+        }
+
+        TEST_CASE("handle-loop-reuses-slots", "[facet][objecthandle][freelist]")
+        {
+            using xo::facet::DObjectHandle;
+            using H = DObjectHandle<AComplex, DRectCoords>;
+
+            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.loop");
+
+            /* how many slots this flywheel actually has.  Derived, not assumed:
+             * an arena rounds its reservation up to a page, so the strong set
+             * holds rather more than the 64 bytes asked for.
+             */
+            std::size_t capacity = 0;
+            {
+                std::vector<H> hold;
+
+                /* fill it: stop when add_strong_ref stops handing out slots.
+                 * NB that is a silent truncation rather than an error -- see
+                 * .xo-backlog/pyobject2/issues/09.
+                 */
+                DRectCoords * p = alloc_rect(fw, 0.0, 0.0);
+
+                while (true) {
+                    auto h = H::make_strong_ref(fw, obj<AComplex, DRectCoords>(p));
+
+                    if (h._impl_handle() == nullptr)
+                        break;
+
+                    hold.push_back(std::move(h));
+                }
+
+                capacity = hold.size();
+
+                REQUIRE(capacity > 0);
+                REQUIRE(fw->strong_root_count() == capacity);
+            }
+
+            REQUIRE(fw->strong_root_count() == 0);
+
+            /* the point of the free list: far more handles than the set can
+             * hold, one at a time, without exhausting it.
+             *
+             * ONE representation, rooted repeatedly.  Allocating a fresh
+             * DRectCoords per iteration exhausts the STORAGE arena instead --
+             * which this test would then report as a free-list failure.  The
+             * two resources are independent and only the root set is under
+             * test here.
+             */
+            DRectCoords * p = alloc_rect(fw, 1.0, 2.0);
+
+            for (std::size_t i = 0; i < 20 * capacity; ++i) {
+                auto h = H::make_strong_ref(fw, obj<AComplex, DRectCoords>(p));
+
+                REQUIRE(h._impl_handle() != nullptr);
+                REQUIRE(fw->strong_root_count() == 1);
+            }
+
+            REQUIRE(fw->strong_root_count() == 0);
+        }
+
+        TEST_CASE("double-release-does-not-share-a-slot",
+                  "[facet][objecthandle][freelist]")
+        {
+            using xo::facet::DObjectHandle;
+            using H = DObjectHandle<AComplex, DRectCoords>;
+
+            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.dbl");
+
+            auto h = H::make_strong_ref(fw, obj<AComplex, DRectCoords>
+                                            (alloc_rect(fw, 5.0, 6.0)));
+            auto ix = h.object_ix();
+
+            fw->remove_strong_ref(ix);
+            REQUIRE(fw->strong_root_count() == 0);
+
+            /* second release of the same index is a no-op.  Without the
+             * emptiness guard it would push ix onto the free list twice, and
+             * the two make_strong_ref calls below would collide on one slot.
+             */
+            fw->remove_strong_ref(ix);
+            REQUIRE(fw->strong_root_count() == 0);
+
+            auto a = H::make_strong_ref(fw, obj<AComplex, DRectCoords>
+                                            (alloc_rect(fw, 7.0, 0.0)));
+            auto b = H::make_strong_ref(fw, obj<AComplex, DRectCoords>
+                                            (alloc_rect(fw, 8.0, 0.0)));
+
+            REQUIRE(a.object_ix() != b.object_ix());
+            REQUIRE(a._native().xcoord() == 7.0);
+            REQUIRE(b._native().xcoord() == 8.0);
+
+            /* h's dtor will release ix a third time; harmless for the same
+             * reason, but the slot is now occupied by someone else, so this
+             * asserts the guard holds where it matters
+             */
         }
     }
 }

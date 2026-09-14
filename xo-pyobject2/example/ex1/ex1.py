@@ -85,8 +85,9 @@ def main():
 
     print("5. where the memory went")
     # Each context reports only the pools it owns, so walking the chain and
-    # concatenating cannot double-count.  The flywheel's three are its arena
-    # and its two root sets; the facet context's are its registries; the
+    # concatenating cannot double-count.  The flywheel's five are its arena,
+    # its two root sets, and the free list serving each of those; the facet
+    # context's are its registries; the
     # indentlog2 context's are per-thread and appear once this thread renders.
     for label, pools in (("flywheel  ", fw.visit_pools()),
                          ("facet cx  ", cx.visit_pools()),
