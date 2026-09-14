@@ -46,14 +46,11 @@ namespace xo::mm {
          **/
         DHandleStore(Storage && storage,
                      DArenaVector<Handle> && strong,
-                     DArenaVector<handle_index_type> && strong_freelist,
-                     DArenaVector<Handle> && weak,
-                     DArenaVector<handle_index_type> && weak_freelist)
+                     DArenaVector<handle_index_type> && strong_freelist)
         : storage_{std::move(storage)},
           strong_refs_{std::move(strong)},
-          strong_freelist_{std::move(strong_freelist)},
-          weak_refs_{std::move(weak)},
-          weak_freelist_{std::move(weak_freelist)} {}
+          strong_freelist_{std::move(strong_freelist)}
+        {}
 
         /** move-assignment **/
         DHandleStore & operator=(DHandleStore && other) = default;
@@ -77,14 +74,11 @@ namespace xo::mm {
             storage_.visit_pools(fn);
             strong_refs_.visit_pools(fn);
             strong_freelist_.visit_pools(fn);
-            weak_refs_.visit_pools(fn);
-            weak_freelist_.visit_pools(fn);
         }
         /** enumerates the same vectors as visit_pools() **/
         bool contains(const void * p) const noexcept {
             return (storage_.contains(p)
-                    || strong_refs_.contains(p) || strong_freelist_.contains(p)
-                    || weak_refs_.contains(p) || weak_freelist_.contains(p));
+                    || strong_refs_.contains(p) || strong_freelist_.contains(p));
         }
         AllocError last_error() const noexcept { return storage_.last_error(); }
         AllocInfo alloc_info(value_type mem) const noexcept { return storage_.alloc_info(mem); }
@@ -113,16 +107,6 @@ namespace xo::mm {
             return _add_ref(strong_refs_, strong_freelist_, x);
         }
 
-        /** copy handle @p x into weak reference set.
-         *  @return pair (i, &h), where i indexed &h in weak reference set,
-         *  and h is a copy of @p x.
-         *
-         *  Require: @p x refers to memory owned by @ref storage_
-         **/
-        std::pair<handle_index_type, Handle*> add_weak_ref(Handle x) {
-            return _add_ref(weak_refs_, weak_freelist_, x);
-        }
-
         /** release the strong slot at @p ix, returning it to the free list.
          *  Idempotent.
          **/
@@ -130,26 +114,15 @@ namespace xo::mm {
             _remove_ref(strong_refs_, strong_freelist_, ix);
         }
 
-        void remove_weak_ref(size_type ix) {
-            _remove_ref(weak_refs_, weak_freelist_, ix);
-        }
-
         /** counts non-empty strong slots **/
         handle_index_type strong_root_count() const {
             return strong_refs_.size() - strong_freelist_.size();
-        }
-
-        /** counts non-empty weak slots **/
-        handle_index_type weak_root_count() const {
-            return weak_refs_.size() - weak_freelist_.size();
         }
 
         void clear() {
             // 1. clears refs + freelists.
             strong_refs_.clear();
             strong_freelist_.clear();
-            weak_refs_.clear();
-            weak_freelist_.clear();
             // 2. clear storage
             storage_.clear();
         }
@@ -226,17 +199,6 @@ namespace xo::mm {
 
         /** Index positions of empty slots in @ref strong_refs_ **/
         DArenaVector<handle_index_type> strong_freelist_;
-
-        /** Weak references.
-         *
-         *  Promise: these do not keep @ref storage_ alive,
-         *  but will be sent to a well-defined sentinel state
-         *  whenever @ref storage_ is reclaimed/cleared.
-         **/
-        DArenaVector<Handle> weak_refs_;
-
-        /** Index positions of released slots in @ref weak_refs_ **/
-        DArenaVector<handle_index_type> weak_freelist_;
 
         ///@}
     };

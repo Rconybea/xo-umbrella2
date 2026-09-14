@@ -30,9 +30,7 @@ namespace xo::mm {
         AllocFlywheel(const FacetAppcx & appcx,
                       DArena && storage,
                       DArenaVector<obj<ATop>> && strong,
-                      DArenaVector<handle_index_type> && strong_freelist,
-                      DArenaVector<obj<ATop>> && weak,
-                      DArenaVector<handle_index_type> && weak_freelist);
+                      DArenaVector<handle_index_type> && strong_freelist);
 
         /** Create new instance from configuration.
          *  We don't ussually heap-allocate.
@@ -42,14 +40,12 @@ namespace xo::mm {
          *  @p appcx.  Proof of work (as of Sep2026: facet+indentlog2)
          *  @p storage_cfg.  Configures primary arena.
          *  @p strong_root_cfg.  Configures strong root set.
-         *  @p weak_root_cfg.  Configures weak root set.
          *
          *  Free-list arenas are derived from the corresponding root-set configs.
          **/
         static rp<AllocFlywheel> make_app(const FacetAppcx & appcx,
                                           const ArenaConfig & storage_cfg,
-                                          const ArenaConfig & strong_root_cfg,
-                                          const ArenaConfig & weak_root_cfg);
+                                          const ArenaConfig & strong_root_cfg);
 
         /** Provide default arguments to make_app() **/
         static rp<AllocFlywheel> make_default_app(const FacetAppcx & appcx);
@@ -84,11 +80,9 @@ namespace xo::mm {
          *  protect.
          **/
         void remove_strong_ref(handle_index_type ix);
-        void remove_weak_ref(handle_index_type ix);
 
         /** count number of non-empty root slots. **/
         handle_index_type strong_root_count() const;
-        handle_index_type weak_root_count() const;
 
         // from Displayable
 

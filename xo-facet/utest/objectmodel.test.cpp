@@ -582,9 +582,8 @@ namespace xo {
             FacetAppcx & facet_appcx = FacetUtestAppcx::appcx().cx<S_facet_tag>();
             ArenaConfig storage_cfg{ .name_ = flatstring("utest.oh.storage"), .size_ = 16*1024 };
             ArenaConfig strong_cfg { .name_ = flatstring("utest.oh.strong"),  .size_ =  4*1024 };
-            ArenaConfig weak_cfg   { .name_ = flatstring("utest.oh.weak"),    .size_ =  4*1024 };
 
-            rp<AllocFlywheel> fw = AllocFlywheel::make_app(facet_appcx, storage_cfg, strong_cfg, weak_cfg);
+            rp<AllocFlywheel> fw = AllocFlywheel::make_app(facet_appcx, storage_cfg, strong_cfg);
 
             REQUIRE(fw.get() != nullptr);
 
@@ -630,10 +629,8 @@ namespace xo {
                                          .size_ = 64*1024 };
                 ArenaConfig strong_cfg { .name_ = ArenaNameStr::sprintf("%s.strong", tag),
                                          .size_ = 64 };
-                ArenaConfig weak_cfg   { .name_ = ArenaNameStr::sprintf("%s.weak", tag),
-                                         .size_ = 64 };
 
-                return AllocFlywheel::make_app(facet_appcx, storage_cfg, strong_cfg, weak_cfg);
+                return AllocFlywheel::make_app(facet_appcx, storage_cfg, strong_cfg);
             }
 
             /** a DRectCoords in @p fw's arena, as make_strong_ref requires **/

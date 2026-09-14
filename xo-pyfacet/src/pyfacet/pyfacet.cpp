@@ -260,10 +260,8 @@ namespace xo {
                             py::arg("appcx"),
                             py::arg("storage_cfg"),
                             py::arg("strong_root_cfg"),
-                            py::arg("weak_root_cfg"),
                             py::keep_alive<0, 1>(),
-                            "create a flywheel: primary arena, strong root set,"
-                            " weak root set")
+                            "create a flywheel: primary arena, strong root set")
 
                 .def_static("make_default_app",
                             &AllocFlywheel::make_default_app,
@@ -283,9 +281,6 @@ namespace xo {
                      "occupied strong slots.  Released slots are deducted, so"
                      " this falls when a handle is dropped -- it is not the"
                      " high-water mark")
-
-                .def("weak_root_count", &AllocFlywheel::weak_root_count,
-                     "occupied weak slots")
 
                 /* renders into a sink supplied by the caller -- typically an
                  * xo_pyindentlog2.PrettySink.  Declared as PpSink & so any

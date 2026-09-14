@@ -187,7 +187,7 @@ class VisitPoolsTestCase(unittest.TestCase):
         pools = self.pools()
         self.assertIsInstance(pools, list)
         self.assertEqual([p.name for p in pools],
-                         ["store", "strong", "strong-free", "weak", "weak-free"])
+                         ["store", "strong", "strong-free"])
 
     def test_used_grows_with_allocation(self):
         before = self.pools()[0].used
@@ -223,8 +223,7 @@ class VisitPoolsTestCase(unittest.TestCase):
         fw = f.AllocFlywheel.make_app(
             FACET_CX,
             mm.ArenaConfig(name="store", size=1 << 18, store_header_flag=True),
-            mm.ArenaConfig(name="strong", size=1 << 12),
-            mm.ArenaConfig(name="weak", size=1 << 12))
+            mm.ArenaConfig(name="strong", size=1 << 12))
         keep = [o.Float.make(fw, float(i)) for i in range(5)]
         self.assertEqual(len(keep), 5)
 
