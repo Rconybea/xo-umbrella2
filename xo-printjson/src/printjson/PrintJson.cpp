@@ -7,7 +7,8 @@
 #include <xo/timeutil/timeutil.hpp>
 // #include "time/Time.hpp"
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
+#include <xo/ppsink/quoted_ostream.hpp>
+#include <xo/flatstring/flatstring.hpp>     /* os << quot(..) */
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
 #include <xo/ppsink/pp_time_ostream.hpp>    /* os << iso8601(..) */
 #include <cmath>
@@ -385,6 +386,82 @@ namespace xo {
             } /*provide_string_printer*/
         } /*namespace */
 
+        /** flatstring<N> renders as a json string.
+         *
+         *  Separate from JsonPrinter_string because the conversion has to be
+         *  explicit: flatstring has BOTH operator std::string_view() and
+         *  operator const char*(), so quot(*x) is ambiguous.
+         **/
+        template<std::size_t N>
+        class JsonPrinter_flatstring : public JsonPrinter {
+        public:
+            JsonPrinter_flatstring(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            virtual void print_json(TaggedPtr tp,
+                                    std::ostream * p_os) const override {
+                xo::flatstring<N> * x = tp.recover_native<xo::flatstring<N>>();
+
+                if (x) {
+                    *p_os << quot(std::string_view(*x));
+                } else {
+                    report_internal_type_consistency_error(Reflect::require<xo::flatstring<N>>(),
+                                                           tp.td(),
+                                                           p_os);
+                }
+            } /*print_json*/
+        }; /*JsonPrinter_flatstring*/
+
+        namespace {
+            template<std::size_t N>
+            void
+            provide_flatstring_printer(PrintJson * p_json)
+            {
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_flatstring<N>(p_json));
+
+                p_json->provide_printer(Reflect::require<xo::flatstring<N>>(), std::move(printer));
+            } /*provide_flatstring_printer*/
+        } /*namespace*/
+
+        /** an address renders as a DECIMAL integer, not hex and not a string.
+         *
+         *  json has no hex literal (RFC 8259 section 6), so 0x... would have to
+         *  be a string and cost every consumer a parseInt.  Decimal parses
+         *  straight to a number.
+         *
+         *  NB javascript numbers are IEEE754 doubles, so this is exact only
+         *  below 2^53.  A 48-bit address has ~68x headroom; a 57-bit one (5-level
+         *  paging) does not, and the rounding is undetectable on the consumer's
+         *  side.  Prefer reporting an OFFSET into a known region where the value
+         *  matters -- see SlotInfo::offset_ in xo-facet.
+         **/
+        class JsonPrinter_address : public JsonPrinter {
+        public:
+            JsonPrinter_address(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            virtual void print_json(TaggedPtr tp,
+                                    std::ostream * p_os) const override {
+                const void ** x = tp.recover_native<const void *>();
+
+                if (x) {
+                    *p_os << reinterpret_cast<std::uintptr_t>(*x);
+                } else {
+                    report_internal_type_consistency_error(Reflect::require<const void *>(),
+                                                           tp.td(),
+                                                           p_os);
+                }
+            } /*print_json*/
+        }; /*JsonPrinter_address*/
+
+        namespace {
+            void
+            provide_address_printer(PrintJson * p_json)
+            {
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_address(p_json));
+
+                p_json->provide_printer(Reflect::require<const void *>(), std::move(printer));
+            } /*provide_address_printer*/
+        } /*namespace*/
+
         class JsonPrinter_utc_nanos : public JsonPrinter {
         public:
             JsonPrinter_utc_nanos(PrintJson * pjson) : JsonPrinter(pjson) {}
@@ -444,6 +521,16 @@ namespace xo {
             provide_string_printer<char const *>(this);
             provide_string_printer<std::string>(this);
             provide_string_printer<std::string_view>(this);
+
+            /* MemoryNameStr (=flatstring<48>) and NameStr (=flatstring<32>) are
+             * the sizes that appear in reflected structs today; re-derive
+             * rather than trusting this list:
+             *   grep -rn "using .*Str = flatstring" xo-facet xo-arena
+             */
+            provide_flatstring_printer<32>(this);
+            provide_flatstring_printer<48>(this);
+
+            provide_address_printer(this);
 
             provide_utc_nanos_printer(this);
         } /*provide_std_printers*/

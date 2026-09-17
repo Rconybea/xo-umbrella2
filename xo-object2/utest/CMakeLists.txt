@@ -6,6 +6,7 @@ set(UTEST_SRCS
     DArray.test.cpp
     printable_render.test.cpp
     json_render.test.cpp
+    flywheel_frame.test.cpp
 #    DString.test.cpp
 #    StringOps.test.cpp
 #    X1Collector.test.cpp   # moved to xo-gc/

@@ -15,6 +15,7 @@ xo_pybind11_dependency(${SELF_LIB} xo_facet)
 xo_pybind11_dependency(${SELF_LIB} xo_printable2)
 # IAllocator_DArena: obj<AAllocator> over the flywheel's arena
 xo_pybind11_dependency(${SELF_LIB} xo_alloc2)
+xo_pybind11_dependency(${SELF_LIB} printjson)
 # PpSink: Float.pretty's argument type
 xo_pybind11_dependency(${SELF_LIB} xo_ppsink)
 # AllocFlywheel / PpSink are REGISTERED by these, which this module imports at

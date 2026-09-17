@@ -543,24 +543,24 @@ namespace xo {
         TEST_CASE("witness-chain", "[facet][witness]")
         {
             using xo::carries_facet_appcx;
-            using xo::carries_indentlog2;
+            using xo::carries_indentlog2_appcx;
             using xo::mm::AllocFlywheel;
             using xo::facet::DObjectHandle;
 
             /* the contexts themselves */
-            static_assert(carries_indentlog2<xo::FacetAppcx>);
+            static_assert(carries_indentlog2_appcx<xo::FacetAppcx>);
 
             /* a flywheel retains the context it was made with, and forwards */
             static_assert(carries_facet_appcx<AllocFlywheel>);
-            static_assert(carries_indentlog2<AllocFlywheel>);
+            static_assert(carries_indentlog2_appcx<AllocFlywheel>);
 
             /* and a handle reaches both through its flywheel */
             static_assert(carries_facet_appcx<DObjectHandle<AComplex, DRectCoords>>);
-            static_assert(carries_indentlog2<DObjectHandle<AComplex, DRectCoords>>);
+            static_assert(carries_indentlog2_appcx<DObjectHandle<AComplex, DRectCoords>>);
 
             /* not satisfied by types that cannot attest */
             static_assert(!carries_facet_appcx<int>);
-            static_assert(!carries_indentlog2<int>);
+            static_assert(!carries_indentlog2_appcx<int>);
             static_assert(!carries_facet_appcx<DRectCoords>);
 
             SUCCEED("witness chain holds");
@@ -753,6 +753,94 @@ namespace xo {
             }
 
             REQUIRE(fw->strong_root_count() == 0);
+        }
+
+        TEST_CASE("flywheel-snapshot-reports-live-slots",
+                  "[facet][objecthandle][snapshot]")
+        {
+            using xo::facet::DObjectHandle;
+            using xo::mm::FlywheelInfo;
+            using H = DObjectHandle<AComplex, DRectCoords>;
+
+            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.snap");
+
+            /* registered so the snapshot can NAME the representation; without
+             * it typeseq_ is still reported and type_ is the sentinel
+             */
+            xo::facet::FacetRegistry::register_impl<AComplex, DRectCoords>();
+
+            {
+                FlywheelInfo empty = fw->snapshot();
+
+                /* the pools the store reports, in its order */
+                REQUIRE(empty.pool_v_.size() == 3);
+                REQUIRE(empty.pool_v_[0].resource_name_ == std::string("utest.snap.storage"));
+                REQUIRE(empty.pool_v_[1].resource_name_ == std::string("utest.snap.strong"));
+                REQUIRE(empty.pool_v_[2].resource_name_ == std::string("utest.snap.strong-free"));
+
+                REQUIRE(empty.strong_.live_ == 0);
+                REQUIRE(empty.strong_.slot_v_.empty());
+                REQUIRE(empty.strong_.capacity_ > 0);
+            }
+
+            DRectCoords * p0 = alloc_rect(fw, 3.0, 4.0);
+            DRectCoords * p1 = alloc_rect(fw, 5.0, 6.0);
+
+            auto h0 = H::make_strong_ref(fw, obj<AComplex, DRectCoords>(p0));
+            auto h1 = H::make_strong_ref(fw, obj<AComplex, DRectCoords>(p1));
+
+            {
+                FlywheelInfo snap = fw->snapshot();
+
+                REQUIRE(snap.strong_.live_ == 2);
+                REQUIRE(snap.strong_.slot_v_.size() == 2);
+                REQUIRE(snap.strong_.free_.empty());
+
+                /* offset_ is the animation's identity for an object: it
+                 * locates the representation within the storage arena, so a
+                 * consumer can follow it across frames and draw it moving
+                 */
+                auto base = reinterpret_cast<std::uint64_t>(fw->storage().lo_);
+
+                REQUIRE(snap.strong_.slot_v_[0].offset_
+                        == reinterpret_cast<std::uint64_t>(p0) - base);
+                REQUIRE(snap.strong_.slot_v_[1].offset_
+                        == reinterpret_cast<std::uint64_t>(p1) - base);
+                /* and bounded by the arena, which is what makes it safe as a
+                 * json number on a consumer that uses IEEE754 doubles
+                 */
+                REQUIRE(snap.strong_.slot_v_[1].offset_ < snap.pool_v_[0].reserved_);
+
+                REQUIRE(snap.strong_.slot_v_[0].ix_ == h0.object_ix());
+                REQUIRE(snap.strong_.slot_v_[1].ix_ == h1.object_ix());
+
+                REQUIRE(snap.strong_.slot_v_[0].typeseq_
+                        == typeseq::id<DRectCoords>().seqno());
+                REQUIRE(snap.strong_.slot_v_[0].type_
+                        == std::string(xo::reflect::type_name<DRectCoords>()));
+            }
+
+            /* a released slot leaves the report, and shows up on the free list
+             * instead -- the frame tracks occupancy, not the high-water mark
+             */
+            auto ix0 = h0.object_ix();
+            fw->remove_strong_ref(ix0);
+
+            {
+                FlywheelInfo snap = fw->snapshot();
+
+                REQUIRE(snap.strong_.live_ == 1);
+                REQUIRE(snap.strong_.slot_v_.size() == 1);
+                REQUIRE(snap.strong_.slot_v_[0].offset_
+                        == reinterpret_cast<std::uint64_t>(p1)
+                           - reinterpret_cast<std::uint64_t>(fw->storage().lo_));
+
+                REQUIRE(snap.strong_.free_.size() == 1);
+                REQUIRE(snap.strong_.free_[0] == ix0);
+
+                /* size_ is the high-water mark and does NOT fall */
+                REQUIRE(snap.strong_.size_ == 2);
+            }
         }
 
         TEST_CASE("double-release-does-not-share-a-slot",

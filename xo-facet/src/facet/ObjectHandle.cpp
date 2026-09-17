@@ -31,6 +31,18 @@ namespace xo::facet {
             memory_->remove_strong_ref(object_ix_);
     }
 
+    FacetAppcx::CreationEvidence
+    ObjectHandleBase::facetappcx_creation_evidence() const
+    {
+        return memory_->facetappcx_creation_evidence();
+    }
+
+    Indentlog2Appcx::CreationEvidence
+    ObjectHandleBase::indentlog2appcx_creation_evidence() const
+    {
+        return memory_->indentlog2appcx_creation_evidence();
+    }
+
 } /*namespace xo::facet*/
 
 /* end ObjectHandle.cpp */

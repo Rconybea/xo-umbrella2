@@ -19,12 +19,15 @@
 #include <xo/pyindentlog2/pyindentlog2.hpp>
 #include <xo/object2/Float.hpp>
 #include <xo/object2/SetupObject2.hpp>
+#include <xo/object2/reflect_flywheel_info.hpp>
+#include <xo/printjson/PrintJson.hpp>
 #include <xo/facet/ObjectHandle.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/ppsink/PpSink.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/pyutil/pyutil.hpp>
+#include <sstream>
 
 namespace xo {
     namespace py = pybind11;
@@ -103,10 +106,44 @@ namespace xo {
                 .def("__repr__",
                      [](const HFloat & self) {
                          /** proves TempPrettySink is available **/
-                         static_assert(xo::carries_indentlog2<HFloat>);
+                         static_assert(xo::carries_indentlog2_appcx<HFloat>);
 
                          return TempPpSink::pp2str(self._native());
                      });
+
+            // ----------------------------------------------------------------
+            // one animation frame for a flywheel
+
+            /* Here rather than in xo_pyfacet, which owns AllocFlywheel, for the
+             * same reason reflect_flywheel_info lives in xo-object2 rather than
+             * xo-facet: xo_pyfacet is levelled BELOW xo-printjson and cannot
+             * reach a PrintJson.  Expected to move when the websocket feeder
+             * lands -- see reflect_flywheel_info.hpp.
+             */
+            m.def("flywheel_frame",
+                  [](const AllocFlywheel & fw) {
+                      /* idempotent; StructReflector's completion flag is
+                       * per-type and static
+                       */
+                      xo::mm::reflect_flywheel_info();
+
+                      /* one PrintJson for the process.  A frame is a read, so
+                       * nothing here should depend on which context asked.
+                       */
+                      static xo::json::PrintJson s_pjson;
+
+                      std::stringstream ss;
+                      s_pjson.print(fw.snapshot(), &ss);
+
+                      return ss.str();
+                  },
+                  py::arg("flywheel"),
+                  "this flywheel's state as one json frame.\n"
+                  "\n"
+                  "A wire model, not a dump of the c++ layout: pool sizes, and"
+                  " for each OCCUPIED root slot its index, type and address."
+                  "  The address is a stable identity between frames, so a"
+                  " consumer can follow an object as a collector moves it.");
 
         } /*PYBIND11_MODULE*/
     } /*namespace scm*/

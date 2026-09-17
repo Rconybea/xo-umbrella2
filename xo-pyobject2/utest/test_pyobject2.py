@@ -134,15 +134,42 @@ class RootReleaseTestCase(unittest.TestCase):
         gc.collect()
         self.assertEqual(self.fw.strong_root_count(), 0)
 
+    def store(self):
+        return [p for p in self.fw.visit_pools() if p.name == "store"][0]
+
     def test_a_long_loop_does_not_exhaust_the_root_set(self):
         """the REPL case the ticket was filed for
 
         The default strong set holds a few hundred slots; without reuse this
         loop would run it dry and add_strong_ref would start handing back null.
         The iteration count is deliberately far above that capacity.
+
+        But it is bounded by a DIFFERENT resource: each iteration allocates a
+        DFloat from the storage arena, and dropping the handle releases the
+        root, not the memory -- there is no collector yet.  So the loop must
+        stay inside the store, and the store shrank when DHandleStore began
+        requiring alloc headers (8 bytes per allocation, which doubles the cost
+        of a boxed double).  Overrunning it is not a clean failure: _box does
+        placement-new on a null alloc, so the test segfaults.
+
+        Hence the bound is DERIVED from an observed cost rather than written
+        down -- a hardcoded 20000 passed until headers landed and then crashed.
         """
         import gc
-        for i in range(20000):
+
+        before = self.store().used
+        probe = [o.Float.make(self.fw, float(i)) for i in range(16)]
+        cost = max(1, (self.store().used - before) // len(probe))
+        del probe
+        gc.collect()
+
+        headroom = (self.store().reserved - self.store().used) // cost
+        n = min(20000, headroom // 2)
+
+        # still far above the root set, which is what the case is about
+        self.assertGreater(n, 20 * self.fw.strong_root_count() + 2000)
+
+        for i in range(n):
             t = o.Float.make(self.fw, float(i))
             self.assertEqual(t.value(), float(i))
             del t

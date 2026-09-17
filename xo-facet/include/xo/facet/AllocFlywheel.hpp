@@ -50,22 +50,22 @@ namespace xo::mm {
         /** Provide default arguments to make_app() **/
         static rp<AllocFlywheel> make_default_app(const FacetAppcx & appcx);
 
-        const FacetAppcx & facet_appcx() const { return facet_appcx_; }
-
-        /** forwarded from @ref facet_appcx_, so anything holding a flywheel is
-         *  one hop from the xo-indentlog2 context too -- see
-         *  @ref xo::carries_indentlog2.  Without this the chain is transitive
-         *  and a caller has to know to make two hops.
-         **/
-        const Indentlog2Appcx & indentlog2_appcx() const {
-            return facet_appcx_.indentlog2_appcx();
-        }
+        FacetAppcx::CreationEvidence facetappcx_creation_evidence() const { return facetappcx_creation_evidence_; }
+        Indentlog2Appcx::CreationEvidence indentlog2appcx_creation_evidence() const { return indentlog2appcx_creation_evidence_; }
 
         DArena & storage() { return store_.storage(); }
 
         /** report memory consumption, one @ref MemorySizeInfo per pool.
          *
-         *  Memory pools pools owned by this flyswheel.
+         *  Three pools, in the order @ref HandleStore visits them: the primary
+         *  arena objects are allocated from, the strong root set, and the free
+         *  list serving that set.  Const: reporting must not be able to disturb
+         *  what it measures.
+         *
+         *  NB reserved/committed/used are three different numbers here.  A root
+         *  set reserves its whole configured extent up front and commits as it
+         *  grows, so "reserved" says what a flywheel COULD consume and
+         *  "committed" what it currently does.
          **/
         void visit_pools(const MemorySizeVisitor & fn) const { store_.visit_pools(fn); }
 
@@ -81,6 +81,15 @@ namespace xo::mm {
          **/
         void remove_strong_ref(handle_index_type ix);
 
+        /** this flywheel's state as a wire model -- one animation frame.
+         *
+         *  See @ref FlywheelInfo for why this is a view model rather than
+         *  reflection of the representation.  Const, and allocating only in the
+         *  returned value: a frame must not disturb the pools it reports, and
+         *  in particular must not allocate from the flywheel's own arena.
+         **/
+        FlywheelInfo snapshot() const;
+
         /** count number of non-empty root slots. **/
         handle_index_type strong_root_count() const;
 
@@ -90,8 +99,10 @@ namespace xo::mm {
         virtual std::string display_string() const override;
 
     private:
-        /** xo-facet/ context **/
-        const FacetAppcx & facet_appcx_;
+        /** evidence that a FacetAppcx instance was created **/
+        FacetAppcx::CreationEvidence facetappcx_creation_evidence_;
+        /** evidence that a Indentlog2Appcx instance was created **/
+        Indentlog2Appcx::CreationEvidence indentlog2appcx_creation_evidence_;
 
         /** combined allocator and root set **/
         HandleStore store_;

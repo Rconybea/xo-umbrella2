@@ -87,7 +87,7 @@ namespace xo {
 
             template <typename T>
             static typeseq id() {
-                return typeseq(xo::reflect::typerecd::recd<T>().seqno());
+                return typeseq(typerecd::recd<T>().seqno());
             }
 
             bool is_sentinel() const { return seqno_ == -1; }

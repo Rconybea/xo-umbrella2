@@ -49,17 +49,12 @@ namespace xo::facet {
         //const AllocFlywheel & flywheel() const { return *memory_.get(); }
         handle_index_type object_ix() const { return object_ix_; }
 
-        /** @defgroup objecthandle-witness evidence carried by a handle
-         *
-         *  A handle cannot exist without a flywheel, which cannot exist without
-         *  a FacetAppcx, which cannot exist without an Indentlog2Appcx.  These
-         *  accessors make that chain reachable from the handle, so code that
-         *  relies on it can say so (@ref xo::carries_facet_appcx) rather than
-         *  asserting it in a comment.
+        /** @defgroup objecthandle-witness evidence carried by a handle;
+         *  chain of trust checked at compile time.
          **/
         ///@{
-        const FacetAppcx & facet_appcx() const { return memory_->facet_appcx(); }
-        const Indentlog2Appcx & indentlog2_appcx() const { return memory_->indentlog2_appcx(); }
+        FacetAppcx::CreationEvidence facetappcx_creation_evidence() const;
+        Indentlog2Appcx::CreationEvidence indentlog2appcx_creation_evidence() const;
         ///@}
 
     private:

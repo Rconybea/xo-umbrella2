@@ -11,6 +11,7 @@
 #include "xo/indentlog2/print/PrettySink.hpp"
 #include "xo/ppsink/TempPpSink.hpp"
 #include <xo/subsys/AppContext.hpp>
+#include <xo/subsys/Evidence.hpp>
 #include <concepts>
 #include <xo/ppsink/LogState.hpp>
 
@@ -22,6 +23,8 @@ namespace xo {
      **/
     class Indentlog2Appcx {
     public:
+        using CreationEvidence = Evidence<class Indentlog2AppcxCreated_tag>;
+        using CreationEvp = EvidenceProvider<CreationEvidence>;
         using TempPpSink = xo::pp::TempPpSink;
         using TempArena = xo::mm::TempArena;
         using PrettySinkFactory = xo::pp::PrettySinkFactory;
@@ -47,6 +50,7 @@ namespace xo {
                         const Indentlog2Config & cfg) : Indentlog2Appcx(cfg) {}
 
         InitEvidence init_evidence() const { return init_evidence_; }
+        CreationEvidence creation_evidence() const { return indentlog2_evp_; }
         const Indentlog2Config & config() const { return config_; }
         /** report memory consumption, one @ref MemorySizeInfo per pool.
          *  Only for pools owned by current thread.
@@ -59,6 +63,9 @@ namespace xo {
     private:
         /** ensures low-level subsystem initialization **/
         InitEvidence init_evidence_;
+
+        /** provides evidence that Indentlog2Appcx has been created **/
+        CreationEvp indentlog2_evp_;
 
         /** xo-indentlog2/ configuration **/
         Indentlog2Config config_;
@@ -82,21 +89,12 @@ namespace xo {
     };
     /** @brief types that can attest xo-indentlog2 has been configured.
      *
-     *  An Indentlog2Appcx can only be constructed by configuring the
-     *  subsystem, so a value that can hand one over is evidence the
-     *  configuration happened -- notably that TempPrettySink::init() ran, which
-     *  everything reaching for a scratch sink depends on.
-     *
-     *  Use it to state a dependency that would otherwise live in a comment:
-     *
-     *    static_assert(carries_indentlog2<HFloat>);
-     *
-     *  NB this checks that the TYPE can produce the witness.  It is only proof
-     *  because the witness itself is unforgeable; see InitEvidence.
+     *  Satisfied by Indentlog2Appcx itself
+     *  + anything that can produce Indentlog2Appcx::creation_evidence().
      **/
     template <typename T>
-    concept carries_indentlog2 = requires (const T & x) {
-        { x.indentlog2_appcx() } -> std::convertible_to<const Indentlog2Appcx &>;
+    concept carries_indentlog2_appcx = requires (const T & x) {
+        { x.indentlog2appcx_creation_evidence() } -> std::convertible_to<Indentlog2Appcx::CreationEvidence>;
     };
 
 } /*namespace xo*/

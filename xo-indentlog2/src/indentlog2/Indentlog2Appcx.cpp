@@ -11,8 +11,11 @@ namespace xo {
     using xo::pp::PpSink;
     using xo::pp::ThreadLogState;
 
+    constexpr uint64_t c_indentlog2appcx_creation_secret = 0xa2b3c4;
+
     Indentlog2Appcx::Indentlog2Appcx(const Indentlog2Config & cfg)
     : init_evidence_{InitSubsys<S_indentlog2_tag>::require()},
+      indentlog2_evp_{c_indentlog2appcx_creation_secret},
       config_{cfg},
       sink_factory_{cfg.pp_config()}
     {

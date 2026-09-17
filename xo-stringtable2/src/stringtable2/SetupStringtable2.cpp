@@ -19,6 +19,8 @@ namespace xo {
     using xo::pp::scope;
     using xo::pp::xtag;
 
+    using xo::json::JsonPrinter;
+    using xo::json::PrintJson;
     using xo::print::APrintable;
     using xo::reflect::AReflectable;
     using xo::mm::ACollector;
@@ -31,10 +33,10 @@ namespace xo {
     namespace scm {
         namespace {
             /** json printing for DString **/
-            class DStringJsonPrinter : public xo::json::JsonPrinter {
+            class DStringJsonPrinter : public JsonPrinter {
             public:
-                DStringJsonPrinter(const xo::json::PrintJson * pjson)
-                    : xo::json::JsonPrinter(pjson) {}
+                DStringJsonPrinter(const PrintJson * pjson)
+                    : JsonPrinter(pjson) {}
 
                 virtual void print_json(TaggedPtr tp,
                                         std::ostream * p_os) const override

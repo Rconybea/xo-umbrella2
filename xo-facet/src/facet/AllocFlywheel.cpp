@@ -4,6 +4,7 @@
  **/
 
 #include "AllocFlywheel.hpp"
+#include "TypeRegistry.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
@@ -12,12 +13,13 @@ namespace xo::mm {
                                  DArena && storage,
                                  DArenaVector<obj<ATop>> && strong,
                                  DArenaVector<handle_index_type> && strong_freelist)
-      : facet_appcx_{facet_appcx},
-        store_{std::move(storage),
-               std::move(strong),
-               std::move(strong_freelist)}
+    : facetappcx_creation_evidence_{facet_appcx.creation_evidence()},
+      indentlog2appcx_creation_evidence_{facet_appcx.indentlog2appcx_creation_evidence()},
+      store_{std::move(storage),
+             std::move(strong),
+             std::move(strong_freelist)}
     {
-        // facet_appcx_: proof of work: facet,indentlog2 init performed;
+        // facet_appcx: proof of work: facet,indentlog2 init performed;
         // implies config-dependent globals setup, including:
         // - FacetRegistry
         // - TempArena
@@ -52,8 +54,12 @@ namespace xo::mm {
         auto strong = DArenaVector<obj<ATop>>::map(strong_cfg);
         auto strong_freelist = make_freelist(strong_cfg, strong.capacity());
 
+        /* alloc headers forced on, overriding whatever the caller asked for.
+         * DHandleStore requires them (see its ctor), so honouring a false here
+         * would only produce a throw one layer down.
+         */
         return new AllocFlywheel(appcx,
-                                 DArena::map(storage_cfg),
+                                 DArena::map(storage_cfg.with_store_header_flag(true)),
                                  std::move(strong), std::move(strong_freelist));
     }
 
@@ -78,6 +84,44 @@ namespace xo::mm {
     AllocFlywheel::remove_strong_ref(handle_index_type ix)
     {
         store_.remove_strong_ref(ix);
+    }
+
+    FlywheelInfo
+    AllocFlywheel::snapshot() const
+    {
+        FlywheelInfo retval;
+
+        /* pools first, in the order the store reports them, so pool_v_[0] is
+         * the storage arena and the root-set arenas follow.
+         *
+         * MemorySizeInfo reported AS-IS, not copied into a shadow struct: it is
+         * already the right shape, and reflecting it directly means there is
+         * nothing to keep in step.  Its detail_ is excluded by the reflection
+         * (see reflect_flywheel_info), not by copying around it.
+         */
+        store_.visit_pools([&retval](const MemorySizeInfo & x) {
+                retval.pool_v_.push_back(x);
+            });
+
+        /* offsets are measured from the storage arena's base, which is
+         * pool_v_[0].lo_ -- the same number a consumer sees in the frame
+         */
+        store_.snapshot(&retval.strong_,
+                        reinterpret_cast<std::uint64_t>(store_.storage().lo_));
+
+        /* the half DHandleStore cannot do: it is generic over Handle, and
+         * naming a typeseq is xo-facet's business.  An unregistered type comes
+         * back as TypeRegistry's sentinel name rather than throwing -- a frame
+         * is a diagnostic, and must render whatever state it finds.
+         */
+        for (SlotInfo & slot : retval.strong_.slot_v_) {
+            std::string_view name
+                = xo::facet::TypeRegistry::id2name(xo::reflect::typeseq(slot.typeseq_));
+
+            slot.type_ = std::string(name);
+        }
+
+        return retval;
     }
 
     auto

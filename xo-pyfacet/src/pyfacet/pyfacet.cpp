@@ -249,11 +249,8 @@ namespace xo {
                  * movable -- Refcount's atomic member deletes both).
                  */
 
-                /* keep_alive<0,1>: AllocFlywheel stores `const FacetAppcx &`
-                 * (facet_appcx_), so the flywheel must not outlive the context
-                 * it was made from.  Load-bearing since appcx-config/04: while
-                 * the module owned the context, it outlived everything by
-                 * construction.
+                /* keep_alive<0,1>: the flywheel must not outlive the context
+                 * it was made from.
                  */
                 .def_static("make_app",
                             &AllocFlywheel::make_app,
@@ -272,8 +269,8 @@ namespace xo {
                 /* memory reporting.  Returns owne memory pools. */
                 .def("visit_pools", &collect_pools<AllocFlywheel>,
                      "this flywheel's memory pools, as a list of MemorySizeInfo:"
-                     " storage arena, strong root set and its free list, weak"
-                     " root set and its free list")
+                     " storage arena, strong root set, and the free list"
+                     " serving it")
 
                 /* how many in-use roots are currently held.
                  */
@@ -295,7 +292,7 @@ namespace xo {
 
                 .def("__repr__",
                      [](const AllocFlywheel & self) {
-                         static_assert(xo::carries_indentlog2<AllocFlywheel>);
+                         static_assert(xo::carries_indentlog2_appcx<AllocFlywheel>);
 
                          return TempPpSink::pp2str(self);
                      });

@@ -15,6 +15,7 @@
 #include <xo/facet/alloc/AAllocator.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/object2/number/IReflectable_DFloat.hpp>
+#include <xo/object2/reflect_flywheel_info.hpp>
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -67,6 +68,12 @@ namespace xo {
         SetupObject2::reflect_types()
         {
             DFloat::reflect_self();
+
+            /* not object2's type -- xo-facet's.  Homed here because xo-facet
+             * cannot reach a StructReflector; see reflect_flywheel_info.hpp,
+             * which also says where it is expected to move.
+             */
+            xo::mm::reflect_flywheel_info();
         } /*reflect_types*/
 
         void

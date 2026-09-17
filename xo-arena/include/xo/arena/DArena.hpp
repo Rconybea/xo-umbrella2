@@ -10,6 +10,7 @@
 #include "ArenaConfig.hpp"
 #include "MemorySizeInfo.hpp"
 #include <xo/reflectutil/typeseq.hpp>
+#include <string_view>
 
 namespace xo {
     namespace mm {
@@ -105,6 +106,23 @@ namespace xo {
 
             /** false -> not eligible for GC (allocates own memory + not moveable) **/
             static constexpr bool is_gc_eligible() { return false; }
+
+            /** The configuration this arena was mapped with.
+             *
+             *  @ref config_ is public -- DArena is a struct with no access
+             *  specifiers -- so this adds no reach.  It exists to give generic
+             *  code a NAME to depend on: @c DHandleStore is templated on its
+             *  storage type and requires alloc headers, and spelling that as
+             *  @c storage_.config_.store_header_flag_ would pin every future
+             *  Storage to this member layout.
+             **/
+            const ArenaConfig & config() const noexcept { return config_; }
+
+            /** This arena's name, as configured.
+             *
+             *  Borrowed from @ref config_, so valid as long as the arena is.
+             **/
+            std::string_view name() const noexcept { return config_.name(); }
 
             /** Reserved memory, in bytes. This is the maximum size of this arena. **/
             size_type reserved() const noexcept { return hi_ - lo_; }

@@ -211,7 +211,7 @@ namespace xo {
                 .def("__repr__",
                      [](const HString & self) {
                          /** proves TempPrettySink is available **/
-                         static_assert(xo::carries_indentlog2<HString>);
+                         static_assert(xo::carries_indentlog2_appcx<HString>);
 
                          return TempPpSink::pp2str(self._native());
                      });

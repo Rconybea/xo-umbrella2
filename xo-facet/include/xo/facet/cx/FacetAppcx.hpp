@@ -10,6 +10,7 @@
 #include "xo/facet/TypeRegistry.hpp"
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/subsys/AppContext.hpp>
+#include <xo/subsys/Evidence.hpp>
 #include <concepts>
 
 namespace xo {
@@ -17,6 +18,8 @@ namespace xo {
      **/
     class FacetAppcx {
     public:
+        using CreationEvidence = Evidence<class FacetAppcxCreated_tag>;
+        using CreationEvp = EvidenceProvider<CreationEvidence>;
         using FacetRegistry = xo::facet::FacetRegistry;
         using TypeRegistry = xo::facet::TypeRegistry;
         using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
@@ -42,6 +45,8 @@ namespace xo {
         const Indentlog2Appcx & indentlog2_appcx() const { return indentlog2_appcx_; }
 
         InitEvidence init_evidence() const { return init_evidence_; }
+        CreationEvidence creation_evidence() const { return facet_evp_; }
+        Indentlog2Appcx::CreationEvidence indentlog2appcx_creation_evidence() const;
         const FacetConfig & config() const { return config_; }
         /** report memory consumption, one @ref MemorySizeInfo per pool.
          *
@@ -70,6 +75,12 @@ namespace xo {
         /** ensures low-level subsystem initialization **/
         InitEvidence init_evidence_;
 
+        /** provides evidence that FacetAppcx has been created **/
+        CreationEvp facet_evp_;
+
+        /** evidence that an Indentlog2Appcx existed **/
+        Indentlog2Appcx::CreationEvidence indentlog2appcx_creation_evidence_;
+
         /** xo-facet/ configuration **/
         FacetConfig config_;
 
@@ -85,14 +96,11 @@ namespace xo {
 
     /** @brief types that can attest xo-facet has been configured.
      *
-     *  Satisfied by FacetAppcx itself, by AllocFlywheel (which retains the
-     *  context it was made with), and by any DObjectHandle (which reaches it
-     *  through its flywheel).  So "I hold one of these" and "xo-facet was
-     *  configured" are the same statement, checkably.
+     *  Satisfied by FacetAppcx itself + anything that copies FacetAppcx::creation_evidence()
      **/
     template <typename T>
     concept carries_facet_appcx = requires (const T & x) {
-        { x.facet_appcx() } -> std::convertible_to<const FacetAppcx &>;
+        { x.facetappcx_creation_evidence() } -> std::convertible_to<FacetAppcx::CreationEvidence>;
     };
 
     template <>
