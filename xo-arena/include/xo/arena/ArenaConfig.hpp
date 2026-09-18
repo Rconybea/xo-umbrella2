@@ -43,6 +43,18 @@ namespace xo {
                 return copy;
             }
 
+            ArenaConfig with_base_align_z(std::size_t z) const {
+                ArenaConfig copy(*this);
+                copy.base_align_z_ = z;
+                return copy;
+            }
+
+            ArenaConfig with_exclusive_block_flag(bool x) const {
+                ArenaConfig copy(*this);
+                copy.exclusive_block_flag_ = x;
+                return copy;
+            }
+
             ArenaConfig with_store_header_flag(bool x) const {
                 ArenaConfig copy(*this);
                 copy.store_header_flag_ = x;
@@ -70,6 +82,23 @@ namespace xo {
             MemoryNameStr name_;
             /** desired arena size -- hard max = reserved virtual memory **/
             std::size_t size_ = 0;
+            /** desired alignment for this arena's BASE address.
+             *  0 for the page/hugepage default.
+             *
+             *  Allow recovering an arena's base from any pointer in that arena,
+             *  by masking off the low-order @c base_align_z_-1
+             *  bits. This is sound only if @code size_ <= base_align_z_ @endcode
+             *  See @ref with_base_align_z.
+             **/
+            std::size_t base_align_z_ = 0;
+            /** when @ref base_align_z_ > 0:
+             *  true to reserve the whole @ref base_align_z_ block rather than
+             *  just @ref size_. Applies to address space, not committed memory.
+             *  Ignored when @ref base_align_z_ is zero.
+             *
+             *  See @ref with_exclusive_block_flag.
+             **/
+            bool exclusive_block_flag_ = false;
             /** hugepage size -- using huge pages relieves some TLB pressure
              *  (provided you use their full extent :)
              **/

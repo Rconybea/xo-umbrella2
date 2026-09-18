@@ -60,7 +60,8 @@ namespace xo {
             auto mapped_span
                 = span<char>::from_memory(mmap_util::map_aligned_range
                                               (config.max_capacity_,
-                                               align_z,
+                                               align_z /* base alignment */,
+                                               align_z /* page alignment */,
                                                enable_hugepage_flag,
                                                config.debug_flag_));
 

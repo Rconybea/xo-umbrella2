@@ -7,6 +7,8 @@
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp> /* Catch2 INFO() streams the tag to an ostream */
 #include <catch2/catch.hpp>
+#include <cstdint>
+#include <utility>
 
 namespace xo {
     using xo::mm::DArena;
@@ -16,6 +18,7 @@ namespace xo {
     using xo::mm::ArenaNameStr;
     using xo::mm::padding;
     using xo::mm::error;
+    using xo::reflect::typeseq;
     using xo::reflect::typeseq;
     using xo::pp::xtag;
     using std::byte;
@@ -214,6 +217,107 @@ namespace xo {
             REQUIRE(arena.committed() <= arena.reserved());
         }
 
+        namespace {
+            /** @p align must be a power of two; masks off its low-order bits **/
+            std::uintptr_t mask_to_block(const void * p, std::size_t align) {
+                return reinterpret_cast<std::uintptr_t>(p) & ~(static_cast<std::uintptr_t>(align) - 1);
+            }
+
+            std::pair<std::uintptr_t, std::uintptr_t> bounds(const DArena & a) {
+                std::uintptr_t lo = 0, hi = 0;
+                a.visit_pools([&lo, &hi](const xo::mm::MemorySizeInfo & m) {
+                        lo = reinterpret_cast<std::uintptr_t>(m.lo_);
+                        hi = reinterpret_cast<std::uintptr_t>(m.hi_);
+                    });
+                return {lo, hi};
+            }
+
+            ArenaConfig aligned_cfg(std::size_t size_z, std::size_t align_z, bool exclusive) {
+                return ArenaConfig()
+                    .with_name(ArenaNameStr::from_chars("utest.align"))
+                    .with_size(size_z)
+                    .with_base_align_z(align_z)
+                    .with_exclusive_block_flag(exclusive);
+            }
+        }
+
+        TEST_CASE("darena-base-align-is-maskable", "[arena][base_align]")
+        {
+            /* 2GB alignment with a 1MB arena: the interesting case, because the
+             * extent and the alignment are wildly different.  Reserving address
+             * space is cheap -- measured 2026-09-17, a 2GB PROT_NONE mapping
+             * adds ZERO page-table entries; they appear on first touch.
+             */
+            constexpr std::size_t c_align = 2UL * 1024 * 1024 * 1024;
+            constexpr std::size_t c_size = 1UL * 1024 * 1024;
+
+            DArena arena = DArena::map(aligned_cfg(c_size, c_align, false));
+
+            auto [lo, hi] = bounds(arena);
+
+            REQUIRE(lo % c_align == 0);
+
+            /* the extent is what was ASKED for, not the block.  Rounding the
+             * extent up to the base alignment would reserve 2GB here, and that
+             * is what with_exclusive_block_flag is for -- it must not happen by
+             * accident
+             */
+            REQUIRE(hi - lo == c_size);
+
+            /* the property the feature exists for */
+            auto * m0 = arena.alloc(typeseq::sentinel(), 64);
+            auto * m1 = arena.alloc(typeseq::sentinel(), 64);
+
+            REQUIRE(m0);
+            REQUIRE(m1);
+            REQUIRE(mask_to_block(m0, c_align) == lo);
+            REQUIRE(mask_to_block(m1, c_align) == lo);
+
+            /* committing must not round up to the BASE alignment.  When it did,
+             * a 64-byte alloc tried to commit 2GB: mprotect failed for a 1MB
+             * arena, and for an exclusive one it silently committed the whole
+             * block.  arena_align_z_ is the COMMIT granularity, not the base
+             * alignment -- see DArena::map.
+             */
+            REQUIRE(arena.committed() < c_size);
+            REQUIRE(arena.committed() <= arena.reserved());
+        }
+
+        TEST_CASE("darena-exclusive-block-claims-the-whole-block", "[arena][base_align]")
+        {
+            constexpr std::size_t c_align = 2UL * 1024 * 1024 * 1024;
+            constexpr std::size_t c_size = 1UL * 1024 * 1024;
+
+            DArena arena = DArena::map(aligned_cfg(c_size, c_align, true));
+
+            auto [lo, hi] = bounds(arena);
+
+            REQUIRE(lo % c_align == 0);
+            /* the whole block, so nothing unrelated can be mapped in it and
+             * mask to this arena's base
+             */
+            REQUIRE(hi - lo == c_align);
+
+            auto * m0 = arena.alloc(typeseq::sentinel(), 64);
+
+            REQUIRE(m0);
+            REQUIRE(mask_to_block(m0, c_align) == lo);
+            REQUIRE(arena.committed() < c_size);
+        }
+
+        TEST_CASE("darena-base-align-rejects-what-cannot-work", "[arena][base_align]")
+        {
+            /* an arena larger than its alignment spans two blocks, so a pointer
+             * in the second masks to the wrong base.  Refused rather than left
+             * to give a wrong answer later.
+             */
+            REQUIRE_THROWS(DArena::map(aligned_cfg(4 * 1024 * 1024,
+                                                   1024 * 1024,
+                                                   false)));
+
+            /* masking is meaningless unless the alignment is a power of two */
+            REQUIRE_THROWS(DArena::map(aligned_cfg(1024, 3 * 4096, false)));
+        }
     }
 }
 

@@ -15,9 +15,9 @@ namespace xo {
             using size_type = std::size_t;
 
             /** obtain uncommitted contiguous memory range comprising
-             *  a whole multiple of @p align_z bytes, of at least size @p req_z,
-             *  aligned on a @p align_z boundary.  Uncommitted memory is not (yet)
-             *  backed by physical memory.
+             *  a whole multiple of @p page_align_z bytes, of at least size @p req_z,
+             *  aligned on a @p base_align_z boundary.
+             *  Uncommitted memory is not (yet) backed by physical memory.
              *
              *  If @p enable_hugepage_flag is true and THP
              *  (transparent huge pages) are available, use THP for arena memory.
@@ -36,10 +36,11 @@ namespace xo {
              *
              *  Write log messages iff @p debug_flag is true.
              *
-             *  @return spqn giving reserved memory address range [lo,hi)
+             *  @return span giving reserved memory address range [lo,hi)
              **/
             static span_type map_aligned_range(size_type req_z,
-                                               size_type align_z,
+                                               size_type base_align_z,
+                                               size_type page_align_z,
                                                bool enable_hugepage_flag,
                                                bool debug_flag);
         };

@@ -22,16 +22,25 @@ namespace xo {
     namespace mm {
         auto
         mmap_util::map_aligned_range(size_t req_z,
-                                     size_t align_z,
+                                     size_t base_align_z,
+                                     size_t page_align_z,
                                      bool enable_hugepage_flag,
                                      bool debug_flag) -> span_type
         {
             scope log(XO_DEBUG_(debug_flag),
                       xtag("req_z", req_z),
-                      xtag("align_z", align_z));
+                      xtag("base_align_z", base_align_z),
+                      xtag("page_align_z", page_align_z));
 
-            // 1. round up to multiple of align_z
-            size_t target_z = padding::with_padding(req_z, align_z); // 4.
+            /* 1. round the EXTENT up to page granularity.
+             *
+             *    Deliberately not to base_align_z: those are separate
+             *    quantities (see the header).  Rounding to the base alignment
+             *    would turn a 1MB request at 2GB alignment into a 2GB
+             *    reservation -- which is what with_exclusive_block_flag asks
+             *    for explicitly, and must not happen by accident.
+             */
+            size_t target_z = padding::with_padding(req_z, page_align_z);
 
             // 2. mmap() will give us page-aligned memory,
             //    but not hugepage-aligned.
@@ -40,15 +49,15 @@ namespace xo {
             //    aligned subrange of size target_z
             //
             byte * base = (byte *)(::mmap(nullptr,
-                                          target_z + align_z,
+                                          target_z + base_align_z,
                                           PROT_NONE,
                                           MAP_PRIVATE | MAP_ANONYMOUS,
                                           -1, 0));
 
             // on mmap success: upper limit of mapped address range
-            byte * hi = base + (target_z + align_z);
+            byte * hi = base + (target_z + base_align_z);
             // lowest hugepage-aligned address in [base, hi)
-            byte * aligned_base = (byte *)(padding::with_padding((size_t)base, align_z));
+            byte * aligned_base = (byte *)(padding::with_padding((size_t)base, base_align_z));
             // end of hugeppage-aligned range starting at aligned_base
             byte * aligned_hi = aligned_base + target_z;
 
@@ -67,9 +76,9 @@ namespace xo {
                                                     xtag("size", req_z)));
                 }
 
-                assert((size_t)aligned_base % align_z == 0);
+                assert((size_t)aligned_base % base_align_z == 0);
                 assert(aligned_base >= base);
-                assert(aligned_base < base + align_z);
+                assert(aligned_base < base + base_align_z);
             }
 
             // 4. release unaligned prefix

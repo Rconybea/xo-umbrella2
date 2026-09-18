@@ -13,9 +13,10 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tostr0.hpp>
+#include <algorithm>
+#include <new>        // for std::launder()
 #include <cassert>
 #include <exception>
-#include <new>        // for std::launder()
 #include <string.h>   // for ::memset()
 #include <sys/mman.h> // for ::munmap()
 #include <unistd.h>   // for ::getpagesize()
@@ -46,13 +47,52 @@ namespace xo {
              * Will use THP (transparent huge pages) if available
              * and arena size is at least as large as hugepage size (2MB, probably)
              */
-            size_t align_z = (enable_hugepage_flag ? cfg.hugepage_z_ : page_z);
+            size_t page_align_z = (enable_hugepage_flag ? cfg.hugepage_z_ : page_z);
+
+            /* Base alignment.  A caller asking for more than the page/hugepage
+             * boundary is buying the ability to recover this arena's base from
+             * a pointer into it, by masking off the low-order bits -- see
+             * ArenaConfig::with_base_align_z.
+             */
+            size_t base_align_z = std::max(cfg.base_align_z_, page_align_z);
+
+            if (cfg.base_align_z_ > 0) {
+                /* Only when the caller opted-in to a maskable base. */
+
+                if ((base_align_z & (base_align_z - 1)) != 0) {
+                    throw std::runtime_error
+                        (tostr0("DArena::map: base alignment must be a power of 2",
+                                xtag("arena", cfg.name().c_str()),
+                                xtag("base_align_z", base_align_z)));
+                }
+
+                if (cfg.size_ > base_align_z) {
+                    /* the arena would span more than one aligned block, and a
+                     * pointer in the second block would mask to the wrong base
+                     */
+                    throw std::runtime_error
+                        (tostr0("DArena::map: arena size exceeds its base alignment,"
+                                " so its base would not be recoverable by masking",
+                                xtag("arena", cfg.name().c_str()),
+                                xtag("size", cfg.size_),
+                                xtag("base_align_z", base_align_z)));
+                }
+            } /*if base_align_z_ requested*/
+
+            /* Exclusivity: claim the whole block, so no unrelated mapping can
+             * land in it and mask to this arena's base.  Separate from
+             * alignment on purpose -- see ArenaConfig::with_exclusive_block_flag.
+             */
+            size_t reserve_z = (cfg.exclusive_block_flag_ ? base_align_z : cfg.size_);
 
             log && log(xtag("page_z", page_z),
-                       xtag("align_z", align_z));
+                       xtag("page_align_z", page_align_z),
+                       xtag("base_align_z", base_align_z),
+                       xtag("reserve_z", reserve_z));
 
-            auto span = mmap_util::map_aligned_range(cfg.size_,
-                                                     align_z,
+            auto span = mmap_util::map_aligned_range(reserve_z,
+                                                     base_align_z,
+                                                     page_align_z,
                                                      enable_hugepage_flag,
                                                      cfg.debug_flag_);
 
@@ -70,7 +110,7 @@ namespace xo {
                        xtag("hugepage_z", hugepage_z_));
 #endif
 
-            return DArena(cfg, page_z, align_z, span.lo(), span.hi());
+            return DArena(cfg, page_z, page_align_z, span.lo(), span.hi());
         } /*map*/
 
         DArena::DArena(const ArenaConfig & cfg)
