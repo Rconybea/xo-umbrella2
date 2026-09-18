@@ -49,7 +49,7 @@ namespace xo {
             // rely on configured max.
 
             // relying on this because bypassing DArena::alloc()
-            assert(tk_buffer_.config_.store_header_flag_ == false);
+            assert(tk_buffer_.config().store_header_flag_ == false);
         }
 
         void

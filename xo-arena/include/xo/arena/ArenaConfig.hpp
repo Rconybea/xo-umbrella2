@@ -78,6 +78,7 @@ namespace xo {
             /** @defgroup mm-arenaconfig-instance-vars ArenaConfig members **/
             ///@{
 
+        public:
             /** optional name, for diagnostics **/
             MemoryNameStr name_;
             /** desired arena size -- hard max = reserved virtual memory **/

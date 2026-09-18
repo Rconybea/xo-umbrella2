@@ -72,7 +72,6 @@ namespace xo {
             };
 
             ///@}
-
             /** @defgroup mm-arena-ctors arena constructors and destructors **/
             ///@{
 
@@ -100,7 +99,6 @@ namespace xo {
             DArena & operator=(DArena && other);
 
             ///@}
-
             /** @defgroup mm-arena-methods **/
             ///@{
 
@@ -283,9 +281,11 @@ namespace xo {
             /** @defgroup mm-arena-instance-vars **/
             ///@{
 
+        private:
             /** arena configuration **/
             ArenaConfig config_;
 
+        public:
             /** size of a VM page (obtained automatically via getpagesize()). Likely 4k **/
             size_type page_z_ = 0;
 

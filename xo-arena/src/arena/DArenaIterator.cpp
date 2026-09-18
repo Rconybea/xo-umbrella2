@@ -81,7 +81,7 @@ namespace xo {
             if (!contains_flag || !bounds_flag) {
                 arena_->capture_error(error::alloc_iterator_deref, __PRETTY_FUNCTION__);
 
-                return AllocInfo::error_invalid_iterator(&(arena_->config_.header_));
+                return AllocInfo::error_invalid_iterator(&(arena_->config().header_));
             }
 
             /* iterator points to beginning of header.
@@ -131,8 +131,8 @@ namespace xo {
                 return;
             }
 
-            size_t   mem_z = arena_->config_.header_.size(*pos_);
-            size_t guard_z = arena_->config_.header_.guard_z_;
+            size_t   mem_z = arena_->config().header_.size(*pos_);
+            size_t guard_z = arena_->config().header_.guard_z_;
 
             byte * next_as_byte = ((byte *)pos_ + sizeof(AllocHeader) + mem_z + guard_z);
             /* next == ix.arena_free_ --> iterator is at end of allocator */

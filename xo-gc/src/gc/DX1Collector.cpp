@@ -305,7 +305,7 @@ namespace xo {
                         ok &= arena_d->upsert_cstr(mm, "d-limit", DInteger::box(mm, limit - lo));
                         ok &= arena_d->upsert_cstr(mm, "d-hi", DInteger::box(mm, hi - lo));
 
-                        const DString * key = DString::from_str(mm, arena->config_.name_.c_str());
+                        const DString * key = DString::from_str(mm, arena->config().name_.c_str());
 
                         rpt->upsert(mm, std::make_pair(key, obj<AGCObject,DDictionary>(arena_d)));
                     }

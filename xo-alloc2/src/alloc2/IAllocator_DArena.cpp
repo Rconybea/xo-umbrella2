@@ -29,7 +29,7 @@ namespace xo {
 
         std::string_view
         IAllocator_DArena::name(const DArena & s) noexcept {
-            return s.config_.name_;
+            return s.config().name_;
         }
 
         size_t

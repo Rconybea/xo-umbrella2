@@ -585,7 +585,7 @@ namespace xo {
             DArena::header_type alloc_hdr = *p_header;
 
             /* recover allocation size */
-            std::size_t alloc_z = some_arena->config_.header_.size_with_padding(alloc_hdr);
+            std::size_t alloc_z = some_arena->config().header_.size_with_padding(alloc_hdr);
 
             if (log) {
                 log(xtag("some_arena.lo", some_arena->lo_),

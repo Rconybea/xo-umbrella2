@@ -50,7 +50,7 @@ namespace xo {
                               .size_ = 10*1024*1024 };
             DArena arena = DArena::map(cfg);
 
-            REQUIRE(arena.config_.name_ == cfg.name_);
+            REQUIRE(arena.config().name_ == cfg.name_);
             REQUIRE(arena.lo_ != nullptr);
             REQUIRE(arena.free_ == arena.lo_);
             REQUIRE(arena.limit_ == arena.lo_);

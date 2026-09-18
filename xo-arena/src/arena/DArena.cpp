@@ -277,7 +277,7 @@ namespace xo {
                 }
             }
 
-            fn(MemorySizeInfo(config_.name_,
+            fn(MemorySizeInfo(config_.name(),
                               this->allocated() /*used*/,
                               this->allocated(),
                               this->committed(),
@@ -554,7 +554,7 @@ namespace xo {
                 this->free_ += config_.header_.guard_z_;
             }
 
-            log && log(xtag("self", config_.name_),
+            log && log(xtag("self", config_.name()),
                        xtag("hz", hz),
                        xtag("z0", req_z),
                        xtag("+pad", dz),
