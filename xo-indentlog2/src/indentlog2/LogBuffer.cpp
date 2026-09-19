@@ -87,19 +87,19 @@ namespace xo {
     }
 
     auto
-    LogBufferAdapter::committed_span() const -> Span
+    LogBufferAdapter::char_committed_span() const -> Span
     {
         return Span(porigin_, epptr_);
     }
 
     auto
-    LogBufferAdapter::used_span() const -> Span
+    LogBufferAdapter::char_used_span() const -> Span
     {
         return Span(porigin_, pptr_);
     }
 
     auto
-    LogBufferAdapter::available_span() const -> Span
+    LogBufferAdapter::char_available_span() const -> Span
     {
         return Span(pptr_, epptr_);
     }
@@ -110,9 +110,12 @@ namespace xo {
     }
 
     bool
-    LogBufferAdapter::expand_to(size_t new_z)
+    LogBufferAdapter::char_expand_to(size_t new_char_z)
     {
-        bool ok = buf_v_->expand(new_z, "LogBuffer::expand_to");
+        auto overhead_z = buf_v_->preamble_z() + buf_v_->per_alloc_overhead_z();
+        auto new_mem_z = new_char_z + overhead_z;
+
+        bool ok = buf_v_->expand(new_mem_z, "LogBuffer::expand_to");
 
         if (!ok) {
             expand_fail_ = "DArena::expand refused (see arena last_error)";
@@ -127,7 +130,7 @@ namespace xo {
             auto z = buf_v_->available();
 
             buf_ckp_ = buf_v_->checkpoint();
-            porigin_ = (char *)buf_v_->alloc(reflect::typeseq::id<char[]>(), z);
+            porigin_ = reinterpret_cast<char *>(buf_v_->alloc(reflect::typeseq::id<char[]>(), z));
 
             if (!porigin_) {
                 expand_fail_ = "first alloc from arena returned null";
@@ -176,17 +179,17 @@ namespace xo {
     bool
     LogBufferAdapter::_require_avail(uint32_t x)
     {
-        Span out = this->available_span();
+        Span out = this->char_available_span();
 
         if (x > out.size()) {
-            auto min_z = this->used_span().size() + x;
+            auto min_z = this->char_used_span().size() + x;
 
             // expand to make room
-            if (!this->expand_to(min_z)) {
+            if (!this->char_expand_to(min_z)) {
                 return false;
             }
 
-            out = this->available_span();
+            //out = this->char_available_span();
         }
 
         return true;
@@ -341,7 +344,7 @@ namespace xo {
         /* ask for 256 byte, in practice will get one vm page
          * However, available memory less than that if we used object header
          */
-        this->expand_to(256);
+        this->char_expand_to(256);
     }
 
 } /*namespace xo*/

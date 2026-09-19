@@ -132,9 +132,8 @@ namespace xo {
             REQUIRE(arena.committed() >= z2);
             REQUIRE(arena.committed() % arena.page_z() == 0);
             REQUIRE(arena.available() >= z2);
-            REQUIRE(arena.available() == arena.committed());
-            REQUIRE(arena.allocated() == 0);
-
+            REQUIRE(arena.preamble_z() + arena.available() == arena.committed());
+            REQUIRE(arena.allocated() == arena.preamble_z());
         }
 
         TEST_CASE("arena-alloc-1", "[arena][DArena]")
@@ -157,7 +156,7 @@ namespace xo {
             REQUIRE(arena.last_error().error_ == error::ok);
             REQUIRE(arena.last_error().error_seq_ == 0);
             REQUIRE(arena.allocated() >= z0);
-            REQUIRE(arena.allocated() < z0 + padding::c_alloc_alignment );
+            REQUIRE(arena.allocated() < arena.preamble_z() + z0 + padding::c_alloc_alignment );
             REQUIRE(arena.allocated() <= arena.committed());
             REQUIRE(arena.allocated() + arena.available() == arena.committed());
             REQUIRE(arena.committed() <= arena.reserved());
@@ -211,7 +210,7 @@ namespace xo {
             REQUIRE(arena.last_error().error_ == error::ok);
             REQUIRE(arena.last_error().error_seq_ == 0);
             REQUIRE(arena.allocated() >= z0);
-            REQUIRE(arena.allocated() < sizeof(DArena::header_type) + z0 + padding::c_alloc_alignment );
+            REQUIRE(arena.allocated() < arena.preamble_z() + arena.per_alloc_overhead_z() + z0 + padding::c_alloc_alignment );
             REQUIRE(arena.allocated() <= arena.committed());
             REQUIRE(arena.allocated() + arena.available() == arena.committed());
             REQUIRE(arena.committed() <= arena.reserved());

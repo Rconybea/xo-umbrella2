@@ -158,8 +158,11 @@ namespace xo {
             /* .size() is synonym for .committed() */
             REQUIRE(a1o.size() == a1o.committed());
             REQUIRE(a1o.available() >= z2);
-            REQUIRE(a1o.available() == a1o.committed());
-            REQUIRE(a1o.allocated() == 0);
+            /* not ==: an arena's preamble (back pointer + initial guard) is
+             * consumed at first commit, before any alloc
+             */
+            REQUIRE(a1o.data()->preamble_z() + a1o.available() == a1o.committed());
+            REQUIRE(a1o.allocated() == a1o.data()->preamble_z()  /* committed: preamble consumed */);
 
             a1o._drop();
             {
@@ -193,7 +196,7 @@ namespace xo {
             REQUIRE(a1o.last_error().error_ == error::ok);
             REQUIRE(a1o.last_error().error_seq_ == 0);
             REQUIRE(a1o.allocated() >= z0);
-            REQUIRE(a1o.allocated() < z0 + padding::c_alloc_alignment );
+            REQUIRE(a1o.allocated() < a1o.data()->preamble_z() + z0 + padding::c_alloc_alignment );
             REQUIRE(a1o.allocated() <= a1o.committed());
             REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
             REQUIRE(a1o.committed() <= a1o.reserved());
@@ -259,7 +262,8 @@ namespace xo {
             REQUIRE(a1o.last_error().error_ == error::ok);
             REQUIRE(a1o.last_error().error_seq_ == 0);
             REQUIRE(a1o.allocated() >= z0);
-            REQUIRE(a1o.allocated() < sizeof(AAllocator::header_type) + z0 + padding::c_alloc_alignment );
+            REQUIRE(a1o.allocated() < a1o.data()->preamble_z()
+                    + sizeof(AAllocator::header_type) + z0 + padding::c_alloc_alignment );
             REQUIRE(a1o.allocated() <= a1o.committed());
             REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
             REQUIRE(a1o.committed() <= a1o.reserved());
@@ -285,7 +289,7 @@ namespace xo {
             a1o.clear();
             {
                 // allocated size got reset
-                REQUIRE(a1o.allocated() == 0);
+                REQUIRE(a1o.allocated() == a1o.data()->preamble_z()  /* committed: preamble consumed */);
                 // committed size unchanged
                 REQUIRE(a1o.committed() == committed0_z);
                 REQUIRE(a1o.last_error().error_ == error::ok);
@@ -360,7 +364,11 @@ namespace xo {
                 REQUIRE(a1o.last_error().error_ == error::ok);
                 REQUIRE(a1o.last_error().error_seq_ == 0);
 
-                REQUIRE(a1o.allocated() == (cfg.header_.guard_z_
+                /* preamble_z() IS the back pointer plus the initial guard --
+                 * the leading guard term this formula used to carry.  Adding
+                 * both double-counts it.
+                 */
+                REQUIRE(a1o.allocated() == (a1o.data()->preamble_z()
                                             + sizeof(header_type)
                                             + z0
                                             + pad

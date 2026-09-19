@@ -22,10 +22,10 @@ namespace xo {
     }
 
     auto
-    LogStreambuf::committed_span() -> Span
+    LogStreambuf::char_committed_span() -> Span
     {
         if (logbuf_) [[likely]] {
-            return logbuf_->committed_span();
+            return logbuf_->char_committed_span();
         } else {
             return Span();
         }
@@ -37,7 +37,7 @@ namespace xo {
         /** reset line accounting and buffer pointers **/
         logbuf_->reset_buffer();
 
-        auto buf_span = logbuf_->committed_span();
+        auto buf_span = logbuf_->char_committed_span();
 
         /* tells parent streambuf our current buffer extent */
         this->setp(buf_span.lo(), buf_span.hi());
@@ -51,7 +51,7 @@ namespace xo {
 
         // note: correct also in edge case where {epptr, pptr} are nullptr
         if (this->epptr() - this->pptr() < n) {
-            this->expand_to((this->pptr() - this->pbase()) + n);
+            this->char_expand_to((this->pptr() - this->pbase()) + n);
         }
 
         // #of bytes to copy
@@ -75,7 +75,7 @@ namespace xo {
 
         assert(this->verify_ok());
 
-        auto z0 = logbuf_->committed_span().size();
+        auto z0 = logbuf_->char_committed_span().size();
 
         if (logbuf_->debug_flag()) {
             cerr << "LogStreambuf::overflow: new_ch="
@@ -83,7 +83,7 @@ namespace xo {
         }
 
         /* increase buffer size.  Arena will add at least one page */
-        if (this->expand_to(z0 + 1)) [[likely]] {
+        if (this->char_expand_to(z0 + 1)) [[likely]] {
             *(this->pptr()) = new_ch;
 
             this->pbump(1); // advances this->pptr();
@@ -132,7 +132,7 @@ namespace xo {
             if (pbase) [[likely]] {
                 /* using .setp for side-effect: sets .pptr to .pbase **/
                 this->setp(pbase, this->epptr());
-                this->pbump(this->committed_span().size() + off);
+                this->pbump(this->char_committed_span().size() + off);
             } else {
                 /* buffer not allocated yet */
             }
@@ -142,15 +142,15 @@ namespace xo {
     }
 
     bool
-    LogStreambuf::expand_to(size_t new_z)
+    LogStreambuf::char_expand_to(size_t new_z)
     {
-        if (!logbuf_->expand_to(new_z))
+        if (!logbuf_->char_expand_to(new_z))
             return false;
 
         // current write offset; 0 when uninitialized
         off_type off = this->pptr() - this->pbase();
 
-        auto c = logbuf_->committed_span();
+        auto c = logbuf_->char_committed_span();
 
         // note: setp clobbers pptr -> need pbump to restore it
         this->setp(c.lo(), c.hi());
@@ -162,8 +162,8 @@ namespace xo {
     void
     LogStreambuf::_check_update_streambuf_state()
     {
-        auto used = logbuf_->used_span();
-        auto avail = logbuf_->available_span();
+        auto used = logbuf_->char_used_span();
+        auto avail = logbuf_->char_available_span();
 
         auto pbase = this->pbase(); (void)pbase;
         auto pptr = this->pptr();
@@ -187,7 +187,7 @@ namespace xo {
         /* push: inform LogBuffer of chars written through the sputc fast path
          * (which bypasses xsputn/overflow) since the last sync.
          */
-        if (logbuf_ && (this->pptr() > logbuf_->used_span().hi())) {
+        if (logbuf_ && (this->pptr() > logbuf_->char_used_span().hi())) {
             logbuf_->_check_update_local_state(this->pptr());
         }
 
@@ -201,7 +201,7 @@ namespace xo {
         const char * P = this->pptr();
         const char * E = this->epptr();
 
-        auto c = logbuf_->committed_span();
+        auto c = logbuf_->char_committed_span();
 
         // 1. put area well-formed.
         //    Also holds in the lazy state, where B == P == E == nullptr.
@@ -213,7 +213,7 @@ namespace xo {
             return false;
 
         // 3. LogBuffer write pointer mirrors the streambuf write pointer
-        if (logbuf_->used_span().hi() != P)
+        if (logbuf_->char_used_span().hi() != P)
             return false;
 
         // 4. line accountant has consumed exactly up to the write pointer

@@ -71,7 +71,7 @@ namespace xo {
              *  Valid until the next write or logbuf reset.
              **/
             std::string_view output() const {
-                auto s = logbuf_.used_span();
+                auto s = logbuf_.char_used_span();
                 return std::string_view(s.lo(), s.hi());
             }
 

@@ -515,16 +515,33 @@ namespace xo {
                                   + sizeof(DList)
                                   + sizeof(DArray) + sizeof(obj<AGCObject>));
                         /* the add_gc_root() above; root_set_ is a
-                         * DArenaVector<GCRoot>, and its backing arena now counts
-                         * an element as allocated (see DArenaVector::_sync_store)
+                         * DArenaVector<GCRoot>, and its backing arena counts the
+                         * element as allocated.
+                         *
+                         * overhead_z() on top: since 2026-09-19 a DArenaVector
+                         * allocates its buffer THROUGH its arena, so the arena
+                         * also carries a preamble (the DArena back pointer) and
+                         * one AllocHeader covering the whole buffer.  Derived
+                         * rather than written as +16, so it follows the arena's
+                         * configuration.
                          */
                         auto z_root = sizeof(xo::mm::GCRoot);
                         {
                             REQUIRE(z == 80);
                             // cf earlier assertion on mm.allocated();
                             // now adding cost of 3 specific objects, + 1 root
-                            REQUIRE(mm.allocated() == alloc0 + z + z_root);
-                            REQUIRE(gc.allocated(g0, Role::to_space()) == z);
+                            REQUIRE(mm.allocated() == alloc0 + z + z_root
+                                    /* mm spans BOTH collector tables (see the
+                                     * note at the top of this case), and each
+                                     * arena now carries its own preamble
+                                     */
+                                    + gc.data()->get_root_set()->overhead_z()
+                                    + gc.data()->get_object_types()->overhead_z());
+                            /* + the space's preamble: a generation arena
+                             * consumes its back pointer at first commit
+                             */
+                            REQUIRE(gc.allocated(g0, Role::to_space())
+                                    == z + gc.data()->to_space(g0)->preamble_z());
                             REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
                             REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
                             REQUIRE(gc.allocated(g1, Role::from_space()) == 0);
@@ -539,10 +556,22 @@ namespace xo {
                         REQUIRE(mm->contains(Role::from_space(), l1.data()));
                         REQUIRE(!mm->contains_allocated(Role::from_space(), l1.data()));
 
-                        REQUIRE(mm.allocated() == alloc0 + z + z_root);
-                        REQUIRE(gc.allocated(g0, Role::to_space()) == z);
+                        /* one preamble per COMMITTED arena: the two collector
+                         * tables, plus the space that x1/l1 were moved into
+                         */
+                        REQUIRE(mm.allocated()
+                                == (alloc0 + z + z_root
+                                    + gc.data()->get_root_set()->overhead_z()
+                                    + gc.data()->get_object_types()->overhead_z()
+                                    + gc.data()->to_space(g0)->preamble_z()));
+                        REQUIRE(gc.allocated(g0, Role::to_space())
+                                == z + gc.data()->to_space(g0)->preamble_z());
                         REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
-                        REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
+                        /* committed (it held x1/l1 before the move), so its
+                         * preamble is charged though no live object remains
+                         */
+                        REQUIRE(gc.allocated(g0, Role::from_space())
+                                == gc.data()->from_space(g0)->preamble_z());
                         REQUIRE(gc.allocated(g1, Role::from_space()) == 0);
                     }
 

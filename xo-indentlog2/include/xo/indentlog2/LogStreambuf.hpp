@@ -19,7 +19,7 @@ namespace xo {
         LogStreambuf(LogBufferAdapter * logbuf);
 
         /** allocated buffer extned available to hold content (allocated + available) **/
-        Span committed_span();
+        Span char_committed_span();
 
         /** reset stream to empty state, ready to receive output.
          *  Preserves buffer memory allocation.
@@ -31,7 +31,7 @@ namespace xo {
          *  Can fail if physical memory exhausted.
          *  Returns false if expansion failed.
          **/
-        bool expand_to(size_t new_z);
+        bool char_expand_to(size_t new_z);
 
         /** verify cross-layer invariant between this streambuf's put-area
          *  pointers {pbase, pptr, epptr} and the backing @ref logbuf_.

@@ -91,9 +91,9 @@ namespace ut {
 
         std::string expected = expected_ss.str();
 
-        LogBuffer::Span used = buf.used_span();
-        LogBuffer::Span committed = buf.committed_span();
-        LogBuffer::Span available = buf.available_span();
+        LogBuffer::Span used = buf.char_used_span();
+        LogBuffer::Span committed = buf.char_committed_span();
+        LogBuffer::Span available = buf.char_available_span();
 
         REHEARSE(*p_rh, used.is_subspan_of(committed));
         REHEARSE(*p_rh, available.is_subspan_of(committed));
@@ -110,11 +110,11 @@ namespace ut {
         REHEARSE(*p_rh, buf.viz_lpos() == tc.exp_viz_lpos_);
 
         /** grow buffer (1byte ask will round up to 1page) **/
-        buf.expand_to(buf.committed_span().size() + 1);
+        buf.char_expand_to(buf.char_committed_span().size() + 1);
 
-        LogBuffer::Span used2 = buf.used_span();
-        LogBuffer::Span committed2 = buf.committed_span();
-        LogBuffer::Span available2 = buf.available_span();
+        LogBuffer::Span used2 = buf.char_used_span();
+        LogBuffer::Span committed2 = buf.char_committed_span();
+        LogBuffer::Span available2 = buf.char_available_span();
 
         REHEARSE(*p_rh, used == used2);
         REHEARSE(*p_rh, committed.size() < committed2.size());
@@ -124,9 +124,9 @@ namespace ut {
 
         buf.reset_buffer();
 
-        REHEARSE(*p_rh, buf.used_span().empty());
-        REHEARSE(*p_rh, buf.used_span().is_subspan_of(buf.committed_span()));
-        REHEARSE(*p_rh, buf.available_span().is_subspan_of(buf.committed_span()));
+        REHEARSE(*p_rh, buf.char_used_span().empty());
+        REHEARSE(*p_rh, buf.char_used_span().is_subspan_of(buf.char_committed_span()));
+        REHEARSE(*p_rh, buf.char_available_span().is_subspan_of(buf.char_committed_span()));
         REHEARSE(*p_rh, buf.lpos() == 0);
         REHEARSE(*p_rh, buf.viz_lpos() == 0);
     }
@@ -196,7 +196,7 @@ namespace ut {
             buf.reset_buffer();
 
             REQUIRE(oss.str() == "hello");
-            REQUIRE(buf.used_span().empty());
+            REQUIRE(buf.char_used_span().empty());
         }
 
         SECTION("reset_buffer after flush doesn't double-emit") {
@@ -234,7 +234,7 @@ namespace ut {
 
             wr(buf, "rec1");
             buf.reset_buffer();
-            REQUIRE(buf.used_span().empty());
+            REQUIRE(buf.char_used_span().empty());
 
             wr(buf, "rec2");
             buf.reset_buffer();
@@ -247,10 +247,10 @@ namespace ut {
 
             wr(buf, "hello");
             buf.flush();                    /* no-op, no crash */
-            REQUIRE(buf.used_span().size() == 5);
+            REQUIRE(buf.char_used_span().size() == 5);
 
             buf.reset_buffer();             /* rewinds without draining */
-            REQUIRE(buf.used_span().empty());
+            REQUIRE(buf.char_used_span().empty());
         }
 
         SECTION("detach mid-stream: post-detach content not drained") {
@@ -275,13 +275,13 @@ namespace ut {
             wr(buf, "pre");
             buf.flush();                    /* bpptr_ now past porigin_ */
 
-            std::size_t cap0 = buf.committed_span().size();
+            std::size_t cap0 = buf.char_committed_span().size();
             std::string big(cap0 + 1000, 'z');   /* exceeds capacity -> expand_to */
 
             wr(buf, big.c_str());
             buf.flush();
 
-            REQUIRE(buf.committed_span().size() > cap0);   /* grew in place */
+            REQUIRE(buf.char_committed_span().size() > cap0);   /* grew in place */
             REQUIRE(oss.str() == "pre" + big);             /* "pre" not re-sent */
         }
 
@@ -295,7 +295,7 @@ namespace ut {
              * completed line, so a record of many lines never grows the buffer
              * past its initial extent (total content here >> that extent).
              */
-            const std::size_t cap0 = buf.committed_span().size();
+            const std::size_t cap0 = buf.char_committed_span().size();
             const char * line = "line-content-abcdefghijklmnopqrstuvwxyz";  /* 39 chars */
             const int n = 1000;
 
@@ -310,7 +310,7 @@ namespace ut {
             buf.reset_buffer();     /* drains the final line */
 
             REQUIRE(oss.str() == expect.str());          /* every line reached the sink */
-            REQUIRE(buf.committed_span().size() == cap0); /* buffer never had to grow */
+            REQUIRE(buf.char_committed_span().size() == cap0); /* buffer never had to grow */
         }
 
         SECTION("no reclaim without a dest: multi-line content accumulates in the buffer") {
@@ -323,7 +323,7 @@ namespace ut {
             buf.newline_indent(2);
             wr(buf, "bbb");
 
-            LogBuffer::Span used = buf.used_span();
+            LogBuffer::Span used = buf.char_used_span();
             REQUIRE(used.size() == 3 + 1 + 2 + 3);       /* "aaa" "\n" "  " "bbb" */
             REQUIRE(std::string(used.lo(), used.hi()) == "aaa\n  bbb");
         }

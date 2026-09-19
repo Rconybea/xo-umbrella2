@@ -156,7 +156,7 @@ namespace ut {
             }
         }
 
-        LogBuffer::Span used = logbuf.used_span();
+        LogBuffer::Span used = logbuf.char_used_span();
 
         REHEARSE(*p_rh, used.size() == tc.exp_output_.size());
         REHEARSE(*p_rh,
@@ -191,7 +191,7 @@ namespace ut {
             sb.commit();
         }
 
-        LogBuffer::Span used = logbuf.used_span();
+        LogBuffer::Span used = logbuf.char_used_span();
 
         REQUIRE(std::string_view(used.lo(), used.hi()) == "42 -7");
     }

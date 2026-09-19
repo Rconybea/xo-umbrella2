@@ -17,6 +17,7 @@ namespace xo {
 
     namespace mm {
 
+        class DArena;
         using ArenaNameStr = MemoryNameStr;
 
         /** @class ArenaConfig
@@ -25,6 +26,7 @@ namespace xo {
          **/
         struct ArenaConfig {
             using PpSink = xo::pp::PpSink;
+            using size_type = std::size_t;
 
             /** @defgroup mm-arenaconfig-ctors **/
             ///@{
@@ -66,6 +68,12 @@ namespace xo {
             ///@{
 
             const MemoryNameStr & name() const { return name_; }
+            size_type preamble_z() const { return sizeof(DArena*) + header_.guard_z_; }
+            size_type alloc_header_z() const { return store_header_flag_ ? sizeof(AllocHeader) : 0; }
+            size_type guard_z() const { return header_.guard_z_; }
+            size_type padded_guard_z() const { return padding::with_padding(header_.guard_z_); }
+            /** hard max arena size **/
+            size_type size() const { return size_; }
 
             ///@}
             /** @defgroup mm-arenaconfig-methods ArenaConfig methods **/

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "DArena.hpp"
+#include <xo/reflectutil/typeseq.hpp>
 #include <cstring> // for ::memset()
 #include <stdexcept>
 
@@ -32,10 +33,14 @@ namespace xo {
             using const_reference = const value_type &;
             using iterator = value_type *;
             using const_iterator = const value_type *;
+            using Checkpoint = DArena::Checkpoint;
 
             /** null ctor **/
             DArenaVector() = default;
-            /** create arena-backed vector from @p cfg.  Will reserve memory for allocation **/
+            /** create arena-backed vector from @p cfg.  Will reserve memory for allocation.
+             *  @p cfg size is desired size for *vector* storage,
+             *  before accounting for arena overhead.
+             **/
             DArenaVector(const ArenaConfig & cfg);
             /** ctor from already-mapped (but not committed) address range_type
              *  vector has size zero
@@ -52,14 +57,27 @@ namespace xo {
             /** releases mapped memory **/
             ~DArenaVector();
 
-            /** create empty vector using @p cfg to configure backing store **/
+            /** create empty vector using @p cfg to configure backing store.
+             *  @p cfg size is desired size for *vector* storage,
+             *  before accounting for arena overhead.
+             **/
             static DArenaVector map(const ArenaConfig & cfg);
 
             /** true iff vector is emtpy **/
             bool empty() const { return size_ == 0; }
             size_type size() const { return size_; }
             size_type max_size() const { return capacity(); }
-            size_type capacity() const { return store_.reserved() / sizeof(T); }
+            size_type capacity() const {
+                return (store_.reserved()
+                        - store_.preamble_z()
+                        - store_.alloc_header_z()
+                        - store_.padded_guard_z())
+                       / sizeof(T);
+            }
+            /** allocation overhead for this vector:
+             *  arena memory used for metadata, not available for element storage
+             **/
+            size_type overhead_z() const { return store_.preamble_z() + store_.per_alloc_overhead_z(); }
 
             /** get reference to element at zero-based index @p i. Do not check bounds **/
             T & operator[](size_t i) noexcept { return *(this->_address_of(i)); }
@@ -82,8 +100,8 @@ namespace xo {
             const T & back() const { return *(this->_address_of(size_ - 1)); }
 
             constexpr const DArena * store() const { return &store_; }
-            constexpr T * data() { return reinterpret_cast<T*>(store_.lo_); }
-            constexpr const T * data() const { return reinterpret_cast<const T*>(store_.lo_); }
+            constexpr T * data() { return base_; /*return reinterpret_cast<T*>(store_.lo_);*/ }
+            constexpr const T * data() const { return base_; /*reinterpret_cast<const T*>(store_.lo_);*/ }
 
             /** arena used for element storage
              *  (Might prefer obj<AResourceVisitor> here; refrain to avoid leveling violation)
@@ -93,7 +111,7 @@ namespace xo {
             /** reserve space, if possible, for at least @p z elements.
              *  Always limited by ArenaConfig.size_
              **/
-            void reserve(size_type z);
+            bool reserve(size_type z);
             /** resize to size @p z.  Return true on success. May fail iff oom. **/
             bool resize(size_type z);
             void shrink_to_fit();
@@ -115,30 +133,42 @@ namespace xo {
             DArenaVector & operator=(DArenaVector && x) noexcept;
 
         private:
-            T * _address_of(size_type i) { return ((T *)store_.lo_) + i; }
-            const T * _address_of(size_type i) const { return ((const T *)store_.lo_) + i; }
+            /** total arena memory needed to store @p n elements of type T **/
+            size_type _memory_z(size_type n) const {
+                size_type req_z = n * sizeof(T);
+
+                return (store_.preamble_z()
+                        + store_.alloc_header_z()
+                        + req_z
+                        + padding::alloc_padding(req_z)
+                        + store_.padded_guard_z()
+                        );
+            }
+
+            T * _address_of(size_type i) { return base_ + i; /*((T *)store_.lo_) + i;*/ }
+            const T * _address_of(size_type i) const { return base_ + i; /* ((const T *)store_.lo_) + i;*/ }
 
             void _check_valid_index(size_type i) const;
 
-            /** point the backing arena's free pointer at the end of the live
-             *  elements.  Call after any change to @ref size_.
-             *
-             *  Nothing else advances it: this vector addresses @c store_.lo_
-             *  directly, and uses @ref DArena::expand only to commit pages,
-             *  which moves committed_z_ and limit_ but not free_.  Without
-             *  this the arena reports allocated()==0 however many elements the
-             *  vector holds -- and visit_pools() reports used=0 with it.
-             *
-             *  Deliberately not routed through @ref DArena::alloc: that writes
-             *  an AllocHeader when ArenaConfig.store_header_flag_ is set,
-             *  which @ref _address_of does not account for.
+            /** ensure arena alloc for this vector matches size @p z,
+             *  given @p z does not shrink size.
+             *  works for initial commit+alloc
              **/
-            void _sync_store() noexcept {
-                store_.restore(DArena::Checkpoint(store_.lo_ + size_ * sizeof(T)));
-            }
+            bool _increase_alloc_aux(size_type z);
+
+            /** ensure arena alloc for this vector matches size @p z,
+             *  given @p z shrinks size.
+             **/
+            void _decrease_alloc_aux(size_type z);
 
         private:
             size_type size_ = 0;
+
+            /** arena state before first alloc **/
+            Checkpoint prealloc_;
+            /** address of first vector element **/
+            T * base_ = nullptr;
+
             DArena store_;
         };
 
@@ -154,13 +184,17 @@ namespace xo {
                                       size_type arena_align_z,
                                       DArena::value_type lo,
                                       DArena::value_type hi)
-        : store_{cfg, page_z, arena_align_z, lo, hi}
-        {}
+        : base_{nullptr},
+          store_{cfg, page_z, arena_align_z, lo, hi}
+        {
+        }
 
         template <typename T>
         DArenaVector<T>::DArenaVector(DArenaVector && other)
-        : size_{other.size_}, store_{std::move(other.store_)}
+        : size_{other.size_}, prealloc_{other.prealloc_}, base_{other.base_}, store_{std::move(other.store_)}
         {
+            other.prealloc_ = Checkpoint();
+            other.base_ = nullptr;
             other.size_ = 0;
         }
 
@@ -184,9 +218,13 @@ namespace xo {
         DArenaVector<T>::operator=(DArenaVector && other) noexcept
         {
             this->size_ = other.size_;
+            this->prealloc_ = other.prealloc_;
+            this->base_ = other.base_;
             this->store_ = std::move(other.store_);
 
             other.size_ = 0;
+            other.prealloc_ = Checkpoint();
+            other.base_ = nullptr;
 
             return *this;
         }
@@ -197,32 +235,95 @@ namespace xo {
         {
             DArenaVector<T> retval;
 
-            retval.store_ = DArena::map(cfg);
+            size_type element_z = cfg.size();
+
+            ArenaConfig arena_cfg
+                = cfg.with_size(cfg.preamble_z()
+                                + cfg.alloc_header_z()
+                                + element_z
+                                + cfg.padded_guard_z());
+
+            retval.store_ = DArena::map(arena_cfg);
+            /* memory not committed yet */
+            retval.base_ = nullptr;
 
             return retval;
         }
 
         template <typename T>
-        void
+        bool
         DArenaVector<T>::reserve(size_type z) {
-            store_.expand(z * sizeof(T), __PRETTY_FUNCTION__);
+            size_t mem_z = this->_memory_z(z);
+
+            return store_.expand(mem_z,
+                                 __PRETTY_FUNCTION__);
+        }
+
+        template <typename T>
+        bool
+        DArenaVector<T>::_increase_alloc_aux(size_type z) {
+            // technically includes the equals-current-size case when size_ is zero
+
+            using xo::reflect::typeseq;
+
+            // expand arena to accomodate
+
+            size_type mem_z = this->_memory_z(z);
+
+            if (!store_.expand(mem_z, __PRETTY_FUNCTION__))
+                return false;
+
+            if (!base_) [[unlikely]] {
+                prealloc_ = store_.checkpoint();
+
+                // first alloc for this ArenaVector
+                base_ = reinterpret_cast<T *>(store_.alloc(typeseq::id<T[]>(), z * sizeof(T)));
+
+                assert(base_); // success guaranteed by preceding expand() call
+            } else {
+                store_.restore(prealloc_);
+
+                // alloc to get alloc header + guard bytes
+                auto b = reinterpret_cast<T *>(store_.alloc(typeseq::id<T[]>(), z * sizeof(T)));
+
+                assert(b == base_);
+            }
+
+            return true;
+        }
+
+        template <typename T>
+        void
+        DArenaVector<T>::_decrease_alloc_aux(size_type z) {
+            using xo::reflect::typeseq;
+
+            assert(base_);
+
+            store_.restore(prealloc_);
+
+            if (z > 0) {
+                auto b = reinterpret_cast<T *>(store_.alloc(typeseq::id<T[]>(), z * sizeof(T)));
+
+                assert(b == base_);
+            }
         }
 
         template <typename T>
         bool
         DArenaVector<T>::resize(size_type z) {
-            // new arena size in bytes
-            size_t req_z = z * sizeof(T);
-
-            if (z > size_) {
+            if (z >= size_) {
                 // expand arena to accomodate
 
-                if (!store_.expand(req_z, __PRETTY_FUNCTION__))
+                bool ok = this->_increase_alloc_aux(z);
+
+                if (!ok) {
                     return false;
+                }
 
                 // run ctors
                 if constexpr (std::is_trivially_constructible_v<T>) {
-                    ::memset(this->_address_of(size_), 0, req_z - (size_ * sizeof(T)));
+                    // trivially constructible -> init new element memory to zeroes
+                    ::memset(this->_address_of(size_), 0, (z - size_) * sizeof(T));
                 } else {
                     for (size_type i = size_; i < z; ++i) {
                         void * addr = &(*this)[i];
@@ -231,6 +332,8 @@ namespace xo {
                     }
                 }
             } else {
+                assert(base_);
+
                 if constexpr (std::is_trivially_destructible_v<T>) {
                     // nothing to do
                 } else {
@@ -241,10 +344,11 @@ namespace xo {
                         x.~T();
                     }
                 }
+
+                this->_decrease_alloc_aux(z);
             }
 
             this->size_ = z;
-            this->_sync_store();
 
             return true;
         }
@@ -271,53 +375,57 @@ namespace xo {
         template <typename T>
         T &
         DArenaVector<T>::insert(size_type pos, T && x) {
-            {
-                size_type new_z = size_ + 1;
-                size_type req_z = new_z * sizeof(T);
+            size_type z = size_ + 1;
 
-                store_.expand(req_z, __PRETTY_FUNCTION__);
+            if (this->_increase_alloc_aux(z)) {
+                // move elements [i .. z-1] right by one position.
+                // must proceed in reverse order!
+                for (size_type ip1 = size_; ip1 > pos; --ip1) {
+                    (*this)[ip1] = std::move((*this)[ip1-1]);
+                }
+
+                T * addr = this->_address_of(pos);
+
+                new (addr) T{std::move(x)};
+
+                this->size_ = size_ + 1;
+
+                return *addr;
+            } else {
+                assert(false);
+
+                T * x = nullptr;
+
+                return *x;
             }
-
-            // move elements [i .. z-1] right by one position.
-            // must proceed in reverse order!
-            for (size_type ip1 = size_; ip1 > pos; --ip1) {
-                (*this)[ip1] = std::move((*this)[ip1-1]);
-            }
-
-            T * addr = this->_address_of(pos);
-
-            new (addr) T{std::move(x)};
-
-            this->size_ = size_ + 1;
-            this->_sync_store();
-
-            return *addr;
         }
 
         template <typename T>
         T &
         DArenaVector<T>::insert(size_type pos, const T & x) {
-            {
-                size_type new_z = size_ + 1;
-                size_type req_z = new_z * sizeof(T);
+            size_type z = size_ + 1;
 
-                store_.expand(req_z, __PRETTY_FUNCTION__);
+            if (this->_increase_alloc_aux(z)) {
+                // move elements [i .. z-1] right by one position.
+                // must proceed in reverse order!
+                for (size_type ip1 = size_; ip1 > pos; --ip1) {
+                    (*this)[ip1] = std::move((*this)[ip1-1]);
+                }
+
+                T * addr = this->_address_of(pos);
+
+                new (addr) T{x};
+
+                this->size_ = size_ + 1;
+
+                return *addr;
+            } else {
+                assert(false);
+
+                T * x = nullptr;
+
+                return *x;
             }
-
-            // move elements [i .. z-1] right by one position.
-            // must proceed in reverse order!
-            for (size_type ip1 = size_; ip1 > pos; --ip1) {
-                (*this)[ip1] = std::move((*this)[ip1-1]);
-            }
-
-            T * addr = this->_address_of(pos);
-
-            new (addr) T{x};
-
-            this->size_ = size_ + 1;
-            this->_sync_store();
-
-            return *addr;
         }
 
         template <typename T>
@@ -333,27 +441,26 @@ namespace xo {
             }
 
             --(this->size_);
-            this->_sync_store();
+
+            this->_decrease_alloc_aux(size_);
         }
 
         template <typename T>
         T *
         DArenaVector<T>::push_back(T && x) {
             size_type z = size_ + 1;
-            size_type req_z = z * sizeof(T);
 
-            if (this->store_.expand(req_z, __PRETTY_FUNCTION__)) {
-                T * addr = this->_address_of(size_);
-
-                new (addr) T{std::move(x)};
-
-                this->size_ = z;
-                this->_sync_store();
-
-                return addr;
+            if (!this->_increase_alloc_aux(z)) [[unlikely]] {
+                return nullptr;
             }
 
-            return nullptr;
+            T * addr = this->_address_of(size_);
+
+            new (addr) T{std::move(x)};
+
+            this->size_ = z;
+
+            return addr;
         }
 
         template <typename T>
@@ -361,18 +468,17 @@ namespace xo {
         DArenaVector<T>::push_back(const T & x) {
             size_type z = size_ + 1;
 
-            if (this->store_.expand(z * sizeof(T), __PRETTY_FUNCTION__)) {
-                T * addr = this->_address_of(size_);
-
-                new (addr) T{x};
-
-                this->size_ = z;
-                this->_sync_store();
-
-                return addr;
+            if (!this->_increase_alloc_aux(z)) [[unlikely]] {
+                return nullptr;
             }
 
-            return nullptr;
+            T * addr = this->_address_of(size_);
+
+            new (addr) T{x};
+
+            this->size_ = z;
+
+            return addr;
         }
 
         template <typename T>
@@ -380,7 +486,6 @@ namespace xo {
         DArenaVector<T>::pop_back() {
             if (size_ > 0) [[likely]] {
                 --size_;
-                this->_sync_store();
 
                 if constexpr (std::is_trivially_destructible_v<T>) {
                     // nothing to do
@@ -389,6 +494,8 @@ namespace xo {
 
                     x.~T();
                 }
+
+                this->_decrease_alloc_aux(size_);
             }
         }
 
@@ -396,6 +503,8 @@ namespace xo {
         void
         DArenaVector<T>::swap(DArenaVector & other) noexcept {
             std::swap(size_, other.size_);
+            std::swap(prealloc_, other.prealloc_);
+            std::swap(base_, other.base_);
             std::swap(store_, other.store_);
         }
 

@@ -685,7 +685,13 @@ namespace ut {
                 }
             }
 
-            REQUIRE(gcos.from_space(gi)->allocated() == 0);
+            /* a space that never committed charges nothing; one that did
+             * still carries its preamble, even with no live object
+             */
+            REQUIRE(gcos.from_space(gi)->allocated()
+                    == (gcos.from_space(gi)->committed() > 0
+                        ? gcos.from_space(gi)->preamble_z()
+                        : 0));
         }
     }
 
@@ -705,7 +711,13 @@ namespace ut {
                 // Before we begin, to-space had better be empty
                 // (everthing in gi is in from-space)
 
-                REQUIRE(gcos.to_space(gi)->allocated() == 0);
+                /* as above: an uncommitted space charges nothing, a committed
+                 * one still carries its preamble
+                 */
+                REQUIRE(gcos.to_space(gi)->allocated()
+                        == (gcos.to_space(gi)->committed() > 0
+                            ? gcos.to_space(gi)->preamble_z()
+                            : 0));
             } else {
                 // we're not collecting generation gi.
                 // from-space must be empty.

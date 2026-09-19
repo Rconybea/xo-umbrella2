@@ -136,6 +136,16 @@ namespace xo {
             size_type available() const noexcept { return limit_ - free_; }
             /** VM page size for this arena (likely 4KB) **/
             size_type page_z() const noexcept { return page_z_; }
+            /** per-arena overhead, within mapped memory **/
+            size_type preamble_z() const noexcept { return config_.preamble_z(); }
+            /** per-allocation overhead **/
+            size_type alloc_header_z() const noexcept { return config_.alloc_header_z(); }
+            size_type guard_z() const noexcept { return config_.guard_z(); }
+            size_type padded_guard_z() const noexcept { return config_.padded_guard_z(); }
+            size_type per_alloc_overhead_z() const noexcept {
+                return (this->alloc_header_z() + this->padded_guard_z());
+            }
+
             /** Last error encountered by this arena **/
             const AllocError & last_error() const noexcept { return last_error_; }
 
@@ -235,7 +245,17 @@ namespace xo {
              **/
             bool expand(size_type z, const char * src_fn) noexcept;
 
-            /** create initial guard **/
+            /** store pointer back to this DArena
+             *  (arena storage begins with pointer to DArena itself)
+             **/
+            void establish_meta_pointer() noexcept;
+
+            /** Correct meta pointer, after moving this DArena.
+             *  Only acts if arena owns committed storage
+             **/
+            void fixup_meta_pointer() noexcept;
+
+            /** create initial guard: **/
             void establish_initial_guard() noexcept;
 
             /** checkpoint arena state.  Revert to the same state with

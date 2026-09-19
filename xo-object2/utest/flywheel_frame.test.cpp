@@ -144,14 +144,18 @@ namespace xo {
                 ", \"lo\": ADDR, \"hi\": ADDR}"
                 ", {\"_name_\": \"MemorySizeInfo\""
                 ", \"name\": \"utest.frame.empty.strong\""
-                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 4096"
+                /* two pages, not one: DArenaVector::map inflates the request by
+                 * the arena overhead, which pushes 4096 past a page boundary
+                 */
+                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 8192"
                 ", \"lo\": ADDR, \"hi\": ADDR}"
                 ", {\"_name_\": \"MemorySizeInfo\""
                 ", \"name\": \"utest.frame.empty.strong-free\""
                 ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 4096"
                 ", \"lo\": ADDR, \"hi\": ADDR}]"
                 ", \"strong\": {\"_name_\": \"RootSetInfo\""
-                ", \"size\": 0, \"capacity\": 256, \"live\": 0"
+                /* 511, not 512: the per-allocation overhead costs one slot */
+                ", \"size\": 0, \"capacity\": 511, \"live\": 0"
                 ", \"free\": [], \"slots\": []}}"));
 
             /* the bound the redaction hid, asserted structurally instead */
@@ -190,14 +194,15 @@ namespace xo {
              */
             REQUIRE(frame.find("\"live\": 2") != std::string::npos);
             REQUIRE(frame.find("\"type\": \"xo::scm::DFloat\"") != std::string::npos);
-            /* The first allocation sits at 8, not 0: DHandleStore requires
-             * alloc headers on its storage arena (see its ctor), and the
-             * 8-byte header precedes the payload.  Pinned because the number
-             * is a consequence of that requirement -- if this reads 0 again,
+            /* The first allocation sits at 16, not 0: an arena's storage now
+             * begins behind a preamble (the DArena back pointer) AND each
+             * allocation carries an 8-byte AllocHeader, which DHandleStore
+             * requires on its storage arena (see its ctor).  Pinned because
+             * the number is a consequence of both -- if this reads 0 again,
              * headers were silently turned off and alloc_info() became a
              * segfault waiting to happen.
              */
-            REQUIRE(frame.find("\"offset\": 8") != std::string::npos);
+            REQUIRE(frame.find("\"offset\": 16") != std::string::npos);
             REQUIRE(frame.find("\"ix\": 0") != std::string::npos);
             REQUIRE(frame.find("\"ix\": 1") != std::string::npos);
 
@@ -208,7 +213,7 @@ namespace xo {
              */
             FlywheelInfo snap = fw->snapshot();
             REQUIRE(snap.strong_.slot_v_.size() == 2);
-            REQUIRE(snap.strong_.slot_v_[0].offset_ == 8);   /* past the alloc header */
+            REQUIRE(snap.strong_.slot_v_[0].offset_ == 16);  /* past the preamble + alloc header */
             REQUIRE(snap.strong_.slot_v_[1].offset_ != 0);
             REQUIRE(snap.strong_.slot_v_[0].offset_ != snap.strong_.slot_v_[1].offset_);
 

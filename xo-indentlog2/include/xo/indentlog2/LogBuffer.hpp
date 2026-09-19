@@ -36,20 +36,22 @@ namespace xo {
         size_t lpos() const { return lstate_.lpos(); }
         size_t viz_lpos() const { return lstate_.viz_lpos(); }
 
-        /** allocated buffer extent available to hold content (allocated + available) **/
-        Span committed_span() const;
+        /** allocated buffer extent available to hold content (allocated + available),
+         *  including arena overhead
+         **/
+        Span char_committed_span() const;
         /** used buffer extent **/
-        Span used_span() const;
+        Span char_used_span() const;
         /** available (contiguous) buffer extent **/
-        Span available_span() const;
+        Span char_available_span() const;
 
         /** visit mapped storage pools **/
         void visit_pools(const MemorySizeVisitor & fn) const;
 
-        /** expand buffered character storage to at least @p new_z.
+        /** expand buffered character storage to have space for at least @p new_z characters.
          *  @return true on success, false if oom
          **/
-        bool expand_to(size_t new_z);
+        bool char_expand_to(size_t new_z);
 
         /** write newline and @p indent spaces **/
         void newline_indent(uint32_t indent);

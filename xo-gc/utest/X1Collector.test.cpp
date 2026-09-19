@@ -209,13 +209,22 @@ namespace ut {
 
                     REQUIRE(otypes != nullptr);
                     REQUIRE(otypes->store()->reserved() >= cfg.object_types_z_);
-                    REQUIRE(otypes->store()->reserved() < cfg.object_types_z_ + otypes->store()->page_z_);
+                    /* two pages of slack, not one: DArenaVector::map inflates
+                     * the request by the arena's overhead, which can push the
+                     * reservation across one more page boundary.  The intent is
+                     * unchanged -- reserved() is object_types_z_ rounded up,
+                     * not wildly more.
+                     */
+                    REQUIRE(otypes->store()->reserved()
+                            < cfg.object_types_z_ + 2 * otypes->store()->page_z_);
 
                     const DX1Collector::RootSet * roots = gc.get_root_set();
 
                     REQUIRE(roots != nullptr);
                     REQUIRE(roots->store()->reserved() >= cfg.object_roots_z_);
-                    REQUIRE(roots->store()->reserved() < cfg.object_roots_z_ + roots->store()->page_z_);
+                    /* two pages of slack: see the object-types assertion above */
+                    REQUIRE(roots->store()->reserved()
+                            < cfg.object_roots_z_ + 2 * roots->store()->page_z_);
 
                     const DArena * from_0 = gc.get_space(Role::from_space(), Generation{0});
 
@@ -259,6 +268,17 @@ namespace ut {
 
                 /* attempt allocation */
                 auto gc_o = with_facet<AAllocator>::mkobj(&gc);
+
+                /* what a CLEARED collector still charges: one preamble per
+                 * arena it has committed.  clear() rewinds free_ but does not
+                 * decommit, so the preambles survive.
+                 */
+                auto cleared_alloc_z = [&gc]() {
+                    return (gc.get_object_types()->store()->preamble_z()
+                            + gc.get_root_set()->store()->preamble_z()
+                            + gc.to_space(Generation{0})->preamble_z()
+                            + gc.from_space(Generation{0})->preamble_z());
+                };
                 auto c_o = with_facet<ACollector>::mkobj(&gc);
 
                 /* register object types */
@@ -288,21 +308,22 @@ namespace ut {
                 auto x0_o = DFloat::box<AGCObject>(gc_o, 3.1415927);
                 auto x0_o_orig = x0_o;
                 c_o.add_gc_root(&x0_o);
-                REQUIRE(to_0->allocated() == sizeof(AllocHeader) + sizeof(DFloat));
+                REQUIRE(to_0->allocated()
+                        == to_0->preamble_z() + sizeof(AllocHeader) + sizeof(DFloat));
 
                 // n1_o will be added as gc root.  n1_o_orig will not
                 auto n1_o = DInteger::box<AGCObject>(gc_o, 42);
                 auto n1_o_orig = n1_o;
                 c_o.add_gc_root(&n1_o);
 
-                REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
+                REQUIRE(to_0->allocated() == (to_0->preamble_z() + sizeof(AllocHeader) + sizeof(DFloat)
                                               + sizeof(AllocHeader) + sizeof(DInteger)));
 
                 // l0_o will be added as gc root.  l0_o_orig will not
                 auto l0_o = ListOps::list(gc_o, x0_o);
                 auto l0_o_orig = l0_o;
                 c_o.add_gc_root(&l0_o);
-                REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
+                REQUIRE(to_0->allocated() == (to_0->preamble_z() + sizeof(AllocHeader) + sizeof(DFloat)
                                               + sizeof(AllocHeader) + sizeof(DInteger)
                                               + sizeof(AllocHeader) + sizeof(DList)));
 
@@ -498,7 +519,7 @@ namespace ut {
 
                 gc_o.clear();
                 {
-                    REQUIRE(gc_o.allocated() == 0);
+                    REQUIRE(gc_o.allocated() == cleared_alloc_z());
                 }
 
             } catch (std::exception & ex) {

@@ -152,6 +152,8 @@ namespace xo {
             error_count_       = other.error_count_;
             last_error_        = other.last_error_;
 
+            this->fixup_meta_pointer();
+
             other.config_      = ArenaConfig();
             other.lo_          = nullptr;
             other.committed_z_ = 0;
@@ -175,6 +177,8 @@ namespace xo {
             hi_                = other.hi_;
             error_count_       = other.error_count_;
             last_error_        = other.last_error_;
+
+            this->fixup_meta_pointer();
 
             other.config_      = ArenaConfig();
             other.lo_          = nullptr;
@@ -338,7 +342,10 @@ namespace xo {
                 return nullptr;
             }
 
-            return (AllocHeader *)(lo_ + config_.header_.guard_z_);
+            if (committed_z_ > 0)
+                return (AllocHeader *)(lo_ + this->preamble_z());
+            else
+                return this->end_header();
         }
 
         AllocHeader *
@@ -568,10 +575,26 @@ namespace xo {
         }
 
         void
+        DArena::establish_meta_pointer() noexcept
+        {
+            if (committed_z_ > 0) {
+                *(reinterpret_cast<DArena**>(this->free_)) = this;
+
+                this->free_ += sizeof(DArena *);
+            }
+        }
+
+        void
+        DArena::fixup_meta_pointer() noexcept
+        {
+            if (committed_z_ > 0) {
+                *(reinterpret_cast<DArena**>(this->lo_)) = this;
+            }
+        }
+
+        void
         DArena::establish_initial_guard() noexcept
         {
-            assert(free_ == lo_);
-
             ::memset(this->free_,
                      config_.header_.guard_byte_,
                      config_.header_.guard_z_);
@@ -657,6 +680,7 @@ namespace xo {
             if (commit_start == lo_) [[unlikely]] {
                 /* first expand() for this allocator - start with guard_z_ bytes */
 
+                this->establish_meta_pointer();
                 this->establish_initial_guard();
             }
 
@@ -676,6 +700,7 @@ namespace xo {
         DArena::clear() noexcept
         {
             this->free_ = lo_;
+            this->establish_meta_pointer();
             this->establish_initial_guard();
         }
 
@@ -693,6 +718,9 @@ namespace xo {
             std::swap(hi_, other.hi_);
             std::swap(error_count_, other.error_count_);
             std::swap(last_error_, other.last_error_);
+
+            this->fixup_meta_pointer();
+            other.fixup_meta_pointer();
         }
     }
 } /*namespace xo*/

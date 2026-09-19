@@ -187,7 +187,7 @@ namespace ut {
             }
         }
 
-        LogBuffer::Span used = logbuf.used_span();
+        LogBuffer::Span used = logbuf.char_used_span();
 
         std::string expected = tc.exp_output_;
 

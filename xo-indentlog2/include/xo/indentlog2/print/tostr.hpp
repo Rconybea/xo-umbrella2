@@ -58,7 +58,7 @@ namespace xo::pp {
 
         (sink.pp(args), ...);
 
-        auto span = buf.used_span();
+        auto span = buf.char_used_span();
         auto retval = std::string(span.lo(), span.hi());
 
         return retval;

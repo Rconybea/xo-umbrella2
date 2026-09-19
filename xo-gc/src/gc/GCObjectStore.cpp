@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, Apr 2026
  **/
 
+#include <algorithm>
 #include "GCObjectStore.hpp"
 #include "GCObjectStoreVisitor.hpp"
 #include "X1VerifyStats.hpp"
@@ -754,7 +755,32 @@ namespace xo {
             // If we're collecting gen0, still need to allow for objects getting promoted
 
             for (uint32_t g = 0; g < std::min(upto + 1, config_.n_generation_); ++g) {
-                gray_lo_v[g] = this->to_space(Generation{g})->free_;
+                DArena * to_sp = this->to_space(Generation{g});
+
+                /* NOT simply free_.
+                 *
+                 * An arena's preamble (the DArena back pointer, plus the
+                 * initial guard) is established by the first expand(), not by
+                 * map().  Until then free_ == lo_, so a checkpoint taken on an
+                 * uncommitted space captures lo_ -- the very address the
+                 * preamble is later written at.  The forwarding walk in
+                 * _forward_children_until_fixpoint then reads the back pointer
+                 * as an AllocHeader and dispatches on a garbage typeseq.
+                 *
+                 * Unlike the other preamble hazards this one cannot be guarded
+                 * with `committed_z_ > 0': the captured pointer was valid when
+                 * taken and was invalidated afterwards.  Taking the first
+                 * address an object COULD occupy closes the window in both
+                 * states -- preamble_z() is a pure function of config, so it
+                 * does not require the preamble to have been written yet.
+                 *
+                 * Eagerly committing the spaces would also work, and is what
+                 * this did first.  It was reverted: expand() rounds a commit up
+                 * to arena_align_z_, so asking for an 8-byte preamble committed
+                 * 8MB per space.
+                 */
+                gray_lo_v[g] = std::max(to_sp->free_,
+                                        to_sp->lo_ + to_sp->preamble_z());
             }
 
             return gray_lo_v;
