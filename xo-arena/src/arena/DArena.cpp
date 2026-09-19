@@ -227,6 +227,15 @@ namespace xo {
             this->unmap();
         }
 
+        DArena *
+        DArena::obj2arena(const void * obj, size_type base_align_z)
+        {
+            auto obj_n = reinterpret_cast<std::uint64_t>(obj);
+            auto p_arena = reinterpret_cast<DArena **>(obj_n & ~(base_align_z - 1));
+
+            return *p_arena;
+        }
+
         auto
         DArena::obj2hdr(void * obj) noexcept -> header_type *
         {

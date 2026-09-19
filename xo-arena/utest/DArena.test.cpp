@@ -304,6 +304,83 @@ namespace xo {
             REQUIRE(arena.committed() < c_size);
         }
 
+        TEST_CASE("darena-obj2arena-recovers-the-arena", "[arena][base_align][obj2arena]")
+        {
+            /* the payoff of base alignment: from an interior pointer alone,
+             * recover the DArena that owns it -- no lookup, no registry
+             */
+            constexpr std::size_t c_align = 2UL * 1024 * 1024 * 1024;
+            constexpr std::size_t c_size = 1UL * 1024 * 1024;
+
+            DArena arena = DArena::map(aligned_cfg(c_size, c_align, true));
+
+            auto * m0 = arena.alloc(typeseq::sentinel(), 64);
+            auto * m1 = arena.alloc(typeseq::sentinel(), 64);
+
+            REQUIRE(m0);
+            REQUIRE(m1);
+
+            REQUIRE(DArena::obj2arena(m0, c_align) == &arena);
+            REQUIRE(DArena::obj2arena(m1, c_align) == &arena);
+
+            /* interior of an allocation, not just its first byte */
+            REQUIRE(DArena::obj2arena(m0 + 17, c_align) == &arena);
+
+            /* the mask must clear the LOW bits, not keep them.  `n & (align-1)'
+             * yields the offset WITHIN the block -- 0x10 for the first
+             * allocation -- which then gets dereferenced.  Asserting the
+             * recovered pointer is the arena would pass for a one-arena
+             * process by luck if the wrong expression happened not to fault,
+             * so pin the arithmetic itself.
+             */
+            auto n0 = reinterpret_cast<std::uintptr_t>(m0);
+
+            REQUIRE((n0 & ~(static_cast<std::uintptr_t>(c_align) - 1)) == bounds(arena).first);
+            REQUIRE((n0 & (static_cast<std::uintptr_t>(c_align) - 1)) != bounds(arena).first);
+        } /*TEST_CASE(darena-obj2arena-recovers-the-arena)*/
+
+        TEST_CASE("darena-obj2arena-across-two-arenas", "[arena][base_align][obj2arena]")
+        {
+            /* the case a single arena cannot exercise: two participating
+             * arenas sharing one alignment policy, each pointer resolving to
+             * its OWN arena.  A mask that returned a constant, or that read the
+             * wrong slot, passes the single-arena test and fails here.
+             */
+            constexpr std::size_t c_align = 2UL * 1024 * 1024 * 1024;
+            constexpr std::size_t c_size = 1UL * 1024 * 1024;
+
+            DArena a1 = DArena::map(aligned_cfg(c_size, c_align, true));
+            DArena a2 = DArena::map(aligned_cfg(c_size, c_align, true));
+
+            REQUIRE(bounds(a1).first != bounds(a2).first);
+
+            auto * p1 = a1.alloc(typeseq::sentinel(), 64);
+            auto * p2 = a2.alloc(typeseq::sentinel(), 64);
+
+            REQUIRE(DArena::obj2arena(p1, c_align) == &a1);
+            REQUIRE(DArena::obj2arena(p2, c_align) == &a2);
+        } /*TEST_CASE(darena-obj2arena-across-two-arenas)*/
+
+        TEST_CASE("darena-obj2arena-survives-a-move", "[arena][base_align][obj2arena]")
+        {
+            /* the back pointer names whichever DArena currently owns the
+             * storage, so a move must re-point it -- that is what
+             * fixup_meta_pointer is for.  Without it obj2arena hands back a
+             * stale DArena* that no longer owns anything.
+             */
+            constexpr std::size_t c_align = 2UL * 1024 * 1024 * 1024;
+            constexpr std::size_t c_size = 1UL * 1024 * 1024;
+
+            DArena a1 = DArena::map(aligned_cfg(c_size, c_align, true));
+            auto * p = a1.alloc(typeseq::sentinel(), 64);
+
+            REQUIRE(DArena::obj2arena(p, c_align) == &a1);
+
+            DArena a2 = std::move(a1);
+
+            REQUIRE(DArena::obj2arena(p, c_align) == &a2);
+        } /*TEST_CASE(darena-obj2arena-survives-a-move)*/
+
         TEST_CASE("darena-base-align-rejects-what-cannot-work", "[arena][base_align]")
         {
             /* an arena larger than its alignment spans two blocks, so a pointer

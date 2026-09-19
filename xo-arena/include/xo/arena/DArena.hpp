@@ -105,6 +105,17 @@ namespace xo {
             /** false -> not eligible for GC (allocates own memory + not moveable) **/
             static constexpr bool is_gc_eligible() { return false; }
 
+            /** recover DArena address from a pointer to its interior
+             *  Requires:
+             *  - @p x belongs to a DArena that has base_align_z_ = 2^k
+             *    for some specific k > 0.
+             *    To remove all doubt: all arenas to which @p x might
+             *    belong, must be using the same value for base_align_z_.
+             *
+             *  Note that the requirement isn't verifiable at runtime.
+             **/
+            static DArena * obj2arena(const void * obj, size_type base_align_z);
+
             /** The configuration this arena was mapped with.
              *
              *  @ref config_ is public -- DArena is a struct with no access
