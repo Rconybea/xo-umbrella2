@@ -800,7 +800,7 @@ namespace xo {
                  * locates the representation within the storage arena, so a
                  * consumer can follow it across frames and draw it moving
                  */
-                auto base = reinterpret_cast<std::uint64_t>(fw->storage().lo_);
+                auto base = reinterpret_cast<std::uint64_t>(fw->storage()._mem_lo());
 
                 REQUIRE(snap.strong_.slot_v_[0].offset_
                         == reinterpret_cast<std::uint64_t>(p0) - base);
@@ -833,7 +833,7 @@ namespace xo {
                 REQUIRE(snap.strong_.slot_v_.size() == 1);
                 REQUIRE(snap.strong_.slot_v_[0].offset_
                         == reinterpret_cast<std::uint64_t>(p1)
-                           - reinterpret_cast<std::uint64_t>(fw->storage().lo_));
+                           - reinterpret_cast<std::uint64_t>(fw->storage()._mem_lo()));
 
                 REQUIRE(snap.strong_.free_.size() == 1);
                 REQUIRE(snap.strong_.free_[0] == ix0);

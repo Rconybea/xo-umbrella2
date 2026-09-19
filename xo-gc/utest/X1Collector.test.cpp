@@ -263,7 +263,7 @@ namespace ut {
                     REQUIRE(gc.reserved()
                             == otypes->store()->reserved() + roots->store()->reserved() + 4 * from_0->reserved());
 
-                    log && log(xtag("from_0", from_0->lo_), xtag("to_0", to_0->lo_));
+                    log && log(xtag("from_0", from_0->_mem_lo()), xtag("to_0", to_0->_mem_lo()));
                 }
 
                 /* attempt allocation */

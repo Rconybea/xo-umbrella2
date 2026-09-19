@@ -192,7 +192,7 @@ namespace xo {
                                                        (int32_t)scan_total_ /*snapshot*/,
                                                        offset,
                                                        align_here);
-            uint32_t tk_ix = (std::byte *)mem - tk_buffer_.lo_;
+            uint32_t tk_ix = (std::byte *)mem - tk_buffer_._mem_lo();
 
             scan_stack_.push_back(tk_ix);
 
@@ -238,7 +238,7 @@ namespace xo {
             // then emit a zero-space split.  Since the enclosing group can no
             // longer "fit", that split will render as newline+indent.
             for (auto & ix : scan_stack_) {
-                PpToken * b = (PpToken *)((char *)tk_buffer_.lo_ + ix);
+                PpToken * b = (PpToken *)((char *)tk_buffer_._mem_lo() + ix);
                 b->set_forced_flag();
             }
 
@@ -278,7 +278,7 @@ namespace xo {
                 return;
             }
 
-            PpToken * begin_token = (PpToken *)((char *)tk_buffer_.lo_ + scan_stack_.back());
+            PpToken * begin_token = (PpToken *)((char *)tk_buffer_._mem_lo() + scan_stack_.back());
 
             // reminder: just pops the index, doeesn't invalidate begin_token
             scan_stack_.pop_back();
@@ -352,7 +352,7 @@ namespace xo {
                                              tk_mem + extra_z,
                                              &empty_placeholder);
 
-            assert((const char *)tk_buffer_.lo_ + scan_ix_ == s->span().lo() + s->tk_mem());
+            assert((const char *)tk_buffer_._mem_lo() + scan_ix_ == s->span().lo() + s->tk_mem());
 
             this->current_open_string_ = s;
 
@@ -372,7 +372,7 @@ namespace xo {
             assert(used.hi() <= s->mem_span().hi());
 
             // verify scan_ix_ hasn't been
-            assert((const char *)tk_buffer_.lo_ + scan_ix_ == s->span().lo() + s->tk_mem());
+            assert((const char *)tk_buffer_._mem_lo() + scan_ix_ == s->span().lo() + s->tk_mem());
 
             // now that we know actual string span, shrink to padded-fit
 
@@ -385,7 +385,7 @@ namespace xo {
             s->finalize_inplace(tk_viz_len, tk_len, tk_mem);
 
             // retreat scan_ix_ based on now-known actual size of s
-            this->scan_ix_ = s->mem_span().hi() - (const char *)tk_buffer_.lo_;
+            this->scan_ix_ = s->mem_span().hi() - (const char *)tk_buffer_._mem_lo();
             this->scan_viz_total_ += tk_viz_len;
             this->scan_total_ += tk_len;
 
@@ -418,7 +418,7 @@ namespace xo {
             }
 
             while (print_ix_ != scan_ix_) {
-                PpToken * token = (PpToken *)((char *)tk_buffer_.lo_ + print_ix_);
+                PpToken * token = (PpToken *)((char *)tk_buffer_._mem_lo() + print_ix_);
 
                 if (!token->size_established()) {
                     // need to know next token size before we
@@ -484,7 +484,7 @@ namespace xo {
                             break;
 
                         uint32_t parent_ix = print_stack_.back();
-                        PpToken * parent = (PpToken *)((char *)tk_buffer_.lo_ + parent_ix);
+                        PpToken * parent = (PpToken *)((char *)tk_buffer_._mem_lo() + parent_ix);
 
                         if (parent->tk_flags() & k_fits) {
                             // parent fits: render the break as its flat spaces
@@ -508,7 +508,7 @@ namespace xo {
                     if (!print_stack_.empty()) {
                         uint32_t begin_ix = print_stack_.back();
                         PpToken * begin_tk
-                            = (PpToken *)((char *)tk_buffer_.lo_ + begin_ix);
+                            = (PpToken *)((char *)tk_buffer_._mem_lo() + begin_ix);
 
                         if (begin_tk->is_begin()) [[likely]] {
                             print_indent_
@@ -574,15 +574,15 @@ namespace xo {
         void *
         PpState::alloc_scan_aux(uint32_t z)
         {
-            void * retval = (char *)tk_buffer_.lo_ + scan_ix_;
+            void * retval = (char *)tk_buffer_._mem_lo() + scan_ix_;
             scan_ix_ += z;
 
             // cosmetic: get arena free pointer to extend to upper
             // orbit of scan_ix_
-            if ((tk_buffer_.free_ < tk_buffer_.lo_ + scan_ix_)
+            if ((tk_buffer_.free_ < tk_buffer_._mem_lo() + scan_ix_)
                 && (retval < tk_buffer_.limit_))
             {
-                tk_buffer_.free_ = tk_buffer_.lo_ + scan_ix_;
+                tk_buffer_.free_ = tk_buffer_._mem_lo() + scan_ix_;
             }
 
             return retval;
@@ -608,7 +608,7 @@ namespace xo {
                     }
                     scan_ix_ = z;
 
-                    return tk_buffer_.lo_;
+                    return tk_buffer_._mem_lo();
                 }
                 // fall through
             } else if (scan_ix_ < print_ix_) {
@@ -617,7 +617,7 @@ namespace xo {
                 uint32_t avail2_z = print_ix_ - scan_ix_ - 1;
 
                 if (z <= avail2_z) {
-                    void * retval = tk_buffer_.lo_ + scan_ix_;
+                    void * retval = tk_buffer_._mem_lo() + scan_ix_;
                     scan_ix_ += z;
 
                     return retval;
@@ -680,12 +680,12 @@ namespace xo {
                 uint32_t avail_z = tk_buffer_.committed() - extent_;
                 uint32_t copy_z = min(scan_ix_, avail_z);
 
-                ::memcpy(tk_buffer_.lo_ + extent_,
-                         tk_buffer_.lo_,
+                ::memcpy(tk_buffer_._mem_lo() + extent_,
+                         tk_buffer_._mem_lo(),
                          copy_z);
 
-                this->reindex_stacks(((const char *)tk_buffer_.lo_) + extent_,
-                                     (const char *)tk_buffer_.lo_,
+                this->reindex_stacks(((const char *)tk_buffer_._mem_lo()) + extent_,
+                                     (const char *)tk_buffer_._mem_lo(),
                                      copy_z);
 
                 scan_ix_ = extent_ + copy_z;
@@ -705,7 +705,7 @@ namespace xo {
                     extent_ = scan_ix_;
                     scan_ix_ = z;
 
-                    return tk_buffer_.lo_;
+                    return tk_buffer_._mem_lo();
                 }
             }
 
@@ -721,14 +721,14 @@ namespace xo {
             int32_t offset = tk_dest - tk_src;
 
             for (auto & ix : scan_stack_) {
-                const char * p = ((const char *)tk_buffer_.lo_) + ix;
+                const char * p = ((const char *)tk_buffer_._mem_lo()) + ix;
 
                 if ((tk_src <= p) && (p < tk_src + z))
                     ix += offset;
             }
 
             for (auto & ix : print_stack_) {
-                const char * p = ((const char *)tk_buffer_.lo_) + ix;
+                const char * p = ((const char *)tk_buffer_._mem_lo()) + ix;
 
                 if ((tk_src <= p) && (p < tk_src + z))
                     ix += offset;

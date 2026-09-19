@@ -135,7 +135,7 @@ namespace xo {
                 log(xtag("types.size", object_types_.size()),
                     xtag("types.allocated", object_types_.store()->allocated()),
                     xtag("types.committed", object_types_.store()->committed()),
-                    xtag("types.lo", object_types_.store()->lo_),
+                    xtag("types.lo", object_types_.store()->_mem_lo()),
                     xtag("types.limit", object_types_.store()->limit_),
                     xtag("types.hi", object_types_.store()->hi_));
 
@@ -589,7 +589,7 @@ namespace xo {
             std::size_t alloc_z = some_arena->config().header_.size_with_padding(alloc_hdr);
 
             if (log) {
-                log(xtag("some_arena.lo", some_arena->lo_),
+                log(xtag("some_arena.lo", some_arena->_mem_lo()),
                     xtag("p_header", p_header),
                     xtag("alloc_z", alloc_z));
 
@@ -780,7 +780,7 @@ namespace xo {
                  * 8MB per space.
                  */
                 gray_lo_v[g] = std::max(to_sp->free_,
-                                        to_sp->lo_ + to_sp->preamble_z());
+                                        to_sp->_mem_lo() + to_sp->preamble_z());
             }
 
             return gray_lo_v;

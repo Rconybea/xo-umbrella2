@@ -298,6 +298,13 @@ namespace xo {
 
             ///@}
 
+            /** @defgroup mm-implementation-methods **/
+            ///@{
+
+            std::byte * _mem_lo() const { return lo_; }
+
+            ///@}
+
             /** @defgroup mm-arena-instance-vars **/
             ///@{
 
@@ -312,10 +319,11 @@ namespace xo {
             /** alignment for this arena.  In practice will be either page_z_ or cfg.hugepage_z_ **/
             size_type arena_align_z_ = 0;
 
-            /** arena owns memory in range [@ref lo_, @ref hi_)
-             **/
+        private:
+            /** arena owns memory in range [@ref lo_, @ref hi_) **/
             std::byte * lo_ = nullptr;
 
+        public:
             /** prefix of this size is committed.
              *  Remainder mapped but uncommitted.
              **/

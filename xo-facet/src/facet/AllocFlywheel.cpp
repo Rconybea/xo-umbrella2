@@ -107,7 +107,7 @@ namespace xo::mm {
          * pool_v_[0].lo_ -- the same number a consumer sees in the frame
          */
         store_.snapshot(&retval.strong_,
-                        reinterpret_cast<std::uint64_t>(store_.storage().lo_));
+                        reinterpret_cast<std::uint64_t>(store_.storage()._mem_lo()));
 
         /* the half DHandleStore cannot do: it is generic over Handle, and
          * naming a typeseq is xo-facet's business.  An unregistered type comes

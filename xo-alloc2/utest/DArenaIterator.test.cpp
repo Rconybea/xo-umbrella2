@@ -225,7 +225,7 @@ namespace xo {
             {
                 log && log(xtag("section", "obj<AAllocIterator>"),
                            xtag("arena", &arena),
-                           xtag("arena.lo", arena.lo_),
+                           xtag("arena.lo", arena._mem_lo()),
                            xtag("arena.free", arena.free_));
 
                 DArena scratch_mm

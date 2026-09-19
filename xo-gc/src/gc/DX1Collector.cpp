@@ -295,7 +295,7 @@ namespace xo {
                         const DArena * arena = this->get_space(rj, gi);
                         DDictionary * arena_d = DDictionary::make(mm);
 
-                        auto lo = reinterpret_cast<DInteger::value_type>(arena->lo_);
+                        auto lo = reinterpret_cast<DInteger::value_type>(arena->_mem_lo());
                         auto free = reinterpret_cast<DInteger::value_type>(arena->free_);
                         auto limit = reinterpret_cast<DInteger::value_type>(arena->limit_);
                         auto hi = reinterpret_cast<DInteger::value_type>(arena->hi_);
@@ -520,8 +520,8 @@ namespace xo {
             log && log("step 1  : swap from/to roles (now to-space is empty)");
             this->_swap_roles(upto);
 
-            log && log(xtag("from_0", get_space(Role::from_space(), Generation{0})->lo_),
-                       xtag("to_0", get_space(Role::to_space(), Generation{0})->lo_));
+            log && log(xtag("from_0", get_space(Role::from_space(), Generation{0})->_mem_lo()),
+                       xtag("to_0", get_space(Role::to_space(), Generation{0})->_mem_lo()));
 
             log && log("step 2a : copy roots");
             this->_copy_roots(upto);

@@ -39,7 +39,7 @@ namespace xo {
 
         size_t
         IAllocator_DArena::size(const DArena & s) noexcept {
-            return s.limit_ - s.lo_;
+            return s.limit_ - s._mem_lo();
         }
 
         size_t
@@ -68,7 +68,7 @@ namespace xo {
         IAllocator_DArena::contains(const DArena & s,
                                     const void * p) noexcept
         {
-            return (s.lo_ <= p) && (p < s.hi_);
+            return s.contains(p);
         }
 
         AllocError
