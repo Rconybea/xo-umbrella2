@@ -12,6 +12,8 @@
 #include <xo/refcnt/Displayable.hpp>
 
 namespace xo::facet {
+    class FlywheelInfo; // see facet/FlywheelInfo.hpp
+
     using xo::mm::DArenaVector;
 
     /** @brief memory flywheel for python bindings

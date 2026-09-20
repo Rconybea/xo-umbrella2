@@ -23,6 +23,7 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/facet/ObjectHandle.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
+#include <xo/facet/FlywheelInfo.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/ppsink/PpSink.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>

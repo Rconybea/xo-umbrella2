@@ -5,6 +5,7 @@
 
 #include "AllocFlywheel.hpp"
 #include "TypeRegistry.hpp"
+#include "FlywheelInfo.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 

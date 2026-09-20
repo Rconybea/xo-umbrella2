@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "xo/facet/FlywheelInfo.hpp"
 #include <xo/arena/DArenaVector.hpp>
 #include <xo/arena/DArena.hpp>
 #include <stdexcept>

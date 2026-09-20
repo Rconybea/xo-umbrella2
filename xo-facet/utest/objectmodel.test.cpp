@@ -6,6 +6,7 @@
 #include "FacetUtestAppcx.hpp"
 #include "xo/facet/FacetRegistry.hpp"
 #include "xo/facet/ObjectHandle.hpp"
+#include "xo/facet/FlywheelInfo.hpp"
 #include "xo/facet/Top.hpp"
 #include "xo/facet/OObject.hpp"
 #include "xo/facet/RRouter.hpp"
