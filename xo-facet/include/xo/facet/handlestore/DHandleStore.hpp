@@ -99,6 +99,12 @@ namespace xo::facet {
                           (std::string("DHandleStore: storage arena must have non-zero base alignment")
                            + std::string(this->name()));
             }
+
+            if (storage_.config().base_align_z_ != DHandleStoreBase::s_storage_base_align)  {
+                throw std::runtime_error
+                          (std::string("DhandleStore: storage base alignment must match DHandleStoreBase")
+                           + std::string(this->name()));
+            }
         }
 
         /** move-assignment **/
