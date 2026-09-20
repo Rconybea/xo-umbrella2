@@ -18,6 +18,22 @@
 #include <vector>
 
 namespace xo {
+    namespace mm {
+        /** @brief arena-backed vector; see xo/arena/DArenaVector.hpp
+         *
+         *  Forward-declared rather than included.  EstablishTdx's
+         *  specialisation below only needs the NAME to be declared; its
+         *  make() is a template, so DArenaVector has to be complete only at
+         *  the point someone calls Reflect::require<DArenaVector<T>>(), where
+         *  they have necessarily included the real header.
+         *
+         *  Pulling xo/arena/DArenaVector.hpp in here would put it on the
+         *  include path of every translation unit that reflects anything.
+         **/
+        template <typename T>
+        struct DArenaVector;
+    }
+
     namespace reflect {
         template<typename T>
         class EstablishTdx {
@@ -57,6 +73,15 @@ namespace xo {
         class EstablishTdx<std::vector<Element>> {
         public:
             /* definition provide after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- xo::mm::DArenaVector<Element> -----
+
+        template<typename Element>
+        class EstablishTdx<mm::DArenaVector<Element>> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
         };
 
@@ -320,6 +345,26 @@ namespace xo {
             Reflect::require<Element>();
 
             return StdVectorTdx<Element>::make();
+        } /*make*/
+
+        // ----- xo::mm::DArenaVector<Element> -----
+
+        /* declared above before
+         *   class Reflect { .. }
+         *
+         * StlVectorTdx, not a new Tdx class: it is generic over the container
+         * (value_type, size(), operator[] as lvalue), which DArenaVector
+         * satisfies.  StdVectorTdx exists separately for std::vector and is
+         * body-for-body the same thing -- see
+         * .xo-backlog/xo-reflect/issues/02.
+         */
+        template<typename Element>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<mm::DArenaVector<Element>>::make() {
+            /* need to ensure Element is properly reflected */
+            Reflect::require<Element>();
+
+            return StlVectorTdx<mm::DArenaVector<Element>>::make();
         } /*make*/
 
         // ----- std::pair<Lhs, Rhs> -----

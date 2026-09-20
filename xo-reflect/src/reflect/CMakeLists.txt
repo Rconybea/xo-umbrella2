@@ -16,6 +16,7 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 xo_dependency(${SELF_LIB} refcnt)
 xo_dependency(${SELF_LIB} xo_ppsink)
 xo_dependency(${SELF_LIB} xo_indentlog2)
+xo_dependency(${SELF_LIB} xo_arena)
 xo_headeronly_dependency(${SELF_LIB} subsys)
 
 # end CMakeLists.txt

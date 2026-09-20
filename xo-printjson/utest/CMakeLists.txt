@@ -13,6 +13,7 @@ xo_dependency(${SELF_EXE} xo_indentlog2)
 # has-not-opted-in case
 xo_dependency(${SELF_EXE} xo_printable2)
 xo_dependency(${SELF_EXE} xo_facet)
+xo_dependency(${SELF_EXE} xo_arena)
 xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 
 # end CMakeLists.txt

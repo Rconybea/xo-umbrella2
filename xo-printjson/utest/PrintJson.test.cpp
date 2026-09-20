@@ -8,6 +8,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << tag(..) */
+#include <xo/arena/DArenaVector.hpp>
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <sstream>
@@ -30,7 +31,60 @@ namespace xo {
 
         namespace {
             struct TestStruct0 {};
+
+            /** arena-backed vector, for the DArenaVector cases below **/
+            template <typename T>
+            xo::mm::DArenaVector<T> make_arena_vec(const char * name) {
+                using xo::mm::ArenaConfig;
+                using xo::mm::ArenaNameStr;
+
+                return xo::mm::DArenaVector<T>::map(ArenaConfig()
+                                                    .with_name(ArenaNameStr::from_cstr(name))
+                                                    .with_size(64*1024));
+            }
         }
+
+        /* DArenaVector reflects as mt_vector since
+         * .xo-backlog/xo-reflect/issues/02.  The point of these two cases is
+         * that printjson needed NO change to render it: print_generic_vector
+         * keys on the metatype, not on std::vector, so describing the
+         * container was the whole of the work.
+         *
+         * Before that specialisation existed, DArenaVector fell to
+         * EstablishTdx's primary template and reflected as an atom, so this
+         * rendered <error-json-printer-not-found ... metatype=mt_atomic>.
+         */
+        TEST_CASE("print-json-darena-vector", "[printjson][darenavector]") {
+            PrintJson print_json;
+
+            auto v = make_arena_vec<double>("utest.pj.dav");
+
+            v.push_back(1.5);
+            v.push_back(2.25);
+            v.push_back(-3.0);
+
+            std::stringstream ss;
+            print_json.print(v, &ss);
+
+            INFO("rendered: " << ss.str());
+
+            REQUIRE(ss.str() == std::string("[1.5, 2.25, -3]"));
+        } /*TEST_CASE(print-json-darena-vector)*/
+
+        TEST_CASE("print-json-darena-vector-empty", "[printjson][darenavector]") {
+            PrintJson print_json;
+
+            auto v = make_arena_vec<double>("utest.pj.dav.empty");
+
+            std::stringstream ss;
+            print_json.print(v, &ss);
+
+            /* empty, not null: n_child() reports SIZE, and a DArenaVector's
+             * capacity is fixed at construction, so a non-zero capacity must
+             * not show up here
+             */
+            REQUIRE(ss.str() == std::string("[]"));
+        } /*TEST_CASE(print-json-darena-vector-empty)*/
 
         TEST_CASE("print-json-empty-struct", "[printjson]") {
             INFO(tag("s_init_evidence", s_init_evidence));
