@@ -771,7 +771,11 @@ namespace xo {
                 REQUIRE(empty.pool_v_[2].resource_name_ == std::string("utest.snap.strong-free"));
 
                 REQUIRE(empty.strong_.live_ == 0);
-                REQUIRE(empty.strong_.slot_v_.empty());
+                /* slot_v_ tracks size_ (the high-water mark), not live_:
+                 * cleared slots are reported too, so a slot's index is its
+                 * position here
+                 */
+                REQUIRE(empty.strong_.slot_v_.size() == empty.strong_.size_);
                 REQUIRE(empty.strong_.capacity_ > 0);
             }
 
@@ -788,28 +792,22 @@ namespace xo {
                 REQUIRE(snap.strong_.slot_v_.size() == 2);
                 REQUIRE(snap.strong_.free_.empty());
 
-                /* offset_ is the animation's identity for an object: it
-                 * locates the representation within the storage arena, so a
-                 * consumer can follow it across frames and draw it moving
+                /* the slots ARE the handles' targets -- no shadow struct.
+                 * SlotInfo held a derived (ix, typeseq, type, offset) until
+                 * 2026-09-20; an ObjectSlot answers all four itself, and
+                 * JsonPrinter_ObjectSlot resolves the offset from the pointer
+                 * via DArena::obj2arena rather than being handed a base.
                  */
-                auto base = reinterpret_cast<std::uint64_t>(fw->storage()._mem_lo());
+                REQUIRE(snap.strong_.slot_v_[h0.object_ix()].opaque_data() == p0);
+                REQUIRE(snap.strong_.slot_v_[h1.object_ix()].opaque_data() == p1);
 
-                REQUIRE(snap.strong_.slot_v_[0].offset_
-                        == reinterpret_cast<std::uint64_t>(p0) - base);
-                REQUIRE(snap.strong_.slot_v_[1].offset_
-                        == reinterpret_cast<std::uint64_t>(p1) - base);
-                /* and bounded by the arena, which is what makes it safe as a
-                 * json number on a consumer that uses IEEE754 doubles
+                REQUIRE(snap.strong_.slot_v_[h0.object_ix()]._typeseq()
+                        == typeseq::id<DRectCoords>());
+
+                /* position IS the index, which is what lets free_ index into
+                 * the same vector
                  */
-                REQUIRE(snap.strong_.slot_v_[1].offset_ < snap.pool_v_[0].reserved_);
-
-                REQUIRE(snap.strong_.slot_v_[0].ix_ == h0.object_ix());
-                REQUIRE(snap.strong_.slot_v_[1].ix_ == h1.object_ix());
-
-                REQUIRE(snap.strong_.slot_v_[0].typeseq_
-                        == typeseq::id<DRectCoords>().seqno());
-                REQUIRE(snap.strong_.slot_v_[0].type_
-                        == std::string(xo::reflect::type_name<DRectCoords>()));
+                REQUIRE(h0.object_ix() != h1.object_ix());
             }
 
             /* a released slot leaves the report, and shows up on the free list
@@ -822,10 +820,12 @@ namespace xo {
                 FlywheelInfo snap = fw->snapshot();
 
                 REQUIRE(snap.strong_.live_ == 1);
-                REQUIRE(snap.strong_.slot_v_.size() == 1);
-                REQUIRE(snap.strong_.slot_v_[0].offset_
-                        == reinterpret_cast<std::uint64_t>(p1)
-                           - reinterpret_cast<std::uint64_t>(fw->storage()._mem_lo()));
+                /* the vector still reports every slot; the released one is
+                 * empty rather than absent, and renders as json null
+                 */
+                REQUIRE(snap.strong_.slot_v_.size() == 2);
+                REQUIRE(!snap.strong_.slot_v_[ix0]);
+                REQUIRE(snap.strong_.slot_v_[h1.object_ix()].opaque_data() == p1);
 
                 REQUIRE(snap.strong_.free_.size() == 1);
                 REQUIRE(snap.strong_.free_[0] == ix0);

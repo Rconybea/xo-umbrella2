@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "handlestore/ObjectSlot.hpp"
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <string>
 #include <vector>
@@ -24,9 +25,13 @@ namespace xo::facet {
      *  2. Reflecting the representation is not available for the parts that
      *     remain here.  @c strong_refs_ holds ERASED fops, whose reflection
      *     rotates through @c AReflectable and THROWS for a representation that
-     *     has not opted in -- 2 of 56 had, as of 2026-09-15.  So a slot
-     *     structurally cannot describe itself, and @ref SlotInfo is the only
-     *     description available rather than a parallel one.
+     *     has not opted in.
+     *
+     *     A slot used to need a shadow struct for that reason.  It no longer
+     *     does: @c ObjectSlot derives from @c obj<ATop> rather than aliasing
+     *     it, so it escapes FopTdx's erased path and reflects as an atom, and
+     *     @c JsonPrinter_ObjectSlot renders it directly.  @ref slot_v_ holds
+     *     the slots themselves.
      *
      *     Where an existing type CAN be reflected, it is: pools are reported as
      *     @c MemorySizeInfo directly (2026-09-15), not copied into a shadow
@@ -48,8 +53,8 @@ namespace xo::facet {
      *  CreationEvidence.  So reflecting AllocFlywheel directly is now merely
      *  unattractive rather than impossible -- @ref FlywheelInfo earns its place
      *  as the frame ENVELOPE (where a sequence number would go), not because
-     *  the alternative is blocked.  @ref SlotInfo's justification is untouched:
-     *  an erased fop still cannot describe itself.
+     *  the alternative is blocked.  The slots themselves no longer need a view
+     *  model at all -- see @ref RootSetInfo::slot_v_.
      *
      *  The cost is a second description of the same thing, which is a shape
      *  that has gone wrong repeatedly in this tree.  Mitigation:
@@ -58,48 +63,6 @@ namespace xo::facet {
      *  the wire fails rather than going quietly missing.
      **/
     ///@{
-
-    /** one occupied slot of a root set.
-     *
-     *  Identity and location, no contents.  Everything here is available from
-     *  @c ATop without rotating to any other facet, which is what makes it work
-     *  for every representation rather than only the ones that have opted into
-     *  @c AReflectable.
-     *
-     *  @c offset_ is the point of the whole structure for an animation: it
-     *  locates the object within the flywheel's storage arena, so a consumer
-     *  can draw it, and can show it MOVING when a collector relocates it.
-     *  Reflecting the object's contents would not give that.
-     *
-     *  An OFFSET rather than an absolute address, for three reasons:
-     *  - json numbers are IEEE754 doubles on the consumer's side, exact only
-     *    below 2^53.  A 48-bit address has ~68x headroom but a 57-bit one
-     *    (5-level paging) does not, and the rounding is undetectable there.
-     *    An offset is bounded by the arena's extent, so the question does not
-     *    arise.
-     *  - it is the number a consumer actually wants; absolute would have it
-     *    subtract @c lo from the pool record on every slot of every frame.
-     *  - it survives remapping.  Absolute addresses all change when an arena
-     *    is mapped somewhere else; offsets do not, so an object that did not
-     *    move does not appear to.
-     *
-     *  NB no size field.  Per-allocation size comes from @c DArena::alloc_info,
-     *  which reads an @c AllocHeader that is only written when
-     *  @c ArenaConfig.store_header_flag_ is set -- so it is absent for a
-     *  default arena, and a field that is usually missing is worse than none.
-     **/
-    struct SlotInfo {
-        /** index in the root set's vector; matches @ref RootSetInfo::free_ **/
-        std::uint32_t ix_ = 0;
-        /** representation's type id, from ATop::_typeseq() **/
-        std::int32_t typeseq_ = 0;
-        /** representation's registered name; "" if never registered **/
-        std::string type_;
-        /** byte offset of the representation from the base of the flywheel's
-         *  storage arena -- i.e. from @c pool_v_[0].lo_
-         **/
-        std::uint64_t offset_ = 0;
-    };
 
     /** a root set's occupancy.
      *
@@ -118,11 +81,17 @@ namespace xo::facet {
         std::uint32_t live_ = 0;
         /** indices currently on the free list **/
         std::vector<std::uint32_t> free_;
-        /** the occupied slots.  Cleared slots are omitted, so this has
-         *  @ref live_ entries and the frame stays proportional to what is
-         *  actually rooted
+        /** every slot, INCLUDING the cleared ones -- so a slot's index is its
+         *  position here, and @ref free_ indexes into it directly.
+         *
+         *  The slots are @c ObjectSlot, not a shadow struct.  That was
+         *  @c SlotInfo until 2026-09-20, which existed because an erased fop
+         *  could not describe itself; @c JsonPrinter_ObjectSlot now does, and
+         *  resolves each slot's offset from its own pointer via
+         *  @c DArena::obj2arena rather than needing a base handed in.  A
+         *  cleared slot renders as @c null.
          **/
-        std::vector<SlotInfo> slot_v_;
+        std::vector<ObjectSlot> slot_v_;
     };
 
     /** one frame: a flywheel's state at an instant **/
@@ -130,7 +99,8 @@ namespace xo::facet {
         /** every pool this flywheel owns, in the order it reports them:
          *  the storage arena first, then the root set and its free list.
          *
-         *  @c pool_v_[0] is the arena @ref SlotInfo::offset_ is relative to.
+         *  @c pool_v_[0] is the arena a slot's rendered offset is relative to;
+         *  JsonPrinter_ObjectSlot recovers it per slot via DArena::obj2arena.
          **/
         std::vector<xo::mm::MemorySizeInfo> pool_v_;
         /** the strong root set.  Singular since 2026-09-13, when the weak set

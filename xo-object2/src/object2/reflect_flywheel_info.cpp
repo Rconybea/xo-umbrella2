@@ -52,16 +52,11 @@ namespace xo {
                 sr.require_complete();
             }
 
-            {
-                StructReflector<SlotInfo> sr;
-
-                sr.reflect_member("ix", &SlotInfo::ix_);
-                sr.reflect_member("typeseq", &SlotInfo::typeseq_);
-                sr.reflect_member("type", &SlotInfo::type_);
-                sr.reflect_member("offset", &SlotInfo::offset_);
-
-                sr.require_complete();
-            }
+            /* no StructReflector for the slots: RootSetInfo::slot_v_ holds
+             * ObjectSlot, which reflects as an atom and is rendered by
+             * JsonPrinter_ObjectSlot.  SlotInfo was the shadow struct this
+             * used to describe, retired 2026-09-20.
+             */
 
             {
                 StructReflector<RootSetInfo> sr;
@@ -70,6 +65,9 @@ namespace xo {
                 sr.reflect_member("capacity", &RootSetInfo::capacity_);
                 sr.reflect_member("live", &RootSetInfo::live_);
                 sr.reflect_member("free", &RootSetInfo::free_);
+                /* a vector of ObjectSlot; each element renders via its own
+                 * printer, and a cleared slot renders as null
+                 */
                 sr.reflect_member("slots", &RootSetInfo::slot_v_);
 
                 sr.require_complete();

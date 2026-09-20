@@ -203,19 +203,23 @@ namespace xo {
              * segfault waiting to happen.
              */
             REQUIRE(frame.find("\"offset\": 16") != std::string::npos);
-            REQUIRE(frame.find("\"ix\": 0") != std::string::npos);
-            REQUIRE(frame.find("\"ix\": 1") != std::string::npos);
+            /* no "ix" any more: every slot is emitted, so a consumer reads
+             * an index from array position.  SlotInfo carried one until
+             * 2026-09-20.
+             */
+            REQUIRE(frame.find("\"ix\":") == std::string::npos);
 
-            /* both slots carry a NON-ZERO address.  That field is the frame's
-             * whole reason for existing -- it is how a consumer follows one
-             * object across frames -- so a silently zero addr would make the
-             * animation wrong while every other assertion still passed.
+            /* the slots are ObjectSlot, so each carries its own _name_ */
+            REQUIRE(frame.find("\"_name_\": \"ObjectSlot\"") != std::string::npos);
+
+            /* offset is the frame's whole reason for existing -- it is how a
+             * consumer follows one object across frames -- and it is resolved
+             * per slot from its own pointer, so two slots must differ
              */
             FlywheelInfo snap = fw->snapshot();
             REQUIRE(snap.strong_.slot_v_.size() == 2);
-            REQUIRE(snap.strong_.slot_v_[0].offset_ == 16);  /* past the preamble + alloc header */
-            REQUIRE(snap.strong_.slot_v_[1].offset_ != 0);
-            REQUIRE(snap.strong_.slot_v_[0].offset_ != snap.strong_.slot_v_[1].offset_);
+            REQUIRE(snap.strong_.slot_v_[0].opaque_data()
+                    != snap.strong_.slot_v_[1].opaque_data());
 
             REQUIRE(h0.object_ix() != h1.object_ix());
         } /*TEST_CASE(occupied-slots-appear-in-the-frame)*/
@@ -242,15 +246,19 @@ namespace xo {
             const std::string frame = ss.str();
             INFO("frame: " << frame);
 
-            /* the slot is gone from `slots' and its index is on `free'; `size'
+            /* the slot EMPTIES rather than disappearing: it stays at its
+             * position and renders as null, its index is on `free', and `size'
              * stays 1 because it is a high-water mark.  A consumer animating
-             * the root set needs all three to draw a slot emptying rather than
-             * disappearing.
+             * the root set draws a slot going dark, which it could not do if
+             * the entry vanished and shifted everything after it.
+             *
+             * This is what retiring SlotInfo bought: an ObjectSlot can BE
+             * empty, where a shadow struct had to be omitted.
              */
             REQUIRE(frame.find("\"size\": 1") != std::string::npos);
             REQUIRE(frame.find("\"live\": 0") != std::string::npos);
             REQUIRE(frame.find("\"free\": [0]") != std::string::npos);
-            REQUIRE(frame.find("\"slots\": []") != std::string::npos);
+            REQUIRE(frame.find("\"slots\": [null]") != std::string::npos);
         } /*TEST_CASE(released-slot-moves-to-the-free-list)*/
 
     } /*namespace ut*/

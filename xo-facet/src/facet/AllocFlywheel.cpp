@@ -111,23 +111,7 @@ namespace xo::facet {
                 retval.pool_v_.push_back(x);
             });
 
-        /* offsets are measured from the storage arena's base, which is
-         * pool_v_[0].lo_ -- the same number a consumer sees in the frame
-         */
-        store_.snapshot(&retval.strong_,
-                        reinterpret_cast<std::uint64_t>(store_.storage()._mem_lo()));
-
-        /* the half DHandleStore cannot do: it is generic over Handle, and
-         * naming a typeseq is xo-facet's business.  An unregistered type comes
-         * back as TypeRegistry's sentinel name rather than throwing -- a frame
-         * is a diagnostic, and must render whatever state it finds.
-         */
-        for (SlotInfo & slot : retval.strong_.slot_v_) {
-            std::string_view name
-                = xo::facet::TypeRegistry::id2name(xo::reflect::typeseq(slot.typeseq_));
-
-            slot.type_ = std::string(name);
-        }
+        store_.snapshot(&retval.strong_);
 
         return retval;
     }

@@ -435,7 +435,7 @@ namespace xo {
          *  below 2^53.  A 48-bit address has ~68x headroom; a 57-bit one (5-level
          *  paging) does not, and the rounding is undetectable on the consumer's
          *  side.  Prefer reporting an OFFSET into a known region where the value
-         *  matters -- see SlotInfo::offset_ in xo-facet.
+         *  matters -- see JsonPrinter_ObjectSlot's `offset' below.
          **/
         class JsonPrinter_address : public JsonPrinter {
         public:

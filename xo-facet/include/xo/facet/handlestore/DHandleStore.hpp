@@ -187,20 +187,16 @@ namespace xo::facet {
          *  it describes; the mitigation is that whoever adds a member to this
          *  class reads this in the same file.
          *
-         *  Reports only OCCUPIED slots, so a frame is proportional to what is
-         *  rooted rather than to capacity -- a default flywheel has 256 slots
-         *  and typically holds a handful.
+         *  Reports EVERY slot, cleared ones included, so a slot's index is
+         *  its position in @ref RootSetInfo::slot_v_ -- which is also how
+         *  @ref RootSetInfo::free_ indexes.
          *
-         *  @p base is the address @ref SlotInfo::offset_ is measured from --
-         *  the storage arena's low bound.  Passed in rather than read from
-         *  @ref storage_, which is a template parameter here and need not
-         *  expose bounds.
-         *
-         *  Fills @ref SlotInfo::typeseq_ but NOT @ref SlotInfo::type_: naming a
-         *  typeseq needs xo-facet's TypeRegistry, and this class is generic
-         *  over Handle.  @ref AllocFlywheel::snapshot fills the names in.
+         *  Nothing is derived here.  The slots are copied as they are:
+         *  naming a type and locating an object within its arena are both
+         *  the slot printer's business (JsonPrinter_ObjectSlot), which is
+         *  why there is no base to hand in any more.
          **/
-        void snapshot(RootSetInfo * p_out, std::uint64_t base) const {
+        void snapshot(RootSetInfo * p_out) const {
             p_out->size_ = static_cast<std::uint32_t>(strong_refs_.size());
             p_out->capacity_ = static_cast<std::uint32_t>(strong_refs_.capacity());
             p_out->live_ = static_cast<std::uint32_t>(this->strong_root_count());
@@ -211,24 +207,9 @@ namespace xo::facet {
                 p_out->free_.push_back(static_cast<std::uint32_t>(strong_freelist_[i]));
 
             p_out->slot_v_.clear();
-            p_out->slot_v_.reserve(p_out->live_);
-            for (std::size_t i = 0, n = strong_refs_.size(); i < n; ++i) {
-                const Handle & h = strong_refs_[i];
-
-                if (!h)
-                    continue;
-
-                SlotInfo slot;
-                slot.ix_ = static_cast<std::uint32_t>(i);
-                slot.typeseq_ = h._typeseq().seqno();
-                /* every rooted object was allocated from this flywheel's own
-                 * arena -- make_strong_ref requires it -- so the subtraction
-                 * cannot underflow for a well-formed store
-                 */
-                slot.offset_ = reinterpret_cast<std::uint64_t>(h.opaque_data()) - base;
-
-                p_out->slot_v_.push_back(std::move(slot));
-            }
+            p_out->slot_v_.reserve(strong_refs_.size());
+            for (std::size_t i = 0, n = strong_refs_.size(); i < n; ++i)
+                p_out->slot_v_.push_back(strong_refs_[i]);
         }
 
         /** counts non-empty strong slots **/
