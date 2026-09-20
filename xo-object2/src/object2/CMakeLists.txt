@@ -5,7 +5,6 @@ set(SELF_SRCS
     init_object2.cpp
 	Object2Appcx.cpp
     SetupObject2.cpp
-    reflect_flywheel_info.cpp
 
     GCObjectConversion_DFloat.cpp
     GCObjectConversion_DInteger.cpp

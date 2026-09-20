@@ -5,6 +5,9 @@
 
 #include "PrintJson.hpp"
 #include <xo/reflect/TypeDescr.hpp>
+#include <xo/reflect/StructReflector.hpp>
+#include <xo/arena/MemorySizeInfo.hpp>
+#include <xo/facet/AllocFlywheel.hpp>
 #include <xo/facet/handlestore/ObjectSlot.hpp>
 #include <xo/facet/handlestore/DHandleStore.hpp>
 #include <xo/facet/TypeRegistry.hpp>
@@ -574,16 +577,6 @@ namespace xo {
             } /*print_json*/
         }; /*JsonPrinter_ObjectSlot*/
 
-        namespace {
-            void
-            provide_object_slot_printer(PrintJson * p_json)
-            {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_ObjectSlot(p_json));
-
-                p_json->provide_printer(Reflect::require<xo::facet::ObjectSlot>(),
-                                        std::move(printer));
-            } /*provide_object_slot_printer*/
-        } /*namespace*/
 
         /** @brief json printer for a flywheel's strong root set
          *
@@ -593,10 +586,14 @@ namespace xo {
          *  dereference, because a raw pointer had no @c EstablishTdx
          *  specialisation and so reflected as an atom -- never reaching
          *  @c print_generic_pointer's dispatch to a child.  Raw pointers are
-         *  reflected now (.xo-backlog/xo-reflect/issues/01), so
-         *  @c FlywheelInfo::strong_ takes that path and arrives here already
-         *  dereferenced.  A null @c strong_ is handled by that path, which
-         *  renders json null.
+         *  reflected now (.xo-backlog/xo-reflect/issues/01), which is what
+         *  let the key move to the pointee.
+         *
+         *  Its caller is @c JsonPrinter_AllocFlywheel, which reaches the store
+         *  DIRECTLY via @c AllocFlywheel::strong_root_set -- there is no
+         *  pointer in the path any more, since @c FlywheelInfo went the day
+         *  after.  The pointee key is still the right one; it is simply no
+         *  longer the flywheel frame that exercises raw-pointer reflection.
          *
          *  This printer is what retired @c RootSetInfo on 2026-09-21.  That
          *  struct held size/capacity/live/free/slots, copied out of the store
@@ -612,7 +609,8 @@ namespace xo {
          *  "RootSetInfo" to "RootSet", because the type it named is gone.
          *
          *  What DID change is WHEN the state is read: at print time, not at
-         *  snapshot time.  See @c FlywheelInfo::strong_.
+         *  snapshot time.  @c AllocFlywheel::snapshot() no longer exists, so
+         *  that is now the only reading there is.
          **/
         class JsonPrinter_RootSet : public JsonPrinter {
         public:
@@ -672,20 +670,164 @@ namespace xo {
             } /*print_json*/
         }; /*JsonPrinter_RootSet*/
 
-        namespace {
-            void
-            provide_root_set_printer(PrintJson * p_json)
-            {
-                using RootSet = JsonPrinter_RootSet::RootSet;
 
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_RootSet(p_json));
+        /** @brief json printer for a whole AllocFlywheel -- one frame
+         *
+         *  This is the FRAME ENVELOPE, and it is a printer rather than a
+         *  reflected struct because the last of those was retired on
+         *  2026-09-22.
+         *
+         *  The lineage is worth knowing, because it went one layer at a time
+         *  and each layer looked necessary while it stood:
+         *
+         *  | retired | was | replaced by |
+         *  |---|---|---|
+         *  | @c PoolInfo     | copy of MemorySizeInfo | reflecting MemorySizeInfo directly |
+         *  | @c SlotInfo     | shadow of an erased fop | ObjectSlot + JsonPrinter_ObjectSlot |
+         *  | @c RootSetInfo  | copy of the root set | visit_object_slots + JsonPrinter_RootSet |
+         *  | @c FlywheelInfo | envelope struct | this |
+         *
+         *  What they had in common: each described a thing that could already
+         *  describe itself, and each cost a second place to keep in step.  A
+         *  printer is the right tool for a view model whose fields are
+         *  COMPUTED -- @c capacity and @c live are not members of anything,
+         *  and reflection can only name members.
+         *
+         *  A frame reads the flywheel at PRINT time.  There is no snapshot to
+         *  go stale, which is the upside of the same property that made
+         *  FlywheelInfo::strong_ a borrowed pointer before it went.
+         **/
+        class JsonPrinter_AllocFlywheel : public JsonPrinter {
+        public:
+            using AllocFlywheel = xo::facet::AllocFlywheel;
 
-                /* the POINTEE.  FlywheelInfo::strong_ is a const RootSet*,
-                 * which reaches this through print_generic_pointer
+            JsonPrinter_AllocFlywheel(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            virtual void print_json(TaggedPtr tp,
+                                    std::ostream * p_os) const override {
+                using xo::mm::MemorySizeInfo;
+
+                const AllocFlywheel * fw
+                    = this->check_recover_native<AllocFlywheel>(tp, p_os);
+
+                if (!fw)
+                    return;
+
+                PrintJson const * pjson = this->pjson();
+
+                *p_os << "{" << "\"_name_\": " << quot("Flywheel");
+
+                /* every pool the store owns, in the order it reports them:
+                 * the storage arena first, then the root set and its free
+                 * list.  pool_v_[0] is the arena a slot's offset is relative
+                 * to -- though JsonPrinter_ObjectSlot recovers that per slot
+                 * via DArena::obj2arena rather than relying on the order.
+                 *
+                 * MemorySizeInfo goes through REFLECTION, not by hand: it is
+                 * already the right shape, so restating its fields here would
+                 * be the very thing this printer exists to stop doing.
                  */
-                p_json->provide_printer(Reflect::require<RootSet>(),
-                                        std::move(printer));
-            } /*provide_root_set_printer*/
+                *p_os << ", \"pools\": [";
+                {
+                    bool first = true;
+
+                    fw->visit_pools([pjson, p_os, &first](const MemorySizeInfo & x) {
+                            if (!first)
+                                *p_os << ", ";
+                            first = false;
+
+                            pjson->print_aux(
+                                TaggedPtr(Reflect::require<MemorySizeInfo>(),
+                                          const_cast<MemorySizeInfo *>(&x)),
+                                p_os);
+                        });
+                }
+                *p_os << "]";
+
+                /* the root set, via JsonPrinter_RootSet */
+                *p_os << ", \"strong\": ";
+                {
+                    const auto & rs = fw->strong_root_set();
+
+                    pjson->print_aux(
+                        TaggedPtr(Reflect::require<AllocFlywheel::HandleStore>(),
+                                  const_cast<AllocFlywheel::HandleStore *>(&rs)),
+                        p_os);
+                }
+
+                *p_os << "}";
+            } /*print_json*/
+        }; /*JsonPrinter_AllocFlywheel*/
+
+        namespace {
+            /** describe MemorySizeInfo to xo-reflect, and install the three
+             *  flywheel printers.
+             *
+             *  The reflection lives HERE, beside the printer that needs it,
+             *  rather than in a free function a caller has to remember.  It
+             *  was @c xo::facet::reflect_flywheel_info in xo-object2 until
+             *  2026-09-22 -- homeless, because xo-facet owns AllocFlywheel but
+             *  cannot reach a StructReflector, and its own doc said it was
+             *  expected to move to wherever the consumer landed.  This is that
+             *  consumer.
+             *
+             *  Member names are given EXPLICITLY rather than through
+             *  REFLECT_MEMBER, which would derive the json key from the c++
+             *  member name (`resource_name_' -> "resource_name").  The keys
+             *  are a wire contract with a browser; house style for a member
+             *  must not be able to rename them.
+             *
+             *  @c detail_ is deliberately absent: a pointer into the stack
+             *  frame of whoever ran the visit, and almost always null.  If the
+             *  per-type histogram is ever wanted it belongs in its own report
+             *  at its own cadence.  (Raw pointers ARE reflected now -- see
+             *  .xo-backlog/xo-reflect/issues/01 -- so this omission is a
+             *  curation choice, not a limitation.)
+             **/
+            void
+            provide_flywheel_printers(PrintJson * p_json)
+            {
+                using xo::mm::MemorySizeInfo;
+                using xo::reflect::StructReflector;
+                using RootSet = JsonPrinter_RootSet::RootSet;
+                using AllocFlywheel = xo::facet::AllocFlywheel;
+
+                {
+                    /* idempotent: StructReflector's completion flag is
+                     * per-type and static
+                     */
+                    StructReflector<MemorySizeInfo> sr;
+
+                    sr.reflect_member("name", &MemorySizeInfo::resource_name_);
+                    sr.reflect_member("used", &MemorySizeInfo::used_);
+                    sr.reflect_member("allocated", &MemorySizeInfo::allocated_);
+                    sr.reflect_member("committed", &MemorySizeInfo::committed_);
+                    sr.reflect_member("reserved", &MemorySizeInfo::reserved_);
+                    sr.reflect_member("lo", &MemorySizeInfo::lo_);
+                    sr.reflect_member("hi", &MemorySizeInfo::hi_);
+
+                    sr.require_complete();
+                }
+
+                {
+                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_ObjectSlot(p_json));
+                    p_json->provide_printer(Reflect::require<xo::facet::ObjectSlot>(),
+                                            std::move(printer));
+                }
+                {
+                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_RootSet(p_json));
+                    /* the POINTEE; a const RootSet* reaches it through
+                     * print_generic_pointer
+                     */
+                    p_json->provide_printer(Reflect::require<RootSet>(),
+                                            std::move(printer));
+                }
+                {
+                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_AllocFlywheel(p_json));
+                    p_json->provide_printer(Reflect::require<AllocFlywheel>(),
+                                            std::move(printer));
+                }
+            } /*provide_flywheel_printers*/
         } /*namespace*/
 
         class JsonPrinter_utc_nanos : public JsonPrinter {
@@ -758,8 +900,7 @@ namespace xo {
 
             provide_address_printer(this);
 
-            provide_object_slot_printer(this);
-            provide_root_set_printer(this);
+            provide_flywheel_printers(this);
 
             provide_utc_nanos_printer(this);
         } /*provide_std_printers*/

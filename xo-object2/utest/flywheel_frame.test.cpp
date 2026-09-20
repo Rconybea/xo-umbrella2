@@ -4,10 +4,10 @@
  *
  * JSON rendering of an AllocFlywheel's state -- one animation frame.
  *
- * NOT object2's subject.  AllocFlywheel is xo-facet's, and this lives here
- * only because xo-facet cannot reach a StructReflector; see
- * xo-object2/include/xo/object2/reflect_flywheel_info.hpp, which records why
- * and where it is expected to move.
+ * NOT object2's subject.  AllocFlywheel is xo-facet's, and the printers are
+ * xo-printjson's.  This lives here because it is the lowest place a flywheel
+ * can be filled with a REAL representation (DFloat) and then rendered --
+ * xo-printjson's own utest has facet but no D-type worth putting in a slot.
  *
  * What is pinned here is a WIRE CONTRACT: the key names below are what a
  * consumer outside this process parses.  So they are asserted literally rather
@@ -17,13 +17,11 @@
  * Expectations are OBSERVED, never predicted.
  */
 
-#include <xo/object2/reflect_flywheel_info.hpp>
 #include <xo/object2/Float.hpp>   /* DFloat + IPrintable_DFloat */
 #include <xo/object2/SetupObject2.hpp>
 #include <xo/object2/number/IGCObject_DFloat.hpp>
 #include <xo/facet/ObjectHandle.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
-#include <xo/facet/FlywheelInfo.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/facet/cx/FacetAppcx.hpp>
@@ -40,7 +38,6 @@ namespace xo {
     using xo::scm::SetupObject2;
     using xo::json::PrintJson;
     using xo::facet::AllocFlywheel;
-    using xo::facet::FlywheelInfo;
     using xo::facet::DObjectHandle;
     using xo::facet::with_facet;
     using xo::mm::ArenaConfig;
@@ -87,32 +84,46 @@ namespace xo {
             }
         }
 
-        TEST_CASE("flywheel-info-reflects-as-a-struct", "[printjson][flywheel]")
+        TEST_CASE("constructing-a-printjson-reflects-memorysizeinfo",
+                  "[printjson][flywheel]")
         {
-            xo::facet::reflect_flywheel_info();
+            /* MemorySizeInfo is the one part of a frame still rendered by
+             * REFLECTION rather than by a bespoke printer -- it is already the
+             * right shape, so restating its fields would be the duplication
+             * the Info classes were retired for.
+             *
+             * Its registration moved into PrintJson's constructor on
+             * 2026-09-22, from a free function a caller had to remember.  That
+             * is what this pins: build one, and the description exists.
+             */
+            PrintJson print_json;
 
-            auto td = Reflect::require<FlywheelInfo>();
+            auto td = Reflect::require<xo::mm::MemorySizeInfo>();
 
             REQUIRE(td->metatype() == Metatype::mt_struct);
-            REQUIRE(td->n_child_fixed() == 2);
+            REQUIRE(td->n_child_fixed() == 7);
 
-            /* the wire keys, asserted literally.  "pools" and not "pool_v":
-             * reflect_flywheel_info names members explicitly so house style for
-             * a vector member cannot leak into the schema
+            /* the wire keys, asserted literally: "name", not "resource_name".
+             * Members are named explicitly at registration so house style for
+             * a c++ member cannot leak into the schema.
+             *
+             * detail_ is absent by CHOICE -- it points into the stack frame of
+             * whoever ran the visit.  Raw pointers do reflect now
+             * (.xo-backlog/xo-reflect/issues/01), so 7 rather than 8 is
+             * curation, not a limitation.
              */
-            REQUIRE(td->struct_member_name(0) == std::string("pools"));
-            REQUIRE(td->struct_member_name(1) == std::string("strong"));
-        } /*TEST_CASE(flywheel-info-reflects-as-a-struct)*/
+            REQUIRE(td->struct_member_name(0) == std::string("name"));
+            REQUIRE(td->struct_member_name(5) == std::string("lo"));
+            REQUIRE(td->struct_member_name(6) == std::string("hi"));
+        } /*TEST_CASE(constructing-a-printjson-reflects-memorysizeinfo)*/
 
         TEST_CASE("empty-flywheel-renders-a-frame", "[printjson][flywheel]")
         {
             PrintJson print_json;
-            xo::facet::reflect_flywheel_info();
-
             rp<AllocFlywheel> fw = make_fw("utest.frame.empty");
 
             std::stringstream ss;
-            print_json.print(fw->snapshot(), &ss);
+            print_json.print(*fw.get(), &ss);
 
             /* the whole frame, byte for byte.  Brittle on purpose: this IS the
              * wire contract, so any change to it should require someone to
@@ -136,7 +147,7 @@ namespace xo {
             INFO("frame: " << frame);
 
             REQUIRE(frame == std::string(
-                "{\"_name_\": \"FlywheelInfo\""
+                "{\"_name_\": \"Flywheel\""
                 ", \"pools\": ["
                 "{\"_name_\": \"MemorySizeInfo\""
                 ", \"name\": \"utest.frame.empty.storage\""
@@ -153,25 +164,25 @@ namespace xo {
                 ", \"name\": \"utest.frame.empty.strong-free\""
                 ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 4096"
                 ", \"lo\": ADDR, \"hi\": ADDR}]"
-                /* "RootSet", not "RootSetInfo": there is no longer a struct
-                 * of that name.  FlywheelInfo::strong_ points at the live
-                 * store and JsonPrinter_RootSet reads it, which is what
-                 * retired RootSetInfo (2026-09-21).  Every other key and value
-                 * below is unchanged by that -- deliberately, since they are
-                 * the wire contract
+                /* "RootSet", not "RootSetInfo", and "Flywheel" above rather
+                 * than "FlywheelInfo": neither struct exists any more.  Both
+                 * are now bespoke printers reading the live flywheel.  Every
+                 * other key and value here is unchanged by that -- deliberately,
+                 * since they are the wire contract
                  */
                 ", \"strong\": {\"_name_\": \"RootSet\""
                 /* 511, not 512: the per-allocation overhead costs one slot */
                 ", \"size\": 0, \"capacity\": 511, \"live\": 0"
                 ", \"free\": [], \"slots\": []}}"));
 
-            /* the bound the redaction hid, asserted structurally instead */
-            FlywheelInfo snap = fw->snapshot();
-            for (const auto & pool : snap.pool_v_) {
-                REQUIRE(static_cast<const char *>(pool.hi_)
-                        - static_cast<const char *>(pool.lo_)
-                        == static_cast<long>(pool.reserved_));
-            }
+            /* the bound the redaction hid, asserted structurally instead.
+             * Read through visit_pools, which is the path the printer takes
+             */
+            fw->visit_pools([](const xo::mm::MemorySizeInfo & pool) {
+                    REQUIRE(static_cast<const char *>(pool.hi_)
+                            - static_cast<const char *>(pool.lo_)
+                            == static_cast<long>(pool.reserved_));
+                });
         } /*TEST_CASE(empty-flywheel-renders-a-frame)*/
 
         TEST_CASE("occupied-slots-appear-in-the-frame", "[printjson][flywheel]")
@@ -179,8 +190,6 @@ namespace xo {
             using HFloat = DObjectHandle<APrintable, DFloat>;
 
             PrintJson print_json;
-            xo::facet::reflect_flywheel_info();
-
             rp<AllocFlywheel> fw = make_fw("utest.frame.live");
             auto alloc = with_facet<AAllocator>::mkobj(&fw->storage());
 
@@ -190,7 +199,7 @@ namespace xo {
                 (fw, with_facet<APrintable>::mkobj(DFloat::_box(alloc, 2.5)));
 
             std::stringstream ss;
-            print_json.print(fw->snapshot(), &ss);
+            print_json.print(*fw.get(), &ss);
 
             const std::string frame = ss.str();
             INFO("frame: " << frame);
@@ -239,8 +248,6 @@ namespace xo {
             using HFloat = DObjectHandle<APrintable, DFloat>;
 
             PrintJson print_json;
-            xo::facet::reflect_flywheel_info();
-
             rp<AllocFlywheel> fw = make_fw("utest.frame.free");
             auto alloc = with_facet<AAllocator>::mkobj(&fw->storage());
 
@@ -251,7 +258,7 @@ namespace xo {
             }
 
             std::stringstream ss;
-            print_json.print(fw->snapshot(), &ss);
+            print_json.print(*fw.get(), &ss);
 
             const std::string frame = ss.str();
             INFO("frame: " << frame);
@@ -285,8 +292,6 @@ namespace xo {
             using HFloat = DObjectHandle<APrintable, DFloat>;
 
             PrintJson print_json;
-            xo::facet::reflect_flywheel_info();
-
             rp<AllocFlywheel> fw = make_fw("utest.frame.order");
             auto alloc = with_facet<AAllocator>::mkobj(&fw->storage());
 
@@ -304,7 +309,7 @@ namespace xo {
              */
 
             std::stringstream ss;
-            print_json.print(fw->snapshot(), &ss);
+            print_json.print(*fw.get(), &ss);
 
             const std::string frame = ss.str();
             INFO("frame: " << frame);

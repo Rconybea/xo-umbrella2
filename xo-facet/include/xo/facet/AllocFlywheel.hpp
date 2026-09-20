@@ -12,8 +12,6 @@
 #include <xo/refcnt/Displayable.hpp>
 
 namespace xo::facet {
-    class FlywheelInfo; // see facet/FlywheelInfo.hpp
-
     using xo::mm::DArenaVector;
 
     /** @brief memory flywheel for python bindings
@@ -61,6 +59,10 @@ namespace xo::facet {
         Indentlog2Appcx::CreationEvidence indentlog2appcx_creation_evidence() const { return indentlog2appcx_creation_evidence_; }
 
         DArena & storage() { return store_.storage(); }
+
+        /** the strong root set, for a reader that wants to render it.
+         **/
+        const HandleStore & strong_root_set() const { return store_; }
 
         /** report memory consumption, one @ref MemorySizeInfo per pool.
          *
@@ -113,14 +115,6 @@ namespace xo::facet {
          **/
         void remove_strong_ref(handle_index_type ix);
 
-        /** this flywheel's state as a wire model -- one animation frame.
-         *
-         *  See @ref FlywheelInfo for why this is a view model rather than
-         *  reflection of the representation.  Const, and allocating only in the
-         *  returned value: a frame must not disturb the pools it reports, and
-         *  in particular must not allocate from the flywheel's own arena.
-         **/
-        FlywheelInfo snapshot() const;
 
         /** count number of non-empty root slots. **/
         handle_index_type strong_root_count() const;

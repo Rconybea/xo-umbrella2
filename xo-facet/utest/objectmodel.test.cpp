@@ -6,7 +6,6 @@
 #include "FacetUtestAppcx.hpp"
 #include "xo/facet/FacetRegistry.hpp"
 #include "xo/facet/ObjectHandle.hpp"
-#include "xo/facet/FlywheelInfo.hpp"
 #include "xo/facet/Top.hpp"
 #include "xo/facet/OObject.hpp"
 #include "xo/facet/RRouter.hpp"
@@ -29,7 +28,6 @@ namespace xo {
     using xo::facet::ATop;
     using xo::facet::Opaque;
     using xo::facet::AllocFlywheel;
-    using xo::facet::FlywheelInfo;
     using xo::facet::DObjectHandle;
     using xo::facet::valid_abstract_facet;
     using xo::facet::valid_facet_implementation;
@@ -791,21 +789,24 @@ namespace xo {
             xo::facet::FacetRegistry::register_impl<AComplex, DRectCoords>();
 
             {
-                FlywheelInfo empty = fw->snapshot();
-
-                /* the pools the store reports, in its order */
-                REQUIRE(empty.pool_v_.size() == 3);
-                REQUIRE(empty.pool_v_[0].resource_name_ == std::string("utest.snap.storage"));
-                REQUIRE(empty.pool_v_[1].resource_name_ == std::string("utest.snap.strong"));
-                REQUIRE(empty.pool_v_[2].resource_name_ == std::string("utest.snap.strong-free"));
-
-                /* the root set is BORROWED since 2026-09-21, not copied into a
-                 * RootSetInfo.  A frame therefore reads it when it is PRINTED;
-                 * everything below goes through the same visitors the printer
-                 * uses, which is the point of asserting on them rather than on
-                 * a copy that no longer exists.
+                /* the pools the store reports, in its order.
+                 *
+                 * Read through visit_pools rather than a snapshot: FlywheelInfo
+                 * was retired 2026-09-21 along with AllocFlywheel::snapshot(),
+                 * and a frame is now produced by JsonPrinter_AllocFlywheel
+                 * walking these same visitors.  So this asserts on the path the
+                 * wire actually takes.
                  */
-                REQUIRE(empty.strong_ != nullptr);
+                std::vector<std::string> pool_name_v;
+
+                fw->visit_pools([&pool_name_v](const xo::mm::MemorySizeInfo & x) {
+                        pool_name_v.push_back(std::string(x.resource_name_));
+                    });
+
+                REQUIRE(pool_name_v.size() == 3);
+                REQUIRE(pool_name_v[0] == std::string("utest.snap.storage"));
+                REQUIRE(pool_name_v[1] == std::string("utest.snap.strong"));
+                REQUIRE(pool_name_v[2] == std::string("utest.snap.strong-free"));
 
                 REQUIRE(fw->strong_root_count() == 0);
                 /* the walk covers the high-water mark, not the population:

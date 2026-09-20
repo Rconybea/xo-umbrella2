@@ -5,7 +5,6 @@
 
 #include "AllocFlywheel.hpp"
 #include "TypeRegistry.hpp"
-#include "FlywheelInfo.hpp"
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
@@ -95,31 +94,6 @@ namespace xo::facet {
         store_.remove_strong_ref(ix);
     }
 
-    FlywheelInfo
-    AllocFlywheel::snapshot() const
-    {
-        FlywheelInfo retval;
-
-        /* pools first, in the order the store reports them, so pool_v_[0] is
-         * the storage arena and the root-set arenas follow.
-         *
-         * MemorySizeInfo reported AS-IS, not copied into a shadow struct: it is
-         * already the right shape, and reflecting it directly means there is
-         * nothing to keep in step.  Its detail_ is excluded by the reflection
-         * (see reflect_flywheel_info), not by copying around it.
-         */
-        store_.visit_pools([&retval](const MemorySizeInfo & x) {
-                retval.pool_v_.push_back(x);
-            });
-
-        /* the root set is BORROWED, not copied: the frame reads it when it
-         * is printed, not now.  See FlywheelInfo::strong_ -- retiring
-         * RootSetInfo is what removed the copy, and this is what it costs.
-         */
-        retval.strong_ = &store_;
-
-        return retval;
-    }
 
     auto
     AllocFlywheel::strong_root_count() const -> handle_index_type

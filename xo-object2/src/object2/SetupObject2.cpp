@@ -15,7 +15,6 @@
 #include <xo/facet/alloc/AAllocator.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/object2/number/IReflectable_DFloat.hpp>
-#include <xo/object2/reflect_flywheel_info.hpp>
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -69,11 +68,13 @@ namespace xo {
         {
             DFloat::reflect_self();
 
-            /* not object2's type -- xo-facet's.  Homed here because xo-facet
-             * cannot reach a StructReflector; see reflect_flywheel_info.hpp,
-             * which also says where it is expected to move.
+            /* reflect_flywheel_info() used to be called here: xo-facet's
+             * MemorySizeInfo/FlywheelInfo descriptions, homed in object2
+             * because xo-facet cannot reach a StructReflector.  Retired
+             * 2026-09-22 -- FlywheelInfo is gone, and MemorySizeInfo is
+             * reflected by PrintJson's constructor, beside the printer that
+             * needs it.  Nothing to call.
              */
-            xo::facet::reflect_flywheel_info();
         } /*reflect_types*/
 
         void

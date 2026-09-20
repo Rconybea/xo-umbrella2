@@ -19,11 +19,9 @@
 #include <xo/pyindentlog2/pyindentlog2.hpp>
 #include <xo/object2/Float.hpp>
 #include <xo/object2/SetupObject2.hpp>
-#include <xo/object2/reflect_flywheel_info.hpp>
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/facet/ObjectHandle.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
-#include <xo/facet/FlywheelInfo.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/ppsink/PpSink.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
@@ -123,18 +121,17 @@ namespace xo {
              */
             m.def("flywheel_frame",
                   [](const AllocFlywheel & fw) {
-                      /* idempotent; StructReflector's completion flag is
-                       * per-type and static
-                       */
-                      xo::facet::reflect_flywheel_info();
-
                       /* one PrintJson for the process.  A frame is a read, so
                        * nothing here should depend on which context asked.
+                       *
+                       * Constructing it is also what reflects MemorySizeInfo
+                       * and installs the flywheel printers -- until 2026-09-22
+                       * this had to call reflect_flywheel_info() first.
                        */
                       static xo::json::PrintJson s_pjson;
 
                       std::stringstream ss;
-                      s_pjson.print(fw.snapshot(), &ss);
+                      s_pjson.print(fw, &ss);
 
                       return ss.str();
                   },

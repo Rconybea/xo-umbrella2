@@ -14,6 +14,8 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 
 xo_dependency(${SELF_LIB} reflect)
 xo_dependency(${SELF_LIB} xo_reflectable2)
+xo_dependency(${SELF_LIB} xo_facet)
+xo_dependency(${SELF_LIB} xo_arena)
 # PrintJson.cpp uses xo::pp::{xtag,iso8601}; no public header needs it.
 xo_dependency(${SELF_LIB} xo_ppsink)
 
