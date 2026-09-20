@@ -11,7 +11,7 @@
 namespace xo::mm {
     AllocFlywheel::AllocFlywheel(const FacetAppcx & facet_appcx,
                                  DArena && storage,
-                                 DArenaVector<obj<ATop>> && strong,
+                                 DArenaVector<ObjectSlot> && strong,
                                  DArenaVector<handle_index_type> && strong_freelist)
     : facetappcx_creation_evidence_{facet_appcx.creation_evidence()},
       indentlog2appcx_creation_evidence_{facet_appcx.indentlog2appcx_creation_evidence()},
@@ -48,18 +48,23 @@ namespace xo::mm {
 
     rp<AllocFlywheel>
     AllocFlywheel::make_app(const FacetAppcx & appcx,
-                            const ArenaConfig & storage_cfg,
+                            const ArenaConfig & storage_cfg_in,
                             const ArenaConfig & strong_cfg)
     {
-        auto strong = DArenaVector<obj<ATop>>::map(strong_cfg);
+        auto strong = DArenaVector<ObjectSlot>::map(strong_cfg);
         auto strong_freelist = make_freelist(strong_cfg, strong.capacity());
+
+        ArenaConfig storage_cfg
+            = (storage_cfg_in
+               .with_store_header_flag(true)
+               .with_base_align_z(appcx.config().storage_base_align()));
 
         /* alloc headers forced on, overriding whatever the caller asked for.
          * DHandleStore requires them (see its ctor), so honouring a false here
          * would only produce a throw one layer down.
          */
         return new AllocFlywheel(appcx,
-                                 DArena::map(storage_cfg.with_store_header_flag(true)),
+                                 DArena::map(storage_cfg),
                                  std::move(strong), std::move(strong_freelist));
     }
 

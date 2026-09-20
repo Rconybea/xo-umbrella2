@@ -12,6 +12,24 @@
 #include <string>
 
 namespace xo::mm {
+    /** @brief Common base class for DHandleStore<Storage,Handle>
+     **/
+    class DHandleStoreBase {
+    public:
+        /** assign static base alignment for handle storage **/
+        static void assign_storage_base_align(std::size_t z) { s_storage_base_align = z; }
+
+    protected:
+        /** base alignment for storage.
+         *  allows recovering DArena from an allocated address
+         *  within that arena.
+         *
+         *  (@see FacetConfig::storage_base_align_)
+         **/
+        static std::size_t s_storage_base_align;
+
+    };
+
     /** @tparam Storage provides allocator api with explicit clear.
      *  @tparam Handle represents a generic object reference.
      *  Expect this to be something like obj<ATop> or obj<AGCObject>
@@ -34,7 +52,7 @@ namespace xo::mm {
      **/
     template <typename Storage,
               typename Handle>
-    class DHandleStore {
+    class DHandleStore : public DHandleStoreBase {
     public:
         /** @defgroup mm-handlestore-types **/
         ///@{
@@ -66,17 +84,7 @@ namespace xo::mm {
              *
              * DArena::alloc_info() reads the header that store_header_flag_
              * controls.  Without it the read is not a graceful failure -- it
-             * SEGFAULTS (measured 2026-09-15), and alloc_info() is reachable
-             * from ~10 sites including RAllocator::alloc_info and
-             * DArenaIterator.  So a headerless storage arena is a crash waiting
-             * for whoever first asks an allocation how big it is.
-             *
-             * Checked here rather than left to AllocFlywheel::make_app, which
-             * also sets it: this is the class that owns the invariant, and a
-             * direct construction must not be able to skip it.
-             *
-             * Cost, for the record: 8 bytes per allocation, and every offset
-             * shifts (a 16-byte object goes from 0,16 to 8,32).
+             * SEGFAULTS (measured 2026-09-15),
              */
             if (!storage_.config().store_header_flag_) {
                 throw std::runtime_error
@@ -84,6 +92,12 @@ namespace xo::mm {
                                  " headers enabled -- see"
                                  " ArenaConfig::with_store_header_flag; arena=")
                      + std::string(this->name()));
+            }
+
+            if (storage_.config().base_align_z_ == 0) {
+                throw std::runtime_error
+                          (std::string("DHandleStore: storage arena must have non-zero base alignment")
+                           + std::string(this->name()));
             }
         }
 

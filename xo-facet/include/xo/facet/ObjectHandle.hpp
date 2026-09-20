@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AllocFlywheel.hpp"
+#include "xo/facet/handlestore/ObjectSlot.hpp"
 #include <xo/refcnt/Displayable.hpp>
 
 namespace xo::facet {
@@ -72,6 +73,7 @@ namespace xo::facet {
     class DObjectHandle : public ObjectHandleBase {
     public:
         using object_type = obj<AFacet, DRepr>;
+        using ObjectSlot = xo::mm::ObjectSlot;
 
     public:
         DObjectHandle(rp<AllocFlywheel> mem,
@@ -94,7 +96,7 @@ namespace xo::facet {
              *
              * Necessary so polymorphic methods reach the right DRepr.
              */
-            obj<ATop> impl_obj(static_cast<const ATop *>(x.iface()), x.opaque_data());
+            ObjectSlot impl_obj(static_cast<const ATop *>(x.iface()), x.opaque_data());
 
             auto ref = mem->add_strong_ref(impl_obj);
 

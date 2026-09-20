@@ -9,6 +9,8 @@ set(SELF_SRCS
     IAllocIterator_Any.cpp
 	AllocFlywheel.cpp
 	ObjectHandle.cpp
+	ObjectSlot.cpp
+	DHandleStore.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

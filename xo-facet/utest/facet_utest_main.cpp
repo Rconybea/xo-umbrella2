@@ -24,6 +24,10 @@ namespace {
     constexpr uint32_t c_type_registry_capacity = 1024;
     /** capacity for thread-local scratch arena behind tostr()/toppstr() **/
     constexpr uint32_t c_temp_arena_capacity = 64 * 1024;
+    /** alignment base for object store (must be 2^k, k>0).
+     *  universal hard cap for refcounted storage pools
+     **/
+    constexpr uint32_t c_storage_base_align = 1024 * 1024;
 }
 
 int
@@ -50,7 +54,8 @@ main(int argc, char* argv[])
                              (ArenaConfig().with_size(1024 * 1024)),
                          c_temp_arena_capacity),
         FacetConfig(c_facet_registry_capacity,
-                    c_type_registry_capacity)};
+                    c_type_registry_capacity,
+                    c_storage_base_align)};
 
     FacetUtestAppcx::configure(utest_cfg);
 

@@ -51,7 +51,8 @@ main(int argc, char* argv[])
                              (ArenaConfig().with_size(1024 * 1024)),
                          64 * 1024 /*c_temp_arena_capacity*/),
         FacetConfig(1024 /*c_facet_registry_capacity*/,
-                    1024 /*c_type_registry_capacity*/)};
+                    1024 /*c_type_registry_capacity*/,
+                    1024 * 1204 /*c_storage_base_align*/)};
     UtestAppContext utest_appcx{utest_config};
 
     app.setup(); // calls Subsystem::initialize_all()

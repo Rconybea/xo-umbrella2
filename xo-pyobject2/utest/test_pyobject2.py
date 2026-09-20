@@ -400,12 +400,13 @@ class ConfigurationContractTestCase(unittest.TestCase):
     def test_supplied_config_is_honored(self):
         r = self.run_in_fresh_interpreter(
             "import xo.indentlog2 as il, xo.facet as f\n"
-            "cx = f.configure_all(f.FacetConfig(4096, 8192),\n"
+            "cx = f.configure_all(f.FacetConfig(4096, 8192, 1024*1024),\n"
             "                     il.Indentlog2Config(il.PpConfig.plain(), 32*1024))\n"
             "c = cx.config()\n"
             "print(c.facet_registry_capacity(), c.type_registry_capacity(),\n"
+            "      c.storage_base_align(),\n"
             "      cx.indentlog2_appcx().config().temp_arena_capacity())\n")
-        self.assertEqual(r.stdout.split(), ["4096", "8192", "32768"])
+        self.assertEqual(r.stdout.split(), ["4096", "8192", "1048576", "32768"])
 
     def test_zero_reservation_config_is_rejected(self):
         """a sink that could never accept a byte is refused at construction"""

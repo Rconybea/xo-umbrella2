@@ -4,8 +4,10 @@
  **/
 
 #include "cx/FacetAppcx.hpp"
+#include "handlestore/DHandleStore.hpp"
 
 namespace xo {
+    using xo::mm::DHandleStoreBase;
 
     constexpr uint64_t c_facetappcx_creation_secret = 0x1234;
 
@@ -17,7 +19,9 @@ namespace xo {
         facet_registry_{FacetRegistry::instance(cfg.facet_registry_capacity())},
         type_registry_{TypeRegistry::instance(cfg.type_registry_capacity())},
         indentlog2_appcx_{ilog2_appcx}
-    {}
+    {
+        DHandleStoreBase::assign_storage_base_align(cfg.storage_base_align());
+    }
 
     Indentlog2Appcx::CreationEvidence
     FacetAppcx::indentlog2appcx_creation_evidence() const

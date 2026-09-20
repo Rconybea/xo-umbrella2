@@ -7,6 +7,7 @@
 
 #include "cx/FacetAppcx.hpp"
 #include "handlestore/DHandleStore.hpp"
+#include "handlestore/ObjectSlot.hpp"
 #include "Top.hpp"
 #include <xo/refcnt/Displayable.hpp>
 
@@ -20,7 +21,7 @@ namespace xo::mm {
     class AllocFlywheel : public xo::ref::Displayable {
     public:
         using ATop = xo::facet::ATop;
-        using HandleStore = DHandleArena<obj<ATop>>;
+        using HandleStore = DHandleArena<ObjectSlot>;  // was obj<ATop>
         using handle_type = typename HandleStore::handle_type;
         using handle_index_type = typename HandleStore::handle_index_type;
         using PpSink = xo::pp::PpSink;
@@ -29,7 +30,7 @@ namespace xo::mm {
     public:
         AllocFlywheel(const FacetAppcx & appcx,
                       DArena && storage,
-                      DArenaVector<obj<ATop>> && strong,
+                      DArenaVector<ObjectSlot> && strong,
                       DArenaVector<handle_index_type> && strong_freelist);
 
         /** Create new instance from configuration.

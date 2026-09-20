@@ -153,9 +153,10 @@ namespace xo {
             // configure() builds the context, from python-supplied capacities.
 
             py::class_<FacetConfig>(m, "FacetConfig")
-                .def(py::init<std::uint32_t, std::uint32_t>(),
+                .def(py::init<std::uint32_t, std::uint32_t, std::uint32_t>(),
                      py::arg("facet_registry_capacity"),
                      py::arg("type_registry_capacity"),
+                     py::arg("storage_base_align"),
                      "configuration for the xo-facet subsystem")
                 /* the defaults live in c++ (FacetConfig::make_default), so python and
                  * a c++ main() get the same ones -- rather than this binding
@@ -165,6 +166,7 @@ namespace xo {
                             "default configuration")
                 .def("facet_registry_capacity", &FacetConfig::facet_registry_capacity)
                 .def("type_registry_capacity", &FacetConfig::type_registry_capacity)
+                .def("storage_base_align", &FacetConfig::storage_base_align)
                 .def("__repr__",
                      [](const FacetConfig & x) {
                          return ("<FacetConfig facet_registry_capacity="
