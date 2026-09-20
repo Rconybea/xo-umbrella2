@@ -76,6 +76,44 @@ namespace xo {
             static std::unique_ptr<TypeDescrExtra> make();
         };
 
+        // ----- T * (raw pointer) -----
+
+        /** @brief reflect a raw pointer as a pointer, like @c rp<Object>
+         *
+         *  See .xo-backlog/xo-reflect/issues/01.  Function pointers are NOT
+         *  captured by this: @c EstablishTdx<Retval (*)(Args...)> below is a
+         *  more specialised match, and partial ordering prefers it.
+         **/
+        template<typename T>
+        class EstablishTdx<T *> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        /* char strings are TEXT, not pointers-to-char.  Full specialisations,
+         * so they out-rank the T* partial one above; returning AtomicTdx is
+         * restating the primary template, which is exactly what "exempt"
+         * means here.  Rendering them as quoted strings is the printer's job.
+         *
+         * Deliberately NOT exempted: std::byte*, unsigned char* and the rest.
+         * They are memory, not text (DArena::Checkpoint::free_ is a live
+         * std::byte*), and if they should read as addresses that is a printer
+         * registration, not a Tdx specialisation -- the way const void*
+         * already works.
+         */
+        template<>
+        class EstablishTdx<char *> {
+        public:
+            static std::unique_ptr<TypeDescrExtra> make() { return AtomicTdx::make(); }
+        };
+
+        template<>
+        class EstablishTdx<const char *> {
+        public:
+            static std::unique_ptr<TypeDescrExtra> make() { return AtomicTdx::make(); }
+        };
+
         // ----- xo::mm::DArenaVector<Element> -----
 
         template<typename Element>
@@ -345,6 +383,28 @@ namespace xo {
             Reflect::require<Element>();
 
             return StdVectorTdx<Element>::make();
+        } /*make*/
+
+        // ----- T * (raw pointer) -----
+
+        /* declared above before
+         *   class Reflect { .. }
+         */
+        template<typename T>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<T *>::make() {
+            /* need to ensure the pointee is reflected.  cv-stripped, so Foo*
+             * and const Foo* share one pointee TypeDescr whose canonical name
+             * does not depend on which was established first -- see
+             * RawPointerTdx::pointee_t.
+             *
+             * NB this makes the POINTEE's completeness a requirement of
+             * reflecting the pointer, since establish<> takes typeid(T).  Same
+             * bargain RefPointerTdx makes for rp<Object>.
+             */
+            Reflect::require<std::remove_cv_t<T>>();
+
+            return RawPointerTdx<T>::make();
         } /*make*/
 
         // ----- xo::mm::DArenaVector<Element> -----

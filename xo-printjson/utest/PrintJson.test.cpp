@@ -44,6 +44,100 @@ namespace xo {
             }
         }
 
+        namespace {
+            struct DPtrTarget {
+                double v_;
+            };
+
+            /** a struct with a RAW POINTER member -- the shape
+             *  .xo-backlog/xo-reflect/issues/01 exists for.  FlywheelInfo
+             *  ::strong_ is the real instance of it.
+             **/
+            struct DPtrHolder {
+                const DPtrTarget * p_;
+            };
+
+            void reflect_ptr_types() {
+                static bool s_once = []() {
+                    {
+                        StructReflector<DPtrTarget> sr;
+                        sr.reflect_member("v", &DPtrTarget::v_);
+                        sr.require_complete();
+                    }
+                    {
+                        StructReflector<DPtrHolder> sr;
+                        sr.reflect_member("p", &DPtrHolder::p_);
+                        sr.require_complete();
+                    }
+                    return true;
+                }();
+                (void)s_once;
+            }
+        }
+
+        TEST_CASE("print-json-raw-pointer-member", "[printjson][rawpointer]") {
+            /* the member renders as its POINTEE, not as an address and not as
+             * an opaque atom.  Before raw pointers were reflected this printed
+             * <error-json-printer-not-found ... mt_atomic>.
+             */
+            reflect_ptr_types();
+
+            PrintJson print_json;
+
+            DPtrTarget target{1.5};
+            DPtrHolder holder{&target};
+
+            std::stringstream ss;
+            print_json.print(holder, &ss);
+
+            REQUIRE(ss.str() == std::string(
+                        "{\"_name_\": \"DPtrHolder\""
+                        ", \"p\": {\"_name_\": \"DPtrTarget\", \"v\": 1.5}}"));
+        } /*TEST_CASE(print-json-raw-pointer-member)*/
+
+        TEST_CASE("print-json-null-raw-pointer-member", "[printjson][rawpointer]") {
+            /* json null, not "{}".  print_generic_pointer emitted "{}" until
+             * 2026-09-21, distinguishable from a real struct only by the
+             * absent _name_ member.
+             */
+            reflect_ptr_types();
+
+            PrintJson print_json;
+
+            DPtrHolder holder{nullptr};
+
+            std::stringstream ss;
+            print_json.print(holder, &ss);
+
+            REQUIRE(ss.str() == std::string("{\"_name_\": \"DPtrHolder\", \"p\": null}"));
+        } /*TEST_CASE(print-json-null-raw-pointer-member)*/
+
+        TEST_CASE("print-json-null-c-string", "[printjson][rawpointer]") {
+            /* REGRESSION: quot(nullptr) segfaulted.  char* and const char*
+             * have been registered with provide_string_printer since long
+             * before raw-pointer reflection, so this was reachable already --
+             * it just had no test.  Measured as a crash 2026-09-21.
+             */
+            PrintJson print_json;
+
+            const char * s = nullptr;
+
+            std::stringstream ss;
+            print_json.print(s, &ss);
+
+            REQUIRE(ss.str() == std::string("null"));
+
+            /* a non-null one still renders as a quoted string, i.e. the
+             * exemption from T* held
+             */
+            const char * t = "abc";
+
+            std::stringstream ss2;
+            print_json.print(t, &ss2);
+
+            REQUIRE(ss2.str() == std::string("\"abc\""));
+        } /*TEST_CASE(print-json-null-c-string)*/
+
         /* DArenaVector reflects as mt_vector since
          * .xo-backlog/xo-reflect/issues/02.  The point of these two cases is
          * that printjson needed NO change to render it: print_generic_vector

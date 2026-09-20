@@ -15,6 +15,7 @@
 #include <xo/ppsink/pp_time_ostream.hpp>    /* os << iso8601(..) */
 #include <xo/timeutil/timeutil.hpp>
 #include <cmath>
+#include <type_traits>
 
 namespace xo {
     using xo::time::utc_nanos;
@@ -72,10 +73,15 @@ namespace xo {
                 if (tp.n_child()) {
                     print_json.print_aux(tp.get_child(0), p_os);
                 } else {
-                    /* note: this can be distinguished from a bona fide struct,
-                     * b/c it doesn't supply the _name_ member
+                    /* was "{}" until 2026-09-21, distinguishable from a real
+                     * struct only by the absent _name_ member.  json null says
+                     * the same thing without asking a consumer to notice an
+                     * absence, and it is what the bespoke pointer printers
+                     * (JsonPrinter_ObjectSlot, JsonPrinter_RootSet) already
+                     * emit -- so routing a pointer through this path is no
+                     * longer a change in what a null looks like.
                      */
-                    *p_os << "{}";
+                    *p_os << "null";
                 }
             } /*print_generic_pointer*/
 
@@ -368,6 +374,24 @@ namespace xo {
                 T * x = tp.recover_native<T>();
 
                 if (x) {
+                    if constexpr (std::is_pointer_v<T>) {
+                        /* a null char pointer.  Rendering it as json null
+                         * rather than "" keeps it distinguishable from an
+                         * empty string, and -- the reason this branch exists
+                         * -- quot(nullptr) SEGFAULTS.  Measured 2026-09-21;
+                         * both char pointer types have been registered here
+                         * since before that, so this was live.
+                         *
+                         * Reachable because raw pointers are reflected as of
+                         * .xo-backlog/xo-reflect/issues/01, which made it
+                         * worth fixing rather than noting.
+                         */
+                        if (*x == nullptr) {
+                            *p_os << "null";
+                            return;
+                        }
+                    }
+
                     /* TODO: escapes special characters */
                     *p_os << quot(*x);
                 } else {
@@ -563,12 +587,16 @@ namespace xo {
 
         /** @brief json printer for a flywheel's strong root set
          *
-         *  Keyed on the POINTER type @c const DHandleArena<ObjectSlot>*, which
-         *  is how @c FlywheelInfo::strong_ is declared.  Not on the pointee:
-         *  a raw pointer has no @c EstablishTdx specialisation, so it reflects
-         *  as an atom and never reaches @c print_generic_pointer's dispatch to
-         *  a child.  (@c rp<T> and @c obj<AFacet,DRepr> do have one, which is
-         *  what that path exists for.)
+         *  Keyed on the POINTEE, @c DHandleArena<ObjectSlot>.
+         *
+         *  It was keyed on the POINTER until 2026-09-21, doing its own
+         *  dereference, because a raw pointer had no @c EstablishTdx
+         *  specialisation and so reflected as an atom -- never reaching
+         *  @c print_generic_pointer's dispatch to a child.  Raw pointers are
+         *  reflected now (.xo-backlog/xo-reflect/issues/01), so
+         *  @c FlywheelInfo::strong_ takes that path and arrives here already
+         *  dereferenced.  A null @c strong_ is handled by that path, which
+         *  renders json null.
          *
          *  This printer is what retired @c RootSetInfo on 2026-09-21.  That
          *  struct held size/capacity/live/free/slots, copied out of the store
@@ -594,21 +622,10 @@ namespace xo {
 
             virtual void print_json(TaggedPtr tp,
                                     std::ostream * p_os) const override {
-                const RootSet ** pp
-                    = this->check_recover_native<const RootSet *>(tp, p_os);
+                const RootSet * rs = this->check_recover_native<RootSet>(tp, p_os);
 
-                if (!pp)
+                if (!rs)
                     return;
-
-                const RootSet * rs = *pp;
-
-                if (!rs) {
-                    /* a frame that was never populated.  Distinguishable from
-                     * an EMPTY root set, which still reports its capacity
-                     */
-                    *p_os << "null";
-                    return;
-                }
 
                 *p_os << "{"
                       << "\"_name_\": " << quot("RootSet")
@@ -663,7 +680,10 @@ namespace xo {
 
                 std::unique_ptr<JsonPrinter> printer(new JsonPrinter_RootSet(p_json));
 
-                p_json->provide_printer(Reflect::require<const RootSet *>(),
+                /* the POINTEE.  FlywheelInfo::strong_ is a const RootSet*,
+                 * which reaches this through print_generic_pointer
+                 */
+                p_json->provide_printer(Reflect::require<RootSet>(),
                                         std::move(printer));
             } /*provide_root_set_printer*/
         } /*namespace*/

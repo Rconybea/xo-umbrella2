@@ -216,10 +216,16 @@ namespace xo {
             std::stringstream ss;
             print_json.print(Reflect::make_tp(&o), &ss);
 
-            /* print_generic_pointer emits {} when there are no children;
-             * distinguishable from a struct because it has no _name_ member
+            /* print_generic_pointer emits json null when there are no
+             * children.  It emitted "{}" until 2026-09-21 -- distinguishable
+             * from a real struct only by the ABSENT _name_ member, which asks
+             * a consumer to notice an absence.
+             *
+             * An empty fop is now spelled the same way an empty ObjectSlot
+             * already was, which matters because an ObjectSlot IS an erased
+             * fop: two spellings for one condition was the actual defect.
              */
-            REQUIRE(ss.str() == std::string("{}"));
+            REQUIRE(ss.str() == std::string("null"));
         } /*TEST_CASE(print-json-empty-fop-object)*/
 
         TEST_CASE("print-obj-matches-a-hand-built-tagged-ptr", "[printjson]") {
@@ -263,7 +269,7 @@ namespace xo {
             REQUIRE(via_fast.str() == via_generic.str());
         } /*TEST_CASE(print-obj-fast-path-agrees-with-the-generic-one)*/
 
-        TEST_CASE("print-obj-renders-an-empty-fop-as-braces", "[printjson]") {
+        TEST_CASE("print-obj-renders-an-empty-fop-as-null", "[printjson]") {
             /* the fast path's guard.  An EMPTY obj<AReflectable> carries
              * IReflectable_Any for its iface, whose self_tp() terminates, so
              * the fast path must fall through to the generic one.
@@ -277,8 +283,9 @@ namespace xo {
             std::stringstream ss;
             print_json.print_obj(empty, &ss);
 
-            REQUIRE(ss.str() == std::string("{}"));
-        } /*TEST_CASE(print-obj-renders-an-empty-fop-as-braces)*/
+            /* null since 2026-09-21; see print-json-empty-fop-object */
+            REQUIRE(ss.str() == std::string("null"));
+        } /*TEST_CASE(print-obj-renders-an-empty-fop-as-null)*/
 
         TEST_CASE("print-obj-fast-path-skips-the-registry", "[printjson]") {
             /* The check that the fast path is actually TAKEN.  Comparing its

@@ -7,6 +7,7 @@ set(SELF_SOURCE_FILES
     VectorTdx.test.cpp
     StructTdx.test.cpp
     FunctionTdx.test.cpp
+    PointerTdx.test.cpp
     TypeDescr_pp.test.cpp
     ostream_baseline.test.cpp)
 
