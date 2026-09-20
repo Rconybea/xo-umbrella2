@@ -6,7 +6,7 @@
 #pragma once
 
 namespace xo {
-    namespace mm {
+    namespace facet {
         /** describe @ref FlywheelInfo and its parts to xo-reflect, so a frame
          *  can be rendered as json.
          *
@@ -38,7 +38,7 @@ namespace xo {
          *  static, so calling this twice is harmless.
          **/
         void reflect_flywheel_info();
-    } /*namespace mm*/
+    } /*namespace facet*/
 } /*namespace xo*/
 
 /* end reflect_flywheel_info.hpp */

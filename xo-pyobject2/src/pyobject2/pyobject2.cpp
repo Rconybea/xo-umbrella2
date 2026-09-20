@@ -32,10 +32,10 @@
 namespace xo {
     namespace py = pybind11;
 
+    using xo::facet::AllocFlywheel;
     using xo::facet::DObjectHandle;
     using xo::facet::with_facet;
     using xo::mm::AAllocator;
-    using xo::mm::AllocFlywheel;
     using xo::pp::TempPpSink;
     using xo::pp::PpSink;
     using xo::print::APrintable;
@@ -125,7 +125,7 @@ namespace xo {
                       /* idempotent; StructReflector's completion flag is
                        * per-type and static
                        */
-                      xo::mm::reflect_flywheel_info();
+                      xo::facet::reflect_flywheel_info();
 
                       /* one PrintJson for the process.  A frame is a read, so
                        * nothing here should depend on which context asked.

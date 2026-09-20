@@ -39,14 +39,14 @@ namespace xo {
     using xo::scm::DFloat;
     using xo::scm::SetupObject2;
     using xo::json::PrintJson;
-    using xo::mm::AllocFlywheel;
-    using xo::mm::ArenaConfig;
-    using xo::mm::ArenaNameStr;
-    using xo::mm::FlywheelInfo;
-    using xo::reflect::Metatype;
-    using xo::reflect::Reflect;
+    using xo::facet::AllocFlywheel;
+    using xo::facet::FlywheelInfo;
     using xo::facet::DObjectHandle;
     using xo::facet::with_facet;
+    using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
+    using xo::reflect::Metatype;
+    using xo::reflect::Reflect;
     using xo::mm::AAllocator;
     using xo::print::APrintable;
 
@@ -89,7 +89,7 @@ namespace xo {
 
         TEST_CASE("flywheel-info-reflects-as-a-struct", "[printjson][flywheel]")
         {
-            xo::mm::reflect_flywheel_info();
+            xo::facet::reflect_flywheel_info();
 
             auto td = Reflect::require<FlywheelInfo>();
 
@@ -107,7 +107,7 @@ namespace xo {
         TEST_CASE("empty-flywheel-renders-a-frame", "[printjson][flywheel]")
         {
             PrintJson print_json;
-            xo::mm::reflect_flywheel_info();
+            xo::facet::reflect_flywheel_info();
 
             rp<AllocFlywheel> fw = make_fw("utest.frame.empty");
 
@@ -172,7 +172,7 @@ namespace xo {
             using HFloat = DObjectHandle<APrintable, DFloat>;
 
             PrintJson print_json;
-            xo::mm::reflect_flywheel_info();
+            xo::facet::reflect_flywheel_info();
 
             rp<AllocFlywheel> fw = make_fw("utest.frame.live");
             auto alloc = with_facet<AAllocator>::mkobj(&fw->storage());
@@ -225,7 +225,7 @@ namespace xo {
             using HFloat = DObjectHandle<APrintable, DFloat>;
 
             PrintJson print_json;
-            xo::mm::reflect_flywheel_info();
+            xo::facet::reflect_flywheel_info();
 
             rp<AllocFlywheel> fw = make_fw("utest.frame.free");
             auto alloc = with_facet<AAllocator>::mkobj(&fw->storage());

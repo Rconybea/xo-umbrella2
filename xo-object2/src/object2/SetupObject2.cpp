@@ -73,7 +73,7 @@ namespace xo {
              * cannot reach a StructReflector; see reflect_flywheel_info.hpp,
              * which also says where it is expected to move.
              */
-            xo::mm::reflect_flywheel_info();
+            xo::facet::reflect_flywheel_info();
         } /*reflect_types*/
 
         void

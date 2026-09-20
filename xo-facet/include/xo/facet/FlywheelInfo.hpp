@@ -10,7 +10,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace xo::mm {
+namespace xo::facet {
     /** @defgroup mm-flywheelinfo a flywheel's state, as a wire model
      *
      *  These types are a VIEW MODEL, not a description of
@@ -132,7 +132,7 @@ namespace xo::mm {
          *
          *  @c pool_v_[0] is the arena @ref SlotInfo::offset_ is relative to.
          **/
-        std::vector<MemorySizeInfo> pool_v_;
+        std::vector<xo::mm::MemorySizeInfo> pool_v_;
         /** the strong root set.  Singular since 2026-09-13, when the weak set
          *  was retired (see .xo-backlog/pyobject2/issues/02); a vector here
          *  rather than a second member would invite it back
@@ -141,6 +141,6 @@ namespace xo::mm {
     };
 
     ///@}
-} /*namespace xo::mm*/
+} /*namespace xo::facet*/
 
 /* end FlywheelInfo.hpp */

@@ -7,7 +7,7 @@
 
 #include "xo/facet/Top.hpp"
 
-namespace xo::mm {
+namespace xo::facet {
 
     /** @brief representation for an AllocFlywhell root pointer
      *
@@ -42,6 +42,6 @@ namespace xo::mm {
         ObjectSlot(const ATop * iface, void * data) : obj<ATop>{iface, data} {}
         explicit ObjectSlot(const obj<ATop> & x) : obj<ATop>{x} {}
     };
-} /*namespace xo::mm*/
+} /*namespace xo::facet*/
 
 /* end ObjectSlot.hpp */

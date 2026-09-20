@@ -23,7 +23,6 @@ namespace xo::facet {
      **/
     class ObjectHandleBase {
     public:
-        using AllocFlywheel = xo::mm::AllocFlywheel;
         using FacetAppcx = xo::FacetAppcx;
         using Indentlog2Appcx = xo::Indentlog2Appcx;
         using impl_handle_type = AllocFlywheel::handle_type;
@@ -73,7 +72,6 @@ namespace xo::facet {
     class DObjectHandle : public ObjectHandleBase {
     public:
         using object_type = obj<AFacet, DRepr>;
-        using ObjectSlot = xo::mm::ObjectSlot;
 
     public:
         DObjectHandle(rp<AllocFlywheel> mem,

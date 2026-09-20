@@ -8,7 +8,10 @@
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 
-namespace xo::mm {
+namespace xo::facet {
+    using xo::mm::ArenaConfig;
+    using xo::mm::MemorySizeInfo;
+
     AllocFlywheel::AllocFlywheel(const FacetAppcx & facet_appcx,
                                  DArena && storage,
                                  DArenaVector<ObjectSlot> && strong,
@@ -153,6 +156,6 @@ namespace xo::mm {
 
         return tostr(rp<AllocFlywheel>(self));
     }
-} /*namespace xo::mm*/
+} /*namespace xo::facet*/
 
 /* end AllocFlywheel.cpp */

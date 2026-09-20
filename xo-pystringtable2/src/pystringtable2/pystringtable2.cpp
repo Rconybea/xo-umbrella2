@@ -20,10 +20,10 @@
 namespace xo {
     namespace py = pybind11;
 
+    using xo::facet::AllocFlywheel;
     using xo::facet::DObjectHandle;
     using xo::facet::with_facet;
     using xo::mm::AAllocator;
-    using xo::mm::AllocFlywheel;
     using xo::pp::TempPpSink;
     using xo::pp::PpSink;
     using xo::print::APrintable;

@@ -7,7 +7,7 @@
 #include "handlestore/DHandleStore.hpp"
 
 namespace xo {
-    using xo::mm::DHandleStoreBase;
+    using xo::facet::DHandleStoreBase;
 
     constexpr uint64_t c_facetappcx_creation_secret = 0x1234;
 

@@ -11,7 +11,9 @@
 #include "Top.hpp"
 #include <xo/refcnt/Displayable.hpp>
 
-namespace xo::mm {
+namespace xo::facet {
+    using xo::mm::DArenaVector;
+
     /** @brief memory flywheel for python bindings
      *
      *  Consolidated memory pool and reference set,
@@ -25,6 +27,8 @@ namespace xo::mm {
         using handle_type = typename HandleStore::handle_type;
         using handle_index_type = typename HandleStore::handle_index_type;
         using PpSink = xo::pp::PpSink;
+        using DArena = xo::mm::DArena;
+        using ArenaConfig = xo::mm::ArenaConfig;
         using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
     public:
@@ -109,6 +113,6 @@ namespace xo::mm {
         HandleStore store_;
     };
 
-} /*namespace xo::mm*/
+} /*namespace xo::facet*/
 
 /* end AllocFlywheel.hpp */

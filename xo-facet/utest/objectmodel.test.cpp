@@ -23,8 +23,13 @@
 
 namespace xo {
     using xo::FacetAppcx;
+    using xo::carries_facet_appcx;
+    using xo::carries_indentlog2_appcx;
     using xo::facet::ATop;
     using xo::facet::Opaque;
+    using xo::facet::AllocFlywheel;
+    using xo::facet::FlywheelInfo;
+    using xo::facet::DObjectHandle;
     using xo::facet::valid_abstract_facet;
     using xo::facet::valid_facet_implementation;
     using xo::facet::FacetImplementation;
@@ -36,6 +41,8 @@ namespace xo {
     using xo::facet::typeseq;
     using xo::facet::obj;
     using xo::facet::with_facet;
+    using xo::mm::ArenaConfig;
+    using xo::mm::ArenaNameStr;
 
     // ------ AComplex -----
 
@@ -542,11 +549,6 @@ namespace xo {
          **/
         TEST_CASE("witness-chain", "[facet][witness]")
         {
-            using xo::carries_facet_appcx;
-            using xo::carries_indentlog2_appcx;
-            using xo::mm::AllocFlywheel;
-            using xo::facet::DObjectHandle;
-
             /* the contexts themselves */
             static_assert(carries_indentlog2_appcx<xo::FacetAppcx>);
 
@@ -575,10 +577,6 @@ namespace xo {
          **/
         TEST_CASE("objecthandle-nontop-facet", "[facet][objecthandle]")
         {
-            using xo::mm::AllocFlywheel;
-            using xo::mm::ArenaConfig;
-            using xo::facet::DObjectHandle;
-
             FacetAppcx & facet_appcx = FacetUtestAppcx::appcx().cx<S_facet_tag>();
             ArenaConfig storage_cfg{ .name_ = flatstring("utest.oh.storage"), .size_ = 16*1024 };
             ArenaConfig strong_cfg { .name_ = flatstring("utest.oh.strong"),  .size_ =  4*1024 };
@@ -618,11 +616,7 @@ namespace xo {
              *  legibly; this holds far fewer, and the tests below derive the
              *  actual number rather than assuming one.
              **/
-            rp<xo::mm::AllocFlywheel> make_small_flywheel(const char * tag) {
-                using xo::mm::AllocFlywheel;
-                using xo::mm::ArenaConfig;
-                using xo::mm::ArenaNameStr;
-
+            rp<AllocFlywheel> make_small_flywheel(const char * tag) {
                 FacetAppcx & facet_appcx = FacetUtestAppcx::appcx().cx<S_facet_tag>();
 
                 ArenaConfig storage_cfg{ .name_ = ArenaNameStr::sprintf("%s.storage", tag),
@@ -634,7 +628,7 @@ namespace xo {
             }
 
             /** a DRectCoords in @p fw's arena, as make_strong_ref requires **/
-            DRectCoords * alloc_rect(rp<xo::mm::AllocFlywheel> & fw, double x, double y) {
+            DRectCoords * alloc_rect(rp<AllocFlywheel> & fw, double x, double y) {
                 auto * mem = fw->storage().alloc(typeseq::id<DRectCoords>(),
                                                  sizeof(DRectCoords));
                 REQUIRE(mem != nullptr);
@@ -648,7 +642,7 @@ namespace xo {
             using xo::facet::DObjectHandle;
             using H = DObjectHandle<AComplex, DRectCoords>;
 
-            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.rel");
+            rp<AllocFlywheel> fw = make_small_flywheel("utest.rel");
 
             REQUIRE(fw->strong_root_count() == 0);
 
@@ -677,7 +671,7 @@ namespace xo {
             using xo::facet::DObjectHandle;
             using H = DObjectHandle<AComplex, DRectCoords>;
 
-            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.mv");
+            rp<AllocFlywheel> fw = make_small_flywheel("utest.mv");
 
             {
                 auto h = H::make_strong_ref(fw, obj<AComplex, DRectCoords>
@@ -701,7 +695,7 @@ namespace xo {
             using xo::facet::DObjectHandle;
             using H = DObjectHandle<AComplex, DRectCoords>;
 
-            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.loop");
+            rp<AllocFlywheel> fw = make_small_flywheel("utest.loop");
 
             /* how many slots this flywheel actually has.  Derived, not assumed:
              * an arena rounds its reservation up to a page, so the strong set
@@ -758,11 +752,9 @@ namespace xo {
         TEST_CASE("flywheel-snapshot-reports-live-slots",
                   "[facet][objecthandle][snapshot]")
         {
-            using xo::facet::DObjectHandle;
-            using xo::mm::FlywheelInfo;
             using H = DObjectHandle<AComplex, DRectCoords>;
 
-            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.snap");
+            rp<AllocFlywheel> fw = make_small_flywheel("utest.snap");
 
             /* registered so the snapshot can NAME the representation; without
              * it typeseq_ is still reported and type_ is the sentinel
@@ -849,7 +841,7 @@ namespace xo {
             using xo::facet::DObjectHandle;
             using H = DObjectHandle<AComplex, DRectCoords>;
 
-            rp<xo::mm::AllocFlywheel> fw = make_small_flywheel("utest.dbl");
+            rp<AllocFlywheel> fw = make_small_flywheel("utest.dbl");
 
             auto h = H::make_strong_ref(fw, obj<AComplex, DRectCoords>
                                             (alloc_rect(fw, 5.0, 6.0)));

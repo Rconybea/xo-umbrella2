@@ -23,7 +23,7 @@
 namespace xo {
     namespace py = pybind11;
 
-    using xo::mm::AllocFlywheel;
+    using xo::facet::AllocFlywheel;
     using xo::pyarena::collect_pools;
     using xo::mm::ArenaConfig;
     using xo::pp::TempPpSink;

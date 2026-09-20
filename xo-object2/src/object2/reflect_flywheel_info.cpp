@@ -13,7 +13,7 @@ namespace xo {
 
     using xo::mm::MemorySizeInfo;
 
-    namespace mm {
+    namespace facet {
         void
         reflect_flywheel_info()
         {
@@ -84,7 +84,7 @@ namespace xo {
                 sr.require_complete();
             }
         } /*reflect_flywheel_info*/
-    } /*namespace mm*/
+    } /*namespace facet*/
 } /*namespace xo*/
 
 /* end reflect_flywheel_info.cpp */

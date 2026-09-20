@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include "../FlywheelInfo.hpp"
+#include "xo/facet/FlywheelInfo.hpp"
 #include <xo/arena/DArenaVector.hpp>
 #include <xo/arena/DArena.hpp>
 #include <stdexcept>
 #include <string>
 
-namespace xo::mm {
+namespace xo::facet {
     /** @brief Common base class for DHandleStore<Storage,Handle>
      **/
     class DHandleStoreBase {
@@ -57,7 +57,7 @@ namespace xo::mm {
         /** @defgroup mm-handlestore-types **/
         ///@{
         using handle_type = Handle;
-        using handle_index_type = typename DArenaVector<Handle>::size_type;
+        using handle_index_type = typename xo::mm::DArenaVector<Handle>::size_type;
         using typeseq = typename Storage::typeseq;
         using size_type = typename Storage::size_type;
         using value_type = typename Storage::value_type;
@@ -74,8 +74,8 @@ namespace xo::mm {
          *  in no particular order.
          **/
         DHandleStore(Storage && storage,
-                     DArenaVector<Handle> && strong,
-                     DArenaVector<handle_index_type> && strong_freelist)
+                     xo::mm::DArenaVector<Handle> && strong,
+                     xo::mm::DArenaVector<handle_index_type> && strong_freelist)
         : storage_{std::move(storage)},
           strong_refs_{std::move(strong)},
           strong_freelist_{std::move(strong_freelist)}
@@ -119,7 +119,7 @@ namespace xo::mm {
         size_type available() const noexcept { return storage_.available(); }
         size_type allocated() const noexcept { return storage_.allocated(); }
         /** one entry per pool, in the order below. **/
-        void visit_pools(const MemorySizeVisitor & fn) const {
+        void visit_pools(const xo::mm::MemorySizeVisitor & fn) const {
             storage_.visit_pools(fn);
             strong_refs_.visit_pools(fn);
             strong_freelist_.visit_pools(fn);
@@ -129,9 +129,9 @@ namespace xo::mm {
             return (storage_.contains(p)
                     || strong_refs_.contains(p) || strong_freelist_.contains(p));
         }
-        AllocError last_error() const noexcept { return storage_.last_error(); }
-        AllocInfo alloc_info(value_type mem) const noexcept { return storage_.alloc_info(mem); }
-        range_type alloc_range(DArena & mm) const noexcept { return storage_.alloc_range(mm); }
+        xo::mm::AllocError last_error() const noexcept { return storage_.last_error(); }
+        xo::mm::AllocInfo alloc_info(value_type mem) const noexcept { return storage_.alloc_info(mem); }
+        range_type alloc_range(xo::mm::DArena & mm) const noexcept { return storage_.alloc_range(mm); }
 
         ///@}
 
@@ -239,8 +239,8 @@ namespace xo::mm {
 
         /** reuse a released slot if there is one, else grow the vector **/
         static std::pair<handle_index_type, Handle*>
-        _add_ref(DArenaVector<Handle> & refs,
-                 DArenaVector<handle_index_type> & freelist,
+        _add_ref(xo::mm::DArenaVector<Handle> & refs,
+                 xo::mm::DArenaVector<handle_index_type> & freelist,
                  Handle x)
         {
             if (!freelist.empty()) {
@@ -263,8 +263,8 @@ namespace xo::mm {
         }
 
         /** reset a slot, and if it was non-empty return to freelist **/
-        static void _remove_ref(DArenaVector<Handle> & refs,
-                                DArenaVector<handle_index_type> & freelist,
+        static void _remove_ref(xo::mm::DArenaVector<Handle> & refs,
+                                xo::mm::DArenaVector<handle_index_type> & freelist,
                                 size_type ix)
         {
             if (ix >= refs.size())
@@ -299,17 +299,17 @@ namespace xo::mm {
          *  Promise: memory allocated from @ref storage_ remains
          *  valid while any non-null references remain in @ref strong_
          **/
-        DArenaVector<Handle> strong_refs_;
+        xo::mm::DArenaVector<Handle> strong_refs_;
 
         /** Index positions of empty slots in @ref strong_refs_ **/
-        DArenaVector<handle_index_type> strong_freelist_;
+        xo::mm::DArenaVector<handle_index_type> strong_freelist_;
 
         ///@}
     };
 
     template <typename Handle>
-    using DHandleArena = DHandleStore<DArena, Handle>;
+    using DHandleArena = DHandleStore<xo::mm::DArena, Handle>;
 
-} /*namespace xo::mm*/
+} /*namespace xo::facet*/
 
 /* end DHandleStore.hpp */
