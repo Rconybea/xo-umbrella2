@@ -19,6 +19,13 @@ namespace xo::facet {
         /** assign static base alignment for handle storage **/
         static void assign_storage_base_align(std::size_t z) { s_storage_base_align = z; }
 
+        /** base alignment every participating storage arena shares.
+         *
+         *  0 until a FacetAppcx has been constructed.
+         *  Reader must no call @ref DArena::obj2arena if this is zero.
+         **/
+        static std::size_t storage_base_align() { return s_storage_base_align; }
+
     protected:
         /** base alignment for storage.
          *  allows recovering DArena from an allocated address

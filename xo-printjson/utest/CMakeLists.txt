@@ -1,7 +1,7 @@
 # build unittest printjson/utest
 
 set(SELF_EXE utest.printjson)
-set(SELF_SRCS printjson_utest_main.cpp PrintJson.test.cpp FopJson.test.cpp)
+set(SELF_SRCS printjson_utest_main.cpp PrintJson.test.cpp FopJson.test.cpp ObjectSlotJson.test.cpp)
 
 xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
 xo_self_dependency(${SELF_EXE} printjson)
@@ -12,6 +12,7 @@ xo_dependency(${SELF_EXE} xo_indentlog2)
 # test-only: a D-type that is printable but NOT reflectable, for the
 # has-not-opted-in case
 xo_dependency(${SELF_EXE} xo_printable2)
+xo_dependency(${SELF_EXE} xo_facet)
 xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 
 # end CMakeLists.txt

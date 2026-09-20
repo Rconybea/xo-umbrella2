@@ -4,13 +4,16 @@
  */
 
 #include "PrintJson.hpp"
-#include <xo/timeutil/timeutil.hpp>
-// #include "time/Time.hpp"
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/ppsink/quoted_ostream.hpp>
+#include <xo/facet/handlestore/ObjectSlot.hpp>
+#include <xo/facet/handlestore/DHandleStore.hpp>
+#include <xo/facet/TypeRegistry.hpp>
+#include <xo/arena/DArena.hpp>
 #include <xo/flatstring/flatstring.hpp>     /* os << quot(..) */
+#include <xo/ppsink/quoted_ostream.hpp>
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
 #include <xo/ppsink/pp_time_ostream.hpp>    /* os << iso8601(..) */
+#include <xo/timeutil/timeutil.hpp>
 #include <cmath>
 
 namespace xo {
@@ -462,6 +465,102 @@ namespace xo {
             } /*provide_address_printer*/
         } /*namespace*/
 
+        /** @brief json printer for xo::facet::ObjectSlot
+         *
+         *  xo::facet::ObjectSlot represents a root object in
+         *  xo::facet::AllocFlywheel.
+         *
+         *  We want a bespoke printer so that we can print
+         *  the root object's offset relative to the start of its storage.
+         *
+         *  This is valid for AllocFlywheel instances,
+         *  since they're guaranteed to be hosted by an Arena
+         *  with storage aligned on @ref DHandleStoreBase::storage_base_align()
+         *
+         *  This isn't true of obj<ATop> in general, so the separate
+         *  ObjectSlot type is necessary.
+         *
+         *  - @c typeseq / @c type: from ATop, no rotation.  @c type reads the
+         *    sentinel name for a type never registered with TypeRegistry --
+         *    which is every type, seen from a pybind module, until
+         *    .xo-backlog/xo-facet/issues/01 lands.
+         *  - @c offset: bytes from the base of the arena that owns the object.
+         *    Recovered from the object pointer ALONE via DArena::obj2arena,
+         *    which is what the maskable base alignment exists for
+         *    (.xo-backlog/xo-arena/issues/04).  An offset rather than an
+         *    address because json numbers are IEEE754 doubles on the consumer's
+         *    side; see JsonPrinter_address.
+         *
+         *  An EMPTY slot renders as @c null.  Slots are emitted including the
+         *  empty ones, so a consumer reads a slot's index from its position in
+         *  the enclosing array.
+         **/
+        class JsonPrinter_ObjectSlot : public JsonPrinter {
+        public:
+            JsonPrinter_ObjectSlot(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            virtual void print_json(TaggedPtr tp,
+                                    std::ostream * p_os) const override {
+                using xo::facet::ObjectSlot;
+                using xo::facet::DHandleStoreBase;
+                using xo::facet::TypeRegistry;
+                using xo::mm::DArena;
+
+                ObjectSlot * x = tp.recover_native<ObjectSlot>();
+
+                if (!x) {
+                    report_internal_type_consistency_error(Reflect::require<ObjectSlot>(),
+                                                           tp.td(),
+                                                           p_os);
+                    return;
+                }
+
+                void * data = x->opaque_data();
+
+                if (!data) {
+                    /* a released slot.  Emitted rather than skipped, so array
+                     * position remains the slot index
+                     */
+                    *p_os << "null";
+                    return;
+                }
+
+                auto tseq = x->_typeseq();
+
+                *p_os << "{"
+                      << "\"_name_\": " << quot("ObjectSlot")
+                      << ", \"typeseq\": " << tseq.seqno()
+                      << ", \"type\": " << quot(TypeRegistry::id2name(tseq));
+
+                /* 0 means no FacetAppcx has been constructed, so there is no
+                 * agreed alignment to mask with.  Reporting the absence beats
+                 * masking with ~(0-1) == 0 and dereferencing the result.
+                 */
+                std::size_t align_z = DHandleStoreBase::storage_base_align();
+
+                if (align_z == 0) {
+                    *p_os << ", \"offset\": null}";
+                } else {
+                    DArena * arena = DArena::obj2arena(data, align_z);
+
+                    *p_os << ", \"offset\": "
+                          << (static_cast<const std::byte *>(data) - arena->_mem_lo())
+                          << "}";
+                }
+            } /*print_json*/
+        }; /*JsonPrinter_ObjectSlot*/
+
+        namespace {
+            void
+            provide_object_slot_printer(PrintJson * p_json)
+            {
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_ObjectSlot(p_json));
+
+                p_json->provide_printer(Reflect::require<xo::facet::ObjectSlot>(),
+                                        std::move(printer));
+            } /*provide_object_slot_printer*/
+        } /*namespace*/
+
         class JsonPrinter_utc_nanos : public JsonPrinter {
         public:
             JsonPrinter_utc_nanos(PrintJson * pjson) : JsonPrinter(pjson) {}
@@ -531,6 +630,8 @@ namespace xo {
             provide_flatstring_printer<48>(this);
 
             provide_address_printer(this);
+
+            provide_object_slot_printer(this);
 
             provide_utc_nanos_printer(this);
         } /*provide_std_printers*/
