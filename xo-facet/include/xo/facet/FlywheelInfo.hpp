@@ -6,6 +6,7 @@
 #pragma once
 
 #include "handlestore/ObjectSlot.hpp"
+#include "handlestore/DHandleStore.hpp"
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <string>
 #include <vector>
@@ -22,16 +23,19 @@ namespace xo::facet {
      *     websocket).  A schema that tracked the c++ layout would turn every
      *     member rename into a change on the far side.
      *
-     *  2. Reflecting the representation is not available for the parts that
-     *     remain here.  @c strong_refs_ holds ERASED fops, whose reflection
-     *     rotates through @c AReflectable and THROWS for a representation that
-     *     has not opted in.
+     *  2. Only ONE member survives here, and it is a VIEW rather than a copy.
+     *     The root set used to be copied into a @c RootSetInfo -- five fields
+     *     and a vector of slots, restated in three places (the struct, the
+     *     copier, the reflection).  It is now @ref strong_, a pointer to the
+     *     live store, rendered by @c JsonPrinter_RootSet walking
+     *     @c DHandleStore::visit_object_slots and @c visit_free_list.
      *
-     *     A slot used to need a shadow struct for that reason.  It no longer
-     *     does: @c ObjectSlot derives from @c obj<ATop> rather than aliasing
-     *     it, so it escapes FopTdx's erased path and reflects as an atom, and
-     *     @c JsonPrinter_ObjectSlot renders it directly.  @ref slot_v_ holds
-     *     the slots themselves.
+     *     **So a frame is not a snapshot of the root set.**  It reads the
+     *     store at the moment it is PRINTED, not the moment
+     *     @c AllocFlywheel::snapshot ran, and it dangles if the flywheel
+     *     outlives neither.  That is inherent in not copying, and it suits the
+     *     intended use -- take a frame, serialise it, discard it -- but a
+     *     caller that holds a frame across a mutation gets the later state.
      *
      *     Where an existing type CAN be reflected, it is: pools are reported as
      *     @c MemorySizeInfo directly (2026-09-15), not copied into a shadow
@@ -53,46 +57,15 @@ namespace xo::facet {
      *  CreationEvidence.  So reflecting AllocFlywheel directly is now merely
      *  unattractive rather than impossible -- @ref FlywheelInfo earns its place
      *  as the frame ENVELOPE (where a sequence number would go), not because
-     *  the alternative is blocked.  The slots themselves no longer need a view
-     *  model at all -- see @ref RootSetInfo::slot_v_.
+     *  the alternative is blocked.
      *
-     *  The cost is a second description of the same thing, which is a shape
-     *  that has gone wrong repeatedly in this tree.  Mitigation:
-     *  @ref DHandleStore::snapshot is written beside the members it reports,
-     *  and pinned field-by-field by a test, so a new member that never reaches
-     *  the wire fails rather than going quietly missing.
+     *  The cost used to be a second description of the same thing, which is a
+     *  shape that has gone wrong repeatedly in this tree.  Retiring
+     *  @c RootSetInfo removed that copy; what remains is one reflected member
+     *  (@ref pool_v_) and one printed by hand.
      **/
     ///@{
 
-    /** a root set's occupancy.
-     *
-     *  No name field: @ref FlywheelInfo::pool_v_ already names the arena
-     *  backing this vector, and a second copy of a name is precisely the drift
-     *  this file's header warns about.
-     **/
-    struct RootSetInfo {
-        /** slots ever allocated.  A HIGH-WATER MARK: with a free list the
-         *  vector never shrinks, so this is not the population
-         **/
-        std::uint32_t size_ = 0;
-        /** slots the arena can hold **/
-        std::uint32_t capacity_ = 0;
-        /** occupied slots -- size_ minus free_.size() **/
-        std::uint32_t live_ = 0;
-        /** indices currently on the free list **/
-        std::vector<std::uint32_t> free_;
-        /** every slot, INCLUDING the cleared ones -- so a slot's index is its
-         *  position here, and @ref free_ indexes into it directly.
-         *
-         *  The slots are @c ObjectSlot, not a shadow struct.  That was
-         *  @c SlotInfo until 2026-09-20, which existed because an erased fop
-         *  could not describe itself; @c JsonPrinter_ObjectSlot now does, and
-         *  resolves each slot's offset from its own pointer via
-         *  @c DArena::obj2arena rather than needing a base handed in.  A
-         *  cleared slot renders as @c null.
-         **/
-        std::vector<ObjectSlot> slot_v_;
-    };
 
     /** one frame: a flywheel's state at an instant **/
     struct FlywheelInfo {
@@ -103,11 +76,20 @@ namespace xo::facet {
          *  JsonPrinter_ObjectSlot recovers it per slot via DArena::obj2arena.
          **/
         std::vector<xo::mm::MemorySizeInfo> pool_v_;
-        /** the strong root set.  Singular since 2026-09-13, when the weak set
-         *  was retired (see .xo-backlog/pyobject2/issues/02); a vector here
-         *  rather than a second member would invite it back
+        /** the strong root set, BORROWED -- see point 2 of this group's
+         *  header for what that costs.
+         *
+         *  Rendered by @c JsonPrinter_RootSet, which reflection could not do:
+         *  a raw pointer has no EstablishTdx specialisation, so this reflects
+         *  as an atom and the printer keys on the POINTER type rather than
+         *  taking @c print_generic_pointer's dispatch to a pointee.  Null
+         *  renders as @c null.
+         *
+         *  Singular since 2026-09-13, when the weak set was retired (see
+         *  .xo-backlog/pyobject2/issues/02); a vector here rather than a
+         *  second member would invite it back.
          **/
-        RootSetInfo strong_;
+        const DHandleArena<ObjectSlot> * strong_ = nullptr;
     };
 
     ///@}

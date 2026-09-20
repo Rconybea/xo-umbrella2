@@ -52,26 +52,15 @@ namespace xo {
                 sr.require_complete();
             }
 
-            /* no StructReflector for the slots: RootSetInfo::slot_v_ holds
-             * ObjectSlot, which reflects as an atom and is rendered by
-             * JsonPrinter_ObjectSlot.  SlotInfo was the shadow struct this
-             * used to describe, retired 2026-09-20.
+            /* no StructReflector for the root set.  It used to be a
+             * RootSetInfo -- five fields copied out of the store and described
+             * here a third time -- retired 2026-09-21.  FlywheelInfo::strong_
+             * is now a pointer to the live store, and JsonPrinter_RootSet
+             * reads it (and the ObjectSlots inside it) directly.
+             *
+             * Nothing to register for that member: a raw pointer reflects as
+             * an atom, which is exactly what the printer keys on.
              */
-
-            {
-                StructReflector<RootSetInfo> sr;
-
-                sr.reflect_member("size", &RootSetInfo::size_);
-                sr.reflect_member("capacity", &RootSetInfo::capacity_);
-                sr.reflect_member("live", &RootSetInfo::live_);
-                sr.reflect_member("free", &RootSetInfo::free_);
-                /* a vector of ObjectSlot; each element renders via its own
-                 * printer, and a cleared slot renders as null
-                 */
-                sr.reflect_member("slots", &RootSetInfo::slot_v_);
-
-                sr.require_complete();
-            }
 
             {
                 StructReflector<FlywheelInfo> sr;

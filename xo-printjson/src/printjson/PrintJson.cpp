@@ -561,6 +561,113 @@ namespace xo {
             } /*provide_object_slot_printer*/
         } /*namespace*/
 
+        /** @brief json printer for a flywheel's strong root set
+         *
+         *  Keyed on the POINTER type @c const DHandleArena<ObjectSlot>*, which
+         *  is how @c FlywheelInfo::strong_ is declared.  Not on the pointee:
+         *  a raw pointer has no @c EstablishTdx specialisation, so it reflects
+         *  as an atom and never reaches @c print_generic_pointer's dispatch to
+         *  a child.  (@c rp<T> and @c obj<AFacet,DRepr> do have one, which is
+         *  what that path exists for.)
+         *
+         *  This printer is what retired @c RootSetInfo on 2026-09-21.  That
+         *  struct held size/capacity/live/free/slots, copied out of the store
+         *  by @c DHandleStore::snapshot and described a third time by a
+         *  StructReflector -- one fact in three places, in a tree where that
+         *  shape has gone wrong repeatedly.  The same five fields are now read
+         *  straight off the live store.
+         *
+         *  The wire schema is UNCHANGED by that move, deliberately: same keys,
+         *  same meanings, same free-list ORDER (LIFO -- which is why
+         *  @c visit_free_list exists rather than the printer deriving the free
+         *  set from the cleared slots).  Only @c _name_ changed, from
+         *  "RootSetInfo" to "RootSet", because the type it named is gone.
+         *
+         *  What DID change is WHEN the state is read: at print time, not at
+         *  snapshot time.  See @c FlywheelInfo::strong_.
+         **/
+        class JsonPrinter_RootSet : public JsonPrinter {
+        public:
+            using RootSet = xo::facet::DHandleArena<xo::facet::ObjectSlot>;
+
+            JsonPrinter_RootSet(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            virtual void print_json(TaggedPtr tp,
+                                    std::ostream * p_os) const override {
+                const RootSet ** pp
+                    = this->check_recover_native<const RootSet *>(tp, p_os);
+
+                if (!pp)
+                    return;
+
+                const RootSet * rs = *pp;
+
+                if (!rs) {
+                    /* a frame that was never populated.  Distinguishable from
+                     * an EMPTY root set, which still reports its capacity
+                     */
+                    *p_os << "null";
+                    return;
+                }
+
+                *p_os << "{"
+                      << "\"_name_\": " << quot("RootSet")
+                      << ", \"size\": " << rs->strong_size()
+                      << ", \"capacity\": " << rs->strong_capacity()
+                      << ", \"live\": " << rs->strong_root_count();
+
+                *p_os << ", \"free\": [";
+                {
+                    bool first = true;
+
+                    rs->visit_free_list([p_os, &first](std::size_t ix) {
+                            if (!first)
+                                *p_os << ", ";
+                            first = false;
+                            *p_os << ix;
+                        });
+                }
+                *p_os << "]";
+
+                /* every slot, cleared ones included, so a consumer reads a
+                 * slot's index from its position here -- which is also what
+                 * `free' indexes into.  Each element goes through
+                 * JsonPrinter_ObjectSlot; a cleared slot renders as null.
+                 */
+                *p_os << ", \"slots\": [";
+                {
+                    bool first = true;
+                    PrintJson const * pjson = this->pjson();
+
+                    rs->visit_object_slots(
+                        [pjson, p_os, &first](const xo::facet::ObjectSlot & slot) {
+                            if (!first)
+                                *p_os << ", ";
+                            first = false;
+
+                            pjson->print_aux(
+                                TaggedPtr(Reflect::require<xo::facet::ObjectSlot>(),
+                                          const_cast<xo::facet::ObjectSlot *>(&slot)),
+                                p_os);
+                        });
+                }
+                *p_os << "]}";
+            } /*print_json*/
+        }; /*JsonPrinter_RootSet*/
+
+        namespace {
+            void
+            provide_root_set_printer(PrintJson * p_json)
+            {
+                using RootSet = JsonPrinter_RootSet::RootSet;
+
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_RootSet(p_json));
+
+                p_json->provide_printer(Reflect::require<const RootSet *>(),
+                                        std::move(printer));
+            } /*provide_root_set_printer*/
+        } /*namespace*/
+
         class JsonPrinter_utc_nanos : public JsonPrinter {
         public:
             JsonPrinter_utc_nanos(PrintJson * pjson) : JsonPrinter(pjson) {}
@@ -632,6 +739,7 @@ namespace xo {
             provide_address_printer(this);
 
             provide_object_slot_printer(this);
+            provide_root_set_printer(this);
 
             provide_utc_nanos_printer(this);
         } /*provide_std_printers*/

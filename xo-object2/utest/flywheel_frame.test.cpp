@@ -153,7 +153,14 @@ namespace xo {
                 ", \"name\": \"utest.frame.empty.strong-free\""
                 ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 4096"
                 ", \"lo\": ADDR, \"hi\": ADDR}]"
-                ", \"strong\": {\"_name_\": \"RootSetInfo\""
+                /* "RootSet", not "RootSetInfo": there is no longer a struct
+                 * of that name.  FlywheelInfo::strong_ points at the live
+                 * store and JsonPrinter_RootSet reads it, which is what
+                 * retired RootSetInfo (2026-09-21).  Every other key and value
+                 * below is unchanged by that -- deliberately, since they are
+                 * the wire contract
+                 */
+                ", \"strong\": {\"_name_\": \"RootSet\""
                 /* 511, not 512: the per-allocation overhead costs one slot */
                 ", \"size\": 0, \"capacity\": 511, \"live\": 0"
                 ", \"free\": [], \"slots\": []}}"));
@@ -216,10 +223,13 @@ namespace xo {
              * consumer follows one object across frames -- and it is resolved
              * per slot from its own pointer, so two slots must differ
              */
-            FlywheelInfo snap = fw->snapshot();
-            REQUIRE(snap.strong_.slot_v_.size() == 2);
-            REQUIRE(snap.strong_.slot_v_[0].opaque_data()
-                    != snap.strong_.slot_v_[1].opaque_data());
+            std::vector<xo::facet::ObjectSlot> slot_v;
+            fw->visit_object_slots([&slot_v](const xo::facet::ObjectSlot & slot) {
+                    slot_v.push_back(slot);
+                });
+
+            REQUIRE(slot_v.size() == 2);
+            REQUIRE(slot_v[0].opaque_data() != slot_v[1].opaque_data());
 
             REQUIRE(h0.object_ix() != h1.object_ix());
         } /*TEST_CASE(occupied-slots-appear-in-the-frame)*/
@@ -260,6 +270,59 @@ namespace xo {
             REQUIRE(frame.find("\"free\": [0]") != std::string::npos);
             REQUIRE(frame.find("\"slots\": [null]") != std::string::npos);
         } /*TEST_CASE(released-slot-moves-to-the-free-list)*/
+
+        TEST_CASE("free-list-order-is-reported-not-derived", "[printjson][flywheel]")
+        {
+            /* `free' is the one part of the frame that visit_object_slots
+             * cannot supply.  The SET of free indices is derivable -- a
+             * released slot renders as null -- but the ORDER is not, and the
+             * order is what says which slot comes back next.  That is why
+             * DHandleStore::visit_free_list exists alongside
+             * visit_object_slots rather than the printer inferring it.
+             *
+             * Two releases, so an order exists to get wrong.
+             */
+            using HFloat = DObjectHandle<APrintable, DFloat>;
+
+            PrintJson print_json;
+            xo::facet::reflect_flywheel_info();
+
+            rp<AllocFlywheel> fw = make_fw("utest.frame.order");
+            auto alloc = with_facet<AAllocator>::mkobj(&fw->storage());
+
+            {
+                auto h0 = HFloat::make_strong_ref
+                    (fw, with_facet<APrintable>::mkobj(DFloat::_box(alloc, 1.5)));
+                auto h1 = HFloat::make_strong_ref
+                    (fw, with_facet<APrintable>::mkobj(DFloat::_box(alloc, 2.5)));
+
+                REQUIRE(h0.object_ix() == 0);
+                REQUIRE(h1.object_ix() == 1);
+            }
+            /* both released at scope exit, in REVERSE declaration order -- so
+             * index 1 is released first and index 0 last
+             */
+
+            std::stringstream ss;
+            print_json.print(fw->snapshot(), &ss);
+
+            const std::string frame = ss.str();
+            INFO("frame: " << frame);
+
+            /* push order: 1 was released first.  Observed, and it is not the
+             * order a reader would guess -- which is the point
+             */
+            REQUIRE(frame.find("\"free\": [1, 0]") != std::string::npos);
+            REQUIRE(frame.find("\"slots\": [null, null]") != std::string::npos);
+
+            /* and the LAST entry is the one that comes back -- so a consumer
+             * reading `free' left-to-right is reading it backwards
+             */
+            auto h2 = HFloat::make_strong_ref
+                (fw, with_facet<APrintable>::mkobj(DFloat::_box(alloc, 3.5)));
+
+            REQUIRE(h2.object_ix() == 0);
+        } /*TEST_CASE(free-list-order-is-reported-not-derived)*/
 
     } /*namespace ut*/
 } /*namespace xo*/

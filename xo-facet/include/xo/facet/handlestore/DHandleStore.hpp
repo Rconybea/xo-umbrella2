@@ -137,6 +137,50 @@ namespace xo::facet {
             strong_refs_.visit_pools(fn);
             strong_freelist_.visit_pools(fn);
         }
+
+        /** visit every root slot in order, cleared ones included.
+         *
+         *  Mirrors @ref visit_pools: lets a reader walk the root set without
+         *  the container being exposed, and without materialising a copy.
+         *  @c RootSetInfo existed to carry that copy until 2026-09-21.
+         *
+         *  A slot's INDEX is its position in this walk -- which is what lets a
+         *  consumer match a slot against the free list, and why cleared slots
+         *  are visited rather than skipped.
+         **/
+        template <typename Fn>
+        void visit_object_slots(Fn && fn) const {
+            for (std::size_t i = 0, n = strong_refs_.size(); i < n; ++i)
+                fn(strong_refs_[i]);
+        }
+
+        /** visit each RELEASED slot's index, in the order the free list
+         *  STORES them -- oldest release first.
+         *
+         *  Reuse runs the other way: @ref _add_ref pops the BACK, so the LAST
+         *  index visited here is the one the next @ref add_strong_ref takes.
+         *
+         *  The same SET could be derived from @ref visit_object_slots (a
+         *  released slot is a cleared one), but not the same ORDER, and the
+         *  order is the part a reader cannot reconstruct -- which is why this
+         *  exists rather than the printer inferring the free list from the
+         *  cleared slots.
+         **/
+        template <typename Fn>
+        void visit_free_list(Fn && fn) const {
+            for (std::size_t i = 0, n = strong_freelist_.size(); i < n; ++i)
+                fn(strong_freelist_[i]);
+        }
+
+        /** slots ever allocated: a HIGH-WATER MARK, not the population --
+         *  with a free list the vector never shrinks.  @ref strong_root_count
+         *  is the population
+         **/
+        handle_index_type strong_size() const { return strong_refs_.size(); }
+
+        /** slots this root set can hold -- not derivable from the walk **/
+        handle_index_type strong_capacity() const { return strong_refs_.capacity(); }
+
         /** enumerates the same vectors as visit_pools() **/
         bool contains(const void * p) const noexcept {
             return (storage_.contains(p)
@@ -180,37 +224,6 @@ namespace xo::facet {
             _remove_ref(strong_refs_, strong_freelist_, ix);
         }
 
-        /** this store's state as a wire model -- see @ref FlywheelInfo.
-         *
-         *  Written HERE, beside the members it reports, rather than in a helper
-         *  above.  The hazard of a view model is that it drifts from the thing
-         *  it describes; the mitigation is that whoever adds a member to this
-         *  class reads this in the same file.
-         *
-         *  Reports EVERY slot, cleared ones included, so a slot's index is
-         *  its position in @ref RootSetInfo::slot_v_ -- which is also how
-         *  @ref RootSetInfo::free_ indexes.
-         *
-         *  Nothing is derived here.  The slots are copied as they are:
-         *  naming a type and locating an object within its arena are both
-         *  the slot printer's business (JsonPrinter_ObjectSlot), which is
-         *  why there is no base to hand in any more.
-         **/
-        void snapshot(RootSetInfo * p_out) const {
-            p_out->size_ = static_cast<std::uint32_t>(strong_refs_.size());
-            p_out->capacity_ = static_cast<std::uint32_t>(strong_refs_.capacity());
-            p_out->live_ = static_cast<std::uint32_t>(this->strong_root_count());
-
-            p_out->free_.clear();
-            p_out->free_.reserve(strong_freelist_.size());
-            for (std::size_t i = 0, n = strong_freelist_.size(); i < n; ++i)
-                p_out->free_.push_back(static_cast<std::uint32_t>(strong_freelist_[i]));
-
-            p_out->slot_v_.clear();
-            p_out->slot_v_.reserve(strong_refs_.size());
-            for (std::size_t i = 0, n = strong_refs_.size(); i < n; ++i)
-                p_out->slot_v_.push_back(strong_refs_[i]);
-        }
 
         /** counts non-empty strong slots **/
         handle_index_type strong_root_count() const {

@@ -38,7 +38,7 @@ namespace xo {
         template<typename Object>
         class EstablishTdx<rp<Object>> {
         public:
-            /* definition provide after decl for Reflect {} below */
+            /* note: definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
         };
 
@@ -47,7 +47,7 @@ namespace xo {
         template<typename Element, std::size_t N>
         class EstablishTdx<std::array<Element, N>> {
         public:
-            /* definition provide after decl for Reflect {} below */
+            /* note: definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
         };
 

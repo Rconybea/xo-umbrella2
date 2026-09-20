@@ -74,6 +74,31 @@ namespace xo::facet {
          **/
         void visit_pools(const MemorySizeVisitor & fn) const { store_.visit_pools(fn); }
 
+        /** visit every root slot, cleared ones included -- see
+         *  DHandleStore::visit_object_slots
+         **/
+        template <typename Fn>
+        void visit_object_slots(Fn && fn) const {
+            store_.visit_object_slots(std::forward<Fn>(fn));
+        }
+
+        /** visit each released slot's index, oldest release first; the LAST
+         *  one visited is what the next @ref add_strong_ref reuses -- see
+         *  DHandleStore::visit_free_list
+         **/
+        template <typename Fn>
+        void visit_free_list(Fn && fn) const {
+            store_.visit_free_list(std::forward<Fn>(fn));
+        }
+
+        /** slots ever allocated in the strong root set: a high-water mark.
+         *  @ref strong_root_count is the population
+         **/
+        handle_index_type strong_size() const { return store_.strong_size(); }
+
+        /** slots the strong root set can hold **/
+        handle_index_type strong_capacity() const { return store_.strong_capacity(); }
+
         /** insert strong reference to @p x into this flywheel **/
         std::pair<handle_index_type, handle_type*> add_strong_ref(handle_type x);
 

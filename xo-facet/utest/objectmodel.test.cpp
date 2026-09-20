@@ -635,6 +635,34 @@ namespace xo {
 
                 return new (mem) DRectCoords(x, y);
             }
+
+            /** the root set's slots, in index order -- cleared ones included.
+             *
+             *  This is what a reader gets since RootSetInfo was retired
+             *  (2026-09-21): a walk, not a copy.  Collecting into a vector
+             *  here is the TEST's choice, so the assertions below can be
+             *  written by index; JsonPrinter_RootSet streams instead.
+             **/
+            std::vector<xo::facet::ObjectSlot> slots_of(const AllocFlywheel & fw) {
+                std::vector<xo::facet::ObjectSlot> retval;
+
+                fw.visit_object_slots([&retval](const xo::facet::ObjectSlot & slot) {
+                        retval.push_back(slot);
+                    });
+
+                return retval;
+            }
+
+            /** the free list, oldest release first -- reuse takes the LAST **/
+            std::vector<std::size_t> free_list_of(const AllocFlywheel & fw) {
+                std::vector<std::size_t> retval;
+
+                fw.visit_free_list([&retval](std::size_t ix) {
+                        retval.push_back(ix);
+                    });
+
+                return retval;
+            }
         }
 
         TEST_CASE("objecthandle-releases-its-root", "[facet][objecthandle][freelist]")
@@ -770,13 +798,21 @@ namespace xo {
                 REQUIRE(empty.pool_v_[1].resource_name_ == std::string("utest.snap.strong"));
                 REQUIRE(empty.pool_v_[2].resource_name_ == std::string("utest.snap.strong-free"));
 
-                REQUIRE(empty.strong_.live_ == 0);
-                /* slot_v_ tracks size_ (the high-water mark), not live_:
-                 * cleared slots are reported too, so a slot's index is its
-                 * position here
+                /* the root set is BORROWED since 2026-09-21, not copied into a
+                 * RootSetInfo.  A frame therefore reads it when it is PRINTED;
+                 * everything below goes through the same visitors the printer
+                 * uses, which is the point of asserting on them rather than on
+                 * a copy that no longer exists.
                  */
-                REQUIRE(empty.strong_.slot_v_.size() == empty.strong_.size_);
-                REQUIRE(empty.strong_.capacity_ > 0);
+                REQUIRE(empty.strong_ != nullptr);
+
+                REQUIRE(fw->strong_root_count() == 0);
+                /* the walk covers the high-water mark, not the population:
+                 * cleared slots are visited too, so a slot's index is its
+                 * position in the walk
+                 */
+                REQUIRE(slots_of(*fw.get()).size() == fw->strong_size());
+                REQUIRE(fw->strong_capacity() > 0);
             }
 
             DRectCoords * p0 = alloc_rect(fw, 3.0, 4.0);
@@ -786,11 +822,11 @@ namespace xo {
             auto h1 = H::make_strong_ref(fw, obj<AComplex, DRectCoords>(p1));
 
             {
-                FlywheelInfo snap = fw->snapshot();
+                auto slot_v = slots_of(*fw.get());
 
-                REQUIRE(snap.strong_.live_ == 2);
-                REQUIRE(snap.strong_.slot_v_.size() == 2);
-                REQUIRE(snap.strong_.free_.empty());
+                REQUIRE(fw->strong_root_count() == 2);
+                REQUIRE(slot_v.size() == 2);
+                REQUIRE(free_list_of(*fw.get()).empty());
 
                 /* the slots ARE the handles' targets -- no shadow struct.
                  * SlotInfo held a derived (ix, typeseq, type, offset) until
@@ -798,14 +834,14 @@ namespace xo {
                  * JsonPrinter_ObjectSlot resolves the offset from the pointer
                  * via DArena::obj2arena rather than being handed a base.
                  */
-                REQUIRE(snap.strong_.slot_v_[h0.object_ix()].opaque_data() == p0);
-                REQUIRE(snap.strong_.slot_v_[h1.object_ix()].opaque_data() == p1);
+                REQUIRE(slot_v[h0.object_ix()].opaque_data() == p0);
+                REQUIRE(slot_v[h1.object_ix()].opaque_data() == p1);
 
-                REQUIRE(snap.strong_.slot_v_[h0.object_ix()]._typeseq()
+                REQUIRE(slot_v[h0.object_ix()]._typeseq()
                         == typeseq::id<DRectCoords>());
 
-                /* position IS the index, which is what lets free_ index into
-                 * the same vector
+                /* position in the walk IS the index, which is what lets the
+                 * free list index into it
                  */
                 REQUIRE(h0.object_ix() != h1.object_ix());
             }
@@ -817,21 +853,23 @@ namespace xo {
             fw->remove_strong_ref(ix0);
 
             {
-                FlywheelInfo snap = fw->snapshot();
+                auto slot_v = slots_of(*fw.get());
 
-                REQUIRE(snap.strong_.live_ == 1);
-                /* the vector still reports every slot; the released one is
-                 * empty rather than absent, and renders as json null
+                REQUIRE(fw->strong_root_count() == 1);
+                /* the walk still covers every slot; the released one is empty
+                 * rather than absent, and renders as json null
                  */
-                REQUIRE(snap.strong_.slot_v_.size() == 2);
-                REQUIRE(!snap.strong_.slot_v_[ix0]);
-                REQUIRE(snap.strong_.slot_v_[h1.object_ix()].opaque_data() == p1);
+                REQUIRE(slot_v.size() == 2);
+                REQUIRE(!slot_v[ix0]);
+                REQUIRE(slot_v[h1.object_ix()].opaque_data() == p1);
 
-                REQUIRE(snap.strong_.free_.size() == 1);
-                REQUIRE(snap.strong_.free_[0] == ix0);
+                auto free_v = free_list_of(*fw.get());
 
-                /* size_ is the high-water mark and does NOT fall */
-                REQUIRE(snap.strong_.size_ == 2);
+                REQUIRE(free_v.size() == 1);
+                REQUIRE(free_v[0] == ix0);
+
+                /* strong_size() is the high-water mark and does NOT fall */
+                REQUIRE(fw->strong_size() == 2);
             }
         }
 

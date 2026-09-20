@@ -111,7 +111,11 @@ namespace xo::facet {
                 retval.pool_v_.push_back(x);
             });
 
-        store_.snapshot(&retval.strong_);
+        /* the root set is BORROWED, not copied: the frame reads it when it
+         * is printed, not now.  See FlywheelInfo::strong_ -- retiring
+         * RootSetInfo is what removed the copy, and this is what it costs.
+         */
+        retval.strong_ = &store_;
 
         return retval;
     }
