@@ -61,9 +61,22 @@ namespace xo {
             XO_PYINDENTLOG2_IMPORT_MODULE();
 
             /* facet implementations for the object2 representations.
-             * Unnecessary: guaranteed by HFloat
+             *
+             * This used to be commented out as "Unnecessary: guaranteed by
+             * HFloat".  It is not: DObjectHandle has no auto-registration, and
+             * TypeRegistry::register_type<T>() fires only from
+             * FacetRegistry::register_impl.  Without this, a frame from python
+             * named every slot "_%sentinel%_".
+             *
+             * Uncommenting it alone would NOT have fixed that, which is
+             * presumably why it looked unnecessary: register_facets() is
+             * compiled into libxo_object2, so its typeseq for DFloat was that
+             * library's, while the slot's came from with_facet<> instantiated
+             * HERE -- and before .xo-backlog/xo-facet/issues/01 those were
+             * different numbers.  Registration under one id, lookup under
+             * another, sentinel either way.
              */
-            //SetupObject2::register_facets();
+            SetupObject2::register_facets();
 
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.object2";

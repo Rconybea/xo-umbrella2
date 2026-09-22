@@ -21,16 +21,14 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # ----------------------------------------------------------------
 
 #add_subdirectory(example)
-#add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # provide find_package() support for projects using this library
 
-set(SELF_LIB xo_reflectutil)
-xo_add_headeronly_library(${SELF_LIB})
-xo_headeronly_dependency(${SELF_LIB} xo_ppsink)
+add_subdirectory(src/reflectutil)
 
-xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
+# after the library: utest declares a self-dependency on it
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # docs targets depend on all the other library/utest targets

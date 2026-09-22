@@ -14,6 +14,10 @@ Only reproducible facts are asserted.  Not asserted, deliberately: arena names
 carrying an address, and ANSI escapes (they depend on the pp config).
 """
 
+import shutil
+import re
+import os
+import glob
 import subprocess
 import sys
 import unittest
@@ -419,6 +423,86 @@ class ConfigurationContractTestCase(unittest.TestCase):
             "    print('RAISED', e)\n")
         self.assertIn("RAISED", r.stdout)
         self.assertIn("reserves 0 bytes", r.stdout)
+
+    def test_frame_names_its_types(self):
+        """a frame from python reports real type names, not the sentinel.
+
+        THE regression test for .xo-backlog/xo-facet/issues/01.  It has to run
+        here, in a fresh interpreter, because that is the only level where both
+        a shared library and a pybind11 extension module are loaded -- and the
+        disagreement between them was the whole bug.  Inside either one alone
+        everything was self-consistent.
+
+        Two independent causes had to be fixed for this to pass, so it guards
+        both:
+
+        1. typeseq ids were per-module.  Each pybind module built with
+           -fvisibility=hidden got a private copy of the id counter, so DFloat
+           was 10 in libxo_object2 and 0 here.  Ids now come from a compiled
+           typeseq_id_for() in libxo_reflectutil.
+        2. SetupObject2::register_facets() was commented out in pyobject2.cpp
+           as "unnecessary", which it was not -- nothing else populates
+           TypeRegistry.
+
+        Fixing either alone leaves the sentinel: registration happens in
+        libxo_object2 under ITS id, lookup happens here under this module's.
+        """
+        r = self.run_in_fresh_interpreter(
+            "import json, xo.facet as f, xo.object2 as o\n"
+            "fcx = f.configure_all()\n"
+            "fw = f.AllocFlywheel.make_default_app(fcx)\n"
+            "a = o.Float.make(fw, 1.5)\n"
+            "slots = json.loads(o.flywheel_frame(fw))['strong']['slots']\n"
+            "occupied = [s for s in slots if s]\n"
+            "print('TYPE', occupied[0]['type'])\n"
+            "print('SEQ', occupied[0]['typeseq'])\n")
+
+        self.assertIn("TYPE xo::scm::DFloat", r.stdout)
+        self.assertNotIn("_%sentinel%_", r.stdout)
+
+        """and the id is the one the C++ side uses, not a module-local 0.
+
+        Asserted as 'not the sentinel id and not 0' rather than as a literal:
+        the number depends on how many types the process draws before DFloat,
+        which is not a contract.  0 IS meaningful though -- it is what a fresh
+        per-module counter hands out first, so it is the fingerprint of the bug.
+        """
+        seq = int([ln for ln in r.stdout.splitlines()
+                   if ln.startswith("SEQ ")][0].split()[1])
+        self.assertGreater(seq, 0)
+
+    def test_no_module_privately_copies_the_id_source(self):
+        """structural guard: no pybind module may own a private id counter.
+
+        test_frame_names_its_types catches today's symptom.  This catches the
+        CAUSE re-entering by a different door -- a future module hiding some
+        other piece of the id machinery the way -fvisibility=hidden hid
+        s_next_id.  Neither the fix nor a code review stops that; only reading
+        the symbol tables does.
+
+        'b'/'B' is local BSS -- a private copy.  'u' is a GNU unique symbol,
+        merged process-wide.  That difference WAS the entire bug.
+
+        Note the per-type memo (typerecd::recd<T>()::id) is still duplicated,
+        deliberately, and must NOT be matched here: a cache of a shared answer
+        is harmless.  What must never reappear is a duplicated SOURCE.
+        """
+        nm = shutil.which("nm")
+        if nm is None:
+            self.skipTest("nm not available")
+
+        mod_dir = os.path.dirname(os.path.dirname(o.__file__))
+        sos = glob.glob(os.path.join(mod_dir, "xo", "*.so"))
+        self.assertTrue(sos, "no extension modules found to check")
+
+        offenders = []
+        for so in sos:
+            out = subprocess.run([nm, "-C", so], capture_output=True, text=True)
+            for line in out.stdout.splitlines():
+                if re.match(r"^\S* [bB] .*(require_next_id|typeseq_id_for)", line):
+                    offenders.append(f"{os.path.basename(so)}: {line.strip()}")
+
+        self.assertEqual(offenders, [], "private copy of the typeseq id source")
 
 
 if __name__ == "__main__":

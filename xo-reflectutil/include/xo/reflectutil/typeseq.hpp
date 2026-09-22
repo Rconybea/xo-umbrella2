@@ -7,7 +7,10 @@
 
 #include "type_name.hpp"
 #include <xo/ppsink/pretty.hpp>
+#include <vector>
+#include <string_view>
 #include <cstdint>
+#include <cstddef>
 
 namespace xo {
     namespace reflect {
@@ -19,53 +22,51 @@ namespace xo {
             explicit typerecd(int32_t s,
                               std::string_view n) : seqno_{s}, name_{n} {}
 
-            /** Can't have this be constexpr.
-             *  We need ids in shared libraries to be generated
-             *  at load time to avoid false positives
-             *
-             *  Return unique id number for each type.
-             *  Numbers are sequentially allocated, so can use
-             *  as vector indices
-             *
-             *  Conversely note that built-in typeinfo may
-             *  return false negatives across library boundaries
-             *  when using clang.
-             **/
-            template <typename T>
-            static typerecd recd() {
-                // reminder: {armed, id} are distint for each T
-                static bool s_armed = true;
-                static int32_t id = 0;
-
-                if (s_armed) {
-                    s_armed = false;
-                    id = require_next_id();
-                }
-
-                return typerecd(id, xo::reflect::type_name<T>());
-
-            }
-
-            static int32_t require_next_id() {
-                static int32_t s_next_id = 0;
-                return s_next_id++;
-            }
-
-            int32_t seqno() const { return seqno_; }
-            std::string_view name() const { return name_; }
-
             /** sentinel typerecd instance **/
             static typerecd sentinel() {
                 return typerecd();
             }
 
+            /** Get globally unique identity record for type T.
+             *  Note this isn't knowable until load time for
+             *  symbols in shared libraries.
+             **/
+            template <typename T>
+            static typerecd recd() {
+                /* note: The id variable may be separate for each
+                 * library, depending on symbol visibility.
+                 *
+                 * In particular pybind libraries that
+                 * instantiate this template get their own private id.
+                 */
+                static const typerecd recd = _by_name(type_name<T>());
+
+                return recd;
+            }
+
+            /** Establish identity record for type @p name.
+             *  O(n) may be acceptable here, since only used
+             *  in implementation of @ref recd()
+             **/
+            static typerecd _by_name(std::string_view name);
+
+            /** next global id# **/
+            static int32_t id_count();
+            /** number of entries in global typerecd table **/
+            static std::size_t table_z();
+
+            int32_t seqno() const { return seqno_; }
+            std::string_view name() const { return name_; }
+
         private:
+            /** next global type id number **/
+            static std::int32_t s_next_id;
+            /** globally-unique lookup table for typerecd instances. **/
+            static std::vector<typerecd> s_typerecd_table_;
+
             int32_t seqno_ = -1;
             std::string_view name_ = "_%sentinel%_";
         };
-
-        //template <typename Tag>
-        //int32_t typerecd_impl<Tag>::s_next_id = 0;
 
         /**
          * Tag here so we can preserve header-only implementation
@@ -96,9 +97,6 @@ namespace xo {
         private:
             int32_t seqno_ = -1;
         };
-
-        //template <typename Tag>
-        //int32_t typeseq_impl<Tag>::s_next_id = 0;
 
         inline bool
         operator==(const typeseq & lhs, const typeseq & rhs) {
