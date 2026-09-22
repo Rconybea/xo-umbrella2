@@ -11,23 +11,9 @@
 
 namespace xo {
     namespace reflect {
+        std::mutex s_typerecd_mutex;
+
         namespace {
-
-            /** guards both of the above.
-             *
-             *  `the upgrade precedes threads' is the model for the phase-(b)
-             *  hashmap, but it says nothing about phase (a): a magic static in
-             *  two threads can reach two DIFFERENT types' first id draw
-             *  concurrently, and they now share one counter where before each
-             *  module had its own.  So consolidating the counter is exactly
-             *  what makes the race reachable across modules.  Paid once per
-             *  (type, module).
-             **/
-            std::mutex & s_mutex() {
-                static std::mutex s_m;
-                return s_m;
-            }
-
             /** true for a type with internal linkage.
              *  Such types not be name-keyed.
              *
@@ -62,7 +48,7 @@ namespace xo {
         typerecd
         typerecd::_by_name(std::string_view name)
         {
-            std::lock_guard<std::mutex> lock(s_mutex());
+            std::lock_guard<std::mutex> lock(s_typerecd_mutex);
 
             if (has_internal_linkage(name)) {
                 /* generate an id, but do not (and must not) insert */
