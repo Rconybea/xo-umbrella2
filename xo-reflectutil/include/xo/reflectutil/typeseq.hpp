@@ -14,7 +14,11 @@
 
 namespace xo {
     namespace reflect {
-        struct typerecd {
+        /** define in unit test to access private typerecd methods **/
+        class typerecd_utaccess;
+
+        class typerecd {
+        public:
             /** sentinel value **/
             typerecd() = default;
 
@@ -44,19 +48,24 @@ namespace xo {
                 return recd;
             }
 
+            int32_t seqno() const { return seqno_; }
+            std::string_view name() const { return name_; }
+
+            friend class typerecd_utaccess;
+
+        private:
             /** Establish identity record for type @p name.
              *  O(n) may be acceptable here, since only used
-             *  in implementation of @ref recd()
+             *  in implementation of @ref recd().
+             *
+             *  Application code should use recd<T>()
              **/
             static typerecd _by_name(std::string_view name);
 
             /** next global id# **/
-            static int32_t id_count();
+            static int32_t _id_count();
             /** number of entries in global typerecd table **/
-            static std::size_t table_z();
-
-            int32_t seqno() const { return seqno_; }
-            std::string_view name() const { return name_; }
+            static std::size_t _table_z();
 
         private:
             /** next global type id number **/
@@ -64,7 +73,9 @@ namespace xo {
             /** globally-unique lookup table for typerecd instances. **/
             static std::vector<typerecd> s_typerecd_table_;
 
+            /** sequence number uniquely identifying this type **/
             int32_t seqno_ = -1;
+            /** type name according to type_name<T> **/
             std::string_view name_ = "_%sentinel%_";
         };
 

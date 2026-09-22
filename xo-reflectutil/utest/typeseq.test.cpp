@@ -26,9 +26,30 @@
 namespace xo {
     using xo::reflect::typeseq;
     using xo::reflect::typerecd;
+    using xo::reflect::typerecd_utaccess;
     //using xo::reflect::typeseq_id_for;
     //using xo::reflect::typeseq_id_count;
     //using xo::reflect::typeseq_table_size;
+
+    namespace reflect {
+        /** Access some private methods on typerecd,
+         *  for the sake of testing.
+         **/
+        class typerecd_utaccess {
+        public:
+            static typerecd _by_name(std::string_view name) {
+                return typerecd::_by_name(name);
+            }
+
+            static uint32_t _id_count() {
+                return typerecd::_id_count();
+            }
+
+            static uint32_t _table_z() {
+                return typerecd::_table_z();
+            }
+        };
+    }
 
     namespace ut {
         /* EXTERNAL linkage, deliberately -- at namespace xo::ut scope rather
@@ -55,13 +76,13 @@ namespace xo {
              * and they get it from a compiled function rather than from a
              * static this header would have duplicated per module.
              */
-            typerecd a = typerecd::_by_name("xo::ut::DSeqProbe");
-            typerecd b = typerecd::_by_name("xo::ut::DSeqProbe");
+            typerecd a = typerecd_utaccess::_by_name("xo::ut::DSeqProbe");
+            typerecd b = typerecd_utaccess::_by_name("xo::ut::DSeqProbe");
 
             REQUIRE(a.seqno() == b.seqno());
 
             /* and a different name gets a different one */
-            typerecd c = typerecd::_by_name("xo::ut::DSeqOther");
+            typerecd c = typerecd_utaccess::_by_name("xo::ut::DSeqOther");
 
             REQUIRE(a.seqno() != c.seqno());
         } /*TEST_CASE(same-name-gets-the-same-id)*/
@@ -70,16 +91,16 @@ namespace xo {
             /* TypeRegistry::_id2name indexes a DArenaVector by seqno(), so a
              * gap would be a hole in that vector
              */
-            std::int32_t before = typerecd::id_count();
+            std::int32_t before = typerecd_utaccess::_id_count();
 
-            std::int32_t a = typerecd::_by_name("xo::ut::DSeqDense1").seqno();
-            std::int32_t b = typerecd::_by_name("xo::ut::DSeqDense2").seqno();
-            std::int32_t c = typerecd::_by_name("xo::ut::DSeqDense3").seqno();
+            std::int32_t a = typerecd_utaccess::_by_name("xo::ut::DSeqDense1").seqno();
+            std::int32_t b = typerecd_utaccess::_by_name("xo::ut::DSeqDense2").seqno();
+            std::int32_t c = typerecd_utaccess::_by_name("xo::ut::DSeqDense3").seqno();
 
             REQUIRE(a == before);
             REQUIRE(b == before + 1);
             REQUIRE(c == before + 2);
-            REQUIRE(typerecd::id_count() == before + 3);
+            REQUIRE(typerecd_utaccess::_id_count() == before + 3);
         } /*TEST_CASE(ids-are-dense-and-sequential)*/
 
         TEST_CASE("internal-linkage-types-are-not-name-keyed", "[typeseq]") {
@@ -93,11 +114,11 @@ namespace xo {
             const char * gcc_spelling = "xo::ut::{anonymous}::DSeqWidget";
             const char * clang_spelling = "xo::ut::(anonymous namespace)::DSeqWidget";
 
-            std::size_t rows_before = typerecd::table_z();
+            std::size_t rows_before = typerecd_utaccess::_table_z();
 
-            std::int32_t a = typerecd::_by_name(gcc_spelling).seqno();
-            std::int32_t b = typerecd::_by_name(gcc_spelling).seqno();
-            std::int32_t c = typerecd::_by_name(clang_spelling).seqno();
+            std::int32_t a = typerecd_utaccess::_by_name(gcc_spelling).seqno();
+            std::int32_t b = typerecd_utaccess::_by_name(gcc_spelling).seqno();
+            std::int32_t c = typerecd_utaccess::_by_name(clang_spelling).seqno();
 
             /* same spelling, DIFFERENT ids -- the opposite of the rule for
              * every other type
@@ -106,10 +127,9 @@ namespace xo {
             REQUIRE(b != c);
 
             /* and no rows were added */
-            REQUIRE(typerecd::table_z() == rows_before);
+            REQUIRE(typerecd_utaccess::_table_z() == rows_before);
         } /*TEST_CASE(internal-linkage-types-are-not-name-keyed)*/
 
-#ifdef BROKEN
         TEST_CASE("an-id-is-never-reassigned", "[typeseq]") {
             /* the invariant whose violation is SILENT.  Ids are cached in
              * per-type statics all over the process -- a trivial program
@@ -117,18 +137,65 @@ namespace xo {
              * one would invalidate every cache holding it, with nothing to
              * notice.
              *
-             * Checked by drawing an id, forcing plenty of unrelated traffic,
-             * then asking again.
+             * Every name here has STATIC STORAGE DURATION, and that is a
+             * requirement rather than convenience: the table stores typerecd,
+             * whose name_ is a string_view, so it BORROWS its keys.  An
+             * earlier draft built filler names as `"..." + std::to_string(i)'
+             * and left the table holding views into destroyed temporaries.
+             *
+             * That is also why _by_name is private: its only production caller
+             * is recd<T>(), passing type_name<T>(), which is a static.  The
+             * access restriction IS the lifetime contract, and typerecd_utaccess
+             * is a test opting into keeping it by hand.
              */
-            std::int32_t first = typerecd::_by_name("xo::ut::DSeqStable").seqno();
+            static const char * const c_filler[] = {
+                "xo::ut::DSeqFillerA", "xo::ut::DSeqFillerB",
+                "xo::ut::DSeqFillerC", "xo::ut::DSeqFillerD",
+                "xo::ut::DSeqFillerE", "xo::ut::DSeqFillerF",
+            };
+            /* internal linkage: draws an id WITHOUT adding a row, so it
+             * moves the counter and the table out of step.  Interleaved so
+             * that the check below runs with them ALREADY diverged.
+             */
+            static const char * const c_anon = "xo::ut::{anonymous}::DSeqNoise";
 
-            // this test violates lifetime rules
-            for (int i = 0; i < 64; ++i)
-                typeseq_id_for("xo::ut::DSeqFiller" + std::to_string(i));
+            std::int32_t first
+                = typerecd_utaccess::_by_name("xo::ut::DSeqStable").seqno();
 
-            REQUIRE(typeseq_id_for("xo::ut::DSeqStable") == first);
+            for (const char * name : c_filler) {
+                typerecd_utaccess::_by_name(name);
+                typerecd_utaccess::_by_name(c_anon);
+            }
+
+            REQUIRE(typerecd_utaccess::_by_name("xo::ut::DSeqStable").seqno()
+                    == first);
+
+            /* the traffic really did move both counters, unequally */
+            REQUIRE(typerecd_utaccess::_id_count() > first + 1);
+            REQUIRE(typerecd_utaccess::_table_z() < static_cast<std::size_t>(typerecd_utaccess::_id_count()));
+
+            /* AN ID IS NOT A TABLE INDEX.  With the two now diverged, a fresh
+             * name must take the next COUNTER value, not the next row number.
+             *
+             * This has to happen here rather than in
+             * `ids-are-dense-and-sequential', which cannot see the difference:
+             * catch2 runs cases in declaration order, and that one runs before
+             * any anonymous draw has occurred -- at which point index and
+             * counter are still equal and an index-based implementation passes
+             * it.  Measured: returning the table index from _by_name leaves
+             * every other case in this file green.
+             */
+            std::int32_t expect = typerecd_utaccess::_id_count();
+            std::size_t rows = typerecd_utaccess::_table_z();
+
+            REQUIRE(expect != static_cast<std::int32_t>(rows));
+
+            std::int32_t fresh
+                = typerecd_utaccess::_by_name("xo::ut::DSeqAfterNoise").seqno();
+
+            REQUIRE(fresh == expect);
         } /*TEST_CASE(an-id-is-never-reassigned)*/
-#endif
+
 
         TEST_CASE("typeseq-id-agrees-with-the-table", "[typeseq]") {
             /* typeseq::id<T>() memoises in a per-type static; that cache is
@@ -137,7 +204,7 @@ namespace xo {
              */
             std::int32_t via_typeseq = typeseq::id<DSeqAlpha>().seqno();
             std::int32_t via_table
-                = typerecd::_by_name(xo::reflect::type_name<DSeqAlpha>()).seqno();
+                = typerecd_utaccess::_by_name(xo::reflect::type_name<DSeqAlpha>()).seqno();
 
             REQUIRE(via_typeseq == via_table);
 

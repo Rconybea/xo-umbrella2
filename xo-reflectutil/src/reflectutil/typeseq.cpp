@@ -12,34 +12,6 @@
 namespace xo {
     namespace reflect {
         namespace {
-#ifdef OBSOLETE
-            /** one (name, id) the process has allocated.
-             *
-             *  Owns its name.  @c type_name<T>()'s storage is a per-module
-             *  header static, so the same type's name lives at DIFFERENT
-             *  addresses in different modules -- the whole reason this table
-             *  exists.  Borrowing a @c string_view would tie an entry to
-             *  whichever module happened to insert it.
-             **/
-            struct Entry {
-                std::string name_;
-                std::int32_t id_;
-            };
-#endif
-
-#ifdef OBSOLETE
-            std::vector<Entry> & s_table() {
-                static std::vector<Entry> s_v;
-                return s_v;
-            }
-#endif
-
-#ifdef OBSOLETE
-            std::int32_t & s_next_id() {
-                static std::int32_t s_n = 0;
-                return s_n;
-            }
-#endif
 
             /** guards both of the above.
              *
@@ -81,54 +53,6 @@ namespace xo {
             }
         } /*namespace*/
 
-#ifdef OBSOLETE
-        std::int32_t
-        typeseq_id_for(std::string_view name)
-        {
-            std::lock_guard<std::mutex> lock(s_mutex());
-
-            if (has_internal_linkage(name)) {
-                /* draw, but do not insert */
-                return s_next_id()++;
-            }
-
-            for (const Entry & entry : s_table()) {
-                if (entry.name_ == name)
-                    return entry.id_;
-            }
-
-            /* ids are dense and sequential -- TypeRegistry indexes a vector by
-             * seqno().  Note the id is NOT the table index: an anonymous type
-             * draws from the counter without adding a row, so the two diverge.
-             */
-            std::int32_t id = s_next_id()++;
-
-            s_table().push_back(Entry{std::string(name), id});
-
-            return id;
-        } /*typeseq_id_for*/
-#endif
-
-#ifdef OBSOLETE
-        std::size_t
-        typeseq_table_size()
-        {
-            std::lock_guard<std::mutex> lock(s_mutex());
-
-            return s_table().size();
-        } /*typeseq_table_size*/
-#endif
-
-#ifdef OBSOLETE
-        std::int32_t
-        typeseq_id_count()
-        {
-            std::lock_guard<std::mutex> lock(s_mutex());
-
-            return s_next_id();
-        } /*typeseq_id_count*/
-#endif
-
         int32_t
         typerecd::s_next_id = 0;
 
@@ -163,13 +87,13 @@ namespace xo {
         }
 
         std::int32_t
-        typerecd::id_count()
+        typerecd::_id_count()
         {
             return s_next_id;
         }
 
         std::size_t
-        typerecd::table_z()
+        typerecd::_table_z()
         {
             return s_typerecd_table_.size();
         }
