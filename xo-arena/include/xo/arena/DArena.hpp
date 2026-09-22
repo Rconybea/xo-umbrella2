@@ -23,7 +23,8 @@ namespace xo {
          *  Provides minimal RAII functionality around memory mapping.
          *  For allocation implementation see @ref IAllocator_DArena
          **/
-        struct DArena {
+        class DArena {
+        public:
             /*
              *    <----------------------------size-------------------------->
              *    <------------committed-----------><-------uncommitted------>
