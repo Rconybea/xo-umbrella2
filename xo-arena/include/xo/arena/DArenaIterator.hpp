@@ -11,7 +11,7 @@
 
 namespace xo {
     namespace mm {
-        struct DArena;
+        class DArena;
 
         /** @class DArenaIterator
          *  @brief Representation for alloc iterator over arena
