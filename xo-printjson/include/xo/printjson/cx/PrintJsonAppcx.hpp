@@ -58,8 +58,10 @@ namespace xo {
         /** json printers, indexed by type **/
         rp<PrintJson> print_json_;
 
+#ifdef NOT_USING
         /** xo-reflect/ context **/
         const ReflectAppcx & reflect_appcx_;
+#endif
     };
 
     template <>
