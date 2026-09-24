@@ -35,6 +35,7 @@ namespace xo {
             using const_iterator = const value_type *;
             using Checkpoint = DArena::Checkpoint;
 
+        public:
             /** null ctor **/
             DArenaVector() = default;
             /** create arena-backed vector from @p cfg.  Will reserve memory for allocation.
@@ -286,7 +287,8 @@ namespace xo {
                 // alloc to get alloc header + guard bytes
                 auto b = reinterpret_cast<T *>(store_.alloc(typeseq::id<T[]>(), z * sizeof(T)));
 
-                assert(b == base_);
+                if (b != base_)
+                    assert(false);
             }
 
             return true;
@@ -304,7 +306,8 @@ namespace xo {
             if (z > 0) {
                 auto b = reinterpret_cast<T *>(store_.alloc(typeseq::id<T[]>(), z * sizeof(T)));
 
-                assert(b == base_);
+                if(b != base_)
+                    assert(false);
             }
         }
 
