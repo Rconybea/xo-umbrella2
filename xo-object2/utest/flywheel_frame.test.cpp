@@ -219,6 +219,20 @@ namespace xo {
              * segfault waiting to happen.
              */
             REQUIRE(frame.find("\"offset\": 16") != std::string::npos);
+            /* size is the allocation's own, read from its alloc header --
+             * AllocInfo::size(), which the store-only ObjectSlot contract
+             * makes safe to call (.xo-backlog/xo-facet/issues/04).  Spelled
+             * with the enclosing "offset" so it cannot accidentally match
+             * RootSet's unrelated "size" key one level up.
+             *
+             * 8 here, which happens to equal sizeof(DFloat) -- a fixed-size
+             * representation needing no padding.  It is NOT read from the
+             * type: DArray and DString fix capacity at construction rather
+             * than in the type, so for those the two diverge and only the
+             * header is right.  Observed (a first draft predicted 16, for the
+             * allocation including its header; the header is excluded).
+             */
+            REQUIRE(frame.find("\"offset\": 16, \"size\": 8") != std::string::npos);
             /* no "ix" any more: every slot is emitted, so a consumer reads
              * an index from array position.  SlotInfo carried one until
              * 2026-09-20.

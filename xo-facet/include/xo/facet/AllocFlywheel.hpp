@@ -103,8 +103,13 @@ namespace xo::facet {
         /** slots the strong root set can hold **/
         handle_index_type strong_capacity() const { return store_.strong_capacity(); }
 
-        /** insert strong reference to @p x into this flywheel **/
-        std::pair<handle_index_type, handle_type*> add_strong_ref(handle_type x);
+        /** adopt the erased fop (@p iface, @p data) into this flywheel's
+         *  strong reference set.
+         *
+         *  Require: @p data was allocated from @ref storage.
+         **/
+        std::pair<handle_index_type, handle_type*>
+        add_strong_ref(const ATop * iface, void * data);
 
         /** release the strong slot at @p ix, returning it for reuse.
          *

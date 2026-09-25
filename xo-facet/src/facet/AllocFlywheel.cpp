@@ -20,7 +20,8 @@ namespace xo::facet {
       indentlog2appcx_creation_evidence_{facet_appcx.indentlog2appcx_creation_evidence()},
       store_{std::move(storage),
              std::move(strong),
-             std::move(strong_freelist)}
+             std::move(strong_freelist),
+             facet_appcx.creation_evidence()}
     {
         // facet_appcx: proof of work: facet,indentlog2 init performed;
         // implies config-dependent globals setup, including:
@@ -83,9 +84,10 @@ namespace xo::facet {
     }
 
     auto
-    AllocFlywheel::add_strong_ref(handle_type x) -> std::pair<handle_index_type, handle_type*>
+    AllocFlywheel::add_strong_ref(const ATop * iface, void * data)
+        -> std::pair<handle_index_type, handle_type*>
     {
-        return store_.add_strong_ref(x);
+        return store_.add_strong_ref(iface, data);
     }
 
     void

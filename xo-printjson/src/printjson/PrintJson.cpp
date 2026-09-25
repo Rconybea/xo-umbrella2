@@ -517,6 +517,17 @@ namespace xo {
          *    (.xo-backlog/xo-arena/issues/04).  An offset rather than an
          *    address because json numbers are IEEE754 doubles on the consumer's
          *    side; see JsonPrinter_address.
+         *  - @c size: bytes the allocation occupies, from the arena's alloc
+         *    header -- @c AllocInfo::size(), which includes allocator padding
+         *    and excludes the header itself.  NOT @c sizeof(DRepr): DArray and
+         *    DString fix capacity at construction rather than in the type, so
+         *    the representation size says nothing about the payload and a cell
+         *    drawn from it would be wrong by an unbounded factor.
+         *
+         *  Both of those calls are sound because a non-empty ObjectSlot can
+         *  only be made by a DHandleStore, which checked the pointer against
+         *  its own arena and checked that arena's headers and alignment.  See
+         *  ObjectSlot's Provenance note and .xo-backlog/xo-facet/issues/04.
          *
          *  An EMPTY slot renders as @c null.  Slots are emitted including the
          *  empty ones, so a consumer reads a slot's index from its position in
@@ -562,16 +573,27 @@ namespace xo {
                 /* 0 means no FacetAppcx has been constructed, so there is no
                  * agreed alignment to mask with.  Reporting the absence beats
                  * masking with ~(0-1) == 0 and dereferencing the result.
+                 *
+                 * NOT REACHABLE for a slot that came from a flywheel, and
+                 * deliberately kept anyway.  A non-empty slot implies a
+                 * DHandleStore, whose ctor rejects a zero base alignment, and
+                 * assign_storage_base_align is write-once -- so the value
+                 * cannot fall back to 0 underneath a live slot.  The guard
+                 * survives because `data' arrives through recover_native from
+                 * a TaggedPtr a caller assembled, and the failure it prevents
+                 * is a segfault rather than a wrong number.
                  */
                 std::size_t align_z = DHandleStoreBase::storage_base_align();
 
                 if (align_z == 0) {
-                    *p_os << ", \"offset\": null}";
+                    *p_os << ", \"offset\": null, \"size\": null}";
                 } else {
                     DArena * arena = DArena::obj2arena(data, align_z);
 
                     *p_os << ", \"offset\": "
                           << (static_cast<const std::byte *>(data) - arena->_mem_lo())
+                          << ", \"size\": "
+                          << arena->alloc_info(static_cast<std::byte *>(data)).size()
                           << "}";
                 }
             } /*print_json*/

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "FacetConfig.hpp"
+#include "FacetAppcxCreated.hpp"
 #include "xo/facet/FacetRegistry.hpp"
 #include "xo/facet/TypeRegistry.hpp"
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
@@ -18,7 +19,7 @@ namespace xo {
      **/
     class FacetAppcx {
     public:
-        using CreationEvidence = Evidence<class FacetAppcxCreated_tag>;
+        using CreationEvidence = FacetAppcxCreated;
         using CreationEvp = EvidenceProvider<CreationEvidence>;
         using FacetRegistry = xo::facet::FacetRegistry;
         using TypeRegistry = xo::facet::TypeRegistry;
@@ -45,7 +46,7 @@ namespace xo {
         const Indentlog2Appcx & indentlog2_appcx() const { return indentlog2_appcx_; }
 
         InitEvidence init_evidence() const { return init_evidence_; }
-        CreationEvidence creation_evidence() const { return facet_evp_; }
+        FacetAppcxCreated creation_evidence() const { return facet_evp_; }
         Indentlog2Appcx::CreationEvidence indentlog2appcx_creation_evidence() const;
         const FacetConfig & config() const { return config_; }
         /** report memory consumption, one @ref MemorySizeInfo per pool.
@@ -100,7 +101,7 @@ namespace xo {
      **/
     template <typename T>
     concept carries_facet_appcx = requires (const T & x) {
-        { x.facetappcx_creation_evidence() } -> std::convertible_to<FacetAppcx::CreationEvidence>;
+        { x.facetappcx_creation_evidence() } -> std::convertible_to<FacetAppcxCreated>;
     };
 
     template <>

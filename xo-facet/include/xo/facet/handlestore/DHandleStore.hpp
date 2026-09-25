@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "xo/facet/cx/FacetAppcxCreated.hpp"
 #include <xo/arena/DArenaVector.hpp>
 #include <xo/arena/DArena.hpp>
 #include <stdexcept>
@@ -15,8 +16,22 @@ namespace xo::facet {
      **/
     class DHandleStoreBase {
     public:
-        /** assign static base alignment for handle storage **/
-        static void assign_storage_base_align(std::size_t z) { s_storage_base_align = z; }
+        /** assign static base alignment for handle storage.
+         *
+         *  write-once: enforces requirement that all HandleStore instances
+         *  share the same base alignment.
+         *  Necessary to unlock @ref DArena::obj2arena() for HandleStore pointers.
+         **/
+        static void assign_storage_base_align(std::size_t z) {
+            if ((s_storage_base_align != 0) && (s_storage_base_align != z)) {
+                throw std::runtime_error
+                    ("DHandleStoreBase::assign_storage_base_align"
+                     ": storage base alignment is write-once, and a"
+                     " conflicting value was already in force");
+            }
+
+            s_storage_base_align = z;
+        }
 
         /** base alignment every participating storage arena shares.
          *
@@ -81,10 +96,12 @@ namespace xo::facet {
          **/
         DHandleStore(Storage && storage,
                      xo::mm::DArenaVector<Handle> && strong,
-                     xo::mm::DArenaVector<handle_index_type> && strong_freelist)
+                     xo::mm::DArenaVector<handle_index_type> && strong_freelist,
+                     FacetAppcxCreated evidence)
         : storage_{std::move(storage)},
           strong_refs_{std::move(strong)},
-          strong_freelist_{std::move(strong_freelist)}
+          strong_freelist_{std::move(strong_freelist)},
+          facetappcx_evidence_{evidence}
         {
             /* Alloc headers are REQUIRED, not merely useful.
              *
@@ -123,6 +140,8 @@ namespace xo::facet {
 
         /** false -> not eligible for GC (allocates own memory + not moveable) **/
         static constexpr bool is_gc_eligible() { return false; }
+
+        FacetAppcxCreated facetappcx_evidence() const { return facetappcx_evidence_; }
 
         std::string_view name() const noexcept { return storage_.name(); }
         size_type reserved() const noexcept { return storage_.reserved(); }
@@ -189,8 +208,12 @@ namespace xo::facet {
         xo::mm::AllocInfo alloc_info(value_type mem) const noexcept { return storage_.alloc_info(mem); }
         range_type alloc_range(xo::mm::DArena & mm) const noexcept { return storage_.alloc_range(mm); }
 
-        ///@}
+        /** counts non-empty strong slots **/
+        handle_index_type strong_root_count() const {
+            return strong_refs_.size() - strong_freelist_.size();
+        }
 
+        ///@}
         /** @defgroup mm-handlestore-mutable-methods **/
         ///@{
 
@@ -201,19 +224,50 @@ namespace xo::facet {
         const Storage & storage() const { return storage_; }
 
         bool expand(size_type z) { return storage_.expand(z); }
-        value_type alloc(typeseq tseq, size_type z) noexcept { return storage_.alloc(tseq, z); }
-        value_type super_alloc(typeseq tseq, size_type z) noexcept { return storage_.super_alloc(tseq, z); }
-        value_type sub_alloc(size_type z, bool complete_flag) noexcept { return storage_.sub_alloc(z, complete_flag); }
+        value_type alloc(typeseq tseq, size_type z) noexcept {
+            return storage_.alloc(tseq, z);
+        }
+        value_type super_alloc(typeseq tseq, size_type z) noexcept {
+            return storage_.super_alloc(tseq, z);
+        }
+        value_type sub_alloc(size_type z, bool complete_flag) noexcept {
+            return storage_.sub_alloc(z, complete_flag);
+        }
         value_type alloc_copy(value_type src) noexcept { return storage_.alloc_copy(src); }
 
-        /** copy handle @p x into strong reference set.
-         *  @return pair (i, &h), where i indexed &h in strong reference set,
-         *  and h is a copy of @p x.
+        /** adopt the erased fop (@p iface, @p data) into the strong reference
+         *  set, as a new Handle.
          *
-         *  Require: @p x refers to memory owned by @ref storage_
+         *  @return pair (i, &h), where i indexes &h in the strong reference
+         *  set.  &h is nullptr iff the set is full -- a DArenaVector fixes
+         *  capacity at construction, so that is how root-set exhaustion
+         *  reaches a caller.
+         *
+         *  @throw std::runtime_error if @p data was not allocated from
+         *  @ref storage_.
+         *
+         *  This store is the ONLY thing that can make a non-empty Handle (see
+         *  ObjectSlot's Provenance note), which is why the pair arrives here
+         *  rather than an assembled Handle: a caller assembling one could not
+         *  have had its provenance checked.  The check was this function's
+         *  documented precondition for a year and is now enforced.
+         *
+         *  NB @c storage_.contains, not @c this->contains.  The latter also
+         *  spans the root-set and free-list arenas, which are mapped WITHOUT
+         *  alloc headers -- a pointer into one would pass and then fail
+         *  DArena::alloc_info, which is exactly the outcome being excluded.
          **/
-        std::pair<handle_index_type, Handle*> add_strong_ref(Handle x) {
-            return _add_ref(strong_refs_, strong_freelist_, x);
+        std::pair<handle_index_type, Handle*>
+        add_strong_ref(const typename Handle::ATop * iface, void * data) {
+            if (!storage_.contains(data)) {
+                throw std::runtime_error
+                    (std::string("DHandleStore::add_strong_ref"
+                                 ": object was not allocated from this store's"
+                                 " storage arena; arena=")
+                     + std::string(this->name()));
+            }
+
+            return _add_ref(strong_refs_, strong_freelist_, Handle(iface, data));
         }
 
         /** release the strong slot at @p ix, returning it to the free list.
@@ -221,12 +275,6 @@ namespace xo::facet {
          **/
         void remove_strong_ref(size_type ix) {
             _remove_ref(strong_refs_, strong_freelist_, ix);
-        }
-
-
-        /** counts non-empty strong slots **/
-        handle_index_type strong_root_count() const {
-            return strong_refs_.size() - strong_freelist_.size();
         }
 
         void clear() {
@@ -309,6 +357,9 @@ namespace xo::facet {
 
         /** Index positions of empty slots in @ref strong_refs_ **/
         xo::mm::DArenaVector<handle_index_type> strong_freelist_;
+
+        /** evidence that a FacetAppcx instance was created **/
+        FacetAppcxCreated facetappcx_evidence_;
 
         ///@}
     };

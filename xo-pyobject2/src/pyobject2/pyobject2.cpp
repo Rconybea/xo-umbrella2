@@ -94,7 +94,7 @@ namespace xo {
                                 auto alloc = with_facet<AAllocator>::mkobj(&fw->storage());
 
                                 return HFloat::make_strong_ref
-                                    (fw, with_facet<APrintable>::mkobj(DFloat::_box(alloc, x)));
+                                    (fw, DFloat::box<APrintable>(alloc, x));
                             },
                             py::arg("flywheel"),
                             py::arg("value"),

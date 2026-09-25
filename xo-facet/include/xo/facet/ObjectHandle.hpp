@@ -83,20 +83,11 @@ namespace xo::facet {
 
         /** Attach instance to flywheel @p mem to keep its backing memory alive.
          *
-         *  Require: @p x was allocated from flywheel @p mem
+         *  Require: @p x was allocated from flywheel @p mem.
          **/
         static DObjectHandle make_strong_ref(bp<AllocFlywheel> mem, obj<AFacet, DRepr> x) {
-            /* Type-erased version of x.
-             *
-             * Not @code obj<ATop> impl_obj = x @endcode.
-             * Relying on: flywheel slots are obj<ATop, ..>,
-             * and AFacet inherits ATop.
-             *
-             * Necessary so polymorphic methods reach the right DRepr.
-             */
-            ObjectSlot impl_obj(static_cast<const ATop *>(x.iface()), x.opaque_data());
-
-            auto ref = mem->add_strong_ref(impl_obj);
+            auto ref = mem->add_strong_ref(static_cast<const ATop *>(x.iface()),
+                                           x.opaque_data());
 
             return DObjectHandle(mem.promote(), ref);
         }

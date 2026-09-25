@@ -16,16 +16,14 @@
  * Expectations are OBSERVED, never predicted.
  */
 
+#include "printjson_utest_appcx.hpp"
 #include "xo/printjson/PrintJson.hpp"
 #include "xo/printjson/init_printjson.hpp"
-/* the obj<ATop> half of slot-does-not-take-the-erased-fop-path instantiates
- * FopTdx's erased branch, which rotates to AReflectable -- so its router has
- * to be visible.  Same reason FopJson.test.cpp includes these.
- */
 #include <xo/reflectable2/FopTdx.hpp>
 #include <xo/reflectable2/Reflectable.hpp>
 #include <xo/facet/handlestore/ObjectSlot.hpp>
 #include <xo/facet/handlestore/DHandleStore.hpp>
+#include <xo/facet/AllocFlywheel.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
@@ -80,6 +78,7 @@ namespace xo {
 
     namespace ut {
         using xo::facet::ObjectSlot;
+        using xo::facet::AllocFlywheel;
         using xo::facet::DHandleStoreBase;
         using xo::facet::FacetRegistry;
         using xo::print::APrintable;
@@ -88,43 +87,54 @@ namespace xo {
         using xo::mm::DArena;
 
         namespace {
-            /** every participating arena must share this; see
-             *  DHandleStoreBase::storage_base_align
-             **/
-            constexpr std::size_t c_align = 2UL * 1024 * 1024 * 1024;
-
             void require_registered() {
                 static bool s_once = []() {
                     FacetRegistry::register_impl<APrintable, DSlotProbe>();
-                    DHandleStoreBase::assign_storage_base_align(c_align);
                     return true;
                 }();
                 (void)s_once;
             }
 
-            /** an arena configured the way a flywheel's storage is **/
-            DArena make_storage(const char * name) {
-                return DArena::map(ArenaConfig()
-                                   .with_name(ArenaNameStr::from_cstr(name))
-                                   .with_size(1UL * 1024 * 1024)
-                                   .with_base_align_z(c_align)
-                                   .with_exclusive_block_flag(true)
-                                   .with_store_header_flag(true));
+            /** a flywheel, whose storage arena is header-enabled and aligned
+             *  on the one agreed base alignment.
+             *
+             *  Was a bare DArena until 2026-09-24.  A non-empty ObjectSlot can
+             *  now only be made by a DHandleStore, so a test that wants one
+             *  has to have a store -- which is the point, since a storeless
+             *  slot is exactly the unvouched-for state the change removes.
+             **/
+            rp<AllocFlywheel> make_flywheel(const char * tag) {
+                ArenaConfig storage_cfg{ .name_ = ArenaNameStr::sprintf("%s.storage", tag),
+                                         .size_ = 16*1024 };
+                ArenaConfig strong_cfg { .name_ = ArenaNameStr::sprintf("%s.strong", tag),
+                                         .size_ = 4*1024 };
+
+                return AllocFlywheel::make_app(printjson_utest_facet_appcx(),
+                                               storage_cfg, strong_cfg);
             }
 
-            /** allocate a DSlotProbe from @p arena and erase it into a slot,
-             *  exactly as DObjectHandle::make_strong_ref does
+            /** allocate a DSlotProbe from @p fw and adopt it as a root,
+             *  exactly as DObjectHandle::make_strong_ref does.
+             *
+             *  @return a COPY of the slot the store made.  The store keeps the
+             *  original; nothing here releases it, so the copy stays valid for
+             *  the life of @p fw.
              **/
-            ObjectSlot root(DArena & arena, double x) {
-                auto * mem = arena.alloc(xo::reflect::typeseq::id<DSlotProbe>(),
-                                         sizeof(DSlotProbe));
+            ObjectSlot root(AllocFlywheel & fw, double x) {
+                auto * mem = fw.storage().alloc(xo::reflect::typeseq::id<DSlotProbe>(),
+                                                sizeof(DSlotProbe));
                 REQUIRE(mem);
 
                 auto * p = new (mem) DSlotProbe{x};
                 auto typed = xo::facet::with_facet<APrintable>::mkobj(p);
 
-                return ObjectSlot(static_cast<const xo::facet::ATop *>(typed.iface()),
-                                  typed.opaque_data());
+                auto ref = fw.add_strong_ref
+                    (static_cast<const xo::facet::ATop *>(typed.iface()),
+                     typed.opaque_data());
+
+                REQUIRE(ref.second);
+
+                return *ref.second;
             }
 
             std::string render(PrintJson & pj, const ObjectSlot & slot) {
@@ -133,6 +143,18 @@ namespace xo {
                 return ss.str();
             }
         }
+
+        /* the restriction itself, checked by the compiler.  is_constructible
+         * respects access, so this fails the moment the ctor goes public
+         * again -- which is the whole of .xo-backlog/xo-facet/issues/04's
+         * first claim.
+         */
+        static_assert(!std::is_constructible_v<ObjectSlot,
+                                               const xo::facet::ATop *, void *>,
+                      "a non-empty ObjectSlot must only be constructible by"
+                      " DHandleStore -- see ObjectSlot's Provenance note");
+        /* ..and the empty one stays available to anybody */
+        static_assert(std::is_default_constructible_v<ObjectSlot>);
 
         TEST_CASE("slot-does-not-take-the-erased-fop-path", "[printjson][ObjectSlot]")
         {
@@ -164,14 +186,15 @@ namespace xo {
             REQUIRE(render(pj, empty) == std::string("null"));
         } /*TEST_CASE(empty-slot-renders-as-null)*/
 
-        TEST_CASE("occupied-slot-reports-identity-and-offset", "[printjson][ObjectSlot]")
+        TEST_CASE("occupied-slot-reports-identity-offset-and-size",
+                  "[printjson][ObjectSlot]")
         {
             require_registered();
 
             PrintJson pj;
-            DArena arena = make_storage("utest.slot.one");
+            auto fw = make_flywheel("utest.slot.one");
 
-            ObjectSlot s0 = root(arena, 1.5);
+            ObjectSlot s0 = root(*fw.get(), 1.5);
 
             const std::string frame = render(pj, s0);
 
@@ -186,7 +209,13 @@ namespace xo {
              * DHandleStore requires; if it reads 0 the preamble vanished.
              */
             REQUIRE(frame.find("\"offset\": 16") != std::string::npos);
-        } /*TEST_CASE(occupied-slot-reports-identity-and-offset)*/
+
+            /* size comes from the ALLOC HEADER, not sizeof(DSlotProbe) -- the
+             * two agree here only because DSlotProbe is fixed-size and needs
+             * no padding.  Observed, not predicted.
+             */
+            REQUIRE(frame.find("\"size\": 8") != std::string::npos);
+        } /*TEST_CASE(occupied-slot-reports-identity-offset-and-size)*/
 
         TEST_CASE("offset-is-resolved-from-the-pointer-alone", "[printjson][ObjectSlot]")
         {
@@ -194,59 +223,92 @@ namespace xo {
              * sits WITHOUT anyone handing it an arena.  Two arenas, and each
              * slot's offset is relative to its OWN -- which a printer that
              * captured a single base could not do.
+             *
+             * This is also what makes store-only slot creation worth the
+             * trouble rather than just passing the arena down the print tree:
+             * the slot is self-describing, so every consumer of
+             * visit_object_slots gets the same answer without plumbing.
              */
             require_registered();
 
             PrintJson pj;
-            DArena a1 = make_storage("utest.slot.a1");
-            DArena a2 = make_storage("utest.slot.a2");
+            auto fw1 = make_flywheel("utest.slot.a1");
+            auto fw2 = make_flywheel("utest.slot.a2");
 
-            /* a2's first object is at the same offset as a1's, from a
+            /* fw2's first object is at the same offset as fw1's, from a
              * DIFFERENT base -- so equal offsets here mean each was resolved
              * against its own arena
              */
-            ObjectSlot s1 = root(a1, 1.5);
-            ObjectSlot s2 = root(a2, 2.5);
+            ObjectSlot s1 = root(*fw1.get(), 1.5);
+            ObjectSlot s2 = root(*fw2.get(), 2.5);
 
             REQUIRE(render(pj, s1).find("\"offset\": 16") != std::string::npos);
             REQUIRE(render(pj, s2).find("\"offset\": 16") != std::string::npos);
 
-            /* second object in a1 moves on; a2 is untouched by it */
-            ObjectSlot s3 = root(a1, 3.5);
+            /* second object in fw1 moves on; fw2 is untouched by it */
+            ObjectSlot s3 = root(*fw1.get(), 3.5);
 
             REQUIRE(render(pj, s3).find("\"offset\": 16") == std::string::npos);
             REQUIRE(render(pj, s2).find("\"offset\": 16") != std::string::npos);
         } /*TEST_CASE(offset-is-resolved-from-the-pointer-alone)*/
 
-        TEST_CASE("slot-without-an-agreed-alignment-reports-null-offset",
-                  "[printjson][ObjectSlot]")
+        TEST_CASE("a-store-refuses-a-foreign-pointer", "[printjson][ObjectSlot]")
         {
-            /* storage_base_align() is 0 until a FacetAppcx has been built.
-             * Masking with ~(0-1) == 0 would dereference the result, so the
-             * printer reports the absence instead.  Restored afterwards --
-             * the value is process-wide state.
+            /* the runtime half of the provenance contract.  add_strong_ref's
+             * precondition -- "x refers to memory owned by storage_" -- was a
+             * doc comment until 2026-09-24; now the store checks it, which is
+             * what lets the resulting slot vouch for itself.
+             *
+             * Allocate from ONE flywheel, offer it to ANOTHER.  The pointer is
+             * perfectly valid; it just did not come from the store being asked
+             * to adopt it.
              */
             require_registered();
 
-            const std::size_t saved = DHandleStoreBase::storage_base_align();
+            auto fw1 = make_flywheel("utest.slot.owner");
+            auto fw2 = make_flywheel("utest.slot.stranger");
 
-            PrintJson pj;
-            DArena arena = make_storage("utest.slot.noalign");
-            ObjectSlot s0 = root(arena, 1.5);
+            auto * mem = fw1->storage().alloc(xo::reflect::typeseq::id<DSlotProbe>(),
+                                              sizeof(DSlotProbe));
+            REQUIRE(mem);
 
-            DHandleStoreBase::assign_storage_base_align(0);
+            auto * p = new (mem) DSlotProbe{1.5};
+            auto typed = xo::facet::with_facet<APrintable>::mkobj(p);
+            auto * iface = static_cast<const xo::facet::ATop *>(typed.iface());
 
-            const std::string frame = render(pj, s0);
+            REQUIRE_THROWS(fw2->add_strong_ref(iface, typed.opaque_data()));
 
-            DHandleStoreBase::assign_storage_base_align(saved);
+            /* and the rightful owner takes it */
+            REQUIRE_NOTHROW(fw1->add_strong_ref(iface, typed.opaque_data()));
+        } /*TEST_CASE(a-store-refuses-a-foreign-pointer)*/
 
-            INFO("frame: " << frame);
+        TEST_CASE("storage-base-align-is-write-once", "[printjson][ObjectSlot]")
+        {
+            /* the other half.  A slot's offset is masked with this value at
+             * PRINT time, long after the store that validated an arena against
+             * it was built -- so a silent reassignment would recover the wrong
+             * arena and nothing would notice.
+             *
+             * Replaces `slot-without-an-agreed-alignment-reports-null-offset',
+             * which set the value to 0 to exercise the printer's null-offset
+             * branch.  That branch is now unreachable for a slot that exists
+             * (a slot implies a store, a store implies a non-zero value, and
+             * the value cannot change), so the test that reached it has become
+             * the test that it CANNOT be reached.
+             */
+            const std::size_t in_force = DHandleStoreBase::storage_base_align();
 
-            REQUIRE(frame.find("\"offset\": null") != std::string::npos);
-            /* identity still reported -- it needs no alignment */
-            REQUIRE(frame.find("\"type\": \"xo::ut::{anonymous}::DSlotProbe\"")
-                    != std::string::npos);
-        } /*TEST_CASE(slot-without-an-agreed-alignment-reports-null-offset)*/
+            REQUIRE(in_force != 0);
+
+            /* idempotent: several FacetAppcx agreeing is fine */
+            REQUIRE_NOTHROW(DHandleStoreBase::assign_storage_base_align(in_force));
+
+            REQUIRE_THROWS(DHandleStoreBase::assign_storage_base_align(0));
+            REQUIRE_THROWS(DHandleStoreBase::assign_storage_base_align(in_force * 2));
+
+            /* refused, not quietly recorded */
+            REQUIRE(DHandleStoreBase::storage_base_align() == in_force);
+        } /*TEST_CASE(storage-base-align-is-write-once)*/
     } /*namespace ut*/
 } /*namespace xo*/
 
