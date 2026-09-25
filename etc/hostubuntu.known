@@ -1,0 +1,35 @@
+# Basenames that must be symlinked from host libraries for the ubuntu / nvidia
+# graphics stack.  Consumed by ./gen-hostegl --profile=ubuntu.
+#
+# PROVENANCE: harvested 2026-09-25 from the committed etc/hostubuntu/ symlink
+# directory, built up by hand -- running glxgears, vkcube and the xo-imgui
+# examples and recording what failed to load.  See xo-imgui/TROUBLESHOOTING,
+# which names most of these and records that libnvidia-glvkspirv was what
+# vkcube needed.  That is evidence, not a guess: do not prune an entry because
+# it looks unnecessary, only because a run proved it is.
+#
+# One basename per line.  A trailing glob is allowed, and is how a
+# version-suffixed driver library survives a driver upgrade -- the harvested
+# directory pinned 580.126.09 literally, which would dangle at the next bump.
+libdrm.so
+libdrm.so.2
+libdrm.so.2.4.0
+libEGL_mesa.so.0
+libEGL_mesa.so.0.0.0
+libEGL_nvidia.so.*
+libgbm.so
+libgbm.so.1
+libgbm.so.1.0.0
+libGLdispatch.so.0
+libGLdispatch.so.0.0.0
+libGL.so.1
+libGL.so.1.7.0
+libGLX_indirect.so.0
+libGLX_nvidia.so.*
+libGLX.so.0
+libGLX.so.0.0.0
+libnvidia-glcore.so.*
+libnvidia-glsi.so.*
+libnvidia-glvkspirv.so.*
+libnvidia-gpucomp.so.*
+libnvidia-tls.so.*

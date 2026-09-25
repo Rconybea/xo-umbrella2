@@ -1,0 +1,325 @@
+#!/usr/bin/env bash
+# gen-hostegl -- build etc/host{egl,ubuntu}/, a curated directory of symlinks
+# into the host's graphics libraries.
+#
+# WHY THIS EXISTS
+#
+# nixpkgs ships GPU libraries, but they are wired for nixos.  Off nixos the
+# driver half of the stack must come from the host, while libc, libstdc++,
+# libX11 and the rest must keep coming from nix.  Both live in the same "big
+# swimming pool" (/usr/lib/x86_64-linux-gnu), so putting that directory on
+# LD_LIBRARY_PATH would drag a stale libc along with the driver.  A directory
+# containing only the wanted names finesses that -- see README.md, "Nix + SDL2
+# + Vulkan + ImGui".
+#
+# These symlinks used to be COMMITTED, which is wrong: they are host-specific,
+# they name driver builds that apt and nvidia bump underneath them, and by
+# 2026-09-25 twenty-nine of the seventy-eight in etc/hostegl/ were dangling.
+# The basename lists are committed instead, and this script turns a list into
+# symlinks against whatever the host running it actually has.
+#
+# MODES
+#
+#   --mode=known    (default) link every basename in the profile's .known list
+#                   that this host can supply, and REPORT the ones it cannot.
+#                   The lists were built by running apps and recording what
+#                   failed to load, so they are evidence.  This mode reproduces
+#                   them and is the only policy known to work.
+#
+#   --mode=derived  seed from the host's glvnd and Vulkan ICD manifests, then
+#                   walk ldd to a fixpoint and link whatever the loader cannot
+#                   otherwise find.  Self-adapting, and NOT yet trusted: it has
+#                   to be checked against --mode=known on several platforms
+#                   first.  --compare is how you do that.
+#
+# Nothing here writes outside etc/host{egl,ubuntu}/.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+self_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
+profile=
+mode=known
+compare=0
+dry_run=0
+
+usage() {
+    cat <<EOF
+usage: gen-hostegl [--profile=egl|ubuntu] [--mode=known|derived] [--compare] [-n]
+
+  --profile   which tested configuration to build.  Default: autodetected --
+              'egl' under WSL2, 'ubuntu' otherwise.  egl -> etc/hostegl/,
+              ubuntu -> etc/hostubuntu/.
+  --mode      see the header of this script.  Default: known.
+  --compare   write nothing; print what derived would add and drop relative to
+              known.  This is the instrument for testing derived on a new
+              platform before anyone relies on it.
+  -n          dry run: report what would be linked, create nothing.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --profile=*) profile="${1#*=}" ;;
+        --mode=*)    mode="${1#*=}" ;;
+        --compare)   compare=1 ;;
+        -n|--dry-run) dry_run=1 ;;
+        -h|--help)   usage; exit 0 ;;
+        *) echo "gen-hostegl: unknown argument: $1" >&2; usage >&2; exit 2 ;;
+    esac
+    shift
+done
+
+# ---------------------------------------------------------------- profile
+
+if [ -z "$profile" ]; then
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+        profile=egl
+    else
+        profile=ubuntu
+    fi
+    echo "gen-hostegl: autodetected profile '$profile' (override with --profile=)"
+fi
+
+case "$profile" in
+    egl)    out_dir="$self_dir/hostegl";    known_file="$self_dir/hostegl.known" ;;
+    ubuntu) out_dir="$self_dir/hostubuntu"; known_file="$self_dir/hostubuntu.known" ;;
+    *) echo "gen-hostegl: unknown profile: $profile (want egl or ubuntu)" >&2; exit 2 ;;
+esac
+
+case "$mode" in
+    known|derived) ;;
+    *) echo "gen-hostegl: unknown mode: $mode (want known or derived)" >&2; exit 2 ;;
+esac
+
+# Where host libraries live.  /usr/lib/wsl/lib carries the WSL2 GPU shims and
+# is harmless to search elsewhere -- it simply will not exist.
+host_dirs=(/usr/lib/x86_64-linux-gnu /lib/x86_64-linux-gnu /usr/lib/wsl/lib)
+
+# --------------------------------------------------- LD_LIBRARY_PATH scrub
+#
+# LOAD-BEARING.  A shell built by shells.nix already has an etc/host* directory
+# on LD_LIBRARY_PATH -- possibly from a DIFFERENT worktree.  Left in place,
+# every ldd below resolves through the PREVIOUS generation, derived mode sees
+# nothing missing, and the script emits an empty directory most confidently on
+# a machine that was working fine.  Measured 2026-09-25: ldd libGLX_nvidia.so.0
+# reported all four nvidia deps satisfied, from ../xo-umbrella2-claude1.
+
+clean_ld_path=$(printf '%s' "${LD_LIBRARY_PATH:-}" \
+                    | tr ':' '\n' \
+                    | grep -v '/etc/host' \
+                    | paste -sd: -)
+
+# resolve $1 (a basename, possibly with a glob) across the host dirs.
+# Prints one "<basename> <host path>" per match.  The path printed is the one
+# NAMED, never its realpath: linking libdrm.so.2 to .../libdrm.so.2 follows
+# apt's next bump, while linking it to .../libdrm.so.2.125.0 pins a version
+# that will be gone.  That distinction is why libdrm.so.2 still worked in the
+# committed directory and libdrm.so.2.4.0 did not.
+resolve_pattern() {
+    local pattern="$1" dir candidate found=1
+
+    for dir in "${host_dirs[@]}"; do
+        [ -d "$dir" ] || continue
+
+        for candidate in "$dir"/$pattern; do
+            [ -e "$candidate" ] || continue
+            printf '%s %s\n' "$(basename -- "$candidate")" "$candidate"
+            found=0
+        done
+
+        # first directory that has it wins, so /usr/lib/x86_64-linux-gnu
+        # shadows /usr/lib/wsl/lib rather than both contributing
+        [ $found -eq 0 ] && break
+    done
+
+    return $found
+}
+
+# ------------------------------------------------------------- known mode
+#
+# Prints "<name> <path>" for each entry this host can supply.  Entries it
+# cannot are recorded for the report -- never silently dropped, because a
+# missing entry is either a stale name worth pruning or a real gap worth
+# fixing, and only a human looking at the list can tell which.
+
+# compute_known runs inside $(...), so it cannot report back through a shell
+# variable -- the subshell's copy dies with it.  Missing entries go to a file
+# whose name the caller knows.  (First cut used an array and silently reported
+# nothing; the count was right and the report was empty.)
+missing_file=$(mktemp)
+trap 'rm -f "$missing_file"' EXIT
+
+compute_known() {
+    local pattern
+
+    : > "$missing_file"
+
+    while read -r pattern; do
+        case "$pattern" in ''|'#'*) continue ;; esac
+
+        if ! resolve_pattern "$pattern"; then
+            printf '%s\n' "$pattern" >> "$missing_file"
+        fi
+    done < "$known_file"
+}
+
+# ----------------------------------------------------------- derived mode
+#
+# Seeds are the driver libraries the host's own loaders are told to use:
+# glvnd's EGL vendor manifests and the Vulkan ICD manifests both carry a
+# "library_path".  Parsed with sed rather than jq to avoid the dependency.
+
+derived_seeds() {
+    local f
+
+    for f in /usr/share/glvnd/egl_vendor.d/*.json /usr/share/vulkan/icd.d/*.json; do
+        [ -e "$f" ] || continue
+        sed -n 's/.*"library_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$f"
+    done
+
+    # glvnd loads libGLX_<vendor>.so.0 by name rather than through a manifest
+    local d c
+    for d in "${host_dirs[@]}"; do
+        [ -d "$d" ] || continue
+        for c in "$d"/libGLX_*.so.0 "$d"/libEGL_*.so.0; do
+            [ -e "$c" ] && basename -- "$c"
+        done
+    done
+}
+
+# Link what the loader cannot find, then look again: a dependency of a library
+# that was itself missing is INVISIBLE to ldd until the first one resolves.
+# Measured: with the output directory scrubbed, ldd libGLX_nvidia.so.0 reports
+# glsi, tls and glcore missing but never mentions gpucomp, which is glcore's.
+compute_derived() {
+    local staging round name path progress
+
+    staging=$(mktemp -d)
+    trap 'rm -rf "$staging"' RETURN
+
+    # The seeds themselves belong in the directory, not just their missing
+    # dependencies.  glvnd and the Vulkan loader look these up by BARE NAME
+    # through LD_LIBRARY_PATH -- that is what the manifests' "library_path"
+    # is -- so a directory holding only the closure would leave the loader
+    # unable to find the driver it was pointed at.  Caught by running
+    # --mode=derived and noticing libGLX_nvidia.so.0 absent from its own output.
+    while read -r name; do
+        [ -n "$name" ] || continue
+        while read -r resolved path; do
+            [ -e "$staging/$resolved" ] || ln -s "$path" "$staging/$resolved"
+        done < <(resolve_pattern "$name" || true)
+    done < <(derived_seeds | sort -u)
+
+    for round in 1 2 3 4 5 6 7 8; do
+        progress=0
+
+        while read -r name; do
+            [ -n "$name" ] || continue
+            [ -e "$staging/$name" ] && continue
+
+            if resolve_pattern "$name" > /dev/null; then
+                path=$(resolve_pattern "$name" | head -1 | cut -d' ' -f2-)
+                ln -s "$path" "$staging/$name"
+                progress=1
+            fi
+        done < <(derived_missing "$staging")
+
+        [ $progress -eq 0 ] && break
+    done
+
+    for name in "$staging"/*; do
+        [ -e "$name" ] || continue
+        printf '%s %s\n' "$(basename -- "$name")" "$(readlink -- "$name")"
+    done
+}
+
+# every soname ldd cannot resolve, across the seeds and everything linked so far
+derived_missing() {
+    local staging="$1" lib
+
+    {
+        derived_seeds | while read -r s; do
+            resolve_pattern "$s" | cut -d' ' -f2- || true
+        done
+        find "$staging" -type l -exec readlink {} \; 2>/dev/null || true
+    } | sort -u | while read -r lib; do
+        [ -e "$lib" ] || continue
+        LD_LIBRARY_PATH="$staging${clean_ld_path:+:$clean_ld_path}" \
+            ldd "$lib" 2>/dev/null | sed -n 's/^[[:space:]]*\([^ ]*\) => not found.*/\1/p'
+    done | sort -u
+}
+
+# ------------------------------------------------------------------ apply
+
+emit_report() {
+    local n_linked="$1"
+
+    echo
+    echo "gen-hostegl: profile=$profile mode=$mode -> $out_dir"
+    echo "gen-hostegl: linked $n_linked"
+
+    local n_missing
+    n_missing=$(grep -c . "$missing_file" 2>/dev/null || true)
+
+    if [ "${n_missing:-0}" -gt 0 ]; then
+        echo
+        echo "gen-hostegl: $n_missing entries in $(basename -- "$known_file")"
+        echo "             that this host cannot supply.  Each is either a stale name"
+        echo "             worth pruning from the list, or a real gap worth fixing --"
+        echo "             the script will not guess which:"
+        sed 's/^/               /' "$missing_file"
+    fi
+}
+
+if [ "$compare" -eq 1 ]; then
+    k=$(compute_known | cut -d' ' -f1 | sort -u)
+    d=$(compute_derived | cut -d' ' -f1 | sort -u)
+
+    echo "only in known (derived would DROP these):"
+    comm -23 <(printf '%s\n' "$k") <(printf '%s\n' "$d") | sed 's/^/  /'
+    echo "only in derived (derived would ADD these):"
+    comm -13 <(printf '%s\n' "$k") <(printf '%s\n' "$d") | sed 's/^/  /'
+    echo "in both: $(comm -12 <(printf '%s\n' "$k") <(printf '%s\n' "$d") | wc -l)"
+    exit 0
+fi
+
+if [ "$mode" = known ]; then
+    plan=$(compute_known)
+else
+    plan=$(compute_derived)
+fi
+
+n=$(printf '%s' "$plan" | grep -c . || true)
+
+if [ "$dry_run" -eq 1 ]; then
+    printf '%s\n' "$plan" | sed 's/^/  would link /'
+    emit_report "$n"
+    exit 0
+fi
+
+mkdir -p "$out_dir"
+
+# Rebuild rather than accumulate, so a driver upgrade clears out the entries it
+# stranded.  Only symlinks are removed; anything else is left alone and
+# reported, because this script did not put it there.
+for existing in "$out_dir"/* "$out_dir"/.[!.]*; do
+    [ -e "$existing" ] || [ -L "$existing" ] || continue
+
+    if [ -L "$existing" ]; then
+        rm -f "$existing"
+    else
+        echo "gen-hostegl: leaving non-symlink alone: $existing" >&2
+    fi
+done
+
+while read -r name path; do
+    [ -n "$name" ] || continue
+    ln -sfn "$path" "$out_dir/$name"
+done <<< "$plan"
+
+emit_report "$n"
+
+# end gen-hostegl

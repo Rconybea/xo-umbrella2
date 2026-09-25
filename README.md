@@ -189,7 +189,18 @@ that contains both libraries that must come from host OS (e.g. `libGLX_nvidia`) 
 that must come from nixpkgs (e.g. `libc`)
 
 Finesse by introducing a directory-of-symlinks, see `xo-umbrella2/etc/{hostegl, hostubuntu}`.
-These currently setup by hand, so likely to need manual attention on another host.
+
+The symlinks are generated.  Build them with:
+```
+$ ./etc/gen-hostegl                  # profile autodetected; --profile=egl|ubuntu to force
+$ ./etc/gen-hostegl -n               # dry run
+```
+The list of libraries to look for *is* committed, see `etc/host{egl,ubuntu}.known`.  
+
+`--mode=derived` instead seeds from the host's glvnd and Vulkan ICD manifests
+and walks `ldd` to a fixpoint.  Self-adapting.
+`--compare` to see what it would add and drop against the known list before
+relying on it.
 
 An ordinary cmake build may cheerfully use the host-provided graphics stack,
 in return for higher risk of DLL hell.
@@ -234,8 +245,11 @@ xo-umbrella2/
 |  \- install.rst                 umbrella install instructions
 |
 +- etc
-|  +- hostegl/                    sample video driver symlinks for WSL2
-|  \- hostubuntu/                 sample video driver symlinks for ubuntu
+|  +- gen-hostegl                 generates the two directories below
+|  +- hostegl.known               basenames needed for WSL2 (committed)
+|  +- hostubuntu.known            basenames needed for ubuntu+nvidia (committed)
+|  +- hostegl/                    video driver symlinks for WSL2 (generated)
+|  \- hostubuntu/                 video driver symlinks for ubuntu (generated)
 |
 +- default.nix                    top-level nix build (works w/ stock nixpkgs 25.05)
 +- pkgs/                          per-satellite nix builds. see xo-umbrella2/default.nix

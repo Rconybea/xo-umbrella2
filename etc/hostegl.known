@@ -1,0 +1,94 @@
+# Basenames that must be symlinked from host libraries for the WSL2 / mesa
+# graphics stack.  Consumed by ./gen-hostegl --profile=egl.
+#
+# PROVENANCE: harvested 2026-09-25 from the committed etc/hostegl/ symlink
+# directory, which was built up by hand -- running skeleton apps and vkcube and
+# recording what failed to load.  That is evidence, not a guess: do not prune
+# an entry because it looks unnecessary, only because a run proved it is.
+#
+# One basename per line.  A trailing glob is allowed, and is how a
+# version-suffixed driver library survives a driver upgrade.
+#
+# Entries the current host cannot supply are REPORTED, not silently skipped.
+# As of the harvest, 29 of these were already dangling on an ubuntu 24.04 host
+# (libicuuc.so.70, libLLVM-15.so.1, libelf-0.186.so and friends are 22.04-era).
+# Left in deliberately: this list describes WSL2, and pruning it from an ubuntu
+# host would discard the record rather than correct it.
+dri
+libbsd.so.0
+libbsd.so.0.11.5
+libdrm_amdgpu.so.1
+libdrm_amdgpu.so.1.0.0
+libdrm_intel.so.1
+libdrm_intel.so.1.0.0
+libdrm_nouveau.so.2
+libdrm_nouveau.so.2.0.0
+libdrm_radeon.so.1
+libdrm_radeon.so.1.0.1
+libdrm.so.2
+libdrm.so.2.4.0
+libedit.so.2
+libedit.so.2.0.68
+libelf-0.186.so
+libelf.so.1
+libexpat.so.1
+libexpat.so.1.8.7
+libffi.so.8
+libffi.so.8.1.0
+libglapi.so.0
+libglapi.so.0.0.0
+libGLdispatch.so
+libGLdispatch.so.0
+libGLdispatch.so.0.0.0
+libGL.so
+libGL.so.1
+libGL.so.1.7
+libGLX_indirect.so.0
+libGLX_mesa.so.0
+libGLX_mesa.so.0.0.0
+libGLX.so
+libGLX.so.0
+libGLX.so.0.0.0
+libicudata.so.70
+libicudata.so.70.1
+libicuuc.so.70
+libicuuc.so.70.1
+libLLVM-15.so
+libLLVM-15.so.1
+liblzma.so.5
+liblzma.so.5.2.5
+libmd.so.0
+libmd.so.0.0.5
+libpciaccess.so.0
+libpciaccess.so.0.11.1
+libsensors.so.5
+libsensors.so.5.0.0
+libtinfo.so.6
+libtinfo.so.6.3
+libX11-xcb.so.1
+libX11-xcb.so.1.0.0
+libxcb-dri2.so.0
+libxcb-dri2.so.0.0.0
+libxcb-dri3.so.0
+libxcb-dri3.so.0.0.0
+libxcb-glx.so.0
+libxcb-present.so.0
+libxcb-present.so.0.0.0
+libxcb-randr.so.0
+libxcb-randr.so.0.1.0
+libxcb-shm.so.0
+libxcb-shm.so.0.0.0
+libxcb-sync.so.1
+libxcb-sync.so.1.0.0
+libxcb-xfixes.so.0
+libxcb-xfixes.so.0.0.0
+libxml2.so.2
+libxml2.so.2.9.13
+libxshmfence.so.1
+libxshmfence.so.1.0.0
+libXxf86vm.so.1
+libXxf86vm.so.1.0.0
+libz.so.1
+libz.so.1.2.11
+libzstd.so.1
+libzstd.so.1.4.8
