@@ -36,7 +36,6 @@
 
 namespace xo {
     using xo::web::Alist;
-    using xo::reactor::AbstractSink;
     using xo::json::PrintJson;
     using xo::fn::CallbackId;
     using xo::pp::scope;
@@ -327,7 +326,7 @@ namespace xo {
         public:
             WebsocketSubscriptionRecd(std::string const & incoming_uri,
                                       DynamicEndpoint * endpoint,
-                                      rp<AbstractSink> const & ws_sink)
+                                      rp<WebsocketSink> const & ws_sink)
                 : incoming_uri_{incoming_uri},
                   endpoint_{endpoint},
                   ws_sink_{ws_sink}
@@ -356,7 +355,7 @@ namespace xo {
             /* sink established to receive (& forward) events on behalf
              * of this subscription.  application code writes to this sink.
              */
-            rp<AbstractSink> ws_sink_;
+            rp<WebsocketSink> ws_sink_;
         }; /*WebsocketSubscriptionRecd*/
 
         /* bookkeeping record for a websocket session.
@@ -377,7 +376,7 @@ namespace xo {
 
             void subscribe_endpoint(std::string const & incoming_cmd,
                                     DynamicEndpoint * endpoint,
-                                    rp<AbstractSink> const & ws_sink) {
+                                    rp<WebsocketSink> const & ws_sink) {
 
                 scope log(XO_ENTER0_(info),
                           xtag("incoming_cmd", incoming_cmd));
@@ -1401,16 +1400,13 @@ namespace xo {
                     /* sink to receive outbound events bound for session_id,
                      * for stream_name
                      */
-                    rp<AbstractSink> ws_sink
+                    rp<WebsocketSink> ws_sink
                         = WebsocketSink::make(this,
                                               this->pjson_,
                                               session_id,
                                               stream_name);
 
                     log && log("sink created");
-
-                    assert(ws_sink->allow_polymorphic_source());
-                    assert(ws_sink->allow_volatile_source());
 
                     WebsocketSessionRecd * ws_recd = this->session_v_[session_id].get();
 

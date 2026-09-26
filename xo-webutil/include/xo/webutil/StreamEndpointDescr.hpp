@@ -13,11 +13,14 @@
 #include <functional>
 
 namespace xo {
-    namespace reactor { class AbstractSink; }
-
     namespace web {
+        /* the outbound end of one websocket subscription.  Defined in
+         * xo-websock (xo/websock/WebsocketSink.hpp); only named here.
+         */
+        class WebsocketSink;
+
         /* a function that creates an event subscription */
-        using StreamSubscribeFn = std::function<fn::CallbackId (rp<reactor::AbstractSink> const & ws_sink)>;
+        using StreamSubscribeFn = std::function<fn::CallbackId (rp<WebsocketSink> const & ws_sink)>;
         using StreamUnsubscribeFn = std::function<void (fn::CallbackId id)>;
 
         /* describes a stream endpoint
@@ -44,7 +47,6 @@ namespace xo {
              *  See webutil_ostream.hpp for @c os << StreamEndpointDescr.
              **/
             void pretty(PpSink & sink) const;
-
             std::string display_string() const;
 
         private:

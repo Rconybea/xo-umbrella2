@@ -129,7 +129,7 @@ namespace xo {
 
         CallbackId
         DynamicEndpoint::subscribe(std::string const & /*incoming_uri*/,
-                                   rp<AbstractSink> const & ws_sink) const
+                                   rp<WebsocketSink> const & ws_sink) const
         {
             return this->subscribe_fn_(ws_sink);
         } /*subscribe*/

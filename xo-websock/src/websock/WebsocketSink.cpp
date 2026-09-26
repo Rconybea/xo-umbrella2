@@ -6,8 +6,8 @@
 #include "WebsocketSink.hpp"
 #include "Webserver.hpp"
 #include <xo/printjson/PrintJson.hpp>
-#include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
+#include <xo/indentlog2/print/tostr.hpp>  /* display_string */
 #include <xo/ppsink/quoted_ostream.hpp>   /* ss << quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -15,11 +15,8 @@
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
-    using xo::reactor::AbstractSource;
     using xo::json::PrintJson;
-    using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
-    using xo::reflect::TypeDescr;
     using xo::pp::quot;
     using xo::pp::scope;
     using xo::pp::xtag;
@@ -34,7 +31,6 @@ namespace xo {
         class WebsocketSinkImpl : public WebsocketSink {
         public:
             using PrintJson = xo::json::PrintJson;
-            using AbstractSource = reactor::AbstractSource;
 
         public:
             WebsocketSinkImpl(rp<Webserver> const & websrv,
@@ -47,25 +43,13 @@ namespace xo {
                   stream_name_{std::move(stream_name)}
                 {}
 
-            virtual std::string const & name() const override { return name_; }
-            virtual void set_name(std::string const & x) override { this->name_ = x; }
-            /* 0 consumers for websocket sink,  since it's not a source */
-            virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor>)> const &) override {}
-            virtual void pretty(xo::pp::PpSink & sink) const override;
-
-            virtual bool allow_polymorphic_source() const override { return true; }
-            virtual TypeDescr sink_ev_type() const override;
-            virtual bool allow_volatile_source() const override { return true; }
+            virtual std::string const & stream_name() const override { return stream_name_; }
             virtual uint32_t n_in_ev() const override { return n_in_ev_; }
-            virtual void attach_source(rp<AbstractSource> const & src) override;
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
+            virtual std::string display_string() const override;
 
         private:
-            /* (ideally unique) user-controlled name for this sink
-             * in practice not likely to be accessible,
-             * so probably want to generate a unique-y default
-             */
-            std::string name_;
             /* webserver implementation */
             rp<Webserver> websrv_;
             /* print arbitrary reflected stuff as json */
@@ -78,24 +62,14 @@ namespace xo {
              * this will be the vale of the "stream" tag in
              * initiating subscription message
              *   {"cmd": "subscribe", "stream", "/this/stream/name"}
-             * e.g. in python:
-             *   web.register_stream_endpoint(kf.stream_endpoint_descr("/this/stream/name"))
+             * e.g. in python, for a reactor source:
+             *   web.register_stream_endpoint(
+             *       xo.reactor2websock.stream_endpoint_descr(kf, "/this/stream/name"))
              */
             std::string stream_name_;
             /* count #of events received */
             uint32_t n_in_ev_ = 0;
         }; /*WebsocketSinkImpl*/
-
-        TypeDescr
-        WebsocketSinkImpl::sink_ev_type() const
-        {
-            return Reflect::require<void>();
-        } /*sink_ev_type*/
-
-        void
-        WebsocketSinkImpl::attach_source(rp<AbstractSource> const & src) {
-            src->attach_sink(this);
-        } /*attach_source*/
 
         void
         WebsocketSinkImpl::notify_ev_tp(TaggedPtr const & ev_tp)
@@ -131,9 +105,19 @@ namespace xo {
 
             sink.pretty_struct("WebsocketSinkImpl",
                                field("addr", addr),
-                               field("name", name_),
                                field("n_in_ev", n_in_ev_),
                                field("stream", stream_name_));
+        }
+
+        std::string
+        WebsocketSinkImpl::display_string() const
+        {
+            using xo::pp::tostr;
+
+            /* same shape as Webserver::display_string */
+            WebsocketSinkImpl * self = const_cast<WebsocketSinkImpl *>(this);
+
+            return tostr(rp<WebsocketSinkImpl>(self));
         }
 
         // ----- WebsocketSink -----

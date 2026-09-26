@@ -6,6 +6,7 @@
 #pragma once
 
 #include "EndpointUtil.hpp"
+#include "WebsocketSink.hpp"
 #include <xo/webutil/Alist.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
@@ -18,7 +19,6 @@ namespace xo {
          */
         class DynamicEndpoint {
         public:
-            using AbstractSink = xo::reactor::AbstractSink;
             using CallbackId = fn::CallbackId;
 
         public:
@@ -67,7 +67,7 @@ namespace xo {
              * send output to ws_sink
              */
             CallbackId subscribe(std::string const & incoming_uri,
-                                 rp<AbstractSink> const & ws_sink) const;
+                                 rp<WebsocketSink> const & ws_sink) const;
 
             /* unsubscribe stream from this endpoint;
              * reverses the effect of a previous call to .subscribe()

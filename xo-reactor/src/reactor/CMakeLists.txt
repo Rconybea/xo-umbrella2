@@ -24,7 +24,6 @@ xo_dependency(${SELF_LIB} xo_ppsink)
 # PUBLIC: Sink.hpp / EventStore.hpp also use xo::pp::tostr inline, so consumers
 # need indentlog2 too -- not merely a link-time dep of the .cpp sources.
 xo_dependency(${SELF_LIB} xo_indentlog2)
-xo_dependency(${SELF_LIB} webutil)
 xo_dependency(${SELF_LIB} printjson)
 xo_dependency(${SELF_LIB} callback)
 xo_dependency(${SELF_LIB} xo_ordinaltree)
