@@ -10,21 +10,31 @@
 #include <xo/webutil/Alist.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
+#include <xo/refcnt/Refcounted.hpp>
 #include <regex>
 
 namespace xo {
     namespace web {
         /* a dynamic http endpoint.  content served on-browser-demand
          * by user-provided callback
+         *
+         * Reference-counted since 2026-09-26.  The webserver's endpoint map
+         * holds one, and so does every websocket subscription made through it:
+         * a subscription must later call THIS endpoint's unsubscribe, to detach
+         * its sink from the source.  Before, the map held the only owner
+         * (unique_ptr) and subscriptions a raw pointer, so re-registering a
+         * stem freed the endpoint out from under live subscriptions.  Now the
+         * old endpoint lives until its last subscription ends.  First step of
+         * .xo-backlog/xo-websock/issues/07.
          */
-        class DynamicEndpoint {
+        class DynamicEndpoint : public ref::Refcount {
         public:
             using CallbackId = fn::CallbackId;
 
         public:
-            static std::unique_ptr<DynamicEndpoint> make_http(std::string uri_pattern,
-                                                              HttpEndpointFn http_cb) {
-                return (std::unique_ptr<DynamicEndpoint>
+            static rp<DynamicEndpoint> make_http(std::string uri_pattern,
+                                                 HttpEndpointFn http_cb) {
+                return (rp<DynamicEndpoint>
                         (new DynamicEndpoint(std::move(uri_pattern),
                                              std::move(http_cb),
                                              nullptr,
@@ -33,11 +43,11 @@ namespace xo {
             } /*make_http*/
 
             /* @p recv_fn optional; see StreamReceiveFn */
-            static std::unique_ptr<DynamicEndpoint> make_stream(std::string uri_pattern,
-                                                                StreamSubscribeFn sub_fn,
-                                                                StreamUnsubscribeFn unsub_fn,
-                                                                StreamReceiveFn recv_fn = nullptr) {
-                return (std::unique_ptr<DynamicEndpoint>
+            static rp<DynamicEndpoint> make_stream(std::string uri_pattern,
+                                                   StreamSubscribeFn sub_fn,
+                                                   StreamUnsubscribeFn unsub_fn,
+                                                   StreamReceiveFn recv_fn = nullptr) {
+                return (rp<DynamicEndpoint>
                         (new DynamicEndpoint(std::move(uri_pattern),
                                              nullptr,
                                              std::move(sub_fn),

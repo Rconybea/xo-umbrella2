@@ -23,10 +23,12 @@ namespace xo {
             std::uint32_t sub_id_ = 0;
             /* stream name from the subscribe command */
             std::string stream_name_;
-            /* endpoint serving the stream.  Owned by the webserver's stream
-             * map, which outlives every session
+            /* endpoint serving the stream.  Held by rp, not borrowed: if the
+             * stream is re-registered while this subscription lives, the map
+             * lets go of this endpoint but we must not -- unsubscribe has to
+             * run on the endpoint that subscribed us
              */
-            DynamicEndpoint * endpoint_ = nullptr;
+            rp<DynamicEndpoint> endpoint_;
             /* id from the endpoint's subscribe function, for unsubscribe */
             CallbackId callback_id_;
             /* sink delivering to this session for this stream */

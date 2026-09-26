@@ -551,7 +551,7 @@ namespace xo {
         }; /*WebsocketSessionRecd*/
 
         using EndpointMap = std::unordered_map<std::string,
-                                               std::unique_ptr<DynamicEndpoint>>;
+                                               rp<DynamicEndpoint>>;
 
         namespace {
             /* defined below; used earlier, by each session's router */

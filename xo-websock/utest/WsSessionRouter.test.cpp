@@ -97,7 +97,7 @@ namespace xo {
             /** endpoints by stream name, plus a router over them **/
             struct Fixture {
                 Recorder rec_;
-                std::map<std::string, std::unique_ptr<DynamicEndpoint>> endpoint_map_;
+                std::map<std::string, rp<DynamicEndpoint>> endpoint_map_;
 
                 /* how the router makes a sink.  FakeSink unless a case needs
                  * the real envelope
@@ -333,6 +333,49 @@ namespace xo {
             REQUIRE(fx.rec_.received_v_.empty());
             /* unsubscribing twice does not run the endpoint's unsubscribe twice */
             REQUIRE(fx.rec_.unsubscribed_v_.size() == 1);
+        }
+
+        TEST_CASE("an-endpoint-replaced-while-subscribed-outlives-the-map", "[websock][router][ownership]")
+        {
+            /* the hazard DynamicEndpoint's refcount removes.  Before, the map
+             * held the only owner (unique_ptr) and a subscription a raw
+             * pointer, so re-registering a stem freed the endpoint under a live
+             * subscription, whose unsubscribe then called into freed memory.
+             *
+             * `token' is captured by the OLD endpoint's functions only, so its
+             * use_count shows whether that endpoint is still alive.
+             */
+            Fixture fx;
+            auto router = fx.make_router();
+
+            auto token = std::make_shared<int>(0);
+            std::vector<std::string> unsub_log;
+
+            fx.endpoint_map_["/fw"]
+                = DynamicEndpoint::make_stream(
+                      "/fw",
+                      [token](rp<WebsocketSink> const &) { return CallbackId(1); },
+                      [token, &unsub_log](CallbackId) { unsub_log.push_back("old"); });
+
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");
+
+            /* re-register: the map lets go of the old endpoint */
+            fx.endpoint_map_["/fw"]
+                = DynamicEndpoint::make_stream(
+                      "/fw",
+                      [](rp<WebsocketSink> const &) { return CallbackId(2); },
+                      [&unsub_log](CallbackId) { unsub_log.push_back("new"); });
+
+            /* ...but the subscription has not: the old endpoint is alive */
+            REQUIRE(token.use_count() > 1);
+
+            router->perform_cmd(R"({"cmd": "unsubscribe", "sub_id": 0})");
+
+            /* unsubscribe ran on the endpoint that subscribed us, not its
+             * replacement -- and was then the last owner
+             */
+            REQUIRE(unsub_log == std::vector<std::string>{"old"});
+            REQUIRE(token.use_count() == 1);
         }
 
         TEST_CASE("a-retired-sub-id-is-never-reused", "[websock][router]")
