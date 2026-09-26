@@ -39,18 +39,10 @@ namespace xo {
     using xo::reactor::AbstractSink;
     using xo::json::PrintJson;
     using xo::fn::CallbackId;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
     namespace web {
-        /* NB these sit in namespace xo::web, NOT namespace xo.
-         * xo-reactor's public headers (AbstractSink.hpp, Sink.hpp) still
-         * include legacy xo-indentlog, so xo::xtag is visible in this TU.
-         * A using-declaration at namespace-xo scope would be *ambiguous*
-         * with it rather than shadowing it; one scope further in, ordinary
-         * unqualified lookup stops here and never reaches xo::xtag.
-         */
-        using xo::pp::scope;
-        using xo::pp::xtag;
-
         char const *
         RunstateUtil::runstate_descr(Runstate x)
         {
