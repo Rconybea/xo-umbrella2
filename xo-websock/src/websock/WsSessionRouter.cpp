@@ -19,7 +19,9 @@ namespace xo {
         using xo::pp::xtag;
 
         struct WsSessionRouter::Subscription {
-            /* stream name from the subscribe command; what "send" matches */
+            /* index in .subscription_v; what the client addresses */
+            std::uint32_t sub_id_ = 0;
+            /* stream name from the subscribe command */
             std::string stream_name_;
             /* endpoint serving the stream.  Owned by the webserver's stream
              * map, which outlives every session
@@ -55,48 +57,109 @@ namespace xo {
                                   &root,
                                   &err))
             {
-                this->reply_error(nullptr, "malformed json: " + err);
+                this->reply_error("malformed json: " + err);
                 return;
             }
 
             /* Type checks BEFORE any field access.  jsoncpp throws
              * Json::LogicError from operator[] on a non-object and from
              * asString() on a non-string, and an exception escaping into
-             * libwebsockets' C callback terminates the server.  Before this
-             * class, a client sending a bare json string or array did exactly
-             * that.
+             * libwebsockets' C callback terminates the server.
              */
             if (!root.isObject()) {
-                this->reply_error(nullptr, "message is not a json object");
+                this->reply_error("message is not a json object");
                 return;
             }
 
             Json::Value const & cmd_v = root["cmd"];
-            Json::Value const & stream_v = root["stream"];
-
             std::string cmd = (cmd_v.isString() ? cmd_v.asString() : std::string());
-            std::string stream_name = (stream_v.isString() ? stream_v.asString() : std::string());
 
-            log && log(xtag("cmd", cmd), xtag("stream", stream_name));
+            log && log(xtag("cmd", cmd));
 
             if (cmd == "subscribe") {
-                this->subscribe(stream_name);
-            } else if (cmd == "send") {
-                if (stream_name.empty()) {
-                    this->reply_error(nullptr, "send requires a \"stream\"");
+                Json::Value const & stream_v = root["stream"];
+
+                if (!stream_v.isString() || stream_v.asString().empty()) {
+                    this->reply_error("subscribe requires a \"stream\"");
                     return;
                 }
 
-                /* msg is optional; absent reads as json null */
-                this->send(stream_name, root["msg"]);
+                this->subscribe(stream_v.asString());
+            } else if (cmd == "send") {
+                std::uint32_t sub_id = 0;
+
+                if (this->require_sub_id(root, "send", &sub_id)) {
+                    /* msg is optional; absent reads as json null */
+                    this->send(sub_id, root["msg"]);
+                }
+            } else if (cmd == "unsubscribe") {
+                std::uint32_t sub_id = 0;
+
+                if (this->require_sub_id(root, "unsubscribe", &sub_id))
+                    this->unsubscribe(sub_id);
             } else {
-                /* unknown command: logged and ignored, as before.  Unlike a
-                 * failed send this gets no error reply -- a deliberate scope
-                 * limit, see .xo-backlog/xo-websock/issues/04
+                /* unknown command: logged and ignored, as before.  A deliberate
+                 * scope limit -- see .xo-backlog/xo-websock/issues/04
                  */
                 log && log("unknown command, ignored");
             }
         } /*perform_cmd*/
+
+        bool
+        WsSessionRouter::require_sub_id(Json::Value const & root,
+                                        char const * cmd,
+                                        std::uint32_t * p_sub_id)
+        {
+            Json::Value const & v = root["sub_id"];
+
+            /* isUInt(): a non-negative integer that fits uint32 -- rejects
+             * strings, fractions and negatives before asUInt() could throw
+             */
+            if (!v.isUInt()) {
+                this->reply_error(std::string(cmd) + " requires a \"sub_id\"");
+                return false;
+            }
+
+            *p_sub_id = v.asUInt();
+            return true;
+        }
+
+        bool
+        WsSessionRouter::lookup_active(std::uint32_t sub_id, Subscription * p_copy)
+        {
+            bool known = false;
+            bool active = false;
+
+            {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+
+                if (sub_id < this->subscription_v_.size()) {
+                    known = true;
+
+                    Subscription * sub = this->subscription_v_[sub_id].get();
+
+                    if (sub) {
+                        active = true;
+                        *p_copy = *sub;
+                    }
+                }
+            }
+
+            if (!known) {
+                this->reply_error("unknown sub_id", nullptr, &sub_id);
+                return false;
+            }
+
+            if (!active) {
+                /* retired slot: the id existed once and is never reused, so
+                 * this cannot be mistaken for a different subscription
+                 */
+                this->reply_error("already unsubscribed", nullptr, &sub_id);
+                return false;
+            }
+
+            return true;
+        }
 
         void
         WsSessionRouter::subscribe(std::string const & stream_name)
@@ -106,26 +169,56 @@ namespace xo {
             DynamicEndpoint * endpoint = lookup_fn_(stream_name);
 
             if (!endpoint) {
-                /* unchanged behaviour: an unmatched subscribe is silent */
-                log && log("endpoint not found");
+                /* was silent until issue 06; a page that subscribes to a
+                 * stream that does not exist now hears about it
+                 */
+                this->reply_error("unknown stream", &stream_name);
                 return;
             }
 
-            rp<WebsocketSink> sink = sink_fn_(stream_name);
-
-            std::unique_ptr<Subscription> sub(new Subscription());
-            sub->stream_name_ = stream_name;
-            sub->endpoint_ = endpoint;
-            sub->sink_ = sink;
-
-            Subscription * sub_addr = sub.get();
+            std::uint32_t sub_id = 0;
+            Subscription * sub_addr = nullptr;
 
             {
                 std::lock_guard<std::mutex> lock(this->mutex_);
+
+                /* the index IS the id; slots are never removed, so this never
+                 * repeats within a session
+                 */
+                sub_id = static_cast<std::uint32_t>(this->subscription_v_.size());
+
+                std::unique_ptr<Subscription> sub(new Subscription());
+                sub->sub_id_ = sub_id;
+                sub->stream_name_ = stream_name;
+                sub->endpoint_ = endpoint;
+
+                sub_addr = sub.get();
                 this->subscription_v_.push_back(std::move(sub));
             }
 
-            /* lock dropped: subscribe may send, e.g. an initial frame */
+            /* lock dropped from here: making the sink, replying and
+             * subscribing may all re-enter the server
+             */
+            rp<WebsocketSink> sink = sink_fn_(stream_name, sub_id);
+
+            {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+                sub_addr->sink_ = sink;
+            }
+
+            /* ORDER MATTERS: the client must learn its sub_id before any frame
+             * carrying it arrives, and the endpoint's subscribe function may
+             * send an initial frame immediately -- the flywheel demo's does.
+             */
+            {
+                Json::Value msg(Json::objectValue);
+                msg["cmd"] = "subscribed";
+                msg["stream"] = stream_name;
+                msg["sub_id"] = sub_id;
+
+                this->reply(msg);
+            }
+
             CallbackId id = endpoint->subscribe(stream_name, sink);
 
             {
@@ -135,64 +228,83 @@ namespace xo {
         } /*subscribe*/
 
         void
-        WsSessionRouter::send(std::string const & stream_name,
-                              Json::Value const & msg)
+        WsSessionRouter::send(std::uint32_t sub_id, Json::Value const & msg)
         {
-            DynamicEndpoint * endpoint = nullptr;
-            rp<WebsocketSink> sink;
+            Subscription sub;
 
-            {
-                std::lock_guard<std::mutex> lock(this->mutex_);
+            if (!this->lookup_active(sub_id, &sub))
+                return;
 
-                /* first match: subscribing twice to one stream is allowed, and
-                 * messages go to the earlier subscription
-                 */
-                for (auto const & sub : this->subscription_v_) {
-                    if (sub->stream_name_ == stream_name) {
-                        endpoint = sub->endpoint_;
-                        sink = sub->sink_;
-                        break;
-                    }
-                }
-            }
-
-            if (!endpoint) {
-                this->reply_error(&stream_name, "not subscribed to stream");
+            if (!sub.endpoint_->has_receive()) {
+                this->reply_error("stream does not accept messages",
+                                  &sub.stream_name_, &sub_id);
                 return;
             }
 
-            if (!endpoint->has_receive()) {
-                this->reply_error(&stream_name, "stream does not accept messages");
-                return;
-            }
-
-            /* lock dropped: the handler is expected to send */
+            /* lock not held: the handler is expected to send */
             try {
-                endpoint->receive(sink, msg);
+                sub.endpoint_->receive(sub.sink_, msg);
             } catch (std::exception & ex) {
                 /* never let a handler's exception reach libwebsockets */
-                this->reply_error(&stream_name,
-                                  std::string("stream handler failed: ") + ex.what());
+                this->reply_error(std::string("stream handler failed: ") + ex.what(),
+                                  &sub.stream_name_, &sub_id);
             }
         } /*send*/
 
         void
-        WsSessionRouter::reply_error(std::string const * stream_name,
-                                     std::string const & reason)
+        WsSessionRouter::unsubscribe(std::uint32_t sub_id)
         {
-            Json::Value reply(Json::objectValue);
+            Subscription sub;
 
-            reply["error"] = reason;
-            if (stream_name)
-                reply["stream"] = *stream_name;
+            if (!this->lookup_active(sub_id, &sub))
+                return;
 
-            /* jsoncpp for the writing too: reason may carry arbitrary text
-             * (a parser message, an exception's what()) that must be escaped
+            {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+
+                /* retire the slot: null, never erased (later ids would shift)
+                 * and never reused (a stale id would reach someone else)
+                 */
+                this->subscription_v_[sub_id].reset();
+            }
+
+            /* lock dropped, as for subscribe */
+            sub.endpoint_->unsubscribe(sub.callback_id_);
+
+            /* frames already queued may still arrive; this marks the end */
+            Json::Value msg(Json::objectValue);
+            msg["cmd"] = "unsubscribed";
+            msg["sub_id"] = sub_id;
+
+            this->reply(msg);
+        } /*unsubscribe*/
+
+        void
+        WsSessionRouter::reply(Json::Value const & msg)
+        {
+            /* jsoncpp for writing too: stream names and error reasons may carry
+             * arbitrary text that must be escaped
              */
             Json::StreamWriterBuilder wb;
             wb["indentation"] = "";
 
-            this->reply_fn_(Json::writeString(wb, reply));
+            this->reply_fn_(Json::writeString(wb, msg));
+        }
+
+        void
+        WsSessionRouter::reply_error(std::string const & reason,
+                                     std::string const * stream_name,
+                                     std::uint32_t const * sub_id)
+        {
+            Json::Value msg(Json::objectValue);
+
+            msg["error"] = reason;
+            if (stream_name)
+                msg["stream"] = *stream_name;
+            if (sub_id)
+                msg["sub_id"] = *sub_id;
+
+            this->reply(msg);
         } /*reply_error*/
 
         void
@@ -205,9 +317,13 @@ namespace xo {
                 subs.swap(this->subscription_v_);
             }
 
-            /* lock dropped, as for subscribe */
-            for (auto const & sub : subs)
-                sub->endpoint_->unsubscribe(sub->callback_id_);
+            /* lock dropped, as for subscribe.  No replies: the session is
+             * closing
+             */
+            for (auto const & sub : subs) {
+                if (sub)
+                    sub->endpoint_->unsubscribe(sub->callback_id_);
+            }
         } /*unsubscribe_all*/
 
         std::size_t
@@ -215,7 +331,13 @@ namespace xo {
         {
             std::lock_guard<std::mutex> lock(this->mutex_);
 
-            return this->subscription_v_.size();
+            std::size_t n = 0;
+            for (auto const & sub : this->subscription_v_) {
+                if (sub)
+                    ++n;
+            }
+
+            return n;
         }
     } /*namespace web*/
 } /*namespace xo*/

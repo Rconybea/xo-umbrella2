@@ -39,17 +39,19 @@ namespace xo {
             static rp<WebsocketSink> make(rp<Webserver> const & websrv,
                                           rp<PrintJson> const & pjson,
                                           uint32_t session_id,
-                                          std::string const & stream_name);
+                                          std::string const & stream_name,
+                                          uint32_t sub_id);
 
             /** sink handing each finished message to @p send_fn.
              *
              *  The webserver-backed make() above is this plus a send_fn that
              *  calls Webserver::send_text.  Exists so the envelope -- stream,
-             *  seq, event -- can be exercised without a live webserver.
+             *  sub_id, seq, event -- can be exercised without a live webserver.
              **/
             static rp<WebsocketSink> make(SendFn send_fn,
                                           rp<PrintJson> const & pjson,
-                                          std::string const & stream_name);
+                                          std::string const & stream_name,
+                                          uint32_t sub_id);
 
             /** stream name from the subscription message that created this
              *  sink, i.e. the value of "stream" in
@@ -67,10 +69,13 @@ namespace xo {
              *  session, as
              *  @code
              *   {"stream": <name>,
+             *    "sub_id": <id>,
              *    "seq": <n>,
              *    "event": <ev_tp as json>}
              *  @endcode
              *
+             *  @c sub_id is the server-assigned id from the "subscribed" reply;
+             *  it tells apart two subscriptions to one stream.
              *  @c seq values are consecutive, starting with 0.
              **/
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) = 0;

@@ -751,8 +751,9 @@ namespace xo {
 
             /* act on incoming websocket command, e.g.
              *   {"cmd": "subscribe", "stream": "uls"}
-             *   {"cmd": "send", "stream": "uls", "msg": <any JSON>}
-             * delegates to the session's WsSessionRouter
+             *   {"cmd": "send", "sub_id": 0, "msg": <any JSON>}
+             *   {"cmd": "unsubscribe", "sub_id": 0}
+             * delegates to the session's WsSessionRouter; see there for replies
              */
             void perform_ws_cmd(uint32_t session_id,
                                 std::string_view incoming_svw);
@@ -961,9 +962,10 @@ namespace xo {
                           return lookup_pattern(stream_name, this->stream_map_);
                       },
                   /* sink delivering to THIS session */
-                  [this, new_id](std::string const & stream_name)
+                  [this, new_id](std::string const & stream_name, uint32_t sub_id)
                       {
-                          return WebsocketSink::make(this, this->pjson_, new_id, stream_name);
+                          return WebsocketSink::make(this, this->pjson_, new_id,
+                                                     stream_name, sub_id);
                       },
                   /* reply to THIS session outside any subscription */
                   [this, new_id](std::string text)

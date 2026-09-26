@@ -35,10 +35,12 @@ namespace xo {
         public:
             WebsocketSinkImpl(SendFn send_fn,
                               rp<PrintJson> const & pjson,
-                              std::string stream_name)
+                              std::string stream_name,
+                              uint32_t sub_id)
                 : send_fn_{std::move(send_fn)},
                   pjson_{std::move(pjson)},
-                  stream_name_{std::move(stream_name)}
+                  stream_name_{std::move(stream_name)},
+                  sub_id_{sub_id}
                 {}
 
             virtual std::string const & stream_name() const override { return stream_name_; }
@@ -64,6 +66,8 @@ namespace xo {
              *       xo.reactor2websock.stream_endpoint_descr(kf, "/this/stream/name"))
              */
             std::string stream_name_;
+            /* this subscription's server-assigned id, on every envelope */
+            uint32_t sub_id_ = 0;
             /* count #of events received.  Also the next message's seq */
             uint32_t n_in_ev_ = 0;
         }; /*WebsocketSinkImpl*/
@@ -79,6 +83,7 @@ namespace xo {
              * is the count of messages sent before it
              */
             ss << "{" << quot("stream") << ": " << quot(this->stream_name_)
+               << ", " << quot("sub_id") << ": " << this->sub_id_
                << ", " << quot("seq") << ": " << this->n_in_ev_
                << ", " << quot("event") << ": ";
 
@@ -105,6 +110,7 @@ namespace xo {
 
             sink.pretty_struct("WebsocketSinkImpl",
                                field("addr", addr),
+                               field("sub_id", sub_id_),
                                field("n_in_ev", n_in_ev_),
                                field("stream", stream_name_));
         }
@@ -126,7 +132,8 @@ namespace xo {
         WebsocketSink::make(rp<Webserver> const & websrv,
                             rp<PrintJson> const & pjson,
                             uint32_t session_id,
-                            std::string const & stream_name)
+                            std::string const & stream_name,
+                            uint32_t sub_id)
         {
             /* events arriving at this sink are sent only to session_id */
             return make([websrv, session_id](std::string text)
@@ -134,15 +141,17 @@ namespace xo {
                                 websrv->send_text(session_id, std::move(text));
                             },
                         pjson,
-                        stream_name);
+                        stream_name,
+                        sub_id);
         } /*make*/
 
         rp<WebsocketSink>
         WebsocketSink::make(SendFn send_fn,
                             rp<PrintJson> const & pjson,
-                            std::string const & stream_name)
+                            std::string const & stream_name,
+                            uint32_t sub_id)
         {
-            return new WebsocketSinkImpl(std::move(send_fn), pjson, stream_name);
+            return new WebsocketSinkImpl(std::move(send_fn), pjson, stream_name, sub_id);
         } /*make*/
     } /*namespace web*/
 } /*namespace xo*/
