@@ -460,6 +460,12 @@ jobs:
           nix-build ci.nix -A xo-pywebsock -o "$XO_GCROOTS/xo-pywebsock"
           ls -l "$XO_GCROOTS/xo-pywebsock"
 
+      - name: build xo-reactor2websock
+        run: |
+          echo nix-build ci.nix -A xo-reactor2websock -o "$XO_GCROOTS/xo-reactor2websock"
+          nix-build ci.nix -A xo-reactor2websock -o "$XO_GCROOTS/xo-reactor2websock"
+          ls -l "$XO_GCROOTS/xo-reactor2websock"
+
       - name: build xo-statistics
         run: |
           echo nix-build ci.nix -A xo-statistics -o "$XO_GCROOTS/xo-statistics"

@@ -145,6 +145,7 @@ add_subdirectory(xo-reactor)
 add_subdirectory(xo-pyreactor)
 add_subdirectory(xo-websock)
 add_subdirectory(xo-pywebsock)
+add_subdirectory(xo-reactor2websock)   # reactor sources -> websocket endpoints
 #
 add_subdirectory(xo-statistics)
 add_subdirectory(xo-distribution)
