@@ -17,6 +17,7 @@
  */
 
 #include "Webserver.hpp"
+#include "UrlRouter.hpp"
 #include "DynamicEndpoint.hpp"
 #include "WebsockUtil.hpp"
 #include "WebsocketSink.hpp"
@@ -31,7 +32,6 @@
 #include <condition_variable>
 #include <deque>
 #include <regex>
-#include <unordered_map>
 #include <vector>
 
 namespace xo {
@@ -550,15 +550,6 @@ namespace xo {
             std::deque<std::string> outbound_q_;
         }; /*WebsocketSessionRecd*/
 
-        using EndpointMap = std::unordered_map<std::string,
-                                               rp<DynamicEndpoint>>;
-
-        namespace {
-            /* defined below; used earlier, by each session's router */
-            DynamicEndpoint * lookup_pattern(std::string const & incoming_uri,
-                                             EndpointMap const & ep_map);
-        }
-
         /* defined in this translation unit, after WebserverImpl */
         class WebserverImplWsThread;
 
@@ -862,24 +853,13 @@ namespace xo {
 
             /* --- 3. plugin state (writable while server runs) --- */
 
-            /* map :: stem->http_fn,
-             * where
-             *  stem = "longest non-variable URI prefix"
+            /* registered http and stream endpoints, and the matching that
+             * picks one for an incoming uri.  Locks internally.
              *
-             * use .register_http_endpoint() to insert a new URI into this map
-             *
-             * this map used for http endpoints
+             * use .register_http_endpoint(), .register_stream_endpoint()
+             * to insert
              */
-            EndpointMap stem_map_;
-            /* map :: stem->subscribe_fn
-             * where
-             *  stem = "longest non-variable URI prefix"
-             *
-             * use .register_stream_endpoint() to insert a new URI into this map
-             *
-             * this map used for stream endpoints
-             */
-            EndpointMap stream_map_;
+            UrlRouter url_router_;
 
             /* --- 4. libwebsocket session manager --- */
 
@@ -916,21 +896,13 @@ namespace xo {
         void
         WebserverImpl::register_http_endpoint(HttpEndpointDescr const & endpoint_descr)
         {
-            auto endpoint = DynamicEndpoint::make_http(endpoint_descr.uri_pattern(),
-                                                       endpoint_descr.endpoint_fn());
-
-            this->stem_map_[endpoint->stem()] = std::move(endpoint);
+            this->url_router_.register_http(endpoint_descr);
         } /*register_http_endpoint*/
 
         void
         WebserverImpl::register_stream_endpoint(StreamEndpointDescr const & endpoint_descr)
         {
-            auto endpoint = DynamicEndpoint::make_stream(endpoint_descr.uri_pattern(),
-                                                         endpoint_descr.subscribe_fn(),
-                                                         endpoint_descr.unsubscribe_fn(),
-                                                         endpoint_descr.receive_fn());
-
-            this->stream_map_[endpoint->stem()] = std::move(endpoint);
+            this->url_router_.register_stream(endpoint_descr);
         } /*register_stream_endpoint*/
 
 #ifdef DEFINED_BUT_NOT_USED
@@ -959,7 +931,10 @@ namespace xo {
                   /* endpoint serving a stream name */
                   [this](std::string const & stream_name)
                       {
-                          return lookup_pattern(stream_name, this->stream_map_);
+                          /* raw pointer, as EndpointLookup requires; the
+                           * router's subscription takes its own rp<> at once
+                           */
+                          return this->url_router_.find_stream(stream_name).get();
                       },
                   /* sink delivering to THIS session */
                   [this, new_id](std::string const & stream_name, uint32_t sub_id)
@@ -1218,97 +1193,11 @@ namespace xo {
             }
         } /*start_webserver*/
 
-        namespace {
-            DynamicEndpoint *
-            lookup_stem(std::string const & stem,
-                        EndpointMap const & ep_map)
-            {
-                scope log(XO_DEBUG_(true /*debug_flag*/),
-                          xtag("stem", stem));
-
-                auto ix = ep_map.find(stem);
-
-                if (ix != ep_map.end())
-                    return ix->second.get();
-                else
-                    return nullptr;
-            } /*lookup_stem*/
-
-            DynamicEndpoint *
-            lookup_pattern(std::string const & incoming_uri,
-                           EndpointMap const & ep_map)
-            {
-                if (incoming_uri.empty())
-                    return nullptr;
-
-                /* find longest prefix of incoming_uri that appears in .stem_map.
-                 *
-                 * 1. try the whole uri
-                 * 2. try successively shorter prefixes of uri that end in '/'
-                 * 3. try successively shorter prefixes of uri that do not end in '/'
-                 */
-
-                /* 1. try the whole uri */
-                DynamicEndpoint * endpoint = nullptr;
-
-                endpoint = lookup_stem(incoming_uri, ep_map);
-
-                if (!endpoint) {
-                    /* 2. try successively shorter prefixes of uri that end in '/'.
-                     *    we already checked for the whole uri,  so look for a match
-                     *    at or before the 2nd-last character
-                     */
-                    if (incoming_uri.size() >= 2) {
-                        std::string::size_type p = incoming_uri.size() - 1;
-
-                        while (!endpoint) {
-                            p = incoming_uri.find_last_of('/', p-1);
-
-                            if (p == std::string::npos)
-                                break;
-
-                            endpoint
-                                = lookup_stem(incoming_uri.substr(0, p+1), ep_map);
-
-                            if (p == 0)
-                                break;
-                        }
-                    }
-                }
-
-                if (!endpoint) {
-                    /* 3. try successively shorter prefixes of uri that don't end in '/'.
-                     */
-                    if (incoming_uri.size() >= 2) {
-                        std::string::size_type p = incoming_uri.size() - 2;
-
-                        while (!endpoint) {
-                            if (incoming_uri[p] == '/') {
-                                /* all stems ending in '/' have already been excluded */
-                                ;
-                            } else {
-                                endpoint
-                                    = lookup_stem(incoming_uri.substr(0, p+1), ep_map);
-                            }
-
-                            if (p == 0)
-                                break;
-
-                            --p;
-                        }
-                    }
-                }
-
-                return endpoint;
-            } /*lookup_pattern*/
-        } /*namespace*/
-
         void
         WebserverImpl::dynamic_http_response(std::string const & incoming_uri,
                                              std::ostream * p_os)
         {
-            DynamicEndpoint * endpoint = lookup_pattern(incoming_uri,
-                                                        this->stem_map_);
+            rp<DynamicEndpoint> endpoint = this->url_router_.find_http(incoming_uri);
 
             if (endpoint) {
                 endpoint->http_response(incoming_uri, p_os);

@@ -118,7 +118,7 @@ namespace xo {
              *     /fixed/stem/apple/more/fixed/stuff/bananas
              *    --> invoke callback with Alist
              *        ("a" -> "apple", "b" -> "bananas")
-             *    endpoint will be stored in WebserverImpl.stem_map
+             *    endpoint will be stored in UrlRouter.http_map or .stream_map
              *    under fixed prefix,  in this case
              *     /fixed/stem/
              *

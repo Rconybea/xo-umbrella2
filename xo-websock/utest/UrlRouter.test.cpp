@@ -1,0 +1,190 @@
+/** @file UrlRouter.test.cpp
+ *
+ *  @author Roland Conybeare, Sep 2026
+ *
+ *  UrlRouter's matching: which registered endpoint serves an incoming uri.
+ *  The matching was WebserverImpl's lookup_pattern, untested until it moved
+ *  here (.xo-backlog/xo-websock/issues/07).  Endpoints are identified by
+ *  stem(): stems are unique within one map.
+ *
+ *  Expectations are OBSERVED, never predicted.
+ **/
+
+#include "xo/websock/UrlRouter.hpp"
+#include "xo/websock/DynamicEndpoint.hpp"
+#include <catch2/catch.hpp>
+#include <sstream>
+#include <string>
+
+namespace xo {
+    using xo::web::UrlRouter;
+    using xo::web::DynamicEndpoint;
+    using xo::web::HttpEndpointDescr;
+    using xo::web::StreamEndpointDescr;
+    using xo::web::WebsocketSink;
+    using xo::web::Alist;
+    using xo::fn::CallbackId;
+
+    namespace ut {
+        namespace {
+            /** http endpoint on @p pattern, answering "<label>:<uri>" **/
+            HttpEndpointDescr http_descr(std::string pattern, std::string label) {
+                return HttpEndpointDescr(std::move(pattern),
+                                         [label](std::string const & uri,
+                                                 Alist const &,
+                                                 std::ostream * p_os)
+                                             {
+                                                 *p_os << label << ":" << uri;
+                                             });
+            }
+
+            /** stream endpoint on @p pattern; subscribe/unsubscribe do nothing.
+             *  Has a receive function, which an http endpoint never does.
+             **/
+            StreamEndpointDescr stream_descr(std::string pattern) {
+                return StreamEndpointDescr(std::move(pattern),
+                                           [](rp<WebsocketSink> const &) { return CallbackId(1); },
+                                           [](CallbackId) {},
+                                           [](rp<WebsocketSink> const &, Json::Value const &) {});
+            }
+
+            /** stem of the http endpoint serving @p uri; "" if none **/
+            std::string http_stem(UrlRouter const & router, std::string const & uri) {
+                rp<DynamicEndpoint> ep = router.find_http(uri);
+
+                return ep ? ep->stem() : std::string();
+            }
+
+            std::string stream_stem(UrlRouter const & router, std::string const & uri) {
+                rp<DynamicEndpoint> ep = router.find_stream(uri);
+
+                return ep ? ep->stem() : std::string();
+            }
+        }
+
+        TEST_CASE("url-router-empty-finds-nothing", "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+
+            REQUIRE(!router.find_http("/anything"));
+            REQUIRE(!router.find_stream("/anything"));
+            REQUIRE(!router.find_http(""));
+        }
+
+        TEST_CASE("url-router-literal-pattern-matches-whole-uri", "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+            router.register_http(http_descr("/status", "status"));
+
+            REQUIRE(http_stem(router, "/status") == "/status");
+            /* the empty uri matches nothing, even with endpoints present */
+            REQUIRE(http_stem(router, "") == "");
+            REQUIRE(http_stem(router, "/other") == "");
+        }
+
+        TEST_CASE("url-router-var-pattern-is-stored-under-its-stem", "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+            router.register_http(http_descr("/fw/${a}/detail", "fw"));
+
+            rp<DynamicEndpoint> ep = router.find_http("/fw/q7/detail");
+
+            REQUIRE(ep);
+            REQUIRE(ep->stem() == "/fw/");
+
+            std::stringstream ss;
+            ep->http_response("/fw/q7/detail", &ss);
+
+            REQUIRE(ss.str() == "fw:/fw/q7/detail");
+        }
+
+        TEST_CASE("url-router-longest-stem-wins", "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+            router.register_http(http_descr("/fw/${x}", "short"));
+            router.register_http(http_descr("/fw/sub/${y}", "long"));
+
+            REQUIRE(http_stem(router, "/fw/sub/7") == "/fw/sub/");
+            REQUIRE(http_stem(router, "/fw/9") == "/fw/");
+            /* registration order does not matter */
+            UrlRouter router2;
+            router2.register_http(http_descr("/fw/sub/${y}", "long"));
+            router2.register_http(http_descr("/fw/${x}", "short"));
+
+            REQUIRE(http_stem(router2, "/fw/sub/7") == "/fw/sub/");
+            REQUIRE(http_stem(router2, "/fw/9") == "/fw/");
+        }
+
+        TEST_CASE("url-router-slash-terminated-stem-beats-a-longer-bare-prefix",
+                  "[websock][UrlRouter]")
+        {
+            /* NOT strictly longest-prefix: after the whole uri, every prefix
+             * ending in '/' is tried before any that does not.  Pinned as the
+             * matching behaves today.
+             */
+            UrlRouter router;
+            router.register_http(http_descr("/x/", "slash"));
+            router.register_http(http_descr("/x/ab", "bare"));
+
+            REQUIRE(http_stem(router, "/x/abc") == "/x/");
+            /* the whole uri still comes first */
+            REQUIRE(http_stem(router, "/x/ab") == "/x/ab");
+        }
+
+        TEST_CASE("url-router-bare-prefix-matches-when-no-slash-stem-does",
+                  "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+            router.register_http(http_descr("/fwx", "bare"));
+
+            REQUIRE(http_stem(router, "/fwxyz") == "/fwx");
+            REQUIRE(http_stem(router, "/fwx/more") == "/fwx");
+        }
+
+        TEST_CASE("url-router-keeps-http-and-stream-apart", "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+            router.register_stream(stream_descr("/only-stream/${s}"));
+
+            REQUIRE(stream_stem(router, "/only-stream/1") == "/only-stream/");
+            REQUIRE(!router.find_http("/only-stream/1"));
+
+            /* one stem, one endpoint in each map */
+            router.register_http(http_descr("/both/${a}", "http"));
+            router.register_stream(stream_descr("/both/${a}"));
+
+            rp<DynamicEndpoint> h = router.find_http("/both/1");
+            rp<DynamicEndpoint> s = router.find_stream("/both/1");
+
+            REQUIRE(h);
+            REQUIRE(s);
+            REQUIRE(h.get() != s.get());
+            REQUIRE(!h->has_receive());
+            REQUIRE(s->has_receive());
+        }
+
+        TEST_CASE("url-router-reregistering-a-stem-replaces", "[websock][UrlRouter]")
+        {
+            /* issue 07 will make this an error; today it replaces */
+            UrlRouter router;
+            router.register_http(http_descr("/r/${a}", "old"));
+
+            rp<DynamicEndpoint> old_ep = router.find_http("/r/1");
+
+            router.register_http(http_descr("/r/${b}", "new"));
+
+            rp<DynamicEndpoint> new_ep = router.find_http("/r/1");
+
+            REQUIRE(new_ep);
+            REQUIRE(new_ep.get() != old_ep.get());
+
+            /* the router dropped the old endpoint; our rp keeps it usable */
+            std::stringstream ss;
+            old_ep->http_response("/r/1", &ss);
+
+            REQUIRE(ss.str() == "old:/r/1");
+        }
+    } /*namespace ut*/
+} /*namespace xo*/
+
+/* end UrlRouter.test.cpp */

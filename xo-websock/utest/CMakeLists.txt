@@ -6,7 +6,8 @@
 set(SELF_EXE utest.websock)
 set(SELF_SRCS
     websock_unit_main.cpp
-    WsSessionRouter.test.cpp)
+    WsSessionRouter.test.cpp
+    UrlRouter.test.cpp)
 
 if (ENABLE_TESTING)
     xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
