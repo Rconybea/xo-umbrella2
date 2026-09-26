@@ -9,7 +9,6 @@
 #include <xo/ordinaltree/rbtree/OrdinalReduce.hpp>
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 #include <xo/timeutil/timeutil.hpp>
@@ -31,8 +30,6 @@ namespace xo {
         public:
             using PrintJson = xo::json::PrintJson;
             using TaggedPtr = xo::reflect::TaggedPtr;
-            using HttpEndpointDescr = xo::web::HttpEndpointDescr;
-            using Alist = xo::web::Alist;
 
         public:
             /* true iff .size() == 0 */
@@ -54,29 +51,12 @@ namespace xo {
             virtual void http_snapshot(rp<PrintJson> const & pjson,
                                        std::ostream * p_os) const = 0;
 
-            /* http endpoint; generates http output for this eventstore */
-            virtual HttpEndpointDescr http_endpoint_descr(rp<PrintJson> const & pjson,
-                                                          std::string const & url_prefix) const {
-
-                /* important that lambda contains its own rp<PrintJson>;
-                 * reference to stack will not do
-                 */
-                rp<PrintJson> pjson_rp = pjson;
-
-                auto http_fn = ([this, pjson_rp]
-                                (std::string const & /*uri*/,
-                                 Alist const & /*alist*/,
-                                 std::ostream * p_os)
-                    {
-                        /* WARNING: race condition here,
-                         *          given webserver runs from a separate thread
-                         */
-
-                        this->http_snapshot(pjson_rp, p_os);
-                    });
-
-                return HttpEndpointDescr(url_prefix + "/snap", http_fn);
-            } /*http_endpoint_descr*/
+            /* The http endpoint that served this snapshot lived here until
+             * 2026-09-26, making xo-reactor depend on xo-webutil.  It is now
+             * xo::web::http_endpoint_descr() in xo-reactor2websock, which
+             * also holds the store by rp<> rather than capturing a raw `this'.
+             * See .xo-backlog/xo-websock/issues/02.
+             */
 
             virtual void clear() = 0;
 
@@ -128,8 +108,6 @@ namespace xo {
             using EventTree = xo::tree::RedBlackTree<utc_nanos, Event,
                                                      xo::tree::OrdinalReduce<Event>>;
             using PrintJson = xo::json::PrintJson;
-            using Alist = xo::web::Alist;
-            using HttpEndpointDescr = xo::web::HttpEndpointDescr;
 
             static rp<EventStoreImpl> make() { return new EventStoreImpl(); }
 

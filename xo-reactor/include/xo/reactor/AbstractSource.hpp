@@ -9,8 +9,6 @@
 #include <string>
 
 namespace xo {
-    namespace web { class StreamEndpointDescr; }
-
     namespace reactor {
         class AbstractSink;
 
@@ -29,7 +27,6 @@ namespace xo {
          */
         class AbstractSource : public virtual AbstractEventProcessor {
         public:
-            using StreamEndpointDescr = web::StreamEndpointDescr;
             using TypeDescr = reflect::TypeDescr;
             using CallbackId = fn::CallbackId;
 
@@ -67,10 +64,12 @@ namespace xo {
             virtual CallbackId attach_sink(rp<AbstractSink> const & sink) = 0;
             virtual void detach_sink(CallbackId id) = 0;
 
-            /* endpoint for a websocket subscriber;
-             * subscriber delivers events produced by this source
+            /* The websocket stream endpoint for this source lived here until
+             * 2026-09-26, making xo-reactor depend on xo-webutil.  It is now
+             * xo::web::stream_endpoint_descr() in xo-reactor2websock, which
+             * also holds the source by rp<> rather than capturing a raw `this'.
+             * See .xo-backlog/xo-websock/issues/02.
              */
-            StreamEndpointDescr stream_endpoint_descr(std::string const & url_prefix);
 
             /* typically expect events to be delivered using a reactor or simulator.
              * (for example see reactor/Reactor, simulator/Simulator);
