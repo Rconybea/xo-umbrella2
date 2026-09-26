@@ -4,6 +4,7 @@
  **/
 
 #include "DArena.hpp"
+#include <xo/ppsink/tostr0.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tag_ostream.hpp> /* Catch2 INFO() streams the tag to an ostream */
 #include <catch2/catch.hpp>
@@ -12,6 +13,7 @@
 
 namespace xo {
     using xo::mm::DArena;
+    using xo::mm::MapInfo;
     using xo::mm::AllocHeader;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
@@ -20,6 +22,7 @@ namespace xo {
     using xo::mm::error;
     using xo::reflect::typeseq;
     using xo::reflect::typeseq;
+    using xo::pp::tostr0;
     using xo::pp::xtag;
     using std::byte;
 
@@ -381,18 +384,63 @@ namespace xo {
             REQUIRE(DArena::obj2arena(p, c_align) == &a2);
         } /*TEST_CASE(darena-obj2arena-survives-a-move)*/
 
-        TEST_CASE("darena-base-align-rejects-what-cannot-work", "[arena][base_align]")
+        TEST_CASE("darena-base-align-valid-mask", "[arena][base_align]")
         {
+            auto cfg = aligned_cfg(1024 /*size*/,
+                                   3 * 1024 * 1024 /*base_align_z*/,
+                                   false);
+
+            /* base alignment must be a power of 2 */
+
+            MapInfo info;
+            bool ok = DArena::validate(cfg,
+                                       &info,
+                                       false /*debug_flag*/,
+                                       false /*throw_flag*/);
+
+            INFO(tostr0(xtag("page_z", info.page_z),
+                        xtag("enable_hugepage_flag", info.enable_hugepage_flag),
+                        xtag("page_align_z", info.page_align_z),
+                        xtag("base_align_z", info.base_align_z),
+                        xtag("reserve_z", info.reserve_z)
+                     ));
+            REQUIRE(ok == false);
+
+            REQUIRE_THROWS(DArena::validate(cfg,
+                                            &info,
+                                            false /*debug_flag*/,
+                                            true /*throw_flag*/));
+        }
+
+        TEST_CASE("darena-base-align-rejects-oversize", "[arena][base_align]")
+        {
+            auto cfg = aligned_cfg(4 * 1024 * 1024 /*size*/,
+                                   1 * 1024 * 1024 /*base_align_z*/,
+                                   true /*aligned_block_flag*/);
+
             /* an arena larger than its alignment spans two blocks, so a pointer
              * in the second masks to the wrong base.  Refused rather than left
              * to give a wrong answer later.
              */
-            REQUIRE_THROWS(DArena::map(aligned_cfg(4 * 1024 * 1024,
-                                                   1024 * 1024,
-                                                   false)));
 
-            /* masking is meaningless unless the alignment is a power of two */
-            REQUIRE_THROWS(DArena::map(aligned_cfg(1024, 3 * 4096, false)));
+            MapInfo info;
+            bool ok = DArena::validate(cfg,
+                                       &info,
+                                       false /*debug_flag*/,
+                                       false /*throw_flag*/);
+
+            INFO(tostr0(xtag("page_z", info.page_z),
+                        xtag("enable_hugepage_flag", info.enable_hugepage_flag),
+                        xtag("page_align_z", info.page_align_z),
+                        xtag("base_align_z", info.base_align_z),
+                        xtag("reserve_z", info.reserve_z)
+                     ));
+            REQUIRE(ok == false);
+
+            REQUIRE_THROWS(DArena::validate(cfg,
+                                            &info,
+                                            false /*debug_flag*/,
+                                            true /*throw_flag*/));
         }
     }
 }

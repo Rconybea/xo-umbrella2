@@ -32,6 +32,7 @@
 #include <sstream>
 #include <regex>
 #include <string>
+#include <unistd.h>   // for ::getpagesize() on osx
 
 namespace xo {
     using xo::scm::DFloat;
@@ -139,10 +140,40 @@ namespace xo {
              * compare the rest exactly -- the wire contract stays pinned, and
              * a changed key or a reordered field still fails.
              */
-            const std::string frame
+            std::string frame
                 = std::regex_replace(ss.str(),
                                      std::regex("\"(lo|hi)\": [0-9]+"),
                                      "\"$1\": ADDR");
+
+            /* reserved/capacity are not reproducible across HOSTS: arenas
+             * round up to a VM page, and that page is 4k on linux and 16k on
+             * darwin (getpagesize()).  Observed, both for this flywheel's
+             * 16k storage + 4k strong config:
+             *
+             *            requested   4k pages   16k pages
+             *   storage      16384      16384       16384
+             *   strong        4096       8192       16384
+             *   strong-free      --       4096       16384
+             *   capacity        --         511        1023
+             *
+             * At 4k the strong pool takes two pages rather than one, because
+             * DArenaVector::map inflates the request by the arena overhead
+             * and that pushes 4096 past a page boundary; at 16k the same
+             * request fits in one.  capacity follows the strong pool's
+             * reservation (and is one short of a round number because the
+             * per-allocation overhead costs a slot).
+             *
+             * None of that is the wire contract, so redact the VALUES and
+             * keep the KEYS.  Note [0-9]+ still carries real coverage: a
+             * value that is not an integer does not match, so the
+             * substitution does not fire and the comparison below fails --
+             * which is how a missing json printer for size_t showed up on
+             * darwin, rendering these as <error-json-printer-not-found>.
+             * The magnitudes are asserted structurally after the frame.
+             */
+            frame = std::regex_replace(frame,
+                                       std::regex("\"(reserved|capacity)\": [0-9]+"),
+                                       "\"$1\": INT");
 
             INFO("frame: " << frame);
 
@@ -151,18 +182,15 @@ namespace xo {
                 ", \"pools\": ["
                 "{\"_name_\": \"MemorySizeInfo\""
                 ", \"name\": \"utest.frame.empty.storage\""
-                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 16384"
+                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
                 ", \"lo\": ADDR, \"hi\": ADDR}"
                 ", {\"_name_\": \"MemorySizeInfo\""
                 ", \"name\": \"utest.frame.empty.strong\""
-                /* two pages, not one: DArenaVector::map inflates the request by
-                 * the arena overhead, which pushes 4096 past a page boundary
-                 */
-                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 8192"
+                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
                 ", \"lo\": ADDR, \"hi\": ADDR}"
                 ", {\"_name_\": \"MemorySizeInfo\""
                 ", \"name\": \"utest.frame.empty.strong-free\""
-                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": 4096"
+                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
                 ", \"lo\": ADDR, \"hi\": ADDR}]"
                 /* "RootSet", not "RootSetInfo", and "Flywheel" above rather
                  * than "FlywheelInfo": neither struct exists any more.  Both
@@ -171,18 +199,36 @@ namespace xo {
                  * since they are the wire contract
                  */
                 ", \"strong\": {\"_name_\": \"RootSet\""
-                /* 511, not 512: the per-allocation overhead costs one slot */
-                ", \"size\": 0, \"capacity\": 511, \"live\": 0"
+                ", \"size\": 0, \"capacity\": INT, \"live\": 0"
                 ", \"free\": [], \"slots\": []}}"));
 
-            /* the bound the redaction hid, asserted structurally instead.
+            /* the bounds the redaction hid, asserted structurally instead.
              * Read through visit_pools, which is the path the printer takes
              */
-            fw->visit_pools([](const xo::mm::MemorySizeInfo & pool) {
+            const std::size_t page_z = ::getpagesize();
+
+            fw->visit_pools([page_z](const xo::mm::MemorySizeInfo & pool) {
                     REQUIRE(static_cast<const char *>(pool.hi_)
                             - static_cast<const char *>(pool.lo_)
                             == static_cast<long>(pool.reserved_));
+
+                    /* what "reserved": INT gave up: every pool is a whole,
+                     * non-empty number of VM pages.  That is the property the
+                     * literal was really pinning -- 8192 and 4096 were just
+                     * what it looks like where a page is 4k
+                     */
+                    REQUIRE(pool.reserved_ > 0);
+                    REQUIRE(pool.reserved_ % page_z == 0);
                 });
+
+            /* what "capacity": INT gave up: not the number, but that the
+             * printer reports the LIVE one.  Checked against the unredacted
+             * text, so a printer that emitted a constant would still fail
+             */
+            REQUIRE(ss.str().find("\"capacity\": "
+                                  + std::to_string(fw->strong_capacity()))
+                    != std::string::npos);
+            REQUIRE(fw->strong_capacity() > 0);
         } /*TEST_CASE(empty-flywheel-renders-a-frame)*/
 
         TEST_CASE("occupied-slots-appear-in-the-frame", "[printjson][flywheel]")

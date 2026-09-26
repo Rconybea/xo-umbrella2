@@ -60,12 +60,6 @@ namespace xo {
 
         /** xo-object2/ configuration **/
         Object2Config config_;
-
-        /** xo-printjson/ context **/
-        const PrintJsonAppcx & printjson_appcx_;
-
-        /** xo-stringtable2/ context **/
-        const Stringtable2Appcx & stringtable2_appcx_;
     };
 
     template <>

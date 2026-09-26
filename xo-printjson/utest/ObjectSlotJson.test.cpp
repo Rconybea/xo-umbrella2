@@ -201,8 +201,15 @@ namespace xo {
             INFO("frame: " << frame);
 
             REQUIRE(frame.find("\"typeseq\": ") != std::string::npos);
+
+#          ifdef __linux__
             REQUIRE(frame.find("\"type\": \"xo::ut::{anonymous}::DSlotProbe\"")
                     != std::string::npos);
+#          endif
+#          ifdef __APPLE__
+            REQUIRE(frame.find("\"type\": \"xo::ut::(anonymous namespace)::DSlotProbe\"")
+                    != std::string::npos);
+#          endif
 
             /* 16 == the arena preamble (back pointer) + one AllocHeader.  The
              * number is a consequence of storage being header-enabled, which

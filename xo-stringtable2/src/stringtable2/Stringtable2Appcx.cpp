@@ -7,10 +7,9 @@
 
 namespace xo {
     Stringtable2Appcx::Stringtable2Appcx(const Stringtable2Config & cfg,
-                                        const FacetAppcx & facet_appcx)
+                                         const FacetAppcx & /*facet_appcx*/)
         : init_evidence_{InitSubsys<S_stringtable2_tag>::require()},
-          config_{cfg},
-          facet_appcx_{facet_appcx}
+          config_{cfg}
     {}
 
 } /*namespace xo*/

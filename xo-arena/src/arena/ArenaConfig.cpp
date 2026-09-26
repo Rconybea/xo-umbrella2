@@ -11,6 +11,47 @@ namespace xo {
     using xo::pp::field;
 
     namespace mm {
+
+        ArenaConfig
+        ArenaConfig::with_name(const ArenaNameStr & name) const
+        {
+            ArenaConfig copy(*this);
+            copy.name_ = name;
+            return copy;
+        }
+
+        ArenaConfig
+        ArenaConfig::with_size(std::size_t z) const
+        {
+            ArenaConfig copy(*this);
+            copy.size_ = z;
+            return copy;
+        }
+
+        ArenaConfig
+        ArenaConfig::with_base_align_z(std::size_t z) const
+        {
+            ArenaConfig copy(*this);
+            copy.base_align_z_ = z;
+            return copy;
+        }
+
+        ArenaConfig
+        ArenaConfig::with_exclusive_block_flag(bool x) const
+        {
+            ArenaConfig copy(*this);
+            copy.exclusive_block_flag_ = x;
+            return copy;
+        }
+
+        ArenaConfig
+        ArenaConfig::with_store_header_flag(bool x) const
+        {
+            ArenaConfig copy(*this);
+            copy.store_header_flag_ = x;
+            return copy;
+        }
+
         void
         ArenaConfig::pretty(PpSink & sink) const
         {

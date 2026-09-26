@@ -50,9 +50,6 @@ namespace xo {
 
         /** xo-stringtable2/ configuration **/
         Stringtable2Config config_;
-
-        /** xo-facet/ context **/
-        const FacetAppcx & facet_appcx_;
     };
 
     template <>

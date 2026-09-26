@@ -21,7 +21,7 @@ namespace xo {
         using Opaque = xo::facet::Opaque;
 
         class AGCObject;      // see AGCObject.hpp
-        struct DArena;        // see DArena.hpp
+        class DArena;        // see DArena.hpp
 
         /** @class AAllocator
          *  @brief Abstract facet for allocation

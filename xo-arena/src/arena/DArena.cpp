@@ -33,14 +33,10 @@ namespace xo {
 
     namespace mm {
 
-        DArena
-        DArena::map(const ArenaConfig & cfg)
+        MapInfo
+        map_info(const ArenaConfig & cfg)
         {
-            scope log(XO_DEBUG_(cfg.debug_flag_));
-
-            /* vm page size. 4KB, probably */
             size_t page_z = getpagesize();
-
             bool enable_hugepage_flag = (cfg.size_ >= cfg.hugepage_z_);
 
             /* Align start of arena memory on this boundary.
@@ -56,45 +52,90 @@ namespace xo {
              */
             size_t base_align_z = std::max(cfg.base_align_z_, page_align_z);
 
-            if (cfg.base_align_z_ > 0) {
-                /* Only when the caller opted-in to a maskable base. */
-
-                if ((base_align_z & (base_align_z - 1)) != 0) {
-                    throw std::runtime_error
-                        (tostr0("DArena::map: base alignment must be a power of 2",
-                                xtag("arena", cfg.name().c_str()),
-                                xtag("base_align_z", base_align_z)));
-                }
-
-                if (cfg.size_ > base_align_z) {
-                    /* the arena would span more than one aligned block, and a
-                     * pointer in the second block would mask to the wrong base
-                     */
-                    throw std::runtime_error
-                        (tostr0("DArena::map: arena size exceeds its base alignment,"
-                                " so its base would not be recoverable by masking",
-                                xtag("arena", cfg.name().c_str()),
-                                xtag("size", cfg.size_),
-                                xtag("base_align_z", base_align_z)));
-                }
-            } /*if base_align_z_ requested*/
-
             /* Exclusivity: claim the whole block, so no unrelated mapping can
              * land in it and mask to this arena's base.  Separate from
              * alignment on purpose -- see ArenaConfig::with_exclusive_block_flag.
              */
             size_t reserve_z = (cfg.exclusive_block_flag_ ? base_align_z : cfg.size_);
 
-            log && log(xtag("page_z", page_z),
-                       xtag("page_align_z", page_align_z),
-                       xtag("base_align_z", base_align_z),
-                       xtag("reserve_z", reserve_z));
+            return
+                { .page_z = page_z,
+                  .enable_hugepage_flag = enable_hugepage_flag,
+                  .page_align_z = page_align_z,
+                  .base_align_z = base_align_z,
+                  .reserve_z = reserve_z
+                };
+        }
 
-            auto span = mmap_util::map_aligned_range(reserve_z,
-                                                     base_align_z,
-                                                     page_align_z,
-                                                     enable_hugepage_flag,
-                                                     cfg.debug_flag_);
+        bool
+        DArena::validate(const ArenaConfig & cfg,
+                         MapInfo * p_info,
+                         bool debug_flag,
+                         bool throw_flag)
+        {
+            scope log(XO_DEBUG_(debug_flag));
+
+            MapInfo info = map_info(cfg);
+
+            if (p_info)
+                *p_info = info;
+
+            log && log(xtag("page_z", info.page_z),
+                       xtag("page_align_z", info.page_align_z),
+                       xtag("base_align_z", info.base_align_z),
+                       xtag("reserve_z", info.reserve_z));
+
+            if (info.base_align_z > 0) {
+                /* Only when the caller opted-in to a maskable base. */
+
+                if ((info.base_align_z & (info.base_align_z - 1)) != 0) {
+                    if (throw_flag) {
+                        throw std::runtime_error
+                            (tostr0("DArena::map: base alignment must be a power of 2",
+                                    xtag("arena", cfg.name().c_str()),
+                                    xtag("base_align_z", info.base_align_z)));
+                    }
+
+                    return false;
+                }
+
+                if (cfg.exclusive_block_flag_ && (cfg.size_ > info.base_align_z)) {
+                    /* the arena would span more than one aligned block, and a
+                     * pointer in the second block would mask to the wrong base
+                     */
+                    if (throw_flag) {
+                        throw std::runtime_error
+                            (tostr0("DArena::map: arena size exceeds its base alignment,"
+                                    " so its base would not be recoverable by masking",
+                                    xtag("arena", cfg.name().c_str()),
+                                    xtag("size", cfg.size_),
+                                    xtag("base_align_z", info.base_align_z)));
+                    }
+
+                    return false;
+                }
+            } /*if base_align_z_ requested*/
+
+            return true;
+        }
+
+        DArena
+        DArena::map(const ArenaConfig & cfg)
+        {
+            scope log(XO_DEBUG_(cfg.debug_flag_));
+
+            MapInfo info;
+            DArena::validate(cfg,
+                             &info,
+                             false /*debug_flag*/,
+                             true /*throw_flag*/);
+
+            auto span
+                = mmap_util::map_aligned_range(info.reserve_z,
+                                               info.base_align_z,
+                                               info.page_align_z,
+                                               info.enable_hugepage_flag,
+                                               cfg.debug_flag_);
 
             if (!span.lo()) {
                 // control here implies mmap() failed silently
@@ -110,7 +151,9 @@ namespace xo {
                        xtag("hugepage_z", hugepage_z_));
 #endif
 
-            return DArena(cfg, page_z, page_align_z, span.lo(), span.hi());
+            return DArena(cfg,
+                          info.page_z, info.page_align_z,
+                          span.lo(), span.hi());
         } /*map*/
 
         DArena::DArena(const ArenaConfig & cfg)

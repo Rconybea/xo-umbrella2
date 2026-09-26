@@ -222,6 +222,17 @@ namespace xo {
             TaggedPtr::visit_tree_preorder(tp, [](TaggedPtr) {});
         } /*validate_tp*/
 
+        void
+        PrintJson::provide_printer(TypeId id,
+                                   std::unique_ptr<JsonPrinter> p)
+        {
+            std::unique_ptr<JsonPrinter> * pp = printer_map_.require(id);
+
+            if (!*pp) {
+                *pp = std::move(p);
+            }
+        }
+
         /* Consider:
          *   TaggedPtr tp = ...;
          *   std::ostream * p_os = ...;
@@ -903,6 +914,8 @@ namespace xo {
             provide_integer_printer<std::uint32_t>(this);
             provide_integer_printer<std::int64_t>(this);
             provide_integer_printer<std::uint64_t>(this);
+            // on clang, size_t is a distinct type
+            provide_integer_printer<std::size_t>(this);
 
             provide_floatingpoint_printer<float>(this);
             provide_floatingpoint_printer<double>(this);

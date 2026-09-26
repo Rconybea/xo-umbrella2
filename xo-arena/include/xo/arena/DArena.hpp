@@ -16,6 +16,14 @@ namespace xo {
     namespace mm {
         struct DArenaIterator; // see DArenaIterator.hpp
 
+        struct MapInfo {
+            size_t page_z = 0;
+            bool enable_hugepage_flag = false;
+            size_t page_align_z = 0;
+            size_t base_align_z = 0;
+            size_t reserve_z = 0;
+        };
+
         /** @class DArena
          *
          *  @brief represent arena allocator state
@@ -75,6 +83,12 @@ namespace xo {
             ///@}
             /** @defgroup mm-arena-ctors arena constructors and destructors **/
             ///@{
+
+            /** check whether config is admits map() **/
+            static bool validate(const ArenaConfig & cfg,
+                                 MapInfo * info,
+                                 bool debug_flag,
+                                 bool throw_flag);
 
             /** create arena per configuration @p cfg. **/
             static DArena map(const ArenaConfig & cfg);

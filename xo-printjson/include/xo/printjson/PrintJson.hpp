@@ -112,10 +112,7 @@ namespace xo {
                 this->validate_tp(Reflect::make_tp(&x));
             } /*validate_obj*/
 
-            void provide_printer(TypeId id, std::unique_ptr<JsonPrinter> p) {
-                *(printer_map_.require(id)) = std::move(p);
-            }
-
+            void provide_printer(TypeId id, std::unique_ptr<JsonPrinter> p);
             void provide_printer(TypeDescr td, std::unique_ptr<JsonPrinter> p) {
                 this->provide_printer(td->id(), std::move(p));
             }
