@@ -8,7 +8,6 @@
 #include <xo/pyprintjson/pyprintjson.hpp>
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/pyreflect/pyreflect.hpp>
-#include <xo/webutil/StreamEndpointDescr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/timeutil/timeutil.hpp>
 #include <xo/pyutil/pyutil.hpp>
@@ -56,8 +55,11 @@ namespace xo {
                 .def_property_readonly("n_queued_out_ev", &AbstractSource::n_queued_out_ev)
                 .def("attach_sink", &AbstractSource::attach_sink)
                 .def("detach_sink", &AbstractSource::detach_sink)
-                /* editor bait: websock_endpoint_descr */
-                .def("stream_endpoint_descr", &AbstractSource::stream_endpoint_descr)
+                /* stream_endpoint_descr moved to xo.reactor2websock on
+                 * 2026-09-26, as a module function taking the source.
+                 * See .xo-backlog/xo-websock/issues/02.
+                 * (editor bait: websock_endpoint_descr)
+                 */
                 .def("deliver_one", &AbstractSource::deliver_one)
                 .def("deliver_n", &AbstractSource::deliver_n,
                      py::arg("n"));
@@ -92,11 +94,9 @@ namespace xo {
                          self.http_snapshot(PrintJsonSingleton::instance(), &ss);
                          return ss.str();
                      })
-                .def("http_endpoint_descr",
-                     [](AbstractEventStore & self, std::string const & url_prefix) {
-                         return self.http_endpoint_descr(PrintJsonSingleton::instance(), url_prefix);
-                     },
-                     py::arg("url_prefix"))
+                /* http_endpoint_descr moved to xo.reactor2websock on
+                 * 2026-09-26, as a module function taking the store.
+                 */
                 .def("clear",
                      &AbstractEventStore::clear);
 
