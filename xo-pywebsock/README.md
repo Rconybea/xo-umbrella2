@@ -6,7 +6,7 @@
 
 - [github/Rconybea/xo-websock](https://github.com/Rconybea/xo-websock)
 - [github/Rconybea/xo-pyutil](https://github.com/Rconybea/xo-pyutil)
-- [github/Rconybea/xo-pyreactor](https://github.com/Rconybea/xo-pyreactor)
+- [github/Rconybea/xo-pywebutil](https://github.com/Rconybea/xo-pywebutil)
 
 ### build + install
 
