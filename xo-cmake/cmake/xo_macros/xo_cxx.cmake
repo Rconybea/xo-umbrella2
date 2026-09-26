@@ -826,6 +826,17 @@ macro(xo_toplevel_compile_options)
         set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING
             "runpath in installed libraries/executables")
     endif()
+
+    # Also record, in each installed library/executable's runpath, the
+    # directory of every library it links from outside the build tree.
+    #
+    # Need this so xo libraries can find PRIVATE external deps.
+    #
+    # Implicit/system link directories are never added (cmake excludes them),
+    # so a conventional /usr/lib install is unaffected.
+	#
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON CACHE BOOL
+        "add linked libraries' directories (outside the build tree) to installed runpaths")
 endmacro()
 
 # xo_strip_xo_prefix(xo_foo tmp) --> tmp=foo
