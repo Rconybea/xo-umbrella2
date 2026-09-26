@@ -7,6 +7,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* xtag(..) */
+#include <stdexcept>
 
 namespace xo {
     namespace web {
@@ -107,9 +108,7 @@ namespace xo {
             auto endpoint = DynamicEndpoint::make_http(descr.uri_pattern(),
                                                        descr.endpoint_fn());
 
-            std::lock_guard<std::mutex> lock(this->mutex_);
-
-            this->http_map_[endpoint->stem()] = std::move(endpoint);
+            this->insert_in(std::move(endpoint), "http", &this->http_map_);
         } /*register_http*/
 
         void
@@ -120,10 +119,20 @@ namespace xo {
                                                          descr.unsubscribe_fn(),
                                                          descr.receive_fn());
 
-            std::lock_guard<std::mutex> lock(this->mutex_);
-
-            this->stream_map_[endpoint->stem()] = std::move(endpoint);
+            this->insert_in(std::move(endpoint), "stream", &this->stream_map_);
         } /*register_stream*/
+
+        bool
+        UrlRouter::unregister_http(std::string const & uri_pattern)
+        {
+            return this->erase_in(uri_pattern, &this->http_map_);
+        }
+
+        bool
+        UrlRouter::unregister_stream(std::string const & uri_pattern)
+        {
+            return this->erase_in(uri_pattern, &this->stream_map_);
+        }
 
         rp<DynamicEndpoint>
         UrlRouter::find_http(std::string const & uri) const
@@ -148,6 +157,58 @@ namespace xo {
              */
             return rp<DynamicEndpoint>(lookup_pattern(uri, ep_map));
         } /*find_in*/
+
+        void
+        UrlRouter::insert_in(rp<DynamicEndpoint> endpoint,
+                             char const * kind,
+                             EndpointMap * p_ep_map)
+        {
+            std::string stem = endpoint->stem();
+
+            std::lock_guard<std::mutex> lock(this->mutex_);
+
+            auto ix = p_ep_map->find(stem);
+
+            if (ix != p_ep_map->end()) {
+                /* was a silent replace until issue 07 */
+                throw std::runtime_error
+                    (std::string("UrlRouter: ") + kind + " endpoint ["
+                     + endpoint->uri_pattern()
+                     + "] has the same stem [" + stem
+                     + "] as registered endpoint [" + ix->second->uri_pattern()
+                     + "]; unregister that first");
+            }
+
+            p_ep_map->emplace(std::move(stem), std::move(endpoint));
+        } /*insert_in*/
+
+        bool
+        UrlRouter::erase_in(std::string const & uri_pattern,
+                            EndpointMap * p_ep_map)
+        {
+            /* released after the lock: dropping what may be the last
+             * reference runs the endpoint's dtor, and with it the dtors of
+             * whatever its functions capture
+             */
+            rp<DynamicEndpoint> removed;
+
+            {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+
+                auto ix = p_ep_map->find(EndpointUtil::stem(uri_pattern));
+
+                if ((ix == p_ep_map->end())
+                    || (ix->second->uri_pattern() != uri_pattern))
+                {
+                    return false;
+                }
+
+                removed = std::move(ix->second);
+                p_ep_map->erase(ix);
+            }
+
+            return true;
+        } /*erase_in*/
     } /*namespace web*/
 } /*namespace xo*/
 

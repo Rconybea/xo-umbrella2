@@ -84,6 +84,10 @@ namespace xo {
 
             /* current state */
             virtual Runstate state() const = 0;
+            /* register_*_endpoint: throws std::runtime_error if an endpoint of
+             * the same kind with the same stem is already registered; see
+             * UrlRouter
+             */
             virtual void register_http_endpoint(HttpEndpointDescr const & endpoint) = 0;
             virtual void register_stream_endpoint(StreamEndpointDescr const & endpoint) = 0;
 

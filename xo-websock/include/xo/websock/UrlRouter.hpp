@@ -29,6 +29,14 @@ namespace xo {
          *    /fixed/stem/
          *  An http endpoint and a stream endpoint may share a stem.
          *
+         *  Registering a stem already present in the same map is an error;
+         *  replacing an endpoint takes an explicit unregister first.
+         *  "Same stem" is coarser than "same pattern": /fw/${a} and
+         *  /fw/${a}/detail both have stem /fw/, so the second is rejected.
+         *
+         *  Unregistering drops only the router's reference.  Anyone else
+         *  holding the endpoint -- e.g. a live subscription -- keeps it alive.
+         *
          *  THREADING: all methods may be called from any thread.
          *  Registration typically runs on the application's thread, lookup on
          *  the webserver's service thread.
@@ -36,14 +44,28 @@ namespace xo {
         class UrlRouter {
         public:
             /** register http endpoint described by @p descr.
-             *  Replaces any http endpoint already registered with the same stem.
+             *  Throws std::runtime_error if an http endpoint with the same
+             *  stem is already registered.
              **/
             void register_http(HttpEndpointDescr const & descr);
 
             /** register stream endpoint described by @p descr.
-             *  Replaces any stream endpoint already registered with the same stem.
+             *  Throws std::runtime_error if a stream endpoint with the same
+             *  stem is already registered.
              **/
             void register_stream(StreamEndpointDescr const & descr);
+
+            /** remove the http endpoint registered with exactly @p uri_pattern.
+             *  Returns false, changing nothing, if there is none -- including
+             *  when a DIFFERENT pattern with the same stem is registered.
+             **/
+            bool unregister_http(std::string const & uri_pattern);
+
+            /** remove the stream endpoint registered with exactly
+             *  @p uri_pattern.  Returns false, changing nothing, if there is
+             *  none; see unregister_http().
+             **/
+            bool unregister_stream(std::string const & uri_pattern);
 
             /** http endpoint serving @p uri; null if none.  See find_in(). **/
             rp<DynamicEndpoint> find_http(std::string const & uri) const;
@@ -69,6 +91,19 @@ namespace xo {
              **/
             rp<DynamicEndpoint> find_in(std::string const & uri,
                                         EndpointMap const & ep_map) const;
+
+            /** insert @p endpoint into @p *p_ep_map; @p kind ("http" or
+             *  "stream") names the map in the duplicate error
+             **/
+            void insert_in(rp<DynamicEndpoint> endpoint,
+                           char const * kind,
+                           EndpointMap * p_ep_map);
+
+            /** remove the endpoint in @p *p_ep_map registered with exactly
+             *  @p uri_pattern; false if none
+             **/
+            bool erase_in(std::string const & uri_pattern,
+                          EndpointMap * p_ep_map);
 
         private:
             /* guards .http_map, .stream_map */

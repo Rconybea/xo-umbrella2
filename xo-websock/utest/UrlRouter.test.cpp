@@ -14,6 +14,7 @@
 #include "xo/websock/DynamicEndpoint.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 namespace xo {
@@ -163,13 +164,38 @@ namespace xo {
             REQUIRE(s->has_receive());
         }
 
-        TEST_CASE("url-router-reregistering-a-stem-replaces", "[websock][UrlRouter]")
+        TEST_CASE("url-router-rejects-a-duplicate-stem", "[websock][UrlRouter]")
         {
-            /* issue 07 will make this an error; today it replaces */
+            /* was a silent replace until issue 07 */
+            UrlRouter router;
+            router.register_http(http_descr("/r/${a}", "old"));
+
+            /* same pattern, and a different pattern with the same stem */
+            REQUIRE_THROWS_AS(router.register_http(http_descr("/r/${a}", "new")),
+                              std::runtime_error);
+            REQUIRE_THROWS_AS(router.register_http(http_descr("/r/${b}/detail", "new")),
+                              std::runtime_error);
+
+            /* the original is untouched */
+            std::stringstream ss;
+            router.find_http("/r/1")->http_response("/r/1", &ss);
+            REQUIRE(ss.str() == "old:/r/1");
+
+            /* likewise for streams; and the http stem does not block it */
+            router.register_stream(stream_descr("/r/${a}"));
+            REQUIRE_THROWS_AS(router.register_stream(stream_descr("/r/${z}")),
+                              std::runtime_error);
+        }
+
+        TEST_CASE("url-router-unregister-then-register-replaces", "[websock][UrlRouter]")
+        {
             UrlRouter router;
             router.register_http(http_descr("/r/${a}", "old"));
 
             rp<DynamicEndpoint> old_ep = router.find_http("/r/1");
+
+            REQUIRE(router.unregister_http("/r/${a}"));
+            REQUIRE(!router.find_http("/r/1"));
 
             router.register_http(http_descr("/r/${b}", "new"));
 
@@ -183,6 +209,30 @@ namespace xo {
             old_ep->http_response("/r/1", &ss);
 
             REQUIRE(ss.str() == "old:/r/1");
+        }
+
+        TEST_CASE("url-router-unregister-needs-the-exact-pattern", "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+            router.register_http(http_descr("/r/${a}", "http"));
+            router.register_stream(stream_descr("/r/${a}"));
+
+            /* nothing there */
+            REQUIRE(!router.unregister_http("/nope"));
+            /* same stem, different pattern: not the registered endpoint */
+            REQUIRE(!router.unregister_http("/r/${b}"));
+            REQUIRE(router.find_http("/r/1"));
+
+            /* http and stream are unregistered separately */
+            REQUIRE(router.unregister_http("/r/${a}"));
+            REQUIRE(!router.find_http("/r/1"));
+            REQUIRE(router.find_stream("/r/1"));
+
+            /* a second unregister finds nothing */
+            REQUIRE(!router.unregister_http("/r/${a}"));
+
+            REQUIRE(router.unregister_stream("/r/${a}"));
+            REQUIRE(!router.find_stream("/r/1"));
         }
     } /*namespace ut*/
 } /*namespace xo*/

@@ -384,7 +384,8 @@ namespace xo {
 
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");
 
-            /* re-register: the url router lets go of the old endpoint */
+            /* replace: the url router lets go of the old endpoint */
+            REQUIRE(fx.url_router_.unregister_stream("/fw"));
             fx.url_router_.register_stream(StreamEndpointDescr(
                 "/fw",
                 [](rp<WebsocketSink> const &) { return CallbackId(2); },

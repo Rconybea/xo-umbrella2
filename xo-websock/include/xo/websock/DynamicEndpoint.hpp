@@ -55,6 +55,9 @@ namespace xo {
                                              std::move(recv_fn))));
             } /*make_stream*/
 
+            /* pattern this endpoint was registered with */
+            std::string const & uri_pattern() const { return uri_pattern_; }
+
             std::string stem() const {
                 return EndpointUtil::stem(this->uri_pattern_);
             } /*stem*/
