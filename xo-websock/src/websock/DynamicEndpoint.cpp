@@ -13,11 +13,13 @@ namespace xo {
         DynamicEndpoint::DynamicEndpoint(std::string uri_pattern,
                                          HttpEndpointFn http_fn,
                                          StreamSubscribeFn subscribe_fn,
-                                         StreamUnsubscribeFn unsubscribe_fn)
+                                         StreamUnsubscribeFn unsubscribe_fn,
+                                         StreamReceiveFn receive_fn)
             : uri_pattern_{std::move(uri_pattern)},
               http_fn_{std::move(http_fn)},
               subscribe_fn_{std::move(subscribe_fn)},
-              unsubscribe_fn_{std::move(unsubscribe_fn)}
+              unsubscribe_fn_{std::move(unsubscribe_fn)},
+              receive_fn_{std::move(receive_fn)}
         {
             std::string r_pat;
 
@@ -139,6 +141,13 @@ namespace xo {
         {
             return this->unsubscribe_fn_(id);
         } /*unsubscribe*/
+
+        void
+        DynamicEndpoint::receive(rp<WebsocketSink> const & ws_sink,
+                                 Json::Value const & msg) const
+        {
+            this->receive_fn_(ws_sink, msg);
+        } /*receive*/
     } /*namespace web*/
 } /*namespace xo*/
 

@@ -33,13 +33,11 @@ namespace xo {
             using PrintJson = xo::json::PrintJson;
 
         public:
-            WebsocketSinkImpl(rp<Webserver> const & websrv,
+            WebsocketSinkImpl(SendFn send_fn,
                               rp<PrintJson> const & pjson,
-                              uint32_t session_id,
                               std::string stream_name)
-                : websrv_{std::move(websrv)},
+                : send_fn_{std::move(send_fn)},
                   pjson_{std::move(pjson)},
-                  session_id_{session_id},
                   stream_name_{std::move(stream_name)}
                 {}
 
@@ -50,14 +48,13 @@ namespace xo {
             virtual std::string display_string() const override;
 
         private:
-            /* webserver implementation */
-            rp<Webserver> websrv_;
+            /* delivers each finished message.
+             * For a webserver-created sink this sends to a specific
+             * websocket session.
+             */
+            SendFn send_fn_;
             /* print arbitrary reflected stuff as json */
             rp<PrintJson> pjson_;
-            /* websocket session id# - events arriving at this sink
-             * will be sent only to the session identified by .session_id
-             */
-            uint32_t session_id_;
             /* name for stream.
              * this will be the vale of the "stream" tag in
              * initiating subscription message
@@ -67,7 +64,7 @@ namespace xo {
              *       xo.reactor2websock.stream_endpoint_descr(kf, "/this/stream/name"))
              */
             std::string stream_name_;
-            /* count #of events received */
+            /* count #of events received.  Also the next message's seq */
             uint32_t n_in_ev_ = 0;
         }; /*WebsocketSinkImpl*/
 
@@ -78,8 +75,11 @@ namespace xo {
 
             std::stringstream ss;
 
-            /* format message envelope */
+            /* format message envelope.  seq is 0-based: this message's seq
+             * is the count of messages sent before it
+             */
             ss << "{" << quot("stream") << ": " << quot(this->stream_name_)
+               << ", " << quot("seq") << ": " << this->n_in_ev_
                << ", " << quot("event") << ": ";
 
             /* format event as json */
@@ -92,7 +92,7 @@ namespace xo {
             ++(this->n_in_ev_);
 
             /* send event via associated websocket */
-            this->websrv_->send_text(this->session_id_, ss.str());
+            this->send_fn_(ss.str());
 
         } /*notify_ev_tp*/
 
@@ -128,7 +128,21 @@ namespace xo {
                             uint32_t session_id,
                             std::string const & stream_name)
         {
-            return new WebsocketSinkImpl(websrv, pjson, session_id, stream_name);
+            /* events arriving at this sink are sent only to session_id */
+            return make([websrv, session_id](std::string text)
+                            {
+                                websrv->send_text(session_id, std::move(text));
+                            },
+                        pjson,
+                        stream_name);
+        } /*make*/
+
+        rp<WebsocketSink>
+        WebsocketSink::make(SendFn send_fn,
+                            rp<PrintJson> const & pjson,
+                            std::string const & stream_name)
+        {
+            return new WebsocketSinkImpl(std::move(send_fn), pjson, stream_name);
         } /*make*/
     } /*namespace web*/
 } /*namespace xo*/

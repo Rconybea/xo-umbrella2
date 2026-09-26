@@ -8,6 +8,7 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/refcnt/Displayable.hpp>
 #include <cstdint>
+#include <functional>
 #include <string>
 
 namespace xo {
@@ -28,11 +29,26 @@ namespace xo {
         public:
             using PrintJson = xo::json::PrintJson;
             using TaggedPtr = xo::reflect::TaggedPtr;
+            /* delivers one finished outbound message (json text) */
+            using SendFn = std::function<void (std::string text)>;
 
         public:
+            /** sink sending to session @p session_id of @p websrv.
+             *  This is what the webserver creates per subscription.
+             **/
             static rp<WebsocketSink> make(rp<Webserver> const & websrv,
                                           rp<PrintJson> const & pjson,
                                           uint32_t session_id,
+                                          std::string const & stream_name);
+
+            /** sink handing each finished message to @p send_fn.
+             *
+             *  The webserver-backed make() above is this plus a send_fn that
+             *  calls Webserver::send_text.  Exists so the envelope -- stream,
+             *  seq, event -- can be exercised without a live webserver.
+             **/
+            static rp<WebsocketSink> make(SendFn send_fn,
+                                          rp<PrintJson> const & pjson,
                                           std::string const & stream_name);
 
             /** stream name from the subscription message that created this
@@ -41,11 +57,21 @@ namespace xo {
              **/
             virtual std::string const & stream_name() const = 0;
 
-            /** lifetime count of events delivered to this sink **/
+            /** lifetime count of events delivered to this sink.
+             *  Also the "seq" of the NEXT outbound message: seq is 0-based
+             *  and per subscription.
+             **/
             virtual uint32_t n_in_ev() const = 0;
 
             /** render @p ev_tp as json and send it to this subscription's
-             *  session
+             *  session, as
+             *  @code
+             *   {"stream": <name>,
+             *    "seq": <n>,
+             *    "event": <ev_tp as json>}
+             *  @endcode
+             *
+             *  @c seq values are consecutive, starting with 0.
              **/
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) = 0;
 

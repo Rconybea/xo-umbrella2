@@ -21,13 +21,13 @@
 #include "WebsockUtil.hpp"
 #include "WebsocketSink.hpp"
 #include "WsSafetyToken.hpp"
+#include "WsSessionRouter.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
-#include <json/json.h> // for Json::Reader,  to parse json input
 #include <condition_variable>
 #include <deque>
 #include <regex>
@@ -321,84 +321,33 @@ namespace xo {
             }; /*per_vhost_data__minimal*/
         } /*namespace*/
 
-        /* bookkeeping record for a websocket subscription. */
-        class WebsocketSubscriptionRecd {
-        public:
-            WebsocketSubscriptionRecd(std::string const & incoming_uri,
-                                      DynamicEndpoint * endpoint,
-                                      rp<WebsocketSink> const & ws_sink)
-                : incoming_uri_{incoming_uri},
-                  endpoint_{endpoint},
-                  ws_sink_{ws_sink}
-                {}
-
-            void subscribe() {
-                this->callback_id_ = this->endpoint_->subscribe(this->incoming_uri_,
-                                                                this->ws_sink_);
-            } /*subscribe*/
-
-            void unsubscribe() {
-                this->endpoint_->unsubscribe(this->callback_id_);
-            } /*unsubscribe*/
-
-        private:
-            /* original subscription url */
-            std::string incoming_uri_;
-            /* endpoint that matched .subscribe_cmd
-             * (see WebserverImpl.stream_map)
-             */
-            DynamicEndpoint * endpoint_ = nullptr;
-            /* id created when subscription established
-             * (see CallbackSetImpl.add_callback())
-             */
-            CallbackId callback_id_;
-            /* sink established to receive (& forward) events on behalf
-             * of this subscription.  application code writes to this sink.
-             */
-            rp<WebsocketSink> ws_sink_;
-        }; /*WebsocketSubscriptionRecd*/
-
         /* bookkeeping record for a websocket session.
          * WebserverImpl (below) keeps exactly one of these
          * for each active websocket session
          */
         class WebsocketSessionRecd {
         public:
-            WebsocketSessionRecd(OutputBuffer * output_buf) : output_buf_{output_buf} {
+            /* the three functions are the session's router's view of the
+             * webserver; see WsSessionRouter
+             */
+            WebsocketSessionRecd(OutputBuffer * output_buf,
+                                 WsSessionRouter::EndpointLookup lookup_fn,
+                                 WsSessionRouter::SinkFactory sink_fn,
+                                 WsSessionRouter::ReplyFn reply_fn)
+                : output_buf_{output_buf},
+                  router_{std::move(lookup_fn), std::move(sink_fn), std::move(reply_fn)}
+            {
                 assert(this->output_buf_);
             }
+
+            /* this session's subscriptions, and the commands that use them */
+            WsSessionRouter & router() { return router_; }
 
             bool is_output_busy() const {
                 return (this->output_buf_
                         && this->output_buf_->is_busy());
             }
             bool outbound_q_empty() const { return this->outbound_q_.empty(); }
-
-            void subscribe_endpoint(std::string const & incoming_cmd,
-                                    DynamicEndpoint * endpoint,
-                                    rp<WebsocketSink> const & ws_sink) {
-
-                scope log(XO_ENTER0_(info),
-                          xtag("incoming_cmd", incoming_cmd));
-
-                std::unique_ptr<WebsocketSubscriptionRecd> sub_recd_uptr
-                    (new WebsocketSubscriptionRecd(incoming_cmd,
-                                                   endpoint,
-                                                   ws_sink));
-                WebsocketSubscriptionRecd * sub_recd_addr = sub_recd_uptr.get();
-
-                {
-                    std::lock_guard<std::mutex> lock(this->mutex_);
-
-                    this->active_subscription_v_.push_back(std::move(sub_recd_uptr));
-                }
-
-                /* note: need to call with lock dropped,
-                 *       since subscribe may in principle call WebserverImpl.send_text()
-                 */
-                if (sub_recd_addr)
-                    sub_recd_addr->subscribe();
-            } /*subscribe_endpoint*/
 
             void send_text(std::string text) {
                 scope log(XO_ENTER0_(info));
@@ -513,18 +462,21 @@ namespace xo {
 
             /* threadsafe */
             void unsubscribe_all() {
-                std::lock_guard<std::mutex> lock(this->mutex_);
+                {
+                    std::lock_guard<std::mutex> lock(this->mutex_);
 
-                /* also drop .output_buf,
-                 * to short-circuit any subsequent attempts to use .lws_write_pending()
-                 * (which will happen in response to LWS_CALLBACK_EVENT_WAIT_CANCELLED
-                 *  on any session)
+                    /* drop .output_buf,
+                     * to short-circuit any subsequent attempts to use .lws_write_pending()
+                     * (which will happen in response to LWS_CALLBACK_EVENT_WAIT_CANCELLED
+                     *  on any session)
+                     */
+                    this->output_buf_ = nullptr;
+                }
+
+                /* session lock NOT held: the router runs endpoints' unsubscribe
+                 * functions, which may call back into the server
                  */
-                for (auto & sub_ptr : this->active_subscription_v_)
-                    sub_ptr->unsubscribe();
-
-                this->output_buf_ = nullptr;
-                this->active_subscription_v_.clear();
+                this->router_.unsubscribe_all();
             } /*unsubscribe_all*/
 
         private:
@@ -581,10 +533,12 @@ namespace xo {
              * .output_buf
              */
             OutputBuffer * output_buf_ = nullptr;
-            /* protects .active_subscription_v, .last_msg_seq, .outbound_q */
+            /* protects .output_buf, .last_msg_seq, .outbound_q
+             * (.router has its own lock)
+             */
             std::mutex mutex_;
-            /* active subscriptions established by this session */
-            std::vector<std::unique_ptr<WebsocketSubscriptionRecd>> active_subscription_v_;
+            /* this session's subscriptions, and inbound command handling */
+            WsSessionRouter router_;
             /* generate seq#'s for outgoing messages */
             uint32_t last_msg_seq_ = 0;
             /* when new outgoing message appears:
@@ -599,6 +553,12 @@ namespace xo {
         using EndpointMap = std::unordered_map<std::string,
                                                std::unique_ptr<DynamicEndpoint>>;
 
+        namespace {
+            /* defined below; used earlier, by each session's router */
+            DynamicEndpoint * lookup_pattern(std::string const & incoming_uri,
+                                             EndpointMap const & ep_map);
+        }
+
         /* defined in this translation unit, after WebserverImpl */
         class WebserverImplWsThread;
 
@@ -608,7 +568,6 @@ namespace xo {
                           rp<PrintJson> const & pjson)
                 : ws_config_{ws_config},
                   pjson_{pjson},
-                  readjson_{Json::CharReaderBuilder().newCharReader()},
                   interrupt_flag_{false},
                   state_{Runstate::stopped}
                 {
@@ -790,9 +749,10 @@ namespace xo {
             void dynamic_http_response(std::string const & incoming_uri,
                                        std::ostream * p_os);
 
-            /* act on incoming websocket command
-             * expecting json like
-             *   {"command": "subscribe", "stream": "uls"}
+            /* act on incoming websocket command, e.g.
+             *   {"cmd": "subscribe", "stream": "uls"}
+             *   {"cmd": "send", "stream": "uls", "msg": <any JSON>}
+             * delegates to the session's WsSessionRouter
              */
             void perform_ws_cmd(uint32_t session_id,
                                 std::string_view incoming_svw);
@@ -839,9 +799,6 @@ namespace xo {
 
             /* json printer (w/ plugins for reflected types) */
             rp<PrintJson> pjson_;
-
-            /* json reader */
-            std::unique_ptr<Json::CharReader> readjson_;
 
             /* --- 1. LWS configuration stuff (set once) ---*/
 
@@ -969,7 +926,8 @@ namespace xo {
         {
             auto endpoint = DynamicEndpoint::make_stream(endpoint_descr.uri_pattern(),
                                                          endpoint_descr.subscribe_fn(),
-                                                         endpoint_descr.unsubscribe_fn());
+                                                         endpoint_descr.unsubscribe_fn(),
+                                                         endpoint_descr.receive_fn());
 
             this->stream_map_[endpoint->stem()] = std::move(endpoint);
         } /*register_stream_endpoint*/
@@ -994,7 +952,24 @@ namespace xo {
             if (this->session_v_.size() <= new_id)
                 this->session_v_.resize(new_id + 1);
 
-            this->session_v_[new_id].reset(new WebsocketSessionRecd(output_buf));
+            this->session_v_[new_id].reset
+                (new WebsocketSessionRecd
+                 (output_buf,
+                  /* endpoint serving a stream name */
+                  [this](std::string const & stream_name)
+                      {
+                          return lookup_pattern(stream_name, this->stream_map_);
+                      },
+                  /* sink delivering to THIS session */
+                  [this, new_id](std::string const & stream_name)
+                      {
+                          return WebsocketSink::make(this, this->pjson_, new_id, stream_name);
+                      },
+                  /* reply to THIS session outside any subscription */
+                  [this, new_id](std::string text)
+                      {
+                          this->send_text(new_id, std::move(text));
+                      }));
 
             /* control comes here when a new websocket session is created,
              * after LWS_CALLBACK_HTTP_BIND_PROTOCOL
@@ -1358,67 +1333,19 @@ namespace xo {
         WebserverImpl::perform_ws_cmd(uint32_t session_id,
                                       std::string_view incoming_cmd)
         {
-            /* expecting input like:
-             *   {"command": "subscribe",
-             *    "stream": "usl"}
+            /* parsing, subscribe and send all live in WsSessionRouter,
+             * which knows nothing of libwebsockets -- see
+             * .xo-backlog/xo-websock/issues/04
              */
+            WebsocketSessionRecd * ws_recd
+                = ((session_id < this->session_v_.size())
+                   ? this->session_v_[session_id].get()
+                   : nullptr);
 
-            scope log(XO_ENTER0_(info),
-                      xtag("incoming_cmd", incoming_cmd));
+            assert(ws_recd);
 
-            Json::Value root;
-
-            JSONCPP_STRING err;
-            bool ok = this->readjson_->parse(incoming_cmd.data(),
-                                             incoming_cmd.data() + incoming_cmd.size(),
-                                             &root,
-                                             &err);
-
-            if (!ok) {
-                log && log("error: parsing failed",
-                           xtag("incoming_cmd", incoming_cmd));
-            }
-
-            //std::cout << "WebserverImpl::perform_ws_cmd :root [" << root << "]" << std::endl;
-
-            std::string cmd = root["cmd"].asString();
-
-            log && log("ws command", xtag("cmd", cmd));
-            //std::cout << "WebserverImpl::perform_ws_cmd :cmd [" << cmd << "]" << std::endl;
-
-            if (cmd == "subscribe") {
-                std::string stream_name = root["stream"].asString();
-
-                log && log("subscribe stream", xtag("stream", stream_name));
-
-                DynamicEndpoint * endpoint = lookup_pattern(stream_name,
-                                                            this->stream_map_);
-
-                if (endpoint) {
-                    log && log("endpoint found");
-
-                    /* sink to receive outbound events bound for session_id,
-                     * for stream_name
-                     */
-                    rp<WebsocketSink> ws_sink
-                        = WebsocketSink::make(this,
-                                              this->pjson_,
-                                              session_id,
-                                              stream_name);
-
-                    log && log("sink created");
-
-                    WebsocketSessionRecd * ws_recd = this->session_v_[session_id].get();
-
-                    assert(ws_recd);
-
-                    ws_recd->subscribe_endpoint(std::string(incoming_cmd),
-                                                endpoint,
-                                                ws_sink);
-                } else {
-                    log && log("endpoint not found");
-                }
-            }
+            if (ws_recd)
+                ws_recd->router().perform_cmd(incoming_cmd);
         } /*perform_ws_cmd*/
 
         void
@@ -1849,6 +1776,12 @@ namespace xo {
 
             case LWS_CALLBACK_RECEIVE:
             {
+                /* NB each callback is treated as one complete message.
+                 * libwebsockets may deliver a large message in fragments
+                 * (see lws_is_final_fragment()), which this does not
+                 * reassemble.  Commands are small enough to arrive whole;
+                 * revisit if that stops being true.
+                 */
                 char const * incoming_cmd
                     = reinterpret_cast<char const *>(input);
 

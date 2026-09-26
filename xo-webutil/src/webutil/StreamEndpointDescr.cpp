@@ -9,10 +9,12 @@ namespace xo {
     namespace web {
         StreamEndpointDescr::StreamEndpointDescr(std::string uri_pattern,
                                                  StreamSubscribeFn subscribe_fn,
-                                                 StreamUnsubscribeFn unsubscribe_fn)
+                                                 StreamUnsubscribeFn unsubscribe_fn,
+                                                 StreamReceiveFn receive_fn)
             : uri_pattern_{std::move(uri_pattern)},
               subscribe_fn_{std::move(subscribe_fn)},
-              unsubscribe_fn_{std::move(unsubscribe_fn)}
+              unsubscribe_fn_{std::move(unsubscribe_fn)},
+              receive_fn_{std::move(receive_fn)}
         {}
 
         void

@@ -1,5 +1,39 @@
-# build unittest websock/utest
+# xo-websock/utest/CMakeLists.txt
 
+# ----------------------------------------------------------------
+# unit tests
+
+set(SELF_EXE utest.websock)
+set(SELF_SRCS
+    websock_unit_main.cpp
+    WsSessionRouter.test.cpp)
+
+if (ENABLE_TESTING)
+    xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
+
+    xo_self_dependency(${SELF_EXE} websock)
+    # websock_unit_main.cpp builds an Indentlog2Appcx: PrintJson and the
+    # sink's scope logging run through indentlog2
+    xo_dependency(${SELF_EXE} xo_indentlog2)
+    # UtestAppStart/UtestListener: shared utest main
+    xo_dependency(${SELF_EXE} xo_testutil)
+    xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
+endif()
+
+# ----------------------------------------------------------------
+# kalman-era browser demo -- NOT built.
+#
+# This directory used to hold only a manual browser demo (a websocket + d3 view
+# of a live Kalman filter), which cannot build: it needs the `option' and
+# `volfit' subsystems, which do not exist in this tree.  Whether to delete it
+# or port it is .xo-backlog/xo-websock/issues/01, still undecided.
+#
+# Real unit tests arrived here on 2026-09-26 (.xo-backlog/xo-websock/issues/04).
+# To leave issue 01's decision untouched, the demo's files stay where they are
+# and its build stanza is kept verbatim below, disabled.  That is why the unit
+# tests' main is websock_unit_main.cpp: websock_utest_main.cpp is the demo's.
+#
+if(FALSE)
 set(SELF_EXE utest.websock)
 set(SELF_SRCS websock_utest_main.cpp)
 
@@ -43,5 +77,6 @@ target_link_libraries(${SELF_EXE} PUBLIC volfit)
 #  set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
 #      ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 #endif()
+endif()
 
 # end CMakeLists.txt
