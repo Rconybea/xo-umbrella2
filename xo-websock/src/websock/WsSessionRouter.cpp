@@ -4,6 +4,7 @@
  **/
 
 #include "WsSessionRouter.hpp"
+#include "UrlRouter.hpp"
 #include "DynamicEndpoint.hpp"
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -35,10 +36,10 @@ namespace xo {
             rp<WebsocketSink> sink_;
         };
 
-        WsSessionRouter::WsSessionRouter(EndpointLookup lookup_fn,
+        WsSessionRouter::WsSessionRouter(UrlRouter const & url_router,
                                          SinkFactory sink_fn,
                                          ReplyFn reply_fn)
-            : lookup_fn_{std::move(lookup_fn)},
+            : url_router_{url_router},
               sink_fn_{std::move(sink_fn)},
               reply_fn_{std::move(reply_fn)},
               readjson_{Json::CharReaderBuilder().newCharReader()}
@@ -168,7 +169,7 @@ namespace xo {
         {
             scope log(XO_ENTER0_(info), xtag("stream", stream_name));
 
-            DynamicEndpoint * endpoint = lookup_fn_(stream_name);
+            rp<DynamicEndpoint> endpoint = url_router_.find_stream(stream_name);
 
             if (!endpoint) {
                 /* was silent until issue 06; a page that subscribes to a

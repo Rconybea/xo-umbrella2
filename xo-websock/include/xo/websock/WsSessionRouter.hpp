@@ -25,6 +25,7 @@ namespace Json {
 namespace xo {
     namespace web {
         class DynamicEndpoint;
+        class UrlRouter;
 
         /** @brief one websocket session's subscriptions, and the commands
          *  that manage and use them.
@@ -58,10 +59,10 @@ namespace xo {
          *  different subscription.  See .xo-backlog/xo-websock/issues/06.
          *
          *  Knows nothing about libwebsockets.  It reaches the server only
-         *  through three injected functions -- look up an endpoint, make a
-         *  sink, send text to this session -- which is what lets it be
-         *  unit-tested with fakes.  Split out of WebserverImpl on 2026-09-26;
-         *  see .xo-backlog/xo-websock/issues/04.
+         *  through the server's UrlRouter (to find endpoints) and two injected
+         *  functions -- make a sink, send text to this session -- which is
+         *  what lets it be unit-tested without a socket.  Split out of
+         *  WebserverImpl on 2026-09-26; see .xo-backlog/xo-websock/issues/04.
          *
          *  Threading: perform_cmd() is called on the webserver's service
          *  thread.  No internal lock is held while an endpoint's subscribe,
@@ -70,8 +71,6 @@ namespace xo {
          **/
         class WsSessionRouter {
         public:
-            /** endpoint serving @p stream_name, or nullptr **/
-            using EndpointLookup = std::function<DynamicEndpoint * (std::string const & stream_name)>;
             /** new sink delivering to this session, for @p stream_name, whose
              *  envelopes carry @p sub_id
              **/
@@ -81,7 +80,10 @@ namespace xo {
             using ReplyFn = std::function<void (std::string text)>;
 
         public:
-            WsSessionRouter(EndpointLookup lookup_fn,
+            /** @p url_router is borrowed: it must outlive this router.
+             *  Endpoints are server-wide and outlive every session.
+             **/
+            WsSessionRouter(UrlRouter const & url_router,
                             SinkFactory sink_fn,
                             ReplyFn reply_fn);
             ~WsSessionRouter();
@@ -126,7 +128,8 @@ namespace xo {
                              std::uint32_t const * sub_id = nullptr);
 
         private:
-            EndpointLookup lookup_fn_;
+            /* finds the endpoint serving a stream name.  Borrowed; see ctor */
+            UrlRouter const & url_router_;
             SinkFactory sink_fn_;
             ReplyFn reply_fn_;
 

@@ -35,7 +35,6 @@
 #include <vector>
 
 namespace xo {
-    using xo::web::Alist;
     using xo::json::PrintJson;
     using xo::fn::CallbackId;
     using xo::pp::scope;
@@ -327,15 +326,16 @@ namespace xo {
          */
         class WebsocketSessionRecd {
         public:
-            /* the three functions are the session's router's view of the
-             * webserver; see WsSessionRouter
+            /* @p url_router and the two functions are the session's router's
+             * view of the webserver; see WsSessionRouter.  @p url_router is
+             * borrowed, and must outlive this session
              */
             WebsocketSessionRecd(OutputBuffer * output_buf,
-                                 WsSessionRouter::EndpointLookup lookup_fn,
+                                 UrlRouter const & url_router,
                                  WsSessionRouter::SinkFactory sink_fn,
                                  WsSessionRouter::ReplyFn reply_fn)
                 : output_buf_{output_buf},
-                  router_{std::move(lookup_fn), std::move(sink_fn), std::move(reply_fn)}
+                  router_{url_router, std::move(sink_fn), std::move(reply_fn)}
             {
                 assert(this->output_buf_);
             }
@@ -725,13 +725,6 @@ namespace xo {
                 }
             } /*init_cx_config*/
 
-            /* check for a DynamicEndpoint stored under stem;
-             * if found,  invoke it on incoming_uri to respond
-             *
-             * return.  true iff stem matched a dynamic endpoint;
-             */
-            DynamicEndpoint * lookup_dynamic_http_stem(std::string const & stem);
-
             /* write dynamic http response for incoming_uri, on *p_os
              * incoming_uri will be suffix of original uri from browser,
              * following dynamic mount point [/dyn].
@@ -856,6 +849,9 @@ namespace xo {
             /* registered http and stream endpoints, and the matching that
              * picks one for an incoming uri.  Locks internally.
              *
+             * Each session's router borrows this: declared BEFORE .session_v,
+             * so sessions are destroyed first.
+             *
              * use .register_http_endpoint(), .register_stream_endpoint()
              * to insert
              */
@@ -928,14 +924,8 @@ namespace xo {
             this->session_v_[new_id].reset
                 (new WebsocketSessionRecd
                  (output_buf,
-                  /* endpoint serving a stream name */
-                  [this](std::string const & stream_name)
-                      {
-                          /* raw pointer, as EndpointLookup requires; the
-                           * router's subscription takes its own rp<> at once
-                           */
-                          return this->url_router_.find_stream(stream_name).get();
-                      },
+                  /* endpoints serving stream names */
+                  this->url_router_,
                   /* sink delivering to THIS session */
                   [this, new_id](std::string const & stream_name, uint32_t sub_id)
                       {

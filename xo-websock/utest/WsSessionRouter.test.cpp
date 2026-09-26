@@ -2,10 +2,12 @@
  *
  *  @author Roland Conybeare, Sep 2026
  *
- *  No socket anywhere.  WsSessionRouter reaches the server only through three
- *  injected functions (find an endpoint, make a sink, reply to the session),
- *  so each case wires those to recorders and drives perform_cmd() with the
- *  exact text a browser would send.  The sink cases use the REAL sink
+ *  No socket anywhere.  WsSessionRouter reaches the server only through a
+ *  UrlRouter (find an endpoint) and two injected functions (make a sink,
+ *  reply to the session).  Each case registers endpoints on a REAL UrlRouter,
+ *  so stream names resolve by the server's own matching, wires the functions
+ *  to recorders, and drives perform_cmd() with the exact text a browser would
+ *  send.  The sink cases use the REAL sink
  *  implementation through WebsocketSink::make(send_fn, ...), whose output is
  *  the envelope a browser would receive.
  *
@@ -13,7 +15,7 @@
  **/
 
 #include "xo/websock/WsSessionRouter.hpp"
-#include "xo/websock/DynamicEndpoint.hpp"
+#include "xo/websock/UrlRouter.hpp"
 #include "xo/websock/WebsocketSink.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/reflect/Reflect.hpp>
@@ -28,7 +30,8 @@
 
 namespace xo {
     using xo::web::WsSessionRouter;
-    using xo::web::DynamicEndpoint;
+    using xo::web::UrlRouter;
+    using xo::web::StreamEndpointDescr;
     using xo::web::WebsocketSink;
     using xo::json::PrintJson;
     using xo::json::PrintJsonSingleton;
@@ -97,7 +100,8 @@ namespace xo {
             /** endpoints by stream name, plus a router over them **/
             struct Fixture {
                 Recorder rec_;
-                std::map<std::string, rp<DynamicEndpoint>> endpoint_map_;
+                /* the real server-side routing; the router borrows it */
+                UrlRouter url_router_;
 
                 /* how the router makes a sink.  FakeSink unless a case needs
                  * the real envelope
@@ -129,13 +133,11 @@ namespace xo {
                         };
                     }
 
-                    endpoint_map_[stream]
-                        = DynamicEndpoint::make_stream(stream, sub_fn, unsub_fn, recv_fn);
+                    url_router_.register_stream(StreamEndpointDescr(stream, sub_fn, unsub_fn, recv_fn));
                 }
 
                 std::unique_ptr<WsSessionRouter> make_router() {
                     Recorder * rec = &rec_;
-                    auto * epmap = &endpoint_map_;
 
                     WsSessionRouter::ReplyFn reply_fn = reply_fn_;
                     if (!reply_fn) {
@@ -145,10 +147,7 @@ namespace xo {
                     }
 
                     return std::make_unique<WsSessionRouter>(
-                        [epmap](std::string const & stream) -> DynamicEndpoint * {
-                            auto ix = epmap->find(stream);
-                            return (ix == epmap->end()) ? nullptr : ix->second.get();
-                        },
+                        url_router_,
                         sink_fn_,
                         reply_fn);
                 }
@@ -194,6 +193,34 @@ namespace xo {
             REQUIRE(fx.rec_.reply_v_[0]["stream"].asString() == "/nope");
         }
 
+        TEST_CASE("subscribe-resolves-a-stream-name-through-its-pattern", "[websock][router]")
+        {
+            /* the server's matching, not an exact-name lookup: one endpoint
+             * on a ${var} pattern serves every name under its stem, and the
+             * subscription keeps the name the client asked for
+             */
+            Fixture fx;
+            fx.add_endpoint("/fw/${id}");
+            auto router = fx.make_router();
+
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw/7"})");
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw/8"})");
+
+            REQUIRE(router->n_subscription() == 2);
+            REQUIRE(fx.rec_.errors().empty());
+            REQUIRE(fx.rec_.subscribed_v_.size() == 2);
+            REQUIRE(fx.rec_.subscribed_v_[0]->stream_name() == "/fw/7");
+            REQUIRE(fx.rec_.subscribed_v_[1]->stream_name() == "/fw/8");
+            REQUIRE(fx.rec_.reply_v_[1]["stream"].asString() == "/fw/8");
+            REQUIRE(fx.rec_.reply_v_[1]["sub_id"].asUInt() == 1);
+
+            /* outside the stem: no endpoint */
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/other/7"})");
+
+            REQUIRE(fx.rec_.errors().size() == 1);
+            REQUIRE(router->n_subscription() == 2);
+        }
+
         TEST_CASE("subscribed-reply-precedes-the-initial-frame", "[websock][router][sink]")
         {
             /* the ordering the protocol depends on: an endpoint whose subscribe
@@ -213,14 +240,13 @@ namespace xo {
                     [&wire](std::string t) { wire.push_back(std::move(t)); },
                     pjson, stream, sub_id);
             };
-            fx.endpoint_map_["/fw"]
-                = DynamicEndpoint::make_stream(
-                      "/fw",
-                      [](rp<WebsocketSink> const & sink) {
-                          sink->notify_ev_tp(Reflect::make_tp(&s_initial));
-                          return CallbackId(1);
-                      },
-                      [](CallbackId) {});
+            fx.url_router_.register_stream(StreamEndpointDescr(
+                "/fw",
+                [](rp<WebsocketSink> const & sink) {
+                    sink->notify_ev_tp(Reflect::make_tp(&s_initial));
+                    return CallbackId(1);
+                },
+                [](CallbackId) {}));
             auto router = fx.make_router();
 
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");
@@ -351,20 +377,18 @@ namespace xo {
             auto token = std::make_shared<int>(0);
             std::vector<std::string> unsub_log;
 
-            fx.endpoint_map_["/fw"]
-                = DynamicEndpoint::make_stream(
-                      "/fw",
-                      [token](rp<WebsocketSink> const &) { return CallbackId(1); },
-                      [token, &unsub_log](CallbackId) { unsub_log.push_back("old"); });
+            fx.url_router_.register_stream(StreamEndpointDescr(
+                "/fw",
+                [token](rp<WebsocketSink> const &) { return CallbackId(1); },
+                [token, &unsub_log](CallbackId) { unsub_log.push_back("old"); }));
 
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");
 
-            /* re-register: the map lets go of the old endpoint */
-            fx.endpoint_map_["/fw"]
-                = DynamicEndpoint::make_stream(
-                      "/fw",
-                      [](rp<WebsocketSink> const &) { return CallbackId(2); },
-                      [&unsub_log](CallbackId) { unsub_log.push_back("new"); });
+            /* re-register: the url router lets go of the old endpoint */
+            fx.url_router_.register_stream(StreamEndpointDescr(
+                "/fw",
+                [](rp<WebsocketSink> const &) { return CallbackId(2); },
+                [&unsub_log](CallbackId) { unsub_log.push_back("new"); }));
 
             /* ...but the subscription has not: the old endpoint is alive */
             REQUIRE(token.use_count() > 1);
@@ -447,14 +471,13 @@ namespace xo {
         TEST_CASE("a-throwing-handler-becomes-an-error-reply", "[websock][router]")
         {
             Fixture fx;
-            fx.endpoint_map_["/fw"]
-                = DynamicEndpoint::make_stream(
-                      "/fw",
-                      [](rp<WebsocketSink> const &) { return CallbackId(1); },
-                      [](CallbackId) {},
-                      [](rp<WebsocketSink> const &, Json::Value const &) {
-                          throw std::runtime_error("boom");
-                      });
+            fx.url_router_.register_stream(StreamEndpointDescr(
+                "/fw",
+                [](rp<WebsocketSink> const &) { return CallbackId(1); },
+                [](CallbackId) {},
+                [](rp<WebsocketSink> const &, Json::Value const &) {
+                    throw std::runtime_error("boom");
+                }));
             auto router = fx.make_router();
 
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");
@@ -545,14 +568,13 @@ namespace xo {
             static int s_frame = 7;
 
             for (auto stream : {"/a", "/b"}) {
-                fx.endpoint_map_[stream]
-                    = DynamicEndpoint::make_stream(
-                          stream,
-                          [](rp<WebsocketSink> const &) { return CallbackId(1); },
-                          [](CallbackId) {},
-                          [](rp<WebsocketSink> const & sink, Json::Value const &) {
-                              sink->notify_ev_tp(Reflect::make_tp(&s_frame));
-                          });
+                fx.url_router_.register_stream(StreamEndpointDescr(
+                    stream,
+                    [](rp<WebsocketSink> const &) { return CallbackId(1); },
+                    [](CallbackId) {},
+                    [](rp<WebsocketSink> const & sink, Json::Value const &) {
+                        sink->notify_ev_tp(Reflect::make_tp(&s_frame));
+                    }));
             }
             auto router = fx.make_router();
 
