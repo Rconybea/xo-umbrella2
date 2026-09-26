@@ -7,7 +7,7 @@
   xo-webutil,
 
   xo-ppsink,
-  xo-reactor,
+  xo-printjson,
 
 } :
 
@@ -28,6 +28,6 @@ stdenv.mkDerivation (finalattrs:
       libwebsockets
       jsoncpp
 
-      xo-reactor
+      xo-printjson
     ];
   })

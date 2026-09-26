@@ -8,7 +8,6 @@
   xo-ppsink,
   xo-indentlog2,
   xo-reflect,
-  xo-webutil,
   xo-printjson,
   xo-ordinaltree,
 
@@ -38,7 +37,6 @@ stdenv.mkDerivation (finalattrs:
       xo-ppsink
       xo-indentlog2
       xo-reflect
-      xo-webutil
       xo-printjson
       xo-ordinaltree
     ];
