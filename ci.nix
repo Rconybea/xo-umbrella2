@@ -77,6 +77,7 @@ in
       xo-websock
       xo-pywebsock
       xo-reactor2websock
+      xo-pyreactor2websock
       xo-statistics
       xo-distribution
       xo-pydistribution

@@ -1207,6 +1207,24 @@ jobs:
           xo-build --install xo-reactor2websock
           echo "::endgroup::"
 
+      - name: build xo-pyreactor2websock
+        run: |
+          echo "::group::xo-pyreactor2websock configure"
+          xo-build --configure --with-utests --with-examples xo-pyreactor2websock
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor2websock build"
+          xo-build --build xo-pyreactor2websock
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor2websock utest"
+          xo-build --utest xo-pyreactor2websock
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreactor2websock install"
+          xo-build --install xo-pyreactor2websock
+          echo "::endgroup::"
+
       - name: build xo-statistics
         run: |
           echo "::group::xo-statistics configure"

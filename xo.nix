@@ -92,6 +92,7 @@ let
     xo-websock        = callPackage pkgs/xo-websock.nix        { stdenv = jitStdenv; };
     xo-pywebsock      = callPackage pkgs/xo-pywebsock.nix      { stdenv = jitStdenv; };
     xo-reactor2websock   = callPackage pkgs/xo-reactor2websock.nix   { stdenv = jitStdenv; };
+    xo-pyreactor2websock = callPackage pkgs/xo-pyreactor2websock.nix { stdenv = jitStdenv; };
     xo-statistics     = callPackage pkgs/xo-statistics.nix     { stdenv = jitStdenv; };
     xo-distribution   = callPackage pkgs/xo-distribution.nix   { stdenv = jitStdenv; };
     xo-pydistribution = callPackage pkgs/xo-pydistribution.nix { stdenv = jitStdenv; };
