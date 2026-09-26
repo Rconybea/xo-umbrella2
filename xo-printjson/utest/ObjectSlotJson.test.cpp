@@ -46,12 +46,17 @@ namespace xo {
             /** throwaway representation, printable so an ObjectSlot can be
              *  built the way DObjectHandle::make_strong_ref builds one.
              *
-             *  NB being in an anonymous namespace puts "{anonymous}" in the
-             *  name TypeRegistry reports, which the assertions below spell out.
-             *  That is also the spelling two TUs would SHARE -- see
-             *  .xo-backlog/xo-facet/issues/01, where internal-linkage types are
-             *  deliberately excluded from name-keyed id allocation for exactly
-             *  that reason.
+             *  NB being in an anonymous namespace puts an internal-linkage
+             *  marker in the name TypeRegistry reports.
+             *  gcc/clang spell it differently.
+             *
+             *  @code
+             *  g++:      xo::ut::{anonymous}::DSlotProbe
+             *  clang++:  xo::ut::(anonymous namespace)::DSlotProbe
+             *  @endcode
+             *
+             *  Test assertions use expect_type_key() instead of assuming
+             *  a fixed spelling.
              **/
             struct DSlotProbe {
                 double value_;
@@ -84,7 +89,6 @@ namespace xo {
         using xo::print::APrintable;
         using xo::mm::ArenaConfig;
         using xo::mm::ArenaNameStr;
-        using xo::mm::DArena;
 
         namespace {
             void require_registered() {
@@ -141,6 +145,16 @@ namespace xo {
                 std::stringstream ss;
                 pj.print(slot, &ss);
                 return ss.str();
+            }
+
+            /** Expect to see this key when json-printing an ObjectSlot;
+             *  spelling is compiler-dependent.
+             **/
+            template <typename T>
+            std::string expect_type_key() {
+                return (std::string("\"type\": \"")
+                        + std::string(xo::reflect::type_name<T>())
+                        + '"');
             }
         }
 
@@ -202,14 +216,9 @@ namespace xo {
 
             REQUIRE(frame.find("\"typeseq\": ") != std::string::npos);
 
-#          ifdef __linux__
-            REQUIRE(frame.find("\"type\": \"xo::ut::{anonymous}::DSlotProbe\"")
-                    != std::string::npos);
-#          endif
-#          ifdef __APPLE__
-            REQUIRE(frame.find("\"type\": \"xo::ut::(anonymous namespace)::DSlotProbe\"")
-                    != std::string::npos);
-#          endif
+            INFO("expected type key: " << expect_type_key<DSlotProbe>());
+
+            REQUIRE(frame.find(expect_type_key<DSlotProbe>()) != std::string::npos);
 
             /* 16 == the arena preamble (back pointer) + one AllocHeader.  The
              * number is a consequence of storage being header-enabled, which
