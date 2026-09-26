@@ -3,10 +3,12 @@
 include(CMakeFindDependencyMacro)
 
 #
-# Libwebsockets is NOT generated: it arrives via find_package(), not
-# xo_dependency(), and xo_export_cmake_config() only knows about xo deps.
-# Any other external package this subsystem needs has to be listed here too.
+# Libwebsockets arrives via find_package().
+# xo_export_cmake_config() only knows about xo deps
+# Other external packages Libwebsockets needs must list here also
 find_dependency(Libwebsockets)
+# jsoncpp_lib is in websock's INTERFACE_LINK_LIBRARIES.
+find_dependency(jsoncpp CONFIG)
 
 @XO_FIND_DEPENDENCY_BLOCK@
 
