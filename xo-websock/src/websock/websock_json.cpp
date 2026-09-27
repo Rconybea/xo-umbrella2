@@ -5,16 +5,25 @@
  *  json printers for xo-websock's own objects, for introspection.
  *  See .xo-backlog/xo-websock/issues/10.
  *
- *  The Webserver printer reads the server through its public API.  Native
- *  printers so far: Webserver, DynamicEndpoint (5b); the session and its
- *  WsSessionSender (5c) live in Webserver.cpp, which alone sees those types
- *  (webserver_json.hpp).  A session's subscriptions are still printed from
- *  SubscriptionInfo; 5d replaces that with the subscription and its sink.
+ *  The Webserver printer reads the server through its public API.  Every
+ *  object is printed in full once, where it is owned, and elsewhere as
+ *  {"ref": id} -- so neither cycles nor shared objects reach PrintJson.
+ *
+ *    Webserver (here)
+ *     +- endpoints: DynamicEndpoint (here)
+ *     +- sessions: WsSession, and its WsSessionSender (Webserver.cpp)
+ *         +- subscriptions: Subscription (WsSessionRouter.cpp)
+ *             +- endpoint: ref
+ *             +- sink: WebsocketSink (here -> its virtual print_json)
+ *                 +- sender: ref
+ *
+ *  Types private to one file are printed there (webserver_json.hpp).
  **/
 
 #include "websock_json.hpp"
 #include "Webserver.hpp"
 #include "DynamicEndpoint.hpp"
+#include "WebsocketSink.hpp"
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/reflect/Reflect.hpp>
@@ -32,23 +41,9 @@ namespace xo {
 
     namespace web {
         namespace {
-            /** an object's identity on the page: its address, as a json
-             *  string.  Unique within one snapshot; an address may be reused
-             *  once its object is freed, so not across snapshots
-             **/
-            std::string json_id(void const * p) {
-                std::ostringstream ss;
-                ss << p;
-                return ss.str();
-            }
-
-            /* ----- temporary: Info fragments, retired as native printers
-             *       arrive (increments 5b..5d)
-             */
-
             /** @brief a registered endpoint.  Printed in full where it is
-             *  owned -- the Webserver's endpoint list; elsewhere (a
-             *  subscription, 5d) it will appear as a ref by id
+             *  owned -- the Webserver's endpoint list; a subscription shows
+             *  it as a ref by id
              **/
             class JsonPrinter_DynamicEndpoint : public JsonPrinter {
             public:
@@ -73,6 +68,21 @@ namespace xo {
                           << "}";
                 }
             }; /*JsonPrinter_DynamicEndpoint*/
+
+            /** @brief a sink, keyed on the abstract type: delegates to its
+             *  virtual print_json, so each implementation says what it holds
+             **/
+            class JsonPrinter_WebsocketSink : public JsonPrinter {
+            public:
+                JsonPrinter_WebsocketSink(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                    WebsocketSink const * sink = this->check_recover_native<WebsocketSink>(tp, p_os);
+
+                    if (sink)
+                        sink->print_json(*(this->pjson()), p_os);
+                }
+            };
 
             /** @brief Webserver, keyed on the abstract type: what a
              *  Webserver* in a reflected struct dispatches to
@@ -144,8 +154,11 @@ namespace xo {
                                    std::make_unique<JsonPrinter_Webserver>(pjson));
             pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
                                    std::make_unique<JsonPrinter_DynamicEndpoint>(pjson));
-            /* session and sender: private to Webserver.cpp, printed there */
+            pjson->provide_printer(Reflect::require<WebsocketSink>(),
+                                   std::make_unique<JsonPrinter_WebsocketSink>(pjson));
+            /* types private to one file, printed there */
             provide_webserver_json_printers(pjson);
+            provide_router_json_printers(pjson);
         }
     } /*namespace web*/
 } /*namespace xo*/

@@ -11,7 +11,13 @@
 //            endpoints: [{id, refcount, kind, stem, pattern, has_receive}],
 //            sessions: [{id, session_id,
 //                        sender: {id, refcount, session_id, open},
-//                        subscriptions: [{sub_id, stream, endpoint}]}]}.
+//                        subscriptions: [{id, sub_id, stream,
+//                                         endpoint: {ref},
+//                                         sink: {id, refcount, stream, sub_id,
+//                                                seq, sender: {ref}}}]}]}.
+//
+// Each object is printed in full once; elsewhere as {ref: id}.  The page
+// joins refs to objects by id.
 
 "use strict";
 
@@ -69,11 +75,11 @@ function layout(snap) {
     const links = [];
     const n_in = {http: 0, stream: 0};
 
-    const endpoint_id = {};   // "kind:pattern" -> node id
+    const endpoint_node = {};   // endpoint object id -> node id
 
     for (const ep of (snap.endpoints || [])) {
         const id = `${ep.kind}:${ep.stem}`;
-        endpoint_id[`${ep.kind}:${ep.pattern}`] = id;
+        endpoint_node[ep.id] = id;
         nodes.push({id: id, kind: ep.kind, label: ep.pattern, refcount: ep.refcount,
                     x: col_x[ep.kind], y: top_y + row_h * n_in[ep.kind]++});
         links.push({source: "server", target: id});
@@ -112,12 +118,18 @@ function layout(snap) {
 
         subs.forEach((sub, k) => {
             const sid = `${id}:sub:${sub.sub_id}`;
-            nodes.push({id: sid, kind: "subscription",
+            const sink = sub.sink || {};
+            // the sink's sender should be this session's: flag it if not
+            const astray = s.sender && sink.sender && sink.sender.ref !== s.sender.id;
+
+            nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
+                        refcount: sink.refcount,   // the sink's: slot + its source
                         x: x + 18, y: session_y + row_h + (k + 1) * sub_h, small: true});
             links.push({source: id, target: sid, kind: "owns"});
 
-            const ep = endpoint_id[`stream:${sub.endpoint}`];
+            // joined BY ID: the endpoint object this subscription holds
+            const ep = sub.endpoint && endpoint_node[sub.endpoint.ref];
             if (ep)
                 uses.push({source: sid, target: ep});
         });

@@ -487,7 +487,6 @@ namespace xo {
             REQUIRE(v[0]["subscriptions"].empty());
             REQUIRE(v[1]["subscriptions"].size() == 1);
             REQUIRE(v[1]["subscriptions"][0]["stream"].asString() == "/fw");
-            REQUIRE(v[1]["subscriptions"][0]["endpoint"].asString() == "/fw");
 
             std::uint64_t second_id = v[1]["session_id"].asUInt64();
 
@@ -498,6 +497,17 @@ namespace xo {
             REQUIRE(eps.size() == 1);
             REQUIRE(eps[0]["pattern"].asString() == "/fw");
             REQUIRE(eps[0]["refcount"].asUInt() == 2);
+
+            /* the edges, joined by id: the subscription's endpoint is THAT
+             * endpoint; its sink's sender is ITS session's sender.  The sink
+             * is held by the router's slot and by the endpoint's subscriber
+             * (the test's SinkBox)
+             */
+            Json::Value const & sub = v[1]["subscriptions"][0];
+
+            REQUIRE(sub["endpoint"]["ref"].asString() == eps[0]["id"].asString());
+            REQUIRE(sub["sink"]["sender"]["ref"].asString() == v[1]["sender"]["id"].asString());
+            REQUIRE(sub["sink"]["refcount"].asUInt() == 2);
 
             /* a closed session leaves the listing */
             REQUIRE(first->close(c_timeout));

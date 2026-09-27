@@ -7,12 +7,13 @@
 
 #include "WebsocketSink.hpp"
 #include "WsSender.hpp"
-#include "SubscriptionInfo.hpp"
+#include <xo/reflect/TaggedPtr.hpp>
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/callback/CallbackId.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -115,14 +116,25 @@ namespace xo {
             /** number of ACTIVE subscriptions -- unsubscribed slots excluded **/
             std::size_t n_subscription() const;
 
-            /** ACTIVE subscriptions, by sub_id; copies, taken under the lock.
-             *  For introspection
+            /** one subscription: defined in WsSessionRouter.cpp, and opaque
+             *  everywhere else.  Named here only so its json printer (in
+             *  that file) can be keyed on it
              **/
-            std::vector<SubscriptionInfo> subscriptions() const;
-
-        private:
             struct Subscription;
 
+            /** visits an ACTIVE subscription, as a TaggedPtr -- the type is
+             *  opaque; PrintJson dispatches it to the printer the websock
+             *  context installed
+             **/
+            using SubscriptionVisitor = std::function<void (xo::reflect::TaggedPtr subscription)>;
+
+            /** call @p fn on each ACTIVE subscription, by sub_id.  For
+             *  introspection.  Runs under the router's lock: @p fn must not
+             *  call back into this router (subscribe, send, unsubscribe)
+             **/
+            void visit_subscriptions(SubscriptionVisitor const & fn) const;
+
+        private:
             void subscribe(std::string const & stream_name);
             void send(std::uint32_t sub_id, Json::Value const & msg);
             void unsubscribe(std::uint32_t sub_id);

@@ -22,6 +22,7 @@
 #include <json/json.h>
 #include <iterator>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -621,34 +622,68 @@ namespace xo {
             REQUIRE(fx.rec_.received_v_.size() == 1);
         }
 
-        TEST_CASE("subscriptions-lists-the-active-ones", "[websock][router]")
+        TEST_CASE("subscriptions-print-as-json", "[websock][router][json]")
         {
+            /* what the webserver's json shows of a session's subscriptions:
+             * each printed natively, its sink in full, its endpoint and the
+             * sink's sender as refs by id (address)
+             */
+            auto id_of = [](void const * p) { std::ostringstream ss; ss << p; return ss.str(); };
+
             Fixture fx;
             fx.add_endpoint("/a");
             fx.add_endpoint("/fw/${id}");
             auto router = fx.make_router();
 
-            REQUIRE(router->subscriptions().empty());
+            /* each visited subscription, printed and parsed */
+            auto visit = [&router] {
+                std::vector<Json::Value> v;
+                router->visit_subscriptions([&v](xo::reflect::TaggedPtr sub) {
+                        std::stringstream ss;
+                        PrintJsonSingleton::instance()->print_tp(sub, &ss);
+                        v.push_back(parse(ss.str()));
+                    });
+                return v;
+            };
+
+            REQUIRE(visit().empty());
 
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/a"})");      /* sub 0 */
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw/7"})");   /* sub 1 */
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw/8"})");   /* sub 2 */
             router->perform_cmd(R"({"cmd": "unsubscribe", "sub_id": 1})");
 
-            auto v = router->subscriptions();
+            auto v = visit();
 
-            /* active only, by sub_id; the name asked for, and the serving
-             * endpoint's pattern
-             */
+            /* active only, by sub_id; the name asked for */
             REQUIRE(v.size() == 2);
-            REQUIRE(v[0].sub_id_ == 0);
-            REQUIRE(v[0].stream_name_ == "/a");
-            REQUIRE(v[0].endpoint_pattern_ == "/a");
-            REQUIRE(v[1].sub_id_ == 2);
-            REQUIRE(v[1].stream_name_ == "/fw/8");
-            REQUIRE(v[1].endpoint_pattern_ == "/fw/${id}");
-
             REQUIRE(v.size() == router->n_subscription());
+            REQUIRE(v[0]["_name_"].asString() == "Subscription");
+            REQUIRE(v[0]["sub_id"].asUInt() == 0);
+            REQUIRE(v[0]["stream"].asString() == "/a");
+            REQUIRE(v[1]["sub_id"].asUInt() == 2);
+            REQUIRE(v[1]["stream"].asString() == "/fw/8");
+
+            /* the endpoint, as a ref to the very object the url router holds */
+            REQUIRE(v[0]["endpoint"]["ref"].asString()
+                    == id_of(fx.url_router_.find_stream("/a").get()));
+            REQUIRE(v[1]["endpoint"]["ref"].asString()
+                    == id_of(fx.url_router_.find_stream("/fw/8").get()));
+
+            /* the sink, in full: the one the endpoint's subscribe was handed;
+             * held by the router's slot and by the test's recorder
+             */
+            Json::Value const & sink = v[1]["sink"];
+
+            REQUIRE(sink["_name_"].asString() == "WebsocketSink");
+            REQUIRE(sink["id"].asString() == id_of(fx.rec_.subscribed_v_[2].get()));
+            REQUIRE(sink["refcount"].asUInt() == 2);
+            REQUIRE(sink["stream"].asString() == "/fw/8");
+            REQUIRE(sink["sub_id"].asUInt() == 2);
+            REQUIRE(sink["seq"].asUInt() == 0);
+            /* its sender: the router's -- one sender per session */
+            REQUIRE(sink["sender"]["ref"].asString()
+                    == id_of(static_cast<xo::web::WsSender *>(fx.sender_.get())));
         }
 
         TEST_CASE("envelope-carries-sub-id-and-per-subscription-seq", "[websock][sink][seq]")

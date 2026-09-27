@@ -4,6 +4,7 @@
  */
 
 #include "WebsocketSink.hpp"
+#include "webserver_json.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>  /* display_string */
@@ -45,6 +46,7 @@ namespace xo {
             virtual std::string const & stream_name() const override { return stream_name_; }
             virtual uint32_t n_in_ev() const override { return n_in_ev_; }
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override;
+            virtual void print_json(PrintJson const & pjson, std::ostream * p_os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
             virtual std::string display_string() const override;
 
@@ -125,7 +127,36 @@ namespace xo {
             return tostr(rp<WebsocketSinkImpl>(self));
         }
 
+        void
+        WebsocketSinkImpl::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
+        {
+            *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
+                  << ", " << quot("id") << ": " << quot(json_id(this))
+                  /* the router's subscription slot, plus whatever the
+                   * application holds (e.g. a source it is attached to)
+                   */
+                  << ", " << quot("refcount") << ": " << this->reference_counter()
+                  << ", " << quot("stream") << ": " << quot(this->stream_name_)
+                  << ", " << quot("sub_id") << ": " << this->sub_id_
+                  /* read without a lock: a source may be sending now */
+                  << ", " << quot("seq") << ": " << this->n_in_ev_
+                  /* held, not owned: printed in full under its session */
+                  << ", " << quot("sender") << ": {" << quot("ref") << ": "
+                  << quot(json_id(this->sender_.get())) << "}"
+                  << "}";
+        } /*print_json*/
+
         // ----- WebsocketSink -----
+
+        void
+        WebsocketSink::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
+        {
+            *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
+                  << ", " << quot("id") << ": " << quot(json_id(this))
+                  << ", " << quot("refcount") << ": " << this->reference_counter()
+                  << ", " << quot("stream") << ": " << quot(this->stream_name())
+                  << "}";
+        } /*print_json*/
 
         rp<WebsocketSink>
         WebsocketSink::make(rp<WsSender> sender,

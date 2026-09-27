@@ -6,6 +6,10 @@
 #include "WsSessionRouter.hpp"
 #include "UrlRouter.hpp"
 #include "DynamicEndpoint.hpp"
+#include "webserver_json.hpp"
+#include <xo/printjson/JsonPrinter.hpp>
+#include <xo/reflect/Reflect.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* xtag(..) */
@@ -14,6 +18,11 @@
 
 namespace xo {
     using xo::fn::CallbackId;
+    using xo::json::PrintJson;
+    using xo::json::JsonPrinter;
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
+    using xo::pp::quot;
 
     namespace web {
         using xo::pp::scope;
@@ -366,24 +375,64 @@ namespace xo {
             return ended_v.size();
         } /*end_subscriptions_on*/
 
-        std::vector<SubscriptionInfo>
-        WsSessionRouter::subscriptions() const
+        void
+        WsSessionRouter::visit_subscriptions(SubscriptionVisitor const & fn) const
         {
             std::lock_guard<std::mutex> lock(this->mutex_);
 
-            std::vector<SubscriptionInfo> retval;
-
             /* index order IS sub_id order */
             for (auto const & sub : this->subscription_v_) {
-                if (sub) {
-                    retval.push_back(SubscriptionInfo{sub->sub_id_,
-                                                      sub->stream_name_,
-                                                      sub->endpoint_->uri_pattern()});
-                }
+                if (sub)
+                    fn(TaggedPtr(Reflect::require<Subscription>(), sub.get()));
             }
+        } /*visit_subscriptions*/
 
-            return retval;
-        } /*subscriptions*/
+        namespace {
+            /** @brief one subscription, printed in full by its router: its
+             *  sink in full (the router's slot is one of the sink's holders);
+             *  the endpoint as a ref -- it is printed in full in the
+             *  webserver's endpoint list
+             **/
+            class JsonPrinter_Subscription : public JsonPrinter {
+            public:
+                using Subscription = WsSessionRouter::Subscription;
+
+                JsonPrinter_Subscription(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                    Subscription const * sub = this->check_recover_native<Subscription>(tp, p_os);
+
+                    if (!sub)
+                        return;
+
+                    *p_os << "{" << quot("_name_") << ": " << quot("Subscription")
+                          << ", " << quot("id") << ": " << quot(json_id(sub))
+                          << ", " << quot("sub_id") << ": " << sub->sub_id_
+                          << ", " << quot("stream") << ": " << quot(sub->stream_name_)
+                          << ", " << quot("endpoint") << ": {" << quot("ref") << ": "
+                          << quot(json_id(sub->endpoint_.get())) << "}"
+                          << ", " << quot("sink") << ": ";
+
+                    if (sub->sink_) {
+                        this->pjson()->print_aux(TaggedPtr(Reflect::require<WebsocketSink>(),
+                                                           sub->sink_.get()),
+                                                 p_os);
+                    } else {
+                        /* in the moment between slot and sink (subscribe) */
+                        *p_os << "null";
+                    }
+
+                    *p_os << "}";
+                }
+            };
+        } /*namespace*/
+
+        void
+        provide_router_json_printers(PrintJson * pjson)
+        {
+            pjson->provide_printer(Reflect::require<WsSessionRouter::Subscription>(),
+                                   std::make_unique<JsonPrinter_Subscription>(pjson));
+        }
 
         std::size_t
         WsSessionRouter::n_subscription() const

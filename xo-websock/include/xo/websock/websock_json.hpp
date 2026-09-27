@@ -21,6 +21,9 @@ namespace xo {
          *  - DynamicEndpoint: id, refcount, kind, stem, pattern, has_receive
          *  - the session (WsSession): id, session_id, sender, subscriptions
          *  - its WsSessionSender: id, refcount, session_id, open
+         *  - a Subscription: id, sub_id, stream, endpoint (ref), sink
+         *  - WebsocketSink: via its virtual print_json -- the webserver's
+         *    sink: id, refcount, stream, sub_id, seq, sender (ref)
          *
          *  See .xo-backlog/xo-websock/issues/10.
          **/

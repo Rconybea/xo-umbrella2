@@ -1017,11 +1017,8 @@ namespace xo {
                     if (!x)
                         return;
 
-                    std::ostringstream id;
-                    id << static_cast<void const *>(x);
-
                     *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
-                          << ", " << quot("id") << ": " << quot(id.str())
+                          << ", " << quot("id") << ": " << quot(json_id(x))
                           /* session record + router + one per live sink */
                           << ", " << quot("refcount") << ": " << x->reference_counter()
                           << ", " << quot("session_id") << ": " << x->session_id()
@@ -1031,7 +1028,7 @@ namespace xo {
             };
 
             /** @brief a live session: its id, its sender (in full), and its
-             *  subscriptions -- still from SubscriptionInfo until 5d
+             *  subscriptions (in full, each with its sink)
              **/
             class JsonPrinter_WsSession : public JsonPrinter {
             public:
@@ -1044,11 +1041,8 @@ namespace xo {
                     if (!recd)
                         return;
 
-                    std::ostringstream id;
-                    id << static_cast<void const *>(recd);
-
                     *p_os << "{" << quot("_name_") << ": " << quot("WsSession")
-                          << ", " << quot("id") << ": " << quot(id.str())
+                          << ", " << quot("id") << ": " << quot(json_id(recd))
                           << ", " << quot("session_id") << ": " << recd->session_id()
                           << ", " << quot("sender") << ": ";
 
@@ -1056,20 +1050,21 @@ namespace xo {
                                                        const_cast<WsSessionSenderImpl *>(&recd->sender())),
                                              p_os);
 
-                    /* temporary: SubscriptionInfo fragments, until 5d */
+                    /* each subscription via its printer (in
+                     * WsSessionRouter.cpp), under the router's lock
+                     */
                     *p_os << ", " << quot("subscriptions") << ": [";
                     {
                         bool first = true;
-                        for (SubscriptionInfo const & sub : recd->router().subscriptions()) {
-                            if (!first)
-                                *p_os << ", ";
-                            first = false;
+                        PrintJson const * pjson = this->pjson();
 
-                            *p_os << "{" << quot("sub_id") << ": " << sub.sub_id_
-                                  << ", " << quot("stream") << ": " << quot(sub.stream_name_)
-                                  << ", " << quot("endpoint") << ": " << quot(sub.endpoint_pattern_)
-                                  << "}";
-                        }
+                        recd->router().visit_subscriptions([pjson, p_os, &first](TaggedPtr sub) {
+                                if (!first)
+                                    *p_os << ", ";
+                                first = false;
+
+                                pjson->print_aux(sub, p_os);
+                            });
                     }
                     *p_os << "]}";
                 }
