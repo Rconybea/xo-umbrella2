@@ -219,8 +219,14 @@ def main(argv=None):
     repo_root = os.path.normpath(os.path.realpath(args.repo_root))
     subsystem = args.subsystem or os.path.basename(source_dir)
 
-    with open(args.compile_commands) as f:
-        db = json.load(f)
+    # no database: cmake writes none for a project without TUs (a header-only
+    # subsystem built on its own) -- an empty map, as in the umbrella build
+    db = []
+    if os.path.exists(args.compile_commands):
+        with open(args.compile_commands) as f:
+            db = json.load(f)
+    else:
+        print(f'xo-type-src-map: note: no {args.compile_commands}: no TUs', file=sys.stderr)
 
     tus = [e for e in db
            if os.path.normpath(os.path.realpath(e['file'])).startswith(source_dir + os.sep)]

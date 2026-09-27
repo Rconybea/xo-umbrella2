@@ -33,6 +33,12 @@ if (XO_ENABLE_EXAMPLES)
 
     add_custom_target(${SELF_EXE}_page ALL DEPENDS ${PAGE_COPIES})
     add_dependencies(${SELF_EXE} ${SELF_EXE}_page)
+
+    # with -DXO_ENABLE_SOURCE_MAP=ON: the list of type -> source maps of
+    # xo-websock and everything it depends on.  The program merges them
+    # when asked (/dyn/types), so the page can link each object to the code
+    # defining its type (.xo-backlog/xo-websock/issues/12)
+    xo_type_src_map_list(${CMAKE_CURRENT_BINARY_DIR}/type-maps.json)
 endif()
 
 # end CMakeLists.txt

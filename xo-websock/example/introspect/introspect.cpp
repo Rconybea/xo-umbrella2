@@ -27,8 +27,17 @@
  *  any directory:
  *
  *    .build/xo-websock/example/introspect/websock_ex_introspect [port]
+ *                                          [--type-maps=TEMPLATE]
  *
  *  then open http://localhost:<port>/ ; Ctrl-C to stop.
+ *
+ *  Type -> source locations (.xo-backlog/xo-websock/issues/12): built with
+ *  -DXO_ENABLE_SOURCE_MAP=ON, cmake writes type-maps.json beside the
+ *  executable -- where each subsystem's map is, for xo-websock and
+ *  everything it depends on.  http://host:port/dyn/types merges them, on
+ *  every request, so a rebuilt map shows without a restart.
+ *  --type-maps=TEMPLATE overrides the locations: each subsystem's map is
+ *  TEMPLATE with {subsystem} replaced by its name.
  **/
 
 #include <xo/websock/Webserver.hpp>
@@ -52,12 +61,16 @@
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace xo {
@@ -219,6 +232,116 @@ namespace xo {
             Webserver * websrv_ = nullptr;
             Ticker * ticker_ = nullptr;
         };
+
+        /** where each subsystem's type -> source map is (xo-type-src-map,
+         *  one per subsystem); merged on request, so never stale
+         **/
+        class TypeMaps {
+        public:
+            /** from @p list_file (cmake's type-maps.json).  A non-empty
+             *  @p tmpl overrides each map's location: @p tmpl with
+             *  "{subsystem}" replaced by the subsystem's name
+             **/
+            static TypeMaps from_list(std::filesystem::path const & list_file,
+                                      std::string const & tmpl) {
+                TypeMaps retval;
+
+                std::ifstream in(list_file);
+                if (!in)
+                    return retval;
+
+                Json::Value list;
+                Json::CharReaderBuilder rb;
+                std::string errs;
+                if (!Json::parseFromStream(rb, in, &list, &errs))
+                    throw std::runtime_error("TypeMaps: cannot parse "
+                                             + list_file.string() + ": " + errs);
+
+                Json::Value const & maps = list["maps"];
+                for (auto const & name : maps.getMemberNames()) {
+                    std::string path = maps[name].asString();
+
+                    if (!tmpl.empty()) {
+                        path = tmpl;
+                        std::string::size_type p = path.find("{subsystem}");
+                        if (p != std::string::npos)
+                            path.replace(p, std::string("{subsystem}").size(), name);
+                    }
+
+                    retval.maps_.emplace_back(name, path);
+                }
+
+                return retval;
+            }
+
+            bool empty() const { return maps_.empty(); }
+
+            /** the union of the maps, as json on @p p_os.  A missing or
+             *  unreadable map is listed under "missing"; a name in two maps
+             *  at different places is left out of "types" and listed under
+             *  "conflicts" -- as xo-type-src-merge does
+             **/
+            void write_merged(std::ostream * p_os) const {
+                Json::Value types(Json::objectValue);
+                Json::Value owner(Json::objectValue);    /* name -> subsystem */
+                Json::Value conflicts(Json::objectValue);
+                Json::Value used(Json::arrayValue);
+                Json::Value missing(Json::arrayValue);
+
+                for (auto const & [name, path] : maps_) {
+                    std::ifstream in(path);
+                    Json::Value m;
+                    Json::CharReaderBuilder rb;
+                    std::string errs;
+
+                    if (!in || !Json::parseFromStream(rb, in, &m, &errs)) {
+                        missing.append(name);
+                        continue;
+                    }
+
+                    used.append(name);
+
+                    Json::Value const & mtypes = m["types"];
+                    for (auto const & tname : mtypes.getMemberNames()) {
+                        Json::Value const & loc = mtypes[tname];
+
+                        if (!types.isMember(tname)) {
+                            types[tname] = loc;
+                            owner[tname] = name;
+                        } else if (types[tname] != loc) {
+                            if (!conflicts.isMember(tname))
+                                conflicts[tname].append(located(owner[tname].asString(),
+                                                                types[tname]));
+                            conflicts[tname].append(located(name, loc));
+                        }
+                    }
+                }
+
+                for (auto const & tname : conflicts.getMemberNames())
+                    types.removeMember(tname);
+
+                Json::Value out(Json::objectValue);
+                out["format"] = "xo-type-src-map/1";
+                out["subsystems"] = used;
+                out["missing"] = missing;
+                out["types"] = types;
+                out["conflicts"] = conflicts;
+
+                Json::StreamWriterBuilder wb;
+                wb["indentation"] = "";
+                *p_os << Json::writeString(wb, out);
+            }
+
+        private:
+            static Json::Value located(std::string const & subsystem, Json::Value const & loc) {
+                Json::Value x = loc;
+                x["subsystem"] = subsystem;
+                return x;
+            }
+
+            /* (subsystem, path to its types.json) */
+            std::vector<std::pair<std::string, std::string>> maps_;
+        };
     } /*namespace web*/
 } /*namespace xo*/
 
@@ -254,7 +377,19 @@ main(int argc, char * argv[])
     using xo::web::IntrospectSnapshot;
     using xo::web::IntrospectReceiver;
 
-    std::int32_t port = (argc > 1) ? std::atoi(argv[1]) : 7681;
+    using xo::web::TypeMaps;
+
+    std::int32_t port = 7681;
+    std::string type_maps_tmpl;
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+
+        if (arg.rfind("--type-maps=", 0) == 0)
+            type_maps_tmpl = arg.substr(std::string("--type-maps=").size());
+        else
+            port = std::atoi(argv[i]);
+    }
 
     /* the subsystem stack: logging, reflection, json printing, websock.
      * Establishing the websock context installs its json printers; a
@@ -323,6 +458,21 @@ main(int argc, char * argv[])
                            [](std::string const &, Alist const & args, std::ostream * p_os)
                                {
                                    *p_os << "<html>hello, " << args.lookup("name") << "</html>";
+                               }));
+
+    /* type -> source locations: http://host:port/dyn/types */
+    auto type_maps = std::make_shared<TypeMaps>
+        (TypeMaps::from_list(exe_dir(argv[0]) / "type-maps.json", type_maps_tmpl));
+
+    if (type_maps->empty())
+        std::cerr << "introspect: no type maps (build with -DXO_ENABLE_SOURCE_MAP=ON):"
+                     " /dyn/types is empty" << std::endl;
+
+    websrv->register_http_endpoint
+        (HttpEndpointDescr("/types",
+                           [type_maps](std::string const &, Alist const &, std::ostream * p_os)
+                               {
+                                   type_maps->write_merged(p_os);
                                }));
 
     websrv->register_stream_endpoint

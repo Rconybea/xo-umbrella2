@@ -1549,6 +1549,94 @@ function(xo_type_source_map)
 endfunction()
 
 # ----------------------------------------------------------------
+# xo_type_src_map_list(<output>)
+#
+# With XO_ENABLE_SOURCE_MAP: write <output>, a json list of the type -> source
+# maps (xo_type_source_map) of this subsystem and everything it depends on,
+# directly or indirectly -- for a program to merge AT RUN TIME, so a merged
+# map is never stale.  The build's part is only the list:
+#
+#   {"format": "xo-type-src-maps/1",
+#    "maps": {"<subsystem>": "<path to its types.json>", ..}}
+#
+# The closure comes from subsystem-edges at configure time: in the umbrella
+# build, the one the umbrella configure writes (NB: at the END of that
+# configure -- so a changed dependency shows here one configure later);
+# otherwise the one installed with xo-cmake.  Paths: in the umbrella build,
+# each subsystem's build directory; otherwise the installed
+# share/<subsystem>/types.json, except this subsystem's own map, from its
+# build directory.
+#
+# The closure computation belongs in xo-top (.xo-backlog/xo-cmake/issues/07).
+# See .xo-backlog/xo-websock/issues/12.
+#
+function(xo_type_src_map_list output)
+    if (NOT XO_ENABLE_SOURCE_MAP)
+        # a list left by an earlier configure with the option on would still
+        # be read by the program
+        file(REMOVE ${output})
+        return()
+    endif()
+
+    # own lookup: a subsystem may call this (e.g. from an example subdir)
+    # BEFORE xo_export_cmake_config runs xo_type_source_map
+    find_program(XO_SOURCE_MAP_PYTHON3 NAMES python3)
+    if (NOT XO_SOURCE_MAP_PYTHON3)
+        message(WARNING "xo_type_src_map_list: python3 not found: no ${output}")
+        return()
+    endif()
+
+    get_filename_component(_subsystem ${PROJECT_SOURCE_DIR} NAME)
+    set(_merge ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/xo-type-src-merge.py)
+
+    if (XO_SUBMODULE_BUILD AND EXISTS ${XO_UMBRELLA_BINARY_DIR}/subsystem-edges)
+        set(_edges ${XO_UMBRELLA_BINARY_DIR}/subsystem-edges)
+        set(_template ${XO_UMBRELLA_BINARY_DIR}/{subsystem}/types.json)
+    else()
+        set(_edges ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../etc/xo/subsystem-edges)
+        set(_template ${CMAKE_INSTALL_FULL_DATADIR}/{subsystem}/types.json)
+    endif()
+
+    if (NOT EXISTS ${_edges})
+        message(WARNING "xo_type_src_map_list: no ${_edges}: no ${output}")
+        return()
+    endif()
+
+    execute_process(
+        COMMAND ${XO_SOURCE_MAP_PYTHON3} ${_merge} --print-closure
+                --edges ${_edges} --root ${_subsystem}
+        OUTPUT_VARIABLE _closure
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE _rc)
+    if (NOT _rc EQUAL 0)
+        message(WARNING "xo_type_src_map_list: closure of ${_subsystem} failed: no ${output}")
+        return()
+    endif()
+    string(REPLACE "\n" ";" _closure "${_closure}")
+
+    set(_body "")
+    foreach(_s ${_closure})
+        if (_s STREQUAL _subsystem)
+            set(_path ${PROJECT_BINARY_DIR}/types.json)
+        else()
+            string(REPLACE "{subsystem}" "${_s}" _path "${_template}")
+        endif()
+        if (_body)
+            string(APPEND _body ",\n")
+        endif()
+        string(APPEND _body "  \"${_s}\": \"${_path}\"")
+    endforeach()
+
+    # rewritten only when the content changes
+    file(CONFIGURE OUTPUT ${output}
+         CONTENT "{\"format\": \"xo-type-src-maps/1\",\n \"maps\": {\n${_body}\n}}\n"
+         @ONLY)
+
+    # a dependency added or dropped changes the list: re-run configure
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${_edges})
+endfunction()
+
+# ----------------------------------------------------------------
 # helper macro for xo_dependency_helper() see below
 #
 macro(xo_dependency_helper1 target visibility dep_include_subdir)

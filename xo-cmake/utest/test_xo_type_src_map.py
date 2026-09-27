@@ -222,6 +222,22 @@ class TestParseDump(unittest.TestCase):
         self.assertEqual(m.tu_flags(e),
                          ["-isystem", "/n/gcc-14/include/c++/14.3.0", "-I/r/inc"])
 
+    def test_no_compile_database_is_an_empty_map(self):
+        # a header-only subsystem built on its own has no TUs, so cmake
+        # writes no compile_commands.json.  Regression: the generator failed
+        # the build (xo-subsys, xo-allocutil, xo-callback)
+        m = _load_module()
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "types.json")
+            rc = m.main(["--compile-commands", os.path.join(d, "absent.json"),
+                         "--source-dir", d, "--repo-root", d,
+                         "--subsystem", "xo-hdronly", "--output", out])
+            self.assertEqual(rc, 0)
+            with open(out) as f:
+                got = json.load(f)
+            self.assertEqual(got["subsystem"], "xo-hdronly")
+            self.assertEqual(got["types"], {})
+
 
 if __name__ == "__main__":
     unittest.main()
