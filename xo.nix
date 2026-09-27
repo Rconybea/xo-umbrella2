@@ -89,7 +89,7 @@ let
     xo-pysimulator    = callPackage pkgs/xo-pysimulator.nix    { stdenv = jitStdenv; };
     xo-process        = callPackage pkgs/xo-process.nix        { stdenv = jitStdenv; };
     xo-pyprocess      = callPackage pkgs/xo-pyprocess.nix      { stdenv = jitStdenv; };
-    xo-websock        = callPackage pkgs/xo-websock.nix        { stdenv = jitStdenv; };
+    xo-websock        = callPackage pkgs/xo-websock.nix        { stdenv = jitStdenv;                   buildExamples = true; };
     xo-pywebsock      = callPackage pkgs/xo-pywebsock.nix      { stdenv = jitStdenv; };
     xo-reactor2websock   = callPackage pkgs/xo-reactor2websock.nix   { stdenv = jitStdenv; };
     xo-pyreactor2websock = callPackage pkgs/xo-pyreactor2websock.nix { stdenv = jitStdenv; };
