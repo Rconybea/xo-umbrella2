@@ -1529,6 +1529,15 @@ function(xo_type_source_map)
          ${PROJECT_SOURCE_DIR}/*.cpp ${PROJECT_SOURCE_DIR}/*.hpp ${PROJECT_SOURCE_DIR}/*.h)
     list(FILTER _srcs EXCLUDE REGEX "/\\.build/")
 
+    # the source SET, as a dependency: a deleted (or added) source leaves the
+    # map's other inputs no newer than it, so make would call it current.
+    # The glob re-runs configure; this list is then rewritten -- only when
+    # the set changed
+    list(SORT _srcs)
+    list(JOIN _srcs "\n" _srcs_text)
+    set(_srcs_list ${PROJECT_BINARY_DIR}/xo-type-src-map/sources.txt)
+    file(CONFIGURE OUTPUT ${_srcs_list} CONTENT "${_srcs_text}\n" @ONLY)
+
     # header TUs: one "#include <header>" per header, so a header no TU
     # includes (every header, in a header-only subsystem) still reaches the
     # dump -- the generator dumps only those the real TUs did not include.
@@ -1562,7 +1571,7 @@ function(xo_type_source_map)
                 --repo-root ${_repo_root}
                 --clang ${XO_SOURCE_MAP_CLANGXX}
                 --output ${_output}
-        DEPENDS ${_script} ${_srcs}
+        DEPENDS ${_script} ${_srcs} ${_srcs_list}
         COMMENT "type -> source map for ${_subsystem}"
         VERBATIM)
 

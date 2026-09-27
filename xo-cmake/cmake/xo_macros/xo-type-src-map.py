@@ -52,17 +52,14 @@ FORMAT = 'xo-type-src-map/1'
 
 # a dump node: tree prefix, kind, address
 NODE_RE = re.compile(r'^((?:[| ] )*[|`]-)?(\w+) (0x[0-9a-f]+)')
-# every file mentioned on a line, IN ORDER.  clang prints a location's file
-# only when it differs from the last one printed ANYWHERE -- inside the <range>,
-# or after it (a decl's name in another file than its range start) -- so every
-# mention must be followed, not just the ones after '<'
-FILE_RE = re.compile(r'(/[^:\s<>,\']+):\d+:\d+')
+# every location printed on a line, IN ORDER.  clang prints a location
+# relative to the last one it printed ANYWHERE: "/file:L:C" when the file
+# changed, "line:L:C" when only the line did, "col:C" when neither -- inside
+# the <range>, or after it (the decl's name) -- so every one must be followed
+LOC_RE = re.compile(r'(/[^:\s<>,\']+):(\d+):\d+|\bline:(\d+):\d+|\bcol:\d+')
 # record definition: "... class Foo definition"
 RECORD_DEF_RE = re.compile(r' (?:class|struct|union) (\w+) definition')
 RECORD_ANY_RE = re.compile(r' (?:class|struct|union) (\w+)')
-# location of the decl's NAME: "> line:346:15" or "> col:15" (same line as range start)
-NAMELOC_RE = re.compile(r'> (?:line:(\d+):\d+|col:\d+)')
-RANGE_START_RE = re.compile(r'<(?:/[^:>,]+:)?(?:line:)?(\d+):\d+')
 PARENT_RE = re.compile(r' parent (0x[0-9a-f]+)')
 # a quoted type string, e.g. 'std::vector<int>'
 QUOTED_RE = re.compile(r"'[^']*'")
@@ -173,6 +170,7 @@ def parse_dump(text, source_dir):
     stack = []          # (depth, name, is_function)
     base = []           # qualifier from the "Dumping" header
     cur_file = None
+    cur_line = None
 
     for line in text.splitlines():
         m = re.match(r'Dumping (.*):$', line)
@@ -188,8 +186,13 @@ def parse_dump(text, source_dir):
         # ...but not inside a quoted type string: "'.. (lambda at /x.cpp:3:5) ..'"
         # names a file without printing a location, so clang's "last file"
         # does not move
-        for f in FILE_RE.findall(QUOTED_RE.sub("''", line)):
-            cur_file = f
+        # On a decl line the LAST location is its name's, so afterwards
+        # (cur_file, cur_line) is where the name is
+        for lm in LOC_RE.finditer(QUOTED_RE.sub("''", line)):
+            if lm.group(1):
+                cur_file, cur_line = lm.group(1), int(lm.group(2))
+            elif lm.group(3):
+                cur_line = int(lm.group(3))
 
         n = NODE_RE.match(line)
         if not n:
@@ -236,12 +239,7 @@ def parse_dump(text, source_dir):
                 else:
                     qual = '::'.join(base + [s[1] for s in stack] + [name])
 
-                lm = NAMELOC_RE.search(line)
-                if lm and lm.group(1):
-                    line_no = int(lm.group(1))
-                else:
-                    rs = RANGE_START_RE.search(line)
-                    line_no = int(rs.group(1)) if rs else None
+                line_no = cur_line
 
                 if (cur_file and line_no and ANON not in qual
                         and os.path.normpath(cur_file).startswith(source_dir + os.sep)):

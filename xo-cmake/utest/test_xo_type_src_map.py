@@ -261,6 +261,29 @@ class TestParseDump(unittest.TestCase):
         found = m.parse_dump(dump, "/r/sub")
         self.assertEqual(found["xo::nested::begin"], ("/r/sub/a.hpp", 83))
 
+    def test_line_carries_over_a_column_only_location(self):
+        # clang prints only "col:N" for a location on the line it printed
+        # last.  Regression: a type defined on its namespace's line was lost
+        m = _load_module()
+        dump = "\n".join([
+            "Dumping xo::jit:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:2:16, col:64> col:26 jit",
+            "`-CXXRecordDecl 0x2 <col:32, col:61> col:39 struct ScratchProbe definition",
+        ])
+        found = m.parse_dump(dump, "/r/sub")
+        self.assertEqual(found["xo::jit::ScratchProbe"], ("/r/sub/a.hpp", 2))
+
+    def test_name_location_line_wins_over_range_start(self):
+        # "struct\nFoo": the range starts on one line, the name is on the next
+        m = _load_module()
+        dump = "\n".join([
+            "Dumping xo::sub:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, line:40:1> line:1:11 sub",
+            "`-CXXRecordDecl 0x2 <line:5:5, line:9:5> line:6:12 struct Foo definition",
+        ])
+        found = m.parse_dump(dump, "/r/sub")
+        self.assertEqual(found["xo::sub::Foo"], ("/r/sub/a.hpp", 6))
+
     def test_gcc_internal_includes_dropped(self):
         m = _load_module()
         e = {"file": "/r/x.cpp", "directory": "/r",
