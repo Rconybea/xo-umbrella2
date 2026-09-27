@@ -11,11 +11,12 @@
   # imported at module init: xo.reactor and xo.webutil
   xo-pyreactor,
   xo-pywebutil,
-  # imported, in turn, by xo.reactor (xo.printjson, xo.reflect) and by
-  # xo.reflect (xo.indentlog2)
+  # imported, in turn, by xo.reactor (xo.printjson, xo.reflect), by
+  # xo.reflect (xo.indentlog2), and by xo.indentlog2 (xo.arena)
   xo-pyprintjson,
   xo-pyreflect,
   xo-pyindentlog2,
+  xo-pyarena,
 
   doCheck ? true,
 } :
@@ -35,7 +36,7 @@ stdenv.mkDerivation (finalattrs:
     # above.  Each of those modules lives in its own store path; `xo' is a PEP
     # 420 namespace package, so python merges them -- see pkgs/xo-pyobject2.nix.
     preCheck = ''
-      export PYTHONPATH=${xo-pyreactor}/lib/python:${xo-pywebutil}/lib/python:${xo-pyprintjson}/lib/python:${xo-pyreflect}/lib/python:${xo-pyindentlog2}/lib/python
+      export PYTHONPATH=${xo-pyreactor}/lib/python:${xo-pywebutil}/lib/python:${xo-pyprintjson}/lib/python:${xo-pyreflect}/lib/python:${xo-pyindentlog2}/lib/python:${xo-pyarena}/lib/python
     '';
 
     nativeBuildInputs = [
@@ -51,5 +52,6 @@ stdenv.mkDerivation (finalattrs:
       xo-pyprintjson
       xo-pyreflect
       xo-pyindentlog2
+      xo-pyarena
     ];
   })
