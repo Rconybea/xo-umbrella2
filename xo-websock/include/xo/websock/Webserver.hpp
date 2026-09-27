@@ -3,6 +3,7 @@
 #pragma once
 
 #include "EndpointInfo.hpp"
+#include "SessionInfo.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
@@ -134,6 +135,11 @@ namespace xo {
              * copies, for introspection.  Any thread
              */
             virtual std::vector<EndpointInfo> endpoints() const = 0;
+
+            /* every live websocket session, by id; copies, for
+             * introspection.  Any thread
+             */
+            virtual std::vector<SessionInfo> sessions() const = 0;
 
             /* start thread for this webserver; idempotent */
             virtual void start_webserver() = 0;

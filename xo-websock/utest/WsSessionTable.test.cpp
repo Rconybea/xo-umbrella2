@@ -133,6 +133,21 @@ namespace xo {
 
             REQUIRE(visited == std::set<std::string>{"a", "c"});
         }
+
+        TEST_CASE("session-table-const-for-each-reads-live-sessions", "[websock][WsSessionTable]")
+        {
+            Table table;
+            open(&table, "a");
+            SessionId b = open(&table, "b");
+            table.take(b);
+
+            Table const & ctable = table;
+            std::set<std::string> visited;
+
+            ctable.for_each([&visited](FakeRecd const & r) { visited.insert(r.name_); });
+
+            REQUIRE(visited == std::set<std::string>{"a"});
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 

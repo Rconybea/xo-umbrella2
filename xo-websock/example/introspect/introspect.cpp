@@ -13,7 +13,8 @@
  *    1. the server's port and run state
  *    2. its registered endpoints -- plus two demo endpoints, so there is more
  *       than /introspect to see
- *  Later: sessions, subscriptions, and how they share objects.
+ *    3. its live websocket sessions: one per connected page
+ *  Later: subscriptions, and how they share objects.
  *
  *  The page files live in mount-origin/ beside the executable (cmake copies
  *  them there); found from the executable's own location, so this runs from
@@ -80,12 +81,30 @@ namespace xo {
             std::string pattern_;
         };
 
+        /** one live websocket session, for the page **/
+        struct IntrospectSession {
+            static void reflect_self() {
+                StructReflector<IntrospectSession> sr;
+
+                if (sr.is_incomplete()) {
+                    REFLECT_MEMBER(sr, id);
+                    REFLECT_MEMBER(sr, sender_open);
+                    REFLECT_MEMBER(sr, n_subscription);
+                }
+            }
+
+            std::uint64_t id_ = 0;
+            bool sender_open_ = false;
+            std::uint32_t n_subscription_ = 0;
+        };
+
         /** what the page is told about this server.  Plain reflected value
          *  type: PrintJson renders it as a json object.
          **/
         struct IntrospectSnapshot {
             static void reflect_self() {
                 IntrospectEndpoint::reflect_self();
+                IntrospectSession::reflect_self();
 
                 StructReflector<IntrospectSnapshot> sr;
 
@@ -93,6 +112,7 @@ namespace xo {
                     REFLECT_MEMBER(sr, listen_port);
                     REFLECT_MEMBER(sr, state);
                     REFLECT_MEMBER(sr, endpoints);
+                    REFLECT_MEMBER(sr, sessions);
                 }
             }
 
@@ -100,6 +120,8 @@ namespace xo {
             std::string state_;
             /* http then stream, each by stem */
             std::vector<IntrospectEndpoint> endpoints_;
+            /* by id */
+            std::vector<IntrospectSession> sessions_;
         };
 
         /** answers {"cmd": "send", "msg": "refresh"} with a snapshot, on the
@@ -122,6 +144,13 @@ namespace xo {
                         (IntrospectEndpoint{endpoint_kind_descr(ep.kind_),
                                             ep.stem_,
                                             ep.uri_pattern_});
+                }
+
+                for (SessionInfo const & s : websrv_->sessions()) {
+                    snap.sessions_.push_back
+                        (IntrospectSession{s.session_id_,
+                                           s.sender_open_,
+                                           s.n_subscription_});
                 }
 
                 sink->notify_ev_tp(Reflect::make_tp(&snap));

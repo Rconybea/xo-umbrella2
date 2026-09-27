@@ -32,6 +32,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <algorithm>
 #include <atomic>
 #include <condition_variable>
 #include <deque>
@@ -357,6 +358,15 @@ namespace xo {
              */
             void close_sender() { this->sender_->close(); }
 
+            /* this session, as a plain value; for introspection.  Takes the
+             * router's lock (briefly, via n_subscription)
+             */
+            SessionInfo info() const {
+                return SessionInfo{this->sender_->session_id(),
+                                   this->sender_->is_open(),
+                                   static_cast<std::uint32_t>(this->router_.n_subscription())};
+            }
+
             bool is_output_busy() const {
                 return (this->output_buf_
                         && this->output_buf_->is_busy());
@@ -614,6 +624,7 @@ namespace xo {
             virtual std::vector<EndpointInfo> endpoints() const override {
                 return this->url_router_.endpoints();
             }
+            virtual std::vector<SessionInfo> sessions() const override;
             virtual void start_webserver() override;
             virtual void interrupt_stop_webserver() override;
             virtual void stop_webserver() override;
@@ -969,6 +980,30 @@ namespace xo {
         {
             this->url_router_.register_stream(endpoint_descr);
         } /*register_stream_endpoint*/
+
+        std::vector<SessionInfo>
+        WebserverImpl::sessions() const
+        {
+            std::vector<SessionInfo> retval;
+
+            /* lock order: session table, then each router's own lock (inside
+             * n_subscription).  Nothing takes them the other way round: a
+             * router never calls out while holding its lock
+             */
+            this->session_table_.for_each([&retval](WebsocketSessionRecd const & recd)
+                {
+                    retval.push_back(recd.info());
+                });
+
+            /* the table is unordered: sort, so a listing is stable */
+            std::sort(retval.begin(), retval.end(),
+                      [](SessionInfo const & x, SessionInfo const & y)
+                          {
+                              return x.session_id_ < y.session_id_;
+                          });
+
+            return retval;
+        } /*sessions*/
 
         bool
         WebserverImpl::unregister_http_endpoint(std::string const & uri_pattern)

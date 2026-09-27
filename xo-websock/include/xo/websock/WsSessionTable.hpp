@@ -117,6 +117,15 @@ namespace xo {
                     fn(*(ix.second));
             }
 
+            /** as for_each above, read-only: @p fn gets Recd const & **/
+            template <typename Fn>
+            void for_each(Fn && fn) const {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+
+                for (auto const & ix : this->session_map_)
+                    fn(static_cast<Recd const &>(*(ix.second)));
+            }
+
             /** number of live sessions **/
             std::size_t size() const {
                 std::lock_guard<std::mutex> lock(this->mutex_);

@@ -148,6 +148,22 @@ namespace xo {
                                            new BoxReceiver(box));
             }
 
+            /** true once @p pred holds; polls, since the server's session
+             *  bookkeeping runs on its own thread with nothing to wait on
+             **/
+            template <typename Pred>
+            bool wait_until(Pred pred) {
+                auto deadline = std::chrono::steady_clock::now() + c_timeout;
+
+                while (!pred()) {
+                    if (std::chrono::steady_clock::now() > deadline)
+                        return false;
+                    std::this_thread::sleep_for(1ms);
+                }
+
+                return true;
+            }
+
             /** a started webserver on an OS-assigned port **/
             struct LiveServer {
                 LiveServer() {
@@ -404,6 +420,53 @@ namespace xo {
             REQUIRE(parse(msg_v[0])["cmd"].asString() == "subscribed");
             for (auto const & m : msg_v)
                 REQUIRE(m.find("666") == std::string::npos);
+        }
+
+        TEST_CASE("live-sessions-lists-each-connection", "[websock][live]")
+        {
+            auto box = std::make_shared<SinkBox>();
+
+            LiveServer srv;
+            srv.websrv_->register_stream_endpoint(box_descr("/fw", box));
+
+            std::int32_t port = srv.start();
+            REQUIRE(port > 0);
+
+            REQUIRE(srv.websrv_->sessions().empty());
+
+            auto first = std::make_unique<WsTestClient>(port);
+            REQUIRE(first->wait_connected(c_timeout));
+            REQUIRE(wait_until([&] { return srv.websrv_->sessions().size() == 1; }));
+
+            WsTestClient second(port);
+            REQUIRE(second.wait_connected(c_timeout));
+            REQUIRE(wait_until([&] { return srv.websrv_->sessions().size() == 2; }));
+
+            /* the second subscribes; the reply precedes the subscribe
+             * function, so wait on the sink, not the reply
+             */
+            second.send(R"({"cmd": "subscribe", "stream": "/fw"})");
+            REQUIRE(second.wait_received(1, c_timeout));
+            REQUIRE(box->wait_sink(0));
+
+            auto v = srv.websrv_->sessions();
+
+            /* by id, in connection order; distinct; both open */
+            REQUIRE(v.size() == 2);
+            REQUIRE(v[0].session_id_ < v[1].session_id_);
+            REQUIRE(v[0].sender_open_);
+            REQUIRE(v[1].sender_open_);
+            REQUIRE(v[0].n_subscription_ == 0);
+            REQUIRE(v[1].n_subscription_ == 1);
+
+            std::uint64_t second_id = v[1].session_id_;
+
+            /* a closed session leaves the listing */
+            REQUIRE(first->close(c_timeout));
+            first.reset();
+
+            REQUIRE(wait_until([&] { return srv.websrv_->sessions().size() == 1; }));
+            REQUIRE(srv.websrv_->sessions()[0].session_id_ == second_id);
         }
     } /*namespace ut*/
 } /*namespace xo*/
