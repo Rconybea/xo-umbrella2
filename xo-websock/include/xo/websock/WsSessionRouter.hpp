@@ -96,6 +96,21 @@ namespace xo {
             /** unsubscribe everything; the session is closing **/
             void unsubscribe_all();
 
+            /** end every active subscription served by @p endpoint (by
+             *  identity), because that endpoint has been removed.
+             *
+             *  For each, in sub_id order: retire the sub_id, run the
+             *  endpoint's unsubscribe, and tell the client
+             *  @code {"cmd": "unsubscribed", "sub_id": N, "reason": "endpoint removed"} @endcode
+             *  Frames already queued may still arrive; the reply marks the
+             *  end, as for a client-initiated unsubscribe.
+             *
+             *  Returns the number of subscriptions ended.
+             *  Call on the webserver's service thread, like perform_cmd().
+             *  See .xo-backlog/xo-websock/issues/07.
+             **/
+            std::size_t end_subscriptions_on(rp<DynamicEndpoint> const & endpoint);
+
             /** number of ACTIVE subscriptions -- unsubscribed slots excluded **/
             std::size_t n_subscription() const;
 

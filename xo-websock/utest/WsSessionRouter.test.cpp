@@ -29,6 +29,7 @@
 namespace xo {
     using xo::web::WsSessionRouter;
     using xo::web::UrlRouter;
+    using xo::web::DynamicEndpoint;
     using xo::web::StreamEndpointDescr;
     using xo::web::StreamReceiver;
     using xo::web::WsSender;
@@ -520,6 +521,104 @@ namespace xo {
             /* /b once, by its own unsubscribe -- not again for the retired slot */
             REQUIRE(fx.rec_.unsubscribed_v_ == std::vector<uint32_t>{2, 1, 3});
             REQUIRE(router->n_subscription() == 0);
+        }
+
+        TEST_CASE("removing-an-endpoint-ends-its-subscriptions-only", "[websock][router][removal]")
+        {
+            Fixture fx;
+            fx.add_endpoint("/a");
+            fx.add_endpoint("/b");
+            auto router = fx.make_router();
+
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/a"})");   /* sub 0, cb 1 */
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/b"})");   /* sub 1, cb 2 */
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/a"})");   /* sub 2, cb 3 */
+
+            /* what unregister will do: the router lets go at once, and the
+             * removed endpoint's subscriptions are ended
+             */
+            rp<DynamicEndpoint> removed = fx.url_router_.find_stream("/a");
+            REQUIRE(fx.url_router_.unregister_stream("/a"));
+
+            std::size_t n_reply = fx.rec_.reply_v_.size();
+
+            REQUIRE(router->end_subscriptions_on(removed) == 2);
+
+            /* the removed endpoint's unsubscribe ran once per subscription,
+             * in sub_id order; /b's did not run
+             */
+            REQUIRE(fx.rec_.unsubscribed_v_ == std::vector<uint32_t>{1, 3});
+            REQUIRE(router->n_subscription() == 1);
+
+            /* each client told, with the reason */
+            REQUIRE(fx.rec_.reply_v_.size() == n_reply + 2);
+            for (std::uint32_t k = 0; k < 2; ++k) {
+                Json::Value const & r = fx.rec_.reply_v_[n_reply + k];
+
+                REQUIRE(r["cmd"].asString() == "unsubscribed");
+                REQUIRE(r["sub_id"].asUInt() == 2 * k);
+                REQUIRE(r["reason"].asString() == "endpoint removed");
+            }
+
+            /* ended ids are retired, as for a client unsubscribe */
+            router->perform_cmd(R"({"cmd": "send", "sub_id": 0, "msg": "step"})");
+            REQUIRE(fx.rec_.errors().size() == 1);
+            REQUIRE(fx.rec_.errors()[0]["error"].asString() == "already unsubscribed");
+
+            /* /b still works */
+            router->perform_cmd(R"({"cmd": "send", "sub_id": 1, "msg": "still here"})");
+            REQUIRE(fx.rec_.received_v_.size() == 1);
+            REQUIRE(fx.rec_.received_v_[0].second.asString() == "still here");
+
+            /* a second removal finds nothing; nothing runs twice */
+            REQUIRE(router->end_subscriptions_on(removed) == 0);
+            REQUIRE(fx.rec_.unsubscribed_v_.size() == 2);
+        }
+
+        TEST_CASE("removing-an-endpoint-skips-already-ended-subscriptions", "[websock][router][removal]")
+        {
+            Fixture fx;
+            fx.add_endpoint("/a");
+            auto router = fx.make_router();
+
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/a"})");   /* sub 0, cb 1 */
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/a"})");   /* sub 1, cb 2 */
+            router->perform_cmd(R"({"cmd": "unsubscribe", "sub_id": 0})");
+
+            std::size_t n_reply = fx.rec_.reply_v_.size();
+
+            REQUIRE(router->end_subscriptions_on(fx.url_router_.find_stream("/a")) == 1);
+
+            /* sub 0's unsubscribe ran once, by the client; only sub 1 ended here */
+            REQUIRE(fx.rec_.unsubscribed_v_ == std::vector<uint32_t>{1, 2});
+            REQUIRE(fx.rec_.reply_v_.size() == n_reply + 1);
+            REQUIRE(fx.rec_.reply_v_[n_reply]["sub_id"].asUInt() == 1);
+            REQUIRE(router->n_subscription() == 0);
+        }
+
+        TEST_CASE("removing-an-old-endpoint-leaves-its-replacement", "[websock][router][removal]")
+        {
+            /* identity, not stem: an endpoint unregistered and replaced at the
+             * same stem ends only its OWN subscriptions
+             */
+            Fixture fx;
+            fx.add_endpoint("/fw");
+            auto router = fx.make_router();
+
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");   /* sub 0, cb 1, old */
+
+            rp<DynamicEndpoint> old_ep = fx.url_router_.find_stream("/fw");
+            REQUIRE(fx.url_router_.unregister_stream("/fw"));
+            fx.add_endpoint("/fw");
+
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");   /* sub 1, cb 2, new */
+
+            REQUIRE(router->end_subscriptions_on(old_ep) == 1);
+            REQUIRE(fx.rec_.unsubscribed_v_ == std::vector<uint32_t>{1});
+            REQUIRE(router->n_subscription() == 1);
+
+            router->perform_cmd(R"({"cmd": "send", "sub_id": 1, "msg": "new"})");
+            REQUIRE(fx.rec_.received_v_.size() == 1);
         }
 
         TEST_CASE("envelope-carries-sub-id-and-per-subscription-seq", "[websock][sink][seq]")

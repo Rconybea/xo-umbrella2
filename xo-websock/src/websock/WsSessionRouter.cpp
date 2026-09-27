@@ -331,6 +331,42 @@ namespace xo {
         } /*unsubscribe_all*/
 
         std::size_t
+        WsSessionRouter::end_subscriptions_on(rp<DynamicEndpoint> const & endpoint)
+        {
+            scope log(XO_ENTER0_(info));
+
+            std::vector<Subscription> ended_v;
+
+            {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+
+                for (auto & sub : this->subscription_v_) {
+                    if (sub && (sub->endpoint_.get() == endpoint.get())) {
+                        ended_v.push_back(*sub);
+                        /* retire, as for unsubscribe: never erased or reused */
+                        sub.reset();
+                    }
+                }
+            }
+
+            /* lock dropped, as for unsubscribe */
+            for (Subscription const & sub : ended_v) {
+                sub.endpoint_->unsubscribe(sub.callback_id_);
+
+                Json::Value msg(Json::objectValue);
+                msg["cmd"] = "unsubscribed";
+                msg["sub_id"] = sub.sub_id_;
+                msg["reason"] = "endpoint removed";
+
+                this->reply(msg);
+            }
+
+            log && log(xtag("n_ended", ended_v.size()));
+
+            return ended_v.size();
+        } /*end_subscriptions_on*/
+
+        std::size_t
         WsSessionRouter::n_subscription() const
         {
             std::lock_guard<std::mutex> lock(this->mutex_);
