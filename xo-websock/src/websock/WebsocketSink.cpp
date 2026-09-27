@@ -22,6 +22,30 @@ namespace xo {
     using xo::pp::xtag;
 
     namespace web {
+        namespace {
+            /* sends to one session of a webserver.
+             *
+             * Interim: one per SINK, as the std::function it replaced was, and
+             * never closed.  Issue 05 replaces it with one sender per session,
+             * owned and closed by the webserver.
+             */
+            class WebserverSessionSender : public WsSender {
+            public:
+                WebserverSessionSender(rp<Webserver> websrv, uint32_t session_id)
+                    : websrv_{std::move(websrv)}, session_id_{session_id} {}
+
+                void send_text(std::string text) override {
+                    websrv_->send_text(session_id_, std::move(text));
+                }
+
+                bool is_open() const override { return true; }
+
+            private:
+                rp<Webserver> websrv_;
+                uint32_t session_id_ = 0;
+            };
+        }
+
         /* a sink that publishes to a websocket.
          * The websocket api creates a WebsocketSink instance
          * on behalf of an incoming subscription request.
@@ -33,11 +57,11 @@ namespace xo {
             using PrintJson = xo::json::PrintJson;
 
         public:
-            WebsocketSinkImpl(SendFn send_fn,
+            WebsocketSinkImpl(rp<WsSender> sender,
                               rp<PrintJson> const & pjson,
                               std::string stream_name,
                               uint32_t sub_id)
-                : send_fn_{std::move(send_fn)},
+                : sender_{std::move(sender)},
                   pjson_{std::move(pjson)},
                   stream_name_{std::move(stream_name)},
                   sub_id_{sub_id}
@@ -54,7 +78,7 @@ namespace xo {
              * For a webserver-created sink this sends to a specific
              * websocket session.
              */
-            SendFn send_fn_;
+            rp<WsSender> sender_;
             /* print arbitrary reflected stuff as json */
             rp<PrintJson> pjson_;
             /* name for stream.
@@ -97,7 +121,7 @@ namespace xo {
             ++(this->n_in_ev_);
 
             /* send event via associated websocket */
-            this->send_fn_(ss.str());
+            this->sender_->send_text(ss.str());
 
         } /*notify_ev_tp*/
 
@@ -136,22 +160,19 @@ namespace xo {
                             uint32_t sub_id)
         {
             /* events arriving at this sink are sent only to session_id */
-            return make([websrv, session_id](std::string text)
-                            {
-                                websrv->send_text(session_id, std::move(text));
-                            },
+            return make(new WebserverSessionSender(websrv, session_id),
                         pjson,
                         stream_name,
                         sub_id);
         } /*make*/
 
         rp<WebsocketSink>
-        WebsocketSink::make(SendFn send_fn,
+        WebsocketSink::make(rp<WsSender> sender,
                             rp<PrintJson> const & pjson,
                             std::string const & stream_name,
                             uint32_t sub_id)
         {
-            return new WebsocketSinkImpl(std::move(send_fn), pjson, stream_name, sub_id);
+            return new WebsocketSinkImpl(std::move(sender), pjson, stream_name, sub_id);
         } /*make*/
     } /*namespace web*/
 } /*namespace xo*/

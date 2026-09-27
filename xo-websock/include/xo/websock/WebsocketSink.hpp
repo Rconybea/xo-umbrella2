@@ -5,10 +5,10 @@
 
 #pragma once
 
+#include "WsSender.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/refcnt/Displayable.hpp>
 #include <cstdint>
-#include <functional>
 #include <string>
 
 namespace xo {
@@ -29,8 +29,6 @@ namespace xo {
         public:
             using PrintJson = xo::json::PrintJson;
             using TaggedPtr = xo::reflect::TaggedPtr;
-            /* delivers one finished outbound message (json text) */
-            using SendFn = std::function<void (std::string text)>;
 
         public:
             /** sink sending to session @p session_id of @p websrv.
@@ -42,13 +40,13 @@ namespace xo {
                                           std::string const & stream_name,
                                           uint32_t sub_id);
 
-            /** sink handing each finished message to @p send_fn.
+            /** sink handing each finished message to @p sender.
              *
-             *  The webserver-backed make() above is this plus a send_fn that
-             *  calls Webserver::send_text.  Exists so the envelope -- stream,
-             *  sub_id, seq, event -- can be exercised without a live webserver.
+             *  The webserver-backed make() above is this plus a sender that
+             *  calls Webserver::send_text.  Also lets the envelope -- stream,
+             *  sub_id, seq, event -- be exercised without a live webserver.
              **/
-            static rp<WebsocketSink> make(SendFn send_fn,
+            static rp<WebsocketSink> make(rp<WsSender> sender,
                                           rp<PrintJson> const & pjson,
                                           std::string const & stream_name,
                                           uint32_t sub_id);

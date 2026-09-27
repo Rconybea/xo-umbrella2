@@ -8,7 +8,7 @@
  *  so stream names resolve by the server's own matching, wires the functions
  *  to recorders, and drives perform_cmd() with the exact text a browser would
  *  send.  The sink cases use the REAL sink
- *  implementation through WebsocketSink::make(send_fn, ...), whose output is
+ *  implementation through WebsocketSink::make(sender, ...), whose output is
  *  the envelope a browser would receive.
  *
  *  Expectations are OBSERVED, never predicted.
@@ -33,6 +33,7 @@ namespace xo {
     using xo::web::UrlRouter;
     using xo::web::StreamEndpointDescr;
     using xo::web::StreamReceiver;
+    using xo::web::WsSender;
     using xo::web::WebsocketSink;
     using xo::json::PrintJson;
     using xo::json::PrintJsonSingleton;
@@ -96,6 +97,17 @@ namespace xo {
                             v.push_back(r);
                     return v;
                 }
+            };
+
+            /** stands in for a websocket session: keeps each message sent,
+             *  in order
+             **/
+            class RecordingSender : public WsSender {
+            public:
+                void send_text(std::string text) override { sent_v_.push_back(std::move(text)); }
+                bool is_open() const override { return true; }
+
+                std::vector<std::string> sent_v_;
             };
 
             /** records each message into a Recorder **/
@@ -264,15 +276,15 @@ namespace xo {
              * socket in production.
              */
             rp<PrintJson> pjson = PrintJsonSingleton::instance();
-            std::vector<std::string> wire;
+            /* replies and frames share one ordered wire, as on a socket */
+            rp<RecordingSender> sender(new RecordingSender());
+            std::vector<std::string> const & wire = sender->sent_v_;
             static int s_initial = 11;
 
             Fixture fx;
-            fx.reply_fn_ = [&wire](std::string t) { wire.push_back(std::move(t)); };
-            fx.sink_fn_ = [pjson, &wire](std::string const & stream, uint32_t sub_id) {
-                return WebsocketSink::make(
-                    [&wire](std::string t) { wire.push_back(std::move(t)); },
-                    pjson, stream, sub_id);
+            fx.reply_fn_ = [sender](std::string t) { sender->send_text(std::move(t)); };
+            fx.sink_fn_ = [pjson, sender](std::string const & stream, uint32_t sub_id) {
+                return WebsocketSink::make(sender, pjson, stream, sub_id);
             };
             fx.url_router_.register_stream(StreamEndpointDescr(
                 "/fw",
@@ -547,13 +559,13 @@ namespace xo {
              */
             rp<PrintJson> pjson = PrintJsonSingleton::instance();
 
-            std::vector<std::string> out_a;
-            std::vector<std::string> out_b;
+            rp<RecordingSender> sender_a(new RecordingSender());
+            rp<RecordingSender> sender_b(new RecordingSender());
+            std::vector<std::string> const & out_a = sender_a->sent_v_;
+            std::vector<std::string> const & out_b = sender_b->sent_v_;
 
-            rp<WebsocketSink> a = WebsocketSink::make(
-                [&out_a](std::string t) { out_a.push_back(std::move(t)); }, pjson, "/a", 4);
-            rp<WebsocketSink> b = WebsocketSink::make(
-                [&out_b](std::string t) { out_b.push_back(std::move(t)); }, pjson, "/b", 7);
+            rp<WebsocketSink> a = WebsocketSink::make(sender_a, pjson, "/a", 4);
+            rp<WebsocketSink> b = WebsocketSink::make(sender_b, pjson, "/b", 7);
 
             int ev = 42;
 
@@ -589,13 +601,14 @@ namespace xo {
              * that subscription's outbox only
              */
             rp<PrintJson> pjson = PrintJsonSingleton::instance();
-            std::map<std::string, std::vector<std::string>> outbox;
+            /* one sender per stream, so each outbox shows what reached it */
+            std::map<std::string, rp<RecordingSender>> sender_map;
+            for (auto stream : {"/a", "/b"})
+                sender_map[stream] = new RecordingSender();
 
             Fixture fx;
-            fx.sink_fn_ = [pjson, &outbox](std::string const & stream, uint32_t sub_id) {
-                return WebsocketSink::make(
-                    [&outbox, stream](std::string t) { outbox[stream].push_back(std::move(t)); },
-                    pjson, stream, sub_id);
+            fx.sink_fn_ = [pjson, &sender_map](std::string const & stream, uint32_t sub_id) {
+                return WebsocketSink::make(sender_map.at(stream), pjson, stream, sub_id);
             };
 
             static int s_frame = 7;
@@ -614,12 +627,15 @@ namespace xo {
             router->perform_cmd(R"({"cmd": "send", "sub_id": 1, "msg": "step"})");
             router->perform_cmd(R"({"cmd": "send", "sub_id": 1, "msg": "step"})");
 
-            REQUIRE(outbox["/a"].empty());
-            REQUIRE(outbox["/b"].size() == 2);
-            REQUIRE(parse(outbox["/b"][0])["sub_id"].asUInt() == 1);
-            REQUIRE(parse(outbox["/b"][0])["seq"].asInt() == 0);
-            REQUIRE(parse(outbox["/b"][1])["seq"].asInt() == 1);
-            REQUIRE(parse(outbox["/b"][1])["event"].asInt() == 7);
+            std::vector<std::string> const & outbox_a = sender_map["/a"]->sent_v_;
+            std::vector<std::string> const & outbox_b = sender_map["/b"]->sent_v_;
+
+            REQUIRE(outbox_a.empty());
+            REQUIRE(outbox_b.size() == 2);
+            REQUIRE(parse(outbox_b[0])["sub_id"].asUInt() == 1);
+            REQUIRE(parse(outbox_b[0])["seq"].asInt() == 0);
+            REQUIRE(parse(outbox_b[1])["seq"].asInt() == 1);
+            REQUIRE(parse(outbox_b[1])["event"].asInt() == 7);
         }
     } /*namespace ut*/
 } /*namespace xo*/
