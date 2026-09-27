@@ -9,6 +9,7 @@
 #include <xo/facet/obj.hpp>
 #include <cassert>
 #include <exception>
+#include <iostream>
 
 namespace xo {
     namespace mm {

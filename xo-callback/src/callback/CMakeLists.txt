@@ -9,6 +9,6 @@ xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 # ----------------------------------------------------------------
 # external dependencies:
 
-#xo_dependency(${SELF_LIB} refcnt)
+xo_headeronly_dependency(${SELF_LIB} refcnt)
 
 # end CMakeLists.txt

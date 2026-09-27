@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CallbackSetImpl.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 
 namespace xo {
     namespace fn {

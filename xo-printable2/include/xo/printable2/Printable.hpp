@@ -19,6 +19,5 @@
 #include "detail/RPrintable.hpp"
 
 #include "detail/pretty_Printable.hpp"
-#include <xo/alloc2/Allocator.hpp>
 
 /* end Printable.hpp */
