@@ -7,6 +7,7 @@
 
 #include "WebsocketSink.hpp"
 #include "WsSender.hpp"
+#include "SessionInfo.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/callback/CallbackId.hpp>
@@ -113,6 +114,11 @@ namespace xo {
 
             /** number of ACTIVE subscriptions -- unsubscribed slots excluded **/
             std::size_t n_subscription() const;
+
+            /** ACTIVE subscriptions, by sub_id; copies, taken under the lock.
+             *  For introspection
+             **/
+            std::vector<SubscriptionInfo> subscriptions() const;
 
         private:
             struct Subscription;

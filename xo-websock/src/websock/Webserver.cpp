@@ -25,6 +25,7 @@
 #include "WsSender.hpp"
 #include "WsSessionSender.hpp"
 #include "WsSessionTable.hpp"
+#include "websock_json.hpp"
 #include "WsSessionRouter.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
@@ -359,12 +360,12 @@ namespace xo {
             void close_sender() { this->sender_->close(); }
 
             /* this session, as a plain value; for introspection.  Takes the
-             * router's lock (briefly, via n_subscription)
+             * router's lock (briefly, via subscriptions)
              */
             SessionInfo info() const {
                 return SessionInfo{this->sender_->session_id(),
                                    this->sender_->is_open(),
-                                   static_cast<std::uint32_t>(this->router_.n_subscription())};
+                                   this->router_.subscriptions()};
             }
 
             bool is_output_busy() const {
@@ -1999,6 +2000,10 @@ namespace xo {
         rp<Webserver>
         Webserver::make(WebserverConfig const & ws_config,
                         rp<PrintJson> const & pjson) {
+            /* so pjson can print this server's own objects (introspection) */
+            if (pjson)
+                provide_websock_json_printers(pjson.get());
+
             return WebserverImplWsThread::make(ws_config, pjson);
         } /*make*/
 

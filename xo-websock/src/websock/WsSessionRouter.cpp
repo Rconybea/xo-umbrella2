@@ -366,6 +366,25 @@ namespace xo {
             return ended_v.size();
         } /*end_subscriptions_on*/
 
+        std::vector<SubscriptionInfo>
+        WsSessionRouter::subscriptions() const
+        {
+            std::lock_guard<std::mutex> lock(this->mutex_);
+
+            std::vector<SubscriptionInfo> retval;
+
+            /* index order IS sub_id order */
+            for (auto const & sub : this->subscription_v_) {
+                if (sub) {
+                    retval.push_back(SubscriptionInfo{sub->sub_id_,
+                                                      sub->stream_name_,
+                                                      sub->endpoint_->uri_pattern()});
+                }
+            }
+
+            return retval;
+        } /*subscriptions*/
+
         std::size_t
         WsSessionRouter::n_subscription() const
         {

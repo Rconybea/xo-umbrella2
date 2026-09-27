@@ -4,11 +4,13 @@
 //   -> {"cmd": "subscribe", "stream": "/introspect"}
 //   <- {"cmd": "subscribed", "stream": "/introspect", "sub_id": N}
 //   -> {"cmd": "send", "sub_id": N, "msg": "refresh"}
-//   <- {"stream": "/introspect", "sub_id": N, "seq": k, "event": <snapshot>}
+//   <- {"stream": "/introspect", "sub_id": N, "seq": k,
+//       "event": {"server": <Webserver json>}}
 //
-// Snapshot: {listen_port, state,
+// Webserver json: {id, refcount, listen_port, state,
 //            endpoints: [{kind, stem, pattern}],
-//            sessions: [{id, sender_open, n_subscription}]}.
+//            sessions: [{id, sender_open,
+//                        subscriptions: [{sub_id, stream, endpoint}]}]}.
 
 "use strict";
 
@@ -42,7 +44,7 @@ ws.onmessage = (ev) => {
         status_el.textContent = `error: ${msg.error}`;
     } else if ("event" in msg) {
         raw_el.textContent = JSON.stringify(msg, null, 2);
-        draw(msg.event);
+        draw(msg.event.server);
     }
 };
 
@@ -55,7 +57,8 @@ refresh_btn.onclick = refresh;
 
 // layout: server in the middle, http endpoints to its left, stream endpoints
 // to its right -- so no link passes behind another box.  Sessions in a row
-// beneath all of it, linked up to the server
+// beneath all of it, linked up to the server; each session's subscriptions
+// stacked under it, each with a curved "uses" link to its stream endpoint
 const col_x = {http: 30, server: 330, stream: 640};
 const row_h = 58;
 const top_y = 40;
@@ -65,8 +68,11 @@ function layout(snap) {
     const links = [];
     const n_in = {http: 0, stream: 0};
 
+    const endpoint_id = {};   // "kind:pattern" -> node id
+
     for (const ep of (snap.endpoints || [])) {
         const id = `${ep.kind}:${ep.stem}`;
+        endpoint_id[`${ep.kind}:${ep.pattern}`] = id;
         nodes.push({id: id, kind: ep.kind, label: ep.pattern,
                     x: col_x[ep.kind], y: top_y + row_h * n_in[ep.kind]++});
         links.push({source: "server", target: id});
@@ -78,25 +84,46 @@ function layout(snap) {
                    label: `Webserver :${snap.listen_port} (${snap.state})`,
                    x: col_x.server, y: top_y + row_h * (n_rows - 1) / 2});
 
-    // sessions: one row, below the endpoint columns
+    // sessions: one row, below the endpoint columns; subscriptions under each
     const session_y = top_y + row_h * n_rows + 50;
+    const sub_h = 44;
+    const uses = [];   // subscription -> endpoint
+    let n_sub_max = 0;
+
     (snap.sessions || []).forEach((s, i) => {
         const id = `session:${s.id}`;
-        const subs = `${s.n_subscription} sub${s.n_subscription === 1 ? "" : "s"}`;
+        const x = col_x.http + i * 240;
+        const subs = s.subscriptions || [];
+
         nodes.push({id: id, kind: s.sender_open ? "session" : "session closed",
-                    label: `session ${s.id} · ${subs}`,
-                    x: col_x.http + i * 210, y: session_y});
+                    label: `session ${s.id}`, x: x, y: session_y});
         links.push({source: "server", target: id});
+
+        subs.forEach((sub, k) => {
+            const sid = `${id}:sub:${sub.sub_id}`;
+            nodes.push({id: sid, kind: "subscription",
+                        label: `sub ${sub.sub_id} · ${sub.stream}`,
+                        x: x + 18, y: session_y + row_h + k * sub_h, small: true});
+            links.push({source: id, target: sid, kind: "owns"});
+
+            const ep = endpoint_id[`stream:${sub.endpoint}`];
+            if (ep)
+                uses.push({source: sid, target: ep});
+        });
+
+        n_sub_max = Math.max(n_sub_max, subs.length);
     });
 
     const n_session = (snap.sessions || []).length;
-    const height = (n_session > 0 ? session_y + row_h : top_y + row_h * n_rows) + 20;
+    const height = (n_session > 0
+                    ? session_y + row_h + n_sub_max * sub_h
+                    : top_y + row_h * n_rows) + 20;
 
-    return {nodes, links, height};
+    return {nodes, links, uses, height};
 }
 
 function draw(snap) {
-    const {nodes, links, height} = layout(snap);
+    const {nodes, links, uses, height} = layout(snap);
     const by_id = new Map(nodes.map(d => [d.id, d]));
     const box_h = 40;
 
@@ -105,6 +132,7 @@ function draw(snap) {
     // two fixed layers, links under boxes -- new elements go into their
     // layer, so a refresh cannot paint a line over a box
     const link_layer = svg.selectAll("g.links").data([0]).join("g").attr("class", "links");
+    const uses_layer = svg.selectAll("g.uses").data([0]).join("g").attr("class", "uses");
     const node_layer = svg.selectAll("g.nodes").data([0]).join("g").attr("class", "nodes");
 
     // headings
@@ -121,7 +149,7 @@ function draw(snap) {
         .text(d => d[0]);
 
     link_layer.selectAll("line.link")
-        .data(links, d => d.target)
+        .data(links, d => `${d.source}>${d.target}`)
         .join("line")
         .attr("class", "link");
 
@@ -141,8 +169,10 @@ function draw(snap) {
     // size each box to its label; remember widths for the links
     node.each(function (d) {
         const g = d3.select(this);
+        d.h = d.small ? 30 : box_h;
+        g.select("text").attr("y", d.small ? 20 : 25);
         d.w = g.select("text").node().getComputedTextLength() + 24;
-        g.select("rect").attr("width", d.w).attr("height", box_h);
+        g.select("rect").attr("width", d.w).attr("height", d.h);
     });
 
     // server's facing edge -> endpoint's facing edge
@@ -152,7 +182,11 @@ function draw(snap) {
             const tgt = by_id.get(d.target);
             const line = d3.select(this);
 
-            if (tgt.y > src.y + box_h) {
+            if (d.kind === "owns") {
+                /* session -> its subscription: down its left side */
+                line.attr("x1", src.x + 9).attr("y1", src.y + src.h)
+                    .attr("x2", src.x + 9).attr("y2", tgt.y + tgt.h / 2);
+            } else if (tgt.y > src.y + box_h) {
                 /* a session, below: server's bottom edge -> session's top */
                 line.attr("x1", src.x + src.w / 2).attr("y1", src.y + box_h)
                     .attr("x2", tgt.x + tgt.w / 2).attr("y2", tgt.y);
@@ -164,5 +198,20 @@ function draw(snap) {
                     .attr("x2", left ? tgt.x + tgt.w : tgt.x)
                     .attr("y2", tgt.y + box_h / 2);
             }
+        });
+
+    // subscription -> the stream endpoint it uses: a curve up and over,
+    // into the endpoint's left edge
+    uses_layer.selectAll("path.uses")
+        .data(uses, d => d.source)
+        .join("path")
+        .attr("class", "uses")
+        .attr("d", d => {
+            const src = by_id.get(d.source);
+            const tgt = by_id.get(d.target);
+            const x1 = src.x + src.w, y1 = src.y + src.h / 2;
+            const x2 = tgt.x,         y2 = tgt.y + tgt.h / 2;
+            const dx = Math.max(60, (x2 - x1) / 2);
+            return `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
         });
 }

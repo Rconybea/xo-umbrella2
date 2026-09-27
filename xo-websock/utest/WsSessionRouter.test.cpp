@@ -621,6 +621,36 @@ namespace xo {
             REQUIRE(fx.rec_.received_v_.size() == 1);
         }
 
+        TEST_CASE("subscriptions-lists-the-active-ones", "[websock][router]")
+        {
+            Fixture fx;
+            fx.add_endpoint("/a");
+            fx.add_endpoint("/fw/${id}");
+            auto router = fx.make_router();
+
+            REQUIRE(router->subscriptions().empty());
+
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/a"})");      /* sub 0 */
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw/7"})");   /* sub 1 */
+            router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw/8"})");   /* sub 2 */
+            router->perform_cmd(R"({"cmd": "unsubscribe", "sub_id": 1})");
+
+            auto v = router->subscriptions();
+
+            /* active only, by sub_id; the name asked for, and the serving
+             * endpoint's pattern
+             */
+            REQUIRE(v.size() == 2);
+            REQUIRE(v[0].sub_id_ == 0);
+            REQUIRE(v[0].stream_name_ == "/a");
+            REQUIRE(v[0].endpoint_pattern_ == "/a");
+            REQUIRE(v[1].sub_id_ == 2);
+            REQUIRE(v[1].stream_name_ == "/fw/8");
+            REQUIRE(v[1].endpoint_pattern_ == "/fw/${id}");
+
+            REQUIRE(v.size() == router->n_subscription());
+        }
+
         TEST_CASE("envelope-carries-sub-id-and-per-subscription-seq", "[websock][sink][seq]")
         {
             /* the real sink, handing its finished messages to a recorder: the

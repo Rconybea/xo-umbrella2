@@ -13,7 +13,11 @@
 #include "xo/websock/Webserver.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <catch2/catch.hpp>
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/StructReflector.hpp>
 #include <json/json.h>
+#include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -27,9 +31,38 @@ namespace xo {
     using xo::web::Runstate;
     using xo::json::PrintJsonSingleton;
     using xo::fn::CallbackId;
+    using xo::reflect::Reflect;
+    using xo::reflect::StructReflector;
 
     namespace ut {
         namespace {
+            /** what the introspect example sends: a reflected struct holding
+             *  a Webserver*.  PrintJson follows the pointer to the Webserver
+             *  printer (xo/websock/websock_json.hpp)
+             **/
+            struct HoldsServer {
+                static void reflect_self() {
+                    StructReflector<HoldsServer> sr;
+
+                    if (sr.is_incomplete())
+                        REFLECT_MEMBER(sr, server);
+                }
+
+                Webserver * server_ = nullptr;
+            };
+
+            Json::Value parse_json(std::string const & text) {
+                Json::Value root;
+                JSONCPP_STRING err;
+                std::unique_ptr<Json::CharReader> rd(Json::CharReaderBuilder().newCharReader());
+
+                bool ok = rd->parse(text.data(), text.data() + text.size(), &root, &err);
+
+                INFO("text: " << text << " err: " << err);
+                REQUIRE(ok);
+
+                return root;
+            }
             rp<Webserver> make_idle_server() {
                 /* port never bound: start_webserver() is not called */
                 return Webserver::make(WebserverConfig(), PrintJsonSingleton::instance());
@@ -100,6 +133,42 @@ namespace xo {
 
             REQUIRE(websrv->unregister_stream_endpoint("/fw/${id}"));
             REQUIRE(websrv->endpoints().size() == 1);
+        }
+
+        TEST_CASE("webserver-prints-as-json", "[websock][Webserver][json]")
+        {
+            HoldsServer::reflect_self();
+
+            rp<Webserver> websrv = make_idle_server();
+            websrv->register_http_endpoint(http_descr("/status"));
+            websrv->register_stream_endpoint(stream_descr("/fw/${id}"));
+
+            HoldsServer holder;
+            holder.server_ = websrv.get();
+
+            std::stringstream ss;
+            PrintJsonSingleton::instance()->print(holder, &ss);
+
+            Json::Value root = parse_json(ss.str());
+            Json::Value const & srv = root["server"];
+
+            INFO("json: " << ss.str());
+            REQUIRE(srv["_name_"].asString() == "Webserver");
+            REQUIRE(srv["id"].isString());
+            REQUIRE(srv["refcount"].asUInt() >= 1);
+            REQUIRE(srv["listen_port"].asInt() == 0);
+            REQUIRE(srv["state"].asString() == "stopped");
+
+            Json::Value const & eps = srv["endpoints"];
+            REQUIRE(eps.size() == 2);
+            REQUIRE(eps[0]["kind"].asString() == "http");
+            REQUIRE(eps[0]["pattern"].asString() == "/status");
+            REQUIRE(eps[1]["kind"].asString() == "stream");
+            REQUIRE(eps[1]["stem"].asString() == "/fw/");
+            REQUIRE(eps[1]["pattern"].asString() == "/fw/${id}");
+
+            REQUIRE(srv["sessions"].isArray());
+            REQUIRE(srv["sessions"].empty());
         }
     } /*namespace ut*/
 } /*namespace xo*/

@@ -14,7 +14,11 @@
  *    2. its registered endpoints -- plus two demo endpoints, so there is more
  *       than /introspect to see
  *    3. its live websocket sessions: one per connected page
- *  Later: subscriptions, and how they share objects.
+ *    4. each session's subscriptions -- /demo/${id} is now a ticker, so a
+ *       subscription to it has traffic
+ *    5a. the snapshot is the server itself, printed by xo-websock's
+ *       Webserver json printer rather than assembled here
+ *  Later: how they share objects.
  *
  *  The page files live in mount-origin/ beside the executable (cmake copies
  *  them there); found from the executable's own location, so this runs from
@@ -44,6 +48,8 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <map>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -62,66 +68,68 @@ namespace xo {
     using xo::fn::CallbackId;
 
     namespace web {
-        /** one registered endpoint, for the page.  EndpointInfo with its
-         *  kind as text (the enum is not reflected)
-         **/
-        struct IntrospectEndpoint {
-            static void reflect_self() {
-                StructReflector<IntrospectEndpoint> sr;
-
-                if (sr.is_incomplete()) {
-                    REFLECT_MEMBER(sr, kind);
-                    REFLECT_MEMBER(sr, stem);
-                    REFLECT_MEMBER(sr, pattern);
-                }
-            }
-
-            std::string kind_;
-            std::string stem_;
-            std::string pattern_;
-        };
-
-        /** one live websocket session, for the page **/
-        struct IntrospectSession {
-            static void reflect_self() {
-                StructReflector<IntrospectSession> sr;
-
-                if (sr.is_incomplete()) {
-                    REFLECT_MEMBER(sr, id);
-                    REFLECT_MEMBER(sr, sender_open);
-                    REFLECT_MEMBER(sr, n_subscription);
-                }
-            }
-
-            std::uint64_t id_ = 0;
-            bool sender_open_ = false;
-            std::uint32_t n_subscription_ = 0;
-        };
-
-        /** what the page is told about this server.  Plain reflected value
-         *  type: PrintJson renders it as a json object.
+        /** what the page is told: the server itself.  PrintJson follows the
+         *  pointer to the Webserver json printer (xo/websock/websock_json.hpp),
+         *  which Webserver::make installed.  A struct, so later increments can
+         *  add the application's own objects beside it
          **/
         struct IntrospectSnapshot {
             static void reflect_self() {
-                IntrospectEndpoint::reflect_self();
-                IntrospectSession::reflect_self();
-
                 StructReflector<IntrospectSnapshot> sr;
 
-                if (sr.is_incomplete()) {
-                    REFLECT_MEMBER(sr, listen_port);
-                    REFLECT_MEMBER(sr, state);
-                    REFLECT_MEMBER(sr, endpoints);
-                    REFLECT_MEMBER(sr, sessions);
-                }
+                if (sr.is_incomplete())
+                    REFLECT_MEMBER(sr, server);
             }
 
-            std::int32_t listen_port_ = 0;
-            std::string state_;
-            /* http then stream, each by stem */
-            std::vector<IntrospectEndpoint> endpoints_;
-            /* by id */
-            std::vector<IntrospectSession> sessions_;
+            Webserver * server_ = nullptr;
+        };
+
+        /** /demo/${id}: sends each subscriber a counter, once a second.
+         *  Keeps its sinks by callback id, for unsubscribe.
+         **/
+        class Ticker {
+        public:
+            CallbackId subscribe(rp<WebsocketSink> const & sink) {
+                std::lock_guard<std::mutex> lock(mutex_);
+
+                std::uint32_t id = ++last_id_;
+                sink_map_[id] = sink;
+
+                return CallbackId(id);
+            }
+
+            void unsubscribe(CallbackId id) {
+                std::lock_guard<std::mutex> lock(mutex_);
+
+                sink_map_.erase(id.id());
+            }
+
+            /* one tick to every subscriber.  Sends with the lock RELEASED:
+             * a send enters the server, which may be running subscribe on
+             * its own thread, waiting for this lock
+             */
+            void tick() {
+                std::vector<rp<WebsocketSink>> sink_v;
+
+                {
+                    std::lock_guard<std::mutex> lock(mutex_);
+
+                    for (auto const & ix : sink_map_)
+                        sink_v.push_back(ix.second);
+                }
+
+                std::int64_t n = ++n_tick_;
+
+                for (auto const & sink : sink_v)
+                    sink->notify_ev_tp(Reflect::make_tp(&n));
+            }
+
+        private:
+            std::mutex mutex_;
+            std::uint32_t last_id_ = 0;
+            std::map<std::uint32_t, rp<WebsocketSink>> sink_map_;
+            /* ticker thread only */
+            std::int64_t n_tick_ = 0;
         };
 
         /** answers {"cmd": "send", "msg": "refresh"} with a snapshot, on the
@@ -136,22 +144,7 @@ namespace xo {
                     throw std::runtime_error("expected \"refresh\"");
 
                 IntrospectSnapshot snap;
-                snap.listen_port_ = websrv_->listen_port();
-                snap.state_ = RunstateUtil::runstate_descr(websrv_->state());
-
-                for (EndpointInfo const & ep : websrv_->endpoints()) {
-                    snap.endpoints_.push_back
-                        (IntrospectEndpoint{endpoint_kind_descr(ep.kind_),
-                                            ep.stem_,
-                                            ep.uri_pattern_});
-                }
-
-                for (SessionInfo const & s : websrv_->sessions()) {
-                    snap.sessions_.push_back
-                        (IntrospectSession{s.session_id_,
-                                           s.sender_open_,
-                                           s.n_subscription_});
-                }
+                snap.server_ = websrv_;
 
                 sink->notify_ev_tp(Reflect::make_tp(&snap));
             }
@@ -244,11 +237,13 @@ main(int argc, char * argv[])
                                    *p_os << "<html>hello, " << args.lookup("name") << "</html>";
                                }));
 
-    /* a stream nobody feeds yet; subscribing works, no frames arrive */
+    /* a ticker: each subscriber gets a counter once a second */
+    auto ticker = std::make_shared<xo::web::Ticker>();
+
     websrv->register_stream_endpoint
         (StreamEndpointDescr("/demo/${id}",
-                             [](rp<WebsocketSink> const &) { return CallbackId(1); },
-                             [](CallbackId) {}));
+                             [ticker](rp<WebsocketSink> const & sink) { return ticker->subscribe(sink); },
+                             [ticker](CallbackId id) { ticker->unsubscribe(id); }));
 
     std::signal(SIGINT, on_signal);
     std::signal(SIGTERM, on_signal);
@@ -262,8 +257,13 @@ main(int argc, char * argv[])
     std::cerr << "introspect: open http://localhost:" << websrv->listen_port()
               << "/  (Ctrl-C to stop)" << std::endl;
 
-    while (!s_stop)
+    /* main thread drives the ticker; 100ms steps so Ctrl-C is prompt */
+    for (int i = 1; !s_stop; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        if (i % 10 == 0)
+            ticker->tick();
+    }
 
     websrv->stop_webserver();
     websrv->join_webserver();

@@ -24,6 +24,7 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -456,10 +457,28 @@ namespace xo {
             REQUIRE(v[0].session_id_ < v[1].session_id_);
             REQUIRE(v[0].sender_open_);
             REQUIRE(v[1].sender_open_);
-            REQUIRE(v[0].n_subscription_ == 0);
-            REQUIRE(v[1].n_subscription_ == 1);
+            REQUIRE(v[0].subscriptions_.empty());
+            REQUIRE(v[1].subscriptions_.size() == 1);
+            REQUIRE(v[1].subscriptions_[0].stream_name_ == "/fw");
+            REQUIRE(v[1].subscriptions_[0].endpoint_pattern_ == "/fw");
 
             std::uint64_t second_id = v[1].session_id_;
+
+            /* the same state, through the Webserver json printer */
+            {
+                Webserver * server = srv.websrv_.get();
+                std::stringstream ss;
+                PrintJsonSingleton::instance()->print(server, &ss);
+
+                Json::Value const sessions = parse(ss.str())["sessions"];
+
+                INFO("json: " << ss.str());
+                REQUIRE(sessions.size() == 2);
+                REQUIRE(sessions[0]["id"].asUInt64() == v[0].session_id_);
+                REQUIRE(sessions[1]["sender_open"].asBool());
+                REQUIRE(sessions[1]["subscriptions"].size() == 1);
+                REQUIRE(sessions[1]["subscriptions"][0]["stream"].asString() == "/fw");
+            }
 
             /* a closed session leaves the listing */
             REQUIRE(first->close(c_timeout));
