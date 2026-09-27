@@ -23,6 +23,7 @@
 #include "WebsocketSink.hpp"
 #include "WsSafetyToken.hpp"
 #include "WsSender.hpp"
+#include "WsSessionTable.hpp"
 #include "WsSessionRouter.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
@@ -118,10 +119,10 @@ namespace xo {
              */
             struct OutputBuffer {
             public:
-                OutputBuffer(uint32_t session_id) : session_id_{session_id} {}
+                OutputBuffer(uint64_t session_id) : session_id_{session_id} {}
                 ~OutputBuffer() = default;
 
-                uint32_t session_id() const { return session_id_; }
+                uint64_t session_id() const { return session_id_; }
                 struct lws * wsi() const { return wsi_; }
 
                 /* non-const access required.
@@ -210,8 +211,8 @@ namespace xo {
                              *       showed that entire message was eventually received,
                              *       (though not if we exit() before returning)
                              */
-                            lwsl_user("lws_write_aux: PARTIAL WRITE: session=[%u], m=lws_write(z) with m<z m=[%d] z=[%lu]\n",
-                                      this->session_id_,
+                            lwsl_user("lws_write_aux: PARTIAL WRITE: session=[%llu], m=lws_write(z) with m<z m=[%d] z=[%lu]\n",
+                                      static_cast<unsigned long long>(this->session_id_),
                                       m,
                                       this->text_z());
 
@@ -247,7 +248,8 @@ namespace xo {
                 /* identifies websocket session associated with this buffer
                  * established permanently in ctor
                  */
-                uint32_t session_id_;
+                /* from WsSessionTable::next_id(); never reused */
+                uint64_t session_id_;
 
                 /* opaque pointer;  owned by libwebsocket + identifies this session.
                  * established once (per websocket session) from LWS_CALLBACK_ESTABLISHED
@@ -315,8 +317,6 @@ namespace xo {
 
                 struct per_session_data__minimal * pss_list; /* linked-list of live pss*/
 
-                uint32_t next_session_id_;
-
                 //struct msg amsg; /* the one pending message... */
                 //int current; /* the current message number we are caching */
             }; /*per_vhost_data__minimal*/
@@ -340,7 +340,7 @@ namespace xo {
          */
         class WsSessionSender : public WsSender {
         public:
-            WsSessionSender(WebserverImpl * websrv, uint32_t session_id)
+            WsSessionSender(WebserverImpl * websrv, uint64_t session_id)
                 : websrv_{websrv}, session_id_{session_id} {}
 
             /* defined after WebserverImpl */
@@ -352,7 +352,7 @@ namespace xo {
 
         private:
             WebserverImpl * websrv_ = nullptr;
-            uint32_t session_id_ = 0;
+            uint64_t session_id_ = 0;
             std::atomic<bool> open_{true};
         }; /*WsSessionSender*/
 
@@ -623,10 +623,10 @@ namespace xo {
                  * notify_ws_session_close, but any sink the application still
                  * holds must not reach this server once it is freed
                  */
-                for (auto const & recd : this->session_v_) {
-                    if (recd)
-                        recd->close_sender();
-                }
+                this->session_table_.for_each([](WebsocketSessionRecd & recd)
+                    {
+                        recd.close_sender();
+                    });
             } /*dtor*/
 
             virtual void run() = 0;
@@ -795,7 +795,10 @@ namespace xo {
              *   {"cmd": "unsubscribe", "sub_id": 0}
              * delegates to the session's WsSessionRouter; see there for replies
              */
-            void perform_ws_cmd(uint32_t session_id,
+            /* a fresh session id, never used before; see WsSessionTable */
+            uint64_t next_session_id() { return this->session_table_.next_id(); }
+
+            void perform_ws_cmd(uint64_t session_id,
                                 std::string_view incoming_svw);
 
 #ifdef DEFINED_BUT_NOT_USED
@@ -814,7 +817,7 @@ namespace xo {
                                          WsSafetyToken const & ws_safety_token);
 
             /* send text to the websocket session identified by session_id */
-            void send_text(uint32_t session_id,
+            void send_text(uint64_t session_id,
                            std::string text) override;
 
             /* from lws event loop,  write any pending outbound traffic
@@ -929,19 +932,11 @@ namespace xo {
              */
             per_vhost_data__minimal * ws_vhd_ = nullptr;
 
-            /* indexed by session id# (see per_session_data__minimal.session_id)
-             * .session_v.size() = {max #of simultaneously-open websocket sessions}.
-             * may contain empty slots.   if .session_v[i] is empty,
-             * then i appears in .free_session_id_v[], i..e .free_session_id_v[j]=i for some j
+            /* live websocket sessions, by id.  Ids are assigned at
+             * LWS_CALLBACK_HTTP_BIND_PROTOCOL and never reused; a session's
+             * record is removed when it closes.  Locks internally.
              */
-            std::vector<std::unique_ptr<WebsocketSessionRecd>> session_v_;
-
-            /* When a session closes,  its session id becomes available.
-             * track such session ids here,  so they can be recycled.
-             * want to recycle because they're indexes into .session_v[],
-             * and we don't want that to grow without bound
-             */
-            std::vector<uint32_t> free_session_id_v_;
+            WsSessionTable<WebsocketSessionRecd> session_table_;
 
         }; /*WebserverImpl*/
 
@@ -975,44 +970,28 @@ namespace xo {
 
         void
         WebserverImpl::notify_ws_session_open(OutputBuffer * output_buf,
-                                              per_vhost_data__minimal * vhd,
+                                              per_vhost_data__minimal * /*vhd*/,
                                               WsSafetyToken const & ws_safety_token)
         {
             ws_safety_token.verify();
 
-            uint32_t new_id = output_buf->session_id();
+            uint64_t new_id = output_buf->session_id();
 
-            if (this->session_v_.size() <= new_id)
-                this->session_v_.resize(new_id + 1);
-
-            this->session_v_[new_id].reset
-                (new WebsocketSessionRecd
-                 (output_buf,
-                  /* endpoints serving stream names */
-                  this->url_router_,
-                  /* sends to THIS session: replies, and every sink's frames */
-                  rp<WsSessionSender>(new WsSessionSender(this, new_id)),
-                  this->pjson_));
+            this->session_table_.insert
+                (new_id,
+                 std::unique_ptr<WebsocketSessionRecd>
+                 (new WebsocketSessionRecd
+                  (output_buf,
+                   /* endpoints serving stream names */
+                   this->url_router_,
+                   /* sends to THIS session: replies, and every sink's frames */
+                   rp<WsSessionSender>(new WsSessionSender(this, new_id)),
+                   this->pjson_)));
 
             /* control comes here when a new websocket session is created,
              * after LWS_CALLBACK_HTTP_BIND_PROTOCOL
              */
             output_buf->set_is_writeable(true, ws_safety_token);
-
-            /* compute next available session id + store in vhost struct */
-
-            if (this->free_session_id_v_.empty()) {
-                /* generate a new session id */
-                uint32_t id = this->session_v_.size();
-
-                vhd->next_session_id_ = id;
-            } else {
-                /* recycle a previously-used session id */
-                uint32_t id = this->free_session_id_v_[this->free_session_id_v_.size() - 1];
-                this->free_session_id_v_.pop_back();
-
-                vhd->next_session_id_ = id;
-            }
         } /*notify_ws_session_open*/
 
         void
@@ -1026,23 +1005,24 @@ namespace xo {
                        xtag("this", (void*)this),
                        xtag("output_buf", (void*)output_buf));
 
-            assert(output_buf->session_id() < this->session_v_.size());
-
             ws_safety_token.verify();
 
-            WebsocketSessionRecd * ws_session_recd
-                = this->session_v_[output_buf->session_id()].get();
+            /* out of the table first: from here the id addresses nothing,
+             * ever -- ids are never reused.  Then, with the table's lock
+             * released, since an endpoint's unsubscribe may send:
+             */
+            std::unique_ptr<WebsocketSessionRecd> ws_session_recd
+                = this->session_table_.take(output_buf->session_id());
 
             if (ws_session_recd) {
-                /* first: anything sent from here on, by this session's router
-                 * or by a sink the application kept, is dropped -- never
-                 * delivered to a later session reusing this id
+                /* anything sent from here on, by this session's router or by a
+                 * sink the application kept, is dropped
                  */
                 ws_session_recd->close_sender();
                 ws_session_recd->unsubscribe_all();
             }
 
-            this->free_session_id_v_.push_back(output_buf->session_id());
+            /* record destroyed here */
         } /*notify_ws_session_close*/
 
         /* note: to access lws_protocols.user,
@@ -1272,17 +1252,19 @@ namespace xo {
         } /*dynamic_http_response*/
 
         void
-        WebserverImpl::perform_ws_cmd(uint32_t session_id,
+        WebserverImpl::perform_ws_cmd(uint64_t session_id,
                                       std::string_view incoming_cmd)
         {
             /* parsing, subscribe and send all live in WsSessionRouter,
              * which knows nothing of libwebsockets -- see
              * .xo-backlog/xo-websock/issues/04
+             *
+             * table lock NOT held while the command runs: handlers send.
+             * Safe: we are on the service thread, the only one that removes
+             * sessions.
              */
             WebsocketSessionRecd * ws_recd
-                = ((session_id < this->session_v_.size())
-                   ? this->session_v_[session_id].get()
-                   : nullptr);
+                = this->session_table_.find_owner_thread(session_id);
 
             assert(ws_recd);
 
@@ -1337,26 +1319,27 @@ namespace xo {
         } /*join_webserver*/
 
         void
-        WebserverImpl::send_text(uint32_t session_id,
+        WebserverImpl::send_text(uint64_t session_id,
                                  std::string text)
         {
             scope log(XO_ENTER0_(info));
-            log && log(xtag("session_id", session_id),
-                       xtag(".session_v.size", this->session_v_.size()));
+            log && log(xtag("session_id", session_id));
 
-            if (session_id < this->session_v_.size()) {
-                WebsocketSessionRecd * p_session_recd = this->session_v_[session_id].get();
+            /* any thread.  Table lock held across the record's send_text,
+             * which only queues and wakes the service thread
+             */
+            bool live = this->session_table_.with_session
+                            (session_id,
+                             [&text](WebsocketSessionRecd & recd)
+                                 {
+                                     recd.send_text(std::move(text));
+                                 });
 
-                if (p_session_recd)
-                    p_session_recd->send_text(text);
-
-                //per_session_data__minimal * ws_pss = p_session_recd->ws_pss();
-
-                //lscope.log(xtag("ws_pss", ws_pss),
-                //           xtag("ws_pss.wsi", ws_pss->wsi));
-
-            } else {
-                assert(false);
+            if (!live) {
+                /* session closed: ids are never reused, so this is a stale
+                 * sender, not a different client.  Dropped.
+                 */
+                log && log("no live session; dropped");
             }
         } /*send_text*/
 
@@ -1367,10 +1350,10 @@ namespace xo {
 
             ws_safety_token.verify();
 
-            for (auto & session_ptr : this->session_v_) {
-                if (session_ptr)
-                    session_ptr->lws_write_pending(ws_safety_token);
-            }
+            this->session_table_.for_each([&ws_safety_token](WebsocketSessionRecd & recd)
+                {
+                    recd.lws_write_pending(ws_safety_token);
+                });
         } /*lws_write_pending_traffic*/
 
         /* sequester .ws_safety_token:
@@ -1532,7 +1515,6 @@ namespace xo {
                 vhd->vhost = lws_get_vhost(wsi);
                 vhd->protocol = lws_get_protocol(wsi);
                 vhd->pss_list = nullptr;
-                vhd->next_session_id_ = 1;
                 //vhd->current = 0;
 
                 lwsl_user("WebserverImpl::notify_minimal: vhost=%p, protocols=%p protocol.name=%s\n",
@@ -1556,7 +1538,8 @@ namespace xo {
 
                 assert(vhd);
 
-                ws_pss->output_buf_ = new OutputBuffer(vhd->next_session_id_++);
+                /* the id's only assignment; never reused */
+                ws_pss->output_buf_ = new OutputBuffer(websrv->next_session_id());
 
                 lwsl_user("establish pss->output_buf [%p] in ws_pss [%p]",
                           ws_pss->output_buf_,
@@ -1734,7 +1717,7 @@ namespace xo {
                 assert(ws_pss);
                 assert(websrv);
 
-                uint32_t session_id = ws_pss->output_buf_->session_id();
+                uint64_t session_id = ws_pss->output_buf_->session_id();
 
                 websrv->perform_ws_cmd(session_id,
                                        incoming_svw);

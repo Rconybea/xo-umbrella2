@@ -102,8 +102,10 @@ namespace xo {
             /* wait until webserver thread stopped */
             virtual void join_webserver() = 0;
 
-            /* send text to a websocket session identified by session_id */
-            virtual void send_text(uint32_t session_id,
+            /* send text to a websocket session identified by session_id.
+             * Dropped if that session has closed; ids are never reused
+             */
+            virtual void send_text(uint64_t session_id,
                                    std::string text) = 0;
 
             // ----- Inherited from Displayable -----
