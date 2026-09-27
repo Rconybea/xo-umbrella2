@@ -48,6 +48,15 @@ namespace xo {
                 .def_property_readonly("state", &Webserver::state)
                 .def("register_http_endpoint", &Webserver::register_http_endpoint)
                 .def("register_stream_endpoint", &Webserver::register_stream_endpoint)
+                .def("unregister_http_endpoint", &Webserver::unregister_http_endpoint,
+                     py::arg("uri_pattern"),
+                     "remove the http endpoint registered with exactly uri_pattern;"
+                     " False if none")
+                .def("unregister_stream_endpoint", &Webserver::unregister_stream_endpoint,
+                     py::arg("uri_pattern"),
+                     "remove the stream endpoint registered with exactly uri_pattern;"
+                     " False if none.  Its live subscriptions are ended: each client"
+                     " gets {\"cmd\": \"unsubscribed\", \"reason\": \"endpoint removed\"}")
                 .def("start_webserver", &Webserver::start_webserver)
                 .def("stop_webserver", &Webserver::stop_webserver)
                 .def("join_webserver", &Webserver::join_webserver)

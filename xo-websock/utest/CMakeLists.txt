@@ -9,7 +9,8 @@ set(SELF_SRCS
     WsSessionRouter.test.cpp
     UrlRouter.test.cpp
     WsSessionTable.test.cpp
-    WsSessionSender.test.cpp)
+    WsSessionSender.test.cpp
+    Webserver.test.cpp)
 
 if (ENABLE_TESTING)
     xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})

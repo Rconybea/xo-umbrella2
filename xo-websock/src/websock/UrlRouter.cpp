@@ -122,13 +122,13 @@ namespace xo {
             this->insert_in(std::move(endpoint), "stream", &this->stream_map_);
         } /*register_stream*/
 
-        bool
+        rp<DynamicEndpoint>
         UrlRouter::unregister_http(std::string const & uri_pattern)
         {
             return this->erase_in(uri_pattern, &this->http_map_);
         }
 
-        bool
+        rp<DynamicEndpoint>
         UrlRouter::unregister_stream(std::string const & uri_pattern)
         {
             return this->erase_in(uri_pattern, &this->stream_map_);
@@ -182,13 +182,13 @@ namespace xo {
             p_ep_map->emplace(std::move(stem), std::move(endpoint));
         } /*insert_in*/
 
-        bool
+        rp<DynamicEndpoint>
         UrlRouter::erase_in(std::string const & uri_pattern,
                             EndpointMap * p_ep_map)
         {
-            /* released after the lock: dropping what may be the last
-             * reference runs the endpoint's dtor, and with it the dtors of
-             * whatever its functions capture
+            /* returned, so released after the lock: dropping what may be the
+             * last reference runs the endpoint's dtor, and with it the dtors
+             * of whatever its functions capture
              */
             rp<DynamicEndpoint> removed;
 
@@ -200,14 +200,14 @@ namespace xo {
                 if ((ix == p_ep_map->end())
                     || (ix->second->uri_pattern() != uri_pattern))
                 {
-                    return false;
+                    return nullptr;
                 }
 
                 removed = std::move(ix->second);
                 p_ep_map->erase(ix);
             }
 
-            return true;
+            return removed;
         } /*erase_in*/
     } /*namespace web*/
 } /*namespace xo*/

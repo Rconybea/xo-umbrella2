@@ -608,6 +608,8 @@ namespace xo {
             virtual Runstate state() const override { return state_; }
             virtual void register_http_endpoint(HttpEndpointDescr const & endpoint) override;
             virtual void register_stream_endpoint(StreamEndpointDescr const & endpoint) override;
+            virtual bool unregister_http_endpoint(std::string const & uri_pattern) override;
+            virtual bool unregister_stream_endpoint(std::string const & uri_pattern) override;
             virtual void start_webserver() override;
             virtual void interrupt_stop_webserver() override;
             virtual void stop_webserver() override;
@@ -797,6 +799,12 @@ namespace xo {
              */
             void lws_write_pending_traffic(WsSafetyToken const & ws_safety_token);
 
+            /* from lws event loop: end the live subscriptions of every stream
+             * endpoint queued by .unregister_stream_endpoint(), in every
+             * session
+             */
+            void lws_end_removed_subscriptions(WsSafetyToken const & ws_safety_token);
+
         protected:
             /* callback for http protocol */
             static int notify_dynamic_http(struct lws * wsi,
@@ -888,6 +896,17 @@ namespace xo {
              */
             UrlRouter url_router_;
 
+            /* protects .removed_endpoint_v */
+            std::mutex removed_mutex_;
+            /* stream endpoints unregistered (so already out of .url_router)
+             * whose live subscriptions the service thread has yet to end.
+             * Filled by .unregister_stream_endpoint() on any thread; drained
+             * by .lws_end_removed_subscriptions() on the service thread.
+             * Holding them keeps each alive until its subscriptions have
+             * unsubscribed from it.
+             */
+            std::vector<rp<DynamicEndpoint>> removed_endpoint_v_;
+
             /* --- 4. libwebsocket session manager --- */
 
             /* websocket-associated libwebsocket data.
@@ -923,6 +942,41 @@ namespace xo {
         {
             this->url_router_.register_stream(endpoint_descr);
         } /*register_stream_endpoint*/
+
+        bool
+        WebserverImpl::unregister_http_endpoint(std::string const & uri_pattern)
+        {
+            /* http has no long-lived state to end: gone for the next request */
+            return static_cast<bool>(this->url_router_.unregister_http(uri_pattern));
+        } /*unregister_http_endpoint*/
+
+        bool
+        WebserverImpl::unregister_stream_endpoint(std::string const & uri_pattern)
+        {
+            /* 1. out of the router at once: new subscribes fail from here */
+            rp<DynamicEndpoint> removed = this->url_router_.unregister_stream(uri_pattern);
+
+            if (!removed)
+                return false;
+
+            /* 2. its live subscriptions belong to the service thread (their
+             *    sinks may be receiving from a source right now): queue the
+             *    ending of them there, and wake it -- as send_text does
+             */
+            {
+                std::lock_guard<std::mutex> lock(this->removed_mutex_);
+
+                this->removed_endpoint_v_.push_back(std::move(removed));
+            }
+
+            if (this->lws_cx_)
+                ::lws_cancel_service(this->lws_cx_);
+
+            /* if the server is not running there are no sessions, so nothing
+             * to end; the queue drains on the next wakeup, or with the server
+             */
+            return true;
+        } /*unregister_stream_endpoint*/
 
 #ifdef DEFINED_BUT_NOT_USED
         void
@@ -1320,6 +1374,43 @@ namespace xo {
                 });
         } /*lws_write_pending_traffic*/
 
+        void
+        WebserverImpl::lws_end_removed_subscriptions(WsSafetyToken const & ws_safety_token)
+        {
+            ws_safety_token.verify();
+
+            std::vector<rp<DynamicEndpoint>> removed_v;
+
+            {
+                std::lock_guard<std::mutex> lock(this->removed_mutex_);
+
+                removed_v.swap(this->removed_endpoint_v_);
+            }
+
+            if (removed_v.empty())
+                return;
+
+            scope log(XO_ENTER0_(info), xtag("n_removed", removed_v.size()));
+
+            /* collect the sessions' routers under the table lock, then use
+             * them with it RELEASED: end_subscriptions_on() replies through
+             * the session's sender -> send_text() -> the table lock again,
+             * which is not recursive.  Safe to hold the pointers: this is the
+             * service thread, the only one that removes sessions.
+             */
+            std::vector<WsSessionRouter *> router_v;
+
+            this->session_table_.for_each([&router_v](WebsocketSessionRecd & recd)
+                {
+                    router_v.push_back(&recd.router());
+                });
+
+            for (auto const & endpoint : removed_v) {
+                for (WsSessionRouter * router : router_v)
+                    router->end_subscriptions_on(endpoint);
+            }
+        } /*lws_end_removed_subscriptions*/
+
         /* sequester .ws_safety_token:
          * it may only be used by dedicated websocket library thread
          * (the unique thread that calls ::lws_service())
@@ -1564,8 +1655,10 @@ namespace xo {
 
             case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
             {
-                if (websrv)
+                if (websrv) {
+                    websrv->lws_end_removed_subscriptions(ws_token);
                     websrv->lws_write_pending_traffic(ws_token);
+                }
             }
             break;
 

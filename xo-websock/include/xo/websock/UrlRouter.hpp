@@ -55,17 +55,19 @@ namespace xo {
              **/
             void register_stream(StreamEndpointDescr const & descr);
 
-            /** remove the http endpoint registered with exactly @p uri_pattern.
-             *  Returns false, changing nothing, if there is none -- including
-             *  when a DIFFERENT pattern with the same stem is registered.
+            /** remove the http endpoint registered with exactly @p uri_pattern,
+             *  and return it.  Returns null, changing nothing, if there is
+             *  none -- including when a DIFFERENT pattern with the same stem
+             *  is registered.
              **/
-            bool unregister_http(std::string const & uri_pattern);
+            rp<DynamicEndpoint> unregister_http(std::string const & uri_pattern);
 
             /** remove the stream endpoint registered with exactly
-             *  @p uri_pattern.  Returns false, changing nothing, if there is
-             *  none; see unregister_http().
+             *  @p uri_pattern, and return it -- the caller ends that
+             *  endpoint's live subscriptions.  Returns null, changing nothing,
+             *  if there is none; see unregister_http().
              **/
-            bool unregister_stream(std::string const & uri_pattern);
+            rp<DynamicEndpoint> unregister_stream(std::string const & uri_pattern);
 
             /** http endpoint serving @p uri; null if none.  See find_in(). **/
             rp<DynamicEndpoint> find_http(std::string const & uri) const;
@@ -100,9 +102,9 @@ namespace xo {
                            EndpointMap * p_ep_map);
 
             /** remove the endpoint in @p *p_ep_map registered with exactly
-             *  @p uri_pattern; false if none
+             *  @p uri_pattern, and return it; null if none
              **/
-            bool erase_in(std::string const & uri_pattern,
+            rp<DynamicEndpoint> erase_in(std::string const & uri_pattern,
                           EndpointMap * p_ep_map);
 
         private:

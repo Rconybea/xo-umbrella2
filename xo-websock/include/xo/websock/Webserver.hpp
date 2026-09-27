@@ -91,6 +91,20 @@ namespace xo {
             virtual void register_http_endpoint(HttpEndpointDescr const & endpoint) = 0;
             virtual void register_stream_endpoint(StreamEndpointDescr const & endpoint) = 0;
 
+            /* unregister_*_endpoint: remove the endpoint registered with
+             * exactly @p uri_pattern; false if there is none.
+             *
+             * Takes effect for new requests at once.  Removing a stream
+             * endpoint also ends its live subscriptions, in every session:
+             * shortly after, on the webserver's thread, each runs the
+             * endpoint's unsubscribe and its client gets
+             *   {"cmd": "unsubscribed", "sub_id": N, "reason": "endpoint removed"}
+             * Callable from any thread, before or while the server runs.
+             * See .xo-backlog/xo-websock/issues/07.
+             */
+            virtual bool unregister_http_endpoint(std::string const & uri_pattern) = 0;
+            virtual bool unregister_stream_endpoint(std::string const & uri_pattern) = 0;
+
             /* start thread for this webserver; idempotent */
             virtual void start_webserver() = 0;
             /* stop thread for this webserver;  suitable for calling
