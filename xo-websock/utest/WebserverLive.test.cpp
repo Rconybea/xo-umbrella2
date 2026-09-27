@@ -33,6 +33,7 @@ namespace xo {
     using xo::web::WebserverConfig;
     using xo::web::StreamEndpointDescr;
     using xo::web::WebsocketSink;
+    using xo::web::StreamReceiver;
     using xo::json::PrintJsonSingleton;
     using xo::reflect::Reflect;
     using xo::fn::CallbackId;
@@ -65,6 +66,10 @@ namespace xo {
                 std::mutex mutex_;
                 std::condition_variable cv_;
                 std::vector<rp<WebsocketSink>> sink_v_;
+                /* callback ids the unsubscribe function was handed */
+                std::vector<std::uint32_t> unsub_v_;
+                /* messages the receiver was handed */
+                std::vector<Json::Value> msg_v_;
 
                 CallbackId subscribe(rp<WebsocketSink> const & sink) {
                     std::lock_guard<std::mutex> lock(mutex_);
@@ -73,6 +78,42 @@ namespace xo {
                     cv_.notify_all();
 
                     return CallbackId(static_cast<uint32_t>(sink_v_.size()));
+                }
+
+                void unsubscribe(CallbackId id) {
+                    std::lock_guard<std::mutex> lock(mutex_);
+
+                    unsub_v_.push_back(id.id());
+                    cv_.notify_all();
+                }
+
+                void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) {
+                    {
+                        std::lock_guard<std::mutex> lock(mutex_);
+
+                        msg_v_.push_back(msg);
+                        cv_.notify_all();
+                    }
+
+                    /* reply through the sink handed in: reaches exactly the
+                     * sender's session.  Rendered synchronously, so a local
+                     * is fine
+                     */
+                    int reply = msg["n"].asInt() * 10;
+                    sink->notify_ev_tp(Reflect::make_tp(&reply));
+                }
+
+                /* true once at least n unsubscribes have run */
+                bool wait_unsubscribed(std::size_t n) {
+                    std::unique_lock<std::mutex> lock(mutex_);
+
+                    return cv_.wait_for(lock, c_timeout, [this, n] { return unsub_v_.size() >= n; });
+                }
+
+                std::size_t n_unsubscribed() {
+                    std::lock_guard<std::mutex> lock(mutex_);
+
+                    return unsub_v_.size();
                 }
 
                 /* the n'th sink (0-based) once it exists; null on timeout */
@@ -85,6 +126,27 @@ namespace xo {
                     return sink_v_[n];
                 }
             };
+
+            /** hands each message to a SinkBox, which replies **/
+            class BoxReceiver : public StreamReceiver {
+            public:
+                explicit BoxReceiver(std::shared_ptr<SinkBox> box) : box_{std::move(box)} {}
+
+                void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
+                    box_->receive(sink, msg);
+                }
+
+            private:
+                std::shared_ptr<SinkBox> box_;
+            };
+
+            /** stream endpoint on @p pattern, reporting to @p box **/
+            StreamEndpointDescr box_descr(std::string pattern, std::shared_ptr<SinkBox> const & box) {
+                return StreamEndpointDescr(std::move(pattern),
+                                           [box](rp<WebsocketSink> const & sink) { return box->subscribe(sink); },
+                                           [box](CallbackId id) { box->unsubscribe(id); },
+                                           new BoxReceiver(box));
+            }
 
             /** a started webserver on an OS-assigned port **/
             struct LiveServer {
@@ -200,6 +262,148 @@ namespace xo {
             REQUIRE(joined.wait_for(c_timeout) == std::future_status::ready);
             REQUIRE(second->listen_port() == 0);
             REQUIRE(second->state() == xo::web::Runstate::stopped);
+        }
+
+        TEST_CASE("live-send-reaches-the-receiver-and-its-reply-comes-back", "[websock][live]")
+        {
+            auto box = std::make_shared<SinkBox>();
+
+            LiveServer srv;
+            srv.websrv_->register_stream_endpoint(box_descr("/fw", box));
+
+            std::int32_t port = srv.start();
+            REQUIRE(port > 0);
+
+            WsTestClient client(port);
+            REQUIRE(client.wait_connected(c_timeout));
+
+            client.send(R"({"cmd": "subscribe", "stream": "/fw"})");
+            REQUIRE(client.wait_received(1, c_timeout));
+            std::uint32_t sub_id = parse(client.received()[0])["sub_id"].asUInt();
+
+            client.send(std::string(R"({"cmd": "send", "sub_id": )")
+                        + std::to_string(sub_id)
+                        + R"(, "msg": {"op": "step", "n": 4}})");
+
+            /* the receiver's reply, as a frame of this subscription */
+            REQUIRE(client.wait_received(2, c_timeout));
+            Json::Value frame = parse(client.received()[1]);
+
+            REQUIRE(frame["sub_id"].asUInt() == sub_id);
+            REQUIRE(frame["seq"].asInt() == 0);
+            REQUIRE(frame["event"].asInt() == 40);
+
+            /* and the receiver saw the msg exactly as sent */
+            std::lock_guard<std::mutex> lock(box->mutex_);
+            REQUIRE(box->msg_v_.size() == 1);
+            REQUIRE(box->msg_v_[0]["op"].asString() == "step");
+            REQUIRE(box->msg_v_[0]["n"].asInt() == 4);
+        }
+
+        TEST_CASE("live-unregister-ends-a-live-subscription", "[websock][live]")
+        {
+            /* issue 07 over a socket: the unregister queue, the service
+             * thread's wakeup and drain, and the reply reaching the client
+             */
+            auto box = std::make_shared<SinkBox>();
+
+            LiveServer srv;
+            srv.websrv_->register_stream_endpoint(box_descr("/fw/${id}", box));
+
+            std::int32_t port = srv.start();
+            REQUIRE(port > 0);
+
+            WsTestClient client(port);
+            REQUIRE(client.wait_connected(c_timeout));
+
+            client.send(R"({"cmd": "subscribe", "stream": "/fw/1"})");
+            client.send(R"({"cmd": "subscribe", "stream": "/fw/2"})");
+            REQUIRE(client.wait_received(2, c_timeout));
+            REQUIRE(box->wait_sink(1));
+
+            /* from the test's thread, as python would */
+            REQUIRE(srv.websrv_->unregister_stream_endpoint("/fw/${id}"));
+
+            REQUIRE(client.wait_received(4, c_timeout));
+            std::vector<std::string> msg_v = client.received();
+
+            for (std::size_t i = 2; i < 4; ++i) {
+                Json::Value r = parse(msg_v[i]);
+
+                INFO("reply: " << msg_v[i]);
+                REQUIRE(r["cmd"].asString() == "unsubscribed");
+                REQUIRE(r["sub_id"].asUInt() == i - 2);
+                REQUIRE(r["reason"].asString() == "endpoint removed");
+            }
+
+            /* the endpoint's unsubscribe ran once per subscription -- a real
+             * source would stop pushing here
+             */
+            REQUIRE(box->wait_unsubscribed(2));
+
+            /* a new subscribe finds nothing */
+            client.send(R"({"cmd": "subscribe", "stream": "/fw/3"})");
+            REQUIRE(client.wait_received(5, c_timeout));
+            REQUIRE(parse(client.received()[4])["error"].asString() == "unknown stream");
+
+            /* and nothing ran twice */
+            REQUIRE(box->n_unsubscribed() == 2);
+        }
+
+        TEST_CASE("live-a-sink-kept-past-its-session-reaches-no-one", "[websock][live]")
+        {
+            /* issues 05 and 08: the kept sink's sender is closed with its
+             * session, and the session id is never reused, so a later client
+             * gets nothing from it
+             */
+            auto box = std::make_shared<SinkBox>();
+
+            LiveServer srv;
+            srv.websrv_->register_stream_endpoint(box_descr("/fw", box));
+
+            std::int32_t port = srv.start();
+            REQUIRE(port > 0);
+
+            rp<WebsocketSink> kept;
+
+            {
+                WsTestClient first(port);
+                REQUIRE(first.wait_connected(c_timeout));
+
+                first.send(R"({"cmd": "subscribe", "stream": "/fw"})");
+                REQUIRE(first.wait_received(1, c_timeout));
+
+                kept = box->wait_sink(0);
+                REQUIRE(kept);
+
+                REQUIRE(first.close(c_timeout));
+            }
+
+            /* the server has handled the close once the session's
+             * subscriptions are unsubscribed (notify_ws_session_close)
+             */
+            REQUIRE(box->wait_unsubscribed(1));
+
+            WsTestClient second(port);
+            REQUIRE(second.wait_connected(c_timeout));
+
+            /* the application pushes to the sink it kept */
+            int stale = 666;
+            kept->notify_ev_tp(Reflect::make_tp(&stale));
+
+            /* barrier: the second client's own traffic.  Had the stale frame
+             * been delivered it would precede this reply -- a closed sender
+             * drops synchronously, before this subscribe is even sent
+             */
+            second.send(R"({"cmd": "subscribe", "stream": "/fw"})");
+            REQUIRE(second.wait_received(1, c_timeout));
+
+            std::vector<std::string> msg_v = second.received();
+
+            INFO("first message: " << msg_v[0]);
+            REQUIRE(parse(msg_v[0])["cmd"].asString() == "subscribed");
+            for (auto const & m : msg_v)
+                REQUIRE(m.find("666") == std::string::npos);
         }
     } /*namespace ut*/
 } /*namespace xo*/
