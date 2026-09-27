@@ -23,6 +23,8 @@ namespace xo {
     using xo::web::HttpEndpointDescr;
     using xo::web::StreamEndpointDescr;
     using xo::web::EndpointKind;
+    using xo::web::EndpointInfo;
+    using xo::web::endpoint_kind_descr;
     using xo::web::WebsocketSink;
     using xo::web::Alist;
     using xo::fn::CallbackId;
@@ -231,6 +233,52 @@ namespace xo {
 
             REQUIRE(router.unregister_stream("/r/${a}"));
             REQUIRE(!router.find_stream("/r/1"));
+        }
+
+        TEST_CASE("url-router-lists-its-endpoints", "[websock][UrlRouter]")
+        {
+            UrlRouter router;
+
+            REQUIRE(router.endpoints().empty());
+
+            /* registered out of order, one stem in both maps */
+            router.register_stream(stream_descr("/zz/${a}"));
+            router.register_http(http_descr("/status", "s"));
+            router.register_stream(stream_descr("/aa"));
+            router.register_http(http_descr("/fw/${id}", "f"));
+            router.register_stream(stream_descr("/status"));
+
+            std::vector<EndpointInfo> v = router.endpoints();
+
+            /* http then stream, each by stem */
+            REQUIRE(v.size() == 5);
+
+            REQUIRE(v[0].kind_ == EndpointKind::http);
+            REQUIRE(v[0].stem_ == "/fw/");
+            REQUIRE(v[0].uri_pattern_ == "/fw/${id}");
+
+            REQUIRE(v[1].kind_ == EndpointKind::http);
+            REQUIRE(v[1].stem_ == "/status");
+
+            REQUIRE(v[2].kind_ == EndpointKind::stream);
+            REQUIRE(v[2].stem_ == "/aa");
+            REQUIRE(v[3].kind_ == EndpointKind::stream);
+            REQUIRE(v[3].stem_ == "/status");
+            REQUIRE(v[4].kind_ == EndpointKind::stream);
+            REQUIRE(v[4].stem_ == "/zz/");
+            REQUIRE(v[4].uri_pattern_ == "/zz/${a}");
+
+            /* an unregistered endpoint is no longer listed */
+            REQUIRE(router.unregister_stream("/status"));
+
+            v = router.endpoints();
+            REQUIRE(v.size() == 4);
+            REQUIRE(v[1].kind_ == EndpointKind::http);
+            REQUIRE(v[1].stem_ == "/status");
+            REQUIRE(v[3].stem_ == "/zz/");
+
+            REQUIRE(std::string(endpoint_kind_descr(EndpointKind::http)) == "http");
+            REQUIRE(std::string(endpoint_kind_descr(EndpointKind::stream)) == "stream");
         }
     } /*namespace ut*/
 } /*namespace xo*/

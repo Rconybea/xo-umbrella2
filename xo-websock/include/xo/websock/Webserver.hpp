@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "EndpointInfo.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
@@ -128,6 +129,11 @@ namespace xo {
              */
             virtual bool unregister_http_endpoint(std::string const & uri_pattern) = 0;
             virtual bool unregister_stream_endpoint(std::string const & uri_pattern) = 0;
+
+            /* every registered endpoint (http, then stream, each by stem);
+             * copies, for introspection.  Any thread
+             */
+            virtual std::vector<EndpointInfo> endpoints() const = 0;
 
             /* start thread for this webserver; idempotent */
             virtual void start_webserver() = 0;

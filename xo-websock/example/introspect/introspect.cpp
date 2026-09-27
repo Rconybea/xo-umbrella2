@@ -9,9 +9,11 @@
  *  "refresh"} this program replies with a snapshot of its own state, which
  *  the page draws with d3.
  *
- *  Increment 1 of .xo-backlog/xo-websock/issues/10: the snapshot is just the
- *  server's port and run state.  Later increments add endpoints, sessions,
- *  subscriptions, and how they share objects.
+ *  Increments of .xo-backlog/xo-websock/issues/10:
+ *    1. the server's port and run state
+ *    2. its registered endpoints -- plus two demo endpoints, so there is more
+ *       than /introspect to see
+ *  Later: sessions, subscriptions, and how they share objects.
  *
  *  The page files live in mount-origin/ beside the executable (cmake copies
  *  them there); found from the executable's own location, so this runs from
@@ -43,11 +45,14 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 
 namespace xo {
     using xo::web::Webserver;
     using xo::web::WebserverConfig;
     using xo::web::StreamEndpointDescr;
+    using xo::web::HttpEndpointDescr;
+    using xo::web::Alist;
     using xo::web::StreamReceiver;
     using xo::web::WebsocketSink;
     using xo::json::PrintJsonSingleton;
@@ -56,23 +61,45 @@ namespace xo {
     using xo::fn::CallbackId;
 
     namespace web {
+        /** one registered endpoint, for the page.  EndpointInfo with its
+         *  kind as text (the enum is not reflected)
+         **/
+        struct IntrospectEndpoint {
+            static void reflect_self() {
+                StructReflector<IntrospectEndpoint> sr;
+
+                if (sr.is_incomplete()) {
+                    REFLECT_MEMBER(sr, kind);
+                    REFLECT_MEMBER(sr, stem);
+                    REFLECT_MEMBER(sr, pattern);
+                }
+            }
+
+            std::string kind_;
+            std::string stem_;
+            std::string pattern_;
+        };
+
         /** what the page is told about this server.  Plain reflected value
          *  type: PrintJson renders it as a json object.
-         *
-         *  Increment 1: port and run state only.
          **/
         struct IntrospectSnapshot {
             static void reflect_self() {
+                IntrospectEndpoint::reflect_self();
+
                 StructReflector<IntrospectSnapshot> sr;
 
                 if (sr.is_incomplete()) {
                     REFLECT_MEMBER(sr, listen_port);
                     REFLECT_MEMBER(sr, state);
+                    REFLECT_MEMBER(sr, endpoints);
                 }
             }
 
             std::int32_t listen_port_ = 0;
             std::string state_;
+            /* http then stream, each by stem */
+            std::vector<IntrospectEndpoint> endpoints_;
         };
 
         /** answers {"cmd": "send", "msg": "refresh"} with a snapshot, on the
@@ -89,6 +116,13 @@ namespace xo {
                 IntrospectSnapshot snap;
                 snap.listen_port_ = websrv_->listen_port();
                 snap.state_ = RunstateUtil::runstate_descr(websrv_->state());
+
+                for (EndpointInfo const & ep : websrv_->endpoints()) {
+                    snap.endpoints_.push_back
+                        (IntrospectEndpoint{endpoint_kind_descr(ep.kind_),
+                                            ep.stem_,
+                                            ep.uri_pattern_});
+                }
 
                 sink->notify_ev_tp(Reflect::make_tp(&snap));
             }
@@ -169,6 +203,23 @@ main(int argc, char * argv[])
                              [](rp<WebsocketSink> const &) { return CallbackId(1); },
                              [](CallbackId) {},
                              new IntrospectReceiver(websrv.get())));
+
+    /* demo endpoints: something besides /introspect to look at.
+     * http endpoints are served under the server's dynamic mount, /dyn --
+     * so this one answers http://host:port/dyn/hello/<name>
+     */
+    websrv->register_http_endpoint
+        (HttpEndpointDescr("/hello/${name}",
+                           [](std::string const &, Alist const & args, std::ostream * p_os)
+                               {
+                                   *p_os << "<html>hello, " << args.lookup("name") << "</html>";
+                               }));
+
+    /* a stream nobody feeds yet; subscribing works, no frames arrive */
+    websrv->register_stream_endpoint
+        (StreamEndpointDescr("/demo/${id}",
+                             [](rp<WebsocketSink> const &) { return CallbackId(1); },
+                             [](CallbackId) {}));
 
     std::signal(SIGINT, on_signal);
     std::signal(SIGTERM, on_signal);

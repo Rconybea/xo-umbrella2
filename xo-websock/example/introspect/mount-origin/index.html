@@ -8,8 +8,13 @@
     body { font-family: system-ui, sans-serif; margin: 1.5em; color: #222; }
     #status { color: #666; margin-left: 0.8em; }
     svg { border: 1px solid #ccc; background: #fafafa; margin-top: 1em; display: block; }
-    .node rect { fill: #e8f0fe; stroke: #4a6fa5; stroke-width: 1.5px; rx: 6px; }
-    .node text { font-size: 14px; }
+    .node rect { stroke-width: 1.5px; rx: 6px; }
+    .node.server rect { fill: #e8f0fe; stroke: #4a6fa5; }
+    .node.http rect   { fill: #fdf3e1; stroke: #b07d2b; }
+    .node.stream rect { fill: #e7f5ea; stroke: #3c8a4f; }
+    .node text { font-size: 14px; font-family: ui-monospace, monospace; }
+    text.heading { font-size: 13px; fill: #666; }
+    line.link { stroke: #999; stroke-width: 1.2px; }
     pre { background: #f4f4f4; padding: 0.8em; max-width: 60em; overflow-x: auto; }
   </style>
 </head>
@@ -20,7 +25,7 @@
     <span id="status">connecting...</span>
   </div>
 
-  <svg id="graph" width="640" height="160"></svg>
+  <svg id="graph" width="900" height="160"></svg>
 
   <h3>last frame</h3>
   <pre id="raw">(none yet)</pre>

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "EndpointInfo.hpp"
 #include "EndpointUtil.hpp"
 #include "WebsocketSink.hpp"
 #include <xo/webutil/Alist.hpp>
@@ -15,18 +16,6 @@
 
 namespace xo {
     namespace web {
-        /* which kind of endpoint a DynamicEndpoint is; fixed at construction
-         * by make_http() / make_stream()
-         */
-        enum class EndpointKind {
-            /* serves http requests: http_response() */
-            http,
-            /* serves websocket subscriptions: subscribe(), unsubscribe(),
-             * and receive() if it has a receiver
-             */
-            stream,
-        };
-
         /* a dynamic http endpoint.  content served on-browser-demand
          * by user-provided callback
          *

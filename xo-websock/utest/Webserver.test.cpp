@@ -80,6 +80,27 @@ namespace xo {
             REQUIRE(!websrv->unregister_http_endpoint("/status"));
             REQUIRE(websrv->unregister_stream_endpoint("/status"));
         }
+
+        TEST_CASE("webserver-lists-its-endpoints", "[websock][Webserver]")
+        {
+            rp<Webserver> websrv = make_idle_server();
+
+            REQUIRE(websrv->endpoints().empty());
+
+            websrv->register_stream_endpoint(stream_descr("/fw/${id}"));
+            websrv->register_http_endpoint(http_descr("/status"));
+
+            auto v = websrv->endpoints();
+
+            REQUIRE(v.size() == 2);
+            REQUIRE(v[0].kind_ == xo::web::EndpointKind::http);
+            REQUIRE(v[0].uri_pattern_ == "/status");
+            REQUIRE(v[1].kind_ == xo::web::EndpointKind::stream);
+            REQUIRE(v[1].uri_pattern_ == "/fw/${id}");
+
+            REQUIRE(websrv->unregister_stream_endpoint("/fw/${id}"));
+            REQUIRE(websrv->endpoints().size() == 1);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 

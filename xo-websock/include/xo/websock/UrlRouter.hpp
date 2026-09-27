@@ -6,12 +6,14 @@
 #pragma once
 
 #include "DynamicEndpoint.hpp"
+#include "EndpointInfo.hpp"
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
 #include <xo/refcnt/Refcounted.hpp>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace xo {
     namespace web {
@@ -68,6 +70,11 @@ namespace xo {
              *  if there is none; see unregister_http().
              **/
             rp<DynamicEndpoint> unregister_stream(std::string const & uri_pattern);
+
+            /** every registered endpoint, http then stream, each by stem.
+             *  Copies, taken under the lock; for introspection.
+             **/
+            std::vector<EndpointInfo> endpoints() const;
 
             /** http endpoint serving @p uri; null if none.  See find_in(). **/
             rp<DynamicEndpoint> find_http(std::string const & uri) const;

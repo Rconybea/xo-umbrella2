@@ -7,6 +7,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* xtag(..) */
+#include <algorithm>
 #include <stdexcept>
 
 namespace xo {
@@ -133,6 +134,37 @@ namespace xo {
         {
             return this->erase_in(uri_pattern, &this->stream_map_);
         }
+
+        std::vector<EndpointInfo>
+        UrlRouter::endpoints() const
+        {
+            std::vector<EndpointInfo> retval;
+
+            {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+
+                retval.reserve(this->http_map_.size() + this->stream_map_.size());
+
+                for (auto const * ep_map : {&this->http_map_, &this->stream_map_}) {
+                    for (auto const & ix : *ep_map) {
+                        retval.push_back(EndpointInfo{ix.second->kind(),
+                                                      ix.first,
+                                                      ix.second->uri_pattern()});
+                    }
+                }
+            }
+
+            /* the maps are unordered: sort, so a listing is stable */
+            std::sort(retval.begin(), retval.end(),
+                      [](EndpointInfo const & x, EndpointInfo const & y)
+                          {
+                              if (x.kind_ != y.kind_)
+                                  return x.kind_ < y.kind_;
+                              return x.stem_ < y.stem_;
+                          });
+
+            return retval;
+        } /*endpoints*/
 
         rp<DynamicEndpoint>
         UrlRouter::find_http(std::string const & uri) const
