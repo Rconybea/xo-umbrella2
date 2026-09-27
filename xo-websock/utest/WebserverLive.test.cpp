@@ -21,6 +21,7 @@
 #include <json/json.h>
 #include <chrono>
 #include <condition_variable>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -167,6 +168,38 @@ namespace xo {
             }
 
             REQUIRE(client.close(c_timeout));
+        }
+
+        TEST_CASE("live-a-server-that-cannot-start-still-joins", "[websock][live]")
+        {
+            /* lws_create_context fails when the port is taken; run() used to
+             * return without reporting stopped, so join_webserver() hung
+             */
+            LiveServer first;
+            std::int32_t port = first.start();
+            REQUIRE(port > 0);
+
+            rp<Webserver> second = Webserver::make(WebserverConfig(port, false, false, false),
+                                                   PrintJsonSingleton::instance());
+            second->start_webserver();
+
+            /* join on a DETACHED thread, so a regression fails instead of
+             * hanging: a std::async future would block in its destructor.
+             * The thread holds its own rp, so on regression neither it nor
+             * ~WebserverImpl (which also joins) runs on the test's thread.
+             */
+            std::promise<void> joined_promise;
+            std::future<void> joined = joined_promise.get_future();
+
+            std::thread([second, p = std::move(joined_promise)]() mutable
+                {
+                    second->join_webserver();
+                    p.set_value();
+                }).detach();
+
+            REQUIRE(joined.wait_for(c_timeout) == std::future_status::ready);
+            REQUIRE(second->listen_port() == 0);
+            REQUIRE(second->state() == xo::web::Runstate::stopped);
         }
     } /*namespace ut*/
 } /*namespace xo*/

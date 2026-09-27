@@ -616,6 +616,11 @@ namespace xo {
             virtual void stop_webserver() override;
             virtual void join_webserver() override;
 
+            /* any thread: interrupt the service thread's lws_service(), so it
+             * runs LWS_CALLBACK_EVENT_WAIT_CANCELLED.  No-op when not running
+             */
+            void wake_service_thread();
+
         protected:
             void set_lws_log_level() {
                 lws_set_log_level(LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE
@@ -858,9 +863,19 @@ namespace xo {
              */
             lws_context_creation_info cx_config_;
 
+            /* protects .lws_cx -- the POINTER, against the service thread
+             * publishing it at start and destroying it at stop.  See
+             * .wake_service_thread()
+             */
+            std::mutex cx_mutex_;
+
             /* runtime state owned by LWS library
              * can get application-determined user data from a lws_context by
              *   lws_context_user(.lws_cx)
+             *
+             * Written only by the service thread, under .cx_mutex; null
+             * before start and once stop begins.  Other threads use it only
+             * through .wake_service_thread().
              */
             lws_context * lws_cx_ = nullptr;
 
@@ -975,8 +990,7 @@ namespace xo {
                 this->removed_endpoint_v_.push_back(std::move(removed));
             }
 
-            if (this->lws_cx_)
-                ::lws_cancel_service(this->lws_cx_);
+            this->wake_service_thread();
 
             /* if the server is not running there are no sessions, so nothing
              * to end; the queue drains on the next wakeup, or with the server
@@ -1302,18 +1316,32 @@ namespace xo {
             /* NOTE: this is threadsafe - ::lws_cancel_service()
              *       writes to a pipe to interrupt polling loop
              */
-            {
-                this->interrupt_flag_ = true;
-
-                if (this->lws_cx_) {
-                    ::lws_cancel_service(this->lws_cx_);
-                }
-            }
+            /* flag first: if the context is not yet published, the wakeup
+             * below does nothing, but run() checks the flag before its first
+             * lws_service() call
+             */
+            this->interrupt_flag_ = true;
+            this->wake_service_thread();
 
             std::unique_lock<std::mutex> lock(this->mutex_);
 
             this->state_ = Runstate::stop_requested;
         } /*interrupt_stop_webserver*/
+
+        void
+        WebserverImpl::wake_service_thread()
+        {
+            /* the lock spans the null check AND the call, so the context
+             * cannot be destroyed in between: run() nulls .lws_cx under this
+             * lock before destroying it.  lws_cancel_service() writes to a
+             * pipe -- never blocks, never calls back -- so holding the lock
+             * across it is safe.
+             */
+            std::lock_guard<std::mutex> lock(this->cx_mutex_);
+
+            if (this->lws_cx_)
+                ::lws_cancel_service(this->lws_cx_);
+        } /*wake_service_thread*/
 
         void
         WebserverImpl::stop_webserver()
@@ -1849,18 +1877,36 @@ namespace xo {
 
             /* exit when .state is stop_requested,  setting state to .stopped */
 
-            this->lws_cx_ = lws_create_context(&(this->cx_config_));
+            /* service thread owns the context; other threads reach it only
+             * through wake_service_thread(), via .lws_cx under .cx_mutex
+             */
+            lws_context * lws_cx = lws_create_context(&(this->cx_config_));
 
-            if (!(this->lws_cx_)) {
+            if (!lws_cx) {
                 lwsl_err("lws init failed\n");
+
+                /* still report stopped: join_webserver() waits for exactly
+                 * this, and would otherwise wait forever
+                 */
+                std::unique_lock<std::mutex> lock(this->mutex_);
+
+                this->state_ = Runstate::stopped;
+                this->cond_.notify_all();
+
                 return;
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(this->cx_mutex_);
+
+                this->lws_cx_ = lws_cx;
             }
 
             /* listening from here.  The port the OS picked, when configured
              * with port 0 -- see listen_port()
              */
             {
-                lws_vhost * vhost = ::lws_get_vhost_by_name(this->lws_cx_,
+                lws_vhost * vhost = ::lws_get_vhost_by_name(lws_cx,
                                                             this->cx_config_.vhost_name);
 
                 if (vhost)
@@ -1869,7 +1915,7 @@ namespace xo {
 
             std::int32_t n_event = 0;
             while ((n_event >= 0) && !(this->interrupt_flag_)) {
-                n_event = ::lws_service(this->lws_cx_,
+                n_event = ::lws_service(lws_cx,
                                         0 /*ignored (used to be timeout)*/);
             }
 
@@ -1879,8 +1925,16 @@ namespace xo {
 
             this->listen_port_.store(0);
 
-            lws_context_destroy(this->lws_cx_);
-            this->lws_cx_ = nullptr;
+            /* unpublish BEFORE destroying: a concurrent wake_service_thread()
+             * either finished with the live context, or now sees null
+             */
+            {
+                std::lock_guard<std::mutex> lock(this->cx_mutex_);
+
+                this->lws_cx_ = nullptr;
+            }
+
+            lws_context_destroy(lws_cx);
 
             {
                 std::unique_lock<std::mutex> lock(this->mutex_);
