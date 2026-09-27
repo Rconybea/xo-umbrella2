@@ -434,15 +434,24 @@ namespace xo {
             std::int32_t port = srv.start();
             REQUIRE(port > 0);
 
-            REQUIRE(srv.websrv_->sessions().empty());
+            /* the server as its json printer shows it */
+            auto server_json = [&srv] {
+                Webserver * server = srv.websrv_.get();
+                std::stringstream ss;
+                PrintJsonSingleton::instance()->print(server, &ss);
+                return parse(ss.str());
+            };
+            auto n_session = [&] { return server_json()["sessions"].size(); };
+
+            REQUIRE(n_session() == 0);
 
             auto first = std::make_unique<WsTestClient>(port);
             REQUIRE(first->wait_connected(c_timeout));
-            REQUIRE(wait_until([&] { return srv.websrv_->sessions().size() == 1; }));
+            REQUIRE(wait_until([&] { return n_session() == 1; }));
 
             WsTestClient second(port);
             REQUIRE(second.wait_connected(c_timeout));
-            REQUIRE(wait_until([&] { return srv.websrv_->sessions().size() == 2; }));
+            REQUIRE(wait_until([&] { return n_session() == 2; }));
 
             /* the second subscribes; the reply precedes the subscribe
              * function, so wait on the sink, not the reply
@@ -451,50 +460,51 @@ namespace xo {
             REQUIRE(second.wait_received(1, c_timeout));
             REQUIRE(box->wait_sink(0));
 
-            auto v = srv.websrv_->sessions();
+            Json::Value const root = server_json();
+            Json::Value const & v = root["sessions"];
 
-            /* by id, in connection order; distinct; both open */
+            INFO("json: " << root.toStyledString());
+
+            /* by id, in connection order; distinct */
             REQUIRE(v.size() == 2);
-            REQUIRE(v[0].session_id_ < v[1].session_id_);
-            REQUIRE(v[0].sender_open_);
-            REQUIRE(v[1].sender_open_);
-            REQUIRE(v[0].subscriptions_.empty());
-            REQUIRE(v[1].subscriptions_.size() == 1);
-            REQUIRE(v[1].subscriptions_[0].stream_name_ == "/fw");
-            REQUIRE(v[1].subscriptions_[0].endpoint_pattern_ == "/fw");
+            REQUIRE(v[0]["_name_"].asString() == "WsSession");
+            REQUIRE(v[0]["session_id"].asUInt64() < v[1]["session_id"].asUInt64());
+            REQUIRE(v[0]["id"].asString() != v[1]["id"].asString());
 
-            std::uint64_t second_id = v[1].session_id_;
+            /* each session's sender, in full: open; its session's id; held
+             * by the session record and the router, plus one per sink
+             */
+            for (Json::ArrayIndex k = 0; k < 2; ++k) {
+                Json::Value const & sender = v[k]["sender"];
 
-            /* the same state, through the Webserver json printer */
-            {
-                Webserver * server = srv.websrv_.get();
-                std::stringstream ss;
-                PrintJsonSingleton::instance()->print(server, &ss);
-
-                Json::Value const sessions = parse(ss.str())["sessions"];
-
-                INFO("json: " << ss.str());
-                REQUIRE(sessions.size() == 2);
-                REQUIRE(sessions[0]["id"].asUInt64() == v[0].session_id_);
-                REQUIRE(sessions[1]["sender_open"].asBool());
-                REQUIRE(sessions[1]["subscriptions"].size() == 1);
-                REQUIRE(sessions[1]["subscriptions"][0]["stream"].asString() == "/fw");
-
-                /* the /fw endpoint is held by the router's map and by the one
-                 * subscription served: refcount 2
-                 */
-                Json::Value const eps = parse(ss.str())["endpoints"];
-                REQUIRE(eps.size() == 1);
-                REQUIRE(eps[0]["pattern"].asString() == "/fw");
-                REQUIRE(eps[0]["refcount"].asUInt() == 2);
+                REQUIRE(sender["_name_"].asString() == "WsSessionSender");
+                REQUIRE(sender["open"].asBool());
+                REQUIRE(sender["session_id"].asUInt64() == v[k]["session_id"].asUInt64());
             }
+            REQUIRE(v[0]["sender"]["refcount"].asUInt() == 2);
+            REQUIRE(v[1]["sender"]["refcount"].asUInt() == 3);
+
+            REQUIRE(v[0]["subscriptions"].empty());
+            REQUIRE(v[1]["subscriptions"].size() == 1);
+            REQUIRE(v[1]["subscriptions"][0]["stream"].asString() == "/fw");
+            REQUIRE(v[1]["subscriptions"][0]["endpoint"].asString() == "/fw");
+
+            std::uint64_t second_id = v[1]["session_id"].asUInt64();
+
+            /* the /fw endpoint is held by the router's map and by the one
+             * subscription served: refcount 2
+             */
+            Json::Value const & eps = root["endpoints"];
+            REQUIRE(eps.size() == 1);
+            REQUIRE(eps[0]["pattern"].asString() == "/fw");
+            REQUIRE(eps[0]["refcount"].asUInt() == 2);
 
             /* a closed session leaves the listing */
             REQUIRE(first->close(c_timeout));
             first.reset();
 
-            REQUIRE(wait_until([&] { return srv.websrv_->sessions().size() == 1; }));
-            REQUIRE(srv.websrv_->sessions()[0].session_id_ == second_id);
+            REQUIRE(wait_until([&] { return n_session() == 1; }));
+            REQUIRE(server_json()["sessions"][0]["session_id"].asUInt64() == second_id);
         }
     } /*namespace ut*/
 } /*namespace xo*/

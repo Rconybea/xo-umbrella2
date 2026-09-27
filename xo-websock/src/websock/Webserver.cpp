@@ -26,6 +26,11 @@
 #include "WsSessionSender.hpp"
 #include "WsSessionTable.hpp"
 #include "cx/WebsockAppcx.hpp"
+#include "webserver_json.hpp"
+#include <xo/printjson/JsonPrinter.hpp>
+#include <xo/reflect/Reflect.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
+#include <sstream>
 #include "WsSessionRouter.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
@@ -42,6 +47,10 @@
 
 namespace xo {
     using xo::json::PrintJson;
+    using xo::json::JsonPrinter;
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
+    using xo::pp::quot;
     using xo::fn::CallbackId;
     using xo::pp::scope;
     using xo::pp::xtag;
@@ -359,14 +368,10 @@ namespace xo {
              */
             void close_sender() { this->sender_->close(); }
 
-            /* this session, as a plain value; for introspection.  Takes the
-             * router's lock (briefly, via subscriptions)
-             */
-            SessionInfo info() const {
-                return SessionInfo{this->sender_->session_id(),
-                                   this->sender_->is_open(),
-                                   this->router_.subscriptions()};
-            }
+            /* for introspection (JsonPrinter_WsSession) */
+            std::uint64_t session_id() const { return this->sender_->session_id(); }
+            WsSessionSenderImpl const & sender() const { return *(this->sender_.get()); }
+            WsSessionRouter const & router() const { return router_; }
 
             bool is_output_busy() const {
                 return (this->output_buf_
@@ -625,7 +630,7 @@ namespace xo {
             virtual void visit_endpoints(EndpointVisitor const & fn) const override {
                 this->url_router_.visit_endpoints(fn);
             }
-            virtual std::vector<SessionInfo> sessions() const override;
+            virtual void visit_sessions(SessionVisitor const & fn) const override;
             virtual void start_webserver() override;
             virtual void interrupt_stop_webserver() override;
             virtual void stop_webserver() override;
@@ -982,29 +987,103 @@ namespace xo {
             this->url_router_.register_stream(endpoint_descr);
         } /*register_stream_endpoint*/
 
-        std::vector<SessionInfo>
-        WebserverImpl::sessions() const
+        void
+        WebserverImpl::visit_sessions(SessionVisitor const & fn) const
         {
-            std::vector<SessionInfo> retval;
-
-            /* lock order: session table, then each router's own lock (inside
-             * n_subscription).  Nothing takes them the other way round: a
-             * router never calls out while holding its lock
+            /* lock order: session table, then (inside fn, when printing
+             * subscriptions) each router's own lock.  Nothing takes them the
+             * other way round: a router never calls out holding its lock
              */
-            this->session_table_.for_each([&retval](WebsocketSessionRecd const & recd)
+            this->session_table_.for_each_by_id([&fn](std::uint64_t, WebsocketSessionRecd const & recd)
                 {
-                    retval.push_back(recd.info());
+                    fn(TaggedPtr(Reflect::require<WebsocketSessionRecd>(),
+                                 const_cast<WebsocketSessionRecd *>(&recd)));
                 });
+        } /*visit_sessions*/
 
-            /* the table is unordered: sort, so a listing is stable */
-            std::sort(retval.begin(), retval.end(),
-                      [](SessionInfo const & x, SessionInfo const & y)
-                          {
-                              return x.session_id_ < y.session_id_;
-                          });
+        namespace {
+            /** @brief a session's sender: owned (held) by the session record,
+             *  its router, and every sink made there.  Printed in full under
+             *  its session; a sink will show it as a ref (5d)
+             **/
+            class JsonPrinter_WsSessionSender : public JsonPrinter {
+            public:
+                JsonPrinter_WsSessionSender(PrintJson const * pjson) : JsonPrinter(pjson) {}
 
-            return retval;
-        } /*sessions*/
+                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                    WsSessionSenderImpl const * x
+                        = this->check_recover_native<WsSessionSenderImpl>(tp, p_os);
+
+                    if (!x)
+                        return;
+
+                    std::ostringstream id;
+                    id << static_cast<void const *>(x);
+
+                    *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
+                          << ", " << quot("id") << ": " << quot(id.str())
+                          /* session record + router + one per live sink */
+                          << ", " << quot("refcount") << ": " << x->reference_counter()
+                          << ", " << quot("session_id") << ": " << x->session_id()
+                          << ", " << quot("open") << ": " << (x->is_open() ? "true" : "false")
+                          << "}";
+                }
+            };
+
+            /** @brief a live session: its id, its sender (in full), and its
+             *  subscriptions -- still from SubscriptionInfo until 5d
+             **/
+            class JsonPrinter_WsSession : public JsonPrinter {
+            public:
+                JsonPrinter_WsSession(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                    WebsocketSessionRecd const * recd
+                        = this->check_recover_native<WebsocketSessionRecd>(tp, p_os);
+
+                    if (!recd)
+                        return;
+
+                    std::ostringstream id;
+                    id << static_cast<void const *>(recd);
+
+                    *p_os << "{" << quot("_name_") << ": " << quot("WsSession")
+                          << ", " << quot("id") << ": " << quot(id.str())
+                          << ", " << quot("session_id") << ": " << recd->session_id()
+                          << ", " << quot("sender") << ": ";
+
+                    this->pjson()->print_aux(TaggedPtr(Reflect::require<WsSessionSenderImpl>(),
+                                                       const_cast<WsSessionSenderImpl *>(&recd->sender())),
+                                             p_os);
+
+                    /* temporary: SubscriptionInfo fragments, until 5d */
+                    *p_os << ", " << quot("subscriptions") << ": [";
+                    {
+                        bool first = true;
+                        for (SubscriptionInfo const & sub : recd->router().subscriptions()) {
+                            if (!first)
+                                *p_os << ", ";
+                            first = false;
+
+                            *p_os << "{" << quot("sub_id") << ": " << sub.sub_id_
+                                  << ", " << quot("stream") << ": " << quot(sub.stream_name_)
+                                  << ", " << quot("endpoint") << ": " << quot(sub.endpoint_pattern_)
+                                  << "}";
+                        }
+                    }
+                    *p_os << "]}";
+                }
+            };
+        } /*namespace*/
+
+        void
+        provide_webserver_json_printers(PrintJson * pjson)
+        {
+            pjson->provide_printer(Reflect::require<WebsocketSessionRecd>(),
+                                   std::make_unique<JsonPrinter_WsSession>(pjson));
+            pjson->provide_printer(Reflect::require<WsSessionSenderImpl>(),
+                                   std::make_unique<JsonPrinter_WsSessionSender>(pjson));
+        } /*provide_webserver_json_printers*/
 
         bool
         WebserverImpl::unregister_http_endpoint(std::string const & uri_pattern)

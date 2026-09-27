@@ -7,7 +7,7 @@
 
 #include "WebsocketSink.hpp"
 #include "WsSender.hpp"
-#include "SessionInfo.hpp"
+#include "SubscriptionInfo.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/callback/CallbackId.hpp>

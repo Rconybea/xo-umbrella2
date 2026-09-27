@@ -3,7 +3,6 @@
 #pragma once
 
 #include "EndpointKind.hpp"
-#include "SessionInfo.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
@@ -143,10 +142,15 @@ namespace xo {
              */
             virtual void visit_endpoints(EndpointVisitor const & fn) const = 0;
 
-            /* every live websocket session, by id; copies, for
-             * introspection.  Any thread
+            /* call fn on every live websocket session, in id order, for
+             * introspection.  Any thread.  The session is private to the
+             * server, so fn gets it as a TaggedPtr -- for PrintJson, whose
+             * printer for it the websock context installed.  fn runs under
+             * the session table's lock: it must not send, or open/close
+             * sessions
              */
-            virtual std::vector<SessionInfo> sessions() const = 0;
+            using SessionVisitor = std::function<void (xo::reflect::TaggedPtr session)>;
+            virtual void visit_sessions(SessionVisitor const & fn) const = 0;
 
             /* start thread for this webserver; idempotent */
             virtual void start_webserver() = 0;

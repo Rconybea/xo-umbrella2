@@ -10,6 +10,9 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <utility>
+#include <vector>
+#include <algorithm>
 
 namespace xo {
     namespace web {
@@ -124,6 +127,27 @@ namespace xo {
 
                 for (auto const & ix : this->session_map_)
                     fn(static_cast<Recd const &>(*(ix.second)));
+            }
+
+            /** as for_each const, in increasing id order -- the table is
+             *  unordered, so this sorts, all under the mutex.
+             *  @p fn gets (SessionId, Recd const &)
+             **/
+            template <typename Fn>
+            void for_each_by_id(Fn && fn) const {
+                std::lock_guard<std::mutex> lock(this->mutex_);
+
+                std::vector<std::pair<SessionId, Recd const *>> v;
+                v.reserve(this->session_map_.size());
+
+                for (auto const & ix : this->session_map_)
+                    v.emplace_back(ix.first, ix.second.get());
+
+                std::sort(v.begin(), v.end(),
+                          [](auto const & x, auto const & y) { return x.first < y.first; });
+
+                for (auto const & ix : v)
+                    fn(ix.first, *(ix.second));
             }
 
             /** number of live sessions **/

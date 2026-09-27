@@ -6,15 +6,16 @@
  *  See .xo-backlog/xo-websock/issues/10.
  *
  *  The Webserver printer reads the server through its public API.  Native
- *  printers so far: Webserver, DynamicEndpoint (5b).  Sessions are still
- *  printed from the SessionInfo listing; later increments replace that with
- *  printers for the native objects (the session, WsSessionSender, the
- *  subscription and its sink), after which the Info types go.
+ *  printers so far: Webserver, DynamicEndpoint (5b); the session and its
+ *  WsSessionSender (5c) live in Webserver.cpp, which alone sees those types
+ *  (webserver_json.hpp).  A session's subscriptions are still printed from
+ *  SubscriptionInfo; 5d replaces that with the subscription and its sink.
  **/
 
 #include "websock_json.hpp"
 #include "Webserver.hpp"
 #include "DynamicEndpoint.hpp"
+#include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
@@ -44,30 +45,6 @@ namespace xo {
             /* ----- temporary: Info fragments, retired as native printers
              *       arrive (increments 5b..5d)
              */
-
-            void print_subscription_info(SubscriptionInfo const & x, std::ostream * p_os) {
-                *p_os << "{" << quot("sub_id") << ": " << x.sub_id_
-                      << ", " << quot("stream") << ": " << quot(x.stream_name_)
-                      << ", " << quot("endpoint") << ": " << quot(x.endpoint_pattern_)
-                      << "}";
-            }
-
-            void print_session_info(SessionInfo const & x, std::ostream * p_os) {
-                *p_os << "{" << quot("id") << ": " << x.session_id_
-                      << ", " << quot("sender_open") << ": " << (x.sender_open_ ? "true" : "false")
-                      << ", " << quot("subscriptions") << ": [";
-
-                bool first = true;
-                for (SubscriptionInfo const & sub : x.subscriptions_) {
-                    if (!first)
-                        *p_os << ", ";
-                    first = false;
-
-                    print_subscription_info(sub, p_os);
-                }
-
-                *p_os << "]}";
-            }
 
             /** @brief a registered endpoint.  Printed in full where it is
              *  owned -- the Webserver's endpoint list; elsewhere (a
@@ -140,13 +117,18 @@ namespace xo {
                     *p_os << ", " << quot("sessions") << ": [";
                     {
                         bool first = true;
-                        for (SessionInfo const & s : websrv->sessions()) {
-                            if (!first)
-                                *p_os << ", ";
-                            first = false;
+                        PrintJson const * pjson = this->pjson();
 
-                            print_session_info(s, p_os);
-                        }
+                        /* each session via its own printer (installed by
+                         * provide_webserver_json_printers), in id order
+                         */
+                        websrv->visit_sessions([pjson, p_os, &first](TaggedPtr session) {
+                                if (!first)
+                                    *p_os << ", ";
+                                first = false;
+
+                                pjson->print_aux(session, p_os);
+                            });
                     }
                     *p_os << "]";
 
@@ -162,6 +144,8 @@ namespace xo {
                                    std::make_unique<JsonPrinter_Webserver>(pjson));
             pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
                                    std::make_unique<JsonPrinter_DynamicEndpoint>(pjson));
+            /* session and sender: private to Webserver.cpp, printed there */
+            provide_webserver_json_printers(pjson);
         }
     } /*namespace web*/
 } /*namespace xo*/

@@ -9,7 +9,8 @@
 //
 // Webserver json: {id, refcount, listen_port, state,
 //            endpoints: [{id, refcount, kind, stem, pattern, has_receive}],
-//            sessions: [{id, sender_open,
+//            sessions: [{id, session_id,
+//                        sender: {id, refcount, session_id, open},
 //                        subscriptions: [{sub_id, stream, endpoint}]}]}.
 
 "use strict";
@@ -91,19 +92,29 @@ function layout(snap) {
     let n_sub_max = 0;
 
     (snap.sessions || []).forEach((s, i) => {
-        const id = `session:${s.id}`;
+        const id = `session:${s.session_id}`;
         const x = col_x.http + i * 240;
         const subs = s.subscriptions || [];
+        const open = s.sender && s.sender.open;
 
-        nodes.push({id: id, kind: s.sender_open ? "session" : "session closed",
-                    label: `session ${s.id}`, x: x, y: session_y});
+        nodes.push({id: id, kind: open ? "session" : "session closed",
+                    label: `session ${s.session_id}`, x: x, y: session_y});
         links.push({source: "server", target: id});
+
+        // the session's sender: first under it, with its refcount
+        if (s.sender) {
+            const snd = `${id}:sender`;
+            nodes.push({id: snd, kind: "sender", label: "sender",
+                        refcount: s.sender.refcount,
+                        x: x + 18, y: session_y + row_h, small: true});
+            links.push({source: id, target: snd, kind: "owns"});
+        }
 
         subs.forEach((sub, k) => {
             const sid = `${id}:sub:${sub.sub_id}`;
             nodes.push({id: sid, kind: "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
-                        x: x + 18, y: session_y + row_h + k * sub_h, small: true});
+                        x: x + 18, y: session_y + row_h + (k + 1) * sub_h, small: true});
             links.push({source: id, target: sid, kind: "owns"});
 
             const ep = endpoint_id[`stream:${sub.endpoint}`];
@@ -111,7 +122,7 @@ function layout(snap) {
                 uses.push({source: sid, target: ep});
         });
 
-        n_sub_max = Math.max(n_sub_max, subs.length);
+        n_sub_max = Math.max(n_sub_max, subs.length + 1);   // + the sender
     });
 
     const n_session = (snap.sessions || []).length;

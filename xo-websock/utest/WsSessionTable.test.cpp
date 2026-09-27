@@ -11,6 +11,7 @@
 
 #include "xo/websock/WsSessionTable.hpp"
 #include <catch2/catch.hpp>
+#include <algorithm>
 #include <memory>
 #include <set>
 #include <string>
@@ -147,6 +148,34 @@ namespace xo {
             ctable.for_each([&visited](FakeRecd const & r) { visited.insert(r.name_); });
 
             REQUIRE(visited == std::set<std::string>{"a"});
+        }
+
+        TEST_CASE("session-table-for-each-by-id-is-in-id-order", "[websock][WsSessionTable]")
+        {
+            Table table;
+            std::vector<SessionId> ids;
+
+            for (int i = 0; i < 20; ++i)
+                ids.push_back(open(&table, "s" + std::to_string(i)));
+
+            /* retire every third, so the map has holes */
+            for (int i = 0; i < 20; i += 3)
+                table.take(ids[i]);
+
+            Table const & ctable = table;
+            std::vector<SessionId> seen;
+            std::vector<std::string> names;
+
+            ctable.for_each_by_id([&](SessionId id, FakeRecd const & r) {
+                    seen.push_back(id);
+                    names.push_back(r.name_);
+                });
+
+            REQUIRE(seen.size() == table.size());
+            REQUIRE(std::is_sorted(seen.begin(), seen.end()));
+            /* each id arrives with its own record */
+            for (std::size_t k = 0; k < seen.size(); ++k)
+                REQUIRE(names[k] == "s" + std::to_string(seen[k] - ids[0]));
         }
     } /*namespace ut*/
 } /*namespace xo*/
