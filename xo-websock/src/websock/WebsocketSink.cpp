@@ -4,7 +4,6 @@
  */
 
 #include "WebsocketSink.hpp"
-#include "Webserver.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>  /* display_string */
@@ -22,30 +21,6 @@ namespace xo {
     using xo::pp::xtag;
 
     namespace web {
-        namespace {
-            /* sends to one session of a webserver.
-             *
-             * Interim: one per SINK, as the std::function it replaced was, and
-             * never closed.  Issue 05 replaces it with one sender per session,
-             * owned and closed by the webserver.
-             */
-            class WebserverSessionSender : public WsSender {
-            public:
-                WebserverSessionSender(rp<Webserver> websrv, uint32_t session_id)
-                    : websrv_{std::move(websrv)}, session_id_{session_id} {}
-
-                void send_text(std::string text) override {
-                    websrv_->send_text(session_id_, std::move(text));
-                }
-
-                bool is_open() const override { return true; }
-
-            private:
-                rp<Webserver> websrv_;
-                uint32_t session_id_ = 0;
-            };
-        }
-
         /* a sink that publishes to a websocket.
          * The websocket api creates a WebsocketSink instance
          * on behalf of an incoming subscription request.
@@ -151,20 +126,6 @@ namespace xo {
         }
 
         // ----- WebsocketSink -----
-
-        rp<WebsocketSink>
-        WebsocketSink::make(rp<Webserver> const & websrv,
-                            rp<PrintJson> const & pjson,
-                            uint32_t session_id,
-                            std::string const & stream_name,
-                            uint32_t sub_id)
-        {
-            /* events arriving at this sink are sent only to session_id */
-            return make(new WebserverSessionSender(websrv, session_id),
-                        pjson,
-                        stream_name,
-                        sub_id);
-        } /*make*/
 
         rp<WebsocketSink>
         WebsocketSink::make(rp<WsSender> sender,

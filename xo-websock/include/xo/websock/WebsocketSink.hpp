@@ -15,8 +15,6 @@ namespace xo {
     namespace reflect { class TaggedPtr; }
 
     namespace web {
-        class Webserver;
-
         /** @brief the outbound end of one websocket subscription.
          *
          *  The webserver creates one of these on behalf of an incoming
@@ -31,20 +29,12 @@ namespace xo {
             using TaggedPtr = xo::reflect::TaggedPtr;
 
         public:
-            /** sink sending to session @p session_id of @p websrv.
-             *  This is what the webserver creates per subscription.
-             **/
-            static rp<WebsocketSink> make(rp<Webserver> const & websrv,
-                                          rp<PrintJson> const & pjson,
-                                          uint32_t session_id,
-                                          std::string const & stream_name,
-                                          uint32_t sub_id);
-
             /** sink handing each finished message to @p sender.
              *
-             *  The webserver-backed make() above is this plus a sender that
-             *  calls Webserver::send_text.  Also lets the envelope -- stream,
-             *  sub_id, seq, event -- be exercised without a live webserver.
+             *  The webserver's session router makes one per subscription,
+             *  with that session's sender.  A test sender lets the envelope
+             *  -- stream, sub_id, seq, event -- be exercised without a live
+             *  webserver.
              **/
             static rp<WebsocketSink> make(rp<WsSender> sender,
                                           rp<PrintJson> const & pjson,

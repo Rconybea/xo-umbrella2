@@ -22,6 +22,7 @@
 #include "WebsockUtil.hpp"
 #include "WebsocketSink.hpp"
 #include "WsSafetyToken.hpp"
+#include "WsSender.hpp"
 #include "WsSessionRouter.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
@@ -29,6 +30,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <regex>
@@ -320,28 +322,68 @@ namespace xo {
             }; /*per_vhost_data__minimal*/
         } /*namespace*/
 
+        class WebserverImpl;
+
+        /* sends to one websocket session of a webserver: its router's
+         * replies, and frames from every sink that router makes.
+         * One per session, created at session open.
+         *
+         * Holds a plain WebserverImpl pointer, not rp<>: the server owns its
+         * sessions, and an rp<> here would be a cycle (the session record
+         * outlives the session, until its slot is reused).
+         *
+         * close() at session close (and, as a backstop, when the server is
+         * destroyed): from then on send_text() drops what it is given.  So
+         * a sink the application keeps past its session can neither write
+         * into a later session that reuses the id, nor reach a freed
+         * server.  See .xo-backlog/xo-websock/issues/05.
+         */
+        class WsSessionSender : public WsSender {
+        public:
+            WsSessionSender(WebserverImpl * websrv, uint32_t session_id)
+                : websrv_{websrv}, session_id_{session_id} {}
+
+            /* defined after WebserverImpl */
+            void send_text(std::string text) override;
+            bool is_open() const override { return open_.load(); }
+
+            /* stop delivering; idempotent */
+            void close() { open_.store(false); }
+
+        private:
+            WebserverImpl * websrv_ = nullptr;
+            uint32_t session_id_ = 0;
+            std::atomic<bool> open_{true};
+        }; /*WsSessionSender*/
+
         /* bookkeeping record for a websocket session.
          * WebserverImpl (below) keeps exactly one of these
          * for each active websocket session
          */
         class WebsocketSessionRecd {
         public:
-            /* @p url_router and the two functions are the session's router's
-             * view of the webserver; see WsSessionRouter.  @p url_router is
-             * borrowed, and must outlive this session
+            /* @p url_router and @p sender are the session's router's view of
+             * the webserver; see WsSessionRouter.  @p url_router is borrowed,
+             * and must outlive this session
              */
             WebsocketSessionRecd(OutputBuffer * output_buf,
                                  UrlRouter const & url_router,
-                                 WsSessionRouter::SinkFactory sink_fn,
-                                 WsSessionRouter::ReplyFn reply_fn)
+                                 rp<WsSessionSender> sender,
+                                 rp<PrintJson> pjson)
                 : output_buf_{output_buf},
-                  router_{url_router, std::move(sink_fn), std::move(reply_fn)}
+                  sender_{sender},
+                  router_{url_router, sender, std::move(pjson)}
             {
                 assert(this->output_buf_);
             }
 
             /* this session's subscriptions, and the commands that use them */
             WsSessionRouter & router() { return router_; }
+
+            /* session closed (or server going away): this session's sender,
+             * and every sink holding it, drop anything further
+             */
+            void close_sender() { this->sender_->close(); }
 
             bool is_output_busy() const {
                 return (this->output_buf_
@@ -537,6 +579,8 @@ namespace xo {
              * (.router has its own lock)
              */
             std::mutex mutex_;
+            /* sends to this session; shared by .router and its sinks */
+            rp<WsSessionSender> sender_;
             /* this session's subscriptions, and inbound command handling */
             WsSessionRouter router_;
             /* generate seq#'s for outgoing messages */
@@ -554,6 +598,9 @@ namespace xo {
         class WebserverImplWsThread;
 
         class WebserverImpl : public Webserver {
+            /* delivers through the protected .send_text() */
+            friend class WsSessionSender;
+
         public:
             WebserverImpl(WebserverConfig const & ws_config,
                           rp<PrintJson> const & pjson)
@@ -571,6 +618,15 @@ namespace xo {
                 this->stop_webserver();
                 /* wait for shutdown to complete */
                 this->join_webserver();
+
+                /* backstop: sessions normally close via
+                 * notify_ws_session_close, but any sink the application still
+                 * holds must not reach this server once it is freed
+                 */
+                for (auto const & recd : this->session_v_) {
+                    if (recd)
+                        recd->close_sender();
+                }
             } /*dtor*/
 
             virtual void run() = 0;
@@ -890,6 +946,14 @@ namespace xo {
         }; /*WebserverImpl*/
 
         void
+        WsSessionSender::send_text(std::string text)
+        {
+            /* a closed sender may outlive its server: check before use */
+            if (this->open_.load())
+                this->websrv_->send_text(this->session_id_, std::move(text));
+        } /*send_text*/
+
+        void
         WebserverImpl::register_http_endpoint(HttpEndpointDescr const & endpoint_descr)
         {
             this->url_router_.register_http(endpoint_descr);
@@ -926,17 +990,9 @@ namespace xo {
                  (output_buf,
                   /* endpoints serving stream names */
                   this->url_router_,
-                  /* sink delivering to THIS session */
-                  [this, new_id](std::string const & stream_name, uint32_t sub_id)
-                      {
-                          return WebsocketSink::make(this, this->pjson_, new_id,
-                                                     stream_name, sub_id);
-                      },
-                  /* reply to THIS session outside any subscription */
-                  [this, new_id](std::string text)
-                      {
-                          this->send_text(new_id, std::move(text));
-                      }));
+                  /* sends to THIS session: replies, and every sink's frames */
+                  rp<WsSessionSender>(new WsSessionSender(this, new_id)),
+                  this->pjson_));
 
             /* control comes here when a new websocket session is created,
              * after LWS_CALLBACK_HTTP_BIND_PROTOCOL
@@ -978,6 +1034,11 @@ namespace xo {
                 = this->session_v_[output_buf->session_id()].get();
 
             if (ws_session_recd) {
+                /* first: anything sent from here on, by this session's router
+                 * or by a sink the application kept, is dropped -- never
+                 * delivered to a later session reusing this id
+                 */
+                ws_session_recd->close_sender();
                 ws_session_recd->unsubscribe_all();
             }
 

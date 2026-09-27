@@ -37,11 +37,11 @@ namespace xo {
         };
 
         WsSessionRouter::WsSessionRouter(UrlRouter const & url_router,
-                                         SinkFactory sink_fn,
-                                         ReplyFn reply_fn)
+                                         rp<WsSender> sender,
+                                         rp<PrintJson> pjson)
             : url_router_{url_router},
-              sink_fn_{std::move(sink_fn)},
-              reply_fn_{std::move(reply_fn)},
+              sender_{std::move(sender)},
+              pjson_{std::move(pjson)},
               readjson_{Json::CharReaderBuilder().newCharReader()}
         {}
 
@@ -202,7 +202,8 @@ namespace xo {
             /* lock dropped from here: making the sink, replying and
              * subscribing may all re-enter the server
              */
-            rp<WebsocketSink> sink = sink_fn_(stream_name, sub_id);
+            rp<WebsocketSink> sink
+                = WebsocketSink::make(this->sender_, this->pjson_, stream_name, sub_id);
 
             {
                 std::lock_guard<std::mutex> lock(this->mutex_);
@@ -291,7 +292,7 @@ namespace xo {
             Json::StreamWriterBuilder wb;
             wb["indentation"] = "";
 
-            this->reply_fn_(Json::writeString(wb, msg));
+            this->sender_->send_text(Json::writeString(wb, msg));
         }
 
         void

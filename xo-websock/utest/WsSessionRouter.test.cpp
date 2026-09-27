@@ -3,13 +3,12 @@
  *  @author Roland Conybeare, Sep 2026
  *
  *  No socket anywhere.  WsSessionRouter reaches the server only through a
- *  UrlRouter (find an endpoint) and two injected functions (make a sink,
- *  reply to the session).  Each case registers endpoints on a REAL UrlRouter,
- *  so stream names resolve by the server's own matching, wires the functions
- *  to recorders, and drives perform_cmd() with the exact text a browser would
- *  send.  The sink cases use the REAL sink
- *  implementation through WebsocketSink::make(sender, ...), whose output is
- *  the envelope a browser would receive.
+ *  UrlRouter (find an endpoint) and the session's WsSender.  Each case
+ *  registers endpoints on a REAL UrlRouter, so stream names resolve by the
+ *  server's own matching, hands the router a RecordingSender, and drives
+ *  perform_cmd() with the exact text a browser would send.  The router makes
+ *  REAL sinks on that sender, so what the sender records -- replies and
+ *  frames, in order -- is what a browser would receive.
  *
  *  Expectations are OBSERVED, never predicted.
  **/
@@ -22,7 +21,6 @@
 #include <catch2/catch.hpp>
 #include <json/json.h>
 #include <iterator>
-#include <map>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -56,27 +54,6 @@ namespace xo {
                 return root;
             }
 
-            /** stands in for the webserver's per-subscription sink **/
-            class FakeSink : public WebsocketSink {
-            public:
-                FakeSink(std::string stream, uint32_t sub_id)
-                    : stream_{std::move(stream)}, sub_id_{sub_id} {}
-
-                std::string const & stream_name() const override { return stream_; }
-                uint32_t n_in_ev() const override { return n_in_ev_; }
-                void notify_ev_tp(TaggedPtr const &) override { ++n_in_ev_; }
-                void pretty(xo::pp::PpSink & sink) const override { sink.put("<FakeSink>"); }
-                std::string display_string() const override { return "<FakeSink>"; }
-
-                std::string stream_;
-                uint32_t sub_id_ = 0;
-                uint32_t n_in_ev_ = 0;
-            };
-
-            uint32_t sub_id_of(rp<WebsocketSink> const & sink) {
-                return dynamic_cast<FakeSink &>(*sink.get()).sub_id_;
-            }
-
             /** everything a router did, as seen from outside it **/
             struct Recorder {
                 /* sinks the endpoints' subscribe functions were handed */
@@ -85,8 +62,8 @@ namespace xo {
                 std::vector<std::pair<rp<WebsocketSink>, Json::Value>> received_v_;
                 /* callback ids the unsubscribe functions were handed */
                 std::vector<uint32_t> unsubscribed_v_;
-                /* every reply outside a subscription, parsed: subscribed,
-                 * unsubscribed and errors, in order
+                /* everything sent to the session, parsed, in order: replies
+                 * (subscribed, unsubscribed, errors) and frames from sinks
                  */
                 std::vector<Json::Value> reply_v_;
 
@@ -100,14 +77,24 @@ namespace xo {
             };
 
             /** stands in for a websocket session: keeps each message sent,
-             *  in order
+             *  in order -- as text, and parsed into @p *p_parsed_v if given
              **/
             class RecordingSender : public WsSender {
             public:
-                void send_text(std::string text) override { sent_v_.push_back(std::move(text)); }
+                explicit RecordingSender(std::vector<Json::Value> * p_parsed_v = nullptr)
+                    : p_parsed_v_{p_parsed_v} {}
+
+                void send_text(std::string text) override {
+                    if (p_parsed_v_)
+                        p_parsed_v_->push_back(parse(text));
+                    sent_v_.push_back(std::move(text));
+                }
                 bool is_open() const override { return true; }
 
                 std::vector<std::string> sent_v_;
+
+            private:
+                std::vector<Json::Value> * p_parsed_v_ = nullptr;
             };
 
             /** records each message into a Recorder **/
@@ -152,16 +139,12 @@ namespace xo {
                 /* the real server-side routing; the router borrows it */
                 UrlRouter url_router_;
 
-                /* how the router makes a sink.  FakeSink unless a case needs
-                 * the real envelope
+                /* the session: replies and frames, in one order, as on a
+                 * socket
                  */
-                WsSessionRouter::SinkFactory sink_fn_
-                    = [](std::string const & stream, uint32_t sub_id) -> rp<WebsocketSink> {
-                          return new FakeSink(stream, sub_id);
-                      };
-
-                /* replies go here; a case can redirect them */
-                WsSessionRouter::ReplyFn reply_fn_;
+                rp<RecordingSender> sender_{new RecordingSender(&rec_.reply_v_)};
+                /* renders frames from the router's (real) sinks */
+                rp<PrintJson> pjson_ = PrintJsonSingleton::instance();
 
                 /** an endpoint for @p stream; @p with_receive adds a receiver **/
                 void add_endpoint(std::string const & stream, bool with_receive = true) {
@@ -183,19 +166,7 @@ namespace xo {
                 }
 
                 std::unique_ptr<WsSessionRouter> make_router() {
-                    Recorder * rec = &rec_;
-
-                    WsSessionRouter::ReplyFn reply_fn = reply_fn_;
-                    if (!reply_fn) {
-                        reply_fn = [rec](std::string text) {
-                            rec->reply_v_.push_back(parse(text));
-                        };
-                    }
-
-                    return std::make_unique<WsSessionRouter>(
-                        url_router_,
-                        sink_fn_,
-                        reply_fn);
+                    return std::make_unique<WsSessionRouter>(url_router_, sender_, pjson_);
                 }
             };
         } /*namespace*/
@@ -219,7 +190,12 @@ namespace xo {
             REQUIRE(r["sub_id"].asUInt() == 0);
 
             /* the sink carries the same id the client was told */
-            REQUIRE(sub_id_of(fx.rec_.subscribed_v_[0]) == 0);
+            int ev = 5;
+            fx.rec_.subscribed_v_[0]->notify_ev_tp(Reflect::make_tp(&ev));
+
+            REQUIRE(fx.rec_.reply_v_.size() == 2);
+            REQUIRE(fx.rec_.reply_v_[1]["sub_id"].asUInt() == 0);
+            REQUIRE(fx.rec_.reply_v_[1]["event"].asInt() == 5);
         }
 
         TEST_CASE("subscribe-to-an-unknown-stream-is-an-error", "[websock][router]")
@@ -275,17 +251,10 @@ namespace xo {
              * Replies and frames share one ordered log here, as they share one
              * socket in production.
              */
-            rp<PrintJson> pjson = PrintJsonSingleton::instance();
-            /* replies and frames share one ordered wire, as on a socket */
-            rp<RecordingSender> sender(new RecordingSender());
-            std::vector<std::string> const & wire = sender->sent_v_;
             static int s_initial = 11;
 
             Fixture fx;
-            fx.reply_fn_ = [sender](std::string t) { sender->send_text(std::move(t)); };
-            fx.sink_fn_ = [pjson, sender](std::string const & stream, uint32_t sub_id) {
-                return WebsocketSink::make(sender, pjson, stream, sub_id);
-            };
+            std::vector<std::string> const & wire = fx.sender_->sent_v_;
             fx.url_router_.register_stream(StreamEndpointDescr(
                 "/fw",
                 [](rp<WebsocketSink> const & sink) {
@@ -341,9 +310,10 @@ namespace xo {
             router->perform_cmd(R"({"cmd": "send", "sub_id": 0, "msg": "first"})");
 
             REQUIRE(fx.rec_.received_v_.size() == 2);
-            REQUIRE(sub_id_of(fx.rec_.received_v_[0].first) == 1);
+            /* subscribed_v_ is in subscribe order, i.e. by sub_id */
+            REQUIRE(fx.rec_.received_v_[0].first.get() == fx.rec_.subscribed_v_[1].get());
             REQUIRE(fx.rec_.received_v_[0].second.asString() == "second");
-            REQUIRE(sub_id_of(fx.rec_.received_v_[1].first) == 0);
+            REQUIRE(fx.rec_.received_v_[1].first.get() == fx.rec_.subscribed_v_[0].get());
             REQUIRE(fx.rec_.received_v_[1].second.asString() == "first");
         }
 
@@ -595,21 +565,12 @@ namespace xo {
 
         TEST_CASE("a-handlers-reply-goes-out-through-its-subscription", "[websock][router][sink]")
         {
-            /* end to end short of a socket: real sinks from the router's sink
-             * factory, a handler replying through the sink it was handed, and
-             * the reply arriving -- enveloped, identified and sequenced -- on
-             * that subscription's outbox only
+            /* end to end short of a socket: real sinks made by the router, a
+             * handler replying through the sink it was handed, and the reply
+             * arriving -- enveloped, identified and sequenced -- as frames of
+             * that subscription only
              */
-            rp<PrintJson> pjson = PrintJsonSingleton::instance();
-            /* one sender per stream, so each outbox shows what reached it */
-            std::map<std::string, rp<RecordingSender>> sender_map;
-            for (auto stream : {"/a", "/b"})
-                sender_map[stream] = new RecordingSender();
-
             Fixture fx;
-            fx.sink_fn_ = [pjson, &sender_map](std::string const & stream, uint32_t sub_id) {
-                return WebsocketSink::make(sender_map.at(stream), pjson, stream, sub_id);
-            };
 
             static int s_frame = 7;
 
@@ -627,15 +588,19 @@ namespace xo {
             router->perform_cmd(R"({"cmd": "send", "sub_id": 1, "msg": "step"})");
             router->perform_cmd(R"({"cmd": "send", "sub_id": 1, "msg": "step"})");
 
-            std::vector<std::string> const & outbox_a = sender_map["/a"]->sent_v_;
-            std::vector<std::string> const & outbox_b = sender_map["/b"]->sent_v_;
+            /* frames are the messages carrying an "event" */
+            std::vector<Json::Value> frame_v;
+            for (auto const & m : fx.rec_.reply_v_)
+                if (m.isMember("event"))
+                    frame_v.push_back(m);
 
-            REQUIRE(outbox_a.empty());
-            REQUIRE(outbox_b.size() == 2);
-            REQUIRE(parse(outbox_b[0])["sub_id"].asUInt() == 1);
-            REQUIRE(parse(outbox_b[0])["seq"].asInt() == 0);
-            REQUIRE(parse(outbox_b[1])["seq"].asInt() == 1);
-            REQUIRE(parse(outbox_b[1])["event"].asInt() == 7);
+            REQUIRE(frame_v.size() == 2);
+            REQUIRE(frame_v[0]["stream"].asString() == "/b");
+            REQUIRE(frame_v[0]["sub_id"].asUInt() == 1);
+            REQUIRE(frame_v[0]["seq"].asInt() == 0);
+            REQUIRE(frame_v[1]["sub_id"].asUInt() == 1);
+            REQUIRE(frame_v[1]["seq"].asInt() == 1);
+            REQUIRE(frame_v[1]["event"].asInt() == 7);
         }
     } /*namespace ut*/
 } /*namespace xo*/

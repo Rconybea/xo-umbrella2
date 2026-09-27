@@ -6,11 +6,12 @@
 #pragma once
 
 #include "WebsocketSink.hpp"
+#include "WsSender.hpp"
+#include <xo/printjson/PrintJson.hpp>
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/callback/CallbackId.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -59,10 +60,12 @@ namespace xo {
          *  different subscription.  See .xo-backlog/xo-websock/issues/06.
          *
          *  Knows nothing about libwebsockets.  It reaches the server only
-         *  through the server's UrlRouter (to find endpoints) and two injected
-         *  functions -- make a sink, send text to this session -- which is
-         *  what lets it be unit-tested without a socket.  Split out of
-         *  WebserverImpl on 2026-09-26; see .xo-backlog/xo-websock/issues/04.
+         *  through the server's UrlRouter (to find endpoints) and this
+         *  session's WsSender (to send text), which is what lets it be
+         *  unit-tested without a socket.  Replies and every sink it makes
+         *  share that one sender, so they reach the session in one order.
+         *  Split out of WebserverImpl on 2026-09-26; see
+         *  .xo-backlog/xo-websock/issues/04 and 05.
          *
          *  Threading: perform_cmd() is called on the webserver's service
          *  thread.  No internal lock is held while an endpoint's subscribe,
@@ -71,21 +74,17 @@ namespace xo {
          **/
         class WsSessionRouter {
         public:
-            /** new sink delivering to this session, for @p stream_name, whose
-             *  envelopes carry @p sub_id
-             **/
-            using SinkFactory = std::function<rp<WebsocketSink> (std::string const & stream_name,
-                                                                 std::uint32_t sub_id)>;
-            /** send @p text to this session, outside any subscription **/
-            using ReplyFn = std::function<void (std::string text)>;
+            using PrintJson = xo::json::PrintJson;
 
         public:
             /** @p url_router is borrowed: it must outlive this router.
              *  Endpoints are server-wide and outlive every session.
+             *  @p sender delivers to this session: replies, and frames from
+             *  every sink this router makes.  @p pjson renders those frames.
              **/
             WsSessionRouter(UrlRouter const & url_router,
-                            SinkFactory sink_fn,
-                            ReplyFn reply_fn);
+                            rp<WsSender> sender,
+                            rp<PrintJson> pjson);
             ~WsSessionRouter();
 
             WsSessionRouter(WsSessionRouter const &) = delete;
@@ -130,8 +129,10 @@ namespace xo {
         private:
             /* finds the endpoint serving a stream name.  Borrowed; see ctor */
             UrlRouter const & url_router_;
-            SinkFactory sink_fn_;
-            ReplyFn reply_fn_;
+            /* this session's sender; shared with every sink made here */
+            rp<WsSender> sender_;
+            /* renders events for the sinks made here */
+            rp<PrintJson> pjson_;
 
             /* one per session: jsoncpp readers are not threadsafe */
             std::unique_ptr<Json::CharReader> readjson_;
