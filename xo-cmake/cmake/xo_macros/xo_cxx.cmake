@@ -1526,14 +1526,39 @@ function(xo_type_source_map)
     # regenerate when any of this subsystem's sources change.  Excludes build
     # trees kept inside the source directory (xo-build uses <subsystem>/.build)
     file(GLOB_RECURSE _srcs CONFIGURE_DEPENDS
-         ${PROJECT_SOURCE_DIR}/*.cpp ${PROJECT_SOURCE_DIR}/*.hpp)
+         ${PROJECT_SOURCE_DIR}/*.cpp ${PROJECT_SOURCE_DIR}/*.hpp ${PROJECT_SOURCE_DIR}/*.h)
     list(FILTER _srcs EXCLUDE REGEX "/\\.build/")
+
+    # header TUs: one "#include <header>" per header, so a header no TU
+    # includes (every header, in a header-only subsystem) still reaches the
+    # dump -- the generator dumps only those the real TUs did not include.
+    # Rewritten only when changed
+    set(_hdr_tu_dir ${PROJECT_BINARY_DIR}/xo-type-src-map)
+    set(_hdrs ${_srcs})
+    list(FILTER _hdrs INCLUDE REGEX "\\.h(pp)?$")
+    set(_hdr_tus)
+    foreach(_h ${_hdrs})
+        file(RELATIVE_PATH _rel ${PROJECT_SOURCE_DIR} ${_h})
+        set(_tu ${_hdr_tu_dir}/${_rel}.cpp)
+        file(CONFIGURE OUTPUT ${_tu} CONTENT "#include \"${_h}\"\n" @ONLY)
+        list(APPEND _hdr_tus ${_tu})
+    endforeach()
+
+    # their compile flags: a target, so the compile database lists them.  At
+    # the END of this directory -- the subsystem's libraries may not exist yet
+    # (xo_export_cmake_config can precede add_subdirectory(src)).  EVAL: the
+    # arguments expand now
+    if (_hdr_tus)
+        cmake_language(EVAL CODE
+            "cmake_language(DEFER CALL _xo_type_src_header_tus [[xo_type_src_tus_${_subsystem}]] [[${_hdr_tus}]])")
+    endif()
 
     add_custom_command(
         OUTPUT ${_output}
         COMMAND ${XO_SOURCE_MAP_PYTHON3} ${_script}
                 --compile-commands ${CMAKE_BINARY_DIR}/compile_commands.json
                 --source-dir ${PROJECT_SOURCE_DIR}
+                --header-tu-dir ${_hdr_tu_dir}
                 --repo-root ${_repo_root}
                 --clang ${XO_SOURCE_MAP_CLANGXX}
                 --output ${_output}
@@ -1546,6 +1571,54 @@ function(xo_type_source_map)
     install(FILES ${_output}
             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
             DESTINATION ${CMAKE_INSTALL_DATADIR}/${_subsystem})
+endfunction()
+
+# ----------------------------------------------------------------
+# _xo_type_src_header_tus(<target> <header tus>)
+#
+# For xo_type_source_map(): an OBJECT library of the header TUs, NEVER built
+# (EXCLUDE_FROM_ALL) -- it exists for its compile-database entries, which
+# carry the flags a user of the subsystem's libraries gets (linked: their
+# usage requirements, transitively), plus each compiled library's own
+# include directories and definitions (a header in src/ may need them; a
+# python module, which cannot be linked, gets its flags this way only)
+#
+function(_xo_type_src_header_tus target tus)
+    add_library(${target} OBJECT EXCLUDE_FROM_ALL ${tus})
+    xo_compile_options(${target})
+    target_include_directories(${target} PRIVATE ${PROJECT_SOURCE_DIR}/include)
+
+    set(_libs)
+    if (TARGET all_libraries_${PROJECT_NAME})
+        get_target_property(_libs all_libraries_${PROJECT_NAME} targets)
+    endif()
+
+    foreach(_lib ${_libs})
+        if (NOT TARGET ${_lib})
+            continue()
+        endif()
+        get_target_property(_type ${_lib} TYPE)
+        # a MODULE_LIBRARY (python binding) cannot be linked; its flags come
+        # from the property copies below, which evaluate transitively
+        if (NOT _type STREQUAL "MODULE_LIBRARY")
+            target_link_libraries(${target} PRIVATE ${_lib})
+        endif()
+        if (NOT _type STREQUAL "INTERFACE_LIBRARY")
+            target_include_directories(${target} PRIVATE
+                $<TARGET_PROPERTY:${_lib},INCLUDE_DIRECTORIES>)
+            target_compile_definitions(${target} PRIVATE
+                $<TARGET_PROPERTY:${_lib},COMPILE_DEFINITIONS>)
+        endif()
+    endforeach()
+
+    # the std:: include directories, explicit in the compile database -- as
+    # xo_include_options2 does, in the directory defining each library.  A
+    # directory variable: set in THIS directory (the deferred call's parent
+    # scope), else clang, run from the database, finds no <cstdint>
+    if (CMAKE_EXPORT_COMPILE_COMMANDS)
+        set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
+            ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+    endif()
 endfunction()
 
 # ----------------------------------------------------------------
