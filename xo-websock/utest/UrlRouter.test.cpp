@@ -22,6 +22,7 @@ namespace xo {
     using xo::web::DynamicEndpoint;
     using xo::web::HttpEndpointDescr;
     using xo::web::StreamEndpointDescr;
+    using xo::web::EndpointKind;
     using xo::web::WebsocketSink;
     using xo::web::Alist;
     using xo::fn::CallbackId;
@@ -39,14 +40,11 @@ namespace xo {
                                              });
             }
 
-            /** stream endpoint on @p pattern; subscribe/unsubscribe do nothing.
-             *  Has a receive function, which an http endpoint never does.
-             **/
+            /** stream endpoint on @p pattern; subscribe/unsubscribe do nothing **/
             StreamEndpointDescr stream_descr(std::string pattern) {
                 return StreamEndpointDescr(std::move(pattern),
                                            [](rp<WebsocketSink> const &) { return CallbackId(1); },
-                                           [](CallbackId) {},
-                                           [](rp<WebsocketSink> const &, Json::Value const &) {});
+                                           [](CallbackId) {});
             }
 
             /** stem of the http endpoint serving @p uri; "" if none **/
@@ -160,8 +158,8 @@ namespace xo {
             REQUIRE(h);
             REQUIRE(s);
             REQUIRE(h.get() != s.get());
-            REQUIRE(!h->has_receive());
-            REQUIRE(s->has_receive());
+            REQUIRE(h->kind() == EndpointKind::http);
+            REQUIRE(s->kind() == EndpointKind::stream);
         }
 
         TEST_CASE("url-router-rejects-a-duplicate-stem", "[websock][UrlRouter]")

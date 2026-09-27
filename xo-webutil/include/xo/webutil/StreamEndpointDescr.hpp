@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "StreamReceiver.hpp"
 #include "Alist.hpp"
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/callback/CallbackSet.hpp>
@@ -12,42 +13,11 @@
 #include <xo/ppsink/Prettifier.hpp>
 #include <functional>
 
-/* jsoncpp's parsed-value type, only named here: StreamReceiveFn takes one by
- * const reference, so a declaration is enough and xo-webutil needs no jsoncpp
- * dependency.  Code that builds or calls a receive function includes
- * <json/json.h> itself -- it reaches consumers through xo-websock.
- */
-namespace Json { class Value; }
-
 namespace xo {
     namespace web {
-        /* the outbound end of one websocket subscription.  Defined in
-         * xo-websock (xo/websock/WebsocketSink.hpp); only named here.
-         */
-        class WebsocketSink;
-
         /* a function that creates an event subscription */
         using StreamSubscribeFn = std::function<fn::CallbackId (rp<WebsocketSink> const & ws_sink)>;
         using StreamUnsubscribeFn = std::function<void (fn::CallbackId id)>;
-
-        /* handle an application message sent by a subscriber on this stream,
-         * i.e. the "msg" of
-         *   {"cmd": "send", "stream": "/this/stream", "msg": <any JSON>}
-         *
-         * @p ws_sink is the SAME sink the subscribe function received for
-         * that subscriber, so a reply sent through it reaches exactly the
-         * session that asked.
-         *
-         * THREADING CONTRACT: invoked on the webserver's service thread, from
-         * inside libwebsockets' receive callback.  A handler may send (e.g.
-         * ws_sink->notify_ev_tp()) but must NOT block -- the whole server
-         * stalls while it runs.  The flip side is useful: whatever the handler
-         * mutates, and the frame it sends, happen on one thread.
-         *
-         * See .xo-backlog/xo-websock/issues/04.
-         */
-        using StreamReceiveFn = std::function<void (rp<WebsocketSink> const & ws_sink,
-                                                    Json::Value const & msg)>;
 
         /* describes a stream endpoint
          * this comprises
@@ -60,18 +30,18 @@ namespace xo {
             using PpSink = xo::pp::PpSink;
 
         public:
-            /* @p receive_fn optional: a stream without one rejects
+            /* @p receiver optional: a stream without one rejects
              * {"cmd": "send", ...} with an error reply
              */
             StreamEndpointDescr(std::string uri_pattern,
                                 StreamSubscribeFn subscribe_fn,
                                 StreamUnsubscribeFn unsubscribe_fn,
-                                StreamReceiveFn receive_fn = nullptr);
+                                rp<StreamReceiver> receiver = nullptr);
 
             std::string const & uri_pattern() const { return uri_pattern_; }
             StreamSubscribeFn const & subscribe_fn() const { return subscribe_fn_; }
             StreamUnsubscribeFn const & unsubscribe_fn() const { return unsubscribe_fn_; }
-            StreamReceiveFn const & receive_fn() const { return receive_fn_; }
+            rp<StreamReceiver> const & receiver() const { return receiver_; }
 
             /** structured pretty-printing: render this descriptor into @p sink.
              *
@@ -97,8 +67,8 @@ namespace xo {
             StreamSubscribeFn subscribe_fn_;
             /* reverses effect of a particular call to .subscribe_fn */
             StreamUnsubscribeFn unsubscribe_fn_;
-            /* handles {"cmd": "send", ...} from a subscriber; may be empty */
-            StreamReceiveFn receive_fn_;
+            /* handles {"cmd": "send", ...} from a subscriber; may be null */
+            rp<StreamReceiver> receiver_;
         }; /*StreamEndpointDescr*/
 
     } /*namespace web*/

@@ -15,6 +15,18 @@
 
 namespace xo {
     namespace web {
+        /* which kind of endpoint a DynamicEndpoint is; fixed at construction
+         * by make_http() / make_stream()
+         */
+        enum class EndpointKind {
+            /* serves http requests: http_response() */
+            http,
+            /* serves websocket subscriptions: subscribe(), unsubscribe(),
+             * and receive() if it has a receiver
+             */
+            stream,
+        };
+
         /* a dynamic http endpoint.  content served on-browser-demand
          * by user-provided callback
          *
@@ -35,25 +47,29 @@ namespace xo {
             static rp<DynamicEndpoint> make_http(std::string uri_pattern,
                                                  HttpEndpointFn http_cb) {
                 return (rp<DynamicEndpoint>
-                        (new DynamicEndpoint(std::move(uri_pattern),
+                        (new DynamicEndpoint(EndpointKind::http,
+                                             std::move(uri_pattern),
                                              std::move(http_cb),
                                              nullptr,
                                              nullptr,
                                              nullptr)));
             } /*make_http*/
 
-            /* @p recv_fn optional; see StreamReceiveFn */
+            /* @p receiver optional; see StreamReceiver */
             static rp<DynamicEndpoint> make_stream(std::string uri_pattern,
                                                    StreamSubscribeFn sub_fn,
                                                    StreamUnsubscribeFn unsub_fn,
-                                                   StreamReceiveFn recv_fn = nullptr) {
+                                                   rp<StreamReceiver> receiver = nullptr) {
                 return (rp<DynamicEndpoint>
-                        (new DynamicEndpoint(std::move(uri_pattern),
+                        (new DynamicEndpoint(EndpointKind::stream,
+                                             std::move(uri_pattern),
                                              nullptr,
                                              std::move(sub_fn),
                                              std::move(unsub_fn),
-                                             std::move(recv_fn))));
+                                             std::move(receiver))));
             } /*make_stream*/
+
+            EndpointKind kind() const { return kind_; }
 
             /* pattern this endpoint was registered with */
             std::string const & uri_pattern() const { return uri_pattern_; }
@@ -75,13 +91,15 @@ namespace xo {
             /* get html from this endpoint,  on behalf of uri=incoming_uri;
              * write html on *p_os
              *
-             * require: non-null http_fn
+             * require: kind() == EndpointKind::http
              */
             void http_response(std::string const & incoming_uri,
                                std::ostream * p_os) const;
 
             /* subscribe stream from this endpoint,  on behalf of uri=incoming_uri.
              * send output to ws_sink
+             *
+             * require: kind() == EndpointKind::stream
              */
             CallbackId subscribe(std::string const & incoming_uri,
                                  rp<WebsocketSink> const & ws_sink) const;
@@ -89,29 +107,34 @@ namespace xo {
             /* unsubscribe stream from this endpoint;
              * reverses the effect of a previous call to .subscribe()
              * that returned id
+             *
+             * require: kind() == EndpointKind::stream
              */
             void unsubscribe(CallbackId id) const;
 
             /* true iff this endpoint accepts {"cmd": "send", ...} */
-            bool has_receive() const { return static_cast<bool>(receive_fn_); }
+            bool has_receive() const { return static_cast<bool>(receiver_); }
 
             /* deliver application message @p msg, sent by the subscriber
-             * whose sink is @p ws_sink.  See StreamReceiveFn for the
+             * whose sink is @p ws_sink.  See StreamReceiver for the
              * threading contract.
              *
-             * require: has_receive()
+             * require: kind() == EndpointKind::stream, has_receive()
              */
             void receive(rp<WebsocketSink> const & ws_sink,
                          Json::Value const & msg) const;
 
         private:
-            explicit DynamicEndpoint(std::string uri_pattern,
+            explicit DynamicEndpoint(EndpointKind kind,
+                                     std::string uri_pattern,
                                      HttpEndpointFn http_fn,
                                      StreamSubscribeFn subscribe_fn,
                                      StreamUnsubscribeFn unsubscribe_fn,
-                                     StreamReceiveFn receive_fn);
+                                     rp<StreamReceiver> receiver);
 
         private:
+            /* http or stream: says which of the functions below are set */
+            EndpointKind kind_;
             /* pattern for this endpoint
              * can be string like
              *   /fixed/stem/${a}/more/fixed/stuff/${b}
@@ -149,7 +172,7 @@ namespace xo {
             /* run this function to unsubscribe event stream */
             StreamUnsubscribeFn unsubscribe_fn_;
             /* run this function on {"cmd": "send", ...}; may be empty */
-            StreamReceiveFn receive_fn_;
+            rp<StreamReceiver> receiver_;
         }; /*DynamicEndpoint*/
 
     } /*namespace web*/

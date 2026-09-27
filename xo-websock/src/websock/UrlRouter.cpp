@@ -117,7 +117,7 @@ namespace xo {
             auto endpoint = DynamicEndpoint::make_stream(descr.uri_pattern(),
                                                          descr.subscribe_fn(),
                                                          descr.unsubscribe_fn(),
-                                                         descr.receive_fn());
+                                                         descr.receiver());
 
             this->insert_in(std::move(endpoint), "stream", &this->stream_map_);
         } /*register_stream*/

@@ -32,6 +32,7 @@ namespace xo {
     using xo::web::WsSessionRouter;
     using xo::web::UrlRouter;
     using xo::web::StreamEndpointDescr;
+    using xo::web::StreamReceiver;
     using xo::web::WebsocketSink;
     using xo::json::PrintJson;
     using xo::json::PrintJsonSingleton;
@@ -79,7 +80,7 @@ namespace xo {
             struct Recorder {
                 /* sinks the endpoints' subscribe functions were handed */
                 std::vector<rp<WebsocketSink>> subscribed_v_;
-                /* (sink, msg) pairs the receive functions were handed */
+                /* (sink, msg) pairs the receivers were handed */
                 std::vector<std::pair<rp<WebsocketSink>, Json::Value>> received_v_;
                 /* callback ids the unsubscribe functions were handed */
                 std::vector<uint32_t> unsubscribed_v_;
@@ -95,6 +96,42 @@ namespace xo {
                             v.push_back(r);
                     return v;
                 }
+            };
+
+            /** records each message into a Recorder **/
+            class RecordingReceiver : public StreamReceiver {
+            public:
+                explicit RecordingReceiver(Recorder * rec) : rec_{rec} {}
+
+                void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
+                    rec_->received_v_.push_back({sink, msg});
+                }
+
+            private:
+                Recorder * rec_ = nullptr;
+            };
+
+            /** fails every message **/
+            class ThrowingReceiver : public StreamReceiver {
+            public:
+                void receive(rp<WebsocketSink> const &, Json::Value const &) override {
+                    throw std::runtime_error("boom");
+                }
+            };
+
+            /** answers every message with one frame, *p_frame, through the
+             *  sender's own sink
+             **/
+            class FrameReceiver : public StreamReceiver {
+            public:
+                explicit FrameReceiver(int * p_frame) : p_frame_{p_frame} {}
+
+                void receive(rp<WebsocketSink> const & sink, Json::Value const &) override {
+                    sink->notify_ev_tp(Reflect::make_tp(p_frame_));
+                }
+
+            private:
+                int * p_frame_ = nullptr;
             };
 
             /** endpoints by stream name, plus a router over them **/
@@ -114,7 +151,7 @@ namespace xo {
                 /* replies go here; a case can redirect them */
                 WsSessionRouter::ReplyFn reply_fn_;
 
-                /** an endpoint for @p stream; @p with_receive adds a receive fn **/
+                /** an endpoint for @p stream; @p with_receive adds a receiver **/
                 void add_endpoint(std::string const & stream, bool with_receive = true) {
                     Recorder * rec = &rec_;
 
@@ -125,15 +162,12 @@ namespace xo {
                     auto unsub_fn = [rec](CallbackId id) {
                         rec->unsubscribed_v_.push_back(id.id());
                     };
-                    xo::web::StreamReceiveFn recv_fn = nullptr;
+                    rp<StreamReceiver> receiver;
 
-                    if (with_receive) {
-                        recv_fn = [rec](rp<WebsocketSink> const & sink, Json::Value const & msg) {
-                            rec->received_v_.push_back({sink, msg});
-                        };
-                    }
+                    if (with_receive)
+                        receiver = new RecordingReceiver(rec);
 
-                    url_router_.register_stream(StreamEndpointDescr(stream, sub_fn, unsub_fn, recv_fn));
+                    url_router_.register_stream(StreamEndpointDescr(stream, sub_fn, unsub_fn, receiver));
                 }
 
                 std::unique_ptr<WsSessionRouter> make_router() {
@@ -476,9 +510,7 @@ namespace xo {
                 "/fw",
                 [](rp<WebsocketSink> const &) { return CallbackId(1); },
                 [](CallbackId) {},
-                [](rp<WebsocketSink> const &, Json::Value const &) {
-                    throw std::runtime_error("boom");
-                }));
+                new ThrowingReceiver()));
             auto router = fx.make_router();
 
             router->perform_cmd(R"({"cmd": "subscribe", "stream": "/fw"})");
@@ -573,9 +605,7 @@ namespace xo {
                     stream,
                     [](rp<WebsocketSink> const &) { return CallbackId(1); },
                     [](CallbackId) {},
-                    [](rp<WebsocketSink> const & sink, Json::Value const &) {
-                        sink->notify_ev_tp(Reflect::make_tp(&s_frame));
-                    }));
+                    new FrameReceiver(&s_frame)));
             }
             auto router = fx.make_router();
 

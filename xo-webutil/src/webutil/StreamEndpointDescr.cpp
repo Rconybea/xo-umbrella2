@@ -10,11 +10,11 @@ namespace xo {
         StreamEndpointDescr::StreamEndpointDescr(std::string uri_pattern,
                                                  StreamSubscribeFn subscribe_fn,
                                                  StreamUnsubscribeFn unsubscribe_fn,
-                                                 StreamReceiveFn receive_fn)
+                                                 rp<StreamReceiver> receiver)
             : uri_pattern_{std::move(uri_pattern)},
               subscribe_fn_{std::move(subscribe_fn)},
               unsubscribe_fn_{std::move(unsubscribe_fn)},
-              receive_fn_{std::move(receive_fn)}
+              receiver_{std::move(receiver)}
         {}
 
         void

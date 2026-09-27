@@ -4,22 +4,25 @@
  */
 
 #include "DynamicEndpoint.hpp"
+#include <cassert>
 
 namespace xo {
     using xo::web::Alist;
     using xo::fn::CallbackId;
 
     namespace web {
-        DynamicEndpoint::DynamicEndpoint(std::string uri_pattern,
+        DynamicEndpoint::DynamicEndpoint(EndpointKind kind,
+                                         std::string uri_pattern,
                                          HttpEndpointFn http_fn,
                                          StreamSubscribeFn subscribe_fn,
                                          StreamUnsubscribeFn unsubscribe_fn,
-                                         StreamReceiveFn receive_fn)
-            : uri_pattern_{std::move(uri_pattern)},
+                                         rp<StreamReceiver> receiver)
+            : kind_{kind},
+              uri_pattern_{std::move(uri_pattern)},
               http_fn_{std::move(http_fn)},
               subscribe_fn_{std::move(subscribe_fn)},
               unsubscribe_fn_{std::move(unsubscribe_fn)},
-              receive_fn_{std::move(receive_fn)}
+              receiver_{std::move(receiver)}
         {
             std::string r_pat;
 
@@ -96,6 +99,8 @@ namespace xo {
         DynamicEndpoint::http_response(std::string const & incoming_uri,
                                        std::ostream * p_os) const
         {
+            assert(this->kind_ == EndpointKind::http);
+
             /* send this uri argument list  callback.
              * contains variables extracted from .uri_pattern
              * (variables surrounded by ${...})
@@ -133,12 +138,16 @@ namespace xo {
         DynamicEndpoint::subscribe(std::string const & /*incoming_uri*/,
                                    rp<WebsocketSink> const & ws_sink) const
         {
+            assert(this->kind_ == EndpointKind::stream);
+
             return this->subscribe_fn_(ws_sink);
         } /*subscribe*/
 
         void
         DynamicEndpoint::unsubscribe(CallbackId id) const
         {
+            assert(this->kind_ == EndpointKind::stream);
+
             return this->unsubscribe_fn_(id);
         } /*unsubscribe*/
 
@@ -146,7 +155,10 @@ namespace xo {
         DynamicEndpoint::receive(rp<WebsocketSink> const & ws_sink,
                                  Json::Value const & msg) const
         {
-            this->receive_fn_(ws_sink, msg);
+            assert(this->kind_ == EndpointKind::stream);
+            assert(this->receiver_);
+
+            this->receiver_->receive(ws_sink, msg);
         } /*receive*/
     } /*namespace web*/
 } /*namespace xo*/
