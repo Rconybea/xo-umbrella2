@@ -162,6 +162,8 @@ namespace xo {
 
             INFO("json: " << ss.str());
             REQUIRE(srv["_name_"].asString() == "Webserver");
+            /* the type the printer reads -- the interface, not WebserverImpl */
+            REQUIRE(srv["_type"].asString() == "xo::web::Webserver");
             REQUIRE(srv["id"].isString());
             REQUIRE(srv["refcount"].asUInt() >= 1);
             REQUIRE(srv["listen_port"].asInt() == 0);
@@ -170,6 +172,7 @@ namespace xo {
             Json::Value const & eps = srv["endpoints"];
             REQUIRE(eps.size() == 2);
             REQUIRE(eps[0]["_name_"].asString() == "DynamicEndpoint");
+            REQUIRE(eps[0]["_type"].asString() == "xo::web::DynamicEndpoint");
             REQUIRE(eps[0]["kind"].asString() == "http");
             REQUIRE(eps[0]["pattern"].asString() == "/status");
             REQUIRE(eps[0]["has_receive"].asBool() == false);

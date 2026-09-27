@@ -7,6 +7,7 @@
 #include "xo/printjson/init_printjson.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << tag(..) */
 #include <xo/arena/DArenaVector.hpp>
 #include <catch2/catch.hpp>
@@ -28,6 +29,16 @@ namespace xo {
         using xo::pp::tag;
 
         InitEvidence s_init_evidence = InitSubsys<S_printjson_tag>::require();
+
+        /** the "_type" member the struct printer emits for T, after "_name_":
+         *  its canonical name.  Built, not spelled out: a type in an
+         *  anonymous namespace is "{anonymous}" under gcc, "(anonymous
+         *  namespace)" under clang
+         **/
+        template <typename T>
+        std::string type_member() {
+            return ", \"_type\": \"" + std::string(xo::reflect::type_name<T>()) + "\"";
+        }
 
         namespace {
             struct TestStruct0 {};
@@ -90,9 +101,9 @@ namespace xo {
             std::stringstream ss;
             print_json.print(holder, &ss);
 
-            REQUIRE(ss.str() == std::string(
-                        "{\"_name_\": \"DPtrHolder\""
-                        ", \"p\": {\"_name_\": \"DPtrTarget\", \"v\": 1.5}}"));
+            REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
+                                 + ", \"p\": {\"_name_\": \"DPtrTarget\"" + type_member<DPtrTarget>()
+                                 + ", \"v\": 1.5}}"));
         } /*TEST_CASE(print-json-raw-pointer-member)*/
 
         TEST_CASE("print-json-null-raw-pointer-member", "[printjson][rawpointer]") {
@@ -109,7 +120,8 @@ namespace xo {
             std::stringstream ss;
             print_json.print(holder, &ss);
 
-            REQUIRE(ss.str() == std::string("{\"_name_\": \"DPtrHolder\", \"p\": null}"));
+            REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
+                                 + ", \"p\": null}"));
         } /*TEST_CASE(print-json-null-raw-pointer-member)*/
 
         TEST_CASE("print-json-null-c-string", "[printjson][rawpointer]") {
@@ -197,7 +209,7 @@ namespace xo {
 
             print_json.print(tp, &ss);
 
-            REQUIRE(ss.str() == std::string("{\"_name_\": \"TestStruct0\"}"));
+            REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct0\"" + type_member<TestStruct0>() + "}"));
         } /*TEST_CASE(print-json-empty-struct)*/
 
         namespace {
@@ -238,16 +250,16 @@ namespace xo {
 
             print_json.print(tp, &ss);
 
-            REQUIRE(ss.str() == std::string("{\"_name_\": \"TestStruct1\""
-                                            ", \"i16\": -1"
-                                            ", \"u16\": 2"
-                                            ", \"i32\": -3"
-                                            ", \"u32\": 4"
-                                            ", \"i64\": -5"
-                                            ", \"u64\": 6"
-                                            ", \"f32\": 1.23"
-                                            ", \"f64\": 4.56"
-                                            ", \"s\": \"hello, world\"}"));
+            REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct1\"" + type_member<TestStruct1>()
+                                 + ", \"i16\": -1"
+                                   ", \"u16\": 2"
+                                   ", \"i32\": -3"
+                                   ", \"u32\": 4"
+                                   ", \"i64\": -5"
+                                   ", \"u64\": 6"
+                                   ", \"f32\": 1.23"
+                                   ", \"f64\": 4.56"
+                                   ", \"s\": \"hello, world\"}"));
         } /*TEST_CASE(print-json-s1)*/
 
         TEST_CASE("print-json-v1", "[printjson]") {

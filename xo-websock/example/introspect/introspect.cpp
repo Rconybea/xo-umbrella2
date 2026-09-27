@@ -49,6 +49,7 @@
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/reflectutil/type_name.hpp>
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/indentlog2/cx/Indentlog2Config.hpp>
 #include <xo/indentlog2/init_indentlog2.hpp>
@@ -184,6 +185,7 @@ namespace xo {
                     return;
 
                 *p_os << "{" << quot("_name_") << ": " << quot("Ticker")
+                      << ", " << quot("_type") << ": " << quot(xo::reflect::type_name<Ticker>())
                       << ", " << quot("id") << ": " << quot(address_of(ticker))
                       << ", " << quot("sinks") << ": [";
 

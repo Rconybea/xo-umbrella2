@@ -29,6 +29,7 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <sstream>
 #include "WsSessionRouter.hpp"
@@ -50,6 +51,7 @@ namespace xo {
     using xo::json::JsonPrinter;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::type_name;
     using xo::pp::quot;
     using xo::fn::CallbackId;
     using xo::pp::scope;
@@ -1018,6 +1020,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
+                          << ", " << quot("_type") << ": " << quot(type_name<WsSessionSenderImpl>())
                           << ", " << quot("id") << ": " << quot(json_id(x))
                           /* session record + router + one per live sink */
                           << ", " << quot("refcount") << ": " << x->reference_counter()
@@ -1042,6 +1045,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("WsSession")
+                          << ", " << quot("_type") << ": " << quot(type_name<WebsocketSessionRecd>())
                           << ", " << quot("id") << ": " << quot(json_id(recd))
                           << ", " << quot("session_id") << ": " << recd->session_id()
                           << ", " << quot("sender") << ": ";

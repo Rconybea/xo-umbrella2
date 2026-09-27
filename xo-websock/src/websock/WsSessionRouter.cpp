@@ -9,6 +9,7 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -22,6 +23,7 @@ namespace xo {
     using xo::json::JsonPrinter;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::type_name;
     using xo::pp::quot;
 
     namespace web {
@@ -406,6 +408,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("Subscription")
+                          << ", " << quot("_type") << ": " << quot(type_name<Subscription>())
                           << ", " << quot("id") << ": " << quot(json_id(sub))
                           << ", " << quot("sub_id") << ": " << sub->sub_id_
                           << ", " << quot("stream") << ": " << quot(sub->stream_name_)

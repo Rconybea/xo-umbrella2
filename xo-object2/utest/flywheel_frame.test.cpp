@@ -28,6 +28,7 @@
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/reflectutil/type_name.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <regex>
@@ -177,30 +178,42 @@ namespace xo {
 
             INFO("frame: " << frame);
 
-            REQUIRE(frame == std::string(
-                "{\"_name_\": \"Flywheel\""
-                ", \"pools\": ["
-                "{\"_name_\": \"MemorySizeInfo\""
-                ", \"name\": \"utest.frame.empty.storage\""
-                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
-                ", \"lo\": ADDR, \"hi\": ADDR}"
-                ", {\"_name_\": \"MemorySizeInfo\""
-                ", \"name\": \"utest.frame.empty.strong\""
-                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
-                ", \"lo\": ADDR, \"hi\": ADDR}"
-                ", {\"_name_\": \"MemorySizeInfo\""
-                ", \"name\": \"utest.frame.empty.strong-free\""
-                ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
-                ", \"lo\": ADDR, \"hi\": ADDR}]"
+            /* "_type": each object's canonical name, the key into a type ->
+             * source map (.xo-backlog/xo-websock/issues/12) -- built, not
+             * spelled out, so a spelling difference between compilers cannot
+             * fail this
+             */
+            auto type_member = [](std::string_view name) {
+                return ", \"_type\": \"" + std::string(name) + "\"";
+            };
+            std::string const pool_type
+                = type_member(xo::reflect::type_name<xo::mm::MemorySizeInfo>());
+
+            REQUIRE(frame ==
+                "{\"_name_\": \"Flywheel\"" + type_member(xo::reflect::type_name<AllocFlywheel>())
+                + ", \"pools\": ["
+                  "{\"_name_\": \"MemorySizeInfo\"" + pool_type
+                + ", \"name\": \"utest.frame.empty.storage\""
+                  ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
+                  ", \"lo\": ADDR, \"hi\": ADDR}"
+                  ", {\"_name_\": \"MemorySizeInfo\"" + pool_type
+                + ", \"name\": \"utest.frame.empty.strong\""
+                  ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
+                  ", \"lo\": ADDR, \"hi\": ADDR}"
+                  ", {\"_name_\": \"MemorySizeInfo\"" + pool_type
+                + ", \"name\": \"utest.frame.empty.strong-free\""
+                  ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
+                  ", \"lo\": ADDR, \"hi\": ADDR}]"
                 /* "RootSet", not "RootSetInfo", and "Flywheel" above rather
                  * than "FlywheelInfo": neither struct exists any more.  Both
                  * are now bespoke printers reading the live flywheel.  Every
                  * other key and value here is unchanged by that -- deliberately,
                  * since they are the wire contract
                  */
-                ", \"strong\": {\"_name_\": \"RootSet\""
-                ", \"size\": 0, \"capacity\": INT, \"live\": 0"
-                ", \"free\": [], \"slots\": []}}"));
+                  ", \"strong\": {\"_name_\": \"RootSet\""
+                + type_member(xo::reflect::type_name<xo::facet::DHandleArena<xo::facet::ObjectSlot>>())
+                + ", \"size\": 0, \"capacity\": INT, \"live\": 0"
+                  ", \"free\": [], \"slots\": []}}");
 
             /* the bounds the redaction hid, asserted structurally instead.
              * Read through visit_pools, which is the path the printer takes

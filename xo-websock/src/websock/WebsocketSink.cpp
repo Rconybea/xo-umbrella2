@@ -8,6 +8,7 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>  /* display_string */
+#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* ss << quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -17,6 +18,7 @@
 namespace xo {
     using xo::json::PrintJson;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::type_name;
     using xo::pp::quot;
     using xo::pp::scope;
     using xo::pp::xtag;
@@ -131,6 +133,7 @@ namespace xo {
         WebsocketSinkImpl::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
         {
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
+                  << ", " << quot("_type") << ": " << quot(type_name<WebsocketSinkImpl>())
                   << ", " << quot("id") << ": " << quot(json_id(this))
                   /* the router's subscription slot, plus whatever the
                    * application holds (e.g. a source it is attached to)
@@ -152,6 +155,7 @@ namespace xo {
         WebsocketSink::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
         {
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
+                  << ", " << quot("_type") << ": " << quot(type_name<WebsocketSink>())
                   << ", " << quot("id") << ": " << quot(json_id(this))
                   << ", " << quot("refcount") << ": " << this->reference_counter()
                   << ", " << quot("stream") << ": " << quot(this->stream_name())
