@@ -36,7 +36,11 @@ namespace xo {
                 .def_property_readonly("port", &WebserverConfig::port)
                 .def_property_readonly("tls_flag", &WebserverConfig::tls_flag)
                 .def_property_readonly("host_check_flag", &WebserverConfig::host_check_flag)
-                .def_property_readonly("use_retry_flag", &WebserverConfig::use_retry_flag);
+                .def_property_readonly("use_retry_flag", &WebserverConfig::use_retry_flag)
+                .def_property_readonly("mount_origin", &WebserverConfig::mount_origin)
+                .def("with_mount_origin", &WebserverConfig::with_mount_origin,
+                     py::arg("dir"),
+                     "copy of this config serving static files from dir");
 
             py::class_<Webserver, rp<Webserver>>(m, "Webserver")
                 .def_static("make",

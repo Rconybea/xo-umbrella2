@@ -9,6 +9,7 @@
 #include <xo/ppsink/Prettifier.hpp>   /* Prettifier<>, XO_PRETTIFIER_DECLARE */
 #include <libwebsockets.h> // temporary,  while moving callbacks
 #include <memory>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -37,6 +38,17 @@ namespace xo {
             bool tls_flag() const { return tls_flag_; }
             bool host_check_flag() const { return host_check_flag_; }
             bool use_retry_flag() const { return use_retry_flag_; }
+            std::string const & mount_origin() const { return mount_origin_; }
+
+            /** copy of this config serving static files from @p dir.
+             *  Relative paths resolve against the process's working
+             *  directory, when the server starts.
+             **/
+            WebserverConfig with_mount_origin(std::string dir) const {
+                WebserverConfig retval = *this;
+                retval.mount_origin_ = std::move(dir);
+                return retval;
+            }
 
         private:
             /* accept incoming http requests on this port# */
@@ -47,6 +59,12 @@ namespace xo {
             bool host_check_flag_ = false;
             /* see lws_context_creation_info.retry_and_idle_policy */
             bool use_retry_flag_ = false;
+            /* directory served at "/" (index.html by default).  A request
+             * naming no file there falls through to the dynamic-content
+             * handler, whose "no dynamic content" page is the symptom of a
+             * wrong directory
+             */
+            std::string mount_origin_ = "./mount-origin";
         }; /*WebserverConfig*/
 
         /* libwebsocket:

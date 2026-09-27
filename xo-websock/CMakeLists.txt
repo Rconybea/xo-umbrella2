@@ -21,6 +21,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 add_subdirectory(src/websock)
 add_subdirectory(utest)
+add_subdirectory(example)
 
 # ----------------------------------------------------------------
 # provide find_package() support for websock customers

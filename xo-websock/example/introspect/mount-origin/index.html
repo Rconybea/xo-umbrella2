@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>xo-websock introspect</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1.5em; color: #222; }
+    #status { color: #666; margin-left: 0.8em; }
+    svg { border: 1px solid #ccc; background: #fafafa; margin-top: 1em; display: block; }
+    .node rect { fill: #e8f0fe; stroke: #4a6fa5; stroke-width: 1.5px; rx: 6px; }
+    .node text { font-size: 14px; }
+    pre { background: #f4f4f4; padding: 0.8em; max-width: 60em; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>xo-websock introspect</h1>
+  <div>
+    <button id="refresh" disabled>Refresh</button>
+    <span id="status">connecting...</span>
+  </div>
+
+  <svg id="graph" width="640" height="160"></svg>
+
+  <h3>last frame</h3>
+  <pre id="raw">(none yet)</pre>
+
+  <script src="introspect.js"></script>
+</body>
+</html>

@@ -683,11 +683,14 @@ namespace xo {
 
             void init_mount_static(lws_http_mount const * dynamic,
                                    lws_http_mount * p_mount) {
-                /* default mount serves the URL space from ./mount-origin */
+                /* serves the URL space from WebserverConfig::mount_origin
+                 * (default ./mount-origin).  lws keeps the pointer: it
+                 * points into .ws_config, which lives as long as we do
+                 */
                 *p_mount = {
                     .mount_next            = dynamic,
                     .mountpoint            = "/",
-                    .origin                = "./mount-origin",
+                    .origin                = this->ws_config_.mount_origin().c_str(),
                     .def                   = "index.html",
                     .protocol              = NULL,
                     .cgienv                = NULL,
