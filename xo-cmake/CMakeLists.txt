@@ -110,6 +110,7 @@ install(
     "cmake/xo_macros/xo-project-macros.cmake"
     "cmake/xo_macros/xo_cxx.cmake"
     "cmake/xo_macros/code-coverage.cmake"
+    "cmake/xo_macros/xo-type-src-map.py"
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
     DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/xo_macros
 )
