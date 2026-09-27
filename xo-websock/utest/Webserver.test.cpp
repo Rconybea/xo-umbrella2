@@ -12,6 +12,7 @@
 
 #include "WebsockUtestAppcx.hpp"
 #include "xo/websock/Webserver.hpp"
+#include "xo/websock/DynamicEndpoint.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <catch2/catch.hpp>
 #include <xo/reflect/Reflect.hpp>
@@ -20,6 +21,7 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 #include <string>
 
 namespace xo {
@@ -115,25 +117,30 @@ namespace xo {
             REQUIRE(websrv->unregister_stream_endpoint("/status"));
         }
 
-        TEST_CASE("webserver-lists-its-endpoints", "[websock][Webserver]")
+        TEST_CASE("webserver-visits-its-endpoints", "[websock][Webserver]")
         {
             rp<Webserver> websrv = make_idle_server();
 
-            REQUIRE(websrv->endpoints().empty());
+            std::vector<std::string> v;
+            auto visit = [&] {
+                v.clear();
+                websrv->visit_endpoints([&v](xo::web::DynamicEndpoint const & ep) {
+                        v.push_back(ep.uri_pattern());
+                    });
+            };
+
+            visit();
+            REQUIRE(v.empty());
 
             websrv->register_stream_endpoint(stream_descr("/fw/${id}"));
             websrv->register_http_endpoint(http_descr("/status"));
 
-            auto v = websrv->endpoints();
-
-            REQUIRE(v.size() == 2);
-            REQUIRE(v[0].kind_ == xo::web::EndpointKind::http);
-            REQUIRE(v[0].uri_pattern_ == "/status");
-            REQUIRE(v[1].kind_ == xo::web::EndpointKind::stream);
-            REQUIRE(v[1].uri_pattern_ == "/fw/${id}");
+            visit();
+            REQUIRE(v == std::vector<std::string>{"/status", "/fw/${id}"});
 
             REQUIRE(websrv->unregister_stream_endpoint("/fw/${id}"));
-            REQUIRE(websrv->endpoints().size() == 1);
+            visit();
+            REQUIRE(v == std::vector<std::string>{"/status"});
         }
 
         TEST_CASE("webserver-prints-as-json", "[websock][Webserver][json]")
@@ -162,11 +169,20 @@ namespace xo {
 
             Json::Value const & eps = srv["endpoints"];
             REQUIRE(eps.size() == 2);
+            REQUIRE(eps[0]["_name_"].asString() == "DynamicEndpoint");
             REQUIRE(eps[0]["kind"].asString() == "http");
             REQUIRE(eps[0]["pattern"].asString() == "/status");
+            REQUIRE(eps[0]["has_receive"].asBool() == false);
             REQUIRE(eps[1]["kind"].asString() == "stream");
             REQUIRE(eps[1]["stem"].asString() == "/fw/");
             REQUIRE(eps[1]["pattern"].asString() == "/fw/${id}");
+            /* identity and refcount: distinct objects, each held only by the
+             * router's map (no subscriptions on an idle server)
+             */
+            REQUIRE(eps[0]["id"].isString());
+            REQUIRE(eps[0]["id"].asString() != eps[1]["id"].asString());
+            REQUIRE(eps[0]["refcount"].asUInt() == 1);
+            REQUIRE(eps[1]["refcount"].asUInt() == 1);
 
             REQUIRE(srv["sessions"].isArray());
             REQUIRE(srv["sessions"].empty());

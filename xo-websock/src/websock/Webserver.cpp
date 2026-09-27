@@ -622,8 +622,8 @@ namespace xo {
             virtual void register_stream_endpoint(StreamEndpointDescr const & endpoint) override;
             virtual bool unregister_http_endpoint(std::string const & uri_pattern) override;
             virtual bool unregister_stream_endpoint(std::string const & uri_pattern) override;
-            virtual std::vector<EndpointInfo> endpoints() const override {
-                return this->url_router_.endpoints();
+            virtual void visit_endpoints(EndpointVisitor const & fn) const override {
+                this->url_router_.visit_endpoints(fn);
             }
             virtual std::vector<SessionInfo> sessions() const override;
             virtual void start_webserver() override;

@@ -8,7 +8,7 @@
 //       "event": {"server": <Webserver json>}}
 //
 // Webserver json: {id, refcount, listen_port, state,
-//            endpoints: [{kind, stem, pattern}],
+//            endpoints: [{id, refcount, kind, stem, pattern, has_receive}],
 //            sessions: [{id, sender_open,
 //                        subscriptions: [{sub_id, stream, endpoint}]}]}.
 
@@ -73,7 +73,7 @@ function layout(snap) {
     for (const ep of (snap.endpoints || [])) {
         const id = `${ep.kind}:${ep.stem}`;
         endpoint_id[`${ep.kind}:${ep.pattern}`] = id;
-        nodes.push({id: id, kind: ep.kind, label: ep.pattern,
+        nodes.push({id: id, kind: ep.kind, label: ep.pattern, refcount: ep.refcount,
                     x: col_x[ep.kind], y: top_y + row_h * n_in[ep.kind]++});
         links.push({source: "server", target: id});
     }
@@ -159,20 +159,31 @@ function draw(snap) {
             const g = enter.append("g");
             g.append("rect");
             g.append("text").attr("x", 12).attr("y", 25);
+            // refcount badge, top-right corner (only where known)
+            const b = g.append("g").attr("class", "badge");
+            b.append("circle").attr("r", 10);
+            b.append("text").attr("text-anchor", "middle").attr("dy", "0.35em");
             return g;
         });
 
     node.attr("class", d => `node ${d.kind}`)
         .attr("transform", d => `translate(${d.x},${d.y})`);
-    node.select("text").text(d => d.label);
+    node.select(":scope > text").text(d => d.label);
 
     // size each box to its label; remember widths for the links
     node.each(function (d) {
         const g = d3.select(this);
         d.h = d.small ? 30 : box_h;
-        g.select("text").attr("y", d.small ? 20 : 25);
-        d.w = g.select("text").node().getComputedTextLength() + 24;
+        g.select(":scope > text").attr("y", d.small ? 20 : 25);
+        d.w = g.select(":scope > text").node().getComputedTextLength() + 24;
         g.select("rect").attr("width", d.w).attr("height", d.h);
+
+        // refcount: how many rp<> hold this object
+        const badge = g.select("g.badge")
+            .attr("display", d.refcount === undefined ? "none" : null)
+            .attr("transform", `translate(${d.w},0)`);
+        badge.select("text").text(d.refcount);
+        badge.append("title").text(`refcount ${d.refcount}`);
     });
 
     // server's facing edge -> endpoint's facing edge

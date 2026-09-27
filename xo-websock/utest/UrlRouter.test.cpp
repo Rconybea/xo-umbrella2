@@ -23,7 +23,6 @@ namespace xo {
     using xo::web::HttpEndpointDescr;
     using xo::web::StreamEndpointDescr;
     using xo::web::EndpointKind;
-    using xo::web::EndpointInfo;
     using xo::web::endpoint_kind_descr;
     using xo::web::WebsocketSink;
     using xo::web::Alist;
@@ -235,11 +234,21 @@ namespace xo {
             REQUIRE(!router.find_stream("/r/1"));
         }
 
-        TEST_CASE("url-router-lists-its-endpoints", "[websock][UrlRouter]")
+        TEST_CASE("url-router-visits-its-endpoints", "[websock][UrlRouter]")
         {
+            /* (kind, stem, pattern) of each endpoint visited, in visit order */
+            struct Seen { EndpointKind kind; std::string stem; std::string pattern; };
+            auto visit = [](UrlRouter const & router) {
+                std::vector<Seen> v;
+                router.visit_endpoints([&v](DynamicEndpoint const & ep) {
+                        v.push_back(Seen{ep.kind(), ep.stem(), ep.uri_pattern()});
+                    });
+                return v;
+            };
+
             UrlRouter router;
 
-            REQUIRE(router.endpoints().empty());
+            REQUIRE(visit(router).empty());
 
             /* registered out of order, one stem in both maps */
             router.register_stream(stream_descr("/zz/${a}"));
@@ -248,37 +257,61 @@ namespace xo {
             router.register_http(http_descr("/fw/${id}", "f"));
             router.register_stream(stream_descr("/status"));
 
-            std::vector<EndpointInfo> v = router.endpoints();
+            std::vector<Seen> v = visit(router);
 
             /* http then stream, each by stem */
             REQUIRE(v.size() == 5);
 
-            REQUIRE(v[0].kind_ == EndpointKind::http);
-            REQUIRE(v[0].stem_ == "/fw/");
-            REQUIRE(v[0].uri_pattern_ == "/fw/${id}");
+            REQUIRE(v[0].kind == EndpointKind::http);
+            REQUIRE(v[0].stem == "/fw/");
+            REQUIRE(v[0].pattern == "/fw/${id}");
 
-            REQUIRE(v[1].kind_ == EndpointKind::http);
-            REQUIRE(v[1].stem_ == "/status");
+            REQUIRE(v[1].kind == EndpointKind::http);
+            REQUIRE(v[1].stem == "/status");
 
-            REQUIRE(v[2].kind_ == EndpointKind::stream);
-            REQUIRE(v[2].stem_ == "/aa");
-            REQUIRE(v[3].kind_ == EndpointKind::stream);
-            REQUIRE(v[3].stem_ == "/status");
-            REQUIRE(v[4].kind_ == EndpointKind::stream);
-            REQUIRE(v[4].stem_ == "/zz/");
-            REQUIRE(v[4].uri_pattern_ == "/zz/${a}");
+            REQUIRE(v[2].kind == EndpointKind::stream);
+            REQUIRE(v[2].stem == "/aa");
+            REQUIRE(v[3].kind == EndpointKind::stream);
+            REQUIRE(v[3].stem == "/status");
+            REQUIRE(v[4].kind == EndpointKind::stream);
+            REQUIRE(v[4].stem == "/zz/");
+            REQUIRE(v[4].pattern == "/zz/${a}");
 
-            /* an unregistered endpoint is no longer listed */
+            /* an unregistered endpoint is no longer visited */
             REQUIRE(router.unregister_stream("/status"));
 
-            v = router.endpoints();
+            v = visit(router);
             REQUIRE(v.size() == 4);
-            REQUIRE(v[1].kind_ == EndpointKind::http);
-            REQUIRE(v[1].stem_ == "/status");
-            REQUIRE(v[3].stem_ == "/zz/");
+            REQUIRE(v[1].kind == EndpointKind::http);
+            REQUIRE(v[1].stem == "/status");
+            REQUIRE(v[3].stem == "/zz/");
 
             REQUIRE(std::string(endpoint_kind_descr(EndpointKind::http)) == "http");
             REQUIRE(std::string(endpoint_kind_descr(EndpointKind::stream)) == "stream");
+        }
+
+        TEST_CASE("url-router-visit-sees-the-endpoint-itself", "[websock][UrlRouter]")
+        {
+            /* the object the router holds, not a copy -- and no rp<> taken
+             * by the visit, so its refcount is exactly the router's hold
+             */
+            UrlRouter router;
+            router.register_stream(stream_descr("/s/${x}"));
+
+            DynamicEndpoint const * seen = nullptr;
+            std::uint32_t seen_refcount = 0;
+
+            router.visit_endpoints([&](DynamicEndpoint const & ep) {
+                    seen = &ep;
+                    seen_refcount = ep.reference_counter();
+                });
+
+            REQUIRE(seen_refcount == 1);
+
+            rp<DynamicEndpoint> found = router.find_stream("/s/1");
+            REQUIRE(found.get() == seen);
+            /* find_stream's rp<> is a second hold */
+            REQUIRE(found->reference_counter() == 2);
         }
     } /*namespace ut*/
 } /*namespace xo*/

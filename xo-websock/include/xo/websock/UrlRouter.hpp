@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DynamicEndpoint.hpp"
-#include "EndpointInfo.hpp"
+#include "EndpointKind.hpp"
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
 #include <xo/refcnt/Refcounted.hpp>
@@ -71,10 +71,15 @@ namespace xo {
              **/
             rp<DynamicEndpoint> unregister_stream(std::string const & uri_pattern);
 
-            /** every registered endpoint, http then stream, each by stem.
-             *  Copies, taken under the lock; for introspection.
+            /** call @p fn on every registered endpoint, http then stream,
+             *  each by stem.  For introspection.
+             *
+             *  @p fn runs WITH the router's lock held, so it must not call
+             *  back into this router (register, unregister, find).  It sees
+             *  the endpoint itself -- no rp<> copy is taken, so its
+             *  reference count is as the rest of the program holds it.
              **/
-            std::vector<EndpointInfo> endpoints() const;
+            void visit_endpoints(EndpointVisitor const & fn) const;
 
             /** http endpoint serving @p uri; null if none.  See find_in(). **/
             rp<DynamicEndpoint> find_http(std::string const & uri) const;

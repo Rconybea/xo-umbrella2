@@ -479,6 +479,14 @@ namespace xo {
                 REQUIRE(sessions[1]["sender_open"].asBool());
                 REQUIRE(sessions[1]["subscriptions"].size() == 1);
                 REQUIRE(sessions[1]["subscriptions"][0]["stream"].asString() == "/fw");
+
+                /* the /fw endpoint is held by the router's map and by the one
+                 * subscription served: refcount 2
+                 */
+                Json::Value const eps = parse(ss.str())["endpoints"];
+                REQUIRE(eps.size() == 1);
+                REQUIRE(eps[0]["pattern"].asString() == "/fw");
+                REQUIRE(eps[0]["refcount"].asUInt() == 2);
             }
 
             /* a closed session leaves the listing */

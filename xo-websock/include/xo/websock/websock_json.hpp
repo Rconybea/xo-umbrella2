@@ -18,6 +18,7 @@ namespace xo {
          *
          *  Printers installed:
          *  - Webserver: id, refcount, listen_port, state, endpoints, sessions
+         *  - DynamicEndpoint: id, refcount, kind, stem, pattern, has_receive
          *
          *  See .xo-backlog/xo-websock/issues/10.
          **/

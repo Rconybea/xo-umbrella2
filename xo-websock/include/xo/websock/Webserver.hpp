@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EndpointInfo.hpp"
+#include "EndpointKind.hpp"
 #include "SessionInfo.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
@@ -137,10 +137,11 @@ namespace xo {
             virtual bool unregister_http_endpoint(std::string const & uri_pattern) = 0;
             virtual bool unregister_stream_endpoint(std::string const & uri_pattern) = 0;
 
-            /* every registered endpoint (http, then stream, each by stem);
-             * copies, for introspection.  Any thread
+            /* call fn on every registered endpoint (http, then stream, each by
+             * stem), for introspection.  Any thread.  fn runs under the
+             * router's lock: it must not register or unregister endpoints
              */
-            virtual std::vector<EndpointInfo> endpoints() const = 0;
+            virtual void visit_endpoints(EndpointVisitor const & fn) const = 0;
 
             /* every live websocket session, by id; copies, for
              * introspection.  Any thread

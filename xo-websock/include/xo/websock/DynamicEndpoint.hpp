@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "EndpointInfo.hpp"
+#include "EndpointKind.hpp"
 #include "EndpointUtil.hpp"
 #include "WebsocketSink.hpp"
 #include <xo/webutil/Alist.hpp>

@@ -135,36 +135,32 @@ namespace xo {
             return this->erase_in(uri_pattern, &this->stream_map_);
         }
 
-        std::vector<EndpointInfo>
-        UrlRouter::endpoints() const
+        void
+        UrlRouter::visit_endpoints(EndpointVisitor const & fn) const
         {
-            std::vector<EndpointInfo> retval;
+            std::lock_guard<std::mutex> lock(this->mutex_);
 
-            {
-                std::lock_guard<std::mutex> lock(this->mutex_);
+            /* the maps are unordered: sort, so a visit order is stable */
+            std::vector<DynamicEndpoint const *> ep_v;
 
-                retval.reserve(this->http_map_.size() + this->stream_map_.size());
+            ep_v.reserve(this->http_map_.size() + this->stream_map_.size());
 
-                for (auto const * ep_map : {&this->http_map_, &this->stream_map_}) {
-                    for (auto const & ix : *ep_map) {
-                        retval.push_back(EndpointInfo{ix.second->kind(),
-                                                      ix.first,
-                                                      ix.second->uri_pattern()});
-                    }
-                }
+            for (auto const * ep_map : {&this->http_map_, &this->stream_map_}) {
+                for (auto const & ix : *ep_map)
+                    ep_v.push_back(ix.second.get());
             }
 
-            /* the maps are unordered: sort, so a listing is stable */
-            std::sort(retval.begin(), retval.end(),
-                      [](EndpointInfo const & x, EndpointInfo const & y)
+            std::sort(ep_v.begin(), ep_v.end(),
+                      [](DynamicEndpoint const * x, DynamicEndpoint const * y)
                           {
-                              if (x.kind_ != y.kind_)
-                                  return x.kind_ < y.kind_;
-                              return x.stem_ < y.stem_;
+                              if (x->kind() != y->kind())
+                                  return x->kind() < y->kind();
+                              return x->stem() < y->stem();
                           });
 
-            return retval;
-        } /*endpoints*/
+            for (DynamicEndpoint const * ep : ep_v)
+                fn(*ep);
+        } /*visit_endpoints*/
 
         rp<DynamicEndpoint>
         UrlRouter::find_http(std::string const & uri) const

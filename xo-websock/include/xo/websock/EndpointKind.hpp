@@ -1,11 +1,11 @@
-/** @file EndpointInfo.hpp
+/** @file EndpointKind.hpp
  *
  *  @author Roland Conybeare, Sep 2026
  **/
 
 #pragma once
 
-#include <string>
+#include <functional>
 
 namespace xo {
     namespace web {
@@ -30,20 +30,13 @@ namespace xo {
             return "???";
         }
 
-        /** @brief a registered endpoint, as a plain value: what a listing
-         *  (UrlRouter::endpoints, Webserver::endpoints) reports.
-         *
-         *  A copy, taken under the router's lock; holds no reference to the
-         *  endpoint itself.
+        class DynamicEndpoint;
+
+        /** visits a registered endpoint, e.g. for introspection -- see
+         *  UrlRouter::visit_endpoints, Webserver::visit_endpoints
          **/
-        struct EndpointInfo {
-            EndpointKind kind_ = EndpointKind::http;
-            /* key in the router's map: longest literal prefix of the pattern */
-            std::string stem_;
-            /* as registered, e.g. "/fw/${id}" */
-            std::string uri_pattern_;
-        };
+        using EndpointVisitor = std::function<void (DynamicEndpoint const & endpoint)>;
     } /*namespace web*/
 } /*namespace xo*/
 
-/* end EndpointInfo.hpp */
+/* end EndpointKind.hpp */

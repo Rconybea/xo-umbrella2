@@ -5,15 +5,16 @@
  *  json printers for xo-websock's own objects, for introspection.
  *  See .xo-backlog/xo-websock/issues/10.
  *
- *  Increment 5a: the Webserver printer reads the server through its public
- *  listings -- endpoints(), sessions() -- and prints those Info values
- *  inline.  Later increments replace each Info fragment with a printer for
- *  the native object (DynamicEndpoint, the session, WsSessionSender, the
+ *  The Webserver printer reads the server through its public API.  Native
+ *  printers so far: Webserver, DynamicEndpoint (5b).  Sessions are still
+ *  printed from the SessionInfo listing; later increments replace that with
+ *  printers for the native objects (the session, WsSessionSender, the
  *  subscription and its sink), after which the Info types go.
  **/
 
 #include "websock_json.hpp"
 #include "Webserver.hpp"
+#include "DynamicEndpoint.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
@@ -44,13 +45,6 @@ namespace xo {
              *       arrive (increments 5b..5d)
              */
 
-            void print_endpoint_info(EndpointInfo const & x, std::ostream * p_os) {
-                *p_os << "{" << quot("kind") << ": " << quot(endpoint_kind_descr(x.kind_))
-                      << ", " << quot("stem") << ": " << quot(x.stem_)
-                      << ", " << quot("pattern") << ": " << quot(x.uri_pattern_)
-                      << "}";
-            }
-
             void print_subscription_info(SubscriptionInfo const & x, std::ostream * p_os) {
                 *p_os << "{" << quot("sub_id") << ": " << x.sub_id_
                       << ", " << quot("stream") << ": " << quot(x.stream_name_)
@@ -75,6 +69,34 @@ namespace xo {
                 *p_os << "]}";
             }
 
+            /** @brief a registered endpoint.  Printed in full where it is
+             *  owned -- the Webserver's endpoint list; elsewhere (a
+             *  subscription, 5d) it will appear as a ref by id
+             **/
+            class JsonPrinter_DynamicEndpoint : public JsonPrinter {
+            public:
+                JsonPrinter_DynamicEndpoint(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                    DynamicEndpoint const * ep = this->check_recover_native<DynamicEndpoint>(tp, p_os);
+
+                    if (!ep)
+                        return;
+
+                    *p_os << "{" << quot("_name_") << ": " << quot("DynamicEndpoint")
+                          << ", " << quot("id") << ": " << quot(json_id(ep))
+                          /* held by the router's map, plus one per live
+                           * subscription served (each holds it by rp<>)
+                           */
+                          << ", " << quot("refcount") << ": " << ep->reference_counter()
+                          << ", " << quot("kind") << ": " << quot(endpoint_kind_descr(ep->kind()))
+                          << ", " << quot("stem") << ": " << quot(ep->stem())
+                          << ", " << quot("pattern") << ": " << quot(ep->uri_pattern())
+                          << ", " << quot("has_receive") << ": " << (ep->has_receive() ? "true" : "false")
+                          << "}";
+                }
+            }; /*JsonPrinter_DynamicEndpoint*/
+
             /** @brief Webserver, keyed on the abstract type: what a
              *  Webserver* in a reflected struct dispatches to
              **/
@@ -98,13 +120,20 @@ namespace xo {
                     *p_os << ", " << quot("endpoints") << ": [";
                     {
                         bool first = true;
-                        for (EndpointInfo const & ep : websrv->endpoints()) {
-                            if (!first)
-                                *p_os << ", ";
-                            first = false;
+                        PrintJson const * pjson = this->pjson();
 
-                            print_endpoint_info(ep, p_os);
-                        }
+                        /* under the router's lock; printing never calls back
+                         * into the router
+                         */
+                        websrv->visit_endpoints([pjson, p_os, &first](DynamicEndpoint const & ep) {
+                                if (!first)
+                                    *p_os << ", ";
+                                first = false;
+
+                                pjson->print_aux(TaggedPtr(Reflect::require<DynamicEndpoint>(),
+                                                           const_cast<DynamicEndpoint *>(&ep)),
+                                                 p_os);
+                            });
                     }
                     *p_os << "]";
 
@@ -131,6 +160,8 @@ namespace xo {
         {
             pjson->provide_printer(Reflect::require<Webserver>(),
                                    std::make_unique<JsonPrinter_Webserver>(pjson));
+            pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
+                                   std::make_unique<JsonPrinter_DynamicEndpoint>(pjson));
         }
     } /*namespace web*/
 } /*namespace xo*/
