@@ -23,6 +23,7 @@
 #include "WebsocketSink.hpp"
 #include "WsSafetyToken.hpp"
 #include "WsSender.hpp"
+#include "WsSessionSender.hpp"
 #include "WsSessionTable.hpp"
 #include "WsSessionRouter.hpp"
 #include <xo/printjson/PrintJson.hpp>
@@ -324,37 +325,8 @@ namespace xo {
 
         class WebserverImpl;
 
-        /* sends to one websocket session of a webserver: its router's
-         * replies, and frames from every sink that router makes.
-         * One per session, created at session open.
-         *
-         * Holds a plain WebserverImpl pointer, not rp<>: the server owns its
-         * sessions, and an rp<> here would be a cycle (the session record
-         * outlives the session, until its slot is reused).
-         *
-         * close() at session close (and, as a backstop, when the server is
-         * destroyed): from then on send_text() drops what it is given.  So
-         * a sink the application keeps past its session can neither write
-         * into a later session that reuses the id, nor reach a freed
-         * server.  See .xo-backlog/xo-websock/issues/05.
-         */
-        class WsSessionSender : public WsSender {
-        public:
-            WsSessionSender(WebserverImpl * websrv, uint64_t session_id)
-                : websrv_{websrv}, session_id_{session_id} {}
-
-            /* defined after WebserverImpl */
-            void send_text(std::string text) override;
-            bool is_open() const override { return open_.load(); }
-
-            /* stop delivering; idempotent */
-            void close() { open_.store(false); }
-
-        private:
-            WebserverImpl * websrv_ = nullptr;
-            uint64_t session_id_ = 0;
-            std::atomic<bool> open_{true};
-        }; /*WsSessionSender*/
+        /* sends to one session; see WsSessionSender */
+        using WsSessionSenderImpl = WsSessionSender<WebserverImpl>;
 
         /* bookkeeping record for a websocket session.
          * WebserverImpl (below) keeps exactly one of these
@@ -368,7 +340,7 @@ namespace xo {
              */
             WebsocketSessionRecd(OutputBuffer * output_buf,
                                  UrlRouter const & url_router,
-                                 rp<WsSessionSender> sender,
+                                 rp<WsSessionSenderImpl> sender,
                                  rp<PrintJson> pjson)
                 : output_buf_{output_buf},
                   sender_{sender},
@@ -580,7 +552,7 @@ namespace xo {
              */
             std::mutex mutex_;
             /* sends to this session; shared by .router and its sinks */
-            rp<WsSessionSender> sender_;
+            rp<WsSessionSenderImpl> sender_;
             /* this session's subscriptions, and inbound command handling */
             WsSessionRouter router_;
             /* generate seq#'s for outgoing messages */
@@ -599,7 +571,7 @@ namespace xo {
 
         class WebserverImpl : public Webserver {
             /* delivers through the protected .send_text() */
-            friend class WsSessionSender;
+            friend class WsSessionSender<WebserverImpl>;
 
         public:
             WebserverImpl(WebserverConfig const & ws_config,
@@ -941,14 +913,6 @@ namespace xo {
         }; /*WebserverImpl*/
 
         void
-        WsSessionSender::send_text(std::string text)
-        {
-            /* a closed sender may outlive its server: check before use */
-            if (this->open_.load())
-                this->websrv_->send_text(this->session_id_, std::move(text));
-        } /*send_text*/
-
-        void
         WebserverImpl::register_http_endpoint(HttpEndpointDescr const & endpoint_descr)
         {
             this->url_router_.register_http(endpoint_descr);
@@ -985,7 +949,7 @@ namespace xo {
                    /* endpoints serving stream names */
                    this->url_router_,
                    /* sends to THIS session: replies, and every sink's frames */
-                   rp<WsSessionSender>(new WsSessionSender(this, new_id)),
+                   rp<WsSessionSenderImpl>(new WsSessionSenderImpl(this, new_id)),
                    this->pjson_)));
 
             /* control comes here when a new websocket session is created,

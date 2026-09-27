@@ -8,7 +8,8 @@ set(SELF_SRCS
     websock_unit_main.cpp
     WsSessionRouter.test.cpp
     UrlRouter.test.cpp
-    WsSessionTable.test.cpp)
+    WsSessionTable.test.cpp
+    WsSessionSender.test.cpp)
 
 if (ENABLE_TESTING)
     xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
