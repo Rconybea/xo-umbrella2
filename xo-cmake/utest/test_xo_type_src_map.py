@@ -95,10 +95,17 @@ namespace xo {
 }
 """
 
-# does not compile on its own
+# does not compile on its own -- yet clang's error recovery still dumps
+# Broken; a broken header's dump is not trusted (recovery can mis-nest
+# namespaces: std::xo::xo::mm::.. was seen)
 BROKEN_HPP = """\
 #pragma once
 static_assert(sizeof(Undeclared) > 0);
+namespace xo {
+    namespace sub {
+        struct Broken { Undeclared u; };
+    }
+}
 """
 
 
@@ -213,6 +220,9 @@ class TestTypeSourceMap(unittest.TestCase):
         self.types()
         self.assertIn("header does not compile on its own: sub/include/broken.hpp",
                       self.run_result.stderr)
+
+    def test_header_not_self_contained_contributes_nothing(self):
+        self.assertFalse([k for k in self.types() if "Broken" in k])
 
     def test_exactly_these(self):
         self.assertEqual(sorted(self.types()),
