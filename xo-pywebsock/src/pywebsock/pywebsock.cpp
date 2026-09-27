@@ -2,22 +2,57 @@
 
 #include "pywebsock.hpp"
 #include <xo/websock/Webserver.hpp>
+#include <xo/websock/cx/WebsockAppcx.hpp>
+#include <xo/pyprintjson/pyprintjson.hpp>
+#include <xo/printjson/cx/PrintJsonAppcx.hpp>
 #include <xo/pywebutil/pywebutil.hpp>
-#include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/pyutil/pyutil.hpp>
 #include <pybind11/chrono.h>
+#include <memory>
+#include <stdexcept>
 
 namespace xo {
     using xo::web::WebserverConfig;
     using xo::web::Webserver;
     using xo::web::Runstate;
-    using xo::json::PrintJsonSingleton;
     using xo::rp;
     namespace py = pybind11;
 
     namespace web {
+        namespace {
+            /** Enforce at most one WebsockAppcx per python instance, as
+             *  xo.printjson does for its context: this one installs printers
+             *  into the process-wide printer table.
+             *
+             *  @return websock appcx, to be owned by python.
+             **/
+            std::unique_ptr<WebsockAppcx>
+            configure_once(const WebsockConfig & cfg,
+                           const PrintJsonAppcx & printjson_appcx)
+            {
+                /** true once this function has run **/
+                static bool s_configured = false;
+
+                if (s_configured) {
+                    throw std::runtime_error
+                        ("xo.websock.configure: already configured;"
+                         " the json printer table is process-wide");
+                }
+
+                auto retval = std::make_unique<WebsockAppcx>(cfg, printjson_appcx);
+
+                s_configured = true;
+
+                return retval;
+            }
+        } /*namespace*/
+
         PYBIND11_MODULE(XO_PYWEBSOCK_MODULE_NAME(), m) {
             XO_PYWEBUTIL_IMPORT_MODULE(); // = py::module_::import("pywebutil")
+            /* configure()'s second argument, PrintJsonAppcx, is registered by
+             * xo.printjson; pybind11 permits one registration per c++ type
+             */
+            XO_PYPRINTJSON_IMPORT_MODULE();
 
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.websock";
@@ -42,13 +77,38 @@ namespace xo {
                      py::arg("dir"),
                      "copy of this config serving static files from dir");
 
+            // ----------------------------------------------------------------
+            // subsystem configuration and context.  A Webserver is made from
+            // the context (.xo-backlog/xo-websock/issues/11)
+
+            py::class_<WebsockConfig>(m, "WebsockConfig")
+                .def(py::init<>(),
+                     "configuration for the xo-websock subsystem (no settings yet)")
+                .def("__repr__", [](const WebsockConfig &) {
+                        return std::string("<WebsockConfig>"); });
+
+            py::class_<WebsockAppcx>(m, "WebsockAppcx")
+                .def("config", &WebsockAppcx::config,
+                     py::return_value_policy::reference_internal,
+                     "the WebsockConfig this context was established with")
+                .def("__repr__", [](const WebsockAppcx &) {
+                        return std::string("<WebsockAppcx>"); });
+
+            m.def("configure", &configure_once,
+                  py::arg("config"),
+                  py::arg("printjson_appcx"),
+                  py::keep_alive<0, 2>(),
+                  "establish an xo-websock context, and return it: installs"
+                  " xo-websock's json printers.  Takes the context returned by"
+                  " xo.printjson.configure(); Webservers are made from the"
+                  " result.  Once per process.");
+
             py::class_<Webserver, rp<Webserver>>(m, "Webserver")
-                .def_static("make",
-                            [](WebserverConfig const & ws_config)
-                                {
-                                    return Webserver::make(ws_config,
-                                                           PrintJsonSingleton::instance());
-                                })
+                /* keep_alive: the server's PrintJson came from the context */
+                .def_static("make", &Webserver::make,
+                            py::arg("cx"),
+                            py::arg("ws_config"),
+                            py::keep_alive<0, 1>())
                 .def_property_readonly("state", &Webserver::state)
                 .def("register_http_endpoint", &Webserver::register_http_endpoint)
                 .def("register_stream_endpoint", &Webserver::register_stream_endpoint)
@@ -67,7 +127,10 @@ namespace xo {
                 .def("__repr__", &Webserver::display_string);
 
             m.def("make_webserver",
-                  &Webserver::make);
+                  &Webserver::make,
+                  py::arg("cx"),
+                  py::arg("ws_config"),
+                  py::keep_alive<0, 1>());
         } /*pywebsock*/
     } /*web*/
 } /*namespace xo*/

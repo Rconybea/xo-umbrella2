@@ -11,6 +11,7 @@
   xo-websock,
 
   xo-pyreflect,
+  xo-pyprintjson,
   xo-pywebutil
 } :
 
@@ -28,6 +29,7 @@ xo-pyutil
 #      xo-printjson
       xo-pywebutil
       xo-pyreflect
+      xo-pyprintjson
       xo-websock
 #      python3Packages.python
 #      python3Packages.pybind11

@@ -14,7 +14,7 @@ namespace xo {
          *  So that PrintJson can print the webserver's own objects -- e.g. a
          *  reflected struct holding a @c Webserver* -- for introspection.
          *  Idempotent: PrintJson keeps the first printer installed for a type.
-         *  Webserver::make() calls this on the PrintJson it is given.
+         *  WebsockAppcx calls this on its PrintJson (.xo-backlog/xo-websock/issues/11).
          *
          *  Printers installed:
          *  - Webserver: id, refcount, listen_port, state, endpoints, sessions

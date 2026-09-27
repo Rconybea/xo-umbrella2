@@ -10,6 +10,7 @@
  *  Expectations are OBSERVED, never predicted.
  **/
 
+#include "WebsockUtestAppcx.hpp"
 #include "xo/websock/Webserver.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <catch2/catch.hpp>
@@ -65,7 +66,7 @@ namespace xo {
             }
             rp<Webserver> make_idle_server() {
                 /* port never bound: start_webserver() is not called */
-                return Webserver::make(WebserverConfig(), PrintJsonSingleton::instance());
+                return Webserver::make(WebsockUtestAppcx::appcx().cx<S_websock_tag>(), WebserverConfig());
             }
 
             HttpEndpointDescr http_descr(std::string pattern) {

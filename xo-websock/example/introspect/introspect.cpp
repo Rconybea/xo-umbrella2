@@ -30,9 +30,10 @@
  **/
 
 #include <xo/websock/Webserver.hpp>
+#include <xo/websock/cx/WebsockAppcx.hpp>
+#include <xo/printjson/cx/PrintJsonAppcx.hpp>
+#include <xo/reflect/cx/ReflectAppcx.hpp>
 #include <xo/websock/WebsocketSink.hpp>
-#include <xo/printjson/PrintJsonSingleton.hpp>
-#include <xo/printjson/init_printjson.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
@@ -62,7 +63,6 @@ namespace xo {
     using xo::web::Alist;
     using xo::web::StreamReceiver;
     using xo::web::WebsocketSink;
-    using xo::json::PrintJsonSingleton;
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
     using xo::fn::CallbackId;
@@ -70,7 +70,7 @@ namespace xo {
     namespace web {
         /** what the page is told: the server itself.  PrintJson follows the
          *  pointer to the Webserver json printer (xo/websock/websock_json.hpp),
-         *  which Webserver::make installed.  A struct, so later increments can
+         *  which WebsockAppcx installed.  A struct, so later increments can
          *  add the application's own objects beside it
          **/
         struct IntrospectSnapshot {
@@ -190,14 +190,23 @@ main(int argc, char * argv[])
 
     std::int32_t port = (argc > 1) ? std::atoi(argv[1]) : 7681;
 
-    /* logging + reflection + json printing */
-    InitSubsys<S_printjson_tag>::require();
-    InitSubsys<S_indentlog2_tag>::require();
-    Subsystem::initialize_all();
+    /* the subsystem stack: logging, reflection, json printing, websock.
+     * Establishing the websock context installs its json printers; a
+     * Webserver is made from it
+     */
+    using IntrospectConfig = AppConfig<S_indentlog2_tag, S_reflect_tag,
+                                       S_printjson_tag, S_websock_tag>;
+    using IntrospectContext = AppContext<S_indentlog2_tag, S_reflect_tag,
+                                         S_printjson_tag, S_websock_tag>;
 
-    AppConfig<S_indentlog2_tag> log_config{ Indentlog2Config(pp::PpConfig::plain(),
-                                                             c_temp_arena_capacity) };
-    AppContext<S_indentlog2_tag> log_cx{ log_config };
+    IntrospectConfig app_config{ Indentlog2Config(pp::PpConfig::plain(),
+                                                  c_temp_arena_capacity),
+                                 ReflectConfig(),
+                                 PrintJsonConfig(),
+                                 WebsockConfig() };
+    IntrospectContext app_cx{ app_config };
+
+    Subsystem::initialize_all();
 
     IntrospectSnapshot::reflect_self();
 
@@ -215,9 +224,9 @@ main(int argc, char * argv[])
     }
 
     rp<Webserver> websrv
-        = Webserver::make(WebserverConfig(port, false, false, false)
-                              .with_mount_origin(origin.string()),
-                          PrintJsonSingleton::instance());
+        = Webserver::make(app_cx.cx<S_websock_tag>(),
+                          WebserverConfig(port, false, false, false)
+                              .with_mount_origin(origin.string()));
 
     websrv->register_stream_endpoint
         (StreamEndpointDescr("/introspect",

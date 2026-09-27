@@ -13,6 +13,7 @@
  **/
 
 #include "WsTestClient.hpp"
+#include "WebsockUtestAppcx.hpp"
 #include "xo/websock/Webserver.hpp"
 #include "xo/websock/WebsocketSink.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
@@ -168,7 +169,7 @@ namespace xo {
             /** a started webserver on an OS-assigned port **/
             struct LiveServer {
                 LiveServer() {
-                    websrv_ = Webserver::make(WebserverConfig(), PrintJsonSingleton::instance());
+                    websrv_ = Webserver::make(WebsockUtestAppcx::appcx().cx<S_websock_tag>(), WebserverConfig());
                 }
 
                 ~LiveServer() {
@@ -258,8 +259,8 @@ namespace xo {
             std::int32_t port = first.start();
             REQUIRE(port > 0);
 
-            rp<Webserver> second = Webserver::make(WebserverConfig(port, false, false, false),
-                                                   PrintJsonSingleton::instance());
+            rp<Webserver> second = Webserver::make(WebsockUtestAppcx::appcx().cx<S_websock_tag>(),
+                                                   WebserverConfig(port, false, false, false));
             second->start_webserver();
 
             /* join on a DETACHED thread, so a regression fails instead of

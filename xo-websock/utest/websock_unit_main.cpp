@@ -8,14 +8,9 @@
  *  .xo-backlog/xo-websock/issues/01.
  **/
 
-// note: do NOT define CATCH_CONFIG_RUNNER/CATCH_CONFIG_MAIN here.  The catch2
-//       implementation is compiled once, in libxo_testutil (UtestAppStart.cpp);
-//       a second copy here would get its own test registry, which on osx the
-//       runner never sees.  CATCH_CONFIG_EXTERNAL_INTERFACES pulls in just the
-//       listener interfaces UtestListener.hpp needs.
 #define CATCH_CONFIG_EXTERNAL_INTERFACES // before UtestListener.hpp
 
-#include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
+#include "WebsockUtestAppcx.hpp"
 #include <xo/indentlog2/cx/Indentlog2Config.hpp>
 #include <xo/indentlog2/init_indentlog2.hpp>
 #include <xo/testutil/UtestAppStart.hpp>
@@ -34,8 +29,7 @@ namespace {
 int
 main(int argc, char* argv[])
 {
-    using UtestAppConfig  = xo::AppConfig<xo::S_indentlog2_tag>;
-    using UtestAppContext = xo::AppContext<xo::S_indentlog2_tag>;
+    using xo::WebsockUtestAppcx;
     using xo::Indentlog2Config;
     using xo::pp::PpConfig;
 
@@ -48,9 +42,15 @@ main(int argc, char* argv[])
     if (retval)
         return retval;
 
-    UtestAppConfig utest_config{ Indentlog2Config(PpConfig::plain(),
-                                                  c_temp_arena_capacity) };
-    UtestAppContext utest_appcx{ utest_config };
+    using UtestAppConfig = WebsockUtestAppcx::UtestAppConfig;
+
+    UtestAppConfig utest_cfg{ Indentlog2Config(PpConfig::plain(),
+                                               c_temp_arena_capacity),
+                              xo::ReflectConfig(),
+                              xo::PrintJsonConfig(),
+                              xo::WebsockConfig() };
+
+    WebsockUtestAppcx::configure(utest_cfg);
 
     app.setup(); // calls Subsystem::initialize_all()
 

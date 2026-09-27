@@ -25,7 +25,7 @@
 #include "WsSender.hpp"
 #include "WsSessionSender.hpp"
 #include "WsSessionTable.hpp"
-#include "websock_json.hpp"
+#include "cx/WebsockAppcx.hpp"
 #include "WsSessionRouter.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
@@ -1998,13 +1998,10 @@ namespace xo {
         // ----- Webserver -----
 
         rp<Webserver>
-        Webserver::make(WebserverConfig const & ws_config,
-                        rp<PrintJson> const & pjson) {
-            /* so pjson can print this server's own objects (introspection) */
-            if (pjson)
-                provide_websock_json_printers(pjson.get());
-
-            return WebserverImplWsThread::make(ws_config, pjson);
+        Webserver::make(WebsockAppcx const & cx,
+                        WebserverConfig const & ws_config) {
+            /* cx installed the printers when it was established */
+            return WebserverImplWsThread::make(ws_config, cx.print_json());
         } /*make*/
 
         void

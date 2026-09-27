@@ -6,6 +6,7 @@
 set(SELF_EXE utest.websock)
 set(SELF_SRCS
     websock_unit_main.cpp
+    WebsockUtestAppcx.cpp
     WsSessionRouter.test.cpp
     UrlRouter.test.cpp
     WsSessionTable.test.cpp
@@ -32,6 +33,7 @@ endif()
 set(LIVE_EXE utest.websock.live)
 set(LIVE_SRCS
     websock_unit_main.cpp
+    WebsockUtestAppcx.cpp
     WsTestClient.cpp
     WebserverLive.test.cpp)
 

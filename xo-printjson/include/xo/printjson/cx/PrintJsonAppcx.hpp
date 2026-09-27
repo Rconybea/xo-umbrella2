@@ -6,7 +6,7 @@
 #pragma once
 
 #include "PrintJsonConfig.hpp"
-#include "PrintJson.hpp"
+#include "xo/printjson/PrintJson.hpp"
 #include "xo/printjson/PrintJsonSingleton.hpp"
 #include <xo/reflect/cx/ReflectAppcx.hpp>
 

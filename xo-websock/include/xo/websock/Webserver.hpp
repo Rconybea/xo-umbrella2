@@ -16,6 +16,8 @@
 #include <vector>
 
 namespace xo {
+    class WebsockAppcx;
+
     namespace web {
         enum class Runstate { stopped, stop_requested, running };
 
@@ -98,9 +100,13 @@ namespace xo {
             /* note: although webserver allows creating multiple instances,
              *       the underlying libwebsocket library is not advertised to be
              *       threadsafe
+             *
+             * Made from @p cx: the server prints with cx's PrintJson, into
+             * which cx installed xo-websock's json printers -- so no server
+             * exists without them (.xo-backlog/xo-websock/issues/11)
              */
-            static rp<Webserver> make(WebserverConfig const & ws_config,
-                                      rp<PrintJson> const & pjson);
+            static rp<Webserver> make(WebsockAppcx const & cx,
+                                      WebserverConfig const & ws_config);
 
             /* current state */
             virtual Runstate state() const = 0;
