@@ -52,7 +52,7 @@ namespace xo {
             }
         }
 
-        virtual void testCaseEnded(const Catch::TestCaseStats & stats) override {
+        virtual void testCaseEnded(const Catch::TestCaseStats & /*stats*/) override {
             // postamble
         }
 
