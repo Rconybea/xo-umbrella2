@@ -185,7 +185,7 @@ namespace xo {
                     return;
 
                 *p_os << "{" << quot("_name_") << ": " << quot("Ticker")
-                      << ", " << quot("_type") << ": " << quot(xo::reflect::type_name<Ticker>())
+                      << ", " << quot("_type_") << ": " << quot(xo::reflect::type_name<Ticker>())
                       << ", " << quot("id") << ": " << quot(address_of(ticker))
                       << ", " << quot("sinks") << ": [";
 

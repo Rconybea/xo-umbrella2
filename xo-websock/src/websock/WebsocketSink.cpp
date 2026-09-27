@@ -133,7 +133,7 @@ namespace xo {
         WebsocketSinkImpl::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
         {
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
-                  << ", " << quot("_type") << ": " << quot(type_name<WebsocketSinkImpl>())
+                  << ", " << quot("_type_") << ": " << quot(type_name<WebsocketSinkImpl>())
                   << ", " << quot("id") << ": " << quot(json_id(this))
                   /* the router's subscription slot, plus whatever the
                    * application holds (e.g. a source it is attached to)
@@ -155,7 +155,7 @@ namespace xo {
         WebsocketSink::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
         {
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
-                  << ", " << quot("_type") << ": " << quot(type_name<WebsocketSink>())
+                  << ", " << quot("_type_") << ": " << quot(type_name<WebsocketSink>())
                   << ", " << quot("id") << ": " << quot(json_id(this))
                   << ", " << quot("refcount") << ": " << this->reference_counter()
                   << ", " << quot("stream") << ": " << quot(this->stream_name())

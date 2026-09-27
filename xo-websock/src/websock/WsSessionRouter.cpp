@@ -408,7 +408,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("Subscription")
-                          << ", " << quot("_type") << ": " << quot(type_name<Subscription>())
+                          << ", " << quot("_type_") << ": " << quot(type_name<Subscription>())
                           << ", " << quot("id") << ": " << quot(json_id(sub))
                           << ", " << quot("sub_id") << ": " << sub->sub_id_
                           << ", " << quot("stream") << ": " << quot(sub->stream_name_)

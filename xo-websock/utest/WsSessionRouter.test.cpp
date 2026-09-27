@@ -659,7 +659,7 @@ namespace xo {
             REQUIRE(v.size() == 2);
             REQUIRE(v.size() == router->n_subscription());
             REQUIRE(v[0]["_name_"].asString() == "Subscription");
-            REQUIRE(v[0]["_type"].asString() == "xo::web::WsSessionRouter::Subscription");
+            REQUIRE(v[0]["_type_"].asString() == "xo::web::WsSessionRouter::Subscription");
             REQUIRE(v[0]["sub_id"].asUInt() == 0);
             REQUIRE(v[0]["stream"].asString() == "/a");
             REQUIRE(v[1]["sub_id"].asUInt() == 2);
@@ -677,7 +677,7 @@ namespace xo {
             Json::Value const & sink = v[1]["sink"];
 
             REQUIRE(sink["_name_"].asString() == "WebsocketSink");
-            REQUIRE(sink["_type"].asString() == "xo::web::WebsocketSinkImpl");
+            REQUIRE(sink["_type_"].asString() == "xo::web::WebsocketSinkImpl");
             REQUIRE(sink["id"].asString() == id_of(fx.rec_.subscribed_v_[2].get()));
             REQUIRE(sink["refcount"].asUInt() == 2);
             REQUIRE(sink["stream"].asString() == "/fw/8");

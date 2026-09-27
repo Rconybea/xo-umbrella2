@@ -1020,7 +1020,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
-                          << ", " << quot("_type") << ": " << quot(type_name<WsSessionSenderImpl>())
+                          << ", " << quot("_type_") << ": " << quot(type_name<WsSessionSenderImpl>())
                           << ", " << quot("id") << ": " << quot(json_id(x))
                           /* session record + router + one per live sink */
                           << ", " << quot("refcount") << ": " << x->reference_counter()
@@ -1045,7 +1045,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("WsSession")
-                          << ", " << quot("_type") << ": " << quot(type_name<WebsocketSessionRecd>())
+                          << ", " << quot("_type_") << ": " << quot(type_name<WebsocketSessionRecd>())
                           << ", " << quot("id") << ": " << quot(json_id(recd))
                           << ", " << quot("session_id") << ": " << recd->session_id()
                           << ", " << quot("sender") << ": ";

@@ -58,7 +58,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("DynamicEndpoint")
-                          << ", " << quot("_type") << ": " << quot(type_name<DynamicEndpoint>())
+                          << ", " << quot("_type_") << ": " << quot(type_name<DynamicEndpoint>())
                           << ", " << quot("id") << ": " << quot(json_id(ep))
                           /* held by the router's map, plus one per live
                            * subscription served (each holds it by rp<>)
@@ -102,7 +102,7 @@ namespace xo {
 
                     *p_os << "{" << quot("_name_") << ": " << quot("Webserver")
                           /* the type this printer reads: the interface */
-                          << ", " << quot("_type") << ": " << quot(type_name<Webserver>())
+                          << ", " << quot("_type_") << ": " << quot(type_name<Webserver>())
                           << ", " << quot("id") << ": " << quot(json_id(websrv))
                           << ", " << quot("refcount") << ": " << websrv->reference_counter()
                           << ", " << quot("listen_port") << ": " << websrv->listen_port()

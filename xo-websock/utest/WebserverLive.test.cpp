@@ -468,7 +468,7 @@ namespace xo {
             /* by id, in connection order; distinct */
             REQUIRE(v.size() == 2);
             REQUIRE(v[0]["_name_"].asString() == "WsSession");
-            REQUIRE(v[0]["_type"].asString() == "xo::web::WebsocketSessionRecd");
+            REQUIRE(v[0]["_type_"].asString() == "xo::web::WebsocketSessionRecd");
             REQUIRE(v[0]["session_id"].asUInt64() < v[1]["session_id"].asUInt64());
             REQUIRE(v[0]["id"].asString() != v[1]["id"].asString());
 
@@ -480,7 +480,7 @@ namespace xo {
 
                 REQUIRE(sender["_name_"].asString() == "WsSessionSender");
                 /* a template: its arguments follow */
-                REQUIRE(sender["_type"].asString().starts_with("xo::web::WsSessionSender<"));
+                REQUIRE(sender["_type_"].asString().starts_with("xo::web::WsSessionSender<"));
                 REQUIRE(sender["open"].asBool());
                 REQUIRE(sender["session_id"].asUInt64() == v[k]["session_id"].asUInt64());
             }

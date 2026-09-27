@@ -30,14 +30,14 @@ namespace xo {
 
         InitEvidence s_init_evidence = InitSubsys<S_printjson_tag>::require();
 
-        /** the "_type" member the struct printer emits for T, after "_name_":
+        /** the "_type_" member the struct printer emits for T, after "_name_":
          *  its canonical name.  Built, not spelled out: a type in an
          *  anonymous namespace is "{anonymous}" under gcc, "(anonymous
          *  namespace)" under clang
          **/
         template <typename T>
         std::string type_member() {
-            return ", \"_type\": \"" + std::string(xo::reflect::type_name<T>()) + "\"";
+            return ", \"_type_\": \"" + std::string(xo::reflect::type_name<T>()) + "\"";
         }
 
         namespace {
