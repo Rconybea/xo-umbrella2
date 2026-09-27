@@ -5,7 +5,7 @@
 //   <- {"cmd": "subscribed", "stream": "/introspect", "sub_id": N}
 //   -> {"cmd": "send", "sub_id": N, "msg": "refresh"}
 //   <- {"stream": "/introspect", "sub_id": N, "seq": k,
-//       "event": {"server": <Webserver json>}}
+//       "event": {"server": <Webserver json>, "ticker": <Ticker json>}}
 //
 // Webserver json: {id, refcount, listen_port, state,
 //            endpoints: [{id, refcount, kind, stem, pattern, has_receive}],
@@ -18,6 +18,14 @@
 //
 // Each object is printed in full once; elsewhere as {ref: id}.  The page
 // joins refs to objects by id.
+//
+// Ticker json: {id, sinks: [{ref}]} -- the application's own holds.
+//
+// Refcount accounting: each refcount is compared with the holds the page can
+// see.  An endpoint is held by the router's map + each subscription to it; a
+// sender by its session record + router + each sink; a sink by the router's
+// slot + each application ref (the ticker).  More than that is flagged: a
+// hold the snapshot does not show.
 
 "use strict";
 
@@ -51,7 +59,7 @@ ws.onmessage = (ev) => {
         status_el.textContent = `error: ${msg.error}`;
     } else if ("event" in msg) {
         raw_el.textContent = JSON.stringify(msg, null, 2);
-        draw(msg.event.server);
+        draw(msg.event);
     }
 };
 
@@ -70,7 +78,10 @@ const col_x = {http: 30, server: 330, stream: 640};
 const row_h = 58;
 const top_y = 40;
 
-function layout(snap) {
+function layout(event) {
+    const snap = event.server;
+    const ticker = event.ticker;
+
     const nodes = [];
     const links = [];
     const n_in = {http: 0, stream: 0};
@@ -137,16 +148,58 @@ function layout(snap) {
         n_sub_max = Math.max(n_sub_max, subs.length + 1);   // + the sender
     });
 
+    // the application's ticker, right of the sessions; a "holds" link to
+    // each subscription whose sink it refers to
+    const holds = [];
+    if (ticker) {
+        const n_s = (snap.sessions || []).length;
+        nodes.push({id: "ticker", kind: "app", label: "Ticker (app)",
+                    x: col_x.http + n_s * 240, y: session_y});
+
+        const sub_of_sink = {};
+        for (const s of (snap.sessions || []))
+            for (const sub of (s.subscriptions || []))
+                if (sub.sink) sub_of_sink[sub.sink.id] = `session:${s.session_id}:sub:${sub.sub_id}`;
+
+        for (const r of (ticker.sinks || []))
+            if (sub_of_sink[r.ref]) holds.push({source: "ticker", target: sub_of_sink[r.ref]});
+    }
+
+    // refcount accounting: the holds this snapshot shows, per object
+    const expect = {};   // node id -> expected refcount
+    const bump = (k, n) => { expect[k] = (expect[k] || 0) + n; };
+    const node_of_ep = endpoint_node;
+    for (const ep of (snap.endpoints || []))
+        bump(node_of_ep[ep.id], 1);                          // router's map
+    const app_refs = {};
+    for (const r of ((ticker && ticker.sinks) || []))
+        app_refs[r.ref] = (app_refs[r.ref] || 0) + 1;
+    for (const s of (snap.sessions || [])) {
+        const sid = `session:${s.session_id}`;
+        bump(`${sid}:sender`, 2);                            // record + router
+        for (const sub of (s.subscriptions || [])) {
+            const subn = `${sid}:sub:${sub.sub_id}`;
+            if (sub.endpoint) bump(node_of_ep[sub.endpoint.ref], 1);
+            if (sub.sink) {
+                bump(subn, 1 + (app_refs[sub.sink.id] || 0)); // slot + app
+                if (sub.sink.sender && s.sender && sub.sink.sender.ref === s.sender.id)
+                    bump(`${sid}:sender`, 1);
+            }
+        }
+    }
+    for (const n of nodes)
+        if (n.refcount !== undefined) n.expected = expect[n.id] || 0;
+
     const n_session = (snap.sessions || []).length;
     const height = (n_session > 0
                     ? session_y + row_h + n_sub_max * sub_h
                     : top_y + row_h * n_rows) + 20;
 
-    return {nodes, links, uses, height};
+    return {nodes, links, uses, holds, height};
 }
 
-function draw(snap) {
-    const {nodes, links, uses, height} = layout(snap);
+function draw(event) {
+    const {nodes, links, uses, holds, height} = layout(event);
     const by_id = new Map(nodes.map(d => [d.id, d]));
     const box_h = 40;
 
@@ -156,6 +209,7 @@ function draw(snap) {
     // layer, so a refresh cannot paint a line over a box
     const link_layer = svg.selectAll("g.links").data([0]).join("g").attr("class", "links");
     const uses_layer = svg.selectAll("g.uses").data([0]).join("g").attr("class", "uses");
+    const holds_layer = svg.selectAll("g.holds").data([0]).join("g").attr("class", "holds");
     const node_layer = svg.selectAll("g.nodes").data([0]).join("g").attr("class", "nodes");
 
     // headings
@@ -201,13 +255,22 @@ function draw(snap) {
         d.w = g.select(":scope > text").node().getComputedTextLength() + 24;
         g.select("rect").attr("width", d.w).attr("height", d.h);
 
-        // refcount: how many rp<> hold this object
+        // refcount: how many rp<> hold this object; red if the snapshot
+        // does not account for every hold
+        const extra = (d.refcount === undefined) ? 0 : d.refcount - d.expected;
         const badge = g.select("g.badge")
             .attr("display", d.refcount === undefined ? "none" : null)
+            .classed("unaccounted", extra !== 0)
             .attr("transform", `translate(${d.w},0)`);
         badge.select("text").text(d.refcount);
-        badge.append("title").text(`refcount ${d.refcount}`);
+        badge.selectAll("title").data([0]).join("title")
+            .text(extra === 0
+                  ? `refcount ${d.refcount}: every hold shown`
+                  : `refcount ${d.refcount}, ${d.expected} shown: ${extra} hold(s) not in this snapshot`);
     });
+
+    // wide enough for the rightmost box (more sessions push the ticker right)
+    svg.attr("width", Math.max(900, d3.max(nodes, d => d.x + d.w) + 40));
 
     // server's facing edge -> endpoint's facing edge
     link_layer.selectAll("line.link")
@@ -232,6 +295,20 @@ function draw(snap) {
                     .attr("x2", left ? tgt.x + tgt.w : tgt.x)
                     .attr("y2", tgt.y + box_h / 2);
             }
+        });
+
+    // application -> subscription whose sink it holds
+    holds_layer.selectAll("path.holds")
+        .data(holds, d => d.target)
+        .join("path")
+        .attr("class", "holds")
+        .attr("d", d => {
+            const src = by_id.get(d.source);
+            const tgt = by_id.get(d.target);
+            const x1 = src.x, y1 = src.y + src.h / 2;
+            const x2 = tgt.x + tgt.w, y2 = tgt.y + tgt.h / 2;
+            const dx = Math.max(40, (x1 - x2) / 2);
+            return `M${x1},${y1} C${x1 - dx},${y1} ${x2 + dx},${y2} ${x2},${y2}`;
         });
 
     // subscription -> the stream endpoint it uses: a curve up and over,
