@@ -25,6 +25,31 @@ if (ENABLE_TESTING)
 endif()
 
 # ----------------------------------------------------------------
+# live tests: a started Webserver and a real websocket client.
+# Separate from utest.websock, which stays socket-free.
+# See .xo-backlog/xo-websock/issues/09.
+
+set(LIVE_EXE utest.websock.live)
+set(LIVE_SRCS
+    websock_unit_main.cpp
+    WsTestClient.cpp
+    WebserverLive.test.cpp)
+
+if (ENABLE_TESTING)
+    xo_add_utest_executable(${LIVE_EXE} ${LIVE_SRCS})
+
+    xo_self_dependency(${LIVE_EXE} websock)
+    xo_dependency(${LIVE_EXE} xo_indentlog2)
+    xo_dependency(${LIVE_EXE} xo_testutil)
+    xo_external_target_dependency(${LIVE_EXE} Catch2 Catch2::Catch2)
+
+    # WsTestClient is a libwebsockets client in its own right.  websock links
+    # libwebsockets PRIVATE (see src/websock/CMakeLists.txt), so link it here.
+    find_package(Libwebsockets CONFIG REQUIRED)
+    target_link_libraries(${LIVE_EXE} PRIVATE websockets_shared)
+endif()
+
+# ----------------------------------------------------------------
 # kalman-era browser demo -- NOT built.
 #
 # This directory used to hold only a manual browser demo (a websocket + d3 view

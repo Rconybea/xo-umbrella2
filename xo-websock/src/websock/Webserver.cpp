@@ -606,6 +606,7 @@ namespace xo {
             // ----- Inherited from Webserver -----
 
             virtual Runstate state() const override { return state_; }
+            virtual std::int32_t listen_port() const override { return listen_port_.load(); }
             virtual void register_http_endpoint(HttpEndpointDescr const & endpoint) override;
             virtual void register_stream_endpoint(StreamEndpointDescr const & endpoint) override;
             virtual bool unregister_http_endpoint(std::string const & uri_pattern) override;
@@ -867,6 +868,11 @@ namespace xo {
 
             /* set this to true to prevent further service loop iteration */
             std::atomic<bool> interrupt_flag_;
+
+            /* port the vhost is listening on; 0 while not listening.
+             * Written by the service thread, read from any
+             */
+            std::atomic<std::int32_t> listen_port_{0};
 
             /* protects .state */
             std::mutex mutex_;
@@ -1312,11 +1318,21 @@ namespace xo {
         void
         WebserverImpl::stop_webserver()
         {
-            std::unique_lock<std::mutex> lock(this->mutex_);
+            bool running = false;
 
-            if(this->state_ == Runstate::running) {
-                this->interrupt_stop_webserver();
+            {
+                std::unique_lock<std::mutex> lock(this->mutex_);
+
+                running = (this->state_ == Runstate::running);
             }
+
+            /* lock released first: interrupt_stop_webserver() takes it, and
+             * it is not recursive.  Holding it here self-deadlocked every
+             * stop of a running server (found by utest.websock.live,
+             * .xo-backlog/xo-websock/issues/09)
+             */
+            if (running)
+                this->interrupt_stop_webserver();
         } /*stop_webserver*/
 
         void
@@ -1840,6 +1856,17 @@ namespace xo {
                 return;
             }
 
+            /* listening from here.  The port the OS picked, when configured
+             * with port 0 -- see listen_port()
+             */
+            {
+                lws_vhost * vhost = ::lws_get_vhost_by_name(this->lws_cx_,
+                                                            this->cx_config_.vhost_name);
+
+                if (vhost)
+                    this->listen_port_.store(::lws_get_vhost_listen_port(vhost));
+            }
+
             std::int32_t n_event = 0;
             while ((n_event >= 0) && !(this->interrupt_flag_)) {
                 n_event = ::lws_service(this->lws_cx_,
@@ -1849,6 +1876,8 @@ namespace xo {
             log && log("webserver runner returned - service loop exited",
                        xtag("n_event", n_event),
                        xtag("interrupted", this->interrupt_flag_.load()));
+
+            this->listen_port_.store(0);
 
             lws_context_destroy(this->lws_cx_);
             this->lws_cx_ = nullptr;

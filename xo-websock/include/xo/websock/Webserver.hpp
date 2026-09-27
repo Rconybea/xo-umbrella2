@@ -84,6 +84,12 @@ namespace xo {
 
             /* current state */
             virtual Runstate state() const = 0;
+            /* port this server is accepting connections on; 0 until it is
+             * listening (start_webserver() returns before that), and again
+             * once stopped.  With WebserverConfig port 0 the OS picks the
+             * port, and this is how to learn it.
+             */
+            virtual std::int32_t listen_port() const = 0;
             /* register_*_endpoint: throws std::runtime_error if an endpoint of
              * the same kind with the same stem is already registered; see
              * UrlRouter
