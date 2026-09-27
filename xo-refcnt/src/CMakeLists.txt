@@ -9,9 +9,9 @@ xo_install_include_tree3(include/xo/cxxutil)
 #
 xo_dependency(${SELF_LIB} xo_reflectutil)
 xo_dependency(${SELF_LIB} xo_ppsink)
-# NOTE: deliberately no xo-indentlog dependency.  No refcnt source needs it;
-# only the opt-in compatibility headers pretty_refcnt.hpp and
-# Refcounted_indentlog.hpp include legacy indentlog, and a consumer that
-# includes one of those declares the dependency itself.  Propagating it from
-# here (xo_dependency is PUBLIC) put indentlog on the command line of every
-# refcnt consumer, which masked whether downstream code had really migrated.
+# NOTE: deliberately no xo-indentlog dependency.  No refcnt source or header
+# needs it (the opt-in compatibility headers pretty_refcnt.hpp and
+# Refcounted_indentlog.hpp, which included legacy indentlog, are deleted:
+# nothing included them).  Propagating it from here (xo_dependency is
+# PUBLIC) put indentlog on the command line of every refcnt consumer, which
+# masked whether downstream code had really migrated.
