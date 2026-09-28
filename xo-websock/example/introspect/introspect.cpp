@@ -29,6 +29,7 @@
  *    .build/xo-websock/example/introspect/websock_ex_introspect [port]
  *                                          [--type-maps=TEMPLATE]
  *                                          [--src-tree=ROOT]
+ *                                          [--src-link=TEMPLATE]
  *
  *  then open http://localhost:<port>/ ; Ctrl-C to stop.
  *
@@ -44,6 +45,13 @@
  *  paths are relative to) as html pages, at
  *  http://host:port/dyn/src/<path>#L<line> -- the files of mapped types
  *  only.  Off unless given.
+ *
+ *  The page links each object to the source of its type (its _type_ looked
+ *  up in /dyn/types), by the url template /dyn/types reports as "link":
+ *  --src-link=TEMPLATE, with {file} and {line} replaced, e.g. a forgejo
+ *  commit:
+ *    --src-link=https://<host>/<owner>/xo-umbrella2/src/commit/<sha>/{file}#L{line}
+ *  else, with --src-tree, /dyn/src/{file}#L{line}; else none -- no links.
  **/
 
 #include <xo/websock/Webserver.hpp>
@@ -287,19 +295,8 @@ namespace xo {
 
             bool empty() const { return maps_.empty(); }
 
-            /** the union of the maps, as json on @p p_os.  A missing or
-             *  unreadable map is listed under "missing"; a name in two maps
-             *  at different places is left out of "types" and listed under
-             *  "conflicts" -- as xo-type-src-merge does
-             **/
-            void write_merged(std::ostream * p_os) const {
-                Json::StreamWriterBuilder wb;
-                wb["indentation"] = "";
-                *p_os << Json::writeString(wb, this->merged());
-            }
-
             /** true iff @p rel (repo-relative) is the file of some type in
-             *  the merged maps -- read now, like write_merged
+             *  the merged maps -- read now, like merged()
              **/
             bool names_file(std::string const & rel) const {
                 Json::Value const m = this->merged();
@@ -313,7 +310,12 @@ namespace xo {
                 return false;
             }
 
-            /** the union of the maps, as json **/
+            /** the union of the maps, as json -- read from the files now, so
+             *  a rebuilt map shows without a restart.  A missing or
+             *  unreadable map is listed under "missing"; a name in two maps
+             *  at different places is left out of "types" and listed under
+             *  "conflicts" -- as xo-type-src-merge does
+             **/
             Json::Value merged() const {
                 Json::Value types(Json::objectValue);
                 Json::Value owner(Json::objectValue);    /* name -> subsystem */
@@ -519,6 +521,7 @@ main(int argc, char * argv[])
     std::int32_t port = 7681;
     std::string type_maps_tmpl;
     std::string src_tree;
+    std::string src_link;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -527,6 +530,8 @@ main(int argc, char * argv[])
             type_maps_tmpl = arg.substr(std::string("--type-maps=").size());
         else if (arg.rfind("--src-tree=", 0) == 0)
             src_tree = arg.substr(std::string("--src-tree=").size());
+        else if (arg.rfind("--src-link=", 0) == 0)
+            src_link = arg.substr(std::string("--src-link=").size());
         else
             port = std::atoi(argv[i]);
     }
@@ -610,14 +615,23 @@ main(int argc, char * argv[])
         std::cerr << "introspect: no type maps (build with -DXO_ENABLE_SOURCE_MAP=ON):"
                      " /dyn/types is empty" << std::endl;
 
+    /* how the page links a type to its source: see the file comment */
+    if (src_link.empty() && !src_tree.empty())
+        src_link = "/dyn/src/{file}#L{line}";
+
     websrv->register_http_endpoint
         (HttpEndpointDescr("/types",
-                           [type_maps](HttpRequest const &)
+                           [type_maps, src_link](HttpRequest const &)
                                {
-                                   std::ostringstream ss;
-                                   type_maps->write_merged(&ss);
+                                   Json::Value out = type_maps->merged();
+                                   out["link"] = (src_link.empty()
+                                                  ? Json::Value(Json::nullValue)
+                                                  : Json::Value(src_link));
 
-                                   return HttpResponse::json(ss.str());
+                                   Json::StreamWriterBuilder wb;
+                                   wb["indentation"] = "";
+
+                                   return HttpResponse::json(Json::writeString(wb, out));
                                }));
 
     /* the source tree: http://host:port/dyn/src/<path>, when asked for */

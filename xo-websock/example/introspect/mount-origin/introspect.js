@@ -21,6 +21,12 @@
 //
 // Ticker json: {id, sinks: [{ref}]} -- the application's own holds.
 //
+// Source links (.xo-backlog/xo-websock/issues/12): every object carries
+// _type_, its C++ type's canonical name.  /dyn/types maps a type -- template
+// arguments stripped -- to {file, line}, and says how to link one ("link":
+// a url template with {file}, {line}; null for none).  Hover a box for its
+// type and location; click to open the source.
+//
 // Refcount accounting: each refcount is compared with the holds the page can
 // see.  An endpoint is held by the router's map + each subscription to it; a
 // sender by its session record + router + each sink; a sink by the router's
@@ -32,8 +38,49 @@
 const status_el = document.getElementById("status");
 const raw_el = document.getElementById("raw");
 const refresh_btn = document.getElementById("refresh");
+const srcinfo_el = document.getElementById("srcinfo");
 
 let sub_id = null;
+let last_event = null;
+
+// the type -> source map and link template, from /dyn/types
+let src = {types: {}, link: null, n_maps: 0};
+
+function load_types() {
+    fetch("/dyn/types")
+        .then(r => r.json())
+        .then(j => {
+            src = {types: j.types || {}, link: j.link || null,
+                   n_maps: (j.subsystems || []).length};
+            const n = Object.keys(src.types).length;
+            srcinfo_el.textContent =
+                (n === 0)
+                ? "source links: none -- no type maps (configure with --enable-source-map)"
+                : (src.link === null)
+                ? `source links: off -- ${n} types mapped; start with --src-tree=ROOT or --src-link=TEMPLATE`
+                : `source links: ${src.link} -- ${n} types from ${src.n_maps} subsystems`;
+            if (last_event)
+                draw(last_event);
+        })
+        .catch(e => { srcinfo_el.textContent = `source links: /dyn/types failed: ${e}`; });
+}
+
+/** {file, line, href} for canonical type name @p t, or null if unmapped **/
+function source_of(t) {
+    if (!t)
+        return null;
+
+    // a template maps under its bare name
+    const loc = src.types[t.replace(/<.*$/, "")];
+    if (!loc)
+        return null;
+
+    const href = src.link && src.link
+          .replace("{file}", loc.file.split("/").map(encodeURIComponent).join("/"))
+          .replace("{line}", loc.line);
+
+    return {file: loc.file, line: loc.line, href: href};
+}
 
 const ws = new WebSocket(`ws://${location.host}/`, "lws-minimal");
 
@@ -54,16 +101,21 @@ ws.onmessage = (ev) => {
         sub_id = msg.sub_id;
         status_el.textContent = `subscribed (sub_id ${sub_id})`;
         refresh_btn.disabled = false;
+        load_types();
         refresh();
     } else if (msg.error) {
         status_el.textContent = `error: ${msg.error}`;
     } else if ("event" in msg) {
         raw_el.textContent = JSON.stringify(msg, null, 2);
+        last_event = msg.event;
         draw(msg.event);
     }
 };
 
 function refresh() {
+    // the maps too: a rebuild changes them
+    load_types();
+
     if (sub_id !== null)
         ws.send(JSON.stringify({cmd: "send", sub_id: sub_id, msg: "refresh"}));
 }
@@ -92,6 +144,7 @@ function layout(event) {
         const id = `${ep.kind}:${ep.stem}`;
         endpoint_node[ep.id] = id;
         nodes.push({id: id, kind: ep.kind, label: ep.pattern, refcount: ep.refcount,
+                    type: ep._type_,
                     x: col_x[ep.kind], y: top_y + row_h * n_in[ep.kind]++});
         links.push({source: "server", target: id});
     }
@@ -100,6 +153,7 @@ function layout(event) {
     const n_rows = Math.max(1, n_in.http, n_in.stream);
     nodes.unshift({id: "server", kind: "server",
                    label: `Webserver :${snap.listen_port} (${snap.state})`,
+                   type: snap._type_,
                    x: col_x.server, y: top_y + row_h * (n_rows - 1) / 2});
 
     // sessions: one row, below the endpoint columns; subscriptions under each
@@ -115,14 +169,15 @@ function layout(event) {
         const open = s.sender && s.sender.open;
 
         nodes.push({id: id, kind: open ? "session" : "session closed",
-                    label: `session ${s.session_id}`, x: x, y: session_y});
+                    label: `session ${s.session_id}`, type: s._type_,
+                    x: x, y: session_y});
         links.push({source: "server", target: id});
 
         // the session's sender: first under it, with its refcount
         if (s.sender) {
             const snd = `${id}:sender`;
             nodes.push({id: snd, kind: "sender", label: "sender",
-                        refcount: s.sender.refcount,
+                        refcount: s.sender.refcount, type: s.sender._type_,
                         x: x + 18, y: session_y + row_h, small: true});
             links.push({source: id, target: snd, kind: "owns"});
         }
@@ -136,6 +191,7 @@ function layout(event) {
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
                         refcount: sink.refcount,   // the sink's: slot + its source
+                        type: sub._type_,
                         x: x + 18, y: session_y + row_h + (k + 1) * sub_h, small: true});
             links.push({source: id, target: sid, kind: "owns"});
 
@@ -153,7 +209,7 @@ function layout(event) {
     const holds = [];
     if (ticker) {
         const n_s = (snap.sessions || []).length;
-        nodes.push({id: "ticker", kind: "app", label: "Ticker (app)",
+        nodes.push({id: "ticker", kind: "app", label: "Ticker (app)", type: ticker._type_,
                     x: col_x.http + n_s * 240, y: session_y});
 
         const sub_of_sink = {};
@@ -234,6 +290,7 @@ function draw(event) {
         .data(nodes, d => d.id)
         .join(enter => {
             const g = enter.append("g");
+            g.append("title");   // the type and its source; see below
             g.append("rect");
             g.append("text").attr("x", 12).attr("y", 25);
             // refcount badge, top-right corner (only where known)
@@ -246,6 +303,19 @@ function draw(event) {
     node.attr("class", d => `node ${d.kind}`)
         .attr("transform", d => `translate(${d.x},${d.y})`);
     node.select(":scope > text").text(d => d.label);
+
+    // source: hover for the type and where it is defined; click to open
+    node.each(function (d) {
+        const s = source_of(d.type);
+        const g = d3.select(this);
+
+        g.classed("linked", !!(s && s.href));
+        g.select(":scope > title").text(
+            !d.type ? "(no _type_ reported)"
+            : !s ? `${d.type}\n(no source location)`
+            : `${d.type}\n${s.file}:${s.line}` + (s.href ? "" : "\n(no link provider)"));
+        g.on("click", (s && s.href) ? () => window.open(s.href, "_blank") : null);
+    });
 
     // size each box to its label; remember widths for the links
     node.each(function (d) {
