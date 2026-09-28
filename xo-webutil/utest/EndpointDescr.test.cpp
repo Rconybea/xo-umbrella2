@@ -44,10 +44,10 @@ namespace xo {
                                            xo::web::StreamUnsubscribeFn{});
             }
 
-            /** an http descriptor with @p uri and a no-op endpoint fn **/
+            /** an http descriptor with @p uri and no handler **/
             HttpEndpointDescr
             make_http(const std::string & uri) {
-                return HttpEndpointDescr(uri, xo::web::HttpEndpointFn{});
+                return HttpEndpointDescr(uri, xo::web::HttpHandler{});
             }
 
             /** render @p x through pretty(), flat **/

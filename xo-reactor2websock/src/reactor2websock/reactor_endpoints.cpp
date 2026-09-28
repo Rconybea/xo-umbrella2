@@ -8,7 +8,9 @@
 #include <xo/reactor/AbstractSource.hpp>
 #include <xo/reactor/EventStore.hpp>
 #include <xo/printjson/PrintJson.hpp>
-#include <xo/webutil/Alist.hpp>
+#include <xo/webutil/HttpRequest.hpp>
+#include <xo/webutil/HttpResponse.hpp>
+#include <sstream>
 
 namespace xo {
     using xo::reactor::AbstractSink;
@@ -54,18 +56,18 @@ namespace xo {
             /* the lambda keeps its own references: the endpoint may be invoked
              * long after this call returns
              */
-            auto http_fn = ([store, pjson]
-                            (std::string const & /*uri*/,
-                             Alist const & /*alist*/,
-                             std::ostream * p_os)
+            auto handler = ([store, pjson](HttpRequest const & /*req*/)
                 {
                     /* WARNING: race condition here, given webserver runs from
                      *          a separate thread.  See header.
                      */
-                    store->http_snapshot(pjson, p_os);
+                    std::ostringstream ss;
+                    store->http_snapshot(pjson, &ss);
+
+                    return HttpResponse::json(ss.str());
                 });
 
-            return HttpEndpointDescr(url_prefix + "/snap", http_fn);
+            return HttpEndpointDescr(url_prefix + "/snap", handler);
         } /*http_endpoint_descr*/
     } /*namespace web*/
 } /*namespace xo*/

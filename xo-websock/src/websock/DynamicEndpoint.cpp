@@ -4,134 +4,111 @@
  */
 
 #include "DynamicEndpoint.hpp"
+#include <algorithm>
 #include <cassert>
+#include <stdexcept>
 
 namespace xo {
     using xo::web::Alist;
     using xo::fn::CallbackId;
 
     namespace web {
+        namespace {
+            /** compile uri pattern @p pattern: a regex matching the uris
+             *  it covers, and its variables in order.
+             *
+             *    /fixed/stem/${a}/more/${b}  ->  /fixed/stem/([^/]+)/more/([^/]+)
+             *    /src/${path...}             ->  /src/(.+)
+             *
+             *  A variable matches one path segment; the LAST may be written
+             *  ${name...} to match the rest of the uri, slashes included.
+             *  Fixed text matches itself (regex characters escaped).
+             **/
+            void
+            compile_pattern(std::string const & pattern,
+                            std::regex * p_regex,
+                            std::vector<std::string> * p_var_v)
+            {
+                static std::regex const var_rgx("\\$\\{([[:alnum:]_]+)(\\.\\.\\.)?\\}");
+                static std::regex const special_rgx("[.^$|()\\[\\]{}*+?\\\\]");
+
+                std::string r_pat;
+                std::string::const_iterator pos = pattern.begin();
+                std::smatch match;
+
+                auto literal = [&r_pat](std::string const & text) {
+                    r_pat += std::regex_replace(text, special_rgx, "\\$&");
+                };
+
+                while (std::regex_search(pos, pattern.end(), match, var_rgx)) {
+                    literal(std::string(pos, match[0].first));
+
+                    bool rest = match[2].matched;
+
+                    if (rest && (match[0].second != pattern.end()))
+                        throw std::invalid_argument("uri pattern [" + pattern + "]: ${"
+                                                    + match[1].str()
+                                                    + "...} must end the pattern");
+
+                    r_pat += (rest ? "(.+)" : "([^/]+)");
+
+                    std::string v = match[1].str();
+
+                    /* a variable repeated in the pattern is reported once, at
+                     * its first position
+                     */
+                    if (std::find(p_var_v->begin(), p_var_v->end(), v) == p_var_v->end())
+                        p_var_v->push_back(v);
+
+                    pos = match[0].second;
+                }
+
+                literal(std::string(pos, pattern.end()));
+
+                *p_regex = std::regex(r_pat);
+            } /*compile_pattern*/
+        } /*namespace*/
+
         DynamicEndpoint::DynamicEndpoint(EndpointKind kind,
                                          std::string uri_pattern,
-                                         HttpEndpointFn http_fn,
+                                         HttpHandler http_handler,
                                          StreamSubscribeFn subscribe_fn,
                                          StreamUnsubscribeFn unsubscribe_fn,
                                          rp<StreamReceiver> receiver)
             : kind_{kind},
               uri_pattern_{std::move(uri_pattern)},
-              http_fn_{std::move(http_fn)},
+              http_handler_{std::move(http_handler)},
               subscribe_fn_{std::move(subscribe_fn)},
               unsubscribe_fn_{std::move(unsubscribe_fn)},
               receiver_{std::move(receiver)}
         {
-            std::string r_pat;
-
-            /* 1st pass -- construct pattern regex .uri_regex
-             * to identify urls that belong to this endpoint
-             *
-             * using regex like:
-             *   \$\{[[:alnum:]]+\}
-             */
-            {
-                std::regex var_rgx("\\$\\{[[:alnum:]]+\\}");
-
-                /* e.g. if .uri_pattern:
-                 *    /fixed/stem/${a}/more/fixed/stuff/${b}
-                 * then want r_pat:
-                 *    /fixed/stem/[[:alnum:]]+/more/fixed/stuff/[[:alnum:]]+
-                 * to find values pattern variables like ${a}, ${b}
-                 */
-                std::regex_replace(std::back_inserter(r_pat),
-                                   this->uri_pattern_.begin(),
-                                   this->uri_pattern_.end(),
-                                   var_rgx,
-                                   std::string("([[:alnum:]]+)"));
-
-                this->uri_regex_ = std::regex(r_pat);
-            }
-
-            /* 2nd pass -- identify pattern variables */
-            {
-                /* regex for:
-                 *   \$\{([[:alnum:]]+)\}
-                 * use to match input like
-                 *   ${apple}
-                 * and also extract the variable name
-                 *   apple
-                 */
-                std::regex var_rgx("\\$\\{([[:alnum:]]+)\\}");
-                std::smatch match;
-
-                std::string subject = this->uri_pattern_;
-
-                /* if subject like
-                 *   /fixed/stem/${a}/more/fixed/stuff/${b}
-                 * extract
-                 *   ["a", "b"]
-                 *
-                 * for
-                 *   /fixed/stem/${a}/more/fixed/stuff/${b}/${a}
-                 * also extract
-                 *   ["a", "b"]
-                 * i.e. avoid extracting the same variable name twice
-                 */
-                while (std::regex_search(subject, match, var_rgx)) {
-                    std::string v = match[1];
-
-                    bool present_flag = false;
-
-                    for (auto const & x : this->var_v_) {
-                        if (x == v) {
-                            present_flag = true;
-                            break;
-                        }
-                    }
-
-                    if (!present_flag)
-                        this->var_v_.push_back(match[1]);
-
-                    subject = match.suffix().str();
-                }
-            }
+            compile_pattern(this->uri_pattern_, &this->uri_regex_, &this->var_v_);
         } /*ctor*/
 
-        void
-        DynamicEndpoint::http_response(std::string const & incoming_uri,
-                                       std::ostream * p_os) const
+        HttpResponse
+        DynamicEndpoint::http_response(std::string const & incoming_uri) const
         {
             assert(this->kind_ == EndpointKind::http);
 
-            /* send this uri argument list  callback.
-             * contains variables extracted from .uri_pattern
-             * (variables surrounded by ${...})
-             */
-            Alist alist;
-
-            /* extract pattern variables in uri
-             * c.f. 2nd pass in DynamicEndpoint.ctor
+            /* the router finds this endpoint by its fixed stem; the whole
+             * uri must still match the pattern.  e.g. .uri_pattern
+             *   /fixed/stem/${a}
+             * is found for /fixed/stem/x/y, which it does not match
              */
             std::smatch match;
-            std::string subject = incoming_uri;
 
-            /* if subject like
-             *   /fixed/stem/apple/more/fixed/stuff/beagle
-             * with .uri_pattern
-             *   /fixed/stem/${a}/more/fixed/stuff/${b}
-             * then we have .uri_regex
-             *   /fixed/stem/([[:alnum:]]+)/more/fixed/stuff/([[:alnum:]]+)
-             * use this to extract values for keys in .var_v,
-             * in the same order
+            if (!std::regex_match(incoming_uri, match, this->uri_regex_))
+                return HttpResponse::not_found("no endpoint matches [" + incoming_uri + "]");
+
+            /* each variable's value, in .var_v order.  A repeated variable
+             * takes its first occurrence's value
              */
-            if (std::regex_match(subject, match, this->uri_regex_)) {
-                for (size_t i = 0, n = this->var_v_.size(); i<n; ++i) {
-                    std::string i_name = this->var_v_[i];
-                    std::string i_value = match[1+i];
+            Alist vars;
 
-                    alist.push_back(i_name, i_value);
-                }
-            }
+            for (size_t i = 0, n = this->var_v_.size(); i < n; ++i)
+                vars.push_back(this->var_v_[i], match[1 + i]);
 
-            this->http_fn_(incoming_uri, alist, p_os);
+            return this->http_handler_(HttpRequest(incoming_uri, std::move(vars)));
         } /*http_response*/
 
         CallbackId

@@ -30,7 +30,8 @@ namespace xo {
     using xo::web::HttpEndpointDescr;
     using xo::web::StreamEndpointDescr;
     using xo::web::WebsocketSink;
-    using xo::web::Alist;
+    using xo::web::HttpRequest;
+    using xo::web::HttpResponse;
     using xo::web::Runstate;
     using xo::json::PrintJsonSingleton;
     using xo::fn::CallbackId;
@@ -73,7 +74,7 @@ namespace xo {
 
             HttpEndpointDescr http_descr(std::string pattern) {
                 return HttpEndpointDescr(std::move(pattern),
-                                         [](std::string const &, Alist const &, std::ostream *) {});
+                                         [](HttpRequest const &) { return HttpResponse::json("{}"); });
             }
 
             StreamEndpointDescr stream_descr(std::string pattern) {

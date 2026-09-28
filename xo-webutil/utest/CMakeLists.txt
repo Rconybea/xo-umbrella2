@@ -3,7 +3,8 @@
 set(SELF_EXE utest.webutil)
 set(SELF_SRCS
     webutil_utest_main.cpp
-    EndpointDescr.test.cpp)
+    EndpointDescr.test.cpp
+    HttpResponse.test.cpp)
 
 if (ENABLE_TESTING)
     xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})

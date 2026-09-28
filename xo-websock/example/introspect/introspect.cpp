@@ -79,7 +79,9 @@ namespace xo {
     using xo::web::WebserverConfig;
     using xo::web::StreamEndpointDescr;
     using xo::web::HttpEndpointDescr;
-    using xo::web::Alist;
+    using xo::web::HttpRequest;
+    using xo::web::HttpResponse;
+    using xo::web::html_escape;
     using xo::web::StreamReceiver;
     using xo::web::WebsocketSink;
     using xo::reflect::Reflect;
@@ -457,9 +459,11 @@ main(int argc, char * argv[])
      */
     websrv->register_http_endpoint
         (HttpEndpointDescr("/hello/${name}",
-                           [](std::string const &, Alist const & args, std::ostream * p_os)
+                           [](HttpRequest const & req)
                                {
-                                   *p_os << "<html>hello, " << args.lookup("name") << "</html>";
+                                   return HttpResponse::html("<html>hello, "
+                                                             + html_escape(req.var("name"))
+                                                             + "</html>");
                                }));
 
     /* type -> source locations: http://host:port/dyn/types */
@@ -472,9 +476,12 @@ main(int argc, char * argv[])
 
     websrv->register_http_endpoint
         (HttpEndpointDescr("/types",
-                           [type_maps](std::string const &, Alist const &, std::ostream * p_os)
+                           [type_maps](HttpRequest const &)
                                {
-                                   type_maps->write_merged(p_os);
+                                   std::ostringstream ss;
+                                   type_maps->write_merged(&ss);
+
+                                   return HttpResponse::json(ss.str());
                                }));
 
     websrv->register_stream_endpoint

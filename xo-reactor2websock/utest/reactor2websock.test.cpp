@@ -19,14 +19,19 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/webutil/Alist.hpp>
+#include <xo/webutil/HttpRequest.hpp>
+#include <xo/webutil/HttpResponse.hpp>
 #include <catch2/catch.hpp>
-#include <sstream>
 #include <vector>
 
 namespace xo {
     using xo::web::WebsocketSink;
     using xo::web::ReactorWebsocketSink;
     using xo::web::Alist;
+    using xo::web::ContentType;
+    using xo::web::HttpRequest;
+    using xo::web::HttpResponse;
+    using xo::web::HttpStatus;
     using xo::reactor::AbstractSink;
     using xo::reactor::AbstractSource;
     using xo::reactor::AbstractEventStore;
@@ -205,10 +210,11 @@ namespace xo {
 
             REQUIRE(descr.uri_pattern() == "/es/snap");
 
-            std::stringstream ss;
-            descr.endpoint_fn()("/es/snap", Alist(), &ss);
+            HttpResponse r = descr.handler()(HttpRequest("/es/snap", Alist()));
 
-            REQUIRE(ss.str() == "SNAPSHOT");
+            REQUIRE(r.status() == HttpStatus::ok());
+            REQUIRE(r.content_type() == ContentType::json);
+            REQUIRE(r.body() == "SNAPSHOT");
         } /*TEST_CASE(http-endpoint-serves-a-snapshot-at-snap)*/
 
         TEST_CASE("http-endpoint-keeps-its-store-alive", "[reactor2websock]")
@@ -224,9 +230,8 @@ namespace xo {
                 REQUIRE(!destroyed);
 
                 /* and still usable -- this is what a raw `this' got wrong */
-                std::stringstream ss;
-                descr.endpoint_fn()("/es/snap", Alist(), &ss);
-                REQUIRE(ss.str() == "SNAPSHOT");
+                HttpResponse r = descr.handler()(HttpRequest("/es/snap", Alist()));
+                REQUIRE(r.body() == "SNAPSHOT");
             }
 
             REQUIRE(destroyed);

@@ -34,11 +34,11 @@ namespace xo {
 
         public:
             static rp<DynamicEndpoint> make_http(std::string uri_pattern,
-                                                 HttpEndpointFn http_cb) {
+                                                 HttpHandler http_handler) {
                 return (rp<DynamicEndpoint>
                         (new DynamicEndpoint(EndpointKind::http,
                                              std::move(uri_pattern),
-                                             std::move(http_cb),
+                                             std::move(http_handler),
                                              nullptr,
                                              nullptr,
                                              nullptr)));
@@ -77,13 +77,13 @@ namespace xo {
             } /*is_match*/
 #endif
 
-            /* get html from this endpoint,  on behalf of uri=incoming_uri;
-             * write html on *p_os
+            /* this endpoint's response to uri=incoming_uri: its handler's,
+             * or not_found if incoming_uri does not match .uri_pattern.
+             * The handler's exceptions propagate.
              *
              * require: kind() == EndpointKind::http
              */
-            void http_response(std::string const & incoming_uri,
-                               std::ostream * p_os) const;
+            HttpResponse http_response(std::string const & incoming_uri) const;
 
             /* subscribe stream from this endpoint,  on behalf of uri=incoming_uri.
              * send output to ws_sink
@@ -116,7 +116,7 @@ namespace xo {
         private:
             explicit DynamicEndpoint(EndpointKind kind,
                                      std::string uri_pattern,
-                                     HttpEndpointFn http_fn,
+                                     HttpHandler http_handler,
                                      StreamSubscribeFn subscribe_fn,
                                      StreamUnsubscribeFn unsubscribe_fn,
                                      rp<StreamReceiver> receiver);
@@ -139,11 +139,14 @@ namespace xo {
              *
              * 2. will not match uris like:
              *     /fixed/stem/app/le/more/fixed/stuff/bononos
+             *
+             * 3. a last variable written ${name...} matches the rest of the
+             *    uri:  /src/${path...}  matches  /src/a/b.hpp  (path -> "a/b.hpp")
              */
             std::string uri_pattern_;
             /* regex for matching input that satisfies .uri_pattern:
-             * each occurrence of
-             *    ${...} replaced by [[:alnum:]]+
+             * each ${..} replaced by [^/]+ (one path segment), a final
+             * ${name...} by .+ (the rest); fixed text escaped
              */
             std::regex uri_regex_;
             /* variables found in .uri_pattern,
@@ -155,7 +158,7 @@ namespace xo {
              */
             std::vector<std::string> var_v_;
             /* run this function to produce an http response */
-            HttpEndpointFn http_fn_;
+            HttpHandler http_handler_;
             /* run this function to subscribe event stream */
             StreamSubscribeFn subscribe_fn_;
             /* run this function to unsubscribe event stream */

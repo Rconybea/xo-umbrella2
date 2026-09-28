@@ -5,29 +5,23 @@
 
 #pragma once
 
-#include "Alist.hpp"
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/ppsink/PpSink.hpp>
 #include <xo/ppsink/Prettifier.hpp>
 #include <functional>
-/* HttpEndpointFn names std::ostream* -- a pointer, so a forward declaration is
- * enough.  Was arriving transitively (via Refcounted.hpp's operator<<), leaving
- * this header not self-contained.
- */
-#include <iosfwd>
 #include <string>
 
 namespace xo {
     namespace web {
-        /* a function that can deliver http content on demand. */
-        using HttpEndpointFn = std::function<void (std::string const &,
-                                                   Alist const &,
-                                                   std::ostream *)>;
+        /** a function that answers an http request on demand **/
+        using HttpHandler = std::function<HttpResponse (HttpRequest const &)>;
 
         /* describes an http endpoint --
          * this comprises:
          * - a uri pattern.
-         * - a function that can deliver http content on demand
+         * - a handler that answers requests for it
          */
         class HttpEndpointDescr {
         public:
@@ -35,10 +29,10 @@ namespace xo {
 
         public:
             HttpEndpointDescr(std::string uri_pattern,
-                              HttpEndpointFn endpoint_fn);
+                              HttpHandler handler);
 
             std::string const & uri_pattern() const { return uri_pattern_; }
-            HttpEndpointFn const & endpoint_fn() const { return endpoint_fn_; }
+            HttpHandler const & handler() const { return handler_; }
 
             /** structured pretty-printing: render this descriptor into @p sink.
              *
@@ -46,9 +40,6 @@ namespace xo {
              *  display_string() both go through it.  Deliberately a PpSink
              *  rather than a std::ostream: see webutil_ostream.hpp if you want
              *  @c os << descr .
-             *
-             *  NB the std::ostream* in HttpEndpointFn above is a different
-             *  thing -- it carries HTTP response payload, not diagnostics.
              **/
             void pretty(PpSink & sink) const;
 
@@ -63,17 +54,18 @@ namespace xo {
              *    /stem/aphid/green
              * but not for
              *    /stem/apple/banana/carrot
+             * A variable matches one path segment; a LAST variable written
+             * ${name...} matches the rest of the uri, slashes included:
+             *    .uri_pattern = /src/${path...}
+             * matches /src/a.hpp and /src/xo-foo/include/b.hpp
              */
             std::string uri_pattern_;
-            /* a function that can construct http output on demand
-             *   .endpoint_fn(uri, alist, &os)
-             * writes http output to os.   output is parameterized
-             * by name-value pairs in alist,  and is prepared on behalf
-             * of .uri_pattern
-             * alist will report name-value pairs for each variable that
-             * appears in .uri_pattern (surrounded by ${..})
+            /* answers a request that matches .uri_pattern:
+             *   .handler(request) -> response
+             * request.vars() holds the value of each variable in
+             * .uri_pattern (surrounded by ${..})
              */
-            HttpEndpointFn endpoint_fn_;
+            HttpHandler handler_;
         }; /*HttpEndpointDescr*/
 
     } /*namespace web*/

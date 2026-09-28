@@ -791,8 +791,7 @@ namespace xo {
              * following dynamic mount point [/dyn].
              * see .init_mount_dynamic()
              */
-            void dynamic_http_response(std::string const & incoming_uri,
-                                       std::ostream * p_os);
+            HttpResponse dynamic_http_response(std::string const & incoming_uri);
 
             /* act on incoming websocket command, e.g.
              *   {"cmd": "subscribe", "stream": "uls"}
@@ -1239,27 +1238,25 @@ namespace xo {
                 lwsl_user("allocate output_str [%p] in http_pss [%p]",
                           http_pss->output_str, http_pss);
 
-                std::stringstream response_ss;
-
                 assert(websrv);
 
-                websrv->dynamic_http_response(incoming_uri,
-                                              &response_ss);
+                HttpResponse response = websrv->dynamic_http_response(incoming_uri);
 
-                *(http_pss->output_str) = response_ss.str();
+                *(http_pss->output_str) = response.body();
 
-                lwsl_user("LWS_CALLBACK_HTTP: got response [%s]",
-                          http_pss->output_str->c_str());
-
-                /* choose mime type */
-                constexpr char const * c_mime_type = "application/json";
+                /* the length, not the body: a body can be a whole source file */
+                lwsl_user("LWS_CALLBACK_HTTP: [%s] -> %d %s, %zu bytes",
+                          incoming_uri,
+                          response.status().code(),
+                          content_type_str(response.content_type()),
+                          http_pss->output_str->length());
 
                 /* prepare and write http headers
                  * (do these precede &p ??)
                  */
                 if (lws_add_http_common_headers(wsi,
-                                                HTTP_STATUS_OK,
-                                                c_mime_type,
+                                                response.status().code(),
+                                                content_type_str(response.content_type()),
                                                 http_pss->output_str->length(),
                                                 &p, end))
                     return 1;
@@ -1382,30 +1379,26 @@ namespace xo {
             }
         } /*start_webserver*/
 
-        void
-        WebserverImpl::dynamic_http_response(std::string const & incoming_uri,
-                                             std::ostream * p_os)
+        HttpResponse
+        WebserverImpl::dynamic_http_response(std::string const & incoming_uri)
         {
             rp<DynamicEndpoint> endpoint = this->url_router_.find_http(incoming_uri);
 
-            if (endpoint) {
-                endpoint->http_response(incoming_uri, p_os);
-                return;
-            } else {
-                /* if control here,  no match */
+            if (!endpoint)
+                return HttpResponse::not_found("no dynamic content for uri ["
+                                               + incoming_uri + "]");
 
-                /* or replace pss->str, pss->len with whatever dynamic content you like */
-                time_t t0 = ::time(nullptr);
-
-                *p_os << ("<html>"
-                          "<img src=\"/libwebsockets.org-logo.svg\">"
-                          "<br>no dynamic content for uri [")
-                      << incoming_uri
-                      << ("]"
-                          " from mountpoint."
-                          "<br>time: ")
-                      << ctime(&t0)
-                      << "</html>";
+            /* a handler's exception stops here: beyond is libwebsockets' C
+             * callback, which an exception must not cross
+             */
+            try {
+                return endpoint->http_response(incoming_uri);
+            } catch (std::exception const & ex) {
+                return HttpResponse::internal_error("endpoint for [" + incoming_uri
+                                                    + "] failed: " + ex.what());
+            } catch (...) {
+                return HttpResponse::internal_error("endpoint for [" + incoming_uri
+                                                    + "] failed");
             }
         } /*dynamic_http_response*/
 

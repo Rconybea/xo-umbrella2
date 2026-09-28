@@ -107,7 +107,7 @@ namespace xo {
         UrlRouter::register_http(HttpEndpointDescr const & descr)
         {
             auto endpoint = DynamicEndpoint::make_http(descr.uri_pattern(),
-                                                       descr.endpoint_fn());
+                                                       descr.handler());
 
             this->insert_in(std::move(endpoint), "http", &this->http_map_);
         } /*register_http*/

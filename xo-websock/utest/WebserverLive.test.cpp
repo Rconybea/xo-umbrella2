@@ -20,8 +20,14 @@
 #include <xo/reflect/Reflect.hpp>
 #include <catch2/catch.hpp>
 #include <json/json.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #include <chrono>
+#include <cctype>
 #include <condition_variable>
+#include <cstdlib>
 #include <future>
 #include <memory>
 #include <mutex>
@@ -34,6 +40,10 @@ namespace xo {
     using xo::web::Webserver;
     using xo::web::WebserverConfig;
     using xo::web::StreamEndpointDescr;
+    using xo::web::HttpEndpointDescr;
+    using xo::web::HttpRequest;
+    using xo::web::HttpResponse;
+    using xo::web::HttpStatus;
     using xo::web::WebsocketSink;
     using xo::web::StreamReceiver;
     using xo::json::PrintJsonSingleton;
@@ -166,6 +176,74 @@ namespace xo {
                 return true;
             }
 
+            /** one http GET: status line code, Content-Type, body **/
+            struct HttpReply {
+                int status_ = 0;
+                std::string content_type_;
+                std::string body_;
+            };
+
+            /** GET @p path from localhost:@p port, over HTTP/1.0 (so the
+             *  server closes when done).  status_ 0 if no reply
+             **/
+            HttpReply http_get(std::int32_t port, std::string const & path) {
+                HttpReply reply;
+
+                int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+                if (fd < 0)
+                    return reply;
+
+                /* bound a hung server */
+                timeval tv{5, 0};
+                ::setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
+                sockaddr_in addr{};
+                addr.sin_family = AF_INET;
+                addr.sin_port = htons(static_cast<std::uint16_t>(port));
+                addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+                if (::connect(fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) != 0) {
+                    ::close(fd);
+                    return reply;
+                }
+
+                std::string req = "GET " + path + " HTTP/1.0\r\nHost: localhost\r\n\r\n";
+                ::send(fd, req.data(), req.size(), 0);
+
+                std::string text;
+                char buf[4096];
+                for (ssize_t n; (n = ::recv(fd, buf, sizeof(buf), 0)) > 0; )
+                    text.append(buf, n);
+                ::close(fd);
+
+                auto hdr_end = text.find("\r\n\r\n");
+                if (hdr_end == std::string::npos)
+                    return reply;
+
+                std::string head = text.substr(0, hdr_end);
+                reply.body_ = text.substr(hdr_end + 4);
+
+                /* "HTTP/1.x NNN ..." */
+                auto sp = head.find(' ');
+                if (sp != std::string::npos)
+                    reply.status_ = std::atoi(head.c_str() + sp + 1);
+
+                /* header names are case-insensitive: lws sends lowercase */
+                std::string lower = head;
+                for (char & c : lower)
+                    c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+                auto ct = lower.find("\r\ncontent-type:");
+                if (ct != std::string::npos) {
+                    auto v = ct + std::string("\r\ncontent-type:").size();
+                    auto e = head.find("\r\n", v);
+                    reply.content_type_ = head.substr(v, e - v);
+                    while (!reply.content_type_.empty() && reply.content_type_.front() == ' ')
+                        reply.content_type_.erase(0, 1);
+                }
+
+                return reply;
+            }
+
             /** a started webserver on an OS-assigned port **/
             struct LiveServer {
                 LiveServer() {
@@ -248,6 +326,57 @@ namespace xo {
             }
 
             REQUIRE(client.close(c_timeout));
+        }
+
+        TEST_CASE("live-http-status-and-content-type", "[websock][live][http]")
+        {
+            /* what a handler chooses is what the client gets: status line and
+             * Content-Type header; and the server's own answers -- no
+             * endpoint, no match, a handler's exception
+             */
+            LiveServer srv;
+            srv.websrv_->register_http_endpoint
+                (HttpEndpointDescr("/j",
+                                   [](HttpRequest const &) { return HttpResponse::json("{\"a\": 1}"); }));
+            srv.websrv_->register_http_endpoint
+                (HttpEndpointDescr("/h/${a}",
+                                   [](HttpRequest const & req) {
+                                       return HttpResponse::html("<p>" + std::string(req.var("a")) + "</p>");
+                                   }));
+            srv.websrv_->register_http_endpoint
+                (HttpEndpointDescr("/boom",
+                                   [](HttpRequest const &) -> HttpResponse {
+                                       throw std::runtime_error("kaboom");
+                                   }));
+
+            std::int32_t port = srv.start();
+            REQUIRE(port > 0);
+
+            HttpReply j = http_get(port, "/dyn/j");
+            REQUIRE(j.status_ == 200);
+            REQUIRE(j.content_type_ == "application/json");
+            REQUIRE(j.body_ == "{\"a\": 1}");
+
+            HttpReply h = http_get(port, "/dyn/h/x-1.hpp");
+            REQUIRE(h.status_ == 200);
+            REQUIRE(h.content_type_ == "text/html; charset=utf-8");
+            REQUIRE(h.body_ == "<p>x-1.hpp</p>");
+
+            /* found by stem, pattern not matched */
+            HttpReply nm = http_get(port, "/dyn/h/x/y");
+            REQUIRE(nm.status_ == 404);
+            REQUIRE(nm.content_type_ == "text/html; charset=utf-8");
+
+            /* no endpoint at all */
+            HttpReply ne = http_get(port, "/dyn/nothing-here");
+            REQUIRE(ne.status_ == 404);
+
+            /* a handler's exception: 500, and the server lives on */
+            HttpReply b = http_get(port, "/dyn/boom");
+            REQUIRE(b.status_ == 500);
+            REQUIRE(b.body_.find("kaboom") != std::string::npos);
+
+            REQUIRE(http_get(port, "/dyn/j").status_ == 200);
         }
 
         TEST_CASE("live-a-server-that-cannot-start-still-joins", "[websock][live]")

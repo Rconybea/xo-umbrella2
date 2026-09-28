@@ -8,9 +8,9 @@
 namespace xo {
     namespace web {
         HttpEndpointDescr::HttpEndpointDescr(std::string uri_pattern,
-                                             HttpEndpointFn endpoint_fn)
+                                             HttpHandler handler)
             : uri_pattern_{std::move(uri_pattern)},
-              endpoint_fn_{std::move(endpoint_fn)}
+              handler_{std::move(handler)}
         {}
 
         void
