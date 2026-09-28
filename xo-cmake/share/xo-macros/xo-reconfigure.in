@@ -6,6 +6,9 @@ dry_run_flag=false
 clobber=false
 capture_edges=false
 testing=@ENABLE_TESTING@
+# as configured; --enable-source-map / --disable-source-map change it
+source_map_was=@XO_ENABLE_SOURCE_MAP@
+source_map=${source_map_was}
 
 orig_path=@CMAKE_BINARY_DIR@/reconfigure
 self_path=$(cd $(dirname $0) && pwd)/$(basename $0)
@@ -30,6 +33,12 @@ while [[ $# -gt 0 ]]; do
         --disable-testing)
             testing=0
             ;;
+        --enable-source-map)
+            source_map=ON
+            ;;
+        --disable-source-map)
+            source_map=OFF
+            ;;
         --clobber)
             clobber=true
             ;;
@@ -46,10 +55,12 @@ while [[ $# -gt 0 ]]; do
             echo "                      [--print-source-dir|--print-build-dir]"
             echo "                      [--clobber]"
             echo "                      [--enable-testing|--disable-testing]"
+            echo "                      [--enable-source-map|--disable-source-map]"
             echo "                      [--capture-subsystem-edges]"
             echo "                      -- CMAKE_ARGS"
             echo ""
-            echo "1. clobber ignores --enable-testing/--disable-testing flags"
+            echo "1. clobber ignores --enable-testing/--disable-testing and"
+            echo "   --enable-source-map/--disable-source-map flags"
             echo "   use to cleanse build directory when stale build artifacts"
             echo "   are confusing cmake"
             echo ""
@@ -59,6 +70,10 @@ while [[ $# -gt 0 ]]; do
             echo "   names the generated file subsystem-edges when every guard"
             echo "   that gates a xo_dependency() call was on, and"
             echo "   subsystem-partial-edges otherwise.  Does not reconfigure."
+            echo ""
+            echo "3. --enable-source-map: XO_ENABLE_SOURCE_MAP=ON -- each subsystem"
+            echo "   builds its type -> source map (types.json; needs clang++)."
+            echo "   Currently: XO_ENABLE_SOURCE_MAP=@XO_ENABLE_SOURCE_MAP@"
             exit 1
     esac
 
@@ -132,6 +147,13 @@ if [[ ${capture_edges} == true ]]; then
     exit 0
 fi
 
+# the source map switch: its value, and whether this run changes it
+if [[ ${source_map} == ${source_map_was} ]]; then
+    2>&1 echo "xo-reconfigure: XO_ENABLE_SOURCE_MAP=${source_map}"
+else
+    2>&1 echo "xo-reconfigure: XO_ENABLE_SOURCE_MAP=${source_map} (was ${source_map_was})"
+fi
+
 # Build the cmake command
 CMAKE_CMD=(
     cmake
@@ -147,6 +169,7 @@ CMAKE_CMD=(
     -DENABLE_TESTING=$testing
     -DXO_ENABLE_DOCS=@XO_ENABLE_DOCS@
     -DXO_ENABLE_ASM=@XO_ENABLE_ASM@
+    -DXO_ENABLE_SOURCE_MAP=$source_map
     -DXO_ENABLE_EXAMPLES=@XO_ENABLE_EXAMPLES@
     -DXO_ENABLE_VULKAN=@XO_ENABLE_VULKAN@
     -DXO_ENABLE_OPENGL=@XO_ENABLE_OPENGL@
