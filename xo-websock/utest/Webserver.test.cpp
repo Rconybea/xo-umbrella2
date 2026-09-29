@@ -163,8 +163,8 @@ namespace xo {
 
             INFO("json: " << ss.str());
             REQUIRE(srv["_name_"].asString() == "Webserver");
-            /* the type the printer reads -- the interface, not WebserverImpl */
-            REQUIRE(srv["_type_"].asString() == "xo::web::Webserver");
+            /* the actual type, via self_tp() -- not the interface */
+            REQUIRE(srv["_type_"].asString() == "xo::web::WebserverImpl");
             REQUIRE(srv["id"].isString());
             REQUIRE(srv["refcount"].asUInt() >= 1);
             REQUIRE(srv["listen_port"].asInt() == 0);

@@ -100,9 +100,11 @@ namespace xo {
                     if (!websrv)
                         return;
 
+                    std::string const type
+                        = const_cast<Webserver *>(websrv)->self_tp().td()->canonical_name();
+
                     *p_os << "{" << quot("_name_") << ": " << quot("Webserver")
-                          /* the type this printer reads: the interface */
-                          << ", " << quot("_type_") << ": " << quot(type_name<Webserver>())
+                          << ", " << quot("_type_") << ": " << quot(type)
                           << ", " << quot("id") << ": " << quot(json_id(websrv))
                           << ", " << quot("refcount") << ": " << websrv->reference_counter()
                           << ", " << quot("listen_port") << ": " << websrv->listen_port()

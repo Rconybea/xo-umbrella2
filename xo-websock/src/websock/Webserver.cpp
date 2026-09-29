@@ -50,6 +50,7 @@ namespace xo {
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
     using xo::reflect::Reflect;
+    using xo::reflect::TaggedRcptr;
     using xo::reflect::TaggedPtr;
     using xo::reflect::type_name;
     using xo::pp::quot;
@@ -620,6 +621,10 @@ namespace xo {
             } /*dtor*/
 
             virtual void run() = 0;
+
+            // ----- Inherited from SelfTaggingDisplayable -----
+
+            virtual TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
 
             // ----- Inherited from Webserver -----
 

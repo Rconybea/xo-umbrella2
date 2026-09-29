@@ -6,7 +6,7 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/webutil/StreamEndpointDescr.hpp>
-#include <xo/refcnt/Displayable.hpp>
+#include <xo/reflect/SelfTaggingDisplayable.hpp>
 #include <xo/ppsink/Prettifier.hpp>   /* Prettifier<>, XO_PRETTIFIER_DECLARE */
 #include <libwebsockets.h> // temporary,  while moving callbacks
 #include <memory>
@@ -90,7 +90,7 @@ namespace xo {
          *   +----------------+
          *
          */
-        class Webserver : public ref::Displayable {
+        class Webserver : public reflect::SelfTaggingDisplayable {
         public:
             using Alist = xo::web::Alist;
             using PrintJson = xo::json::PrintJson;
