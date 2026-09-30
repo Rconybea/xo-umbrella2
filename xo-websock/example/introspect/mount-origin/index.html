@@ -29,6 +29,17 @@
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }
     .node.linked { cursor: pointer; }
     .node.linked:hover rect { stroke-width: 3px; }
+    .node:focus { outline: none; }
+    .node:focus rect { stroke-width: 3px; stroke-dasharray: 3 2; }
+    #ctxmenu { position: absolute; z-index: 10; min-width: 12em; background: #fff;
+               border: 1px solid #bbb; border-radius: 6px; padding: 4px 0;
+               box-shadow: 0 4px 14px rgba(0,0,0,0.18); font-size: 13px; }
+    #ctxmenu .ctxhead { padding: 4px 12px 6px; color: #666; font-family: ui-monospace, monospace;
+                        font-size: 12px; border-bottom: 1px solid #eee; margin-bottom: 3px; }
+    #ctxmenu button { display: block; width: 100%; text-align: left; border: 0; background: none;
+                      padding: 5px 12px; font: inherit; cursor: pointer; }
+    #ctxmenu button:hover:enabled, #ctxmenu button:focus { background: #e8f0fe; outline: none; }
+    #ctxmenu button:disabled { color: #aaa; cursor: default; }
     text.heading { font-size: 13px; fill: #666; }
     line.link { stroke: #999; stroke-width: 1.2px; }
     pre { background: #f4f4f4; padding: 0.8em; max-width: 60em; overflow-x: auto; }
@@ -43,6 +54,11 @@
   <div id="srcinfo">source links: (loading)</div>
 
   <svg id="graph" width="900" height="160"></svg>
+
+  <div id="ctxmenu" role="menu" hidden></div>
+
+  <h3 id="detail-h" hidden></h3>
+  <pre id="detail" hidden></pre>
 
   <h3>last frame</h3>
   <pre id="raw">(none yet)</pre>

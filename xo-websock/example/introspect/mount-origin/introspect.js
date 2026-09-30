@@ -27,6 +27,12 @@
 // a url template with {file}, {line}; null for none).  Hover a box for its
 // type and location; click to open the source.
 //
+// Context menu (.xo-backlog/xo-websock/issues/13): right-click a box -- or
+// focus it (Tab) and press the Menu key / Shift+F10 -- for: open source, show
+// its json, copy its type or id.  Only boxes take over right-click; elsewhere
+// the browser's menu is untouched (in Firefox, Shift+right-click always gets
+// the browser's).
+//
 // Refcount accounting: each refcount is compared with the holds the page can
 // see.  An endpoint is held by the router's map + each subscription to it; a
 // sender by its session record + router + each sink; a sink by the router's
@@ -144,7 +150,7 @@ function layout(event) {
         const id = `${ep.kind}:${ep.stem}`;
         endpoint_node[ep.id] = id;
         nodes.push({id: id, kind: ep.kind, label: ep.pattern, refcount: ep.refcount,
-                    type: ep._type_,
+                    type: ep._type_, obj: ep,
                     x: col_x[ep.kind], y: top_y + row_h * n_in[ep.kind]++});
         links.push({source: "server", target: id});
     }
@@ -153,7 +159,7 @@ function layout(event) {
     const n_rows = Math.max(1, n_in.http, n_in.stream);
     nodes.unshift({id: "server", kind: "server",
                    label: `Webserver :${snap.listen_port} (${snap.state})`,
-                   type: snap._type_,
+                   type: snap._type_, obj: snap,
                    x: col_x.server, y: top_y + row_h * (n_rows - 1) / 2});
 
     // sessions: one row, below the endpoint columns; subscriptions under each
@@ -169,7 +175,7 @@ function layout(event) {
         const open = s.sender && s.sender.open;
 
         nodes.push({id: id, kind: open ? "session" : "session closed",
-                    label: `session ${s.session_id}`, type: s._type_,
+                    label: `session ${s.session_id}`, type: s._type_, obj: s,
                     x: x, y: session_y});
         links.push({source: "server", target: id});
 
@@ -177,7 +183,7 @@ function layout(event) {
         if (s.sender) {
             const snd = `${id}:sender`;
             nodes.push({id: snd, kind: "sender", label: "sender",
-                        refcount: s.sender.refcount, type: s.sender._type_,
+                        refcount: s.sender.refcount, type: s.sender._type_, obj: s.sender,
                         x: x + 18, y: session_y + row_h, small: true});
             links.push({source: id, target: snd, kind: "owns"});
         }
@@ -191,7 +197,7 @@ function layout(event) {
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
                         refcount: sink.refcount,   // the sink's: slot + its source
-                        type: sub._type_,
+                        type: sub._type_, obj: sub,
                         x: x + 18, y: session_y + row_h + (k + 1) * sub_h, small: true});
             links.push({source: id, target: sid, kind: "owns"});
 
@@ -209,7 +215,8 @@ function layout(event) {
     const holds = [];
     if (ticker) {
         const n_s = (snap.sessions || []).length;
-        nodes.push({id: "ticker", kind: "app", label: "Ticker (app)", type: ticker._type_,
+        nodes.push({id: "ticker", kind: "app", label: "Ticker (app)",
+                    type: ticker._type_, obj: ticker,
                     x: col_x.http + n_s * 240, y: session_y});
 
         const sub_of_sink = {};
@@ -315,6 +322,20 @@ function draw(event) {
             : !s ? `${d.type}\n(no source location)`
             : `${d.type}\n${s.file}:${s.line}` + (s.href ? "" : "\n(no link provider)"));
         g.on("click", (s && s.href) ? () => window.open(s.href, "_blank") : null);
+
+        // focusable, so the keyboard can reach the context menu
+        g.attr("tabindex", 0)
+         .on("contextmenu", (ev) => {
+             ev.preventDefault();
+
+             // from the keyboard the event has no pointer position: use the box
+             const r = this.getBoundingClientRect();
+             const at_box = (ev.clientX === 0 && ev.clientY === 0);
+
+             show_menu(at_box ? r.left + window.scrollX + 10 : ev.pageX,
+                       at_box ? r.bottom + window.scrollY : ev.pageY,
+                       d, this);
+         });
     });
 
     // size each box to its label; remember widths for the links
@@ -395,4 +416,121 @@ function draw(event) {
             const dx = Math.max(60, (x2 - x1) / 2);
             return `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
         });
+}
+
+// ----- context menu -----------------------------------------------------
+
+const menu_el = document.getElementById("ctxmenu");
+let menu_owner = null;   // the box element the menu is for, to refocus
+
+/** copy @p text; the clipboard api needs a secure context (https or
+ *  localhost), so fall back to a hidden textarea when viewed from another host
+ **/
+function copy_text(text) {
+    if (navigator.clipboard && window.isSecureContext)
+        return navigator.clipboard.writeText(text);
+
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    return Promise.resolve();
+}
+
+/** the menu's items for box @p d: [label, action, reason-if-disabled] **/
+function menu_items(d) {
+    const s = source_of(d.type);
+    const no_source = !d.type ? "no _type_ reported"
+          : !s ? "no source location"
+          : !s.href ? "no link provider" : null;
+
+    return [
+        ["Open source", () => window.open(s.href, "_blank"), no_source],
+        ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
+        ["Copy type name", () => copy_text(d.type), d.type ? null : "no _type_ reported"],
+        ["Copy id", () => copy_text(d.obj.id), (d.obj && d.obj.id) ? null : "no id"],
+    ];
+}
+
+function show_menu(x, y, d, owner) {
+    menu_owner = owner;
+    menu_el.replaceChildren();
+
+    const head = document.createElement("div");
+    head.className = "ctxhead";
+    head.textContent = d.type || d.label;
+    menu_el.appendChild(head);
+
+    for (const [label, action, disabled] of menu_items(d)) {
+        const b = document.createElement("button");
+        b.textContent = label;
+        b.disabled = !!disabled;
+        if (disabled)
+            b.title = disabled;
+        b.onclick = () => { hide_menu(); action(); };
+        menu_el.appendChild(b);
+    }
+
+    menu_el.style.left = `${x}px`;
+    menu_el.style.top = `${y}px`;
+    menu_el.hidden = false;
+
+    const first = menu_el.querySelector("button:not(:disabled)");
+    if (first)
+        first.focus();
+}
+
+function hide_menu() {
+    if (menu_el.hidden)
+        return;
+
+    menu_el.hidden = true;
+
+    if (menu_owner)
+        menu_owner.focus();
+    menu_owner = null;
+}
+
+// arrows move between items; Escape closes
+menu_el.addEventListener("keydown", (ev) => {
+    const items = [...menu_el.querySelectorAll("button:not(:disabled)")];
+    const i = items.indexOf(document.activeElement);
+
+    if (ev.key === "Escape") {
+        ev.preventDefault();
+        hide_menu();
+    } else if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+        ev.preventDefault();
+        const n = items.length;
+        if (n > 0)
+            items[(i + (ev.key === "ArrowDown" ? 1 : n - 1)) % n].focus();
+    }
+});
+
+// a click outside, resizing or leaving the window closes it.  NOT scrolling:
+// the menu sits in page coordinates, so it scrolls along with its box -- and
+// closing on scroll closed menus opened while "Show JSON" (or focusing a box)
+// scrolled the page
+document.addEventListener("mousedown", (ev) => {
+    if (!menu_el.hidden && !menu_el.contains(ev.target))
+        hide_menu();
+});
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") hide_menu(); });
+window.addEventListener("resize", hide_menu);
+window.addEventListener("blur", hide_menu);
+
+/** "Show JSON": the box's object alone, below the graph **/
+function show_detail(d) {
+    const detail_h = document.getElementById("detail-h");
+    const detail = document.getElementById("detail");
+
+    detail_h.textContent = `object: ${d.label}` + (d.type ? ` (${d.type})` : "");
+    detail.textContent = JSON.stringify(d.obj, null, 2);
+    detail_h.hidden = false;
+    detail.hidden = false;
+    detail_h.scrollIntoView({behavior: "smooth", block: "start"});
 }
