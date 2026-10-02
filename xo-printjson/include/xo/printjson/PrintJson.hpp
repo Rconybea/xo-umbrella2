@@ -32,6 +32,12 @@ namespace xo {
             using TypeId = xo::reflect::TypeId;
 
         public:
+            /** describe PrintJson to xo-reflect.  Called by PrintJsonAppcx.
+             *  @p table is not used yet: xo-reflect's registration uses its
+             *  process-wide table
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             PrintJson();
             ~PrintJson() = default;
 

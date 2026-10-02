@@ -40,6 +40,15 @@ namespace xo {
         using xo::pp::quot;
         using xo::pp::xtag;
 
+        void
+        PrintJson::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            /* no members yet: e.g. so a JsonMembers entry for an
+             * rp<PrintJson> member prints (.xo-backlog/xo-websock/issues/13)
+             */
+            reflect::StructReflector<PrintJson> sr;
+        } /*reflect_self*/
+
         TaggedRcptr
         PrintJson::self_tp()
         {

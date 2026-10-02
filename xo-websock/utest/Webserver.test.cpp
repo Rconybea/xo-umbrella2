@@ -18,6 +18,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <json/json.h>
+#include <functional>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -228,6 +229,30 @@ namespace xo {
                 REQUIRE(mem[2]["_value_"].asString() == "stopped");
                 REQUIRE(mem[4]["_type_"].asString() == "xo::web::UrlRouter");
                 REQUIRE(mem[4]["_value_"]["_type_"].asString() == "xo::web::UrlRouter");
+            }
+
+            /* every member a printer opts in to is printable: anywhere in
+             * the output, no "_error_" (JsonMembers' "type not reflected")
+             */
+            {
+                std::vector<std::string> errors;
+                std::function<void (Json::Value const &)> walk
+                    = [&walk, &errors](Json::Value const & x) {
+                        if (x.isObject()) {
+                            if (x.isMember("_error_"))
+                                errors.push_back(x["_name_"].asString() + ": "
+                                                 + x["_error_"].asString());
+                            for (auto const & k : x.getMemberNames())
+                                walk(x[k]);
+                        } else if (x.isArray()) {
+                            for (Json::Value const & y : x)
+                                walk(y);
+                        }
+                    };
+                walk(root);
+
+                INFO("errors: " << errors.size() << (errors.empty() ? "" : " first: " + errors[0]));
+                REQUIRE(errors.empty());
             }
 
             Json::Value const & eps = srv["endpoints"];
