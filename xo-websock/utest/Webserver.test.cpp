@@ -206,6 +206,30 @@ namespace xo {
             REQUIRE(srv["listen_port"].asInt() == 0);
             REQUIRE(srv["state"].asString() == "stopped");
 
+            /* chosen C++ members (.xo-backlog/xo-websock/issues/13): each
+             * with its declared type, and a value or why not
+             */
+            {
+                Json::Value const & mem = srv["_members_"];
+
+                std::vector<std::string> names;
+                for (Json::Value const & m : mem) {
+                    names.push_back(m["_name_"].asString());
+                    REQUIRE(m["_type_"].isString());
+                    REQUIRE((m.isMember("_value_") != m.isMember("_error_")));
+                }
+
+                REQUIRE(names == std::vector<std::string>{"ws_config_", "listen_port_", "state_",
+                                                          "pjson_", "url_router_", "session_table_"});
+
+                REQUIRE(mem[1]["_type_"].asString() == "std::atomic<int>");
+                REQUIRE(mem[1]["_value_"].asInt() == 0);
+                REQUIRE(mem[2]["_type_"].asString() == "xo::web::Runstate");
+                REQUIRE(mem[2]["_value_"].asString() == "stopped");
+                REQUIRE(mem[4]["_type_"].asString() == "xo::web::UrlRouter");
+                REQUIRE(mem[4]["_value_"]["_type_"].asString() == "xo::web::UrlRouter");
+            }
+
             Json::Value const & eps = srv["endpoints"];
             REQUIRE(eps.size() == 2);
             REQUIRE(eps[0]["_name_"].asString() == "DynamicEndpoint");

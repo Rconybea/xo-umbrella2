@@ -40,6 +40,7 @@
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/printjson/JsonMembers.hpp>
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
@@ -50,6 +51,7 @@
 namespace xo {
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
+    using xo::json::JsonMembers;
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedRcptr;
@@ -590,9 +592,20 @@ namespace xo {
         /* defined in this translation unit, after WebserverImpl */
         class WebserverImplWsThread;
 
+        namespace {
+            /* its json printer, defined below: shows chosen private members */
+            class JsonPrinter_Webserver;
+        }
+
         class WebserverImpl : public Webserver {
             /* delivers through the protected .send_text() */
             friend class WsSessionSender<WebserverImpl>;
+            /* reads private members, for "_members_".  NOT "friend class
+             * JsonPrinter_Webserver": that form does not look into the
+             * anonymous namespace, and would befriend a new class
+             * xo::web::JsonPrinter_Webserver instead
+             */
+            friend JsonPrinter_Webserver;
 
         public:
             WebserverImpl(WebserverConfig const & ws_config,
@@ -1139,6 +1152,20 @@ namespace xo {
                             });
                     }
                     *p_os << "]";
+
+                    /* chosen C++ members, for the page's "expand"
+                     * (.xo-backlog/xo-websock/issues/13).  listen_port_ and
+                     * state_ are read as the accessors above read them
+                     */
+                    JsonMembers mem(this->pjson(), p_os);
+                    mem.member("ws_config_", websrv->ws_config_)
+                        .member_as<std::atomic<std::int32_t>>("listen_port_", websrv->listen_port())
+                        .member_as<Runstate>("state_",
+                                             std::string(RunstateUtil::runstate_descr(websrv->state())))
+                        .member("pjson_", websrv->pjson_)
+                        .member("url_router_", websrv->url_router_)
+                        .member("session_table_", websrv->session_table_);
+                    mem.end();
 
                     *p_os << "}";
                 }

@@ -155,6 +155,14 @@ namespace xo {
 
         } /*namespace*/
 
+        bool
+        PrintJson::has_printer(TypeDescr td) const
+        {
+            std::unique_ptr<JsonPrinter> const * printer = this->printer_map_.lookup(td->id());
+
+            return printer && *printer;
+        } /*has_printer*/
+
         void
         PrintJson::print_aux(TaggedPtr tp,
                              std::ostream * p_os) const

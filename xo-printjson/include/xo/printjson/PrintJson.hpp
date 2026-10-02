@@ -120,6 +120,9 @@ namespace xo {
             /* write json representation for tp on *p_os */
             void print_aux(TaggedPtr tp, std::ostream * p_os) const;
 
+            /** true iff a printer was provided for @p td (provide_printer) **/
+            bool has_printer(TypeDescr td) const;
+
             // ----- inherited from SelfTagging -----
 
             virtual TaggedRcptr self_tp();

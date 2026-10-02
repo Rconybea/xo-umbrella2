@@ -1,7 +1,7 @@
 # build unittest printjson/utest
 
 set(SELF_EXE utest.printjson)
-set(SELF_SRCS printjson_utest_main.cpp PrintJson.test.cpp FopJson.test.cpp ObjectSlotJson.test.cpp)
+set(SELF_SRCS printjson_utest_main.cpp PrintJson.test.cpp JsonMembers.test.cpp FopJson.test.cpp ObjectSlotJson.test.cpp)
 
 xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
 xo_self_dependency(${SELF_EXE} printjson)
