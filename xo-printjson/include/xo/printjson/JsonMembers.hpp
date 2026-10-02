@@ -39,16 +39,18 @@ namespace xo {
         /** @brief writes an object's "_members_" array, for a JsonPrinter that
          *  opts in to showing chosen C++ members:
          *
-         *    "_members_": [{"_name_": .., "_type_": .., "_value_": ..}, ..]
+         *    "_members_": [{"_name_": .., "_type_": .., "_metatype_": .., "_value_": ..}, ..]
          *
-         *  _type_ is the member's DECLARED type (its canonical name); _value_
+         *  _type_ is the member's DECLARED type (its canonical name);
+         *  _metatype_ that type's xo-reflect metatype (atomic, pointer,
+         *  vector, struct, function -- metatype2str); _value_
          *  is printed by PrintJson as any value would be -- so an rp<T> or T*
          *  reflects as its pointee's actual type, and a nested object carries
          *  its own _members_ if its printer writes them.
          *
          *  A member whose type cannot be printed -- neither a json printer
          *  nor a complete reflected struct -- is written without a value:
-         *    {"_name_": .., "_type_": .., "_error_": "type not reflected: X"}
+         *    {"_name_": .., "_type_": .., "_metatype_": .., "_error_": "type not reflected: X"}
          *  so one omission does not spoil the rest of the output.
          *
          *  Use, inside a JsonPrinter's print_json, after the printer's own
@@ -82,13 +84,14 @@ namespace xo {
                 using target_t = typename detail::member_target<V>::type;
 
                 std::string declared(reflect::type_name<Declared>());
+                reflect::Metatype metatype = Reflect::require<Declared>()->metatype();
                 reflect::TypeDescr target = Reflect::require<target_t>();
 
                 if (this->printable(target)) {
-                    this->write_value(name, declared,
+                    this->write_value(name, declared, metatype,
                                       Reflect::make_tp(const_cast<V *>(&value)));
                 } else {
-                    this->write_error(name, declared,
+                    this->write_error(name, declared, metatype,
                                       "type not reflected: " + target->canonical_name());
                 }
 
@@ -105,11 +108,12 @@ namespace xo {
             bool printable(reflect::TypeDescr td) const;
 
             void write_value(std::string_view name, std::string const & declared,
-                             reflect::TaggedPtr value);
+                             reflect::Metatype metatype, reflect::TaggedPtr value);
             void write_error(std::string_view name, std::string const & declared,
-                             std::string const & why);
-            /** the separator and the entry's _name_ and _type_ **/
-            void write_head(std::string_view name, std::string const & declared);
+                             reflect::Metatype metatype, std::string const & why);
+            /** the separator and the entry's _name_, _type_, _metatype_ **/
+            void write_head(std::string_view name, std::string const & declared,
+                            reflect::Metatype metatype);
 
         private:
             PrintJson const * pjson_ = nullptr;

@@ -9,6 +9,7 @@
 
 namespace xo {
     using xo::pp::quot;
+    using xo::reflect::Metatype;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
 
@@ -40,21 +41,23 @@ namespace xo {
         }
 
         void
-        JsonMembers::write_head(std::string_view name, std::string const & declared)
+        JsonMembers::write_head(std::string_view name, std::string const & declared,
+                                Metatype metatype)
         {
             if (!first_)
                 *p_os_ << ", ";
             first_ = false;
 
             *p_os_ << "{" << quot("_name_") << ": " << quot(name)
-                   << ", " << quot("_type_") << ": " << quot(declared);
+                   << ", " << quot("_type_") << ": " << quot(declared)
+                   << ", " << quot("_metatype_") << ": " << quot(metatype2str(metatype));
         }
 
         void
         JsonMembers::write_value(std::string_view name, std::string const & declared,
-                                 TaggedPtr value)
+                                 Metatype metatype, TaggedPtr value)
         {
-            this->write_head(name, declared);
+            this->write_head(name, declared, metatype);
 
             *p_os_ << ", " << quot("_value_") << ": ";
             pjson_->print_aux(value, p_os_);
@@ -63,9 +66,9 @@ namespace xo {
 
         void
         JsonMembers::write_error(std::string_view name, std::string const & declared,
-                                 std::string const & why)
+                                 Metatype metatype, std::string const & why)
         {
-            this->write_head(name, declared);
+            this->write_head(name, declared, metatype);
 
             *p_os_ << ", " << quot("_error_") << ": " << quot(why) << "}";
         }

@@ -48,10 +48,13 @@ namespace xo {
                 return std::string(xo::reflect::type_name<T>());
             }
 
-            /** one entry, as JsonMembers writes it **/
+            /** one entry, as JsonMembers writes it; @p metatype is the
+             *  declared type's, as xo-reflect's metatype2str spells it
+             **/
             std::string entry(std::string const & name, std::string const & type,
-                              std::string const & value) {
+                              std::string const & metatype, std::string const & value) {
                 return "{\"_name_\": \"" + name + "\", \"_type_\": \"" + type
+                    + "\", \"_metatype_\": \"" + metatype
                     + "\", \"_value_\": " + value + "}";
             }
         }
@@ -78,8 +81,8 @@ namespace xo {
             mem.end();
 
             REQUIRE(ss.str() == ", \"_members_\": ["
-                    + entry("n_", type_of<int>(), "7") + ", "
-                    + entry("s_", type_of<std::string>(), "\"hello\"") + "]");
+                    + entry("n_", type_of<int>(), "atomic", "7") + ", "
+                    + entry("s_", type_of<std::string>(), "atomic", "\"hello\"") + "]");
         }
 
         TEST_CASE("json-members-reflected-struct", "[printjson][JsonMembers]") {
@@ -101,9 +104,9 @@ namespace xo {
             pjson.print(r, &rs);
 
             REQUIRE(ss.str() == ", \"_members_\": ["
-                    + entry("r_", type_of<JmReflected>(), rs.str()) + ", "
-                    + entry("p_", type_of<JmReflected *>(), rs.str()) + ", "
-                    + entry("v_", type_of<std::vector<JmReflected>>(), "[" + rs.str() + "]")
+                    + entry("r_", type_of<JmReflected>(), "struct", rs.str()) + ", "
+                    + entry("p_", type_of<JmReflected *>(), "pointer", rs.str()) + ", "
+                    + entry("v_", type_of<std::vector<JmReflected>>(), "vector", "[" + rs.str() + "]")
                     + "]");
         }
 
@@ -123,10 +126,10 @@ namespace xo {
 
             REQUIRE(ss.str() == ", \"_members_\": ["
                     "{\"_name_\": \"u_\", \"_type_\": \"" + type_of<JmUnreflected>()
-                    + "\", \"_error_\": \"" + why + "\"}, "
+                    + "\", \"_metatype_\": \"atomic\", \"_error_\": \"" + why + "\"}, "
                     "{\"_name_\": \"pu_\", \"_type_\": \"" + type_of<JmUnreflected *>()
-                    + "\", \"_error_\": \"" + why + "\"}, "
-                    + entry("n_", type_of<int>(), "3") + "]");
+                    + "\", \"_metatype_\": \"pointer\", \"_error_\": \"" + why + "\"}, "
+                    + entry("n_", type_of<int>(), "atomic", "3") + "]");
         }
 
         TEST_CASE("json-members-member-as-declared-type", "[printjson][JsonMembers]") {
@@ -143,7 +146,7 @@ namespace xo {
             mem.end();
 
             REQUIRE(ss.str() == ", \"_members_\": ["
-                    + entry("port_", type_of<std::atomic<std::int32_t>>(), "8080") + "]");
+                    + entry("port_", type_of<std::atomic<std::int32_t>>(), "atomic", "8080") + "]");
         }
     } /*namespace ut*/
 } /*namespace xo*/

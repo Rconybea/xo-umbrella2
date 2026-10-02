@@ -223,6 +223,14 @@ namespace xo {
                 REQUIRE(names == std::vector<std::string>{"ws_config_", "listen_port_", "state_",
                                                           "pjson_", "url_router_", "session_table_"});
 
+                /* each declared type's xo-reflect metatype */
+                std::vector<std::string> metatypes;
+                for (Json::Value const & m : mem)
+                    metatypes.push_back(m["_metatype_"].asString());
+
+                REQUIRE(metatypes == std::vector<std::string>{"struct", "atomic", "atomic",
+                                                              "pointer", "struct", "struct"});
+
                 REQUIRE(mem[1]["_type_"].asString() == "std::atomic<int>");
                 REQUIRE(mem[1]["_value_"].asInt() == 0);
                 REQUIRE(mem[2]["_type_"].asString() == "xo::web::Runstate");
