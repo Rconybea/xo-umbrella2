@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <title>xo-websock introspect</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <!-- automatic layout (ELK's layered algorithm); not on cdnjs -->
+  <script src="https://cdn.jsdelivr.net/npm/elkjs@0.12.0/lib/elk.bundled.js"></script>
   <style>
     body { font-family: system-ui, sans-serif; margin: 1.5em; color: #222; }
     #status { color: #666; margin-left: 0.8em; }
@@ -24,8 +26,9 @@
     g.badge text { font-size: 11px; font-family: ui-monospace, monospace; fill: #333; }
     g.badge.unaccounted circle { fill: #fde2e0; stroke: #c0392b; stroke-width: 2px; }
     .node.app rect { fill: #eef6fb; stroke: #2c6e8f; stroke-dasharray: 5 3; }
-    path.holds { fill: none; stroke: #d08a2c; stroke-width: 1.4px; stroke-dasharray: 2 3; }
-    path.uses { fill: none; stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; }
+    path.edge { fill: none; stroke: #999; stroke-width: 1.2px; }
+    path.edge.holds { stroke: #d08a2c; stroke-width: 1.4px; stroke-dasharray: 2 3; }
+    path.edge.uses { stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; }
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }
     .node.linked { cursor: pointer; }
     .node.linked:hover rect { stroke-width: 3px; }
@@ -40,8 +43,6 @@
                       padding: 5px 12px; font: inherit; cursor: pointer; }
     #ctxmenu button:hover:enabled, #ctxmenu button:focus { background: #e8f0fe; outline: none; }
     #ctxmenu button:disabled { color: #aaa; cursor: default; }
-    text.heading { font-size: 13px; fill: #666; }
-    line.link { stroke: #999; stroke-width: 1.2px; }
     pre { background: #f4f4f4; padding: 0.8em; max-width: 60em; overflow-x: auto; }
   </style>
 </head>

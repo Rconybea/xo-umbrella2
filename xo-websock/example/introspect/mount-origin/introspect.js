@@ -128,21 +128,30 @@ function refresh() {
 
 refresh_btn.onclick = refresh;
 
-// layout: server in the middle, http endpoints to its left, stream endpoints
-// to its right -- so no link passes behind another box.  Sessions in a row
-// beneath all of it, linked up to the server; each session's subscriptions
-// stacked under it, each with a curved "uses" link to its stream endpoint
-const col_x = {http: 30, server: 330, stream: 640};
-const row_h = 58;
-const top_y = 40;
+// layout: automatic, by ELK (elkjs, its layered algorithm) -- the page builds
+// the object graph (boxes and edges) from the snapshot; ELK places the boxes,
+// sized to their content, and routes the edges.  Hand-placed columns could
+// not grow a box; an expanded box (issue 13) and showing/hiding parts of the
+// graph both need this.  .xo-backlog/xo-websock/issues/13, step 2.
+const elk = new ELK();
 
+/** the object graph for snapshot @p event: {nodes, edges}.  Edge kinds:
+ *  "link"  the server's endpoints and sessions
+ *  "owns"  a session's sender and subscriptions
+ *  "uses"  a subscription -> the stream endpoint it holds
+ *  "holds" the application (ticker) -> a subscription whose sink it holds
+ **/
 function layout(event) {
     const snap = event.server;
     const ticker = event.ticker;
 
     const nodes = [];
-    const links = [];
-    const n_in = {http: 0, stream: 0};
+    const edges = [];
+    const edge = (source, target, kind) => edges.push({source, target, kind});
+
+    nodes.push({id: "server", kind: "server",
+                label: `Webserver :${snap.listen_port} (${snap.state})`,
+                type: snap._type_, obj: snap});
 
     const endpoint_node = {};   // endpoint object id -> node id
 
@@ -150,45 +159,27 @@ function layout(event) {
         const id = `${ep.kind}:${ep.stem}`;
         endpoint_node[ep.id] = id;
         nodes.push({id: id, kind: ep.kind, label: ep.pattern, refcount: ep.refcount,
-                    type: ep._type_, obj: ep,
-                    x: col_x[ep.kind], y: top_y + row_h * n_in[ep.kind]++});
-        links.push({source: "server", target: id});
+                    type: ep._type_, obj: ep});
+        edge("server", id, "link");
     }
 
-    // server centred on the taller column
-    const n_rows = Math.max(1, n_in.http, n_in.stream);
-    nodes.unshift({id: "server", kind: "server",
-                   label: `Webserver :${snap.listen_port} (${snap.state})`,
-                   type: snap._type_, obj: snap,
-                   x: col_x.server, y: top_y + row_h * (n_rows - 1) / 2});
-
-    // sessions: one row, below the endpoint columns; subscriptions under each
-    const session_y = top_y + row_h * n_rows + 50;
-    const sub_h = 44;
-    const uses = [];   // subscription -> endpoint
-    let n_sub_max = 0;
-
-    (snap.sessions || []).forEach((s, i) => {
+    for (const s of (snap.sessions || [])) {
         const id = `session:${s.session_id}`;
-        const x = col_x.http + i * 240;
-        const subs = s.subscriptions || [];
         const open = s.sender && s.sender.open;
 
         nodes.push({id: id, kind: open ? "session" : "session closed",
-                    label: `session ${s.session_id}`, type: s._type_, obj: s,
-                    x: x, y: session_y});
-        links.push({source: "server", target: id});
+                    label: `session ${s.session_id}`, type: s._type_, obj: s});
+        edge("server", id, "link");
 
-        // the session's sender: first under it, with its refcount
         if (s.sender) {
             const snd = `${id}:sender`;
             nodes.push({id: snd, kind: "sender", label: "sender",
                         refcount: s.sender.refcount, type: s.sender._type_, obj: s.sender,
-                        x: x + 18, y: session_y + row_h, small: true});
-            links.push({source: id, target: snd, kind: "owns"});
+                        small: true});
+            edge(id, snd, "owns");
         }
 
-        subs.forEach((sub, k) => {
+        for (const sub of (s.subscriptions || [])) {
             const sid = `${id}:sub:${sub.sub_id}`;
             const sink = sub.sink || {};
             // the sink's sender should be this session's: flag it if not
@@ -197,27 +188,21 @@ function layout(event) {
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
                         refcount: sink.refcount,   // the sink's: slot + its source
-                        type: sub._type_, obj: sub,
-                        x: x + 18, y: session_y + row_h + (k + 1) * sub_h, small: true});
-            links.push({source: id, target: sid, kind: "owns"});
+                        type: sub._type_, obj: sub, small: true});
+            edge(id, sid, "owns");
 
             // joined BY ID: the endpoint object this subscription holds
             const ep = sub.endpoint && endpoint_node[sub.endpoint.ref];
             if (ep)
-                uses.push({source: sid, target: ep});
-        });
+                edge(sid, ep, "uses");
+        }
+    }
 
-        n_sub_max = Math.max(n_sub_max, subs.length + 1);   // + the sender
-    });
-
-    // the application's ticker, right of the sessions; a "holds" link to
-    // each subscription whose sink it refers to
-    const holds = [];
+    // the application's ticker: a "holds" edge to each subscription whose
+    // sink it refers to
     if (ticker) {
-        const n_s = (snap.sessions || []).length;
         nodes.push({id: "ticker", kind: "app", label: "Ticker (app)",
-                    type: ticker._type_, obj: ticker,
-                    x: col_x.http + n_s * 240, y: session_y});
+                    type: ticker._type_, obj: ticker});
 
         const sub_of_sink = {};
         for (const s of (snap.sessions || []))
@@ -225,15 +210,15 @@ function layout(event) {
                 if (sub.sink) sub_of_sink[sub.sink.id] = `session:${s.session_id}:sub:${sub.sub_id}`;
 
         for (const r of (ticker.sinks || []))
-            if (sub_of_sink[r.ref]) holds.push({source: "ticker", target: sub_of_sink[r.ref]});
+            if (sub_of_sink[r.ref])
+                edge("ticker", sub_of_sink[r.ref], "holds");
     }
 
     // refcount accounting: the holds this snapshot shows, per object
     const expect = {};   // node id -> expected refcount
     const bump = (k, n) => { expect[k] = (expect[k] || 0) + n; };
-    const node_of_ep = endpoint_node;
     for (const ep of (snap.endpoints || []))
-        bump(node_of_ep[ep.id], 1);                          // router's map
+        bump(endpoint_node[ep.id], 1);                       // router's map
     const app_refs = {};
     for (const r of ((ticker && ticker.sinks) || []))
         app_refs[r.ref] = (app_refs[r.ref] || 0) + 1;
@@ -242,7 +227,7 @@ function layout(event) {
         bump(`${sid}:sender`, 2);                            // record + router
         for (const sub of (s.subscriptions || [])) {
             const subn = `${sid}:sub:${sub.sub_id}`;
-            if (sub.endpoint) bump(node_of_ep[sub.endpoint.ref], 1);
+            if (sub.endpoint) bump(endpoint_node[sub.endpoint.ref], 1);
             if (sub.sink) {
                 bump(subn, 1 + (app_refs[sub.sink.id] || 0)); // slot + app
                 if (sub.sink.sender && s.sender && sub.sink.sender.ref === s.sender.id)
@@ -253,46 +238,27 @@ function layout(event) {
     for (const n of nodes)
         if (n.refcount !== undefined) n.expected = expect[n.id] || 0;
 
-    const n_session = (snap.sessions || []).length;
-    const height = (n_session > 0
-                    ? session_y + row_h + n_sub_max * sub_h
-                    : top_y + row_h * n_rows) + 20;
-
-    return {nodes, links, uses, holds, height};
+    return {nodes, edges};
 }
 
-function draw(event) {
-    const {nodes, links, uses, holds, height} = layout(event);
-    const by_id = new Map(nodes.map(d => [d.id, d]));
+// a draw is asynchronous (ELK); a newer one supersedes an older one still
+// laying out
+let draw_seq = 0;
+
+async function draw(event) {
+    const seq = ++draw_seq;
+    const {nodes, edges} = layout(event);
     const box_h = 40;
+    const pad = 20;            // around the whole graph
+    const badge_r = 10;        // the refcount badge pokes this far outside a box
 
-    const svg = d3.select("#graph").attr("height", height);
+    const svg = d3.select("#graph");
 
-    // two fixed layers, links under boxes -- new elements go into their
-    // layer, so a refresh cannot paint a line over a box
-    const link_layer = svg.selectAll("g.links").data([0]).join("g").attr("class", "links");
-    const uses_layer = svg.selectAll("g.uses").data([0]).join("g").attr("class", "uses");
-    const holds_layer = svg.selectAll("g.holds").data([0]).join("g").attr("class", "holds");
+    // fixed layers, edges under boxes
+    const edge_layer = svg.selectAll("g.edges").data([0]).join("g").attr("class", "edges");
     const node_layer = svg.selectAll("g.nodes").data([0]).join("g").attr("class", "nodes");
 
-    // headings
-    const session_node = nodes.find(d => d.kind.startsWith("session"));
-    const headings = [["http endpoints", col_x.http, 22], ["stream endpoints", col_x.stream, 22]];
-    if (session_node)
-        headings.push(["websocket sessions", col_x.http, session_node.y - 8]);
-
-    svg.selectAll("text.heading")
-        .data(headings)
-        .join("text")
-        .attr("class", "heading")
-        .attr("x", d => d[1]).attr("y", d => d[2])
-        .text(d => d[0]);
-
-    link_layer.selectAll("line.link")
-        .data(links, d => `${d.source}>${d.target}`)
-        .join("line")
-        .attr("class", "link");
-
+    // 1. the boxes, so their text can be measured
     const node = node_layer.selectAll("g.node")
         .data(nodes, d => d.id)
         .join(enter => {
@@ -302,13 +268,12 @@ function draw(event) {
             g.append("text").attr("x", 12).attr("y", 25);
             // refcount badge, top-right corner (only where known)
             const b = g.append("g").attr("class", "badge");
-            b.append("circle").attr("r", 10);
+            b.append("circle").attr("r", badge_r);
             b.append("text").attr("text-anchor", "middle").attr("dy", "0.35em");
             return g;
         });
 
-    node.attr("class", d => `node ${d.kind}`)
-        .attr("transform", d => `translate(${d.x},${d.y})`);
+    node.attr("class", d => `node ${d.kind}`);
     node.select(":scope > text").text(d => d.label);
 
     // source: hover for the type and where it is defined; click to open
@@ -338,7 +303,7 @@ function draw(event) {
          });
     });
 
-    // size each box to its label; remember widths for the links
+    // size each box to its label
     node.each(function (d) {
         const g = d3.select(this);
         d.h = d.small ? 30 : box_h;
@@ -360,62 +325,53 @@ function draw(event) {
                   : `refcount ${d.refcount}, ${d.expected} shown: ${extra} hold(s) not in this snapshot`);
     });
 
-    // wide enough for the rightmost box (more sessions push the ticker right)
-    svg.attr("width", Math.max(900, d3.max(nodes, d => d.x + d.w) + 40));
+    // 2. ELK: layered, top to bottom; spacing leaves room for the badges
+    const graph = {
+        id: "root",
+        layoutOptions: {
+            "elk.algorithm": "layered",
+            "elk.direction": "DOWN",
+            "elk.edgeRouting": "ORTHOGONAL",
+            "elk.spacing.nodeNode": "40",
+            "elk.layered.spacing.nodeNodeBetweenLayers": "50",
+            "elk.spacing.edgeNode": "20",
+        },
+        children: nodes.map(d => ({id: d.id, width: d.w, height: d.h})),
+        edges: edges.map((e, i) => ({id: `e${i}`, sources: [e.source], targets: [e.target]})),
+    };
 
-    // server's facing edge -> endpoint's facing edge
-    link_layer.selectAll("line.link")
-        .each(function (d) {
-            const src = by_id.get(d.source);
-            const tgt = by_id.get(d.target);
-            const line = d3.select(this);
+    const laid = await elk.layout(graph);
 
-            if (d.kind === "owns") {
-                /* session -> its subscription: down its left side */
-                line.attr("x1", src.x + 9).attr("y1", src.y + src.h)
-                    .attr("x2", src.x + 9).attr("y2", tgt.y + tgt.h / 2);
-            } else if (tgt.y > src.y + box_h) {
-                /* a session, below: server's bottom edge -> session's top */
-                line.attr("x1", src.x + src.w / 2).attr("y1", src.y + box_h)
-                    .attr("x2", tgt.x + tgt.w / 2).attr("y2", tgt.y);
-            } else {
-                const left = (tgt.x < src.x);   /* http column */
+    if (seq !== draw_seq)
+        return;   // superseded while laying out
 
-                line.attr("x1", left ? src.x : src.x + src.w)
-                    .attr("y1", src.y + box_h / 2)
-                    .attr("x2", left ? tgt.x + tgt.w : tgt.x)
-                    .attr("y2", tgt.y + box_h / 2);
-            }
-        });
+    // 3. place the boxes
+    const at = new Map(laid.children.map(c => [c.id, c]));
+    for (const d of nodes) {
+        const c = at.get(d.id);
+        d.x = c.x + pad;
+        d.y = c.y + pad + badge_r;
+    }
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
 
-    // application -> subscription whose sink it holds
-    holds_layer.selectAll("path.holds")
-        .data(holds, d => d.target)
+    svg.attr("width", Math.max(900, laid.width + 2 * pad + badge_r))
+       .attr("height", laid.height + 2 * pad + badge_r);
+
+    // 4. the edges, as ELK routed them
+    const routed = edges.map((e, i) => {
+        const le = laid.edges[i];
+        const pts = [];
+        for (const sec of (le.sections || [])) {
+            pts.push(sec.startPoint, ...(sec.bendPoints || []), sec.endPoint);
+        }
+        return {...e, key: `${e.kind}:${e.source}>${e.target}`, pts};
+    });
+
+    edge_layer.selectAll("path.edge")
+        .data(routed, d => d.key)
         .join("path")
-        .attr("class", "holds")
-        .attr("d", d => {
-            const src = by_id.get(d.source);
-            const tgt = by_id.get(d.target);
-            const x1 = src.x, y1 = src.y + src.h / 2;
-            const x2 = tgt.x + tgt.w, y2 = tgt.y + tgt.h / 2;
-            const dx = Math.max(40, (x1 - x2) / 2);
-            return `M${x1},${y1} C${x1 - dx},${y1} ${x2 + dx},${y2} ${x2},${y2}`;
-        });
-
-    // subscription -> the stream endpoint it uses: a curve up and over,
-    // into the endpoint's left edge
-    uses_layer.selectAll("path.uses")
-        .data(uses, d => d.source)
-        .join("path")
-        .attr("class", "uses")
-        .attr("d", d => {
-            const src = by_id.get(d.source);
-            const tgt = by_id.get(d.target);
-            const x1 = src.x + src.w, y1 = src.y + src.h / 2;
-            const x2 = tgt.x,         y2 = tgt.y + tgt.h / 2;
-            const dx = Math.max(60, (x2 - x1) / 2);
-            return `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
-        });
+        .attr("class", d => `edge ${d.kind}`)
+        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad},${p.y + pad + badge_r}`).join(" "));
 }
 
 // ----- context menu -----------------------------------------------------
