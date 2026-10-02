@@ -5,11 +5,11 @@
  *  json printers for xo-websock's own objects, for introspection.
  *  See .xo-backlog/xo-websock/issues/10.
  *
- *  The Webserver printer reads the server through its public API.  Every
- *  object is printed in full once, where it is owned, and elsewhere as
- *  {"ref": id} -- so neither cycles nor shared objects reach PrintJson.
+ *  Every object is printed in full once, where it is owned, and elsewhere
+ *  as {"ref": id} -- so neither cycles nor shared objects reach PrintJson.
  *
- *    Webserver (here)
+ *    WebserverImpl (Webserver.cpp: a Webserver* is reflected as its actual
+ *                   type)
  *     +- endpoints: DynamicEndpoint (here)
  *     +- sessions: WsSession, and its WsSessionSender (Webserver.cpp)
  *         +- subscriptions: Subscription (WsSessionRouter.cpp)
@@ -87,83 +87,19 @@ namespace xo {
                 }
             };
 
-            /** @brief Webserver, keyed on the abstract type: what a
-             *  Webserver* in a reflected struct dispatches to
-             **/
-            class JsonPrinter_Webserver : public JsonPrinter {
-            public:
-                JsonPrinter_Webserver(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                    Webserver const * websrv = this->check_recover_native<Webserver>(tp, p_os);
-
-                    if (!websrv)
-                        return;
-
-                    std::string const type
-                        = const_cast<Webserver *>(websrv)->self_tp().td()->canonical_name();
-
-                    *p_os << "{" << quot("_name_") << ": " << quot("Webserver")
-                          << ", " << quot("_type_") << ": " << quot(type)
-                          << ", " << quot("id") << ": " << quot(json_id(websrv))
-                          << ", " << quot("refcount") << ": " << websrv->reference_counter()
-                          << ", " << quot("listen_port") << ": " << websrv->listen_port()
-                          << ", " << quot("state") << ": "
-                          << quot(RunstateUtil::runstate_descr(websrv->state()));
-
-                    *p_os << ", " << quot("endpoints") << ": [";
-                    {
-                        bool first = true;
-                        PrintJson const * pjson = this->pjson();
-
-                        /* under the router's lock; printing never calls back
-                         * into the router
-                         */
-                        websrv->visit_endpoints([pjson, p_os, &first](DynamicEndpoint const & ep) {
-                                if (!first)
-                                    *p_os << ", ";
-                                first = false;
-
-                                pjson->print_aux(TaggedPtr(Reflect::require<DynamicEndpoint>(),
-                                                           const_cast<DynamicEndpoint *>(&ep)),
-                                                 p_os);
-                            });
-                    }
-                    *p_os << "]";
-
-                    *p_os << ", " << quot("sessions") << ": [";
-                    {
-                        bool first = true;
-                        PrintJson const * pjson = this->pjson();
-
-                        /* each session via its own printer (installed by
-                         * provide_webserver_json_printers), in id order
-                         */
-                        websrv->visit_sessions([pjson, p_os, &first](TaggedPtr session) {
-                                if (!first)
-                                    *p_os << ", ";
-                                first = false;
-
-                                pjson->print_aux(session, p_os);
-                            });
-                    }
-                    *p_os << "]";
-
-                    *p_os << "}";
-                }
-            }; /*JsonPrinter_Webserver*/
         } /*namespace*/
 
         void
         provide_websock_json_printers(PrintJson * pjson)
         {
-            pjson->provide_printer(Reflect::require<Webserver>(),
-                                   std::make_unique<JsonPrinter_Webserver>(pjson));
             pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
                                    std::make_unique<JsonPrinter_DynamicEndpoint>(pjson));
             pjson->provide_printer(Reflect::require<WebsocketSink>(),
                                    std::make_unique<JsonPrinter_WebsocketSink>(pjson));
-            /* types private to one file, printed there */
+            /* types private to one file, printed there -- including the
+             * server: a Webserver* is reflected as its actual type,
+             * WebserverImpl (SelfTaggingDisplayable)
+             */
             provide_webserver_json_printers(pjson);
             provide_router_json_printers(pjson);
         }

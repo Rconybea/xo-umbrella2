@@ -1,7 +1,7 @@
 # xo-websock/CMakeLists.txt
 
 set(SELF_LIB websock)
-set(SELF_SRCS EndpointUtil.cpp DynamicEndpoint.cpp WebsockUtil.cpp WebsocketSink.cpp WsSessionRouter.cpp UrlRouter.cpp Webserver.cpp websock_json.cpp init_websock.cpp WebsockAppcx.cpp)
+set(SELF_SRCS EndpointUtil.cpp DynamicEndpoint.cpp WebsockUtil.cpp WebsocketSink.cpp WsSessionRouter.cpp UrlRouter.cpp Webserver.cpp WebserverConfig.cpp websock_json.cpp websock_reflect.cpp init_websock.cpp WebsockAppcx.cpp)
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 

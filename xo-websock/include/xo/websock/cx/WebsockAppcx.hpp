@@ -13,8 +13,10 @@
 namespace xo {
     /** @brief application-level state for the websock subsystem.
      *
-     *  Establishing one registers xo-websock's json printers with the
-     *  printjson context's PrintJson (xo/websock/websock_json.hpp).  A
+     *  Establishing one describes xo-websock's types to xo-reflect
+     *  (xo/websock/websock_reflect.hpp), then registers xo-websock's json
+     *  printers with the printjson context's PrintJson
+     *  (xo/websock/websock_json.hpp).  A
      *  Webserver is made FROM a WebsockAppcx (Webserver::make), so a server
      *  cannot exist without its printers.  See
      *  .xo-backlog/xo-websock/issues/11.
@@ -32,6 +34,7 @@ namespace xo {
          *  Primary driver for websock init.
          **/
         WebsockAppcx(const WebsockConfig & cfg,
+                     const ReflectAppcx & reflect_appcx,
                      const PrintJsonAppcx & printjson_appcx);
 
         /** Template for websock init.  Works with AppConfig, AppContext.
@@ -42,7 +45,9 @@ namespace xo {
         template <typename Deps>
         WebsockAppcx(Deps & deps,
                      const WebsockConfig & cfg)
-            : WebsockAppcx(cfg, deps.template cx<S_printjson_tag>()) {}
+            : WebsockAppcx(cfg,
+                           deps.template cx<S_reflect_tag>(),
+                           deps.template cx<S_printjson_tag>()) {}
 
         InitEvidence init_evidence() const { return init_evidence_; }
         CreationEvidence creation_evidence() const { return websock_evp_; }

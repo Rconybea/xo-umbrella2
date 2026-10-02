@@ -15,6 +15,8 @@
 #include <regex>
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     namespace web {
         /* a dynamic http endpoint.  content served on-browser-demand
          * by user-provided callback
@@ -30,6 +32,9 @@ namespace xo {
          */
         class DynamicEndpoint : public ref::Refcount {
         public:
+            /** describe DynamicEndpoint to xo-reflect, using @p table **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             using CallbackId = fn::CallbackId;
 
         public:

@@ -16,6 +16,8 @@
 #include <vector>
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     namespace web {
         /** @brief server-wide: which endpoint serves a uri or stream name.
          *
@@ -45,6 +47,10 @@ namespace xo {
          **/
         class UrlRouter {
         public:
+            /** describe UrlRouter to xo-reflect, using @p table.
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             /** register http endpoint described by @p descr.
              *  Throws std::runtime_error if an http endpoint with the same
              *  stem is already registered.

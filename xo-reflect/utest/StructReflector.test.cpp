@@ -5,6 +5,7 @@
 
 #include "xo/reflect/StructReflector.hpp"
 #include "xo/reflect/Reflect.hpp"
+#include "xo/reflect/SelfTaggingDisplayable.hpp"
 #include <catch2/catch.hpp>
 
 #define STRINGIFY(x) #x
@@ -135,6 +136,41 @@ namespace xo {
       REQUIRE(tp.get_child(3).address() == nullptr);
 
     } /*TEST_CASE(struct-reflect-s3)*/
+
+    namespace {
+      /* abstract base: its TypeDescr is what a TaggedPtr carries when an
+       * object is reached through a base pointer
+       */
+      struct StdBase : public xo::reflect::SelfTaggingDisplayable {
+        virtual void pretty(xo::pp::PpSink &) const override {}
+        virtual std::string display_string() const override { return "StdBase"; }
+      };
+
+      struct StdDerived : public StdBase {
+        virtual xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+
+        int x_ = 7;
+      };
+    }
+
+    TEST_CASE("struct-reflect-self-tagging-displayable-most-derived", "[reflect]") {
+      /* StructReflector uses self_tp() for SelfTaggingDisplayable, as for
+       * SelfTagging: from a base pointer, the most-derived type
+       */
+      { StructReflector<StdBase> sr; }
+      { StructReflector<StdDerived> sr; }
+
+      rp<StdDerived> d = new StdDerived();
+      StdBase * b = d.get();
+
+      TaggedPtr tp = Reflect::make_tp(b);
+      REQUIRE(tp.td() == Reflect::require<StdBase>());
+
+      TaggedPtr most = tp.td()->most_derived_self_tp(b);
+
+      REQUIRE(most.td() == Reflect::require<StdDerived>());
+      REQUIRE(most.address() == d.get());
+    } /*TEST_CASE(struct-reflect-self-tagging-displayable-most-derived)*/
   } /*namespace ut */
 } /*namespace xo*/
 

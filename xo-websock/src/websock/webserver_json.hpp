@@ -4,7 +4,8 @@
  *
  *  INTERNAL to xo-websock (not installed): json printers for types private
  *  to one translation unit, defined where those types are visible --
- *  the session record and sender (Webserver.cpp), a router's subscription
+ *  the server (WebserverImpl), its session record and sender
+ *  (Webserver.cpp), a router's subscription
  *  (WsSessionRouter.cpp).  Called from provide_websock_json_printers.
  **/
 

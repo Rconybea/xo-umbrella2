@@ -14,6 +14,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* xtag(..) */
+#include <xo/reflect/StructReflector.hpp>
 #include <json/json.h>
 #include <exception>
 
@@ -22,6 +23,7 @@ namespace xo {
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
     using xo::reflect::Reflect;
+    using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
     using xo::reflect::type_name;
     using xo::pp::quot;
@@ -31,6 +33,9 @@ namespace xo {
         using xo::pp::xtag;
 
         struct WsSessionRouter::Subscription {
+            /** describe Subscription to xo-reflect; see WsSessionRouter::reflect_self **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             /* index in .subscription_v; what the client addresses */
             std::uint32_t sub_id_ = 0;
             /* stream name from the subscribe command */
@@ -450,6 +455,22 @@ namespace xo {
 
             return n;
         }
+        void
+        WsSessionRouter::Subscription::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            /* no members yet: a member is added as a printer opts in to
+             * show it (.xo-backlog/xo-websock/issues/13)
+             */
+            StructReflector<Subscription> sr;
+        } /*reflect_self*/
+
+        void
+        WsSessionRouter::reflect_self(reflect::TypeDescrTable * table)
+        {
+            { StructReflector<WsSessionRouter> sr; }
+
+            Subscription::reflect_self(table);
+        } /*reflect_self*/
     } /*namespace web*/
 } /*namespace xo*/
 

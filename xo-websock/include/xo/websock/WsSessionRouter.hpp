@@ -26,6 +26,8 @@ namespace Json {
 }
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     namespace web {
         class DynamicEndpoint;
         class UrlRouter;
@@ -76,6 +78,14 @@ namespace xo {
          **/
         class WsSessionRouter {
         public:
+            /** describe WsSessionRouter, and WsSessionRouter::Subscription, to
+             *  xo-reflect.
+             *  Called once, by websock_reflect_types() (websock_reflect.hpp).
+             *  @p table is not used yet: xo-reflect's registration uses its
+             *  process-wide table
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             using PrintJson = xo::json::PrintJson;
 
         public:

@@ -4,11 +4,13 @@
  */
 
 #include "DynamicEndpoint.hpp"
+#include <xo/reflect/StructReflector.hpp>
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
 
 namespace xo {
+    using xo::reflect::StructReflector;
     using xo::web::Alist;
     using xo::fn::CallbackId;
 
@@ -137,6 +139,14 @@ namespace xo {
 
             this->receiver_->receive(ws_sink, msg);
         } /*receive*/
+        void
+        DynamicEndpoint::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            /* no members yet: a member is added as a printer opts in to
+             * show it (.xo-backlog/xo-websock/issues/13)
+             */
+            StructReflector<DynamicEndpoint> sr;
+        } /*reflect_self*/
     } /*namespace web*/
 } /*namespace xo*/
 

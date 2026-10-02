@@ -7,10 +7,12 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* xtag(..) */
+#include <xo/reflect/StructReflector.hpp>
 #include <algorithm>
 #include <stdexcept>
 
 namespace xo {
+    using xo::reflect::StructReflector;
     namespace web {
         using xo::pp::scope;
         using xo::pp::xtag;
@@ -237,6 +239,14 @@ namespace xo {
 
             return removed;
         } /*erase_in*/
+        void
+        UrlRouter::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            /* no members yet: a member is added as a printer opts in to
+             * show it (.xo-backlog/xo-websock/issues/13)
+             */
+            StructReflector<UrlRouter> sr;
+        } /*reflect_self*/
     } /*namespace web*/
 } /*namespace xo*/
 

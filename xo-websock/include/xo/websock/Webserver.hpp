@@ -15,6 +15,8 @@
 #include <vector>
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     class WebsockAppcx;
 
     namespace web {
@@ -27,6 +29,13 @@ namespace xo {
 
         class WebserverConfig {
         public:
+            /** describe WebserverConfig to xo-reflect.
+             *  Called once, by websock_reflect_types() (websock_reflect.hpp).
+             *  @p table is not used yet: xo-reflect's registration uses its
+             *  process-wide table
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             WebserverConfig() = default;
             WebserverConfig(std::int32_t port,
                             bool tls_flag,
@@ -96,6 +105,14 @@ namespace xo {
             using PrintJson = xo::json::PrintJson;
 
         public:
+            /** Reflect Webserver implementation types coming from
+             *  this TU, using process-wide @p table.
+             *  The implementation types defined with it (WebserverImpl,
+             *  WebsocketSessionRecd, WsSessionSender<WebserverImpl>,
+             *  WsSessionTable<WebsocketSessionRecd>).
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             /* note: although webserver allows creating multiple instances,
              *       the underlying libwebsocket library is not advertised to be
              *       threadsafe

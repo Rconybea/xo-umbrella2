@@ -12,6 +12,7 @@
 #include <string>
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
     namespace reflect { class TaggedPtr; }
 
     namespace web {
@@ -25,6 +26,13 @@ namespace xo {
          **/
         class WebsocketSink : public ref::Displayable {
         public:
+            /** describe WebsocketSink, and WebsocketSinkImpl, to xo-reflect.
+             *  Called once, by websock_reflect_types() (websock_reflect.hpp).
+             *  @p table is not used yet: xo-reflect's registration uses its
+             *  process-wide table
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             using PrintJson = xo::json::PrintJson;
             using TaggedPtr = xo::reflect::TaggedPtr;
 

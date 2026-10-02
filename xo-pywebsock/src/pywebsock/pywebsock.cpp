@@ -4,6 +4,7 @@
 #include <xo/websock/Webserver.hpp>
 #include <xo/websock/cx/WebsockAppcx.hpp>
 #include <xo/pyprintjson/pyprintjson.hpp>
+#include <xo/pyreflect/pyreflect.hpp>
 #include <xo/printjson/cx/PrintJsonAppcx.hpp>
 #include <xo/pywebutil/pywebutil.hpp>
 #include <xo/pyutil/pyutil.hpp>
@@ -28,6 +29,7 @@ namespace xo {
              **/
             std::unique_ptr<WebsockAppcx>
             configure_once(const WebsockConfig & cfg,
+                           const ReflectAppcx & reflect_appcx,
                            const PrintJsonAppcx & printjson_appcx)
             {
                 /** true once this function has run **/
@@ -39,7 +41,7 @@ namespace xo {
                          " the json printer table is process-wide");
                 }
 
-                auto retval = std::make_unique<WebsockAppcx>(cfg, printjson_appcx);
+                auto retval = std::make_unique<WebsockAppcx>(cfg, reflect_appcx, printjson_appcx);
 
                 s_configured = true;
 
@@ -53,6 +55,8 @@ namespace xo {
              * xo.printjson; pybind11 permits one registration per c++ type
              */
             XO_PYPRINTJSON_IMPORT_MODULE();
+            /* ... and its first, ReflectAppcx, by xo.reflect */
+            XO_PYREFLECT_IMPORT_MODULE();
 
             /* module docstring */
             m.doc() = "pybind11 plugin for xo.websock";
@@ -96,12 +100,11 @@ namespace xo {
 
             m.def("configure", &configure_once,
                   py::arg("config"),
+                  py::arg("reflect_appcx"),
                   py::arg("printjson_appcx"),
                   py::keep_alive<0, 2>(),
-                  "establish an xo-websock context, and return it: installs"
-                  " xo-websock's json printers.  Takes the context returned by"
-                  " xo.printjson.configure(); Webservers are made from the"
-                  " result.  Once per process.");
+                  py::keep_alive<0, 3>(),
+                  "establish process-wide context for the xo-websock subsystem.");
 
             py::class_<Webserver, rp<Webserver>>(m, "Webserver")
                 /* keep_alive: the server's PrintJson came from the context */

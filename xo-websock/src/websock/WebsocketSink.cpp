@@ -14,9 +14,11 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* ss << xtag(..) */
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <xo/reflect/StructReflector.hpp>
 
 namespace xo {
     using xo::json::PrintJson;
+    using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
     using xo::reflect::type_name;
     using xo::pp::quot;
@@ -170,6 +172,15 @@ namespace xo {
         {
             return new WebsocketSinkImpl(std::move(sender), pjson, stream_name, sub_id);
         } /*make*/
+        void
+        WebsocketSink::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            /* no members yet: a member is added as a printer opts in to
+             * show it (.xo-backlog/xo-websock/issues/13)
+             */
+            { StructReflector<WebsocketSink> sr; }
+            { StructReflector<WebsocketSinkImpl> sr; }
+        } /*reflect_self*/
     } /*namespace web*/
 } /*namespace xo*/
 

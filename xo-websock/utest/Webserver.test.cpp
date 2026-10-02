@@ -144,6 +144,42 @@ namespace xo {
             REQUIRE(v == std::vector<std::string>{"/status"});
         }
 
+        TEST_CASE("websock-types-are-reflected", "[websock][reflect]")
+        {
+            /* the context describes xo-websock's types to xo-reflect
+             * (websock_reflect_types), including ones private to a .cpp
+             */
+            rp<Webserver> websrv = make_idle_server();
+
+            for (char const * name : {"xo::web::Webserver",
+                                      "xo::web::WebserverImpl",
+                                      "xo::web::WebserverConfig",
+                                      "xo::web::WebsocketSessionRecd",
+                                      "xo::web::WsSessionSender<xo::web::WebserverImpl>",
+                                      "xo::web::WsSessionTable<xo::web::WebsocketSessionRecd>",
+                                      "xo::web::WebsocketSink",
+                                      "xo::web::WebsocketSinkImpl",
+                                      "xo::web::WsSessionRouter",
+                                      "xo::web::WsSessionRouter::Subscription",
+                                      "xo::web::DynamicEndpoint",
+                                      "xo::web::UrlRouter"})
+            {
+                INFO(name);
+                auto td = xo::reflect::TypeDescrBase::lookup_by_name(name);
+
+                REQUIRE(td);
+                REQUIRE(td->is_struct());
+                REQUIRE(td->complete_flag());
+            }
+
+            /* SelfTaggingDisplayable: from a Webserver*, the actual type */
+            Webserver * w = websrv.get();
+            auto most = Reflect::require<Webserver>()->most_derived_self_tp(w);
+
+            REQUIRE(most.td()->canonical_name() == "xo::web::WebserverImpl");
+            REQUIRE(most.address() == static_cast<void *>(w));
+        }
+
         TEST_CASE("webserver-prints-as-json", "[websock][Webserver][json]")
         {
             HoldsServer::reflect_self();

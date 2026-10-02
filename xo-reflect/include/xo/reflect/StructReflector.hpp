@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Reflect.hpp"
+#include "SelfTaggingDisplayable.hpp"
 #include "TypeDescr.hpp"
 #include "struct/StructMember.hpp"
 #include "struct/StructTdx.hpp"
@@ -71,7 +72,10 @@ namespace xo {
                 if(!s_reflected_flag) {
                     s_reflected_flag = true;
 
-                    constexpr bool have_to_self_tp = std::is_base_of_v<SelfTagging, StructT>;
+                    /* Base types providing virtual self_tp() -> TaggedPtr */
+                    constexpr bool have_to_self_tp
+                        = (std::is_base_of_v<SelfTagging, StructT>
+                           || std::is_base_of_v<SelfTaggingDisplayable, StructT>);
 
                     /* if self-tagging,  can use .self_tp() to get most-derived tagged pointer */
                     auto to_self_tp_fn
