@@ -437,6 +437,7 @@ function show_all_children(on) {
 }
 
 const row_h = 18;          // a member row
+const row_indent = 14;     // a nested member row, further right per level
 const in_port_x = 24;      // a member edge enters a box this far from its left
 
 /** object id -> the box drawing it this draw: a box's own object, or an
@@ -705,7 +706,7 @@ async function draw(event) {
               .join("text");
 
         rows.attr("class", r => `row ${r.cls}` + (r.expandable ? " expandable" : ""))
-            .attr("x", r => 12 + 14 * r.depth)
+            .attr("x", r => 12 + row_indent * r.depth)
             .on("mouseenter", (ev, r) => highlight_ref([r.key], true))
             .on("mouseleave", (ev, r) => highlight_ref([r.key], false));
 
@@ -741,7 +742,7 @@ async function draw(event) {
                 t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             }
 
-            t.append("tspan").attr("class", "mval").text(" = ");
+            t.append("tspan").attr("class", "mval meq").text(" = ");
             append_ref_toggle(t, r);
             t.append("tspan").attr("class", "mval").text(r.val);
         });
@@ -807,9 +808,25 @@ async function draw(event) {
         g.select(":scope > text.label").attr("y", d.small ? 20 : 25);
 
         d.w = g.select(":scope > text.label").node().getComputedTextLength() + 24;
-        g.selectAll(":scope > g.rows > text.row").each(function (r, i) {
+        const texts = g.selectAll(":scope > g.rows > text.row");
+        texts.each(function (r, i) {
             d3.select(this).attr("y", head_h + i * row_h + 13);
-            d.w = Math.max(d.w, 12 + 14 * r.depth + this.getComputedTextLength() + 16);
+        });
+
+        // rows align on their " = ", stepping in with nesting as the names
+        // do: a row at depth n puts it at x0 + row_indent * n, x0 the least
+        // that clears every row's name
+        let x0 = null;
+        texts.each(function (r) {
+            const x = eq_x(this);
+            if (x !== null)
+                x0 = Math.max(x0 ?? x, x - row_indent * r.depth);
+        });
+        texts.each(function (r) {
+            if (x0 !== null)
+                d3.select(this).select(":scope > tspan.meq").attr("x", x0 + row_indent * r.depth);
+            const b = this.getBBox();
+            d.w = Math.max(d.w, b.x + b.width + 16);
         });
 
         d.head_h = head_h;
@@ -1016,6 +1033,22 @@ function menu_items(d) {
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _canonical_type_ reported"],
         ["Copy id", () => copy_text(d.obj.id), (d.obj && d.obj.id) ? null : "no id"],
     ];
+}
+
+/** the x at which row text @p text's " = " starts, as laid out without
+ *  alignment; null if it has none
+ **/
+function eq_x(text) {
+    let n = 0;   // characters before " = "
+    for (const ts of text.querySelectorAll(":scope > tspan")) {
+        if (ts.classList.contains("meq"))
+            return text.getStartPositionOfChar(n).x;
+        // its own text, not a <title> tooltip's
+        for (const c of ts.childNodes)
+            if (c.nodeType === Node.TEXT_NODE)
+                n += c.nodeValue.length;
+    }
+    return null;
 }
 
 /** member row @p r's tooltip: its type, metatype, canonical type and
