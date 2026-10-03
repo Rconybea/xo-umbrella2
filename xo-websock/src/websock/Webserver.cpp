@@ -1032,32 +1032,46 @@ namespace xo {
                 });
         } /*visit_sessions*/
 
+        /** @brief a session's sender: owned (held) by the session record,
+         *  its router, and every sink made there.  Printed in full under
+         *  its session; a sink will show it as a ref (5d).  Not in the
+         *  anonymous namespace: WsSessionSender befriends it by name, for
+         *  "_members_"
+         **/
+        class JsonPrinter_WsSessionSender : public JsonPrinter {
+        public:
+            JsonPrinter_WsSessionSender(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                WsSessionSenderImpl const * x
+                    = this->check_recover_native<WsSessionSenderImpl>(tp, p_os);
+
+                if (!x)
+                    return;
+
+                *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
+                      << ", " << quot("_type_") << ": " << quot(type_name<WsSessionSenderImpl>())
+                      << ", " << quot("id") << ": " << quot(json_id(x))
+                      /* session record + router + one per live sink */
+                      << ", " << quot("refcount") << ": " << x->reference_counter()
+                      << ", " << quot("session_id") << ": " << x->session_id()
+                      << ", " << quot("open") << ": " << (x->is_open() ? "true" : "false");
+
+                /* chosen C++ members (.xo-backlog/xo-websock/issues/13).  The
+                 * server is printed in full elsewhere: a ref.  open_ an atomic
+                 * -- its value, under its declared type
+                 */
+                JsonMembers mem(this->pjson(), p_os);
+                mem.member_ref<WebserverImpl *>("target_", x->target_)
+                    .member("session_id_", x->session_id_)
+                    .member_as<std::atomic<bool>>("open_", x->open_.load());
+                mem.end();
+
+                *p_os << "}";
+            }
+        };
+
         namespace {
-            /** @brief a session's sender: owned (held) by the session record,
-             *  its router, and every sink made there.  Printed in full under
-             *  its session; a sink will show it as a ref (5d)
-             **/
-            class JsonPrinter_WsSessionSender : public JsonPrinter {
-            public:
-                JsonPrinter_WsSessionSender(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                    WsSessionSenderImpl const * x
-                        = this->check_recover_native<WsSessionSenderImpl>(tp, p_os);
-
-                    if (!x)
-                        return;
-
-                    *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
-                          << ", " << quot("_type_") << ": " << quot(type_name<WsSessionSenderImpl>())
-                          << ", " << quot("id") << ": " << quot(json_id(x))
-                          /* session record + router + one per live sink */
-                          << ", " << quot("refcount") << ": " << x->reference_counter()
-                          << ", " << quot("session_id") << ": " << x->session_id()
-                          << ", " << quot("open") << ": " << (x->is_open() ? "true" : "false")
-                          << "}";
-                }
-            };
 
             /** @brief a live session: its id, its sender (in full), and its
              *  subscriptions (in full, each with its sink)
