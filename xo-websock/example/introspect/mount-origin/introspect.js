@@ -481,6 +481,11 @@ const in_port_x = 24;      // a member edge enters a box this far from its left
  **/
 let box_of_id = new Map();
 
+/** ids of the objects that have a box of their own this draw (as opposed to
+ *  objects printed nested inside one)
+ **/
+let own_box_ids = new Set();
+
 /** ids of the boxes drawn this draw **/
 let shown_box_ids = new Set();
 
@@ -565,8 +570,11 @@ function member_rows(members, depth, path, out) {
                 // a box it refers to, which can be shown / hidden from here
                 const tb = box_of_id.get(v.ref);
                 row.ref_box = (tb !== undefined && tb !== "server") ? tb : null;
-                val = !box_of_id.has(v.ref) ? "→ (not drawn)"
-                    : shown_box_ids.has(box_of_id.get(v.ref)) ? "→" : "→ (hidden)";
+                // "(→)" after its ▸ / ▾: this triangle shows another box,
+                // not rows in place.  What it refers to is in the tooltip
+                val = !box_of_id.has(v.ref) ? "(→ not drawn)"
+                    : row.ref_box ? " (→)" : "(→)";
+                row.ref_tip = ref_tooltip(v.ref);
             } else if (is_ref_map(v)) {
                 // a map to objects printed elsewhere: a row per key
                 row.expandable = true;
@@ -575,7 +583,9 @@ function member_rows(members, depth, path, out) {
             } else if (typeof v === "object") {
                 row.expandable = has_members(v);
                 row.open = row.expandable && expanded.has(key);
-                val = (row.expandable ? (row.open ? "▾ " : "▸ ") : "") + (v._name_ || "{…}");
+                // opens in place: just the triangle (its type is on the
+                // name's tooltip); one that cannot open shows its name
+                val = row.expandable ? (row.open ? "▾" : "▸") : (v._name_ || "{…}");
             } else {
                 val = JSON.stringify(v);
                 if (val.length > 40)
@@ -663,6 +673,7 @@ async function draw(event) {
 
     // every box -- shown or not -- for joining refs; only shown ones drawn
     box_of_id = new Map(all.nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
+    own_box_ids = new Set(box_of_id.keys());
     for (const d of all.nodes)
         if (d.obj)
             note_nested(d.obj._members_, d.id);
@@ -792,7 +803,9 @@ async function draw(event) {
 
             t.append("tspan").attr("class", "mval meq").text(" = ");
             append_ref_toggle(t, r);
-            t.append("tspan").attr("class", "mval").text(r.val);
+            const mv = t.append("tspan").attr("class", "mval").text(r.val);
+            if (r.ref_tip)
+                mv.append("title").text(r.ref_tip);
         });
 
         rows.on("click", (ev, r) => {
@@ -1099,6 +1112,19 @@ function eq_x(text) {
                 n += c.nodeValue.length;
     }
     return null;
+}
+
+/** what object @p id (a ref's target) is, for its row's tooltip: the box
+ *  drawing it, or the box it is printed inside; drawn or not
+ **/
+function ref_tooltip(id) {
+    const b = box_of_id.get(id);
+    if (b === undefined)
+        return `refers to ${id}: no box draws it`;
+
+    const where = own_box_ids.has(id) ? `refers to ${box_label.get(b) || b}`
+          : `refers to an object printed inside ${box_label.get(b) || b}`;
+    return `${where}${shown_box_ids.has(b) ? "" : " (hidden)"}\n${id}`;
 }
 
 /** member row @p r's tooltip: its type, metatype, canonical type and
