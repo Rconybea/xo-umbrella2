@@ -5,7 +5,7 @@
 //   <- {"cmd": "subscribed", "stream": "/introspect", "sub_id": N}
 //   -> {"cmd": "send", "sub_id": N, "msg": "refresh"}
 //   <- {"stream": "/introspect", "sub_id": N, "seq": k,
-//       "event": {"server": <Webserver json>, "app_holds": [sink id, ..]}}
+//       "event": {"server": <Webserver json>}}
 //
 // Webserver json: {id, refcount, listen_port, state,
 //            endpoints: [{id, refcount, kind, stem, pattern, has_receive}],
@@ -19,9 +19,6 @@
 // Each object is printed in full once; elsewhere as {ref: id}.  The page
 // joins refs to objects by id.
 //
-// app_holds: the ids of the sinks the application holds (the example's
-// ticker), for refcount accounting only -- not drawn.
-//
 // Source links (.xo-backlog/xo-websock/issues/12): every object carries
 // _canonical_type_, its C++ type's canonical name (and _short_type_, for
 // display: xo-reflect's short name).  /dyn/types maps a type -- template
@@ -34,12 +31,6 @@
 // its json, copy its type or id.  Only boxes take over right-click; elsewhere
 // the browser's menu is untouched (in Firefox, Shift+right-click always gets
 // the browser's).
-//
-// Refcount accounting: each refcount is compared with the holds the page can
-// see.  An endpoint is held by the router's map + each subscription to it; a
-// sender by its session record + router + each sink; a sink by the router's
-// slot + each application hold (app_holds).  More than that is flagged: a
-// hold the snapshot does not show.
 
 "use strict";
 
@@ -170,7 +161,7 @@ function layout(event) {
     for (const ep of (snap.endpoints || [])) {
         const id = `${ep.kind}:${ep.stem}`;
         endpoint_node[ep.id] = id;
-        nodes.push({id: id, kind: ep.kind, label: ep.pattern, refcount: ep.refcount,
+        nodes.push({id: id, kind: ep.kind, label: ep.pattern,
                     type: ep._canonical_type_, obj: ep});
         edge("server", id, "link");
     }
@@ -186,7 +177,7 @@ function layout(event) {
         if (s.sender) {
             const snd = `${id}:sender`;
             nodes.push({id: snd, kind: "sender", label: "sender",
-                        refcount: s.sender.refcount, type: s.sender._canonical_type_, obj: s.sender,
+                        type: s.sender._canonical_type_, obj: s.sender,
                         small: true});
             edge(id, snd, "owns");
         }
@@ -199,7 +190,6 @@ function layout(event) {
 
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
-                        refcount: sink.refcount,   // the sink's: slot + its source
                         type: sub._canonical_type_, obj: sub, small: true});
             edge(id, sid, "owns");
 
@@ -210,29 +200,6 @@ function layout(event) {
         }
     }
 
-    // refcount accounting: the holds this snapshot shows, per object
-    const expect = {};   // node id -> expected refcount
-    const bump = (k, n) => { expect[k] = (expect[k] || 0) + n; };
-    for (const ep of (snap.endpoints || []))
-        bump(endpoint_node[ep.id], 1);                       // router's map
-    const app_refs = {};
-    for (const id of (event.app_holds || []))
-        app_refs[id] = (app_refs[id] || 0) + 1;
-    for (const s of (snap.sessions || [])) {
-        const sid = `session:${s.session_id}`;
-        bump(`${sid}:sender`, 2);                            // record + router
-        for (const sub of (s.subscriptions || [])) {
-            const subn = `${sid}:sub:${sub.sub_id}`;
-            if (sub.endpoint) bump(endpoint_node[sub.endpoint.ref], 1);
-            if (sub.sink) {
-                bump(subn, 1 + (app_refs[sub.sink.id] || 0)); // slot + app
-                if (sub.sink.sender && s.sender && sub.sink.sender.ref === s.sender.id)
-                    bump(`${sid}:sender`, 1);
-            }
-        }
-    }
-    for (const n of nodes)
-        if (n.refcount !== undefined) n.expected = expect[n.id] || 0;
 
     return {nodes, edges};
 }
@@ -784,7 +751,6 @@ async function draw_aux(event) {
     }
     const box_h = 40;
     const pad = 20;            // around the whole graph
-    const badge_r = 10;        // the refcount badge pokes this far outside a box
 
     const svg = d3.select("#graph");
 
@@ -812,10 +778,6 @@ async function draw_aux(event) {
             g.append("g").attr("class", "rows");
             // children toggle, left of the box (only where it owns any)
             g.append("text").attr("class", "kids").attr("text-anchor", "end").attr("x", -4);
-            // refcount badge, top-right corner (only where known)
-            const b = g.append("g").attr("class", "badge");
-            b.append("circle").attr("r", badge_r);
-            b.append("text").attr("text-anchor", "middle").attr("dy", "0.35em");
             return g;
         },
         update => update,
@@ -1023,18 +985,6 @@ async function draw_aux(event) {
               : sel.transition("size").duration(t_move);
         animate(g.select("rect")).attr("width", d.w).attr("height", d.h);
 
-        // refcount: how many rp<> hold this object; red if the snapshot
-        // does not account for every hold
-        const extra = (d.refcount === undefined) ? 0 : d.refcount - d.expected;
-        const badge = g.select("g.badge")
-            .attr("display", d.refcount === undefined ? "none" : null)
-            .classed("unaccounted", extra !== 0);
-        animate(badge).attr("transform", `translate(${d.w},0)`);
-        badge.select("text").text(d.refcount);
-        badge.selectAll("title").data([0]).join("title")
-            .text(extra === 0
-                  ? `refcount ${d.refcount}: every hold shown`
-                  : `refcount ${d.refcount}, ${d.expected} shown: ${extra} hold(s) not in this snapshot`);
     });
 
     // a ref member's edge: from its box to the box drawing the referenced
@@ -1055,7 +1005,7 @@ async function draw_aux(event) {
     // boxes a member edge arrives at: each gets one entry port
     const member_in = new Set(edges.filter(e => e.kind === "member").map(e => e.target));
 
-    // 2. ELK: layered, top to bottom; spacing leaves room for the badges
+    // 2. ELK: layered, top to bottom
     const graph = {
         id: "root",
         layoutOptions: {
@@ -1108,11 +1058,11 @@ async function draw_aux(event) {
 
     // 3. place the boxes; keep the anchor box where it was on screen
     const at = new Map(laid.children.map(c => [c.id, c]));
-    const scroll_by = anchor_shift(anchor, at, pad, badge_r);
+    const scroll_by = anchor_shift(anchor, at, pad);
     for (const d of nodes) {
         const c = at.get(d.id);
         d.x = c.x + pad + shift.x;
-        d.y = c.y + pad + badge_r + shift.y;
+        d.y = c.y + pad + shift.y;
     }
     // boxes already on screen slide there; new ones appear there, then fade in
     const arriving = node.filter(function () { return this.__arriving; });
@@ -1139,8 +1089,8 @@ async function draw_aux(event) {
     if (scroll_by.y > 0)
         svg_min.h = Math.max(svg_min.h, to.y + window.innerHeight - (r.top + window.scrollY));
     // grow now, shrink only once things have moved -- nothing clipped mid-move
-    const w = Math.max(900, laid.width + 2 * pad + badge_r + shift.x, svg_min.w);
-    const h = Math.max(laid.height + 2 * pad + badge_r + shift.y, svg_min.h);
+    const w = Math.max(900, laid.width + 2 * pad + shift.x, svg_min.w);
+    const h = Math.max(laid.height + 2 * pad + shift.y, svg_min.h);
     svg.attr("width", Math.max(w, +svg.attr("width") || 0))
        .attr("height", Math.max(h, +svg.attr("height") || 0));
     setTimeout(() => { if (seq === draw_seq) svg.attr("width", w).attr("height", h); },
@@ -1169,7 +1119,7 @@ async function draw_aux(event) {
         .transition("fade").delay(t_move).duration(t_show).style("opacity", 1);
     paths
         .attr("class", d => `edge ${d.kind}`)
-        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad + shift.x},${p.y + pad + badge_r + shift.y}`).join(" "))
+        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad + shift.x},${p.y + pad + shift.y}`).join(" "))
         // a member edge: hovering it lights its row too
         .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, true))
         .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, false))
@@ -1308,13 +1258,13 @@ function eq_x(text) {
  *  means shift = max(0, need), scroll change = shift - need, per axis.
  *  No anchor, or one new to the drawing: shift unchanged, no scroll
  **/
-function anchor_shift(anchor, at, pad, badge_r) {
+function anchor_shift(anchor, at, pad) {
     const was = anchor !== null && drawn_at.get(anchor);
     const c = anchor !== null && at.get(anchor);
     if (!was || !c)
         return {x: 0, y: 0};
 
-    const need = {x: was.x - (c.x + pad), y: was.y - (c.y + pad + badge_r)};
+    const need = {x: was.x - (c.x + pad), y: was.y - (c.y + pad)};
     shift = {x: Math.max(0, need.x), y: Math.max(0, need.y)};
     return {x: shift.x - need.x, y: shift.y - need.y};
 }

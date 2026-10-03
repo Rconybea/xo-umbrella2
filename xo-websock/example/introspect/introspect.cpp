@@ -62,7 +62,6 @@
 #include <xo/reflect/cx/ReflectAppcx.hpp>
 #include <xo/websock/WebsocketSink.hpp>
 #include <xo/printjson/JsonPrinter.hpp>
-#include <xo/printjson/JsonMembers.hpp>   /* json::json_id */
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
@@ -131,17 +130,6 @@ namespace xo {
                 sink_map_.erase(id.id());
             }
 
-            /** call @p fn on each sink held, under the ticker's lock -- for
-             *  introspection; @p fn must not send
-             **/
-            template <typename Fn>
-            void visit_sinks(Fn && fn) const {
-                std::lock_guard<std::mutex> lock(mutex_);
-
-                for (auto const & ix : sink_map_)
-                    fn(*(ix.second.get()));
-            }
-
             /* one tick to every subscriber.  Sends with the lock RELEASED:
              * a send enters the server, which may be running subscribe on
              * its own thread, waiting for this lock
@@ -170,11 +158,8 @@ namespace xo {
             std::int64_t n_tick_ = 0;
         };
 
-        /** what the page is told: the server itself; and, for refcount
-         *  accounting only, the ids of the sinks the application holds (the
-         *  ticker's) -- holds the server's json cannot show.  PrintJson
-         *  follows the server pointer to its printer (installed by
-         *  WebsockAppcx)
+        /** what the page is told: the server itself.  PrintJson follows
+         *  the server pointer to its printer (installed by WebsockAppcx)
          **/
         struct IntrospectSnapshot {
             static void reflect_self() {
@@ -182,13 +167,10 @@ namespace xo {
 
                 if (sr.is_incomplete()) {
                     REFLECT_MEMBER(sr, server);
-                    REFLECT_MEMBER(sr, app_holds);
                 }
             }
 
             Webserver * server_ = nullptr;
-            /** one id per hold, the same string as the sink's own "id" **/
-            std::vector<std::string> app_holds_;
         };
 
         /** answers {"cmd": "send", "msg": "refresh"} with a snapshot, on the
@@ -196,8 +178,8 @@ namespace xo {
          **/
         class IntrospectReceiver : public StreamReceiver {
         public:
-            IntrospectReceiver(Webserver * websrv, Ticker * ticker)
-                : websrv_{websrv}, ticker_{ticker} {}
+            explicit IntrospectReceiver(Webserver * websrv)
+                : websrv_{websrv} {}
 
             void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
                 if (!msg.isString() || msg.asString() != "refresh")
@@ -205,18 +187,13 @@ namespace xo {
 
                 IntrospectSnapshot snap;
                 snap.server_ = websrv_;
-                /* by most-derived address: the id the sink's printer writes */
-                ticker_->visit_sinks([&snap](WebsocketSink const & s) {
-                        snap.app_holds_.push_back(xo::json::json_id(dynamic_cast<void const *>(&s)));
-                    });
 
                 sink->notify_ev_tp(Reflect::make_tp(&snap));
             }
 
         private:
-            /* borrowed: both outlive the server's use of this receiver */
+            /* borrowed: outlives the server's use of this receiver */
             Webserver * websrv_ = nullptr;
-            Ticker * ticker_ = nullptr;
         };
 
         /** where each subsystem's type -> source map is (xo-type-src-map,
@@ -551,7 +528,7 @@ main(int argc, char * argv[])
                              /* nothing to attach: every frame is a reply */
                              [](rp<WebsocketSink> const &) { return CallbackId(1); },
                              [](CallbackId) {},
-                             new IntrospectReceiver(websrv.get(), ticker.get())));
+                             new IntrospectReceiver(websrv.get())));
 
     /* demo endpoints: something besides /introspect to look at.
      * http endpoints are served under the server's dynamic mount, /dyn --
