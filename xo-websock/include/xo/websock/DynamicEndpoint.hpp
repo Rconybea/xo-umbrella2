@@ -127,6 +127,10 @@ namespace xo {
                                      rp<StreamReceiver> receiver);
 
         private:
+            /* reads private members, for "_members_" (websock_json.cpp) */
+            friend class JsonPrinter_DynamicEndpoint;
+
+        private:
             /* http or stream: says which of the functions below are set */
             EndpointKind kind_;
             /* pattern for this endpoint

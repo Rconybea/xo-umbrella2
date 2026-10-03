@@ -299,6 +299,37 @@ namespace xo {
             REQUIRE(eps[0]["kind"].asString() == "http");
             REQUIRE(eps[0]["pattern"].asString() == "/status");
             REQUIRE(eps[0]["has_receive"].asBool() == false);
+
+            /* each endpoint's chosen C++ members (.xo-backlog/xo-websock/issues/13) */
+            {
+                Json::Value const & m = eps[0]["_members_"];   /* http /status */
+
+                std::vector<std::string> names;
+                for (Json::Value const & x : m)
+                    names.push_back(x["_name_"].asString());
+
+                REQUIRE(names == std::vector<std::string>{"kind_", "uri_pattern_", "uri_regex_",
+                                                          "var_v_", "http_handler_", "subscribe_fn_",
+                                                          "unsubscribe_fn_", "receiver_"});
+                REQUIRE(m[0]["_value_"].asString() == "http");
+                REQUIRE(m[1]["_value_"].asString() == "/status");
+                REQUIRE(m[2]["_value_"].asString() == "0 captures");
+                REQUIRE(m[3]["_value_"].isArray());
+                REQUIRE(m[3]["_value_"].empty());
+                REQUIRE(m[4]["_value_"].asString() == "set");
+                REQUIRE(m[5]["_value_"].asString() == "empty");
+                REQUIRE(m[7]["_value_"].isNull());
+
+                Json::Value const & s = eps[1]["_members_"];    /* the stream endpoint */
+                REQUIRE(s[0]["_value_"].asString() == "stream");
+                REQUIRE(s[1]["_value_"].asString() == "/fw/${id}");
+                REQUIRE(s[2]["_value_"].asString() == "1 captures");
+                REQUIRE(s[3]["_value_"].size() == 1);
+                REQUIRE(s[3]["_value_"][0].asString() == "id");
+                REQUIRE(s[4]["_value_"].asString() == "empty");
+                REQUIRE(s[5]["_value_"].asString() == "set");
+                REQUIRE(s[6]["_value_"].asString() == "set");
+            }
             REQUIRE(eps[1]["kind"].asString() == "stream");
             REQUIRE(eps[1]["stem"].asString() == "/fw/");
             REQUIRE(eps[1]["pattern"].asString() == "/fw/${id}");

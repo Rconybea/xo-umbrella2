@@ -26,6 +26,7 @@
 #include "WebsocketSink.hpp"
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
+#include <xo/printjson/JsonMembers.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
@@ -36,42 +37,67 @@
 namespace xo {
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
+    using xo::json::JsonMembers;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
     using xo::reflect::type_name;
     using xo::pp::quot;
 
     namespace web {
+        /** @brief a registered endpoint.  Printed in full where it is
+         *  owned -- the Webserver's endpoint list; a subscription shows
+         *  it as a ref by id.  Not in the anonymous namespace:
+         *  DynamicEndpoint's header befriends it by name, for "_members_"
+         **/
+        class JsonPrinter_DynamicEndpoint : public JsonPrinter {
+        public:
+            JsonPrinter_DynamicEndpoint(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                DynamicEndpoint const * ep = this->check_recover_native<DynamicEndpoint>(tp, p_os);
+
+                if (!ep)
+                    return;
+
+                *p_os << "{" << quot("_name_") << ": " << quot("DynamicEndpoint")
+                      << ", " << quot("_type_") << ": " << quot(type_name<DynamicEndpoint>())
+                      << ", " << quot("id") << ": " << quot(json_id(ep))
+                      /* held by the router's map, plus one per live
+                       * subscription served (each holds it by rp<>)
+                       */
+                      << ", " << quot("refcount") << ": " << ep->reference_counter()
+                      << ", " << quot("kind") << ": " << quot(endpoint_kind_descr(ep->kind()))
+                      << ", " << quot("stem") << ": " << quot(ep->stem())
+                      << ", " << quot("pattern") << ": " << quot(ep->uri_pattern())
+                      << ", " << quot("has_receive") << ": " << (ep->has_receive() ? "true" : "false");
+
+                /* chosen C++ members (.xo-backlog/xo-websock/issues/13).
+                 * Not printable as themselves -- the enum, the compiled
+                 * regex, the std::functions -- so their names, capture
+                 * count, presence, under their declared types.  The
+                 * receiver is printed nowhere: a ref
+                 */
+                JsonMembers mem(this->pjson(), p_os);
+                mem.member_as<EndpointKind>("kind_", std::string(endpoint_kind_descr(ep->kind_)))
+                    .member("uri_pattern_", ep->uri_pattern_)
+                    .member_as<std::regex>("uri_regex_",
+                                           std::to_string(ep->uri_regex_.mark_count()) + " captures")
+                    .member("var_v_", ep->var_v_)
+                    .member_as<HttpHandler>("http_handler_",
+                                            std::string(ep->http_handler_ ? "set" : "empty"))
+                    .member_as<StreamSubscribeFn>("subscribe_fn_",
+                                                  std::string(ep->subscribe_fn_ ? "set" : "empty"))
+                    .member_as<StreamUnsubscribeFn>("unsubscribe_fn_",
+                                                    std::string(ep->unsubscribe_fn_ ? "set" : "empty"))
+                    .member_ref<rp<StreamReceiver>>("receiver_",
+                                                    dynamic_cast<void const *>(ep->receiver_.get()));
+                mem.end();
+
+                *p_os << "}";
+            }
+        }; /*JsonPrinter_DynamicEndpoint*/
+
         namespace {
-            /** @brief a registered endpoint.  Printed in full where it is
-             *  owned -- the Webserver's endpoint list; a subscription shows
-             *  it as a ref by id
-             **/
-            class JsonPrinter_DynamicEndpoint : public JsonPrinter {
-            public:
-                JsonPrinter_DynamicEndpoint(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                    DynamicEndpoint const * ep = this->check_recover_native<DynamicEndpoint>(tp, p_os);
-
-                    if (!ep)
-                        return;
-
-                    *p_os << "{" << quot("_name_") << ": " << quot("DynamicEndpoint")
-                          << ", " << quot("_type_") << ": " << quot(type_name<DynamicEndpoint>())
-                          << ", " << quot("id") << ": " << quot(json_id(ep))
-                          /* held by the router's map, plus one per live
-                           * subscription served (each holds it by rp<>)
-                           */
-                          << ", " << quot("refcount") << ": " << ep->reference_counter()
-                          << ", " << quot("kind") << ": " << quot(endpoint_kind_descr(ep->kind()))
-                          << ", " << quot("stem") << ": " << quot(ep->stem())
-                          << ", " << quot("pattern") << ": " << quot(ep->uri_pattern())
-                          << ", " << quot("has_receive") << ": " << (ep->has_receive() ? "true" : "false")
-                          << "}";
-                }
-            }; /*JsonPrinter_DynamicEndpoint*/
-
             /** @brief a sink, keyed on the abstract type: delegates to its
              *  virtual print_json, so each implementation says what it holds
              **/

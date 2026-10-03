@@ -359,7 +359,16 @@ function member_rows(members, depth, path, out) {
                 row.expandable = v.length > 0
                     && v.every(x => x === null || (typeof x === "object" && !Array.isArray(x)));
                 row.open = row.expandable && expanded.has(key);
-                val = (row.expandable ? (row.open ? "▾ " : "▸ ") : "") + `[${v.length}]`;
+                if (row.expandable) {
+                    val = (row.open ? "▾ " : "▸ ") + `[${v.length}]`;
+                } else if (v.every(x => x === null || typeof x !== "object")) {
+                    // scalars: the contents themselves, cut like a scalar
+                    val = JSON.stringify(v);
+                    if (val.length > 40)
+                        val = val.slice(0, 39) + "…";
+                } else {
+                    val = `[${v.length}]`;
+                }
             } else if (is_ref(v)) {
                 row.cls = "ref";
                 row.ref = v.ref;
