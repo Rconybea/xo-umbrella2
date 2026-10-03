@@ -242,22 +242,43 @@ const expanded = new Set();
 
 // ----- which boxes are shown (issue 13: showing / hiding parts of the graph) -
 //
-// Shown is a property of each box: the set `shown`.  A box is DRAWN if it is
-// in `shown`, or on the ownership path from the server to one that is -- so
-// the drawing stays connected; the Webserver box always.  A box's CHILDREN
-// are the boxes it owns ("link" / "owns" edges: server -> endpoints, sessions;
-// session -> sender, subscriptions).  Hiding a box hides its descendants too.
-// Edges with an undrawn end are dropped.  Default: only the Webserver box.
+// The state is a set of WANTED EDGES; the boxes drawn follow from it.
 //
-//   ▸n / ▾ beside a box   show all its children (n hidden) / hide them all;
-//                         also ArrowRight / ArrowLeft on a focused box
-//   menu "Hide"           this box and its descendants (not the Webserver)
-//   menu "Show ▸ <child>" one hidden child
-//   ▸ / ▾ on a ref row    show / hide the box it refers to
-//   Show all / Hide all
+// A box's REF EDGES: one per {"ref": id} anywhere in its members -- open or
+// not -- to the box drawing that object; keyed by the ref's row key
+// ("<box>/<member>/..").  A box's CHILDREN are the boxes it owns ("link" /
+// "owns": server -> endpoints, sessions; session -> sender, subscriptions);
+// the edge to a child is the owner's ref edge to it (e.g. session_map_["1"]
+// -> session 1), or failing one, the ownership edge itself, drawn grey.
+//
+// DRAWN: the Webserver, and every box reachable from it through wanted edges
+// -- so a box goes only when no wanted path reaches it.  Every wanted edge
+// between drawn boxes is drawn, from its box's bottom edge, whether or not
+// its row is open; so is a visible ref row's edge to a box drawn anyway.
+// Ownership edges order the layers, and are otherwise not drawn.
+//
+//   ▸ / ▾ on a ref row    want / unwant its edge
+//   ▸n / ▾ beside a box   want its edges to all its children (n undrawn) /
+//                         hide those children; ArrowRight / ArrowLeft too
+//   menu "Show ▸ <child>" want the edge to that child
+//   menu "Hide"           unwant every edge into this box
+//   collapse a box        unwant every edge out of it -- what was reached
+//                         only through them goes (a member row closing
+//                         does not: its edges still leave the open box)
+//   Show all / Hide all   every edge (but into the Webserver) / none
+//
+// Wanted edges out of a box no longer drawn are kept: show the box again
+// and what hung off it comes back.
 
-/** box ids chosen to be shown; kept across refreshes **/
-const shown = new Set();
+/** keys of the wanted edges; kept across refreshes **/
+const wanted = new Set();
+
+/** this draw's showable edges, every box's: {key, source, target, kind,
+ *  label}; kind "member" (a ref edge) or the ownership kind (a fallback) **/
+let showable = [];
+
+/** this draw's ownership tree: {kids, parent} **/
+let tree = {kids: new Map(), parent: new Map()};
 
 /** the ownership tree of @p edges: {kids: owner -> [child], parent: child -> owner} **/
 function ownership(edges) {
@@ -273,21 +294,75 @@ function ownership(edges) {
     return {kids, parent};
 }
 
-/** ids of the boxes drawn: the server; each shown box; and its owners up to
- *  the server
+/** every ref in member values @p members, open or not, appended to @p out
+ *  as {key, label, ref}: key as member_rows() makes it (under @p path),
+ *  label the member path for display (e.g. session_map_["1"])
  **/
-function drawn_ids(tree) {
+function all_refs(members, path, label, out) {
+    for (const m of (members || [])) {
+        if ("_error_" in m)
+            continue;
+
+        const key = `${path}/${m._name_}`;
+        const lab = m._name_.startsWith("[") ? `${label}${m._name_}`
+              : label ? `${label}.${m._name_}` : m._name_;
+        const v = m._value_;
+
+        if (is_ref(v)) {
+            out.push({key, label: lab, ref: v.ref});
+        } else if (Array.isArray(v)) {
+            all_refs(v.map((x, i) => ({_name_: `[${i}]`, _value_: x})), key, lab, out);
+        } else if (is_ref_map(v)) {
+            all_refs(Object.entries(v).map(([k, x]) => ({_name_: `[${JSON.stringify(k)}]`, _value_: x})),
+                     key, lab, out);
+        } else if (has_members(v)) {
+            all_refs(v._members_, key, lab, out);
+        }
+    }
+}
+
+/** the showable edges of boxes @p nodes, ownership edges @p own_edges --
+ *  needs box_of_id
+ **/
+function showable_edges(nodes, own_edges) {
+    const out = [];
+    for (const d of nodes) {
+        const refs = [];
+        if (d.obj)
+            all_refs(d.obj._members_, d.id, "", refs);
+        for (const r of refs) {
+            const target = box_of_id.get(r.ref);
+            if (target !== undefined && target !== d.id)
+                out.push({key: r.key, source: d.id, target, kind: "member", label: r.label});
+        }
+    }
+    // an owned box no ref of its owner reaches: the ownership edge stands in
+    for (const e of own_edges)
+        if (!out.some(x => x.source === e.source && x.target === e.target))
+            out.push({key: `own:${e.source}>${e.target}`, source: e.source, target: e.target,
+                      kind: e.kind, label: e.kind});
+    return out;
+}
+
+/** ids of the boxes drawn: the server, and what wanted edges reach from it **/
+function drawn_ids() {
     const drawn = new Set(["server"]);
-    for (const id of shown) {
-        for (let x = id; x !== undefined && !drawn.has(x); x = tree.parent.get(x))
-            drawn.add(x);
+    for (let grew = true; grew; ) {
+        grew = false;
+        for (const e of showable)
+            if (wanted.has(e.key) && drawn.has(e.source) && !drawn.has(e.target)) {
+                drawn.add(e.target);
+                grew = true;
+            }
     }
     return drawn;
 }
 
-/** the ownership tree of the current snapshot **/
-function current_tree() {
-    return ownership(last_event ? layout(last_event).edges : []);
+/** the key of the edge from owner @p owner to its child @p kid **/
+function child_edge(owner, kid) {
+    const e = showable.find(x => x.source === owner && x.target === kid && x.kind === "member")
+          || showable.find(x => x.source === owner && x.target === kid);
+    return e ? e.key : null;
 }
 
 function redraw() {
@@ -295,52 +370,62 @@ function redraw() {
         draw(last_event);
 }
 
-/** show box @p id (and so the path to it) **/
+/** want the edges down the ownership path from the server to box @p id **/
 function show_box(id) {
-    shown.add(id);
+    for (let x = id; tree.parent.has(x); x = tree.parent.get(x)) {
+        const k = child_edge(tree.parent.get(x), x);
+        if (k)
+            wanted.add(k);
+    }
     redraw();
 }
 
-/** hide box @p id and its descendants -- never the Webserver **/
-function hide_box(id, tree = current_tree()) {
-    if (id === "server")
-        return;
-    const todo = [id];
-    while (todo.length) {
-        const x = todo.pop();
-        shown.delete(x);
-        todo.push(...(tree.kids.get(x) || []));
-    }
+/** unwant every edge into box @p id -- never the Webserver, always drawn **/
+function hide_box(id) {
+    for (const e of showable)
+        if (e.target === id)
+            wanted.delete(e.key);
 }
 
-/** the triangle beside box @p id: any child undrawn -> show them all; else
- *  hide them all
+/** unwant every edge out of box @p id (it is collapsing) **/
+function drop_edges_from(id) {
+    for (const e of showable)
+        if (e.source === id)
+            wanted.delete(e.key);
+}
+
+/** the triangle beside box @p id: any child undrawn -> want the edges to
+ *  them all; else hide them all
  **/
 function toggle_children(id) {
-    const tree = current_tree();
-    const drawn = drawn_ids(tree);
     const kids = tree.kids.get(id) || [];
 
-    if (kids.some(k => !drawn.has(k))) {
-        shown.add(id);
-        kids.forEach(k => shown.add(k));
+    if (kids.some(k => !shown_box_ids.has(k))) {
+        for (const k of kids) {
+            const key = child_edge(id, k);
+            if (key)
+                wanted.add(key);
+        }
     } else {
-        kids.forEach(k => hide_box(k, tree));
+        kids.forEach(k => hide_box(k));
     }
     redraw();
 }
 
-/** "Show all" / "Hide all" **/
+/** "Show all" / "Hide all".  Not edges into the Webserver: it is always
+ *  drawn, so wanting one keeps nothing shown (its ref row has no ▸ / ▾
+ *  either); each still draws while its row is open
+ **/
 function show_all_children(on) {
-    if (on && last_event)
-        for (const d of layout(last_event).nodes)
-            shown.add(d.id);
-    if (!on)
-        shown.clear();
+    if (on)
+        showable.filter(e => e.target !== "server").forEach(e => wanted.add(e.key));
+    else
+        wanted.clear();
     redraw();
 }
 
 const row_h = 18;          // a member row
+const in_port_x = 24;      // a member edge enters a box this far from its left
 
 /** object id -> the box drawing it this draw: a box's own object, or an
  *  object printed nested inside a box (a member's value).  A ref to any
@@ -503,45 +588,54 @@ function member_rows(members, depth, path, out) {
 }
 
 function toggle(key) {
-    if (expanded.has(key))
+    if (expanded.has(key)) {
         expanded.delete(key);
-    else
+        // a box collapsing: what it alone kept shown goes
+        if (box_label.has(key))
+            drop_edges_from(key);
+    } else {
         expanded.add(key);
+    }
 
     if (last_event)
         draw(last_event);
 }
 
 /** on a ref row whose target is a box (not the Webserver): a ▸ / ▾ before
- *  the arrow, showing / hiding that box
+ *  the arrow, wanting / unwanting its edge
  **/
 function append_ref_toggle(t, r) {
     if (!r.ref_box)
         return;
 
-    const on = shown_box_ids.has(r.ref_box);
+    const on = wanted.has(r.key);
 
     t.append("tspan").attr("class", "rtoggle").text(on ? "▾" : "▸")
         .on("click", (ev) => {
             ev.stopPropagation();
-            if (on) {
-                hide_box(r.ref_box);
-                redraw();
-            } else {
-                show_box(r.ref_box);
-            }
+            if (on)
+                wanted.delete(r.key);
+            else
+                wanted.add(r.key);
+            redraw();
         })
-        .append("title").text(on ? "hide the box it refers to" : "show the box it refers to");
+        .append("title").text(on ? "stop showing the box it refers to"
+                              : "show the box it refers to");
 }
 
-/** the box a ref row @p r of box @p d draws its edge to; null for none --
- *  not a ref, not drawn, or into its own box
+/** the member edges to draw, of drawn boxes @p nodes: each wanted edge
+ *  between drawn boxes; and each visible ref row's edge to a box drawn
+ *  anyway.  In each box's member order
  **/
-function ref_edge_target(d, r) {
-    if (!r.ref)
-        return null;
-    const target = box_of_id.get(r.ref);
-    return (target === undefined || target === d.id || !shown_box_ids.has(target)) ? null : target;
+function member_edges(nodes) {
+    const visible = new Set();
+    for (const d of nodes)
+        for (const r of d.rows)
+            visible.add(r.key);
+
+    return showable.filter(e => e.kind === "member"
+                           && shown_box_ids.has(e.source) && shown_box_ids.has(e.target)
+                           && (wanted.has(e.key) || visible.has(e.key)));
 }
 
 // a draw is asynchronous (ELK); a newer one supersedes an older one still
@@ -551,14 +645,16 @@ let draw_seq = 0;
 async function draw(event) {
     const seq = ++draw_seq;
     const all = layout(event);
-    const tree = ownership(all.edges);
-    shown_box_ids = drawn_ids(tree);
+    tree = ownership(all.edges);
 
     // every box -- shown or not -- for joining refs; only shown ones drawn
     box_of_id = new Map(all.nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
     for (const d of all.nodes)
         if (d.obj)
             note_nested(d.obj._members_, d.id);
+
+    showable = showable_edges(all.nodes, all.edges.filter(e => e.kind === "link" || e.kind === "owns"));
+    shown_box_ids = drawn_ids();
 
     box_label = new Map(all.nodes.map(d => [d.id, d.label]));
     const nodes = all.nodes.filter(d => shown_box_ids.has(d.id));
@@ -630,7 +726,9 @@ async function draw(event) {
               .join("text");
 
         rows.attr("class", r => `row ${r.cls}` + (r.expandable ? " expandable" : ""))
-            .attr("x", r => 12 + 14 * r.depth);
+            .attr("x", r => 12 + 14 * r.depth)
+            .on("mouseenter", (ev, r) => highlight_ref(r.key, true))
+            .on("mouseleave", (ev, r) => highlight_ref(r.key, false));
 
         rows.each(function (r) {
             const t = d3.select(this);
@@ -743,14 +841,21 @@ async function draw(event) {
                   : `refcount ${d.refcount}, ${d.expected} shown: ${extra} hold(s) not in this snapshot`);
     });
 
-    // a ref member's edge: from its row to the box drawing the referenced
+    // a ref member's edge: from its box to the box drawing the referenced
     // object -- its own box, or the box it is printed nested in
-    for (const d of nodes)
-        for (const r of d.rows) {
-            const target = ref_edge_target(d, r);
-            if (target !== null)
-                edges.push({source: `${r.key}#port`, target: target, kind: "member", from: d.id});
-        }
+    const drawn_members = member_edges(nodes);
+    for (const e of drawn_members)
+        edges.push({source: `${e.key}#port`, target: e.target, kind: "member",
+                    from: e.source, row_key: e.key, label: e.label});
+    // a wanted fallback (an owned box no ref reaches): its ownership edge drawn
+    const drawn_own = new Set(showable.filter(e => e.kind !== "member" && wanted.has(e.key))
+                              .map(e => `${e.source}>${e.target}`));
+    for (const e of edges)
+        if ((e.kind === "link" || e.kind === "owns") && drawn_own.has(`${e.source}>${e.target}`))
+            e.drawn = true;
+
+    // boxes a member edge arrives at: each gets one entry port
+    const member_in = new Set(edges.filter(e => e.kind === "member").map(e => e.target));
 
     // 2. ELK: layered, top to bottom; spacing leaves room for the badges
     const graph = {
@@ -762,22 +867,37 @@ async function draw(event) {
             "elk.spacing.nodeNode": "40",
             "elk.layered.spacing.nodeNodeBetweenLayers": "50",
             "elk.spacing.edgeNode": "20",
+            // network simplex, not Brandes-Koepf: BK keeps the narrowest of
+            // four candidate placements, and a near-tie between them can flip
+            // when one box changes width -- e.g. opening a subscription moved
+            // the Webserver box 200px right.  Network simplex keeps boxes put
+            "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
         },
         children: nodes.map(d => ({
             id: d.id, width: d.w, height: d.h,
-            // a ref member's edge leaves its row, on the box's right side
+            // a ref member's edge leaves the box's bottom edge, near its left,
+            // in row order; and enters the box it refers to on its top edge,
+            // near the left -- so an edge descending from a box's left part
+            // need not dogleg left to reach it
             layoutOptions: {"elk.portConstraints": "FIXED_POS"},
-            ports: d.rows.map((r, i) => ({r, i})).filter(x => ref_edge_target(d, x.r) !== null)
-                .map(({r, i}) => ({id: `${r.key}#port`, width: 1, height: 1,
-                                   x: d.w, y: d.head_h + i * row_h + row_h / 2,
-                                   layoutOptions: {"elk.port.side": "EAST"}})),
+            ports: [
+                ...drawn_members.filter(e => e.source === d.id)
+                    .map((e, k) => ({id: `${e.key}#port`, width: 1, height: 1,
+                                     x: 12 + 10 * k, y: d.h,
+                                     layoutOptions: {"elk.port.side": "SOUTH"}})),
+                ...(member_in.has(d.id)
+                    ? [{id: `${d.id}#in`, width: 1, height: 1, x: in_port_x, y: -1,
+                        layoutOptions: {"elk.port.side": "NORTH"}}]
+                    : []),
+            ],
         })),
         // ownership (link, owns) decides top-to-bottom; uses / member
         // edges follow it.  Without this an expanded box's ref edge could
         // invert the layering -- e.g. a session's router's url_router_ (in
         // the server box) put the session above the server
         edges: edges.map((e, i) => ({
-            id: `e${i}`, sources: [e.source], targets: [e.target],
+            id: `e${i}`, sources: [e.source],
+            targets: [e.kind === "member" ? `${e.target}#in` : e.target],
             layoutOptions: {"elk.layered.priority.direction":
                             (e.kind === "link" || e.kind === "owns") ? "10" : "0"},
         })),
@@ -811,11 +931,32 @@ async function draw(event) {
         return {...e, key: `${e.kind}:${e.source}>${e.target}`, pts};
     });
 
+    // ownership edges (link, owns) only order the layers: not drawn, but
+    // for a wanted fallback
     edge_layer.selectAll("path.edge")
-        .data(routed, d => d.key)
+        .data(routed.filter(d => (d.kind !== "link" && d.kind !== "owns") || d.drawn), d => d.key)
         .join("path")
         .attr("class", d => `edge ${d.kind}`)
-        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad},${p.y + pad + badge_r}`).join(" "));
+        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad},${p.y + pad + badge_r}`).join(" "))
+        // a member edge: hovering it lights its row too
+        .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_key, true))
+        .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_key, false))
+        // a member edge says which member it is: its row may not be open
+        .each(function (d) {
+            d3.select(this).selectAll("title").data(d.kind === "member" ? [d] : [])
+                .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.label}`);
+        });
+}
+
+/** light up (@p on) or restore the ref row with key @p row_key and its
+ *  member edge.  Member edges leave the bottom of the box, so this is how
+ *  a row and its edge are seen to belong together
+ **/
+function highlight_ref(row_key, on) {
+    d3.selectAll("text.row").filter(r => r && r.key === row_key).classed("hot", on);
+    d3.selectAll("path.edge.member").filter(e => e && e.row_key === row_key)
+        .classed("hot", on)
+        .each(function () { if (on) this.parentNode.appendChild(this); });   // on top
 }
 
 // ----- context menu -----------------------------------------------------
@@ -857,7 +998,8 @@ function menu_items(d) {
          d.id === "server" ? "the Webserver box is always shown" : null],
         // one entry per hidden child
         ...(d.children || []).filter(k => !shown_box_ids.has(k)).map(k =>
-            [`Show ▸ ${box_label.get(k) || k}`, () => show_box(k), null]),
+            [`Show ▸ ${box_label.get(k) || k}`, () => { const key = child_edge(d.id, k);
+                                                         if (key) wanted.add(key); redraw(); }, null]),
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _type_ reported"],
