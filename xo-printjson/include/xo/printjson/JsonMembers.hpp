@@ -67,6 +67,7 @@ namespace xo {
          *    mem.member("url_router_", x->url_router_);
          *    mem.member_as<std::atomic<int>>("port_", x->port_.load());
          *    mem.member_ref<rp<Sender>>("sender_", x->sender_.get());  // printed elsewhere
+         *    mem.member_refs<std::vector<Sub *>>("sub_v_", {..});      // each printed elsewhere
          *    mem.end();                              // writes ]
          *
          *  See .xo-backlog/xo-websock/issues/13.
@@ -92,7 +93,7 @@ namespace xo {
                 using target_t = typename detail::member_target<V>::type;
 
                 std::string declared(reflect::type_name<Declared>());
-                reflect::Metatype metatype = Reflect::require<Declared>()->metatype();
+                reflect::Metatype metatype = metatype_of<Declared>();
                 reflect::TypeDescr target = Reflect::require<target_t>();
 
                 if (this->printable(target)) {
@@ -113,10 +114,21 @@ namespace xo {
              **/
             template <typename Declared>
             JsonMembers & member_ref(std::string_view name, void const * p) {
-                using reflect::Reflect;
-
                 this->write_ref(name, std::string(reflect::type_name<Declared>()),
-                                Reflect::require<Declared>()->metatype(), p);
+                                metatype_of<Declared>(), p);
+
+                return *this;
+            }
+
+            /** member @p name, declared as type Declared, a container of
+             *  objects printed in full elsewhere: _value_ is an array, an
+             *  element {"ref": json_id(p)} or (a released slot) null -- so
+             *  slot positions are kept
+             **/
+            template <typename Declared>
+            JsonMembers & member_refs(std::string_view name, std::vector<void const *> const & ps) {
+                this->write_refs(name, std::string(reflect::type_name<Declared>()),
+                                 metatype_of<Declared>(), ps);
 
                 return *this;
             }
@@ -125,6 +137,18 @@ namespace xo {
             void end();
 
         private:
+            /** metatype of declared type T.  xo-reflect has none for a C++
+             *  reference: reported as pointer, the nearest -- it refers to
+             *  an object, rather than holding one
+             **/
+            template <typename T>
+            static reflect::Metatype metatype_of() {
+                if constexpr (std::is_reference_v<T>)
+                    return reflect::Metatype::mt_pointer;
+                else
+                    return reflect::Reflect::require<T>()->metatype();
+            }
+
             /** true iff PrintJson can print a @p td: it has a printer for
              *  it, or it is a complete reflected struct
              **/
@@ -136,6 +160,10 @@ namespace xo {
                              reflect::Metatype metatype, std::string const & why);
             void write_ref(std::string_view name, std::string const & declared,
                            reflect::Metatype metatype, void const * p);
+            void write_refs(std::string_view name, std::string const & declared,
+                            reflect::Metatype metatype, std::vector<void const *> const & ps);
+            /** {"ref": json_id(@p p)}, or null **/
+            void write_ref_value(void const * p);
             /** the separator and the entry's _name_, _type_, _metatype_ **/
             void write_head(std::string_view name, std::string const & declared,
                             reflect::Metatype metatype);

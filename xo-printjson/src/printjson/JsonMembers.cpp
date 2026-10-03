@@ -80,11 +80,32 @@ namespace xo {
             this->write_head(name, declared, metatype);
 
             *p_os_ << ", " << quot("_value_") << ": ";
+            this->write_ref_value(p);
+            *p_os_ << "}";
+        }
+
+        void
+        JsonMembers::write_refs(std::string_view name, std::string const & declared,
+                                Metatype metatype, std::vector<void const *> const & ps)
+        {
+            this->write_head(name, declared, metatype);
+
+            *p_os_ << ", " << quot("_value_") << ": [";
+            for (std::size_t i = 0, n = ps.size(); i < n; ++i) {
+                if (i > 0)
+                    *p_os_ << ", ";
+                this->write_ref_value(ps[i]);
+            }
+            *p_os_ << "]}";
+        }
+
+        void
+        JsonMembers::write_ref_value(void const * p)
+        {
             if (p)
                 *p_os_ << "{" << quot("ref") << ": " << quot(json_id(p)) << "}";
             else
                 *p_os_ << "null";
-            *p_os_ << "}";
         }
 
         void

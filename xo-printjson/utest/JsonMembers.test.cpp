@@ -174,6 +174,44 @@ namespace xo {
             addr << static_cast<void const *>(&r);
             REQUIRE(xo::json::json_id(&r) == addr.str());
         }
+
+        TEST_CASE("json-members-member-ref-to-a-reference", "[printjson][JsonMembers]") {
+            /* a C++ reference member: reflection has no metatype for
+             * references -- reported as pointer, the nearest
+             */
+            PrintJson pjson;
+            std::stringstream ss;
+
+            JmReflected r;
+            JmReflected const & cr = r;
+
+            JsonMembers mem(&pjson, &ss);
+            mem.member_ref<JmReflected const &>("cr_", &cr);
+            mem.end();
+
+            REQUIRE(ss.str() == ", \"_members_\": ["
+                    + entry("cr_", type_of<JmReflected const &>(), "pointer",
+                            "{\"ref\": \"" + xo::json::json_id(&r) + "\"}") + "]");
+        }
+
+        TEST_CASE("json-members-member-refs", "[printjson][JsonMembers]") {
+            /* a container of objects printed elsewhere: an array of refs, a
+             * released slot null -- slot positions kept
+             */
+            PrintJson pjson;
+            std::stringstream ss;
+
+            JmReflected a, b;
+
+            JsonMembers mem(&pjson, &ss);
+            mem.member_refs<std::vector<JmReflected *>>("v_", {&a, nullptr, &b});
+            mem.end();
+
+            REQUIRE(ss.str() == ", \"_members_\": ["
+                    + entry("v_", type_of<std::vector<JmReflected *>>(), "vector",
+                            "[{\"ref\": \"" + xo::json::json_id(&a) + "\"}, null, "
+                            "{\"ref\": \"" + xo::json::json_id(&b) + "\"}]") + "]");
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 

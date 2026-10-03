@@ -170,6 +170,10 @@ namespace xo {
                              std::uint32_t const * sub_id = nullptr);
 
         private:
+            /* reads private members, for "_members_" (WsSessionRouter.cpp) */
+            friend class JsonPrinter_WsSessionRouter;
+
+        private:
             /* finds the endpoint serving a stream name.  Borrowed; see ctor */
             UrlRouter const & url_router_;
             /* this session's sender; shared with every sink made here */

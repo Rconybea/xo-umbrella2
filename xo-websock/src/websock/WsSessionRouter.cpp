@@ -8,6 +8,7 @@
 #include "DynamicEndpoint.hpp"
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
+#include <xo/printjson/JsonMembers.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
@@ -22,6 +23,7 @@ namespace xo {
     using xo::fn::CallbackId;
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
+    using xo::json::JsonMembers;
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
@@ -435,9 +437,59 @@ namespace xo {
             };
         } /*namespace*/
 
+        /** @brief a session's router: its chosen C++ members
+         *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
+         *  namespace: WsSessionRouter's header befriends it by name.
+         *
+         *  Its subscriptions are printed in full by the session
+         *  ("subscriptions"), and its sender too ("sender") -- refs here.
+         *  url_router_ is the server's, printed inside the server.
+         **/
+        class JsonPrinter_WsSessionRouter : public JsonPrinter {
+        public:
+            JsonPrinter_WsSessionRouter(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                WsSessionRouter const * r = this->check_recover_native<WsSessionRouter>(tp, p_os);
+
+                if (!r)
+                    return;
+
+                /* slot order, released slots null: index is sub_id */
+                std::vector<void const *> sub_v;
+                {
+                    std::lock_guard<std::mutex> lock(r->mutex_);
+
+                    for (auto const & sub : r->subscription_v_)
+                        sub_v.push_back(sub.get());
+                }
+
+                *p_os << "{" << quot("_name_") << ": " << quot("WsSessionRouter")
+                      << ", " << quot("_type_") << ": " << quot(type_name<WsSessionRouter>())
+                      << ", " << quot("id") << ": " << quot(json_id(r));
+
+                /* the sender by its most-derived address: the id its own
+                 * printer writes
+                 */
+                JsonMembers mem(this->pjson(), p_os);
+                mem.member_ref<UrlRouter const &>("url_router_", &r->url_router_)
+                    .member_ref<rp<WsSender>>("sender_",
+                                              dynamic_cast<void const *>(r->sender_.get()))
+                    .member("pjson_", r->pjson_)
+                    .member_as<std::unique_ptr<Json::CharReader>>("readjson_",
+                                                                  std::string(r->readjson_ ? "set" : "null"))
+                    .member_refs<std::vector<std::unique_ptr<WsSessionRouter::Subscription>>>("subscription_v_", sub_v);
+                mem.end();
+
+                *p_os << "}";
+            }
+        };
+
         void
         provide_router_json_printers(PrintJson * pjson)
         {
+            pjson->provide_printer(Reflect::require<WsSessionRouter>(),
+                                   std::make_unique<JsonPrinter_WsSessionRouter>(pjson));
             pjson->provide_printer(Reflect::require<WsSessionRouter::Subscription>(),
                                    std::make_unique<JsonPrinter_Subscription>(pjson));
         }

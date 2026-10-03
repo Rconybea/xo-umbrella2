@@ -256,6 +256,11 @@ function layout(event) {
 const expanded = new Set();
 
 const row_h = 18;          // a member row
+
+/** ids of the objects drawn as boxes this draw: a ref to another object has
+ *  no edge to draw, and says so
+ **/
+let shown_ids = new Set();
 const row_pad = 8;         // below the last row
 
 /** @p t for display: without namespace qualifiers, anonymous namespaces
@@ -292,11 +297,15 @@ function member_rows(members, depth, path, out) {
             if (v === null || v === undefined) {
                 val = "null";
             } else if (Array.isArray(v)) {
-                val = `[${v.length}]`;
+                // an array of objects or refs opens into a row per element
+                row.expandable = v.length > 0
+                    && v.every(x => x === null || (typeof x === "object" && !Array.isArray(x)));
+                row.open = row.expandable && expanded.has(key);
+                val = (row.expandable ? (row.open ? "▾ " : "▸ ") : "") + `[${v.length}]`;
             } else if (typeof v === "object" && Object.keys(v).length === 1 && "ref" in v) {
                 row.cls = "ref";
                 row.ref = v.ref;
-                val = "→";
+                val = shown_ids.has(v.ref) ? "→" : "→ (not drawn)";
             } else if (typeof v === "object") {
                 row.expandable = has_members(v);
                 row.open = row.expandable && expanded.has(key);
@@ -311,8 +320,15 @@ function member_rows(members, depth, path, out) {
         row.val = val;
         out.push(row);
 
-        if (row.open)
-            member_rows(m._value_._members_, depth + 1, key, out);
+        if (row.open) {
+            if (Array.isArray(m._value_)) {
+                // element rows: no declared type of their own
+                member_rows(m._value_.map((x, i) => ({_name_: `[${i}]`, _value_: x})),
+                            depth + 1, key, out);
+            } else {
+                member_rows(m._value_._members_, depth + 1, key, out);
+            }
+        }
     }
 }
 
@@ -360,6 +376,7 @@ async function draw(event) {
         });
 
     // which boxes can open, and their member rows
+    shown_ids = new Set(nodes.filter(d => d.obj && d.obj.id).map(d => d.obj.id));
     for (const d of nodes) {
         d.expandable = has_members(d.obj);
         d.open = d.expandable && expanded.has(d.id);
@@ -385,6 +402,13 @@ async function draw(event) {
         rows.each(function (r) {
             const t = d3.select(this);
             t.selectAll("*").remove();
+
+            // an array element has no declared type: name = value
+            if (!r.m._type_) {
+                t.append("tspan").attr("class", "mname").text(r.m._name_);
+                t.append("tspan").attr("class", "mval").text(` = ${r.val}`);
+                return;
+            }
 
             t.append("tspan").attr("class", "mname").text(`${r.m._name_}: `);
 

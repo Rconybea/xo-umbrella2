@@ -636,6 +636,30 @@ namespace xo {
                 REQUIRE(mem[1]["_value_"]["ref"].asString() == v[k]["sender"]["id"].asString());
                 REQUIRE(mem[2]["_type_"].asString() == "xo::web::WsSessionRouter");
                 REQUIRE(mem[3]["_value_"].asString() == "0 queued");
+
+                /* the router, nested: its own members.  sender_ the same
+                 * sender (by most-derived address); subscription_v_ refs to
+                 * exactly the subscriptions printed under the session
+                 */
+                Json::Value const & rmem = mem[2]["_value_"]["_members_"];
+
+                std::vector<std::string> rnames;
+                for (Json::Value const & m : rmem)
+                    rnames.push_back(m["_name_"].asString());
+
+                REQUIRE(rnames == std::vector<std::string>{"url_router_", "sender_", "pjson_",
+                                                           "readjson_", "subscription_v_"});
+                REQUIRE(rmem[0]["_metatype_"].asString() == "pointer");   /* a reference */
+                REQUIRE(rmem[1]["_value_"]["ref"].asString() == v[k]["sender"]["id"].asString());
+                REQUIRE(rmem[3]["_value_"].asString() == "set");
+
+                Json::Value const & slots = rmem[4]["_value_"];
+                Json::Value const & subs = v[k]["subscriptions"];
+
+                REQUIRE(rmem[4]["_metatype_"].asString() == "vector");
+                REQUIRE(slots.size() == subs.size());
+                for (Json::ArrayIndex i = 0; i < subs.size(); ++i)
+                    REQUIRE(slots[i]["ref"].asString() == subs[i]["id"].asString());
             }
 
             /* nothing a printer opted in to is unprintable */
