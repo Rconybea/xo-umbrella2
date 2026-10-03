@@ -65,6 +65,10 @@ jobs:
           # whatever main is when the job STARTS: with runs queued, a result
           # then describes a later commit than the one it is labelled with
           # (.xo-backlog/ci/issues/02).
+          # the workspace is owned by another user than this job's (the
+          # container's): without this, git refuses to work in it ("dubious
+          # ownership") once init has made it a repository
+          git config --global --add safe.directory "$PWD"
           git init --quiet .
           git remote add origin $GITHUB_SERVER_URL/roland/xo-umbrella2.git
           git fetch --quiet --depth=1 origin "$GITHUB_SHA"
