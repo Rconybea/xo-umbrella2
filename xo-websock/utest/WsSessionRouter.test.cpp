@@ -686,6 +686,25 @@ namespace xo {
             /* its sender: the router's -- one sender per session */
             REQUIRE(sink["sender"]["ref"].asString()
                     == id_of(static_cast<xo::web::WsSender *>(fx.sender_.get())));
+
+            /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
+             * endpoint and sink as refs to the objects printed in full
+             */
+            Json::Value const & mem = v[1]["_members_"];
+
+            std::vector<std::string> names;
+            for (Json::Value const & m : mem)
+                names.push_back(m["_name_"].asString());
+
+            REQUIRE(names == std::vector<std::string>{"sub_id_", "stream_name_", "endpoint_",
+                                                      "callback_id_", "sink_"});
+            REQUIRE(mem[0]["_value_"].asUInt() == 2);
+            REQUIRE(mem[1]["_value_"].asString() == "/fw/8");
+            REQUIRE(mem[2]["_value_"]["ref"].asString() == v[1]["endpoint"]["ref"].asString());
+            REQUIRE(mem[3]["_type_"].asString().find("CallbackId") != std::string::npos);
+            REQUIRE(mem[3]["_value_"].isUInt());
+            REQUIRE(mem[4]["_value_"]["ref"].asString() == sink["id"].asString());
+            REQUIRE(v[1].toStyledString().find("\"_error_\"") == std::string::npos);
         }
 
         TEST_CASE("envelope-carries-sub-id-and-per-subscription-seq", "[websock][sink][seq]")

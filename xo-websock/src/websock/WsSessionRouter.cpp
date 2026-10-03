@@ -432,6 +432,22 @@ namespace xo {
                         *p_os << "null";
                     }
 
+                    /* chosen C++ members (.xo-backlog/xo-websock/issues/13).
+                     * endpoint_ and sink_ are printed in full elsewhere (the
+                     * server's endpoints; "sink" above): refs, by most-derived
+                     * address -- the id each one's printer writes.
+                     * callback_id_: CallbackId is not reflected -- its number,
+                     * under its declared type
+                     */
+                    JsonMembers mem(this->pjson(), p_os);
+                    mem.member("sub_id_", sub->sub_id_)
+                        .member("stream_name_", sub->stream_name_)
+                        .member_ref<rp<DynamicEndpoint>>("endpoint_", sub->endpoint_.get())
+                        .member_as<CallbackId>("callback_id_", sub->callback_id_.id())
+                        .member_ref<rp<WebsocketSink>>("sink_",
+                                                       dynamic_cast<void const *>(sub->sink_.get()));
+                    mem.end();
+
                     *p_os << "}";
                 }
             };
