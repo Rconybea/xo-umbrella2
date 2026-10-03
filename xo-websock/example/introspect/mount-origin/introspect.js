@@ -523,6 +523,17 @@ function note_nested(members, box_id) {
 }
 const row_pad = 8;         // below the last row
 
+/** true iff canonical type name @p t is a string type, whose values json
+ *  prints quoted for good reason: std::basic_string, std::basic_string_view,
+ *  char* (const or not), xo's flatstring
+ **/
+function is_string_type(t) {
+    // the type itself, not one taking a string argument (deque<string>)
+    return /^(\w+::)*basic_string(_view)?</.test(t)
+        || /^(const\s+)?char\s*(const\s*)?\*$/.test(t)
+        || /^(\w+::)*flatstring</.test(t);
+}
+
 function has_members(obj) {
     return !!obj && Array.isArray(obj._members_) && obj._members_.length > 0;
 }
@@ -586,7 +597,11 @@ function member_rows(members, depth, path, out) {
                     row.tri = row.open ? "▾" : "▸";
                 val = row.expandable ? "" : (v._name_ || "{…}");
             } else {
-                val = JSON.stringify(v);
+                // a string whose declared type is not a string type -- an
+                // enum, or a printer's summary ("0 queued") -- shows bare:
+                // quotes would claim a C++ string that isn't there
+                val = (typeof v === "string" && m._canonical_type_ && !is_string_type(m._canonical_type_))
+                    ? v : JSON.stringify(v);
                 if (val.length > 40)
                     val = val.slice(0, 39) + "…";
             }
