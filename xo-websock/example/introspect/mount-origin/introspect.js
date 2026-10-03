@@ -472,6 +472,7 @@ const row_h = 18;          // a member row
 const mbtn_w = 21;         // the menu button after a box's label: square
 const mbtn_h = 21;
 const mbtn_gap = 8;        // between label and menu button
+const tri_button = 16;     // the square behind a row's triangle
 const row_indent = 14;     // a nested member row, further right per level
 const in_port_x = 24;      // a member edge enters a box this far from its left
 
@@ -555,7 +556,8 @@ function member_rows(members, depth, path, out) {
                     && v.every(x => x === null || (typeof x === "object" && !Array.isArray(x)));
                 row.open = row.expandable && expanded.has(key);
                 if (row.expandable) {
-                    val = (row.open ? "▾ " : "▸ ") + `[${v.length}]`;
+                    row.tri = row.open ? "▾" : "▸";
+                    val = ` [${v.length}]`;
                 } else if (v.every(x => x === null || typeof x !== "object")) {
                     // scalars: the contents themselves, cut like a scalar
                     val = JSON.stringify(v);
@@ -579,13 +581,16 @@ function member_rows(members, depth, path, out) {
                 // a map to objects printed elsewhere: a row per key
                 row.expandable = true;
                 row.open = expanded.has(key);
-                val = (row.open ? "▾ " : "▸ ") + `{${Object.keys(v).length}}`;
+                row.tri = row.open ? "▾" : "▸";
+                val = ` {${Object.keys(v).length}}`;
             } else if (typeof v === "object") {
                 row.expandable = has_members(v);
                 row.open = row.expandable && expanded.has(key);
                 // opens in place: just the triangle (its type is on the
                 // name's tooltip); one that cannot open shows its name
-                val = row.expandable ? (row.open ? "▾" : "▸") : (v._name_ || "{…}");
+                if (row.expandable)
+                    row.tri = row.open ? "▾" : "▸";
+                val = row.expandable ? "" : (v._name_ || "{…}");
             } else {
                 val = JSON.stringify(v);
                 if (val.length > 40)
@@ -634,7 +639,7 @@ function append_ref_toggle(t, r) {
 
     const on = wanted.has(r.key);
 
-    t.append("tspan").attr("class", "rtoggle").text(on ? "▾" : "▸")
+    t.append("tspan").attr("class", "tri rtoggle").text(on ? "▾" : "▸")
         .on("click", (ev) => {
             ev.stopPropagation();
             if (on)
@@ -802,10 +807,15 @@ async function draw(event) {
             }
 
             t.append("tspan").attr("class", "mval meq").text(" = ");
+            // opens in place: its triangle, a button of its own (see tri_buttons)
+            if (r.tri)
+                t.append("tspan").attr("class", "tri xtoggle").text(r.tri);
             append_ref_toggle(t, r);
-            const mv = t.append("tspan").attr("class", "mval").text(r.val);
-            if (r.ref_tip)
-                mv.append("title").text(r.ref_tip);
+            if (r.val !== "") {   // a struct that opens: its triangle is all
+                const mv = t.append("tspan").attr("class", "mval").text(r.val);
+                if (r.ref_tip)
+                    mv.append("title").text(r.ref_tip);
+            }
         });
 
         rows.on("click", (ev, r) => {
@@ -895,6 +905,7 @@ async function draw(event) {
 
         d.head_h = head_h;
         g.select(":scope > text.kids").attr("y", head_h / 2 + 5);
+        tri_buttons(g.select(":scope > g.rows"));
         d.h = head_h + (d.rows.length ? d.rows.length * row_h + row_pad : 0);
         g.select("rect").attr("width", d.w).attr("height", d.h);
 
@@ -1096,6 +1107,34 @@ function menu_items(d) {
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _canonical_type_ reported"],
         ["Copy id", () => copy_text(d.obj.id), (d.obj && d.obj.id) ? null : "no id"],
     ];
+}
+
+/** behind each triangle in rows group @p rows_g, a rounded square: plain
+ *  until hovered, then white, part-transparent -- as the menu button.
+ *  Clicking it does what clicking its triangle does.  SVG text takes no
+ *  background, so the square is a rect placed by the triangle's measured box
+ **/
+function tri_buttons(rows_g) {
+    const g = rows_g.node();
+    rows_g.selectAll(":scope > rect.tbtn").remove();
+
+    for (const ts of g.querySelectorAll(":scope > text.row > tspan.tri")) {
+        const b = ts.getBBox();
+        const z = tri_button;
+        const rect = d3.select(g).insert("rect", ":first-child")
+              .attr("class", "tbtn").attr("rx", 3)
+              .attr("x", b.x + b.width / 2 - z / 2).attr("y", b.y + b.height / 2 - z / 2)
+              .attr("width", z).attr("height", z);
+        const hot = (on) => rect.classed("hot", on);
+
+        d3.select(ts).on("mouseenter.tbtn", () => hot(true)).on("mouseleave.tbtn", () => hot(false));
+        rect.on("mouseenter", () => hot(true))
+            .on("mouseleave", () => hot(false))
+            .on("click", (ev) => {
+                ev.stopPropagation();
+                ts.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+            });
+    }
 }
 
 /** the x at which row text @p text's " = " starts, as laid out without

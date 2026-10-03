@@ -29,7 +29,7 @@
     path.edge.uses { stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; }
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }
     .node.expandable { cursor: pointer; }
-    text.kids { font-size: 13px; fill: #555; cursor: pointer; font-family: ui-monospace, monospace; }
+    text.kids { font-size: 16px; fill: #555; cursor: pointer; font-family: ui-monospace, monospace; }
     text.kids:hover { fill: #000; }
     .node.expandable:hover > rect { stroke-width: 3px; }
     .node.open > rect { fill-opacity: 0.6; }
@@ -40,8 +40,10 @@
     text.row .mtype { fill: #2c5e8f; }
     text.row .mtype.linked { cursor: pointer; text-decoration: underline; }
     text.row .mtag { fill: #888; font-size: 10px; }
-    text.row .rtoggle { fill: #555; cursor: pointer; }
-    text.row .rtoggle:hover { fill: #000; }
+    /* a row's triangles: 25% larger; a square behind, as the menu button's */
+    text.row .tri { font-size: 125%; fill: #555; cursor: pointer; }
+    rect.tbtn { fill: #fff; fill-opacity: 0; cursor: pointer; }
+    rect.tbtn.hot { fill-opacity: 0.85; }
     path.edge.member { stroke: #7a4fa0; stroke-width: 1.4px; }
     path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; }
     text.row.hot .mname { fill: #e0730b; }
