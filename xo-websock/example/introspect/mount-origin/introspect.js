@@ -910,6 +910,16 @@ async function draw_aux(event) {
               .data(d.rows, r => r.key)
               .join(enter => enter.append("text").property("__arriving", true).style("opacity", 0));
 
+        // where each row already on screen was -- its text x, y and its
+        // separator's column -- before this draw re-renders it: a row that
+        // moves will travel there from here, with its box's outline
+        rows.each(function () {
+            const meq = this.querySelector(":scope > tspan.meq");
+            this.__was = this.__arriving ? null
+                : {x: +this.getAttribute("x"), y: +this.getAttribute("y"),
+                   col: meq && meq.hasAttribute("x") ? +meq.getAttribute("x") : null};
+        });
+
         rows.attr("class", r => `row ${r.cls}` + (r.expandable ? " expandable" : ""))
             .attr("x", r => 12 + row_indent * r.depth)
             .on("mouseenter", (ev, r) => highlight_ref([r.key], true))
@@ -1061,8 +1071,16 @@ async function draw_aux(event) {
         d.h = head_h + (d.rows.length ? d.rows.length * row_h + row_pad : 0);
         // resize: animated, but for a box not yet on screen
         const animate = (sel) => this.__arriving ? sel
-              : sel.transition("size").duration(t_move);
+              : sel.transition("size").duration(t_move).ease(d3.easeCubicInOut);
         animate(g.select("rect")).attr("width", d.w).attr("height", d.h);
+
+        // rows already on screen that moved (a nested row opened or closed
+        // above them, or the name column widened): back to where they were,
+        // then along with the outline -- same duration and easing, so a row
+        // inside the old outline and inside the new stays inside throughout.
+        // Their triangle squares move with them
+        if (!this.__arriving)
+            slide_rows(g.select(":scope > g.rows"));
 
     });
 
@@ -1274,6 +1292,46 @@ function menu_items(d) {
     ];
 }
 
+/** rows group @p rows_g: each row with a recorded old place (`__was`) that
+ *  has moved -- y, x, or separator column -- goes back there and transitions
+ *  to its new place; so do the squares behind its triangles (which sit just
+ *  after the separator, so move by its column's and the row's y's change)
+ **/
+function slide_rows(rows_g) {
+    const g = rows_g.node();
+    const ease = d3.easeCubicInOut;
+
+    for (const text of g.querySelectorAll(":scope > text.row")) {
+        const was = text.__was;
+        text.__was = null;
+        if (!was)
+            continue;
+
+        const meq = text.querySelector(":scope > tspan.meq");
+        const now = {x: +text.getAttribute("x"), y: +text.getAttribute("y"),
+                     col: meq && meq.hasAttribute("x") ? +meq.getAttribute("x") : null};
+        const dcol = (was.col !== null && now.col !== null) ? now.col - was.col : now.x - was.x;
+        const dy = now.y - was.y;
+        if (now.x === was.x && dy === 0 && dcol === 0)
+            continue;
+
+        d3.select(text).attr("x", was.x).attr("y", was.y)
+            .transition("move").duration(t_move).ease(ease)
+            .attr("x", now.x).attr("y", now.y);
+        if (meq && was.col !== null && now.col !== null)
+            d3.select(meq).attr("x", was.col)
+                .transition("move").duration(t_move).ease(ease).attr("x", now.col);
+
+        for (const sq of g.querySelectorAll(":scope > rect.tbtn"))
+            if (sq.__text === text) {
+                const x = +sq.getAttribute("x"), y = +sq.getAttribute("y");
+                d3.select(sq).attr("x", x - dcol).attr("y", y - dy)
+                    .transition("move").duration(t_move).ease(ease)
+                    .attr("x", x).attr("y", y);
+            }
+    }
+}
+
 /** behind each triangle in rows group @p rows_g, a rounded square: plain
  *  until hovered, then white, part-transparent -- as the menu button.
  *  Clicking it does what clicking its triangle does.  SVG text takes no
@@ -1287,6 +1345,7 @@ function tri_buttons(rows_g) {
         const b = ts.getBBox();
         const z = tri_button;
         const rect = d3.select(g).insert("rect", ":first-child")
+              .property("__text", ts.parentNode)
               .attr("class", "tbtn").attr("rx", 3)
               .attr("x", b.x + b.width / 2 - z / 2).attr("y", b.y + b.height / 2 - z / 2)
               .attr("width", z).attr("height", z);
