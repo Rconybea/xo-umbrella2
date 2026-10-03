@@ -13,6 +13,7 @@
 #include <xo/ppsink/concat.hpp>
 #include <sstream>                     /* std::ostringstream -- was via indentlog */
 #include <stdexcept>                   /* std::runtime_error -- was via indentlog */
+#include <cctype>
 
 namespace xo {
     using xo::pp::scope;
@@ -244,32 +245,116 @@ namespace xo {
         } /*print_reflected_types*/
 
         namespace {
-            /* readability hack:
-             *    foo::bar::Quux ==> Quux
-             * but lookout for template names:
-             *    std::pair<std::bar, std::foo> ==> pair<std::bar, std::foo>
-             */
-            std::string_view
-            unqualified_name(std::string_view const & canonical_name)
-            {
-                size_t m = canonical_name.find_first_of('<');
+            bool is_ident_char(char c) {
+                return std::isalnum(static_cast<unsigned char>(c)) || (c == '_');
+            }
 
-                /* skip ':', but only in range [0..m) */
-                size_t p = canonical_name.find_last_of(':', m);
+            /** @p s with every occurrence of @p from replaced by @p to **/
+            std::string replace_all(std::string s, std::string_view from, std::string_view to) {
+                for (size_t p = s.find(from); p != std::string::npos; p = s.find(from, p + to.size()))
+                    s.replace(p, from.size(), to);
+                return s;
+            }
 
-                if (p == std::string_view::npos) {
-                    return canonical_name;
-                } else {
-                    if ((canonical_name.substr(0, 9) == "std::pair")
-                        || (canonical_name.substr(0, 13) == "std::_1::pair"))
-                    {
-                        return std::string_view("pair");
+            /** @p s without namespace qualifiers: "a::b::Foo<c::Bar>" -> "Foo<Bar>".
+             *  Keeps a member pointer's class ("Foo::*")
+             **/
+            std::string strip_qualifiers(std::string_view s) {
+                std::string out;
+                size_t i = 0;
+                while (i < s.size()) {
+                    /* an anonymous namespace, as gcc and clang spell it */
+                    bool anon = false;
+                    for (std::string_view a : {std::string_view("{anonymous}::"),
+                                               std::string_view("(anonymous namespace)::")}) {
+                        if (s.substr(i, a.size()) == a) {
+                            i += a.size();
+                            anon = true;
+                            break;
+                        }
+                    }
+                    if (anon)
+                        continue;
+
+                    if (is_ident_char(s[i]) && (i == 0 || !is_ident_char(s[i-1]))) {
+                        size_t j = i;
+                        while (j < s.size() && is_ident_char(s[j]))
+                            ++j;
+
+                        bool qualifier = (s.substr(j, 2) == "::")
+                            && (j + 2 < s.size()) && (s[j + 2] != '*');
+
+                        if (qualifier) {
+                            i = j + 2;
+                        } else {
+                            out.append(s.substr(i, j - i));
+                            i = j;
+                        }
                     } else {
-                        return std::string_view(canonical_name.substr(p+1));
+                        out.push_back(s[i]);
+                        ++i;
                     }
                 }
-            } /*unqualified_name*/
+                return out;
+            }
+
+            /** @p s without the standard library's default template
+             *  arguments, which gcc spells out: ", allocator<..>" etc.
+             *  (qualifiers already stripped)
+             **/
+            std::string drop_default_args(std::string s) {
+                static const char * const c_default_v[] = {
+                    "allocator<", "char_traits<", "default_delete<",
+                    "hash<", "equal_to<", "less<"
+                };
+
+                for (bool again = true; again; ) {
+                    again = false;
+                    for (const char * d : c_default_v) {
+                        std::string pat = std::string(", ") + d;
+                        size_t p = s.find(pat);
+                        if (p == std::string::npos)
+                            continue;
+
+                        /* skip to the matching '>' */
+                        size_t j = p + pat.size();
+                        for (int depth = 1; (j < s.size()) && (depth > 0); ++j) {
+                            if (s[j] == '<')
+                                ++depth;
+                            else if (s[j] == '>')
+                                --depth;
+                        }
+                        s.erase(p, j - p);
+                        again = true;
+                    }
+                }
+                return s;
+            }
+
+            /** @p s without whitespace before '>': "a<b<c> >" -> "a<b<c>>" **/
+            std::string tighten(std::string s) {
+                std::string out;
+                for (char c : s) {
+                    if (c == '>')
+                        while (!out.empty() && (out.back() == ' '))
+                            out.pop_back();
+                    out.push_back(c);
+                }
+                return out;
+            }
         } /*namespace*/
+
+        std::string
+        TypeDescrBase::make_short_name(std::string_view canonical_name)
+        {
+            /* before qualifiers go: only xo's intrusive_ptr is rp */
+            std::string s = replace_all(std::string(canonical_name),
+                                        "xo::ref::intrusive_ptr<", "rp<");
+
+            s = drop_default_args(tighten(strip_qualifiers(s)));
+
+            return replace_all(std::move(s), "basic_string<char>", "string");
+        } /*make_short_name*/
 
         TypeDescrBase::TypeDescrBase(TypeId id,
                                      const std::type_info * native_tinfo,
@@ -279,7 +364,7 @@ namespace xo {
             : id_{std::move(id)},
               native_typeinfo_{native_tinfo},
               canonical_name_{std::move(canonical_name)},
-              short_name_{unqualified_name(canonical_name_)},
+              short_name_{make_short_name(canonical_name_)},
               invoker_{invoker},
               tdextra_{std::move(tdextra)}
         {

@@ -9,7 +9,8 @@ set(SELF_SOURCE_FILES
     FunctionTdx.test.cpp
     PointerTdx.test.cpp
     TypeDescr_pp.test.cpp
-    ostream_baseline.test.cpp)
+    ostream_baseline.test.cpp
+    ShortName.test.cpp)
 
 xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)

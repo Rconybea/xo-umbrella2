@@ -242,6 +242,11 @@ namespace xo {
             /** lookup type by canonical name **/
             static TypeDescr lookup_by_name(const std::string & canonical_name);
 
+            /** the short name for a type with canonical name @p canonical_name,
+             *  for display -- see .short_name
+             **/
+            static std::string make_short_name(std::string_view canonical_name);
+
             /** print table of reflected types to @p sink **/
             static void print_reflected_types(PpSink & sink);
 #ifdef NOT_YET
@@ -252,7 +257,7 @@ namespace xo {
             TypeId id() const { return id_; }
             const std::type_info * native_typeinfo() const { return native_typeinfo_; }
             const std::string & canonical_name() const { return canonical_name_; }
-            const std::string_view & short_name() const { return short_name_; }
+            std::string_view short_name() const { return short_name_; }
             /** report allocation size of target type according to sizeof(T) where well-defined.
              *  0 for void and function types.
              **/
@@ -516,11 +521,19 @@ namespace xo {
              **/
             std::string canonical_name_;
 
-            /** substring .canonical_name, just after last ':'
+            /** .canonical_name for display, without excess detail:
+             *  - no namespace qualifiers, template arguments' included
+             *    ({anonymous}:: too);
+             *  - xo::ref::intrusive_ptr<T> as rp<T>, as xo code writes it;
+             *  - no standard-library default template arguments
+             *    (allocator, char_traits, default_delete, hash, equal_to, less);
+             *  - basic_string<char> as string;  no space before '>'.
              *  e.g.
-             *    Px2
+             *    xo::option::Px2                                   -> Px2
+             *    xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>  -> rp<DynamicEndpoint>
+             *  Not unique: a::Foo and b::Foo share one
              **/
-            std::string_view short_name_;
+            std::string short_name_;
 
             /** set to true once final value for .tdextra is established
              * intially all TypeDescr objects will use AtomicTdx for .tdextra
