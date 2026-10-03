@@ -7,6 +7,7 @@
 
 #include "xo/reflect/Reflect.hpp"
 #include "xo/reflect/TypeDescr.hpp"
+#include <xo/reflectutil/type_name.hpp>
 #include <catch2/catch.hpp>
 #include <map>
 #include <memory>
@@ -74,9 +75,12 @@ namespace xo {
             REQUIRE(Reflect::require<std::vector<std::string>>()->short_name() == "vector<string>");
             REQUIRE(Reflect::require<std::pair<int, double>>()->short_name() == "pair<int, double>");
 
-            /* canonical name unchanged */
+            /* canonical name unchanged.  Built, not spelled out: the anonymous
+             * namespace is "{anonymous}" under gcc, "(anonymous namespace)"
+             * under clang
+             */
             REQUIRE(Reflect::require<ShortNameProbe>()->canonical_name()
-                    == "xo::ut::{anonymous}::ShortNameProbe");
+                    == std::string(xo::reflect::type_name<ShortNameProbe>()));
         }
     } /*namespace ut*/
 } /*namespace xo*/
