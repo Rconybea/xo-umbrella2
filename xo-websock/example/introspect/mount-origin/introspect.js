@@ -698,6 +698,38 @@ let draw_seq = 0;
 // unanchored redraws (Refresh), so they don't jump; Show all / Hide all
 // reset it.
 
+// ----- transitions (issue 13, step 3) ------------------------------------
+//
+// A redraw animates: leaving boxes, rows and edges fade out (t_fade, while
+// ELK lays out); boxes slide to their new places and outlines resize
+// (t_move); then arriving boxes, rows and the edges' new routes fade in
+// (t_show).  A new draw interrupts the last one's transitions and goes on
+// from where things are.  Edges fade rather than morph: old and new routes
+// have different bends, and morphing polylines makes spaghetti.
+
+const t_fade = 120;
+const t_move = 350;
+const t_show = 150;
+
+/** when the latest draw's transitions end (performance.now() ms) **/
+let settled_at = 0;
+
+/** a promise that resolves once the latest draw's transitions have ended --
+ *  for tests, which would otherwise read positions mid-move
+ **/
+function settled() {
+    return new Promise(function wait(resolve) {
+        const left = settled_at - performance.now();
+        if (left <= 0 && pending_draws === 0)
+            resolve(true);
+        else
+            setTimeout(() => wait(resolve), Math.max(left, 20));
+    });
+}
+
+/** draws started and not yet placed (ELK still laying out) **/
+let pending_draws = 0;
+
 /** the box the next draw keeps in place; consumed by that draw **/
 let pending_anchor = null;
 /** the drawing's offset within the svg, kept between draws **/
@@ -716,6 +748,15 @@ for (const type of ["click", "keydown"])   // keydown: Enter / arrows on a focus
     }, true);   // capture: before the handler that redraws
 
 async function draw(event) {
+    ++pending_draws;
+    try {
+        await draw_aux(event);
+    } finally {
+        --pending_draws;
+    }
+}
+
+async function draw_aux(event) {
     const seq = ++draw_seq;
     const anchor = pending_anchor;
     pending_anchor = null;
@@ -755,7 +796,9 @@ async function draw(event) {
     const node = node_layer.selectAll("g.node")
         .data(nodes, d => d.id)
         .join(enter => {
-            const g = enter.append("g");
+            // invisible until placed, then faded in (see 3.).  Marked by a
+            // property, not a class: the class attribute is rewritten below
+            const g = enter.append("g").property("__arriving", true).style("opacity", 0);
             g.append("title");   // the type and its source; see below
             g.append("rect");
             g.append("text").attr("class", "label").attr("x", 12).attr("y", 25);
@@ -774,7 +817,18 @@ async function draw(event) {
             b.append("circle").attr("r", badge_r);
             b.append("text").attr("text-anchor", "middle").attr("dy", "0.35em");
             return g;
-        });
+        },
+        update => update,
+        // leaving: fade out, then gone; inert meanwhile
+        exit => exit.classed("leaving", true).interrupt("move")
+                    .transition("fade").duration(t_fade).style("opacity", 0).remove());
+    // one that was leaving and is back: stop its fade
+    node.filter(function () { return this.classList.contains("leaving"); })
+        .classed("leaving", false).interrupt("fade").style("opacity", null);
+
+    // edges fade out while ELK lays out; the new routes fade in after (4.)
+    edge_layer.selectAll("path.edge").interrupt("fade")
+        .transition("fade").duration(t_fade).style("opacity", 0);
 
     // which boxes can open, and their member rows
     for (const d of nodes) {
@@ -813,7 +867,7 @@ async function draw(event) {
         const box_el = this.parentNode;
         const rows = d3.select(this).selectAll("text.row")
               .data(d.rows, r => r.key)
-              .join("text");
+              .join(enter => enter.append("text").property("__arriving", true).style("opacity", 0));
 
         rows.attr("class", r => `row ${r.cls}` + (r.expandable ? " expandable" : ""))
             .attr("x", r => 12 + row_indent * r.depth)
@@ -964,15 +1018,18 @@ async function draw(event) {
         g.select(":scope > text.kids").attr("y", head_h / 2 + 5);
         tri_buttons(g.select(":scope > g.rows"));
         d.h = head_h + (d.rows.length ? d.rows.length * row_h + row_pad : 0);
-        g.select("rect").attr("width", d.w).attr("height", d.h);
+        // resize: animated, but for a box not yet on screen
+        const animate = (sel) => this.__arriving ? sel
+              : sel.transition("size").duration(t_move);
+        animate(g.select("rect")).attr("width", d.w).attr("height", d.h);
 
         // refcount: how many rp<> hold this object; red if the snapshot
         // does not account for every hold
         const extra = (d.refcount === undefined) ? 0 : d.refcount - d.expected;
         const badge = g.select("g.badge")
             .attr("display", d.refcount === undefined ? "none" : null)
-            .classed("unaccounted", extra !== 0)
-            .attr("transform", `translate(${d.w},0)`);
+            .classed("unaccounted", extra !== 0);
+        animate(badge).attr("transform", `translate(${d.w},0)`);
         badge.select("text").text(d.refcount);
         badge.selectAll("title").data([0]).join("title")
             .text(extra === 0
@@ -1057,7 +1114,20 @@ async function draw(event) {
         d.x = c.x + pad + shift.x;
         d.y = c.y + pad + badge_r + shift.y;
     }
-    node.attr("transform", d => `translate(${d.x},${d.y})`);
+    // boxes already on screen slide there; new ones appear there, then fade in
+    const arriving = node.filter(function () { return this.__arriving; });
+    const staying = node.filter(function () { return !this.__arriving; });
+    arriving.interrupt("move").attr("transform", d => `translate(${d.x},${d.y})`);
+    staying.transition("move").duration(t_move).ease(d3.easeCubicInOut)
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+    arriving.property("__arriving", false)
+        .transition("fade").delay(t_move).duration(t_show).style("opacity", 1);
+    // rows that appeared: fade in once their box has grown
+    node.selectAll(":scope > g.rows > text.row").filter(function () { return this.__arriving; })
+        .property("__arriving", false)
+        .transition("fade").delay(t_move).duration(t_show).style("opacity", 1);
+    // + slack: d3 starts the transitions on its next timer tick
+    settled_at = performance.now() + t_move + t_show + 50;
     drawn_at = new Map(nodes.map(d => [d.id, {x: d.x, y: d.y}]));
 
     // to scroll by scroll_by the page must reach that far: grow the svg
@@ -1068,8 +1138,13 @@ async function draw(event) {
         svg_min.w = Math.max(svg_min.w, to.x + window.innerWidth - (r.left + window.scrollX));
     if (scroll_by.y > 0)
         svg_min.h = Math.max(svg_min.h, to.y + window.innerHeight - (r.top + window.scrollY));
-    svg.attr("width", Math.max(900, laid.width + 2 * pad + badge_r + shift.x, svg_min.w))
-       .attr("height", Math.max(laid.height + 2 * pad + badge_r + shift.y, svg_min.h));
+    // grow now, shrink only once things have moved -- nothing clipped mid-move
+    const w = Math.max(900, laid.width + 2 * pad + badge_r + shift.x, svg_min.w);
+    const h = Math.max(laid.height + 2 * pad + badge_r + shift.y, svg_min.h);
+    svg.attr("width", Math.max(w, +svg.attr("width") || 0))
+       .attr("height", Math.max(h, +svg.attr("height") || 0));
+    setTimeout(() => { if (seq === draw_seq) svg.attr("width", w).attr("height", h); },
+               t_move + t_show);
     if (scroll_by.x || scroll_by.y)
         window.scrollTo(to.x, to.y);
 
@@ -1086,9 +1161,13 @@ async function draw(event) {
 
     // ownership edges (link, owns) only order the layers: not drawn, but
     // for a wanted fallback
-    edge_layer.selectAll("path.edge")
+    const paths = edge_layer.selectAll("path.edge")
         .data(routed.filter(d => (d.kind !== "link" && d.kind !== "owns") || d.drawn), d => d.key)
-        .join("path")
+        .join("path");
+    // the new routes fade in once the boxes have moved
+    paths.interrupt("fade").style("opacity", 0)
+        .transition("fade").delay(t_move).duration(t_show).style("opacity", 1);
+    paths
         .attr("class", d => `edge ${d.kind}`)
         .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad + shift.x},${p.y + pad + badge_r + shift.y}`).join(" "))
         // a member edge: hovering it lights its row too

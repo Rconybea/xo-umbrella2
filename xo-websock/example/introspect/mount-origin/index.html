@@ -48,6 +48,7 @@
     path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; }
     text.row.hot .mname { fill: #e0730b; }
     .node:focus { outline: none; }
+    .node.leaving { pointer-events: none; }   /* fading out: not clickable */
     .mbtn { cursor: pointer; }
     /* plain until hovered; the transparent fill still takes the click */
     .mbtn rect { fill: #fff; fill-opacity: 0; stroke: none; }
