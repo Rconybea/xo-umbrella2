@@ -261,7 +261,8 @@ const expanded = new Set();
 //   ▸ / ▾ on a ref row    want / unwant its edge
 //   ▸n / ▾ beside a box   want its edges to all its children (n undrawn) /
 //                         hide those children; ArrowRight / ArrowLeft too
-//   menu "Show ▸ <child>" want the edge to that child
+//   menu "Show ▸ <child>" want the edge to that child (a child not drawn)
+//   menu "Hide ▸ <child>" hide that child, as its own "Hide" (a child drawn)
 //   menu "Hide"           unwant every edge into this box
 //   collapse a box        unwant every edge out of it -- what was reached
 //                         only through them goes (a member row closing
@@ -963,9 +964,10 @@ function menu_items(d) {
          () => toggle_children(d.id), d.n_children ? null : "owns no boxes"],
         ["Hide", () => { hide_box(d.id); redraw(); },
          d.id === "server" ? "the Webserver box is always shown" : null],
-        // one entry per hidden child
-        ...(d.children || []).filter(k => !shown_box_ids.has(k)).map(k =>
-            [`Show ▸ ${box_label.get(k) || k}`, () => { const key = child_edge(d.id, k);
+        // one entry per child, in ownership order: Hide if drawn, else Show
+        ...(d.children || []).map(k => shown_box_ids.has(k)
+            ? [`Hide ▸ ${box_label.get(k) || k}`, () => { hide_box(k); redraw(); }, null]
+            : [`Show ▸ ${box_label.get(k) || k}`, () => { const key = child_edge(d.id, k);
                                                          if (key) wanted.add(key); redraw(); }, null]),
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
