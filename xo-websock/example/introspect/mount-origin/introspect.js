@@ -437,6 +437,9 @@ function show_all_children(on) {
 }
 
 const row_h = 18;          // a member row
+const mbtn_w = 21;         // the menu button after a box's label: square
+const mbtn_h = 21;
+const mbtn_gap = 8;        // between label and menu button
 const row_indent = 14;     // a nested member row, further right per level
 const in_port_x = 24;      // a member edge enters a box this far from its left
 
@@ -662,6 +665,13 @@ async function draw(event) {
             g.append("title");   // the type and its source; see below
             g.append("rect");
             g.append("text").attr("class", "label").attr("x", 12).attr("y", 25);
+            // menu button, just after the label: left-click opens the box menu
+            const mb = g.append("g").attr("class", "mbtn");
+            mb.append("rect").attr("width", mbtn_w).attr("height", mbtn_h).attr("rx", 3);
+            // three dots, drawn: the "⋯" glyph is tiny in the monospace font
+            for (const dx of [-5, 0, 5])
+                mb.append("circle").attr("cx", mbtn_w / 2 + dx).attr("cy", mbtn_h / 2).attr("r", 1.6);
+            mb.append("title").text("menu");
             g.append("g").attr("class", "rows");
             // children toggle, left of the box (only where it owns any)
             g.append("text").attr("class", "kids").attr("text-anchor", "end").attr("x", -4);
@@ -683,9 +693,15 @@ async function draw(event) {
 
     node.attr("class", d => `node ${d.kind}` + (d.expandable ? " expandable" : "")
               + (d.open ? " open" : ""));
-    // members closed: a trailing ⋯ says there are some (the ▸/▾ is children's)
-    node.select(":scope > text.label")
-        .text(d => d.label + (d.expandable && !d.open ? "  ⋯" : ""));
+    node.select(":scope > text.label").text(d => d.label);
+
+    // the menu button: opens the box menu below it; not a click on the box
+    node.select(":scope > g.mbtn").on("click", function (ev, d) {
+        ev.stopPropagation();
+        const r = this.getBoundingClientRect();
+        show_menu(r.left + window.scrollX, r.bottom + window.scrollY + 2,
+                  d.type || d.label, menu_items(d), this.parentNode);
+    });
 
     node.select(":scope > text.kids")
         .attr("display", d => d.n_children ? null : "none")
@@ -807,7 +823,10 @@ async function draw(event) {
         const head_h = d.small ? 30 : box_h;
         g.select(":scope > text.label").attr("y", d.small ? 20 : 25);
 
-        d.w = g.select(":scope > text.label").node().getComputedTextLength() + 24;
+        const label_w = g.select(":scope > text.label").node().getComputedTextLength();
+        g.select(":scope > g.mbtn")
+            .attr("transform", `translate(${12 + label_w + mbtn_gap},${(head_h - mbtn_h) / 2})`);
+        d.w = 12 + label_w + mbtn_gap + mbtn_w + 12;
         const texts = g.selectAll(":scope > g.rows > text.row");
         texts.each(function (r, i) {
             d3.select(this).attr("y", head_h + i * row_h + 13);

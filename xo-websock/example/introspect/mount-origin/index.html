@@ -11,15 +11,15 @@
     #status { color: #666; margin-left: 0.8em; }
     #srcinfo { color: #666; font-size: 13px; margin-top: 0.4em; }
     svg { border: 1px solid #ccc; background: #fafafa; margin-top: 1em; display: block; }
-    .node rect { stroke-width: 1.5px; rx: 6px; }
-    .node.server rect { fill: #e8f0fe; stroke: #4a6fa5; }
-    .node.http rect   { fill: #fdf3e1; stroke: #b07d2b; }
-    .node.stream rect { fill: #e7f5ea; stroke: #3c8a4f; }
-    .node.session rect { fill: #f3e8fb; stroke: #7a4fa0; }
-    .node.closed rect  { stroke-dasharray: 4 3; opacity: 0.6; }
-    .node.subscription rect { fill: #fff; stroke: #7a4fa0; }
-    .node.sender rect { fill: #fdf6e3; stroke: #8a7a3a; }
-    .node.astray rect { stroke: #c0392b; stroke-width: 2.5px; }
+    .node > rect { stroke-width: 1.5px; rx: 6px; }
+    .node.server > rect { fill: #e8f0fe; stroke: #4a6fa5; }
+    .node.http > rect   { fill: #fdf3e1; stroke: #b07d2b; }
+    .node.stream > rect { fill: #e7f5ea; stroke: #3c8a4f; }
+    .node.session > rect { fill: #f3e8fb; stroke: #7a4fa0; }
+    .node.closed > rect  { stroke-dasharray: 4 3; opacity: 0.6; }
+    .node.subscription > rect { fill: #fff; stroke: #7a4fa0; }
+    .node.sender > rect { fill: #fdf6e3; stroke: #8a7a3a; }
+    .node.astray > rect { stroke: #c0392b; stroke-width: 2.5px; }
     .node.sender text { font-size: 12px; }
     .node.subscription text { font-size: 12px; }
     g.badge circle { fill: #fff; stroke: #555; stroke-width: 1.2px; }
@@ -31,8 +31,8 @@
     .node.expandable { cursor: pointer; }
     text.kids { font-size: 13px; fill: #555; cursor: pointer; font-family: ui-monospace, monospace; }
     text.kids:hover { fill: #000; }
-    .node.expandable:hover rect { stroke-width: 3px; }
-    .node.open rect { fill-opacity: 0.6; }
+    .node.expandable:hover > rect { stroke-width: 3px; }
+    .node.open > rect { fill-opacity: 0.6; }
     text.row { font-size: 12px; font-family: ui-monospace, monospace; fill: #333; }
     text.row.expandable { cursor: pointer; }
     text.row.error { fill: #aaa; }
@@ -46,7 +46,13 @@
     path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; }
     text.row.hot .mname { fill: #e0730b; }
     .node:focus { outline: none; }
-    .node:focus rect { stroke-width: 3px; stroke-dasharray: 3 2; }
+    .mbtn { cursor: pointer; }
+    /* plain until hovered; the transparent fill still takes the click */
+    .mbtn rect { fill: #fff; fill-opacity: 0; stroke: none; }
+    /* hovered: borderless, white, part-transparent -- tinted by the box beneath */
+    .mbtn:hover rect { fill: #fff; fill-opacity: 0.85; }
+    .mbtn circle { fill: #555; }
+    .node:focus > rect { stroke-width: 3px; stroke-dasharray: 3 2; }
     #ctxmenu { position: absolute; z-index: 10; min-width: 12em; background: #fff;
                border: 1px solid #bbb; border-radius: 6px; padding: 4px 0;
                box-shadow: 0 4px 14px rgba(0,0,0,0.18); font-size: 13px; }
