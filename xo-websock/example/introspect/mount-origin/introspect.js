@@ -132,6 +132,16 @@ refresh_btn.onclick = refresh;
 document.getElementById("show-all").onclick = () => show_all_children(true);
 document.getElementById("hide-all").onclick = () => show_all_children(false);
 
+/** member rows show their types inline -- name: Type [metatype] = value --
+ *  else just name = value, the type on the name's tooltip and row menu
+ **/
+let show_types = false;
+document.getElementById("show-types").onchange = (ev) => {
+    show_types = ev.target.checked;
+    if (last_event)
+        draw(last_event);
+};
+
 // layout: automatic, by ELK (elkjs, its layered algorithm) -- the page builds
 // the object graph (boxes and edges) from the snapshot; ELK places the boxes,
 // sized to their content, and routes the edges.  Hand-placed columns could
@@ -687,8 +697,9 @@ async function draw(event) {
         .text(d => d.kids_open ? "hide its children"
               : `show its children (${d.n_hidden} of ${d.n_children} hidden)`);
 
-    // the member rows: name: Type [metatype] = value
+    // the member rows: name = value; with "types", name: Type [metatype] = value
     node.select(":scope > g.rows").each(function (d) {
+        const box_el = this.parentNode;
         const rows = d3.select(this).selectAll("text.row")
               .data(d.rows, r => r.key)
               .join("text");
@@ -702,30 +713,34 @@ async function draw(event) {
             const t = d3.select(this);
             t.selectAll("*").remove();
 
-            // an array element has no declared type: name = value
-            if (!r.m._canonical_type_) {
-                t.append("tspan").attr("class", "mname").text(r.m._name_);
-                t.append("tspan").attr("class", "mval").text(" = ");
-                append_ref_toggle(t, r);
-                t.append("tspan").attr("class", "mval").text(r.val);
-                return;
+            const typed = !!r.m._canonical_type_;   // an array element has no declared type
+            const s = typed ? source_of(r.m._canonical_type_) : null;
+
+            // the name: hover for its type; ctrl/cmd-click to open its source
+            t.append("tspan")
+                .attr("class", "mname" + (s && s.href ? " linked" : ""))
+                .text(typed && show_types ? `${r.m._name_}: ` : r.m._name_)
+                .on("click", (ev) => {
+                    if ((ev.ctrlKey || ev.metaKey) && s && s.href) {
+                        ev.stopPropagation();
+                        window.open(s.href, "_blank");
+                    }
+                })
+                .append("title").text(row_tooltip(r));
+
+            if (typed && show_types) {
+                t.append("tspan")
+                    .attr("class", "mtype" + (s && s.href ? " linked" : ""))
+                    .text(r.m._short_type_ || r.m._canonical_type_)
+                    .on("click", (ev) => {
+                        ev.stopPropagation();
+                        if (s && s.href)
+                            window.open(s.href, "_blank");
+                    })
+                    .append("title").text(row_tooltip(r));
+                t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             }
 
-            t.append("tspan").attr("class", "mname").text(`${r.m._name_}: `);
-
-            const s = source_of(r.m._canonical_type_);
-            t.append("tspan")
-                .attr("class", "mtype" + (s && s.href ? " linked" : ""))
-                .text(r.m._short_type_ || r.m._canonical_type_)
-                .on("click", (ev) => {
-                    ev.stopPropagation();
-                    if (s && s.href)
-                        window.open(s.href, "_blank");
-                })
-                .append("title")
-                .text(r.m._canonical_type_ + (s ? `\n${s.file}:${s.line}` : "\n(no source location)"));
-
-            t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             t.append("tspan").attr("class", "mval").text(" = ");
             append_ref_toggle(t, r);
             t.append("tspan").attr("class", "mval").text(r.val);
@@ -733,8 +748,15 @@ async function draw(event) {
 
         rows.on("click", (ev, r) => {
             ev.stopPropagation();
-            if (r.expandable)
+            if (r.expandable && !ev.ctrlKey && !ev.metaKey)
                 toggle(r.key);
+        });
+
+        // right-click a row: its own menu, not the box's
+        rows.on("contextmenu", (ev, r) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            show_menu(ev.pageX, ev.pageY, row_menu_head(r), row_menu_items(r), box_el);
         });
     });
 
@@ -774,7 +796,7 @@ async function draw(event) {
 
              show_menu(at_box ? r.left + window.scrollX + 10 : ev.pageX,
                        at_box ? r.bottom + window.scrollY : ev.pageY,
-                       d, this);
+                       d.type || d.label, menu_items(d), this);
          });
     });
 
@@ -996,16 +1018,63 @@ function menu_items(d) {
     ];
 }
 
-function show_menu(x, y, d, owner) {
+/** member row @p r's tooltip: its type, metatype, canonical type and
+ *  source location -- what the row no longer shows inline
+ **/
+function row_tooltip(r) {
+    if (!r.m._canonical_type_)
+        return r.m._name_;
+
+    const s = source_of(r.m._canonical_type_);
+    return `${r.m._name_}: ${r.m._short_type_ || r.m._canonical_type_}  [${r.m._metatype_ || "?"}]`
+        + `\n${r.m._canonical_type_}`
+        + (s ? `\n${s.file}:${s.line}` : "\n(no source location)")
+        + (s && s.href ? "\nctrl-click: open source" : "");
+}
+
+/** member row @p r's menu heading: name: Type **/
+function row_menu_head(r) {
+    return r.m._canonical_type_ ? `${r.m._name_}: ${r.m._short_type_ || r.m._canonical_type_}`
+        : r.m._name_;
+}
+
+/** member row @p r's menu items: [label, action, reason-if-disabled] **/
+function row_menu_items(r) {
+    const t = r.m._canonical_type_;
+    const s = source_of(t);
+    const no_source = !t ? "no declared type"
+          : !s ? "no source location"
+          : !s.href ? "no link provider" : null;
+
+    const items = [
+        ["Open source", () => window.open(s.href, "_blank"), no_source],
+        ["Copy type name", () => copy_text(t), t ? null : "no declared type"],
+    ];
+    if (r.expandable)
+        items.push([r.open ? "Collapse" : "Expand", () => toggle(r.key), null]);
+    if (r.ref_box) {
+        const label = box_label.get(r.ref_box) || r.ref_box;
+        items.push(wanted.has(r.key)
+                   ? [`Hide ▸ ${label}`, () => { wanted.delete(r.key); redraw(); }, null]
+                   : [`Show ▸ ${label}`, () => { wanted.add(r.key); redraw(); }, null]);
+    }
+    return items;
+}
+
+/** open the context menu at page position @p x, @p y: heading @p head,
+ *  items @p items ([label, action, reason-if-disabled]); focus returns to
+ *  @p owner on close
+ **/
+function show_menu(x, y, head_text, items, owner) {
     menu_owner = owner;
     menu_el.replaceChildren();
 
     const head = document.createElement("div");
     head.className = "ctxhead";
-    head.textContent = d.type || d.label;
+    head.textContent = head_text;
     menu_el.appendChild(head);
 
-    for (const [label, action, disabled] of menu_items(d)) {
+    for (const [label, action, disabled] of items) {
         const b = document.createElement("button");
         b.textContent = label;
         b.disabled = !!disabled;
