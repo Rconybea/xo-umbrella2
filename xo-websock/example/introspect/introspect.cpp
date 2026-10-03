@@ -19,8 +19,9 @@
  *    5a-5d. the snapshot is the server itself, printed by xo-websock's
  *       native json printers: each object once, others by ref, with ids and
  *       refcounts, so the page draws how the objects share each other
- *    5e. plus the application's own ticker, whose holds on sinks complete
- *       the refcounts
+ *    5e. plus the application's own holds on sinks (the ticker's), which
+ *       complete the refcounts -- reported as ids only, not drawn (the
+ *       ticker box was dropped, .xo-backlog/xo-websock/issues/13)
  *
  *  The page files live in mount-origin/ beside the executable (cmake copies
  *  them there); found from the executable's own location, so this runs from
@@ -60,6 +61,7 @@
 #include <xo/reflect/cx/ReflectAppcx.hpp>
 #include <xo/websock/WebsocketSink.hpp>
 #include <xo/printjson/JsonPrinter.hpp>
+#include <xo/printjson/JsonMembers.hpp>   /* json::json_id */
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
@@ -167,11 +169,11 @@ namespace xo {
             std::int64_t n_tick_ = 0;
         };
 
-        /** what the page is told: the server itself, and the application's
-         *  own object holding server objects -- the ticker, whose sinks count
-         *  in their refcounts.  PrintJson follows each pointer to its
-         *  printer: Webserver's (installed by WebsockAppcx), Ticker's
-         *  (JsonPrinter_Ticker, below, installed by main)
+        /** what the page is told: the server itself; and, for refcount
+         *  accounting only, the ids of the sinks the application holds (the
+         *  ticker's) -- holds the server's json cannot show.  PrintJson
+         *  follows the server pointer to its printer (installed by
+         *  WebsockAppcx)
          **/
         struct IntrospectSnapshot {
             static void reflect_self() {
@@ -179,52 +181,13 @@ namespace xo {
 
                 if (sr.is_incomplete()) {
                     REFLECT_MEMBER(sr, server);
-                    REFLECT_MEMBER(sr, ticker);
+                    REFLECT_MEMBER(sr, app_holds);
                 }
             }
 
             Webserver * server_ = nullptr;
-            Ticker * ticker_ = nullptr;
-        };
-
-        /** @brief the ticker: an application object, so the application
-         *  prints it.  Its sinks are refs -- each is printed in full under
-         *  its subscription, in the server's json
-         **/
-        class JsonPrinter_Ticker : public JsonPrinter {
-        public:
-            JsonPrinter_Ticker(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                Ticker const * ticker = this->check_recover_native<Ticker>(tp, p_os);
-
-                if (!ticker)
-                    return;
-
-                *p_os << "{" << quot("_name_") << ": " << quot("Ticker")
-                      << ", " << quot("_type_") << ": " << quot(xo::reflect::type_name<Ticker>())
-                      << ", " << quot("id") << ": " << quot(address_of(ticker))
-                      << ", " << quot("sinks") << ": [";
-
-                bool first = true;
-                ticker->visit_sinks([p_os, &first](WebsocketSink const & sink) {
-                        if (!first)
-                            *p_os << ", ";
-                        first = false;
-
-                        /* same string as the sink's own id: the page joins them */
-                        *p_os << "{" << quot("ref") << ": " << quot(address_of(&sink)) << "}";
-                    });
-
-                *p_os << "]}";
-            }
-
-        private:
-            static std::string address_of(void const * p) {
-                std::ostringstream ss;
-                ss << p;
-                return ss.str();
-            }
+            /** one id per hold, the same string as the sink's own "id" **/
+            std::vector<std::string> app_holds_;
         };
 
         /** answers {"cmd": "send", "msg": "refresh"} with a snapshot, on the
@@ -241,7 +204,10 @@ namespace xo {
 
                 IntrospectSnapshot snap;
                 snap.server_ = websrv_;
-                snap.ticker_ = ticker_;
+                /* by most-derived address: the id the sink's printer writes */
+                ticker_->visit_sinks([&snap](WebsocketSink const & s) {
+                        snap.app_holds_.push_back(xo::json::json_id(dynamic_cast<void const *>(&s)));
+                    });
 
                 sink->notify_ev_tp(Reflect::make_tp(&snap));
             }
@@ -556,16 +522,8 @@ main(int argc, char * argv[])
 
     IntrospectSnapshot::reflect_self();
 
-    /* the application's own printer, beside the ones WebsockAppcx installed */
-    {
-        PrintJson * pjson = app_cx.cx<S_printjson_tag>().print_json();
-
-        pjson->provide_printer(Reflect::require<xo::web::Ticker>(),
-                               std::make_unique<xo::web::JsonPrinter_Ticker>(pjson));
-    }
-
     /* the ticker: each /demo subscriber gets a counter once a second.  Made
-     * before /introspect, whose receiver reports it
+     * before /introspect, whose receiver reports its holds
      */
     auto ticker = std::make_shared<xo::web::Ticker>();
 

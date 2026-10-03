@@ -5,7 +5,7 @@
 //   <- {"cmd": "subscribed", "stream": "/introspect", "sub_id": N}
 //   -> {"cmd": "send", "sub_id": N, "msg": "refresh"}
 //   <- {"stream": "/introspect", "sub_id": N, "seq": k,
-//       "event": {"server": <Webserver json>, "ticker": <Ticker json>}}
+//       "event": {"server": <Webserver json>, "app_holds": [sink id, ..]}}
 //
 // Webserver json: {id, refcount, listen_port, state,
 //            endpoints: [{id, refcount, kind, stem, pattern, has_receive}],
@@ -19,7 +19,8 @@
 // Each object is printed in full once; elsewhere as {ref: id}.  The page
 // joins refs to objects by id.
 //
-// Ticker json: {id, sinks: [{ref}]} -- the application's own holds.
+// app_holds: the ids of the sinks the application holds (the example's
+// ticker), for refcount accounting only -- not drawn.
 //
 // Source links (.xo-backlog/xo-websock/issues/12): every object carries
 // _type_, its C++ type's canonical name.  /dyn/types maps a type -- template
@@ -36,7 +37,7 @@
 // Refcount accounting: each refcount is compared with the holds the page can
 // see.  An endpoint is held by the router's map + each subscription to it; a
 // sender by its session record + router + each sink; a sink by the router's
-// slot + each application ref (the ticker).  More than that is flagged: a
+// slot + each application hold (app_holds).  More than that is flagged: a
 // hold the snapshot does not show.
 
 "use strict";
@@ -139,11 +140,9 @@ const elk = new ELK();
  *  "link"  the server's endpoints and sessions
  *  "owns"  a session's sender and subscriptions
  *  "uses"  a subscription -> the stream endpoint it holds
- *  "holds" the application (ticker) -> a subscription whose sink it holds
  **/
 function layout(event) {
     const snap = event.server;
-    const ticker = event.ticker;
 
     const nodes = [];
     const edges = [];
@@ -198,30 +197,14 @@ function layout(event) {
         }
     }
 
-    // the application's ticker: a "holds" edge to each subscription whose
-    // sink it refers to
-    if (ticker) {
-        nodes.push({id: "ticker", kind: "app", label: "Ticker (app)",
-                    type: ticker._type_, obj: ticker});
-
-        const sub_of_sink = {};
-        for (const s of (snap.sessions || []))
-            for (const sub of (s.subscriptions || []))
-                if (sub.sink) sub_of_sink[sub.sink.id] = `session:${s.session_id}:sub:${sub.sub_id}`;
-
-        for (const r of (ticker.sinks || []))
-            if (sub_of_sink[r.ref])
-                edge("ticker", sub_of_sink[r.ref], "holds");
-    }
-
     // refcount accounting: the holds this snapshot shows, per object
     const expect = {};   // node id -> expected refcount
     const bump = (k, n) => { expect[k] = (expect[k] || 0) + n; };
     for (const ep of (snap.endpoints || []))
         bump(endpoint_node[ep.id], 1);                       // router's map
     const app_refs = {};
-    for (const r of ((ticker && ticker.sinks) || []))
-        app_refs[r.ref] = (app_refs[r.ref] || 0) + 1;
+    for (const id of (event.app_holds || []))
+        app_refs[id] = (app_refs[id] || 0) + 1;
     for (const s of (snap.sessions || [])) {
         const sid = `session:${s.session_id}`;
         bump(`${sid}:sender`, 2);                            // record + router
@@ -616,7 +599,7 @@ async function draw(event) {
                                    x: d.w, y: d.head_h + i * row_h + row_h / 2,
                                    layoutOptions: {"elk.port.side": "EAST"}})),
         })),
-        // ownership (link, owns) decides top-to-bottom; uses / holds / member
+        // ownership (link, owns) decides top-to-bottom; uses / member
         // edges follow it.  Without this an expanded box's ref edge could
         // invert the layering -- e.g. a session's router's url_router_ (in
         // the server box) put the session above the server
