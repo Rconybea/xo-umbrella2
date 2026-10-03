@@ -66,6 +66,17 @@ namespace xo {
 
             /* a member pointer keeps its class */
             REQUIRE(short_of("int a::Foo::*") == "int Foo::*");
+
+            /* pointers and references read the same from either compiler:
+             * gcc writes "Foo*", "const Foo&"; clang "Foo *", "const Foo &"
+             */
+            REQUIRE(short_of("a::Foo*") == "Foo*");
+            REQUIRE(short_of("a::Foo *") == "Foo*");
+            REQUIRE(short_of("const a::Foo&") == "const Foo&");
+            REQUIRE(short_of("const a::Foo &") == "const Foo&");
+            REQUIRE(short_of("a::Foo &&") == "Foo&&");
+            REQUIRE(short_of("std::vector<a::Foo *>") == "vector<Foo*>");
+            REQUIRE(short_of("std::function<void (const a::Foo &)>") == "function<void (const Foo&)>");
         }
 
         TEST_CASE("short-name-reflected", "[reflect][short_name]") {

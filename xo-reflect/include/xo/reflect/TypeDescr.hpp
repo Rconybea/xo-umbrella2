@@ -527,7 +527,9 @@ namespace xo {
              *  - xo::ref::intrusive_ptr<T> as rp<T>, as xo code writes it;
              *  - no standard-library default template arguments
              *    (allocator, char_traits, default_delete, hash, equal_to, less);
-             *  - basic_string<char> as string;  no space before '>'.
+             *  - basic_string<char> as string;
+             *  - no space before '>', '*' or '&' -- the same whichever compiler
+             *    spelled .canonical_name ("Foo *" under clang, "Foo*" under gcc).
              *  e.g.
              *    xo::option::Px2                                   -> Px2
              *    xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>  -> rp<DynamicEndpoint>

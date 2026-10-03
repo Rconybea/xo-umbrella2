@@ -331,11 +331,14 @@ namespace xo {
                 return s;
             }
 
-            /** @p s without whitespace before '>': "a<b<c> >" -> "a<b<c>>" **/
+            /** @p s without whitespace before '>', '*' or '&', which compilers
+             *  space differently: "a<b<c> >" -> "a<b<c>>" (gcc),
+             *  "Foo *" -> "Foo*", "const Foo &" -> "const Foo&" (clang)
+             **/
             std::string tighten(std::string s) {
                 std::string out;
                 for (char c : s) {
-                    if (c == '>')
+                    if ((c == '>') || (c == '*') || (c == '&'))
                         while (!out.empty() && (out.back() == ' '))
                             out.pop_back();
                     out.push_back(c);

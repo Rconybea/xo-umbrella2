@@ -128,10 +128,10 @@ namespace xo {
 
             REQUIRE(ss.str() == ", \"_members_\": ["
                     "{\"_name_\": \"u_\", \"_canonical_type_\": \"" + type_of<JmUnreflected>()
-                    + "\", \"_short_type_\": \"JmUnreflected"
+                    + "\", \"_short_type_\": \"" + xo::reflect::TypeDescrBase::make_short_name(type_of<JmUnreflected>())
                     + "\", \"_metatype_\": \"atomic\", \"_error_\": \"" + why + "\"}, "
                     "{\"_name_\": \"pu_\", \"_canonical_type_\": \"" + type_of<JmUnreflected *>()
-                    + "\", \"_short_type_\": \"JmUnreflected*"
+                    + "\", \"_short_type_\": \"" + xo::reflect::TypeDescrBase::make_short_name(type_of<JmUnreflected *>())
                     + "\", \"_metatype_\": \"pointer\", \"_error_\": \"" + why + "\"}, "
                     + entry("n_", type_of<int>(), "atomic", "3") + "]");
         }
