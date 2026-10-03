@@ -4,6 +4,13 @@
  **/
 
 #include "UrlRouter.hpp"
+#include "DynamicEndpoint.hpp"
+#include "webserver_json.hpp"
+#include <xo/printjson/JsonPrinter.hpp>
+#include <xo/printjson/JsonMembers.hpp>
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflectutil/type_name.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* xtag(..) */
@@ -247,6 +254,61 @@ namespace xo {
              */
             StructReflector<UrlRouter> sr;
         } /*reflect_self*/
+        /** @brief the url router: its chosen C++ members
+         *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
+         *  namespace: UrlRouter's header befriends it by name.
+         *
+         *  Printed with an id, so a ref to it (a session router's
+         *  url_router_) can be joined to it.  Its endpoints are printed in
+         *  full in the server's endpoint list: refs here, keyed by stem,
+         *  sorted -- an unordered_map has no stable order
+         **/
+        class JsonPrinter_UrlRouter : public json::JsonPrinter {
+        public:
+            JsonPrinter_UrlRouter(json::PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            void print_json(reflect::TaggedPtr tp, std::ostream * p_os) const override {
+                using xo::pp::quot;
+                using xo::reflect::type_name;
+                using Entries = std::vector<std::pair<std::string, void const *>>;
+
+                UrlRouter const * r = this->check_recover_native<UrlRouter>(tp, p_os);
+
+                if (!r)
+                    return;
+
+                Entries http_v;
+                Entries stream_v;
+                {
+                    std::lock_guard<std::mutex> lock(r->mutex_);
+
+                    for (auto const & ix : r->http_map_)
+                        http_v.emplace_back(ix.first, ix.second.get());
+                    for (auto const & ix : r->stream_map_)
+                        stream_v.emplace_back(ix.first, ix.second.get());
+                }
+                std::sort(http_v.begin(), http_v.end());
+                std::sort(stream_v.begin(), stream_v.end());
+
+                *p_os << "{" << quot("_name_") << ": " << quot("UrlRouter")
+                      << ", " << quot("_type_") << ": " << quot(type_name<UrlRouter>())
+                      << ", " << quot("id") << ": " << quot(json_id(r));
+
+                json::JsonMembers mem(this->pjson(), p_os);
+                mem.member_ref_map<EndpointMap>("http_map_", http_v)
+                    .member_ref_map<EndpointMap>("stream_map_", stream_v);
+                mem.end();
+
+                *p_os << "}";
+            }
+        };
+
+        void
+        provide_url_router_json_printers(json::PrintJson * pjson)
+        {
+            pjson->provide_printer(reflect::Reflect::require<UrlRouter>(),
+                                   std::make_unique<JsonPrinter_UrlRouter>(pjson));
+        }
     } /*namespace web*/
 } /*namespace xo*/
 

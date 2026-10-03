@@ -126,6 +126,10 @@ namespace xo {
                           EndpointMap * p_ep_map);
 
         private:
+            /* reads private members, for "_members_" (UrlRouter.cpp) */
+            friend class JsonPrinter_UrlRouter;
+
+        private:
             /* guards .http_map, .stream_map */
             mutable std::mutex mutex_;
 

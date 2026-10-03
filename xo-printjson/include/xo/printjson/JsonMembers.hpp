@@ -13,6 +13,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace xo {
@@ -133,6 +134,20 @@ namespace xo {
                 return *this;
             }
 
+            /** member @p name, declared as type Declared, a map to objects
+             *  printed in full elsewhere: _value_ is a json object, key ->
+             *  {"ref": json_id(p)} or null, keys in the order given (sort
+             *  them, for an unordered container)
+             **/
+            template <typename Declared>
+            JsonMembers & member_ref_map(std::string_view name,
+                                         std::vector<std::pair<std::string, void const *>> const & kvs) {
+                this->write_ref_map(name, std::string(reflect::type_name<Declared>()),
+                                    metatype_of<Declared>(), kvs);
+
+                return *this;
+            }
+
             /** close the array **/
             void end();
 
@@ -162,6 +177,9 @@ namespace xo {
                            reflect::Metatype metatype, void const * p);
             void write_refs(std::string_view name, std::string const & declared,
                             reflect::Metatype metatype, std::vector<void const *> const & ps);
+            void write_ref_map(std::string_view name, std::string const & declared,
+                               reflect::Metatype metatype,
+                               std::vector<std::pair<std::string, void const *>> const & kvs);
             /** {"ref": json_id(@p p)}, or null **/
             void write_ref_value(void const * p);
             /** the separator and the entry's _name_, _type_, _metatype_ **/

@@ -102,6 +102,7 @@ namespace xo {
              */
             provide_webserver_json_printers(pjson);
             provide_router_json_printers(pjson);
+            provide_url_router_json_printers(pjson);
         }
     } /*namespace web*/
 } /*namespace xo*/

@@ -650,6 +650,9 @@ namespace xo {
                 REQUIRE(rnames == std::vector<std::string>{"url_router_", "sender_", "pjson_",
                                                            "readjson_", "subscription_v_"});
                 REQUIRE(rmem[0]["_metatype_"].asString() == "pointer");   /* a reference */
+                /* ... to the server's url router, printed inside the server */
+                REQUIRE(rmem[0]["_value_"]["ref"].asString()
+                        == root["_members_"][4]["_value_"]["id"].asString());
                 REQUIRE(rmem[1]["_value_"]["ref"].asString() == v[k]["sender"]["id"].asString());
                 REQUIRE(rmem[3]["_value_"].asString() == "set");
 

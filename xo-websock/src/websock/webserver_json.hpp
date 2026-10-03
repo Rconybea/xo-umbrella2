@@ -20,6 +20,7 @@ namespace xo {
     namespace web {
         void provide_webserver_json_printers(json::PrintJson * pjson);
         void provide_router_json_printers(json::PrintJson * pjson);
+        void provide_url_router_json_printers(json::PrintJson * pjson);
 
         /** an object's identity on the page: its address, as a json string.
          *  Unique within one snapshot; an address may be reused once its

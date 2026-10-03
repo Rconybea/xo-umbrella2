@@ -100,6 +100,23 @@ namespace xo {
         }
 
         void
+        JsonMembers::write_ref_map(std::string_view name, std::string const & declared,
+                                   Metatype metatype,
+                                   std::vector<std::pair<std::string, void const *>> const & kvs)
+        {
+            this->write_head(name, declared, metatype);
+
+            *p_os_ << ", " << quot("_value_") << ": {";
+            for (std::size_t i = 0, n = kvs.size(); i < n; ++i) {
+                if (i > 0)
+                    *p_os_ << ", ";
+                *p_os_ << quot(kvs[i].first) << ": ";
+                this->write_ref_value(kvs[i].second);
+            }
+            *p_os_ << "}}";
+        }
+
+        void
         JsonMembers::write_ref_value(void const * p)
         {
             if (p)

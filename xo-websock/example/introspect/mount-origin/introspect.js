@@ -257,10 +257,46 @@ const expanded = new Set();
 
 const row_h = 18;          // a member row
 
-/** ids of the objects drawn as boxes this draw: a ref to another object has
- *  no edge to draw, and says so
+/** object id -> the box drawing it this draw: a box's own object, or an
+ *  object printed nested inside a box (a member's value).  A ref to any
+ *  other object has no edge to draw, and says so
  **/
-let shown_ids = new Set();
+let box_of_id = new Map();
+
+/** a json object that is a ref: exactly {"ref": id} **/
+function is_ref(v) {
+    return !!v && typeof v === "object" && !Array.isArray(v)
+        && Object.keys(v).length === 1 && "ref" in v;
+}
+
+/** a json object that is a map of refs: no _name_, every value a ref or
+ *  null (JsonMembers::member_ref_map)
+ **/
+function is_ref_map(v) {
+    return !!v && typeof v === "object" && !Array.isArray(v) && !("_name_" in v)
+        && !is_ref(v) && Object.keys(v).length > 0
+        && Object.values(v).every(x => x === null || is_ref(x));
+}
+
+/** record, as drawn by box @p box_id, every object with an id printed
+ *  nested in member values @p members -- not overriding an object that has
+ *  a box of its own
+ **/
+function note_nested(members, box_id) {
+    const walk = (v) => {
+        if (Array.isArray(v)) {
+            v.forEach(walk);
+        } else if (v && typeof v === "object" && !is_ref(v)) {
+            if (typeof v.id === "string" && "_name_" in v && !box_of_id.has(v.id))
+                box_of_id.set(v.id, box_id);
+            if (Array.isArray(v._members_))
+                v._members_.forEach(m => walk(m._value_));
+            else if (!("_name_" in v))
+                Object.values(v).forEach(walk);
+        }
+    };
+    (members || []).forEach(m => walk(m._value_));
+}
 const row_pad = 8;         // below the last row
 
 /** @p t for display: without namespace qualifiers, anonymous namespaces
@@ -302,10 +338,15 @@ function member_rows(members, depth, path, out) {
                     && v.every(x => x === null || (typeof x === "object" && !Array.isArray(x)));
                 row.open = row.expandable && expanded.has(key);
                 val = (row.expandable ? (row.open ? "▾ " : "▸ ") : "") + `[${v.length}]`;
-            } else if (typeof v === "object" && Object.keys(v).length === 1 && "ref" in v) {
+            } else if (is_ref(v)) {
                 row.cls = "ref";
                 row.ref = v.ref;
-                val = shown_ids.has(v.ref) ? "→" : "→ (not drawn)";
+                val = box_of_id.has(v.ref) ? "→" : "→ (not drawn)";
+            } else if (is_ref_map(v)) {
+                // a map to objects printed elsewhere: a row per key
+                row.expandable = true;
+                row.open = expanded.has(key);
+                val = (row.open ? "▾ " : "▸ ") + `{${Object.keys(v).length}}`;
             } else if (typeof v === "object") {
                 row.expandable = has_members(v);
                 row.open = row.expandable && expanded.has(key);
@@ -325,6 +366,9 @@ function member_rows(members, depth, path, out) {
                 // element rows: no declared type of their own
                 member_rows(m._value_.map((x, i) => ({_name_: `[${i}]`, _value_: x})),
                             depth + 1, key, out);
+            } else if (is_ref_map(m._value_)) {
+                member_rows(Object.entries(m._value_).map(([k, x]) => ({_name_: `[${JSON.stringify(k)}]`, _value_: x})),
+                            depth + 1, key, out);
             } else {
                 member_rows(m._value_._members_, depth + 1, key, out);
             }
@@ -340,6 +384,16 @@ function toggle(key) {
 
     if (last_event)
         draw(last_event);
+}
+
+/** the box a ref row @p r of box @p d draws its edge to; null for none --
+ *  not a ref, not drawn, or into its own box
+ **/
+function ref_edge_target(d, r) {
+    if (!r.ref)
+        return null;
+    const target = box_of_id.get(r.ref);
+    return (target === undefined || target === d.id) ? null : target;
 }
 
 // a draw is asynchronous (ELK); a newer one supersedes an older one still
@@ -376,7 +430,10 @@ async function draw(event) {
         });
 
     // which boxes can open, and their member rows
-    shown_ids = new Set(nodes.filter(d => d.obj && d.obj.id).map(d => d.obj.id));
+    box_of_id = new Map(nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
+    for (const d of nodes)
+        if (d.obj)
+            note_nested(d.obj._members_, d.id);
     for (const d of nodes) {
         d.expandable = has_members(d.obj);
         d.open = d.expandable && expanded.has(d.id);
@@ -499,13 +556,14 @@ async function draw(event) {
                   : `refcount ${d.refcount}, ${d.expected} shown: ${extra} hold(s) not in this snapshot`);
     });
 
-    // a ref member's edge: from its row to the referenced object's box
-    const node_of_obj = new Map(nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
+    // a ref member's edge: from its row to the box drawing the referenced
+    // object -- its own box, or the box it is printed nested in
     for (const d of nodes)
-        for (const r of d.rows)
-            if (r.ref && node_of_obj.has(r.ref))
-                edges.push({source: `${r.key}#port`, target: node_of_obj.get(r.ref),
-                            kind: "member", from: d.id});
+        for (const r of d.rows) {
+            const target = ref_edge_target(d, r);
+            if (target !== null)
+                edges.push({source: `${r.key}#port`, target: target, kind: "member", from: d.id});
+        }
 
     // 2. ELK: layered, top to bottom; spacing leaves room for the badges
     const graph = {
@@ -522,12 +580,20 @@ async function draw(event) {
             id: d.id, width: d.w, height: d.h,
             // a ref member's edge leaves its row, on the box's right side
             layoutOptions: {"elk.portConstraints": "FIXED_POS"},
-            ports: d.rows.map((r, i) => ({r, i})).filter(x => x.r.ref && node_of_obj.has(x.r.ref))
+            ports: d.rows.map((r, i) => ({r, i})).filter(x => ref_edge_target(d, x.r) !== null)
                 .map(({r, i}) => ({id: `${r.key}#port`, width: 1, height: 1,
                                    x: d.w, y: d.head_h + i * row_h + row_h / 2,
                                    layoutOptions: {"elk.port.side": "EAST"}})),
         })),
-        edges: edges.map((e, i) => ({id: `e${i}`, sources: [e.source], targets: [e.target]})),
+        // ownership (link, owns) decides top-to-bottom; uses / holds / member
+        // edges follow it.  Without this an expanded box's ref edge could
+        // invert the layering -- e.g. a session's router's url_router_ (in
+        // the server box) put the session above the server
+        edges: edges.map((e, i) => ({
+            id: `e${i}`, sources: [e.source], targets: [e.target],
+            layoutOptions: {"elk.layered.priority.direction":
+                            (e.kind === "link" || e.kind === "owns") ? "10" : "0"},
+        })),
     };
 
     const laid = await elk.layout(graph);

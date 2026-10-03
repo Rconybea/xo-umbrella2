@@ -237,6 +237,26 @@ namespace xo {
                 REQUIRE(mem[2]["_value_"].asString() == "stopped");
                 REQUIRE(mem[4]["_type_"].asString() == "xo::web::UrlRouter");
                 REQUIRE(mem[4]["_value_"]["_type_"].asString() == "xo::web::UrlRouter");
+
+                /* the url router: an id, and its maps -- stem -> a ref to
+                 * the very endpoint printed in the server's list
+                 */
+                Json::Value const & ur = mem[4]["_value_"];
+                REQUIRE(ur["id"].isString());
+                REQUIRE(ur["_members_"][0]["_name_"].asString() == "http_map_");
+                REQUIRE(ur["_members_"][1]["_name_"].asString() == "stream_map_");
+
+                std::size_t n_refs = 0;
+                for (Json::Value const & ep : srv["endpoints"]) {
+                    Json::Value const & map
+                        = ur["_members_"][ep["kind"].asString() == "http" ? 0 : 1]["_value_"];
+
+                    INFO("stem " << ep["stem"].asString());
+                    REQUIRE(map[ep["stem"].asString()]["ref"].asString() == ep["id"].asString());
+                    ++n_refs;
+                }
+                REQUIRE(n_refs == ur["_members_"][0]["_value_"].size()
+                                  + ur["_members_"][1]["_value_"].size());
             }
 
             /* every member a printer opts in to is printable: anywhere in

@@ -14,6 +14,7 @@
 #include <xo/reflectutil/type_name.hpp>
 #include <catch2/catch.hpp>
 #include <atomic>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -211,6 +212,26 @@ namespace xo {
                     + entry("v_", type_of<std::vector<JmReflected *>>(), "vector",
                             "[{\"ref\": \"" + xo::json::json_id(&a) + "\"}, null, "
                             "{\"ref\": \"" + xo::json::json_id(&b) + "\"}]") + "]");
+        }
+
+        TEST_CASE("json-members-member-ref-map", "[printjson][JsonMembers]") {
+            /* a map to objects printed elsewhere: a json object, key -> ref
+             * (or null), keys in the order given
+             */
+            PrintJson pjson;
+            std::stringstream ss;
+
+            JmReflected a, b;
+
+            JsonMembers mem(&pjson, &ss);
+            mem.member_ref_map<std::map<std::string, JmReflected *>>("m_", {{"/a/", &a}, {"/b/", &b}, {"/z/", nullptr}});
+            mem.end();
+
+            REQUIRE(ss.str() == ", \"_members_\": ["
+                    + entry("m_", type_of<std::map<std::string, JmReflected *>>(), "atomic",
+                            "{\"/a/\": {\"ref\": \"" + xo::json::json_id(&a) + "\"}, "
+                            "\"/b/\": {\"ref\": \"" + xo::json::json_id(&b) + "\"}, "
+                            "\"/z/\": null}") + "]");
         }
     } /*namespace ut*/
 } /*namespace xo*/
