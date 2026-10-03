@@ -467,6 +467,7 @@ const mbtn_h = 21;
 const mbtn_gap = 8;        // between label and menu button
 const tri_button = 16;     // the square behind a row's triangle
 const row_indent = 14;     // a nested member row, further right per level
+const row_sep = ": ";      // between a row's name and its value
 const in_port_x = 24;      // a member edge enters a box this far from its left
 
 /** object id -> the box drawing it this draw: a box's own object, or an
@@ -805,7 +806,11 @@ async function draw(event) {
                 t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             }
 
-            t.append("tspan").attr("class", "mval meq").text(" = ");
+            // the separator before the value, its x the row's alignment
+            // column: "name: value"; with types, "name: Type [metatype] =
+            // value" (a second ":" would be ambiguous there) -- every row
+            // of the types view, element rows included, so they match
+            t.append("tspan").attr("class", "mval meq").text(show_types ? " = " : row_sep);
             // opens in place: its triangle, a button of its own (see tri_buttons)
             if (r.tri)
                 t.append("tspan").attr("class", "tri xtoggle").text(r.tri);
@@ -886,18 +891,25 @@ async function draw(event) {
             d3.select(this).attr("y", head_h + i * row_h + 13);
         });
 
-        // rows align on their " = ", stepping in with nesting as the names
-        // do: a row at depth n puts it at x0 + row_indent * n, x0 the least
-        // that clears every row's name
+        // rows align on their separator (row_sep, before the value),
+        // stepping in with nesting: a row at depth n puts it at
+        // x0 + row_indent * n, x0 the least that clears every row's name.
+        // Names are right-justified against it: a row's text starts at its
+        // column less the width of what precedes the separator (its name;
+        // with "types", name: Type [metatype])
         let x0 = null;
         texts.each(function (r) {
-            const x = eq_x(this);
-            if (x !== null)
-                x0 = Math.max(x0 ?? x, x - row_indent * r.depth);
+            r.eq_natural = eq_x(this);   // where the separator falls, unaligned
+            if (r.eq_natural !== null)
+                x0 = Math.max(x0 ?? r.eq_natural, r.eq_natural - row_indent * r.depth);
         });
         texts.each(function (r) {
-            if (x0 !== null)
-                d3.select(this).select(":scope > tspan.meq").attr("x", x0 + row_indent * r.depth);
+            if (x0 !== null && r.eq_natural !== null) {
+                const col = x0 + row_indent * r.depth;
+                const lead = r.eq_natural - (12 + row_indent * r.depth);   // name's width
+                d3.select(this).attr("x", col - lead);
+                d3.select(this).select(":scope > tspan.meq").attr("x", col);
+            }
             const b = this.getBBox();
             d.w = Math.max(d.w, b.x + b.width + 16);
         });
@@ -1136,11 +1148,11 @@ function tri_buttons(rows_g) {
     }
 }
 
-/** the x at which row text @p text's " = " starts, as laid out without
+/** the x at which row text @p text's separator (before the value) starts, as laid out without
  *  alignment; null if it has none
  **/
 function eq_x(text) {
-    let n = 0;   // characters before " = "
+    let n = 0;   // characters before the separator
     for (const ts of text.querySelectorAll(":scope > tspan")) {
         if (ts.classList.contains("meq"))
             return text.getStartPositionOfChar(n).x;
