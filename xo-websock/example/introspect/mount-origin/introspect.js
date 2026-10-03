@@ -268,7 +268,8 @@ const expanded = new Set();
 // its row is open; so is a visible ref row's edge to a box drawn anyway.
 // Ownership edges order the layers, and are otherwise not drawn.
 //
-//   ▸ / ▾ on a ref row    want / unwant its edge
+//   ▸ / ▾ on a ref row    ▾ while its target is drawn: hide the target (as
+//                         menu "Hide ▸"); ▸: want this row's edge
 //   ▸n / ▾ beside a box   want its edges to all its children (n undrawn) /
 //                         hide those children; ArrowRight / ArrowLeft too
 //   menu "Show children (+k)"  want its edges to its k children not drawn
@@ -276,9 +277,8 @@ const expanded = new Set();
 //   menu "Show ▸ <child>" want the edge to that child (a child not drawn)
 //   menu "Hide ▸ <child>" hide that child, as its own "Hide <label>" (a child drawn)
 //   menu "Hide <label>"   unwant every edge into this box
-//   collapse a box        unwant every edge out of it -- what was reached
-//                         only through them goes (a member row closing
-//                         does not: its edges still leave the open box)
+//   collapse a box        changes nothing drawn: its edges still leave it
+//                         (from its bottom edge, rows open or not)
 //   Show all / Hide all   every edge (but into the Webserver) / none
 //
 // Wanted edges out of a box no longer drawn are kept: show the box again
@@ -398,13 +398,6 @@ function show_box(id) {
 function hide_box(id) {
     for (const e of showable)
         if (e.target === id)
-            wanted.delete(e.key);
-}
-
-/** unwant every edge out of box @p id (it is collapsing) **/
-function drop_edges_from(id) {
-    for (const e of showable)
-        if (e.source === id)
             wanted.delete(e.key);
 }
 
@@ -617,38 +610,44 @@ function member_rows(members, depth, path, out) {
 }
 
 function toggle(key) {
-    if (expanded.has(key)) {
+    if (expanded.has(key))
         expanded.delete(key);
-        // a box collapsing: what it alone kept shown goes
-        if (box_label.has(key))
-            drop_edges_from(key);
-    } else {
+    else
         expanded.add(key);
-    }
 
     if (last_event)
         draw(last_event);
 }
 
+/** ref row @p r's target: drawn -> hide it (as menu "Hide ▸ <child>":
+ *  unwant every edge into it); not drawn -> want this row's edge.  It
+ *  follows the target box, not the row's own edge -- another edge into the
+ *  target (a parallel one, e.g. a session's sender_ and router_.sender_, or
+ *  another box's) would otherwise keep it drawn while the row said hidden
+ **/
+function toggle_ref(r) {
+    if (shown_box_ids.has(r.ref_box))
+        hide_box(r.ref_box);
+    else
+        wanted.add(r.key);
+    redraw();
+}
+
 /** on a ref row whose target is a box (not the Webserver): a ▸ / ▾ before
- *  the arrow, wanting / unwanting its edge
+ *  the arrow -- ▾ while the target is drawn -- showing / hiding it
  **/
 function append_ref_toggle(t, r) {
     if (!r.ref_box)
         return;
 
-    const on = wanted.has(r.key);
+    const on = shown_box_ids.has(r.ref_box);
 
     t.append("tspan").attr("class", "tri rtoggle").text(on ? "▾" : "▸")
         .on("click", (ev) => {
             ev.stopPropagation();
-            if (on)
-                wanted.delete(r.key);
-            else
-                wanted.add(r.key);
-            redraw();
+            toggle_ref(r);
         })
-        .append("title").text(on ? "stop showing the box it refers to"
+        .append("title").text(on ? "hide the box it refers to"
                               : "show the box it refers to");
 }
 
@@ -1202,9 +1201,9 @@ function row_menu_items(r) {
         items.push([r.open ? "Collapse" : "Expand", () => toggle(r.key), null]);
     if (r.ref_box) {
         const label = box_label.get(r.ref_box) || r.ref_box;
-        items.push(wanted.has(r.key)
-                   ? [`Hide ▸ ${label}`, () => { wanted.delete(r.key); redraw(); }, null]
-                   : [`Show ▸ ${label}`, () => { wanted.add(r.key); redraw(); }, null]);
+        items.push(shown_box_ids.has(r.ref_box)
+                   ? [`Hide ▸ ${label}`, () => toggle_ref(r), null]
+                   : [`Show ▸ ${label}`, () => toggle_ref(r), null]);
     }
     return items;
 }
