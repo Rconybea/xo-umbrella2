@@ -695,8 +695,8 @@ async function draw(event) {
 
         rows.attr("class", r => `row ${r.cls}` + (r.expandable ? " expandable" : ""))
             .attr("x", r => 12 + 14 * r.depth)
-            .on("mouseenter", (ev, r) => highlight_ref(r.key, true))
-            .on("mouseleave", (ev, r) => highlight_ref(r.key, false));
+            .on("mouseenter", (ev, r) => highlight_ref([r.key], true))
+            .on("mouseleave", (ev, r) => highlight_ref([r.key], false));
 
         rows.each(function (r) {
             const t = d3.select(this);
@@ -810,11 +810,13 @@ async function draw(event) {
     });
 
     // a ref member's edge: from its box to the box drawing the referenced
-    // object -- its own box, or the box it is printed nested in
-    const drawn_members = member_edges(nodes);
+    // object -- its own box, or the box it is printed nested in.  Parallel
+    // ones merge: one line per pair of boxes, carrying every member it
+    // stands for (e.g. a session's sender_ and router_.sender_)
+    const drawn_members = merge_parallel(member_edges(nodes));
     for (const e of drawn_members)
-        edges.push({source: `${e.key}#port`, target: e.target, kind: "member",
-                    from: e.source, row_key: e.key, label: e.label});
+        edges.push({source: e.port, target: e.target, kind: "member",
+                    from: e.source, row_keys: e.keys, labels: e.labels});
     // a wanted fallback (an owned box no ref reaches): its ownership edge drawn
     const drawn_own = new Set(showable.filter(e => e.kind !== "member" && wanted.has(e.key))
                               .map(e => `${e.source}>${e.target}`));
@@ -850,7 +852,7 @@ async function draw(event) {
             layoutOptions: {"elk.portConstraints": "FIXED_POS"},
             ports: [
                 ...drawn_members.filter(e => e.source === d.id)
-                    .map((e, k) => ({id: `${e.key}#port`, width: 1, height: 1,
+                    .map((e, k) => ({id: e.port, width: 1, height: 1,
                                      x: 12 + 10 * k, y: d.h,
                                      layoutOptions: {"elk.port.side": "SOUTH"}})),
                 ...(member_in.has(d.id)
@@ -907,22 +909,40 @@ async function draw(event) {
         .attr("class", d => `edge ${d.kind}`)
         .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad},${p.y + pad + badge_r}`).join(" "))
         // a member edge: hovering it lights its row too
-        .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_key, true))
-        .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_key, false))
-        // a member edge says which member it is: its row may not be open
+        .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, true))
+        .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, false))
+        // a member edge says which members it stands for: their rows may not be open
         .each(function (d) {
             d3.select(this).selectAll("title").data(d.kind === "member" ? [d] : [])
-                .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.label}`);
+                .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.labels.join(", ")}`);
         });
 }
 
-/** light up (@p on) or restore the ref row with key @p row_key and its
- *  member edge.  Member edges leave the bottom of the box, so this is how
- *  a row and its edge are seen to belong together
+/** @p member_edges merged per (source box, target box): {source, target,
+ *  port, keys, labels}, in order of each pair's first member
  **/
-function highlight_ref(row_key, on) {
-    d3.selectAll("text.row").filter(r => r && r.key === row_key).classed("hot", on);
-    d3.selectAll("path.edge.member").filter(e => e && e.row_key === row_key)
+function merge_parallel(member_edges) {
+    const by_pair = new Map();
+    for (const e of member_edges) {
+        const pair = `${e.source}>${e.target}`;
+        if (!by_pair.has(pair))
+            by_pair.set(pair, {source: e.source, target: e.target, port: `${pair}#port`,
+                               keys: [], labels: []});
+        const m = by_pair.get(pair);
+        m.keys.push(e.key);
+        m.labels.push(e.label);
+    }
+    return [...by_pair.values()];
+}
+
+/** light up (@p on) or restore the ref rows with keys @p row_keys and the
+ *  member edges standing for them.  Member edges leave the bottom of the
+ *  box, so this is how a row and its edge are seen to belong together:
+ *  hovering a row lights its edge; hovering an edge, every row it stands for
+ **/
+function highlight_ref(row_keys, on) {
+    d3.selectAll("text.row").filter(r => r && row_keys.includes(r.key)).classed("hot", on);
+    d3.selectAll("path.edge.member").filter(e => e && e.row_keys.some(k => row_keys.includes(k)))
         .classed("hot", on)
         .each(function () { if (on) this.parentNode.appendChild(this); });   // on top
 }
