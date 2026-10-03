@@ -128,6 +128,8 @@ function refresh() {
 }
 
 refresh_btn.onclick = refresh;
+document.getElementById("show-all").onclick = () => show_all_children(true);
+document.getElementById("hide-all").onclick = () => show_all_children(false);
 
 // layout: automatic, by ELK (elkjs, its layered algorithm) -- the page builds
 // the object graph (boxes and edges) from the snapshot; ELK places the boxes,
@@ -238,6 +240,70 @@ function layout(event) {
  **/
 const expanded = new Set();
 
+// ----- children (issue 13: showing / hiding parts of the graph) ------------
+//
+// A box's CHILDREN are the boxes it owns -- the "link" / "owns" edges:
+// server -> endpoints, sessions; session -> sender, subscriptions.  A ▸/▾
+// beside a box (or ArrowRight / ArrowLeft, or the menu) shows / hides them.
+// A box is shown only if every owner above it shows its children; the
+// Webserver box always.  Edges into hidden boxes are dropped.  Default: only
+// the Webserver box.
+
+/** box ids whose children are shown; kept across refreshes **/
+const children_open = new Set();
+
+/** owner id -> [child ids], from the ownership edges of @p edges **/
+function children_of(edges) {
+    const kids = new Map();
+    for (const e of edges)
+        if (e.kind === "link" || e.kind === "owns") {
+            if (!kids.has(e.source))
+                kids.set(e.source, []);
+            kids.get(e.source).push(e.target);
+        }
+    return kids;
+}
+
+/** ids of the boxes shown: the server, and every child of a shown box
+ *  whose children are open
+ **/
+function visible_ids(kids) {
+    const shown = new Set(["server"]);
+    const todo = ["server"];
+    while (todo.length) {
+        const id = todo.pop();
+        if (!children_open.has(id))
+            continue;
+        for (const k of (kids.get(id) || [])) {
+            shown.add(k);
+            todo.push(k);
+        }
+    }
+    return shown;
+}
+
+function toggle_children(id) {
+    if (children_open.has(id))
+        children_open.delete(id);
+    else
+        children_open.add(id);
+
+    if (last_event)
+        draw(last_event);
+}
+
+/** "Show all" / "Hide all" **/
+function show_all_children(on) {
+    if (on && last_event)
+        for (const id of children_of(layout(last_event).edges).keys())
+            children_open.add(id);
+    if (!on)
+        children_open.clear();
+
+    if (last_event)
+        draw(last_event);
+}
+
 const row_h = 18;          // a member row
 
 /** object id -> the box drawing it this draw: a box's own object, or an
@@ -245,6 +311,9 @@ const row_h = 18;          // a member row
  *  other object has no edge to draw, and says so
  **/
 let box_of_id = new Map();
+
+/** ids of the boxes shown this draw **/
+let shown_box_ids = new Set();
 
 /** a json object that is a ref: exactly {"ref": id} **/
 function is_ref(v) {
@@ -355,7 +424,8 @@ function member_rows(members, depth, path, out) {
             } else if (is_ref(v)) {
                 row.cls = "ref";
                 row.ref = v.ref;
-                val = box_of_id.has(v.ref) ? "→" : "→ (not drawn)";
+                val = !box_of_id.has(v.ref) ? "→ (not drawn)"
+                    : shown_box_ids.has(box_of_id.get(v.ref)) ? "→" : "→ (hidden)";
             } else if (is_ref_map(v)) {
                 // a map to objects printed elsewhere: a row per key
                 row.expandable = true;
@@ -407,7 +477,7 @@ function ref_edge_target(d, r) {
     if (!r.ref)
         return null;
     const target = box_of_id.get(r.ref);
-    return (target === undefined || target === d.id) ? null : target;
+    return (target === undefined || target === d.id || !shown_box_ids.has(target)) ? null : target;
 }
 
 // a draw is asynchronous (ELK); a newer one supersedes an older one still
@@ -416,7 +486,22 @@ let draw_seq = 0;
 
 async function draw(event) {
     const seq = ++draw_seq;
-    const {nodes, edges} = layout(event);
+    const all = layout(event);
+    const kids = children_of(all.edges);
+    shown_box_ids = visible_ids(kids);
+
+    // every box -- shown or not -- for joining refs; only shown ones drawn
+    box_of_id = new Map(all.nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
+    for (const d of all.nodes)
+        if (d.obj)
+            note_nested(d.obj._members_, d.id);
+
+    const nodes = all.nodes.filter(d => shown_box_ids.has(d.id));
+    const edges = all.edges.filter(e => shown_box_ids.has(e.source) && shown_box_ids.has(e.target));
+    for (const d of nodes) {
+        d.n_children = (kids.get(d.id) || []).length;
+        d.kids_open = children_open.has(d.id);
+    }
     const box_h = 40;
     const pad = 20;            // around the whole graph
     const badge_r = 10;        // the refcount badge pokes this far outside a box
@@ -436,6 +521,8 @@ async function draw(event) {
             g.append("rect");
             g.append("text").attr("class", "label").attr("x", 12).attr("y", 25);
             g.append("g").attr("class", "rows");
+            // children toggle, left of the box (only where it owns any)
+            g.append("text").attr("class", "kids").attr("text-anchor", "end").attr("x", -4);
             // refcount badge, top-right corner (only where known)
             const b = g.append("g").attr("class", "badge");
             b.append("circle").attr("r", badge_r);
@@ -444,10 +531,6 @@ async function draw(event) {
         });
 
     // which boxes can open, and their member rows
-    box_of_id = new Map(nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
-    for (const d of nodes)
-        if (d.obj)
-            note_nested(d.obj._members_, d.id);
     for (const d of nodes) {
         d.expandable = has_members(d.obj);
         d.open = d.expandable && expanded.has(d.id);
@@ -458,8 +541,19 @@ async function draw(event) {
 
     node.attr("class", d => `node ${d.kind}` + (d.expandable ? " expandable" : "")
               + (d.open ? " open" : ""));
+    // members closed: a trailing ⋯ says there are some (the ▸/▾ is children's)
     node.select(":scope > text.label")
-        .text(d => (d.expandable ? (d.open ? "▾ " : "▸ ") : "") + d.label);
+        .text(d => d.label + (d.expandable && !d.open ? "  ⋯" : ""));
+
+    node.select(":scope > text.kids")
+        .attr("display", d => d.n_children ? null : "none")
+        .text(d => d.kids_open ? "▾" : `▸${d.n_children}`)
+        .on("click", (ev, d) => {
+            ev.stopPropagation();
+            toggle_children(d.id);
+        })
+        .selectAll("title").data(d => [d]).join("title")
+        .text(d => d.kids_open ? "hide its children" : `show its ${d.n_children} children`);
 
     // the member rows: name: Type [metatype] = value
     node.select(":scope > g.rows").each(function (d) {
@@ -522,6 +616,12 @@ async function draw(event) {
              if (ev.key === "Enter" && d.expandable) {
                  ev.preventDefault();
                  toggle(d.id);
+             } else if (ev.key === "ArrowRight" && d.n_children && !d.kids_open) {
+                 ev.preventDefault();
+                 toggle_children(d.id);
+             } else if (ev.key === "ArrowLeft" && d.kids_open) {
+                 ev.preventDefault();
+                 toggle_children(d.id);
              }
          });
 
@@ -553,6 +653,7 @@ async function draw(event) {
         });
 
         d.head_h = head_h;
+        g.select(":scope > text.kids").attr("y", head_h / 2 + 5);
         d.h = head_h + (d.rows.length ? d.rows.length * row_h + row_pad : 0);
         g.select("rect").attr("width", d.w).attr("height", d.h);
 
@@ -678,6 +779,8 @@ function menu_items(d) {
     return [
         [expanded.has(d.id) && d.expandable ? "Collapse" : "Expand",
          () => toggle(d.id), d.expandable ? null : "no members shown by its printer"],
+        [d.kids_open ? "Hide children" : `Show children (${d.n_children || 0})`,
+         () => toggle_children(d.id), d.n_children ? null : "owns no boxes"],
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _type_ reported"],

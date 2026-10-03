@@ -29,6 +29,8 @@
     path.edge.uses { stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; }
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }
     .node.expandable { cursor: pointer; }
+    text.kids { font-size: 13px; fill: #555; cursor: pointer; font-family: ui-monospace, monospace; }
+    text.kids:hover { fill: #000; }
     .node.expandable:hover rect { stroke-width: 3px; }
     .node.open rect { fill-opacity: 0.6; }
     text.row { font-size: 12px; font-family: ui-monospace, monospace; fill: #333; }
@@ -57,6 +59,8 @@
   <h1>xo-websock introspect</h1>
   <div>
     <button id="refresh" disabled>Refresh</button>
+    <button id="show-all" title="show every box's children">Show all</button>
+    <button id="hide-all" title="hide every box's children: only the Webserver">Hide all</button>
     <span id="status">connecting...</span>
   </div>
   <div id="srcinfo">source links: (loading)</div>
