@@ -665,6 +665,26 @@ namespace xo {
                     REQUIRE(slots[i]["ref"].asString() == subs[i]["id"].asString());
             }
 
+            /* the server's session table: session id -> a ref to that
+             * session, printed in full in "sessions"
+             */
+            {
+                Json::Value const * st = nullptr;
+                for (Json::Value const & m : root["_members_"])
+                    if (m["_name_"].asString() == "session_table_")
+                        st = &m["_value_"];
+                REQUIRE(st);
+
+                Json::Value const & smap = (*st)["_members_"][1]["_value_"];
+                REQUIRE(smap.size() == v.size());
+                for (Json::ArrayIndex k = 0; k < v.size(); ++k) {
+                    std::string const sid = std::to_string(v[k]["session_id"].asUInt64());
+                    REQUIRE(smap[sid]["ref"].asString() == v[k]["id"].asString());
+                }
+                REQUIRE((*st)["_members_"][0]["_value_"].asUInt64()
+                        > v[v.size() - 1]["session_id"].asUInt64());
+            }
+
             /* nothing a printer opted in to is unprintable */
             {
                 std::string const text = root.toStyledString();

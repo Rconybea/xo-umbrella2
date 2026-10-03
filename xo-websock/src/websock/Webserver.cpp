@@ -1208,9 +1208,58 @@ namespace xo {
             }; /*JsonPrinter_Webserver*/
         } /*namespace*/
 
+        /** @brief the session table: its chosen C++ members
+         *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
+         *  namespace: WsSessionTable befriends it by name.  Its sessions are
+         *  printed in full in the server's session list: refs here, keyed by
+         *  session id, in id order
+         **/
+        template <typename Recd>
+        class JsonPrinter_WsSessionTable : public JsonPrinter {
+        public:
+            using Table = WsSessionTable<Recd>;
+
+            JsonPrinter_WsSessionTable(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                Table const * t = this->check_recover_native<Table>(tp, p_os);
+
+                if (!t)
+                    return;
+
+                typename Table::SessionId next_id = 0;
+                std::vector<std::pair<typename Table::SessionId, void const *>> by_id;
+                {
+                    std::lock_guard<std::mutex> lock(t->mutex_);
+
+                    next_id = t->next_id_;
+                    for (auto const & ix : t->session_map_)
+                        by_id.emplace_back(ix.first, ix.second.get());
+                }
+                std::sort(by_id.begin(), by_id.end());
+
+                std::vector<std::pair<std::string, void const *>> sessions;
+                for (auto const & [id, recd] : by_id)
+                    sessions.emplace_back(std::to_string(id), recd);
+
+                *p_os << "{" << quot("_name_") << ": " << quot("WsSessionTable")
+                      << ", " << quot("_type_") << ": " << quot(type_name<Table>())
+                      << ", " << quot("id") << ": " << quot(json_id(t));
+
+                JsonMembers mem(this->pjson(), p_os);
+                mem.member("next_id_", next_id);
+                mem.member_ref_map<decltype(t->session_map_)>("session_map_", sessions);
+                mem.end();
+
+                *p_os << "}";
+            }
+        };
+
         void
         provide_webserver_json_printers(PrintJson * pjson)
         {
+            pjson->provide_printer(Reflect::require<WsSessionTable<WebsocketSessionRecd>>(),
+                                   std::make_unique<JsonPrinter_WsSessionTable<WebsocketSessionRecd>>(pjson));
             pjson->provide_printer(Reflect::require<WebserverImpl>(),
                                    std::make_unique<JsonPrinter_Webserver>(pjson));
             pjson->provide_printer(Reflect::require<WebsocketSessionRecd>(),

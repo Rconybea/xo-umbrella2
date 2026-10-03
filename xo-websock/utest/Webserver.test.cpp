@@ -257,6 +257,15 @@ namespace xo {
                 }
                 REQUIRE(n_refs == ur["_members_"][0]["_value_"].size()
                                   + ur["_members_"][1]["_value_"].size());
+
+                /* the session table: an id; no session yet -- ids from 1 */
+                Json::Value const & st = mem[5]["_value_"];
+                REQUIRE(st["id"].isString());
+                REQUIRE(st["_members_"][0]["_name_"].asString() == "next_id_");
+                REQUIRE(st["_members_"][0]["_value_"].asUInt64() == 1);
+                REQUIRE(st["_members_"][1]["_name_"].asString() == "session_map_");
+                REQUIRE(st["_members_"][1]["_value_"].isObject());
+                REQUIRE(st["_members_"][1]["_value_"].empty());
             }
 
             /* every member a printer opts in to is printable: anywhere in

@@ -299,14 +299,36 @@ function note_nested(members, box_id) {
 }
 const row_pad = 8;         // below the last row
 
+/** @p t without the standard library's default template arguments --
+ *  ", default_delete<..>", ", hash<..>", ", equal_to<..>", ", less<..>",
+ *  ", allocator<..>", ", char_traits<..>" -- which gcc spells out
+ **/
+function drop_default_args(t) {
+    const re = /, (default_delete|hash|equal_to|less|allocator|char_traits)</g;
+    let m;
+    while ((m = re.exec(t)) !== null) {
+        // skip to the matching '>'
+        let depth = 1, j = m.index + m[0].length;
+        while (j < t.length && depth > 0) {
+            if (t[j] === "<") ++depth;
+            else if (t[j] === ">") --depth;
+            ++j;
+        }
+        t = t.slice(0, m.index) + t.slice(j);
+        re.lastIndex = m.index;
+    }
+    return t;
+}
+
 /** @p t for display: without namespace qualifiers, anonymous namespaces
- *  included (xo::web::Foo<xo::web::Bar> -> Foo<Bar>); basic_string<char> as
- *  string; "> >" as ">>".  The full name stays in the tooltip
+ *  included (xo::web::Foo<xo::web::Bar> -> Foo<Bar>); without default
+ *  template arguments; basic_string<char> as string; no space before ">".  The
+ *  full name stays in the tooltip
  **/
 function short_type(t) {
     return t
-        ? t.replace(/(\{anonymous\}::|\(anonymous namespace\)::|\b\w+::)+/g, "")
-           .replace(/> >/g, ">>")
+        ? drop_default_args(t.replace(/(\{anonymous\}::|\(anonymous namespace\)::|\b\w+::)+/g, ""))
+           .replace(/\s+>/g, ">")
            .replace(/\bbasic_string<char>/g, "string")
         : "?";
 }
