@@ -69,7 +69,15 @@ jobs:
           echo PATH=${PATH}
           # plain git, not actions/checkout: see NO JAVASCRIPT ACTIONS above.
           # $GITHUB_SERVER_URL is https://github.com here.
-          git clone --quiet --depth=1 $GITHUB_SERVER_URL/${{github.repository}}.git .
+          # the run's own commit, $GITHUB_SHA -- NOT a plain clone, which takes
+          # whatever main is when the job STARTS: with runs queued, a result
+          # then describes a later commit than the one it is labelled with
+          # (.xo-backlog/ci/issues/02).
+          git init --quiet .
+          git remote add origin $GITHUB_SERVER_URL/${{github.repository}}.git
+          git fetch --quiet --depth=1 origin "$GITHUB_SHA"
+          git checkout --quiet FETCH_HEAD
+          echo "checked out $(git rev-parse HEAD)"
           mkdir -p "$PREFIX"
 
       - name: bootstrap xo-cmake

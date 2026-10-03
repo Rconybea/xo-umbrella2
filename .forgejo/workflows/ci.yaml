@@ -61,7 +61,15 @@ jobs:
           # 2. could clone from /var/lib/forgejo/gitea-repositories/roland/xo-umbrella2.git
           # 3. instead rely on $GITHUB_SERVER_URL
 
-          git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
+          # the run's own commit, $GITHUB_SHA -- NOT a plain clone, which takes
+          # whatever main is when the job STARTS: with runs queued, a result
+          # then describes a later commit than the one it is labelled with
+          # (.xo-backlog/ci/issues/02).
+          git init --quiet .
+          git remote add origin $GITHUB_SERVER_URL/roland/xo-umbrella2.git
+          git fetch --quiet --depth=1 origin "$GITHUB_SHA"
+          git checkout --quiet FETCH_HEAD
+          echo "checked out $(git rev-parse HEAD)"
 
       - name: prepare gc roots
         run: |
