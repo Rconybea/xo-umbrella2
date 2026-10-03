@@ -6,6 +6,7 @@
 #pragma once
 
 #include "PrintJson.hpp"
+#include "type_keys.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflectutil/type_name.hpp>
 #include <xo/refcnt/Refcounted.hpp>
@@ -47,9 +48,11 @@ namespace xo {
         /** @brief writes an object's "_members_" array, for a JsonPrinter that
          *  opts in to showing chosen C++ members:
          *
-         *    "_members_": [{"_name_": .., "_type_": .., "_metatype_": .., "_value_": ..}, ..]
+         *    "_members_": [{"_name_": .., "_canonical_type_": .., "_short_type_": ..,
+         *                   "_metatype_": .., "_value_": ..}, ..]
          *
-         *  _type_ is the member's DECLARED type (its canonical name);
+         *  _canonical_type_, _short_type_ name the member's DECLARED type
+         *  (see type_keys);
          *  _metatype_ that type's xo-reflect metatype (atomic, pointer,
          *  vector, struct, function -- metatype2str); _value_
          *  is printed by PrintJson as any value would be -- so an rp<T> or T*
@@ -58,7 +61,8 @@ namespace xo {
          *
          *  A member whose type cannot be printed -- neither a json printer
          *  nor a complete reflected struct -- is written without a value:
-         *    {"_name_": .., "_type_": .., "_metatype_": .., "_error_": "type not reflected: X"}
+         *    {"_name_": .., "_canonical_type_": .., "_short_type_": .., "_metatype_": ..,
+         *     "_error_": "type not reflected: X"}
          *  so one omission does not spoil the rest of the output.
          *
          *  Use, inside a JsonPrinter's print_json, after the printer's own
@@ -93,15 +97,14 @@ namespace xo {
                 using reflect::Reflect;
                 using target_t = typename detail::member_target<V>::type;
 
-                std::string declared(reflect::type_name<Declared>());
-                reflect::Metatype metatype = metatype_of<Declared>();
+                DeclaredType declared = declared_of<Declared>();
                 reflect::TypeDescr target = Reflect::require<target_t>();
 
                 if (this->printable(target)) {
-                    this->write_value(name, declared, metatype,
+                    this->write_value(name, declared,
                                       Reflect::make_tp(const_cast<V *>(&value)));
                 } else {
-                    this->write_error(name, declared, metatype,
+                    this->write_error(name, declared,
                                       "type not reflected: " + target->canonical_name());
                 }
 
@@ -115,8 +118,7 @@ namespace xo {
              **/
             template <typename Declared>
             JsonMembers & member_ref(std::string_view name, void const * p) {
-                this->write_ref(name, std::string(reflect::type_name<Declared>()),
-                                metatype_of<Declared>(), p);
+                this->write_ref(name, declared_of<Declared>(), p);
 
                 return *this;
             }
@@ -128,8 +130,7 @@ namespace xo {
              **/
             template <typename Declared>
             JsonMembers & member_refs(std::string_view name, std::vector<void const *> const & ps) {
-                this->write_refs(name, std::string(reflect::type_name<Declared>()),
-                                 metatype_of<Declared>(), ps);
+                this->write_refs(name, declared_of<Declared>(), ps);
 
                 return *this;
             }
@@ -142,8 +143,7 @@ namespace xo {
             template <typename Declared>
             JsonMembers & member_ref_map(std::string_view name,
                                          std::vector<std::pair<std::string, void const *>> const & kvs) {
-                this->write_ref_map(name, std::string(reflect::type_name<Declared>()),
-                                    metatype_of<Declared>(), kvs);
+                this->write_ref_map(name, declared_of<Declared>(), kvs);
 
                 return *this;
             }
@@ -152,16 +152,31 @@ namespace xo {
             void end();
 
         private:
-            /** metatype of declared type T.  xo-reflect has none for a C++
-             *  reference: reported as pointer, the nearest -- it refers to
-             *  an object, rather than holding one
+            /** a member's declared type: its names and metatype **/
+            struct DeclaredType {
+                std::string canonical_;
+                std::string short_;
+                reflect::Metatype metatype_;
+            };
+
+            /** declared type T, forwarding its TypeDescr.  xo-reflect has
+             *  none for a C++ reference: its names are what a TypeDescr's
+             *  would be (type_name<T>(), and make_short_name() of that),
+             *  its metatype pointer, the nearest -- it refers to an object,
+             *  rather than holding one
              **/
             template <typename T>
-            static reflect::Metatype metatype_of() {
-                if constexpr (std::is_reference_v<T>)
-                    return reflect::Metatype::mt_pointer;
-                else
-                    return reflect::Reflect::require<T>()->metatype();
+            static DeclaredType declared_of() {
+                if constexpr (std::is_reference_v<T>) {
+                    std::string canonical(reflect::type_name<T>());
+                    std::string short_name = reflect::TypeDescrBase::make_short_name(canonical);
+                    return DeclaredType{std::move(canonical), std::move(short_name),
+                                        reflect::Metatype::mt_pointer};
+                } else {
+                    reflect::TypeDescr td = reflect::Reflect::require<T>();
+                    return DeclaredType{td->canonical_name(), std::string(td->short_name()),
+                                        td->metatype()};
+                }
             }
 
             /** true iff PrintJson can print a @p td: it has a printer for
@@ -169,22 +184,22 @@ namespace xo {
              **/
             bool printable(reflect::TypeDescr td) const;
 
-            void write_value(std::string_view name, std::string const & declared,
-                             reflect::Metatype metatype, reflect::TaggedPtr value);
-            void write_error(std::string_view name, std::string const & declared,
-                             reflect::Metatype metatype, std::string const & why);
-            void write_ref(std::string_view name, std::string const & declared,
-                           reflect::Metatype metatype, void const * p);
-            void write_refs(std::string_view name, std::string const & declared,
-                            reflect::Metatype metatype, std::vector<void const *> const & ps);
-            void write_ref_map(std::string_view name, std::string const & declared,
-                               reflect::Metatype metatype,
+            void write_value(std::string_view name, DeclaredType const & declared,
+                             reflect::TaggedPtr value);
+            void write_error(std::string_view name, DeclaredType const & declared,
+                             std::string const & why);
+            void write_ref(std::string_view name, DeclaredType const & declared,
+                           void const * p);
+            void write_refs(std::string_view name, DeclaredType const & declared,
+                            std::vector<void const *> const & ps);
+            void write_ref_map(std::string_view name, DeclaredType const & declared,
                                std::vector<std::pair<std::string, void const *>> const & kvs);
             /** {"ref": json_id(@p p)}, or null **/
             void write_ref_value(void const * p);
-            /** the separator and the entry's _name_, _type_, _metatype_ **/
-            void write_head(std::string_view name, std::string const & declared,
-                            reflect::Metatype metatype);
+            /** the separator and the entry's _name_, _canonical_type_,
+             *  _short_type_, _metatype_
+             **/
+            void write_head(std::string_view name, DeclaredType const & declared);
 
         private:
             PrintJson const * pjson_ = nullptr;

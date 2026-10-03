@@ -4,9 +4,9 @@
  */
 
 #include "PrintJson.hpp"
+#include "type_keys.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/StructReflector.hpp>
-#include <xo/reflectutil/type_name.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/facet/handlestore/ObjectSlot.hpp>
@@ -29,7 +29,6 @@ namespace xo {
     using xo::reflect::TypeDescr;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TaggedRcptr;
-    using xo::reflect::type_name;
 
     namespace json {
         /* one scope in from namespace xo: a using-decl at xo scope would be
@@ -140,10 +139,10 @@ namespace xo {
                  *   Foo foo{1, 1.4142};
                  *
                  * then expect to print
-                 *   {"_name_": "Foo", "_type_": "xo::Foo", "x": 1, "y": 1.4142}
+                 *   {"_name_": "Foo", "_canonical_type_": "xo::Foo", "_short_type_": "Foo",
+                 *    "x": 1, "y": 1.4142}
                  *
-                 * _type: the canonical (fully qualified) name -- the key
-                 * into a type -> source map (.xo-backlog/xo-websock/issues/12)
+                 * see type_keys
                  *
                  * note that python json parser requires property names in double quotes
                  */
@@ -151,7 +150,7 @@ namespace xo {
                 *p_os << "{";
 
                 *p_os << "\"_name_\": \"" << tp.td()->short_name() << "\""
-                      << ", \"_type_\": " << quot(tp.td()->canonical_name());
+                      << ", " << json::type_keys(tp.td());
 
                 for (uint32_t i = 0, n = tp.n_child(); i < n; ++i) {
                     *p_os << ", \"" << tp.struct_member_name(i) << "\": ";
@@ -601,7 +600,7 @@ namespace xo {
 
                 *p_os << "{"
                       << "\"_name_\": " << quot("ObjectSlot")
-                      << ", \"_type_\": " << quot(type_name<ObjectSlot>())
+                      << ", " << json::type_keys(tp.td())
                       << ", \"typeseq\": " << tseq.seqno()
                       << ", \"type\": " << quot(TypeRegistry::id2name(tseq));
 
@@ -684,7 +683,7 @@ namespace xo {
 
                 *p_os << "{"
                       << "\"_name_\": " << quot("RootSet")
-                      << ", \"_type_\": " << quot(type_name<RootSet>())
+                      << ", " << json::type_keys(tp.td())
                       << ", \"size\": " << rs->strong_size()
                       << ", \"capacity\": " << rs->strong_capacity()
                       << ", \"live\": " << rs->strong_root_count();
@@ -774,7 +773,7 @@ namespace xo {
                 PrintJson const * pjson = this->pjson();
 
                 *p_os << "{" << "\"_name_\": " << quot("Flywheel")
-                      << ", \"_type_\": " << quot(type_name<AllocFlywheel>());
+                      << ", " << json::type_keys(tp.td());
 
                 /* every pool the store owns, in the order it reports them:
                  * the storage arena first, then the root set and its free

@@ -43,7 +43,7 @@ namespace xo {
                 }
             }
 
-            /** the "_type_" text for T: its canonical name **/
+            /** the "_canonical_type_" text for T: its canonical name **/
             template <typename T>
             std::string type_of() {
                 return std::string(xo::reflect::type_name<T>());
@@ -54,7 +54,8 @@ namespace xo {
              **/
             std::string entry(std::string const & name, std::string const & type,
                               std::string const & metatype, std::string const & value) {
-                return "{\"_name_\": \"" + name + "\", \"_type_\": \"" + type
+                return "{\"_name_\": \"" + name + "\", \"_canonical_type_\": \"" + type
+                    + "\", \"_short_type_\": \"" + xo::reflect::TypeDescrBase::make_short_name(type)
                     + "\", \"_metatype_\": \"" + metatype
                     + "\", \"_value_\": " + value + "}";
             }
@@ -126,15 +127,17 @@ namespace xo {
             std::string const why = "type not reflected: " + type_of<JmUnreflected>();
 
             REQUIRE(ss.str() == ", \"_members_\": ["
-                    "{\"_name_\": \"u_\", \"_type_\": \"" + type_of<JmUnreflected>()
+                    "{\"_name_\": \"u_\", \"_canonical_type_\": \"" + type_of<JmUnreflected>()
+                    + "\", \"_short_type_\": \"JmUnreflected"
                     + "\", \"_metatype_\": \"atomic\", \"_error_\": \"" + why + "\"}, "
-                    "{\"_name_\": \"pu_\", \"_type_\": \"" + type_of<JmUnreflected *>()
+                    "{\"_name_\": \"pu_\", \"_canonical_type_\": \"" + type_of<JmUnreflected *>()
+                    + "\", \"_short_type_\": \"JmUnreflected*"
                     + "\", \"_metatype_\": \"pointer\", \"_error_\": \"" + why + "\"}, "
                     + entry("n_", type_of<int>(), "atomic", "3") + "]");
         }
 
         TEST_CASE("json-members-member-as-declared-type", "[printjson][JsonMembers]") {
-            /* a member read through load(): _type_ is the declared type, the
+            /* a member read through load(): the type keys name the declared type, the
              * value whatever the printer read
              */
             PrintJson pjson;

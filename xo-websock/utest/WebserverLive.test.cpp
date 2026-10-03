@@ -597,7 +597,7 @@ namespace xo {
             /* by id, in connection order; distinct */
             REQUIRE(v.size() == 2);
             REQUIRE(v[0]["_name_"].asString() == "WsSession");
-            REQUIRE(v[0]["_type_"].asString() == "xo::web::WebsocketSessionRecd");
+            REQUIRE(v[0]["_canonical_type_"].asString() == "xo::web::WebsocketSessionRecd");
             REQUIRE(v[0]["session_id"].asUInt64() < v[1]["session_id"].asUInt64());
             REQUIRE(v[0]["id"].asString() != v[1]["id"].asString());
 
@@ -618,7 +618,8 @@ namespace xo {
                 REQUIRE(smem[2]["_name_"].asString() == "open_");
                 REQUIRE(smem[2]["_value_"].asBool());
                 /* a template: its arguments follow */
-                REQUIRE(sender["_type_"].asString().starts_with("xo::web::WsSessionSender<"));
+                REQUIRE(sender["_canonical_type_"].asString().starts_with("xo::web::WsSessionSender<"));
+                REQUIRE(sender["_short_type_"].asString().starts_with("WsSessionSender<"));
                 REQUIRE(sender["open"].asBool());
                 REQUIRE(sender["session_id"].asUInt64() == v[k]["session_id"].asUInt64());
             }
@@ -643,7 +644,7 @@ namespace xo {
                                                           "outbound_q_"});
                 REQUIRE(mem[1]["_metatype_"].asString() == "pointer");
                 REQUIRE(mem[1]["_value_"]["ref"].asString() == v[k]["sender"]["id"].asString());
-                REQUIRE(mem[2]["_type_"].asString() == "xo::web::WsSessionRouter");
+                REQUIRE(mem[2]["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
                 REQUIRE(mem[3]["_value_"].asString() == "0 queued");
 
                 /* the router, nested: its own members.  sender_ the same

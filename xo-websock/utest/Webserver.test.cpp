@@ -201,7 +201,8 @@ namespace xo {
             INFO("json: " << ss.str());
             REQUIRE(srv["_name_"].asString() == "Webserver");
             /* the actual type, via self_tp() -- not the interface */
-            REQUIRE(srv["_type_"].asString() == "xo::web::WebserverImpl");
+            REQUIRE(srv["_canonical_type_"].asString() == "xo::web::WebserverImpl");
+            REQUIRE(srv["_short_type_"].asString() == "WebserverImpl");
             REQUIRE(srv["id"].isString());
             REQUIRE(srv["refcount"].asUInt() >= 1);
             REQUIRE(srv["listen_port"].asInt() == 0);
@@ -216,7 +217,8 @@ namespace xo {
                 std::vector<std::string> names;
                 for (Json::Value const & m : mem) {
                     names.push_back(m["_name_"].asString());
-                    REQUIRE(m["_type_"].isString());
+                    REQUIRE(m["_canonical_type_"].isString());
+                    REQUIRE(m["_short_type_"].isString());
                     REQUIRE((m.isMember("_value_") != m.isMember("_error_")));
                 }
 
@@ -231,12 +233,14 @@ namespace xo {
                 REQUIRE(metatypes == std::vector<std::string>{"struct", "atomic", "atomic",
                                                               "pointer", "struct", "struct"});
 
-                REQUIRE(mem[1]["_type_"].asString() == "std::atomic<int>");
+                REQUIRE(mem[1]["_canonical_type_"].asString() == "std::atomic<int>");
+                REQUIRE(mem[1]["_short_type_"].asString() == "atomic<int>");
                 REQUIRE(mem[1]["_value_"].asInt() == 0);
-                REQUIRE(mem[2]["_type_"].asString() == "xo::web::Runstate");
+                REQUIRE(mem[2]["_canonical_type_"].asString() == "xo::web::Runstate");
                 REQUIRE(mem[2]["_value_"].asString() == "stopped");
-                REQUIRE(mem[4]["_type_"].asString() == "xo::web::UrlRouter");
-                REQUIRE(mem[4]["_value_"]["_type_"].asString() == "xo::web::UrlRouter");
+                REQUIRE(mem[4]["_canonical_type_"].asString() == "xo::web::UrlRouter");
+                REQUIRE(mem[4]["_value_"]["_canonical_type_"].asString() == "xo::web::UrlRouter");
+                REQUIRE(mem[4]["_value_"]["_short_type_"].asString() == "UrlRouter");
 
                 /* the url router: an id, and its maps -- stem -> a ref to
                  * the very endpoint printed in the server's list
@@ -295,7 +299,7 @@ namespace xo {
             Json::Value const & eps = srv["endpoints"];
             REQUIRE(eps.size() == 2);
             REQUIRE(eps[0]["_name_"].asString() == "DynamicEndpoint");
-            REQUIRE(eps[0]["_type_"].asString() == "xo::web::DynamicEndpoint");
+            REQUIRE(eps[0]["_canonical_type_"].asString() == "xo::web::DynamicEndpoint");
             REQUIRE(eps[0]["kind"].asString() == "http");
             REQUIRE(eps[0]["pattern"].asString() == "/status");
             REQUIRE(eps[0]["has_receive"].asBool() == false);

@@ -8,8 +8,8 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -269,7 +269,6 @@ namespace xo {
 
             void print_json(reflect::TaggedPtr tp, std::ostream * p_os) const override {
                 using xo::pp::quot;
-                using xo::reflect::type_name;
                 using Entries = std::vector<std::pair<std::string, void const *>>;
 
                 UrlRouter const * r = this->check_recover_native<UrlRouter>(tp, p_os);
@@ -291,7 +290,7 @@ namespace xo {
                 std::sort(stream_v.begin(), stream_v.end());
 
                 *p_os << "{" << quot("_name_") << ": " << quot("UrlRouter")
-                      << ", " << quot("_type_") << ": " << quot(type_name<UrlRouter>())
+                      << ", " << json::type_keys(tp.td())
                       << ", " << quot("id") << ": " << quot(json_id(r));
 
                 json::JsonMembers mem(this->pjson(), p_os);

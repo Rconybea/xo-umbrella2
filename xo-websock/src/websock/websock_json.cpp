@@ -27,8 +27,8 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <cstdint>
 #include <memory>
@@ -40,7 +40,6 @@ namespace xo {
     using xo::json::JsonMembers;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
-    using xo::reflect::type_name;
     using xo::pp::quot;
 
     namespace web {
@@ -60,7 +59,7 @@ namespace xo {
                     return;
 
                 *p_os << "{" << quot("_name_") << ": " << quot("DynamicEndpoint")
-                      << ", " << quot("_type_") << ": " << quot(type_name<DynamicEndpoint>())
+                      << ", " << json::type_keys(tp.td())
                       << ", " << quot("id") << ": " << quot(json_id(ep))
                       /* held by the router's map, plus one per live
                        * subscription served (each holds it by rp<>)

@@ -26,7 +26,7 @@ namespace xo {
         JsonMembers::JsonMembers(PrintJson const * pjson, std::ostream * p_os)
             : pjson_{pjson}, p_os_{p_os}
         {
-            /* the leading comma: _name_ and _type_ always come first */
+            /* the leading comma: the object's _name_ and type keys come first */
             *p_os_ << ", \"_members_\": [";
         }
 
@@ -50,23 +50,22 @@ namespace xo {
         }
 
         void
-        JsonMembers::write_head(std::string_view name, std::string const & declared,
-                                Metatype metatype)
+        JsonMembers::write_head(std::string_view name, DeclaredType const & declared)
         {
             if (!first_)
                 *p_os_ << ", ";
             first_ = false;
 
             *p_os_ << "{" << quot("_name_") << ": " << quot(name)
-                   << ", " << quot("_type_") << ": " << quot(declared)
-                   << ", " << quot("_metatype_") << ": " << quot(metatype2str(metatype));
+                   << ", " << type_keys(declared.canonical_, declared.short_)
+                   << ", " << quot("_metatype_") << ": " << quot(metatype2str(declared.metatype_));
         }
 
         void
-        JsonMembers::write_value(std::string_view name, std::string const & declared,
-                                 Metatype metatype, TaggedPtr value)
+        JsonMembers::write_value(std::string_view name, DeclaredType const & declared,
+                                 TaggedPtr value)
         {
-            this->write_head(name, declared, metatype);
+            this->write_head(name, declared);
 
             *p_os_ << ", " << quot("_value_") << ": ";
             pjson_->print_aux(value, p_os_);
@@ -74,10 +73,10 @@ namespace xo {
         }
 
         void
-        JsonMembers::write_ref(std::string_view name, std::string const & declared,
-                               Metatype metatype, void const * p)
+        JsonMembers::write_ref(std::string_view name, DeclaredType const & declared,
+                               void const * p)
         {
-            this->write_head(name, declared, metatype);
+            this->write_head(name, declared);
 
             *p_os_ << ", " << quot("_value_") << ": ";
             this->write_ref_value(p);
@@ -85,10 +84,10 @@ namespace xo {
         }
 
         void
-        JsonMembers::write_refs(std::string_view name, std::string const & declared,
-                                Metatype metatype, std::vector<void const *> const & ps)
+        JsonMembers::write_refs(std::string_view name, DeclaredType const & declared,
+                                std::vector<void const *> const & ps)
         {
-            this->write_head(name, declared, metatype);
+            this->write_head(name, declared);
 
             *p_os_ << ", " << quot("_value_") << ": [";
             for (std::size_t i = 0, n = ps.size(); i < n; ++i) {
@@ -100,11 +99,10 @@ namespace xo {
         }
 
         void
-        JsonMembers::write_ref_map(std::string_view name, std::string const & declared,
-                                   Metatype metatype,
+        JsonMembers::write_ref_map(std::string_view name, DeclaredType const & declared,
                                    std::vector<std::pair<std::string, void const *>> const & kvs)
         {
-            this->write_head(name, declared, metatype);
+            this->write_head(name, declared);
 
             *p_os_ << ", " << quot("_value_") << ": {";
             for (std::size_t i = 0, n = kvs.size(); i < n; ++i) {
@@ -126,10 +124,10 @@ namespace xo {
         }
 
         void
-        JsonMembers::write_error(std::string_view name, std::string const & declared,
-                                 Metatype metatype, std::string const & why)
+        JsonMembers::write_error(std::string_view name, DeclaredType const & declared,
+                                 std::string const & why)
         {
-            this->write_head(name, declared, metatype);
+            this->write_head(name, declared);
 
             *p_os_ << ", " << quot("_error_") << ": " << quot(why) << "}";
         }

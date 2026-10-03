@@ -6,9 +6,10 @@
 #include "WebsocketSink.hpp"
 #include "webserver_json.hpp"
 #include <xo/printjson/PrintJson.hpp>
+#include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>  /* display_string */
-#include <xo/reflectutil/type_name.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* ss << quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -20,7 +21,7 @@ namespace xo {
     using xo::json::PrintJson;
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
-    using xo::reflect::type_name;
+    using xo::reflect::Reflect;
     using xo::pp::quot;
     using xo::pp::scope;
     using xo::pp::xtag;
@@ -135,7 +136,7 @@ namespace xo {
         WebsocketSinkImpl::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
         {
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
-                  << ", " << quot("_type_") << ": " << quot(type_name<WebsocketSinkImpl>())
+                  << ", " << json::type_keys(Reflect::require<WebsocketSinkImpl>())
                   << ", " << quot("id") << ": " << quot(json_id(this))
                   /* the router's subscription slot, plus whatever the
                    * application holds (e.g. a source it is attached to)
@@ -157,7 +158,7 @@ namespace xo {
         WebsocketSink::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
         {
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
-                  << ", " << quot("_type_") << ": " << quot(type_name<WebsocketSink>())
+                  << ", " << json::type_keys(Reflect::require<WebsocketSink>())
                   << ", " << quot("id") << ": " << quot(json_id(this))
                   << ", " << quot("refcount") << ": " << this->reference_counter()
                   << ", " << quot("stream") << ": " << quot(this->stream_name())

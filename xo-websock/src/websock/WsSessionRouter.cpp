@@ -9,8 +9,8 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -27,7 +27,6 @@ namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
-    using xo::reflect::type_name;
     using xo::pp::quot;
 
     namespace web {
@@ -415,7 +414,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("Subscription")
-                          << ", " << quot("_type_") << ": " << quot(type_name<Subscription>())
+                          << ", " << json::type_keys(tp.td())
                           << ", " << quot("id") << ": " << quot(json_id(sub))
                           << ", " << quot("sub_id") << ": " << sub->sub_id_
                           << ", " << quot("stream") << ": " << quot(sub->stream_name_)
@@ -481,7 +480,7 @@ namespace xo {
                 }
 
                 *p_os << "{" << quot("_name_") << ": " << quot("WsSessionRouter")
-                      << ", " << quot("_type_") << ": " << quot(type_name<WsSessionRouter>())
+                      << ", " << json::type_keys(tp.td())
                       << ", " << quot("id") << ": " << quot(json_id(r));
 
                 /* the sender by its most-derived address: the id its own

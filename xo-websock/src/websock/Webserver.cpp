@@ -29,7 +29,6 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <sstream>
 #include "WsSessionRouter.hpp"
@@ -41,6 +40,7 @@
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/type_keys.hpp>
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
@@ -56,7 +56,6 @@ namespace xo {
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedRcptr;
     using xo::reflect::TaggedPtr;
-    using xo::reflect::type_name;
     using xo::pp::quot;
     using xo::fn::CallbackId;
     using xo::pp::scope;
@@ -1050,7 +1049,7 @@ namespace xo {
                     return;
 
                 *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
-                      << ", " << quot("_type_") << ": " << quot(type_name<WsSessionSenderImpl>())
+                      << ", " << json::type_keys(tp.td())
                       << ", " << quot("id") << ": " << quot(json_id(x))
                       /* session record + router + one per live sink */
                       << ", " << quot("refcount") << ": " << x->reference_counter()
@@ -1088,7 +1087,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("WsSession")
-                          << ", " << quot("_type_") << ": " << quot(type_name<WebsocketSessionRecd>())
+                          << ", " << json::type_keys(tp.td())
                           << ", " << quot("id") << ": " << quot(json_id(recd))
                           << ", " << quot("session_id") << ": " << recd->session_id()
                           << ", " << quot("sender") << ": ";
@@ -1158,7 +1157,7 @@ namespace xo {
                         return;
 
                     *p_os << "{" << quot("_name_") << ": " << quot("Webserver")
-                          << ", " << quot("_type_") << ": " << quot(type_name<WebserverImpl>())
+                          << ", " << json::type_keys(tp.td())
                           << ", " << quot("id") << ": " << quot(json_id(websrv))
                           << ", " << quot("refcount") << ": " << websrv->reference_counter()
                           << ", " << quot("listen_port") << ": " << websrv->listen_port()
@@ -1257,7 +1256,7 @@ namespace xo {
                     sessions.emplace_back(std::to_string(id), recd);
 
                 *p_os << "{" << quot("_name_") << ": " << quot("WsSessionTable")
-                      << ", " << quot("_type_") << ": " << quot(type_name<Table>())
+                      << ", " << json::type_keys(tp.td())
                       << ", " << quot("id") << ": " << quot(json_id(t));
 
                 JsonMembers mem(this->pjson(), p_os);

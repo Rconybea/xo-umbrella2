@@ -47,8 +47,9 @@
  *  http://host:port/dyn/src/<path>#L<line> -- the files of mapped types
  *  only.  Off unless given.
  *
- *  The page links each object to the source of its type (its _type_ looked
- *  up in /dyn/types), by the url template /dyn/types reports as "link":
+ *  The page links each object to the source of its type (its
+ *  _canonical_type_ looked up in /dyn/types), by the url template
+ *  /dyn/types reports as "link":
  *  --src-link=TEMPLATE, with {file} and {line} replaced, e.g. a forgejo
  *  commit:
  *    --src-link=https://<host>/<owner>/xo-umbrella2/src/commit/<sha>/{file}#L{line}

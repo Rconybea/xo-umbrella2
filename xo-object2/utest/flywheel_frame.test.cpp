@@ -178,13 +178,16 @@ namespace xo {
 
             INFO("frame: " << frame);
 
-            /* "_type_": each object's canonical name, the key into a type ->
-             * source map (.xo-backlog/xo-websock/issues/12) -- built, not
+            /* "_canonical_type_", "_short_type_": each object's canonical
+             * name (the key into a type -> source map,
+             * .xo-backlog/xo-websock/issues/12) and short name -- built, not
              * spelled out, so a spelling difference between compilers cannot
              * fail this
              */
             auto type_member = [](std::string_view name) {
-                return ", \"_type_\": \"" + std::string(name) + "\"";
+                return ", \"_canonical_type_\": \"" + std::string(name) + "\""
+                    + ", \"_short_type_\": \""
+                    + xo::reflect::TypeDescrBase::make_short_name(name) + "\"";
             };
             std::string const pool_type
                 = type_member(xo::reflect::type_name<xo::mm::MemorySizeInfo>());

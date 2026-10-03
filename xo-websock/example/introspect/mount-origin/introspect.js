@@ -23,7 +23,8 @@
 // ticker), for refcount accounting only -- not drawn.
 //
 // Source links (.xo-backlog/xo-websock/issues/12): every object carries
-// _type_, its C++ type's canonical name.  /dyn/types maps a type -- template
+// _canonical_type_, its C++ type's canonical name (and _short_type_, for
+// display: xo-reflect's short name).  /dyn/types maps a type -- template
 // arguments stripped -- to {file, line}, and says how to link one ("link":
 // a url template with {file}, {line}; null for none).  Hover a box for its
 // type and location; click to open the source.
@@ -152,7 +153,7 @@ function layout(event) {
 
     nodes.push({id: "server", kind: "server",
                 label: `Webserver :${snap.listen_port} (${snap.state})`,
-                type: snap._type_, obj: snap});
+                type: snap._canonical_type_, obj: snap});
 
     const endpoint_node = {};   // endpoint object id -> node id
 
@@ -160,7 +161,7 @@ function layout(event) {
         const id = `${ep.kind}:${ep.stem}`;
         endpoint_node[ep.id] = id;
         nodes.push({id: id, kind: ep.kind, label: ep.pattern, refcount: ep.refcount,
-                    type: ep._type_, obj: ep});
+                    type: ep._canonical_type_, obj: ep});
         edge("server", id, "link");
     }
 
@@ -169,13 +170,13 @@ function layout(event) {
         const open = s.sender && s.sender.open;
 
         nodes.push({id: id, kind: open ? "session" : "session closed",
-                    label: `session ${s.session_id}`, type: s._type_, obj: s});
+                    label: `session ${s.session_id}`, type: s._canonical_type_, obj: s});
         edge("server", id, "link");
 
         if (s.sender) {
             const snd = `${id}:sender`;
             nodes.push({id: snd, kind: "sender", label: "sender",
-                        refcount: s.sender.refcount, type: s.sender._type_, obj: s.sender,
+                        refcount: s.sender.refcount, type: s.sender._canonical_type_, obj: s.sender,
                         small: true});
             edge(id, snd, "owns");
         }
@@ -189,7 +190,7 @@ function layout(event) {
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
                         refcount: sink.refcount,   // the sink's: slot + its source
-                        type: sub._type_, obj: sub, small: true});
+                        type: sub._canonical_type_, obj: sub, small: true});
             edge(id, sid, "owns");
 
             // joined BY ID: the endpoint object this subscription holds
@@ -475,40 +476,6 @@ function note_nested(members, box_id) {
 }
 const row_pad = 8;         // below the last row
 
-/** @p t without the standard library's default template arguments --
- *  ", default_delete<..>", ", hash<..>", ", equal_to<..>", ", less<..>",
- *  ", allocator<..>", ", char_traits<..>" -- which gcc spells out
- **/
-function drop_default_args(t) {
-    const re = /, (default_delete|hash|equal_to|less|allocator|char_traits)</g;
-    let m;
-    while ((m = re.exec(t)) !== null) {
-        // skip to the matching '>'
-        let depth = 1, j = m.index + m[0].length;
-        while (j < t.length && depth > 0) {
-            if (t[j] === "<") ++depth;
-            else if (t[j] === ">") --depth;
-            ++j;
-        }
-        t = t.slice(0, m.index) + t.slice(j);
-        re.lastIndex = m.index;
-    }
-    return t;
-}
-
-/** @p t for display: without namespace qualifiers, anonymous namespaces
- *  included (xo::web::Foo<xo::web::Bar> -> Foo<Bar>); without default
- *  template arguments; basic_string<char> as string; no space before ">".  The
- *  full name stays in the tooltip
- **/
-function short_type(t) {
-    return t
-        ? drop_default_args(t.replace(/(\{anonymous\}::|\(anonymous namespace\)::|\b\w+::)+/g, ""))
-           .replace(/\s+>/g, ">")
-           .replace(/\bbasic_string<char>/g, "string")
-        : "?";
-}
-
 function has_members(obj) {
     return !!obj && Array.isArray(obj._members_) && obj._members_.length > 0;
 }
@@ -561,7 +528,7 @@ function member_rows(members, depth, path, out) {
             } else if (typeof v === "object") {
                 row.expandable = has_members(v);
                 row.open = row.expandable && expanded.has(key);
-                val = (row.expandable ? (row.open ? "▾ " : "▸ ") : "") + short_type(v._name_ || "{…}");
+                val = (row.expandable ? (row.open ? "▾ " : "▸ ") : "") + (v._name_ || "{…}");
             } else {
                 val = JSON.stringify(v);
                 if (val.length > 40)
@@ -735,7 +702,7 @@ async function draw(event) {
             t.selectAll("*").remove();
 
             // an array element has no declared type: name = value
-            if (!r.m._type_) {
+            if (!r.m._canonical_type_) {
                 t.append("tspan").attr("class", "mname").text(r.m._name_);
                 t.append("tspan").attr("class", "mval").text(" = ");
                 append_ref_toggle(t, r);
@@ -745,17 +712,17 @@ async function draw(event) {
 
             t.append("tspan").attr("class", "mname").text(`${r.m._name_}: `);
 
-            const s = source_of(r.m._type_);
+            const s = source_of(r.m._canonical_type_);
             t.append("tspan")
                 .attr("class", "mtype" + (s && s.href ? " linked" : ""))
-                .text(short_type(r.m._type_))
+                .text(r.m._short_type_ || r.m._canonical_type_)
                 .on("click", (ev) => {
                     ev.stopPropagation();
                     if (s && s.href)
                         window.open(s.href, "_blank");
                 })
                 .append("title")
-                .text(r.m._type_ + (s ? `\n${s.file}:${s.line}` : "\n(no source location)"));
+                .text(r.m._canonical_type_ + (s ? `\n${s.file}:${s.line}` : "\n(no source location)"));
 
             t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             t.append("tspan").attr("class", "mval").text(" = ");
@@ -776,7 +743,7 @@ async function draw(event) {
         const g = d3.select(this);
 
         g.select(":scope > title").text(
-            !d.type ? "(no _type_ reported)"
+            !d.type ? "(no _canonical_type_ reported)"
             : !s ? `${d.type}\n(no source location)`
             : `${d.type}\n${s.file}:${s.line}` + (s.href ? "" : "\n(no link provider)"));
         // left-click / Enter: open or close its members.  Its source is in
@@ -985,7 +952,7 @@ function copy_text(text) {
 /** the menu's items for box @p d: [label, action, reason-if-disabled] **/
 function menu_items(d) {
     const s = source_of(d.type);
-    const no_source = !d.type ? "no _type_ reported"
+    const no_source = !d.type ? "no _canonical_type_ reported"
           : !s ? "no source location"
           : !s.href ? "no link provider" : null;
 
@@ -1002,7 +969,7 @@ function menu_items(d) {
                                                          if (key) wanted.add(key); redraw(); }, null]),
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
-        ["Copy type name", () => copy_text(d.type), d.type ? null : "no _type_ reported"],
+        ["Copy type name", () => copy_text(d.type), d.type ? null : "no _canonical_type_ reported"],
         ["Copy id", () => copy_text(d.obj.id), (d.obj && d.obj.id) ? null : "no id"],
     ];
 }
