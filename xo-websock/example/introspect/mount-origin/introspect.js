@@ -271,9 +271,11 @@ const expanded = new Set();
 //   ▸ / ▾ on a ref row    want / unwant its edge
 //   ▸n / ▾ beside a box   want its edges to all its children (n undrawn) /
 //                         hide those children; ArrowRight / ArrowLeft too
+//   menu "Show children (+k)"  want its edges to its k children not drawn
+//   menu "Hide children (-m)"  hide its m children drawn
 //   menu "Show ▸ <child>" want the edge to that child (a child not drawn)
-//   menu "Hide ▸ <child>" hide that child, as its own "Hide" (a child drawn)
-//   menu "Hide"           unwant every edge into this box
+//   menu "Hide ▸ <child>" hide that child, as its own "Hide <label>" (a child drawn)
+//   menu "Hide <label>"   unwant every edge into this box
 //   collapse a box        unwant every edge out of it -- what was reached
 //                         only through them goes (a member row closing
 //                         does not: its edges still leave the open box)
@@ -412,16 +414,46 @@ function drop_edges_from(id) {
 function toggle_children(id) {
     const kids = tree.kids.get(id) || [];
 
-    if (kids.some(k => !shown_box_ids.has(k))) {
-        for (const k of kids) {
+    if (kids.some(k => !shown_box_ids.has(k)))
+        show_children(id);
+    else
+        hide_children(id);
+}
+
+/** want the edges from box @p id to its children not drawn **/
+function show_children(id) {
+    for (const k of (tree.kids.get(id) || []))
+        if (!shown_box_ids.has(k)) {
             const key = child_edge(id, k);
             if (key)
                 wanted.add(key);
         }
-    } else {
-        kids.forEach(k => hide_box(k));
-    }
     redraw();
+}
+
+/** hide the children of box @p id that are drawn **/
+function hide_children(id) {
+    for (const k of (tree.kids.get(id) || []))
+        if (shown_box_ids.has(k))
+            hide_box(k);
+    redraw();
+}
+
+/** box @p d's menu items for its children as a group: "Show children (+k)"
+ *  for k not drawn, "Hide children (-m)" for m drawn -- each only when its
+ *  count is non-zero, so a partly shown box has both
+ **/
+function children_items(d) {
+    if (!d.n_children)
+        return [["Show children", null, "owns no boxes"]];
+
+    const n_shown = d.n_children - d.n_hidden;
+    const items = [];
+    if (d.n_hidden > 0)
+        items.push([`Show children (+${d.n_hidden})`, () => show_children(d.id), null]);
+    if (n_shown > 0)
+        items.push([`Hide children (-${n_shown})`, () => hide_children(d.id), null]);
+    return items;
 }
 
 /** "Show all" / "Hide all".  Not edges into the Webserver: it is always
@@ -1038,9 +1070,8 @@ function menu_items(d) {
     return [
         [expanded.has(d.id) && d.expandable ? "Collapse" : "Expand",
          () => toggle(d.id), d.expandable ? null : "no members shown by its printer"],
-        [d.kids_open ? "Hide children" : `Show children (${d.n_hidden || 0})`,
-         () => toggle_children(d.id), d.n_children ? null : "owns no boxes"],
-        ["Hide", () => { hide_box(d.id); redraw(); },
+        ...children_items(d),
+        [`Hide ${d.label}`, () => { hide_box(d.id); redraw(); },
          d.id === "server" ? "the Webserver box is always shown" : null],
         // one entry per child, in ownership order: Hide if drawn, else Show
         ...(d.children || []).map(k => shown_box_ids.has(k)
