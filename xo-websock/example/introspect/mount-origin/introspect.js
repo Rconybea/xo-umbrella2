@@ -454,6 +454,8 @@ function children_items(d) {
  *  either); each still draws while its row is open
  **/
 function show_all_children(on) {
+    shift = {x: 0, y: 0};
+    svg_min = {w: 0, h: 0};
     if (on)
         showable.filter(e => e.target !== "server").forEach(e => wanted.add(e.key));
     else
@@ -686,8 +688,37 @@ function member_edges(nodes) {
 // laying out
 let draw_seq = 0;
 
+// ----- anchoring: the box you clicked in stays under the mouse -----------
+//
+// A click inside a box (or on its triangle, or one of its menu items) names
+// it the ANCHOR of the redraw that follows: after layout the whole drawing
+// is shifted -- in the svg (`shift`, never negative) and by scrolling the
+// page -- so that box keeps its place on screen.  Browsers cannot move the
+// mouse pointer, so the drawing moves instead.  The shift persists across
+// unanchored redraws (Refresh), so they don't jump; Show all / Hide all
+// reset it.
+
+/** the box the next draw keeps in place; consumed by that draw **/
+let pending_anchor = null;
+/** the drawing's offset within the svg, kept between draws **/
+let shift = {x: 0, y: 0};
+/** box id -> where it was last drawn (svg coordinates, shift included) **/
+let drawn_at = new Map();
+/** least svg size, kept between draws: room made so the page could scroll
+ *  far enough to hold an anchor in place
+ **/
+let svg_min = {w: 0, h: 0};
+
+for (const type of ["click", "keydown"])   // keydown: Enter / arrows on a focused box
+    document.getElementById("graph").addEventListener(type, (ev) => {
+        const g = ev.target.closest && ev.target.closest("g.node");
+        pending_anchor = g ? g.__data__.id : null;
+    }, true);   // capture: before the handler that redraws
+
 async function draw(event) {
     const seq = ++draw_seq;
+    const anchor = pending_anchor;
+    pending_anchor = null;
     const all = layout(event);
     tree = ownership(all.edges);
 
@@ -1018,17 +1049,29 @@ async function draw(event) {
     if (seq !== draw_seq)
         return;   // superseded while laying out
 
-    // 3. place the boxes
+    // 3. place the boxes; keep the anchor box where it was on screen
     const at = new Map(laid.children.map(c => [c.id, c]));
+    const scroll_by = anchor_shift(anchor, at, pad, badge_r);
     for (const d of nodes) {
         const c = at.get(d.id);
-        d.x = c.x + pad;
-        d.y = c.y + pad + badge_r;
+        d.x = c.x + pad + shift.x;
+        d.y = c.y + pad + badge_r + shift.y;
     }
     node.attr("transform", d => `translate(${d.x},${d.y})`);
+    drawn_at = new Map(nodes.map(d => [d.id, {x: d.x, y: d.y}]));
 
-    svg.attr("width", Math.max(900, laid.width + 2 * pad + badge_r))
-       .attr("height", laid.height + 2 * pad + badge_r);
+    // to scroll by scroll_by the page must reach that far: grow the svg
+    // (its left/top edge is fixed on the page) to make room, and keep it
+    const r = svg.node().getBoundingClientRect();
+    const to = {x: window.scrollX + scroll_by.x, y: window.scrollY + scroll_by.y};
+    if (scroll_by.x > 0)
+        svg_min.w = Math.max(svg_min.w, to.x + window.innerWidth - (r.left + window.scrollX));
+    if (scroll_by.y > 0)
+        svg_min.h = Math.max(svg_min.h, to.y + window.innerHeight - (r.top + window.scrollY));
+    svg.attr("width", Math.max(900, laid.width + 2 * pad + badge_r + shift.x, svg_min.w))
+       .attr("height", Math.max(laid.height + 2 * pad + badge_r + shift.y, svg_min.h));
+    if (scroll_by.x || scroll_by.y)
+        window.scrollTo(to.x, to.y);
 
     // 4. the edges, as ELK routed them
     const laid_edge = new Map(laid.edges.map(le => [le.id, le]));
@@ -1047,7 +1090,7 @@ async function draw(event) {
         .data(routed.filter(d => (d.kind !== "link" && d.kind !== "owns") || d.drawn), d => d.key)
         .join("path")
         .attr("class", d => `edge ${d.kind}`)
-        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad},${p.y + pad + badge_r}`).join(" "))
+        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad + shift.x},${p.y + pad + badge_r + shift.y}`).join(" "))
         // a member edge: hovering it lights its row too
         .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, true))
         .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, false))
@@ -1179,6 +1222,24 @@ function eq_x(text) {
     return null;
 }
 
+/** set `shift` so box @p anchor, laid out at @p at (ELK positions), lands
+ *  where it was last drawn; return the page scroll that makes up the rest.
+ *  On screen a box sits at svg_left + x - scrollX: keeping that, with the
+ *  shift >= 0 (nothing drawn left of / above the svg) and the scroll >= 0,
+ *  means shift = max(0, need), scroll change = shift - need, per axis.
+ *  No anchor, or one new to the drawing: shift unchanged, no scroll
+ **/
+function anchor_shift(anchor, at, pad, badge_r) {
+    const was = anchor !== null && drawn_at.get(anchor);
+    const c = anchor !== null && at.get(anchor);
+    if (!was || !c)
+        return {x: 0, y: 0};
+
+    const need = {x: was.x - (c.x + pad), y: was.y - (c.y + pad + badge_r)};
+    shift = {x: Math.max(0, need.x), y: Math.max(0, need.y)};
+    return {x: shift.x - need.x, y: shift.y - need.y};
+}
+
 /** what object @p id (a ref's target) is, for its row's tooltip: the box
  *  drawing it, or the box it is printed inside; drawn or not
  **/
@@ -1254,7 +1315,13 @@ function show_menu(x, y, head_text, items, owner) {
         b.disabled = !!disabled;
         if (disabled)
             b.title = disabled;
-        b.onclick = () => { hide_menu(); action(); };
+        b.onclick = () => {
+            // a box's menu item: that box is the redraw's anchor
+            const g = menu_owner && menu_owner.closest && menu_owner.closest("g.node");
+            hide_menu();
+            pending_anchor = g ? g.__data__.id : null;
+            action();
+        };
         menu_el.appendChild(b);
     }
 
