@@ -421,8 +421,7 @@ function children_items(d) {
  *  either); each still draws while its row is open
  **/
 function show_all_children(on) {
-    shift = {x: 0, y: 0};
-    svg_min = {w: 0, h: 0};
+    camera_reset = true;
     if (on)
         showable.filter(e => e.target !== "server").forEach(e => wanted.add(e.key));
     else
@@ -655,15 +654,21 @@ function member_edges(nodes) {
 // laying out
 let draw_seq = 0;
 
-// ----- anchoring: the box you clicked in stays under the mouse -----------
+// ----- the camera: the graph's own viewport -------------------------------
 //
-// A click inside a box (or on its triangle, or one of its menu items) names
-// it the ANCHOR of the redraw that follows: after layout the whole drawing
-// is shifted -- in the svg (`shift`, never negative) and by scrolling the
-// page -- so that box keeps its place on screen.  Browsers cannot move the
-// mouse pointer, so the drawing moves instead.  The shift persists across
-// unanchored redraws (Refresh), so they don't jump; Show all / Hide all
-// reset it.
+// The svg is a fixed window onto the graph (full width, filling the browser
+// window below the controls); the rest of the page never moves for its
+// sake.  One group, g.camera, holds the drawing and carries a pan / zoom
+// transform (d3.zoom): Shift + drag the background to pan, Shift + wheel to
+// zoom, "Fit" to see it all.  Without Shift the browser has the events: the
+// wheel scrolls the page.
+//
+// Anchoring: a click inside a box (or on its triangle, or one of its menu
+// items) names it the ANCHOR of the redraw that follows; after layout the
+// camera moves -- in step with the boxes' own move -- so that box keeps its
+// place in the viewport.  Browsers cannot move the mouse pointer, so the
+// drawing moves instead.  No anchor (Refresh): the camera stays; Show all /
+// Hide all (and the first draw) reset it.
 
 // ----- transitions (issue 13, step 3) ------------------------------------
 //
@@ -699,14 +704,87 @@ let pending_draws = 0;
 
 /** the box the next draw keeps in place; consumed by that draw **/
 let pending_anchor = null;
-/** the drawing's offset within the svg, kept between draws **/
-let shift = {x: 0, y: 0};
-/** box id -> where it was last drawn (svg coordinates, shift included) **/
+/** box id -> where it was last drawn, and its size (drawing coordinates) **/
 let drawn_at = new Map();
-/** least svg size, kept between draws: room made so the page could scroll
- *  far enough to hold an anchor in place
+/** the next draw puts the camera back at the origin, scale 1 **/
+let camera_reset = true;
+/** the drawing's size, last draw -- for "Fit" **/
+let drawing_size = {w: 0, h: 0};
+
+const graph_svg = d3.select("#graph");
+
+/** pan / zoom only with Shift held: otherwise the wheel scrolls the page
+ *  and a drag is the browser's.  Dragging on a box is the box's, not a pan
  **/
-let svg_min = {w: 0, h: 0};
+const zoom = d3.zoom()
+      .scaleExtent([0.2, 3])
+      .constrain(keep_a_box_in_view)
+      .filter((ev) => ev.shiftKey
+              && (ev.type === "wheel"
+                  || (!ev.button && !(ev.target.closest && ev.target.closest("g.node")))))
+      // Shift+wheel is a sideways scroll to browsers: some report it in
+      // deltaX, not deltaY -- take whichever moved
+      .wheelDelta((ev) => -(ev.deltaY || ev.deltaX) * (ev.deltaMode === 1 ? 0.05 : ev.deltaMode ? 1 : 0.002))
+      .on("zoom", (ev) => {
+          graph_svg.select(":scope > g.camera").attr("transform", ev.transform);
+          show_zoom_level(ev.transform.k);
+      });
+graph_svg.call(zoom).on("dblclick.zoom", null);
+
+// the hand cursor only while Shift is held: it advertises the gesture
+for (const type of ["keydown", "keyup"])
+    window.addEventListener(type, (ev) => graph_svg.classed("panning", ev.shiftKey));
+window.addEventListener("blur", () => graph_svg.classed("panning", false));
+
+/** d3.zoom's constrain: a pan or zoom may not take every box out of view --
+ *  the centre of at least one must stay inside the viewport @p extent.  If
+ *  transform @p t would leave none, move it just enough to put the centre
+ *  NEAREST the viewport on its edge: the drawing sticks there, and dragging
+ *  back moves at once.  Only gestures pass through here, not the page's own
+ *  camera moves (anchoring, Fit, reset)
+ **/
+function keep_a_box_in_view(t, extent) {
+    const [[x0, y0], [x1, y1]] = extent;
+    let best = null;
+
+    for (const b of drawn_at.values()) {
+        const sx = t.applyX(b.x + b.w / 2), sy = t.applyY(b.y + b.h / 2);
+        if (sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1)
+            return t;   // one in view: fine
+
+        const cx = Math.min(Math.max(sx, x0), x1), cy = Math.min(Math.max(sy, y0), y1);
+        const d2 = (sx - cx) ** 2 + (sy - cy) ** 2;
+        if (best === null || d2 < best.d2)
+            best = {d2, dx: cx - sx, dy: cy - sy};
+    }
+
+    // translate() works in drawing units: screen pixels / k
+    return best === null ? t : t.translate(best.dx / t.k, best.dy / t.k);
+}
+
+/** the svg fills the browser window below the controls **/
+function size_view() {
+    const top = graph_svg.node().getBoundingClientRect().top + window.scrollY;
+    graph_svg.style("height", `${Math.max(240, window.innerHeight - top - 12)}px`);
+}
+size_view();
+window.addEventListener("resize", size_view);
+
+/** the magnification, beside the controls (Shift + wheel zooms) **/
+function show_zoom_level(k) {
+    const el = document.getElementById("zoom-level");
+    if (el)
+        el.textContent = `zoom ${Math.round(k * 100)}%`;
+}
+
+/** "Fit": the whole drawing in view, top-left, scale <= 1 **/
+const fit_btn = document.getElementById("fit");
+if (fit_btn) fit_btn.onclick = () => {
+    const r = graph_svg.node().getBoundingClientRect();
+    const k = Math.min(1, r.width / Math.max(1, drawing_size.w), r.height / Math.max(1, drawing_size.h));
+    graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
+        .call(zoom.transform, d3.zoomIdentity.scale(k));
+};
 
 for (const type of ["click", "keydown"])   // keydown: Enter / arrows on a focused box
     document.getElementById("graph").addEventListener(type, (ev) => {
@@ -755,8 +833,9 @@ async function draw_aux(event) {
     const svg = d3.select("#graph");
 
     // fixed layers, edges under boxes
-    const edge_layer = svg.selectAll("g.edges").data([0]).join("g").attr("class", "edges");
-    const node_layer = svg.selectAll("g.nodes").data([0]).join("g").attr("class", "nodes");
+    const camera = svg.selectAll(":scope > g.camera").data([0]).join("g").attr("class", "camera");
+    const edge_layer = camera.selectAll("g.edges").data([0]).join("g").attr("class", "edges");
+    const node_layer = camera.selectAll("g.nodes").data([0]).join("g").attr("class", "nodes");
 
     // 1. the boxes, so their text can be measured
     const node = node_layer.selectAll("g.node")
@@ -1058,11 +1137,11 @@ async function draw_aux(event) {
 
     // 3. place the boxes; keep the anchor box where it was on screen
     const at = new Map(laid.children.map(c => [c.id, c]));
-    const scroll_by = anchor_shift(anchor, at, pad);
+    const camera_to = camera_target(anchor, at, pad);
     for (const d of nodes) {
         const c = at.get(d.id);
-        d.x = c.x + pad + shift.x;
-        d.y = c.y + pad + shift.y;
+        d.x = c.x + pad;
+        d.y = c.y + pad;
     }
     // boxes already on screen slide there; new ones appear there, then fade in
     const arriving = node.filter(function () { return this.__arriving; });
@@ -1078,25 +1157,13 @@ async function draw_aux(event) {
         .transition("fade").delay(t_move).duration(t_show).style("opacity", 1);
     // + slack: d3 starts the transitions on its next timer tick
     settled_at = performance.now() + t_move + t_show + 50;
-    drawn_at = new Map(nodes.map(d => [d.id, {x: d.x, y: d.y}]));
+    drawn_at = new Map(nodes.map(d => [d.id, {x: d.x, y: d.y, w: d.w, h: d.h}]));
 
-    // to scroll by scroll_by the page must reach that far: grow the svg
-    // (its left/top edge is fixed on the page) to make room, and keep it
-    const r = svg.node().getBoundingClientRect();
-    const to = {x: window.scrollX + scroll_by.x, y: window.scrollY + scroll_by.y};
-    if (scroll_by.x > 0)
-        svg_min.w = Math.max(svg_min.w, to.x + window.innerWidth - (r.left + window.scrollX));
-    if (scroll_by.y > 0)
-        svg_min.h = Math.max(svg_min.h, to.y + window.innerHeight - (r.top + window.scrollY));
-    // grow now, shrink only once things have moved -- nothing clipped mid-move
-    const w = Math.max(900, laid.width + 2 * pad + shift.x, svg_min.w);
-    const h = Math.max(laid.height + 2 * pad + shift.y, svg_min.h);
-    svg.attr("width", Math.max(w, +svg.attr("width") || 0))
-       .attr("height", Math.max(h, +svg.attr("height") || 0));
-    setTimeout(() => { if (seq === draw_seq) svg.attr("width", w).attr("height", h); },
-               t_move + t_show);
-    if (scroll_by.x || scroll_by.y)
-        window.scrollTo(to.x, to.y);
+    // the camera moves in step with the boxes: the anchor stays put
+    if (camera_to)
+        svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
+            .call(zoom.transform, camera_to);
+    drawing_size = {w: laid.width + 2 * pad, h: laid.height + 2 * pad};
 
     // 4. the edges, as ELK routed them
     const laid_edge = new Map(laid.edges.map(le => [le.id, le]));
@@ -1119,7 +1186,7 @@ async function draw_aux(event) {
         .transition("fade").delay(t_move).duration(t_show).style("opacity", 1);
     paths
         .attr("class", d => `edge ${d.kind}`)
-        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad + shift.x},${p.y + pad + shift.y}`).join(" "))
+        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad},${p.y + pad}`).join(" "))
         // a member edge: hovering it lights its row too
         .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, true))
         .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, false))
@@ -1251,22 +1318,25 @@ function eq_x(text) {
     return null;
 }
 
-/** set `shift` so box @p anchor, laid out at @p at (ELK positions), lands
- *  where it was last drawn; return the page scroll that makes up the rest.
- *  On screen a box sits at svg_left + x - scrollX: keeping that, with the
- *  shift >= 0 (nothing drawn left of / above the svg) and the scroll >= 0,
- *  means shift = max(0, need), scroll change = shift - need, per axis.
- *  No anchor, or one new to the drawing: shift unchanged, no scroll
+/** where the camera should go this draw: back to the origin after a reset;
+ *  for anchor box @p anchor, laid out at @p at (ELK positions), moved by
+ *  as much as the box moved, scaled -- so on screen (k * x + t) the box
+ *  stays put; else null, the camera stays
  **/
-function anchor_shift(anchor, at, pad) {
+function camera_target(anchor, at, pad) {
+    if (camera_reset) {
+        camera_reset = false;
+        return d3.zoomIdentity;
+    }
+
     const was = anchor !== null && drawn_at.get(anchor);
     const c = anchor !== null && at.get(anchor);
     if (!was || !c)
-        return {x: 0, y: 0};
+        return null;
 
-    const need = {x: was.x - (c.x + pad), y: was.y - (c.y + pad)};
-    shift = {x: Math.max(0, need.x), y: Math.max(0, need.y)};
-    return {x: shift.x - need.x, y: shift.y - need.y};
+    const t = d3.zoomTransform(graph_svg.node());
+    const dx = was.x - (c.x + pad), dy = was.y - (c.y + pad);
+    return d3.zoomIdentity.translate(t.x + t.k * dx, t.y + t.k * dy).scale(t.k);
 }
 
 /** what object @p id (a ref's target) is, for its row's tooltip: the box

@@ -10,7 +10,13 @@
     body { font-family: system-ui, sans-serif; margin: 1.5em; color: #222; }
     #status { color: #666; margin-left: 0.8em; }
     #srcinfo { color: #666; font-size: 13px; margin-top: 0.4em; }
-    svg { border: 1px solid #ccc; background: #fafafa; margin-top: 1em; display: block; }
+    /* the graph's viewport: full width; its height set to fill the window */
+    #zoom-level { font-size: 13px; color: #555; margin: 0 0.6em; font-variant-numeric: tabular-nums; }
+    svg#graph { border: 1px solid #ccc; background: #fafafa; margin-top: 1em; display: block;
+                width: 100%; box-sizing: border-box; }
+    svg#graph.panning { cursor: grab; }          /* Shift held: pan / zoom */
+    svg#graph.panning:active { cursor: grabbing; }
+    svg#graph .node:not(.expandable) { cursor: default; }
     .node > rect { stroke-width: 1.5px; rx: 6px; }
     .node.server > rect { fill: #e8f0fe; stroke: #4a6fa5; }
     .node.http > rect   { fill: #fdf3e1; stroke: #b07d2b; }
@@ -71,12 +77,14 @@
     <button id="refresh" disabled>Refresh</button>
     <button id="show-all" title="show every box's children">Show all</button>
     <button id="hide-all" title="hide every box's children: only the Webserver">Hide all</button>
+    <button id="fit" title="the whole graph in view">Fit</button>
+    <span id="zoom-level" title="the graph's magnification: Shift + wheel zooms the graph, Shift + drag its background pans">zoom 100%</span>
     <label title="show member types inline: name: Type [metatype] = value"><input type="checkbox" id="show-types"> types</label>
     <span id="status">connecting...</span>
   </div>
   <div id="srcinfo">source links: (loading)</div>
 
-  <svg id="graph" width="900" height="160"></svg>
+  <svg id="graph"></svg>
 
   <div id="ctxmenu" role="menu" hidden></div>
 
