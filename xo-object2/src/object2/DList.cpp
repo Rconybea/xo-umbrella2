@@ -6,6 +6,7 @@
 #include "DList.hpp"
 #include "list/IGCObject_DList.hpp"
 #include "list/IPrintable_DList.hpp"
+#include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 
