@@ -241,6 +241,84 @@ function layout(event) {
     return {nodes, edges};
 }
 
+// ----- expand (issue 13, step 3) -------------------------------------------
+//
+// A box whose object has "_members_" (the C++ members its printer chose to
+// show) toggles open on left-click / Enter: a row per member,
+//   name: Type [metatype] = value
+// A member whose value is an object with members of its own toggles open in
+// place, indented.  A {"ref": id} value is an edge from its row to that
+// object's box.  Clicking a row's type opens its source.
+
+/** box ids, and member paths ("<box>/<member>/<member>.."), shown open;
+ *  kept across refreshes
+ **/
+const expanded = new Set();
+
+const row_h = 18;          // a member row
+const row_pad = 8;         // below the last row
+
+/** @p t without namespace qualifiers: xo::web::Foo<xo::web::Bar> -> Foo<Bar> **/
+function short_type(t) {
+    return t ? t.replace(/\b(\w+::)+/g, "") : "?";
+}
+
+function has_members(obj) {
+    return !!obj && Array.isArray(obj._members_) && obj._members_.length > 0;
+}
+
+/** the rows for @p members (at @p depth, under @p path), and the open
+ *  members' rows beneath them, appended to @p out
+ **/
+function member_rows(members, depth, path, out) {
+    for (const m of (members || [])) {
+        const key = `${path}/${m._name_}`;
+        const row = {key, depth, m, cls: "", ref: null, expandable: false, open: false};
+        let val;
+
+        if ("_error_" in m) {
+            row.cls = "error";
+            val = `⚠ ${m._error_}`;
+        } else {
+            const v = m._value_;
+
+            if (v === null || v === undefined) {
+                val = "null";
+            } else if (Array.isArray(v)) {
+                val = `[${v.length}]`;
+            } else if (typeof v === "object" && Object.keys(v).length === 1 && "ref" in v) {
+                row.cls = "ref";
+                row.ref = v.ref;
+                val = "→";
+            } else if (typeof v === "object") {
+                row.expandable = has_members(v);
+                row.open = row.expandable && expanded.has(key);
+                val = (row.expandable ? (row.open ? "▾ " : "▸ ") : "") + short_type(v._name_ || "{…}");
+            } else {
+                val = JSON.stringify(v);
+                if (val.length > 40)
+                    val = val.slice(0, 39) + "…";
+            }
+        }
+
+        row.val = val;
+        out.push(row);
+
+        if (row.open)
+            member_rows(m._value_._members_, depth + 1, key, out);
+    }
+}
+
+function toggle(key) {
+    if (expanded.has(key))
+        expanded.delete(key);
+    else
+        expanded.add(key);
+
+    if (last_event)
+        draw(last_event);
+}
+
 // a draw is asynchronous (ELK); a newer one supersedes an older one still
 // laying out
 let draw_seq = 0;
@@ -265,7 +343,8 @@ async function draw(event) {
             const g = enter.append("g");
             g.append("title");   // the type and its source; see below
             g.append("rect");
-            g.append("text").attr("x", 12).attr("y", 25);
+            g.append("text").attr("class", "label").attr("x", 12).attr("y", 25);
+            g.append("g").attr("class", "rows");
             // refcount badge, top-right corner (only where known)
             const b = g.append("g").attr("class", "badge");
             b.append("circle").attr("r", badge_r);
@@ -273,20 +352,76 @@ async function draw(event) {
             return g;
         });
 
-    node.attr("class", d => `node ${d.kind}`);
-    node.select(":scope > text").text(d => d.label);
+    // which boxes can open, and their member rows
+    for (const d of nodes) {
+        d.expandable = has_members(d.obj);
+        d.open = d.expandable && expanded.has(d.id);
+        d.rows = [];
+        if (d.open)
+            member_rows(d.obj._members_, 0, d.id, d.rows);
+    }
+
+    node.attr("class", d => `node ${d.kind}` + (d.expandable ? " expandable" : "")
+              + (d.open ? " open" : ""));
+    node.select(":scope > text.label")
+        .text(d => (d.expandable ? (d.open ? "▾ " : "▸ ") : "") + d.label);
+
+    // the member rows: name: Type [metatype] = value
+    node.select(":scope > g.rows").each(function (d) {
+        const rows = d3.select(this).selectAll("text.row")
+              .data(d.rows, r => r.key)
+              .join("text");
+
+        rows.attr("class", r => `row ${r.cls}` + (r.expandable ? " expandable" : ""))
+            .attr("x", r => 12 + 14 * r.depth);
+
+        rows.each(function (r) {
+            const t = d3.select(this);
+            t.selectAll("*").remove();
+
+            t.append("tspan").attr("class", "mname").text(`${r.m._name_}: `);
+
+            const s = source_of(r.m._type_);
+            t.append("tspan")
+                .attr("class", "mtype" + (s && s.href ? " linked" : ""))
+                .text(short_type(r.m._type_))
+                .on("click", (ev) => {
+                    ev.stopPropagation();
+                    if (s && s.href)
+                        window.open(s.href, "_blank");
+                })
+                .append("title")
+                .text(r.m._type_ + (s ? `\n${s.file}:${s.line}` : "\n(no source location)"));
+
+            t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
+            t.append("tspan").attr("class", "mval").text(` = ${r.val}`);
+        });
+
+        rows.on("click", (ev, r) => {
+            ev.stopPropagation();
+            if (r.expandable)
+                toggle(r.key);
+        });
+    });
 
     // source: hover for the type and where it is defined; click to open
     node.each(function (d) {
         const s = source_of(d.type);
         const g = d3.select(this);
 
-        g.classed("linked", !!(s && s.href));
         g.select(":scope > title").text(
             !d.type ? "(no _type_ reported)"
             : !s ? `${d.type}\n(no source location)`
             : `${d.type}\n${s.file}:${s.line}` + (s.href ? "" : "\n(no link provider)"));
-        g.on("click", (s && s.href) ? () => window.open(s.href, "_blank") : null);
+        // left-click / Enter: open or close its members.  Its source is in
+        // the context menu
+        g.on("click", d.expandable ? () => toggle(d.id) : null)
+         .on("keydown", (ev) => {
+             if (ev.key === "Enter" && d.expandable) {
+                 ev.preventDefault();
+                 toggle(d.id);
+             }
+         });
 
         // focusable, so the keyboard can reach the context menu
         g.attr("tabindex", 0)
@@ -306,9 +441,17 @@ async function draw(event) {
     // size each box to its label
     node.each(function (d) {
         const g = d3.select(this);
-        d.h = d.small ? 30 : box_h;
-        g.select(":scope > text").attr("y", d.small ? 20 : 25);
-        d.w = g.select(":scope > text").node().getComputedTextLength() + 24;
+        const head_h = d.small ? 30 : box_h;
+        g.select(":scope > text.label").attr("y", d.small ? 20 : 25);
+
+        d.w = g.select(":scope > text.label").node().getComputedTextLength() + 24;
+        g.selectAll(":scope > g.rows > text.row").each(function (r, i) {
+            d3.select(this).attr("y", head_h + i * row_h + 13);
+            d.w = Math.max(d.w, 12 + 14 * r.depth + this.getComputedTextLength() + 16);
+        });
+
+        d.head_h = head_h;
+        d.h = head_h + (d.rows.length ? d.rows.length * row_h + row_pad : 0);
         g.select("rect").attr("width", d.w).attr("height", d.h);
 
         // refcount: how many rp<> hold this object; red if the snapshot
@@ -325,6 +468,14 @@ async function draw(event) {
                   : `refcount ${d.refcount}, ${d.expected} shown: ${extra} hold(s) not in this snapshot`);
     });
 
+    // a ref member's edge: from its row to the referenced object's box
+    const node_of_obj = new Map(nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
+    for (const d of nodes)
+        for (const r of d.rows)
+            if (r.ref && node_of_obj.has(r.ref))
+                edges.push({source: `${r.key}#port`, target: node_of_obj.get(r.ref),
+                            kind: "member", from: d.id});
+
     // 2. ELK: layered, top to bottom; spacing leaves room for the badges
     const graph = {
         id: "root",
@@ -336,7 +487,15 @@ async function draw(event) {
             "elk.layered.spacing.nodeNodeBetweenLayers": "50",
             "elk.spacing.edgeNode": "20",
         },
-        children: nodes.map(d => ({id: d.id, width: d.w, height: d.h})),
+        children: nodes.map(d => ({
+            id: d.id, width: d.w, height: d.h,
+            // a ref member's edge leaves its row, on the box's right side
+            layoutOptions: {"elk.portConstraints": "FIXED_POS"},
+            ports: d.rows.map((r, i) => ({r, i})).filter(x => x.r.ref && node_of_obj.has(x.r.ref))
+                .map(({r, i}) => ({id: `${r.key}#port`, width: 1, height: 1,
+                                   x: d.w, y: d.head_h + i * row_h + row_h / 2,
+                                   layoutOptions: {"elk.port.side": "EAST"}})),
+        })),
         edges: edges.map((e, i) => ({id: `e${i}`, sources: [e.source], targets: [e.target]})),
     };
 
@@ -358,8 +517,9 @@ async function draw(event) {
        .attr("height", laid.height + 2 * pad + badge_r);
 
     // 4. the edges, as ELK routed them
+    const laid_edge = new Map(laid.edges.map(le => [le.id, le]));
     const routed = edges.map((e, i) => {
-        const le = laid.edges[i];
+        const le = laid_edge.get(`e${i}`);
         const pts = [];
         for (const sec of (le.sections || [])) {
             pts.push(sec.startPoint, ...(sec.bendPoints || []), sec.endPoint);
@@ -405,6 +565,8 @@ function menu_items(d) {
           : !s.href ? "no link provider" : null;
 
     return [
+        [expanded.has(d.id) && d.expandable ? "Collapse" : "Expand",
+         () => toggle(d.id), d.expandable ? null : "no members shown by its printer"],
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _type_ reported"],

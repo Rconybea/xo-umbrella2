@@ -30,8 +30,17 @@
     path.edge.holds { stroke: #d08a2c; stroke-width: 1.4px; stroke-dasharray: 2 3; }
     path.edge.uses { stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; }
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }
-    .node.linked { cursor: pointer; }
-    .node.linked:hover rect { stroke-width: 3px; }
+    .node.expandable { cursor: pointer; }
+    .node.expandable:hover rect { stroke-width: 3px; }
+    .node.open rect { fill-opacity: 0.6; }
+    text.row { font-size: 12px; font-family: ui-monospace, monospace; fill: #333; }
+    text.row.expandable { cursor: pointer; }
+    text.row.error { fill: #aaa; }
+    text.row .mname { font-weight: 600; }
+    text.row .mtype { fill: #2c5e8f; }
+    text.row .mtype.linked { cursor: pointer; text-decoration: underline; }
+    text.row .mtag { fill: #888; font-size: 10px; }
+    path.edge.member { stroke: #7a4fa0; stroke-width: 1.4px; }
     .node:focus { outline: none; }
     .node:focus rect { stroke-width: 3px; stroke-dasharray: 3 2; }
     #ctxmenu { position: absolute; z-index: 10; min-width: 12em; background: #fff;
