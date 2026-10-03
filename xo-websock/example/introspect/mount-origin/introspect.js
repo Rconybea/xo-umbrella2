@@ -240,68 +240,104 @@ function layout(event) {
  **/
 const expanded = new Set();
 
-// ----- children (issue 13: showing / hiding parts of the graph) ------------
+// ----- which boxes are shown (issue 13: showing / hiding parts of the graph) -
 //
-// A box's CHILDREN are the boxes it owns -- the "link" / "owns" edges:
-// server -> endpoints, sessions; session -> sender, subscriptions.  A ▸/▾
-// beside a box (or ArrowRight / ArrowLeft, or the menu) shows / hides them.
-// A box is shown only if every owner above it shows its children; the
-// Webserver box always.  Edges into hidden boxes are dropped.  Default: only
-// the Webserver box.
+// Shown is a property of each box: the set `shown`.  A box is DRAWN if it is
+// in `shown`, or on the ownership path from the server to one that is -- so
+// the drawing stays connected; the Webserver box always.  A box's CHILDREN
+// are the boxes it owns ("link" / "owns" edges: server -> endpoints, sessions;
+// session -> sender, subscriptions).  Hiding a box hides its descendants too.
+// Edges with an undrawn end are dropped.  Default: only the Webserver box.
+//
+//   ▸n / ▾ beside a box   show all its children (n hidden) / hide them all;
+//                         also ArrowRight / ArrowLeft on a focused box
+//   menu "Hide"           this box and its descendants (not the Webserver)
+//   menu "Show ▸ <child>" one hidden child
+//   ▸ / ▾ on a ref row    show / hide the box it refers to
+//   Show all / Hide all
 
-/** box ids whose children are shown; kept across refreshes **/
-const children_open = new Set();
+/** box ids chosen to be shown; kept across refreshes **/
+const shown = new Set();
 
-/** owner id -> [child ids], from the ownership edges of @p edges **/
-function children_of(edges) {
+/** the ownership tree of @p edges: {kids: owner -> [child], parent: child -> owner} **/
+function ownership(edges) {
     const kids = new Map();
+    const parent = new Map();
     for (const e of edges)
         if (e.kind === "link" || e.kind === "owns") {
             if (!kids.has(e.source))
                 kids.set(e.source, []);
             kids.get(e.source).push(e.target);
+            parent.set(e.target, e.source);
         }
-    return kids;
+    return {kids, parent};
 }
 
-/** ids of the boxes shown: the server, and every child of a shown box
- *  whose children are open
+/** ids of the boxes drawn: the server; each shown box; and its owners up to
+ *  the server
  **/
-function visible_ids(kids) {
-    const shown = new Set(["server"]);
-    const todo = ["server"];
-    while (todo.length) {
-        const id = todo.pop();
-        if (!children_open.has(id))
-            continue;
-        for (const k of (kids.get(id) || [])) {
-            shown.add(k);
-            todo.push(k);
-        }
+function drawn_ids(tree) {
+    const drawn = new Set(["server"]);
+    for (const id of shown) {
+        for (let x = id; x !== undefined && !drawn.has(x); x = tree.parent.get(x))
+            drawn.add(x);
     }
-    return shown;
+    return drawn;
 }
 
-function toggle_children(id) {
-    if (children_open.has(id))
-        children_open.delete(id);
-    else
-        children_open.add(id);
+/** the ownership tree of the current snapshot **/
+function current_tree() {
+    return ownership(last_event ? layout(last_event).edges : []);
+}
 
+function redraw() {
     if (last_event)
         draw(last_event);
+}
+
+/** show box @p id (and so the path to it) **/
+function show_box(id) {
+    shown.add(id);
+    redraw();
+}
+
+/** hide box @p id and its descendants -- never the Webserver **/
+function hide_box(id, tree = current_tree()) {
+    if (id === "server")
+        return;
+    const todo = [id];
+    while (todo.length) {
+        const x = todo.pop();
+        shown.delete(x);
+        todo.push(...(tree.kids.get(x) || []));
+    }
+}
+
+/** the triangle beside box @p id: any child undrawn -> show them all; else
+ *  hide them all
+ **/
+function toggle_children(id) {
+    const tree = current_tree();
+    const drawn = drawn_ids(tree);
+    const kids = tree.kids.get(id) || [];
+
+    if (kids.some(k => !drawn.has(k))) {
+        shown.add(id);
+        kids.forEach(k => shown.add(k));
+    } else {
+        kids.forEach(k => hide_box(k, tree));
+    }
+    redraw();
 }
 
 /** "Show all" / "Hide all" **/
 function show_all_children(on) {
     if (on && last_event)
-        for (const id of children_of(layout(last_event).edges).keys())
-            children_open.add(id);
+        for (const d of layout(last_event).nodes)
+            shown.add(d.id);
     if (!on)
-        children_open.clear();
-
-    if (last_event)
-        draw(last_event);
+        shown.clear();
+    redraw();
 }
 
 const row_h = 18;          // a member row
@@ -312,8 +348,11 @@ const row_h = 18;          // a member row
  **/
 let box_of_id = new Map();
 
-/** ids of the boxes shown this draw **/
+/** ids of the boxes drawn this draw **/
 let shown_box_ids = new Set();
+
+/** box id -> its label, every box this draw (for menu entries) **/
+let box_label = new Map();
 
 /** a json object that is a ref: exactly {"ref": id} **/
 function is_ref(v) {
@@ -424,6 +463,9 @@ function member_rows(members, depth, path, out) {
             } else if (is_ref(v)) {
                 row.cls = "ref";
                 row.ref = v.ref;
+                // a box it refers to, which can be shown / hidden from here
+                const tb = box_of_id.get(v.ref);
+                row.ref_box = (tb !== undefined && tb !== "server") ? tb : null;
                 val = !box_of_id.has(v.ref) ? "→ (not drawn)"
                     : shown_box_ids.has(box_of_id.get(v.ref)) ? "→" : "→ (hidden)";
             } else if (is_ref_map(v)) {
@@ -470,6 +512,28 @@ function toggle(key) {
         draw(last_event);
 }
 
+/** on a ref row whose target is a box (not the Webserver): a ▸ / ▾ before
+ *  the arrow, showing / hiding that box
+ **/
+function append_ref_toggle(t, r) {
+    if (!r.ref_box)
+        return;
+
+    const on = shown_box_ids.has(r.ref_box);
+
+    t.append("tspan").attr("class", "rtoggle").text(on ? "▾" : "▸")
+        .on("click", (ev) => {
+            ev.stopPropagation();
+            if (on) {
+                hide_box(r.ref_box);
+                redraw();
+            } else {
+                show_box(r.ref_box);
+            }
+        })
+        .append("title").text(on ? "hide the box it refers to" : "show the box it refers to");
+}
+
 /** the box a ref row @p r of box @p d draws its edge to; null for none --
  *  not a ref, not drawn, or into its own box
  **/
@@ -487,8 +551,8 @@ let draw_seq = 0;
 async function draw(event) {
     const seq = ++draw_seq;
     const all = layout(event);
-    const kids = children_of(all.edges);
-    shown_box_ids = visible_ids(kids);
+    const tree = ownership(all.edges);
+    shown_box_ids = drawn_ids(tree);
 
     // every box -- shown or not -- for joining refs; only shown ones drawn
     box_of_id = new Map(all.nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
@@ -496,11 +560,14 @@ async function draw(event) {
         if (d.obj)
             note_nested(d.obj._members_, d.id);
 
+    box_label = new Map(all.nodes.map(d => [d.id, d.label]));
     const nodes = all.nodes.filter(d => shown_box_ids.has(d.id));
     const edges = all.edges.filter(e => shown_box_ids.has(e.source) && shown_box_ids.has(e.target));
     for (const d of nodes) {
-        d.n_children = (kids.get(d.id) || []).length;
-        d.kids_open = children_open.has(d.id);
+        d.children = tree.kids.get(d.id) || [];
+        d.n_children = d.children.length;
+        d.n_hidden = d.children.filter(k => !shown_box_ids.has(k)).length;
+        d.kids_open = (d.n_children > 0 && d.n_hidden === 0);
     }
     const box_h = 40;
     const pad = 20;            // around the whole graph
@@ -547,13 +614,14 @@ async function draw(event) {
 
     node.select(":scope > text.kids")
         .attr("display", d => d.n_children ? null : "none")
-        .text(d => d.kids_open ? "▾" : `▸${d.n_children}`)
+        .text(d => d.kids_open ? "▾" : `▸${d.n_hidden}`)
         .on("click", (ev, d) => {
             ev.stopPropagation();
             toggle_children(d.id);
         })
         .selectAll("title").data(d => [d]).join("title")
-        .text(d => d.kids_open ? "hide its children" : `show its ${d.n_children} children`);
+        .text(d => d.kids_open ? "hide its children"
+              : `show its children (${d.n_hidden} of ${d.n_children} hidden)`);
 
     // the member rows: name: Type [metatype] = value
     node.select(":scope > g.rows").each(function (d) {
@@ -571,7 +639,9 @@ async function draw(event) {
             // an array element has no declared type: name = value
             if (!r.m._type_) {
                 t.append("tspan").attr("class", "mname").text(r.m._name_);
-                t.append("tspan").attr("class", "mval").text(` = ${r.val}`);
+                t.append("tspan").attr("class", "mval").text(" = ");
+                append_ref_toggle(t, r);
+                t.append("tspan").attr("class", "mval").text(r.val);
                 return;
             }
 
@@ -590,7 +660,9 @@ async function draw(event) {
                 .text(r.m._type_ + (s ? `\n${s.file}:${s.line}` : "\n(no source location)"));
 
             t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
-            t.append("tspan").attr("class", "mval").text(` = ${r.val}`);
+            t.append("tspan").attr("class", "mval").text(" = ");
+            append_ref_toggle(t, r);
+            t.append("tspan").attr("class", "mval").text(r.val);
         });
 
         rows.on("click", (ev, r) => {
@@ -616,7 +688,7 @@ async function draw(event) {
              if (ev.key === "Enter" && d.expandable) {
                  ev.preventDefault();
                  toggle(d.id);
-             } else if (ev.key === "ArrowRight" && d.n_children && !d.kids_open) {
+             } else if (ev.key === "ArrowRight" && d.n_hidden > 0) {
                  ev.preventDefault();
                  toggle_children(d.id);
              } else if (ev.key === "ArrowLeft" && d.kids_open) {
@@ -779,8 +851,13 @@ function menu_items(d) {
     return [
         [expanded.has(d.id) && d.expandable ? "Collapse" : "Expand",
          () => toggle(d.id), d.expandable ? null : "no members shown by its printer"],
-        [d.kids_open ? "Hide children" : `Show children (${d.n_children || 0})`,
+        [d.kids_open ? "Hide children" : `Show children (${d.n_hidden || 0})`,
          () => toggle_children(d.id), d.n_children ? null : "owns no boxes"],
+        ["Hide", () => { hide_box(d.id); redraw(); },
+         d.id === "server" ? "the Webserver box is always shown" : null],
+        // one entry per hidden child
+        ...(d.children || []).filter(k => !shown_box_ids.has(k)).map(k =>
+            [`Show ▸ ${box_label.get(k) || k}`, () => show_box(k), null]),
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _type_ reported"],
