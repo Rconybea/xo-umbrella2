@@ -109,7 +109,7 @@ namespace xo {
              *  this TU, using process-wide @p table.
              *  The implementation types defined with it (WebserverImpl,
              *  WebsocketSessionRecd, WsSessionSender<WebserverImpl>,
-             *  WsSessionTable<WebsocketSessionRecd>).
+             *  WsSessionTable<WebsocketSessionRecd>, OutputBuffer).
              **/
             static void reflect_self(reflect::TypeDescrTable * table);
 

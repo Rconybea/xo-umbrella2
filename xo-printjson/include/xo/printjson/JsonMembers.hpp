@@ -36,6 +36,13 @@ namespace xo {
             struct member_target<std::vector<T>> : member_target<T> {};
         }
 
+        /** an object's identity in json output: its address, as a string.
+         *  An object printed in full writes it as its "id"; a reference to it,
+         *  {"ref": json_id(p)}, so a consumer can join the two.  Unique within
+         *  one output; an address may be reused once its object is freed
+         **/
+        std::string json_id(void const * p);
+
         /** @brief writes an object's "_members_" array, for a JsonPrinter that
          *  opts in to showing chosen C++ members:
          *
@@ -59,6 +66,7 @@ namespace xo {
          *    JsonMembers mem(this->pjson(), p_os);   // writes , "_members_": [
          *    mem.member("url_router_", x->url_router_);
          *    mem.member_as<std::atomic<int>>("port_", x->port_.load());
+         *    mem.member_ref<rp<Sender>>("sender_", x->sender_.get());  // printed elsewhere
          *    mem.end();                              // writes ]
          *
          *  See .xo-backlog/xo-websock/issues/13.
@@ -98,6 +106,21 @@ namespace xo {
                 return *this;
             }
 
+            /** member @p name, declared as type Declared, referring to an
+             *  object printed in full elsewhere: _value_ is {"ref":
+             *  json_id(@p p)}, or null.  For an object owned elsewhere, or
+             *  shared -- printing it in full here would repeat it, or recurse
+             **/
+            template <typename Declared>
+            JsonMembers & member_ref(std::string_view name, void const * p) {
+                using reflect::Reflect;
+
+                this->write_ref(name, std::string(reflect::type_name<Declared>()),
+                                Reflect::require<Declared>()->metatype(), p);
+
+                return *this;
+            }
+
             /** close the array **/
             void end();
 
@@ -111,6 +134,8 @@ namespace xo {
                              reflect::Metatype metatype, reflect::TaggedPtr value);
             void write_error(std::string_view name, std::string const & declared,
                              reflect::Metatype metatype, std::string const & why);
+            void write_ref(std::string_view name, std::string const & declared,
+                           reflect::Metatype metatype, void const * p);
             /** the separator and the entry's _name_, _type_, _metatype_ **/
             void write_head(std::string_view name, std::string const & declared,
                             reflect::Metatype metatype);

@@ -339,6 +339,11 @@ namespace xo {
                 //struct msg amsg; /* the one pending message... */
                 //int current; /* the current message number we are caching */
             }; /*per_vhost_data__minimal*/
+
+            /* the session record's json printer, defined below: shows chosen
+             * private members
+             */
+            class JsonPrinter_WsSession;
         } /*namespace*/
 
         class WebserverImpl;
@@ -517,6 +522,11 @@ namespace xo {
             } /*unsubscribe_all*/
 
         private:
+            /* reads private members, for "_members_" -- see WebserverImpl's
+             * friend JsonPrinter_Webserver for why not "friend class"
+             */
+            friend JsonPrinter_WsSession;
+
             uint32_t generate_msg_seq() { return ++(this->last_msg_seq_); }
 
             /* enqueue application-level message.
@@ -1089,7 +1099,33 @@ namespace xo {
                                 pjson->print_aux(sub, p_os);
                             });
                     }
-                    *p_os << "]}";
+                    *p_os << "]";
+
+                    /* chosen C++ members, for the page's "expand"
+                     * (.xo-backlog/xo-websock/issues/13).  output_buf_ and
+                     * outbound_q_ are guarded by the session's mutex.
+                     * sender_ is printed in full above, so a ref here.
+                     * outbound_q_: xo-reflect has no std::deque -- its size,
+                     * under its declared type
+                     */
+                    OutputBuffer * output_buf = nullptr;
+                    std::size_t n_queued = 0;
+                    {
+                        std::lock_guard<std::mutex> lock(const_cast<std::mutex &>(recd->mutex_));
+
+                        output_buf = recd->output_buf_;
+                        n_queued = recd->outbound_q_.size();
+                    }
+
+                    JsonMembers mem(this->pjson(), p_os);
+                    mem.member("output_buf_", output_buf)
+                        .member_ref<rp<WsSessionSenderImpl>>("sender_", recd->sender_.get())
+                        .member("router_", recd->router_)
+                        .member_as<std::deque<std::string>>("outbound_q_",
+                                                            std::to_string(n_queued) + " queued");
+                    mem.end();
+
+                    *p_os << "}";
                 }
             };
             /** @brief the server, keyed on its actual type: reflection takes a
@@ -2202,6 +2238,7 @@ namespace xo {
             { StructReflector<WebsocketSessionRecd> sr; }
             { StructReflector<WsSessionSenderImpl> sr; }
             { StructReflector<WsSessionTable<WebsocketSessionRecd>> sr; }
+            { StructReflector<OutputBuffer> sr; }
         } /*reflect_self*/
     } /*namespace web*/
 

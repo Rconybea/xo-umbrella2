@@ -6,6 +6,7 @@
 #include "JsonMembers.hpp"
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <cassert>
+#include <sstream>
 
 namespace xo {
     using xo::pp::quot;
@@ -14,6 +15,14 @@ namespace xo {
     using xo::reflect::TypeDescr;
 
     namespace json {
+        std::string
+        json_id(void const * p)
+        {
+            std::ostringstream ss;
+            ss << p;
+            return ss.str();
+        }
+
         JsonMembers::JsonMembers(PrintJson const * pjson, std::ostream * p_os)
             : pjson_{pjson}, p_os_{p_os}
         {
@@ -61,6 +70,20 @@ namespace xo {
 
             *p_os_ << ", " << quot("_value_") << ": ";
             pjson_->print_aux(value, p_os_);
+            *p_os_ << "}";
+        }
+
+        void
+        JsonMembers::write_ref(std::string_view name, std::string const & declared,
+                               Metatype metatype, void const * p)
+        {
+            this->write_head(name, declared, metatype);
+
+            *p_os_ << ", " << quot("_value_") << ": ";
+            if (p)
+                *p_os_ << "{" << quot("ref") << ": " << quot(json_id(p)) << "}";
+            else
+                *p_os_ << "null";
             *p_os_ << "}";
         }
 

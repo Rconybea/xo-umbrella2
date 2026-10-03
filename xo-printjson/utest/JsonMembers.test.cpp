@@ -148,6 +148,32 @@ namespace xo {
             REQUIRE(ss.str() == ", \"_members_\": ["
                     + entry("port_", type_of<std::atomic<std::int32_t>>(), "atomic", "8080") + "]");
         }
+
+        TEST_CASE("json-members-member-ref", "[printjson][JsonMembers]") {
+            /* an object printed elsewhere: its id, so a consumer can join the
+             * two -- the same id that object's own printer writes
+             */
+            PrintJson pjson;
+            std::stringstream ss;
+
+            JmReflected r;
+            JmReflected * null_p = nullptr;
+
+            JsonMembers mem(&pjson, &ss);
+            mem.member_ref<JmReflected *>("r_", &r)
+                .member_ref<JmReflected *>("null_", null_p);
+            mem.end();
+
+            REQUIRE(ss.str() == ", \"_members_\": ["
+                    + entry("r_", type_of<JmReflected *>(), "pointer",
+                            "{\"ref\": \"" + xo::json::json_id(&r) + "\"}") + ", "
+                    + entry("null_", type_of<JmReflected *>(), "pointer", "null") + "]");
+
+            /* the id is the address, as written by ostream */
+            std::stringstream addr;
+            addr << static_cast<void const *>(&r);
+            REQUIRE(xo::json::json_id(&r) == addr.str());
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 

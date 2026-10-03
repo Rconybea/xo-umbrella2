@@ -620,6 +620,31 @@ namespace xo {
             REQUIRE(v[1]["subscriptions"].size() == 1);
             REQUIRE(v[1]["subscriptions"][0]["stream"].asString() == "/fw");
 
+            /* each session's chosen C++ members (.xo-backlog/xo-websock/issues/13):
+             * sender_ a ref to the sender printed in full above
+             */
+            for (Json::ArrayIndex k = 0; k < 2; ++k) {
+                Json::Value const & mem = v[k]["_members_"];
+
+                std::vector<std::string> names;
+                for (Json::Value const & m : mem)
+                    names.push_back(m["_name_"].asString());
+
+                REQUIRE(names == std::vector<std::string>{"output_buf_", "sender_", "router_",
+                                                          "outbound_q_"});
+                REQUIRE(mem[1]["_metatype_"].asString() == "pointer");
+                REQUIRE(mem[1]["_value_"]["ref"].asString() == v[k]["sender"]["id"].asString());
+                REQUIRE(mem[2]["_type_"].asString() == "xo::web::WsSessionRouter");
+                REQUIRE(mem[3]["_value_"].asString() == "0 queued");
+            }
+
+            /* nothing a printer opted in to is unprintable */
+            {
+                std::string const text = root.toStyledString();
+                INFO(text);
+                REQUIRE(text.find("\"_error_\"") == std::string::npos);
+            }
+
             std::uint64_t second_id = v[1]["session_id"].asUInt64();
 
             /* the /fw endpoint is held by the router's map and by the one

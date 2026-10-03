@@ -12,6 +12,7 @@
 #pragma once
 
 #include <xo/printjson/PrintJson.hpp>
+#include <xo/printjson/JsonMembers.hpp>   /* json::json_id */
 #include <sstream>
 #include <string>
 
@@ -23,12 +24,12 @@ namespace xo {
         /** an object's identity on the page: its address, as a json string.
          *  Unique within one snapshot; an address may be reused once its
          *  object is freed, so not across snapshots.  A ref to an object
-         *  prints this same string, so the page can join them
+         *  prints this same string, so the page can join them.  The rule
+         *  lives in xo-printjson, with JsonMembers::member_ref, which writes
+         *  refs to it
          **/
         inline std::string json_id(void const * p) {
-            std::ostringstream ss;
-            ss << p;
-            return ss.str();
+            return json::json_id(p);
         }
     } /*namespace web*/
 } /*namespace xo*/

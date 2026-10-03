@@ -258,9 +258,16 @@ const expanded = new Set();
 const row_h = 18;          // a member row
 const row_pad = 8;         // below the last row
 
-/** @p t without namespace qualifiers: xo::web::Foo<xo::web::Bar> -> Foo<Bar> **/
+/** @p t for display: without namespace qualifiers, anonymous namespaces
+ *  included (xo::web::Foo<xo::web::Bar> -> Foo<Bar>); basic_string<char> as
+ *  string; "> >" as ">>".  The full name stays in the tooltip
+ **/
 function short_type(t) {
-    return t ? t.replace(/\b(\w+::)+/g, "") : "?";
+    return t
+        ? t.replace(/(\{anonymous\}::|\(anonymous namespace\)::|\b\w+::)+/g, "")
+           .replace(/> >/g, ">>")
+           .replace(/\bbasic_string<char>/g, "string")
+        : "?";
 }
 
 function has_members(obj) {
