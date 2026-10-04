@@ -177,6 +177,7 @@ xo-pyreactor xo-pyreactor2websock
 xo-pyreactor xo-pysimulator
 xo-pyreflect xo-pyexpression
 xo-pyreflect xo-pyprintjson
+xo-pyreflect xo-pywebsock
 xo-pyutil xo-pyarena
 xo-pyutil xo-pydistribution
 xo-pyutil xo-pyfacet
@@ -213,6 +214,7 @@ xo-reactor2 xo-pyreactor2
 xo-reactor2websock xo-pyreactor2websock
 xo-reader xo-interpreter
 xo-reader2 xo-interpreter2
+xo-refcnt xo-callback
 xo-refcnt xo-distribution
 xo-refcnt xo-expression
 xo-refcnt xo-facet
@@ -241,6 +243,7 @@ xo-reflect xo-reactor2
 xo-reflect xo-reflectable2
 xo-reflect xo-stringtable2
 xo-reflect xo-type
+xo-reflect xo-webutil
 xo-reflectable2 xo-object2
 xo-reflectable2 xo-printjson
 xo-reflectable2 xo-stringtable2
