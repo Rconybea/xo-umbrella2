@@ -888,7 +888,7 @@ let pending_draws = 0;
 let pending_anchor = null;
 /** box id -> where it was last drawn, and its size (drawing coordinates) **/
 let drawn_at = new Map();
-/** the next draw puts the camera back at the origin, scale 1 **/
+/** the next draw puts the camera back at the origin (right of the legend), scale 1 **/
 let camera_reset = true;
 /** the first draw: the camera centres the drawing, at once **/
 let first_draw = true;
@@ -956,7 +956,7 @@ window.addEventListener("resize", size_view);
 
 /** box kinds, by colour -- one colour per C++ type; the kinds that share
  *  one (an endpoint is http or stream) share a legend entry.  Order: as
- *  the graph reads, top down
+ *  the graph reads, top down.  Nested boxes come after, one entry per type
  **/
 const legend_groups = [
     {kinds: ["server"],                                   sample: "server"},
@@ -966,37 +966,95 @@ const legend_groups = [
     {kinds: ["sender"],                                   sample: "sender"},
     {kinds: ["subscription", "subscription astray"],      sample: "subscription"},
     {kinds: ["sink"],                                     sample: "sink"},
-    {kinds: ["nested"],                                   sample: "nested", label: "nested struct"},
 ];
 
-/** the legend above the graph: for each colour a kind in snapshot @p all
- *  has (drawn or not -- so it doesn't flicker as boxes show and hide), a
- *  swatch styled exactly as that kind's boxes (the same CSS rules match
- *  .swatch.<kind> -- not .node: it is no box) and the short type, as the
- *  snapshot names it
+/** colours for nested boxes, {fill, stroke}: pale fills no other kind uses **/
+const nested_palette = [
+    {fill: "#e9f5e1", stroke: "#4f8a3a"},   // pale green
+    {fill: "#fdebe0", stroke: "#b5653a"},   // peach
+    {fill: "#e1f3fa", stroke: "#2b7fa0"},   // pale cyan
+    {fill: "#f1f2dc", stroke: "#7d7f2e"},   // olive
+    {fill: "#e6e9fb", stroke: "#5560a8"},   // periwinkle
+    {fill: "#f6e6f0", stroke: "#a0527f"},   // mauve
+    {fill: "#e4f1ec", stroke: "#3f7d68"},   // sage
+    {fill: "#f5efe1", stroke: "#8f6f3a"},   // sand
+];
+
+/** canonical type -> its nested boxes' colour, assigned as types first
+ *  appear and kept for the page's life, so a refresh never repaints
+ **/
+const nested_colours = new Map();
+
+/** the colour of nested boxes of canonical type @p type **/
+function nested_colour(type) {
+    if (!nested_colours.has(type))
+        nested_colours.set(type, nested_palette[nested_colours.size % nested_palette.length]);
+    return nested_colours.get(type);
+}
+
+const legend_margin = 8;   // between the viewport's corner and the legend
+const legend_pad = 6;      // inside the legend's panel
+const legend_row = 18;     // one entry
+const swatch_w = 20;
+const swatch_h = 12;
+const swatch_gap = 8;      // between swatch and type
+
+/** the legend's width, with its margins: Fit, Center and the first draw
+ *  keep the drawing right of it
+ **/
+let legend_w = 0;
+
+/** the legend, fixed in the viewport's top-left corner (not panned or
+ *  zoomed): for each colour a box in snapshot @p all has (drawn or not --
+ *  so it doesn't flicker as boxes show and hide), a swatch and the short
+ *  type, top down.  A kind's swatch is styled by the same CSS rules as its
+ *  boxes (.swatch.<kind> -- not .node: it is no box); a nested type's
+ *  carries that type's colour, as its boxes do
  **/
 function draw_legend(all) {
     const entries = [];
     for (const grp of legend_groups) {
         const d = all.nodes.find(n => grp.kinds.includes(n.kind));
         if (d)
-            entries.push({sample: grp.sample, type: grp.label || (d.obj && d.obj._short_type_) || d.kind,
-                          canonical: d.type || ""});
+            entries.push({key: grp.sample, cls: grp.sample, colour: null,
+                          type: (d.obj && d.obj._short_type_) || d.kind, canonical: d.type || ""});
     }
+    for (const d of all.nodes)
+        if (d.kind === "nested" && !entries.some(x => x.key === `nested:${d.type}`))
+            entries.push({key: `nested:${d.type}`, cls: "nested", colour: nested_colour(d.type),
+                          type: d.label, canonical: d.type || ""});
 
-    const e = d3.select("#legend").selectAll("span.entry")
-          .data(entries, x => x.sample)
+    const lg = graph_svg.selectAll(":scope > g.legend").data([0])
           .join(enter => {
-              const sp = enter.append("span").attr("class", "entry");
-              sp.append("svg").attr("width", 22).attr("height", 14)
-                  .append("g").attr("class", x => `swatch ${x.sample}`)
-                  .append("rect").attr("x", 1).attr("y", 1).attr("width", 20).attr("height", 12);
-              sp.append("span").attr("class", "type");
-              return sp;
+              const g = enter.append("g").attr("class", "legend")
+                    .attr("transform", `translate(${legend_margin},${legend_margin})`);
+              g.append("rect").attr("class", "panel");
+              return g;
+          })
+          .raise();   // over the drawing
+    const e = lg.selectAll(":scope > g.entry")
+          .data(entries, x => x.key)
+          .join(enter => {
+              const g = enter.append("g").attr("class", "entry");
+              g.append("title");
+              g.append("g").append("rect").attr("width", swatch_w).attr("height", swatch_h);
+              g.append("text").attr("x", swatch_w + swatch_gap).attr("y", swatch_h - 2);
+              return g;
           });
-    e.attr("title", x => x.canonical);
-    e.select("span.type").text(x => x.type);
-    size_view();   // the legend sits above the viewport: refit it to the window
+    e.attr("transform", (x, i) => `translate(${legend_pad},${legend_pad + i * legend_row})`);
+    e.select(":scope > title").text(x => x.canonical);
+    e.select(":scope > g").attr("class", x => `swatch ${x.cls}`);
+    e.select(":scope > g > rect")
+        .style("fill", x => x.colour ? x.colour.fill : null)
+        .style("stroke", x => x.colour ? x.colour.stroke : null);
+    e.select(":scope > text").text(x => x.type);
+
+    const text_w = d3.max(e.select(":scope > text").nodes(), t => t.getComputedTextLength()) || 0;
+    const w = swatch_w + swatch_gap + text_w + 2 * legend_pad;
+    const h = (entries.length - 1) * legend_row + swatch_h + 2 * legend_pad;
+    lg.select(":scope > rect.panel").attr("width", w).attr("height", h);
+    lg.attr("display", entries.length ? null : "none");
+    legend_w = entries.length ? w + 2 * legend_margin : 0;
 }
 
 /** the magnification, beside the controls (Shift + wheel zooms) **/
@@ -1006,24 +1064,28 @@ function show_zoom_level(k) {
         el.textContent = `zoom ${Math.round(k * 100)}%`;
 }
 
-/** "Center": the drawing's centre at the viewport's, at the current zoom **/
+/** "Center": the drawing's centre at the centre of the viewport right of
+ *  the legend, at the current zoom
+ **/
 const center_btn = document.getElementById("center");
 if (center_btn) center_btn.onclick = () => {
     const r = graph_svg.node().getBoundingClientRect();
     const k = d3.zoomTransform(graph_svg.node()).k;
     graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
         .call(zoom.transform, d3.zoomIdentity
-              .translate(r.width / 2 - k * drawing_size.w / 2, r.height / 2 - k * drawing_size.h / 2)
+              .translate(legend_w + (r.width - legend_w) / 2 - k * drawing_size.w / 2,
+                         r.height / 2 - k * drawing_size.h / 2)
               .scale(k));
 };
 
-/** "Fit": the whole drawing in view, top-left, scale <= 1 **/
+/** "Fit": the whole drawing in view right of the legend, top-left, scale <= 1 **/
 const fit_btn = document.getElementById("fit");
 if (fit_btn) fit_btn.onclick = () => {
     const r = graph_svg.node().getBoundingClientRect();
-    const k = Math.min(1, r.width / Math.max(1, drawing_size.w), r.height / Math.max(1, drawing_size.h));
+    const k = Math.min(1, (r.width - legend_w) / Math.max(1, drawing_size.w),
+                       r.height / Math.max(1, drawing_size.h));
     graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
-        .call(zoom.transform, d3.zoomIdentity.scale(k));
+        .call(zoom.transform, d3.zoomIdentity.translate(legend_w, 0).scale(k));
 };
 
 for (const type of ["click", "keydown"])   // keydown: Enter / arrows on a focused box
@@ -1078,6 +1140,7 @@ async function draw_aux(event) {
     const camera = svg.selectAll(":scope > g.camera").data([0]).join("g").attr("class", "camera");
     const edge_layer = camera.selectAll("g.edges").data([0]).join("g").attr("class", "edges");
     const node_layer = camera.selectAll("g.nodes").data([0]).join("g").attr("class", "nodes");
+    svg.select(":scope > g.legend").raise();   // the legend over the drawing
 
     // 1. the boxes, so their text can be measured
     const node = node_layer.selectAll("g.node")
@@ -1124,6 +1187,9 @@ async function draw_aux(event) {
 
     node.attr("class", d => `node ${d.kind}` + (d.expandable ? " expandable" : "")
               + (d.open ? " open" : ""));
+    node.select(":scope > rect")   // a nested box: its type's colour
+        .style("fill", d => d.kind === "nested" ? nested_colour(d.type).fill : null)
+        .style("stroke", d => d.kind === "nested" ? nested_colour(d.type).stroke : null);
     node.select(":scope > text.label").text(d => d.label);
 
     // the menu button: opens the box menu below it; not a click on the box
@@ -1651,8 +1717,9 @@ function eq_x(text) {
 }
 
 /** where the camera should go this draw, {t, instant}: the first draw,
- *  the drawing (size @p size) centred in the viewport at scale 1, at once;
- *  after a reset, back to the origin; for anchor box @p anchor, laid out at
+ *  the drawing (size @p size) centred in the viewport right of the legend,
+ *  at scale 1, at once; after a reset, back to the origin -- just right of
+ *  the legend -- at scale 1; for anchor box @p anchor, laid out at
  *  @p at (ELK positions), moved by as much as the box moved, scaled -- so
  *  on screen (k * x + t) the box stays put; else null, the camera stays
  **/
@@ -1661,12 +1728,13 @@ function camera_target(anchor, at, pad, size) {
         first_draw = false;
         camera_reset = false;
         const r = graph_svg.node().getBoundingClientRect();
-        return {t: d3.zoomIdentity.translate((r.width - size.w) / 2, (r.height - size.h) / 2),
+        return {t: d3.zoomIdentity.translate(legend_w + (r.width - legend_w - size.w) / 2,
+                                             (r.height - size.h) / 2),
                 instant: true};
     }
     if (camera_reset) {
         camera_reset = false;
-        return {t: d3.zoomIdentity};
+        return {t: d3.zoomIdentity.translate(legend_w, 0)};   // right of the legend
     }
 
     const was = anchor !== null && drawn_at.get(anchor);
