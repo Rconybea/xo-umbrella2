@@ -1138,6 +1138,7 @@ async function draw_aux(event) {
 
     // fixed layers, edges under boxes
     const camera = svg.selectAll(":scope > g.camera").data([0]).join("g").attr("class", "camera");
+    define_arrowheads(svg);
     const edge_layer = camera.selectAll("g.edges").data([0]).join("g").attr("class", "edges");
     const node_layer = camera.selectAll("g.nodes").data([0]).join("g").attr("class", "nodes");
     svg.select(":scope > g.legend").raise();   // the legend over the drawing
@@ -1173,7 +1174,7 @@ async function draw_aux(event) {
         .classed("leaving", false).interrupt("fade").style("opacity", null);
 
     // edges fade out while ELK lays out; the new routes fade in after (4.)
-    edge_layer.selectAll("path.edge").interrupt("fade")
+    edge_layer.selectAll(":scope > g.edge-g").interrupt("fade")
         .transition("fade").duration(t_fade).style("opacity", 0);
 
     // which boxes can open, and their member rows
@@ -1535,15 +1536,26 @@ async function draw_aux(event) {
 
     // ownership edges (link, owns) only order the layers: not drawn, but
     // for a wanted fallback
-    const paths = edge_layer.selectAll("path.edge")
+    // each edge a group: its casing, then the edge.  A later edge's casing
+    // cuts a gap in the earlier edges it crosses -- a crossing reads as one
+    // line passing under another, not as a junction
+    const edge_gs = edge_layer.selectAll(":scope > g.edge-g")
         .data(routed.filter(d => !is_ownership(d.kind) || d.drawn), d => d.key)
-        .join("path");
+        .join(enter => {
+            const g = enter.append("g").attr("class", "edge-g");
+            g.append("path").attr("class", "casing");
+            g.append("path");
+            return g;
+        });
     // the new routes fade in once the boxes have moved
-    paths.interrupt("fade").style("opacity", 0)
+    edge_gs.interrupt("fade").style("opacity", 0)
         .transition("fade").delay(t_move).duration(t_show).style("opacity", 1);
+    const route = d => rounded_path(d.pts.map(p => ({x: p.x + pad, y: p.y + pad})), edge_corner_r);
+    edge_gs.select(":scope > path.casing").attr("d", route);
+    const paths = edge_gs.select(":scope > path:not(.casing)");
     paths
         .attr("class", d => `edge ${d.kind}`)
-        .attr("d", d => d.pts.map((p, k) => `${k ? "L" : "M"}${p.x + pad},${p.y + pad}`).join(" "))
+        .attr("d", route)
         // a member edge: hovering it lights its row too
         .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, true))
         .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, false))
@@ -1552,6 +1564,52 @@ async function draw_aux(event) {
             d3.select(this).selectAll("title").data(d.kind === "member" ? [d] : [])
                 .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.labels.join(", ")}`);
         });
+}
+
+/** arrowhead markers, one per edge colour (index.html picks one per edge
+ *  class with marker-end): a filled triangle, its tip at the edge's end,
+ *  sized in drawing units -- the hot edge's wider stroke doesn't grow it
+ **/
+function define_arrowheads(svg) {
+    const kinds = [["member", "#7a4fa0"], ["hot", "#e0730b"], ["uses", "#3c8a4f"], ["own", "#999"]];
+    svg.selectAll(":scope > defs.arrows").data([0]).join("defs").attr("class", "arrows")
+        .selectAll("marker").data(kinds, k => k[0])
+        .join(enter => enter.append("marker")
+              .attr("id", k => `arrow-${k[0]}`)
+              .attr("viewBox", "0 0 10 10").attr("refX", 10).attr("refY", 5)
+              .attr("markerWidth", 9).attr("markerHeight", 9)
+              .attr("markerUnits", "userSpaceOnUse").attr("orient", "auto")
+              .call(m => m.append("path").attr("d", "M0,0 L10,5 L0,10 Z").attr("fill", k => k[1])));
+}
+
+const edge_corner_r = 6;   // an edge's bends: rounded, this radius at most
+
+/** svg path through points @p pts, straight segments, each bend rounded
+ *  (radius @p r, less where a segment is short): a turn then reads apart
+ *  from a crossing.  The last segment stays straight, for the arrowhead
+ **/
+function rounded_path(pts, r) {
+    if (pts.length === 0)
+        return "";
+
+    let d = `M${pts[0].x},${pts[0].y}`;
+    for (let i = 1; i < pts.length - 1; i++) {
+        const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+        const l1 = Math.hypot(b.x - a.x, b.y - a.y), l2 = Math.hypot(c.x - b.x, c.y - b.y);
+        const k = Math.min(r, l1 / 2, l2 / 2);
+        if (k < 0.5) {
+            d += ` L${b.x},${b.y}`;
+            continue;
+        }
+        const p = {x: b.x + (a.x - b.x) * k / l1, y: b.y + (a.y - b.y) * k / l1};
+        const q = {x: b.x + (c.x - b.x) * k / l2, y: b.y + (c.y - b.y) * k / l2};
+        d += ` L${p.x},${p.y} Q${b.x},${b.y} ${q.x},${q.y}`;
+    }
+    if (pts.length > 1) {
+        const z = pts[pts.length - 1];
+        d += ` L${z.x},${z.y}`;
+    }
+    return d;
 }
 
 /** @p member_edges merged per (source box, target box): {source, target,
@@ -1580,7 +1638,7 @@ function highlight_ref(row_keys, on) {
     d3.selectAll("text.row").filter(r => r && row_keys.includes(r.key)).classed("hot", on);
     d3.selectAll("path.edge.member").filter(e => e && e.row_keys.some(k => row_keys.includes(k)))
         .classed("hot", on)
-        .each(function () { if (on) this.parentNode.appendChild(this); });   // on top
+        .each(function () { if (on) this.parentNode.parentNode.appendChild(this.parentNode); });   // its group on top
 }
 
 // ----- context menu -----------------------------------------------------

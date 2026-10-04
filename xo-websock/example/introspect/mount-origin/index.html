@@ -41,8 +41,11 @@
     .node.subscription text { font-size: 12px; }
     .node.sink text { font-size: 12px; }
     .node.receiver text { font-size: 12px; }
-    path.edge { fill: none; stroke: #999; stroke-width: 1.2px; }
-    path.edge.uses { stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; }
+    path.edge { fill: none; stroke: #999; stroke-width: 1.2px; marker-end: url(#arrow-own); }
+    path.edge.uses { stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; marker-end: url(#arrow-uses); }
+    /* under each edge, in the graph's background colour: where a later edge
+       crosses an earlier one, the earlier shows a gap */
+    path.casing { fill: none; stroke: #fafafa; stroke-width: 5px; pointer-events: none; }
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }
     .node.expandable { cursor: pointer; }
     text.kids { font-size: 16px; fill: #555; cursor: pointer; font-family: ui-monospace, monospace; }
@@ -60,8 +63,8 @@
     text.row .tri { font-size: 125%; fill: #555; cursor: pointer; }
     rect.tbtn { fill: #fff; fill-opacity: 0; cursor: pointer; }
     rect.tbtn.hot { fill-opacity: 0.85; }
-    path.edge.member { stroke: #7a4fa0; stroke-width: 1.4px; }
-    path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; }
+    path.edge.member { stroke: #7a4fa0; stroke-width: 1.4px; marker-end: url(#arrow-member); }
+    path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; marker-end: url(#arrow-hot); }
     text.row.hot .mname { fill: #e0730b; }
     .node:focus { outline: none; }
     .node.leaving { pointer-events: none; }   /* fading out: not clickable */
