@@ -6,6 +6,7 @@
 #include "WebsocketSink.hpp"
 #include "webserver_json.hpp"
 #include <xo/printjson/PrintJson.hpp>
+#include <xo/printjson/JsonMembers.hpp>
 #include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>  /* display_string */
@@ -21,6 +22,7 @@ namespace xo {
     using xo::json::PrintJson;
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::TaggedRcptr;
     using xo::reflect::Reflect;
     using xo::pp::quot;
     using xo::pp::scope;
@@ -36,6 +38,7 @@ namespace xo {
         class WebsocketSinkImpl : public WebsocketSink {
         public:
             using PrintJson = xo::json::PrintJson;
+            using TaggedRcptr = xo::reflect::TaggedRcptr;
 
         public:
             WebsocketSinkImpl(rp<WsSender> sender,
@@ -54,6 +57,10 @@ namespace xo {
             virtual void print_json(PrintJson const & pjson, std::ostream * p_os) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
             virtual std::string display_string() const override;
+            virtual TaggedRcptr self_tp() override;
+
+        private:
+            friend class WebsocketSink;
 
         private:
             /* delivers each finished message.
@@ -133,7 +140,7 @@ namespace xo {
         }
 
         void
-        WebsocketSinkImpl::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
+        WebsocketSinkImpl::print_json(PrintJson const & pjson, std::ostream * p_os) const
         {
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
                   << ", " << json::type_keys(Reflect::require<WebsocketSinkImpl>())
@@ -148,9 +155,28 @@ namespace xo {
                   << ", " << quot("seq") << ": " << this->n_in_ev_
                   /* held, not owned: printed in full under its session */
                   << ", " << quot("sender") << ": {" << quot("ref") << ": "
-                  << quot(json_id(this->sender_.get())) << "}"
-                  << "}";
+                  << quot(json_id(this->sender_.get())) << "}";
+
+            /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
+             * sender is printed in full under its session -- here a ref
+             */
+            json::JsonMembers mem(&pjson, p_os);
+            mem.member_ref<rp<WsSender>>("sender_", dynamic_cast<void const *>(this->sender_.get()))
+                .member("pjson_", this->pjson_)
+                .member("stream_name_", this->stream_name_)
+                .member("sub_id_", this->sub_id_)
+                /* read without a lock: a source may be sending now */
+                .member("n_in_ev_", this->n_in_ev_);
+            mem.end();
+
+            *p_os << "}";
         } /*print_json*/
+
+        TaggedRcptr
+        WebsocketSinkImpl::self_tp()
+        {
+            return Reflect::make_rctp(this);
+        }
 
         // ----- WebsocketSink -----
 
@@ -173,15 +199,36 @@ namespace xo {
         {
             return new WebsocketSinkImpl(std::move(sender), pjson, stream_name, sub_id);
         } /*make*/
+
         void
         WebsocketSink::reflect_self(reflect::TypeDescrTable * /*table*/)
         {
             /* no members yet: a member is added as a printer opts in to
              * show it (.xo-backlog/xo-websock/issues/13)
              */
-            { StructReflector<WebsocketSink> sr; }
-            { StructReflector<WebsocketSinkImpl> sr; }
+            {
+                StructReflector<WebsocketSink> sr;
+
+                if (sr.is_incomplete()) {
+                    //sr.adopt_ancestors<SelfTaggingDisplayable>();  // need SelfTaggingDisplayable reflected
+                }
+            }
+
+            {
+                StructReflector<WebsocketSinkImpl> sr;
+
+                if (sr.is_incomplete()) {
+                    sr.adopt_ancestors<WebsocketSink>();
+
+                    REFLECT_MEMBER(sr, sender);
+                    REFLECT_MEMBER(sr, pjson);
+                    REFLECT_MEMBER(sr, stream_name);
+                    REFLECT_MEMBER(sr, sub_id);
+                    REFLECT_MEMBER(sr, n_in_ev);
+                }
+            }
         } /*reflect_self*/
+
     } /*namespace web*/
 } /*namespace xo*/
 

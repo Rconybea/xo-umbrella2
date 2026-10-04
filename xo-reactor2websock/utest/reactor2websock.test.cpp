@@ -38,6 +38,7 @@ namespace xo {
     using xo::reactor::AbstractEventProcessor;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::TaggedRcptr;
     using xo::reflect::TypeDescr;
     using xo::json::PrintJson;
     using xo::fn::CallbackId;
@@ -58,6 +59,7 @@ namespace xo {
                 }
                 virtual void pretty(xo::pp::PpSink & sink) const override { sink.put("<RecordingWebsocketSink>"); }
                 virtual std::string display_string() const override { return "<RecordingWebsocketSink>"; }
+                virtual TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
 
                 std::string stream_name_ = "/ws/test";
                 uint32_t n_in_ev_ = 0;

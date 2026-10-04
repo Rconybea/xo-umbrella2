@@ -16,10 +16,13 @@ namespace xo {
         void
         WebserverConfig::reflect_self(reflect::TypeDescrTable * /*table*/)
         {
-            /* no members yet: a member is added as a printer opts in to
-             * show it (.xo-backlog/xo-websock/issues/13)
-             */
             StructReflector<WebserverConfig> sr;
+
+            REFLECT_MEMBER(sr, port);
+            REFLECT_MEMBER(sr, tls_flag);
+            REFLECT_MEMBER(sr, host_check_flag);
+            REFLECT_MEMBER(sr, use_retry_flag);
+            REFLECT_MEMBER(sr, mount_origin);
         } /*reflect_self*/
     } /*namespace web*/
 } /*namespace xo*/

@@ -49,6 +49,34 @@ namespace xo {
          *  it as a ref by id.  Not in the anonymous namespace:
          *  DynamicEndpoint's header befriends it by name, for "_members_"
          **/
+        /** a WebserverConfig: a value, printed inside its Webserver -- no
+         *  id, no box of its own; its members, so the page can open it
+         **/
+        class JsonPrinter_WebserverConfig : public JsonPrinter {
+        public:
+            JsonPrinter_WebserverConfig(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
+                WebserverConfig const * cfg = this->check_recover_native<WebserverConfig>(tp, p_os);
+
+                if (!cfg)
+                    return;
+
+                *p_os << "{" << quot("_name_") << ": " << quot("WebserverConfig")
+                      << ", " << json::type_keys(tp.td());
+
+                JsonMembers mem(this->pjson(), p_os);
+                mem.member("port_", cfg->port_)
+                    .member("tls_flag_", cfg->tls_flag_)
+                    .member("host_check_flag_", cfg->host_check_flag_)
+                    .member("use_retry_flag_", cfg->use_retry_flag_)
+                    .member("mount_origin_", cfg->mount_origin_);
+                mem.end();
+
+                *p_os << "}";
+            }
+        }; /*JsonPrinter_WebserverConfig*/
+
         class JsonPrinter_DynamicEndpoint : public JsonPrinter {
         public:
             JsonPrinter_DynamicEndpoint(PrintJson const * pjson) : JsonPrinter(pjson) {}
@@ -138,6 +166,8 @@ namespace xo {
         void
         provide_websock_json_printers(PrintJson * pjson)
         {
+            pjson->provide_printer(Reflect::require<WebserverConfig>(),
+                                   std::make_unique<JsonPrinter_WebserverConfig>(pjson));
             pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
                                    std::make_unique<JsonPrinter_DynamicEndpoint>(pjson));
             pjson->provide_printer(Reflect::require<WebsocketSink>(),

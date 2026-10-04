@@ -292,6 +292,24 @@ namespace xo {
                 REQUIRE(mem[1]["_value_"].asInt() == 0);
                 REQUIRE(mem[2]["_canonical_type_"].asString() == "xo::web::Runstate");
                 REQUIRE(mem[2]["_value_"].asString() == "stopped");
+
+                /* the config: a value with its own members, so the page can
+                 * open it -- a default WebserverConfig
+                 */
+                {
+                    Json::Value const & cfg = mem[0]["_value_"];
+                    REQUIRE(cfg["_short_type_"].asString() == "WebserverConfig");
+                    REQUIRE(!cfg.isMember("id"));   /* a value: printed here only */
+
+                    std::vector<std::string> cnames;
+                    for (Json::Value const & m : cfg["_members_"])
+                        cnames.push_back(m["_name_"].asString());
+                    REQUIRE(cnames == std::vector<std::string>{"port_", "tls_flag_", "host_check_flag_",
+                                                               "use_retry_flag_", "mount_origin_"});
+                    REQUIRE(cfg["_members_"][0]["_value_"].asInt() == 0);
+                    REQUIRE(cfg["_members_"][1]["_value_"].asBool() == false);
+                    REQUIRE(cfg["_members_"][4]["_value_"].asString() == "./mount-origin");
+                }
                 REQUIRE(mem[4]["_canonical_type_"].asString() == "xo::web::UrlRouter");
                 REQUIRE(mem[4]["_value_"]["_canonical_type_"].asString() == "xo::web::UrlRouter");
                 REQUIRE(mem[4]["_value_"]["_short_type_"].asString() == "UrlRouter");

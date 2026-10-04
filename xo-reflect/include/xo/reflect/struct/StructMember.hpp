@@ -171,7 +171,7 @@ namespace xo {
 
             virtual std::unique_ptr<AbstractStructMemberAccessor> clone() const override {
                 return std::unique_ptr<AbstractStructMemberAccessor>
-                    (new AncestorStructMemberAccessor(std::move(this->ancestor_accessor_->clone())));
+                    (new AncestorStructMemberAccessor(this->ancestor_accessor_->clone()));
             } /*clone*/
 
         private:
@@ -211,7 +211,7 @@ namespace xo {
 
                 return StructMember(this->member_name(),
                                     std::move(AncestorStructMemberAccessor<DescendantT, StructT>::adopt
-                                              (std::move(this->accessor_->clone()))));
+                                              (this->accessor_->clone())));
             } /*for_descendant*/
 
             StructMember & operator=(StructMember && x) {

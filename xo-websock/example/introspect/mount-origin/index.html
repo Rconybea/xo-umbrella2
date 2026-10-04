@@ -31,10 +31,13 @@
     .node.closed > rect  { stroke-dasharray: 4 3; opacity: 0.6; }
     :is(.node, .swatch).subscription > rect { fill: #fceef3; stroke: #7a4fa0; }   /* pale rose; its session's outline */
     :is(.node, .swatch).sender > rect { fill: #fdf6e3; stroke: #8a7a3a; }
+    :is(.node, .swatch).sink > rect { fill: #edf0f5; stroke: #64748b; }   /* pale slate: a subscription's WebsocketSink */
     :is(.node, .swatch).receiver > rect { fill: #e2f4f3; stroke: #3a8a86; }   /* pale teal: an endpoint's StreamReceiver */
     .node.astray > rect { stroke: #c0392b; stroke-width: 2.5px; }
     .node.sender text { font-size: 12px; }
     .node.subscription text { font-size: 12px; }
+    .node.sink text { font-size: 12px; }
+    .node.receiver text { font-size: 12px; }
     path.edge { fill: none; stroke: #999; stroke-width: 1.2px; }
     path.edge.uses { stroke: #3c8a4f; stroke-width: 1.4px; stroke-dasharray: 5 3; opacity: 0.8; }
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }

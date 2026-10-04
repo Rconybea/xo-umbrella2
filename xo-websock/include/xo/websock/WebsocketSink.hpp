@@ -7,7 +7,7 @@
 
 #include "WsSender.hpp"
 #include <xo/printjson/PrintJson.hpp>
-#include <xo/refcnt/Displayable.hpp>
+#include <xo/reflect/SelfTaggingDisplayable.hpp>
 #include <cstdint>
 #include <string>
 
@@ -24,7 +24,7 @@ namespace xo {
          *  to deliver events, using @ref notify_ev_tp.
          *  Each such event gets sent to remote connection as json.
          **/
-        class WebsocketSink : public ref::Displayable {
+        class WebsocketSink : public reflect::SelfTaggingDisplayable {
         public:
             /** describe WebsocketSink, and WebsocketSinkImpl, to xo-reflect.
              *  Called once, by websock_reflect_types() (websock_reflect.hpp).

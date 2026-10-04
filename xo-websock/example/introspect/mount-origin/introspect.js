@@ -142,7 +142,8 @@ const elk = new ELK();
 
 /** the object graph for snapshot @p event: {nodes, edges}.  Edge kinds:
  *  "link"  the server's endpoints and sessions
- *  "owns"  a session's sender and subscriptions; an endpoint's receiver
+ *  "owns"  a session's sender and subscriptions; an endpoint's receiver;
+ *          a subscription's sink
  *  "uses"  a subscription -> the stream endpoint it holds
  **/
 function layout(event) {
@@ -202,6 +203,15 @@ function layout(event) {
                         type: sub._canonical_type_, obj: sub, small: true});
             edge(id, sid, "owns");
 
+            // its sink, owned by the subscription (the router's slot holds
+            // it); the subscription's sink_ member refers to it
+            if (sub.sink) {
+                const kid = `${sid}:sink`;
+                nodes.push({id: kid, kind: "sink", label: "sink",
+                            type: sub.sink._canonical_type_, obj: sub.sink, small: true});
+                edge(sid, kid, "owns");
+            }
+
             // joined BY ID: the endpoint object this subscription holds
             const ep = sub.endpoint && endpoint_node[sub.endpoint.ref];
             if (ep)
@@ -235,7 +245,7 @@ const expanded = new Set();
 // not -- to the box drawing that object; keyed by the ref's row key
 // ("<box>/<member>/..").  A box's CHILDREN are the boxes it owns ("link" /
 // "owns": server -> endpoints, sessions; session -> sender, subscriptions;
-// endpoint -> receiver);
+// endpoint -> receiver; subscription -> sink);
 // the edge to a child is the owner's ref edge to it (e.g. session_map_["1"]
 // -> session 1), or failing one, the ownership edge itself, drawn grey.
 //
@@ -793,6 +803,7 @@ const legend_groups = [
     {kinds: ["session", "session closed"],                sample: "session"},
     {kinds: ["sender"],                                   sample: "sender"},
     {kinds: ["subscription", "subscription astray"],      sample: "subscription"},
+    {kinds: ["sink"],                                     sample: "sink"},
 ];
 
 /** the legend above the graph: for each colour a kind in snapshot @p all
@@ -1184,6 +1195,14 @@ async function draw_aux(event) {
             // when one box changes width -- e.g. opening a subscription moved
             // the Webserver box 200px right.  Network simplex keeps boxes put
             "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+            // a cycle (a member edge back up the ownership tree -- a sink's
+            // sender_, a sender's target_) is broken by reversing the edges
+            // that point from a later box to an earlier one in the input
+            // order -- and layout() lists parents before children.  So
+            // ownership decides the layering by construction: the default
+            // (greedy) strategy put session 1 above the Webserver once sinks
+            // added sink -> sender back-edges, priority notwithstanding
+            "elk.layered.cycleBreaking.strategy": "MODEL_ORDER",
         },
         children: nodes.map(d => ({
             id: d.id, width: d.w, height: d.h,
