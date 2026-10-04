@@ -127,6 +127,7 @@ document.getElementById("hide-all").onclick = () => show_all_children(false);
  *  else just name = value, the type on the name's tooltip and row menu
  **/
 let show_types = false;
+
 document.getElementById("show-types").onchange = (ev) => {
     show_types = ev.target.checked;
     if (last_event)
@@ -220,6 +221,12 @@ function layout(event) {
     }
 
 
+    // a struct-valued member gets its own box, nested in a group with its
+    // holder -- see "nested boxes" below
+    for (const d of [...nodes])
+        if (d.obj)
+            add_nested_boxes(d.id, d.obj, d.id, nodes, edge);
+
     return {nodes, edges};
 }
 
@@ -281,12 +288,108 @@ let showable = [];
 /** this draw's ownership tree: {kids, parent} **/
 let tree = {kids: new Map(), parent: new Map()};
 
+// ----- nested boxes (issue 13) ---------------------------------------------
+//
+// A declared member whose value is a struct with members of its own -- the
+// Webserver's url_router_, session_table_, ws_config_; a session's router_
+// -- is drawn as a box of its own, not opened in place: its row is a ref
+// row (▸ / ▾ (→)) to that box, which is the holder's child (a "nests"
+// edge).  The holder and its drawn nested boxes sit inside a group outline
+// (an ELK compound node), so they stay together; an edge from elsewhere to
+// the nested object arrives at its own box.  A nested box's id is the
+// holder's row key for the member, so expanded / wanted keys carry over.
+// Declared members only (they carry a _canonical_type_): a struct that is
+// an array or map ELEMENT still opens in place.
+
+/** member entry @p m gets a nested box: a declared member, its value a
+ *  struct with members (not a ref, an array, a map of refs)
+ **/
+function nests(m) {
+    const v = m._value_;
+    return ("_canonical_type_" in m) && has_members(v)
+        && !is_ref(v) && !Array.isArray(v) && !is_ref_map(v);
+}
+
+/** for box @p owner holding @p obj (row keys under @p path), a nested box
+ *  per struct-valued member -- recursively: a nested box's own nested
+ *  structs nest in it.  Each joins the group of the top box, @p group
+ **/
+function add_nested_boxes(owner, obj, group, nodes, edge, path = owner) {
+    for (const m of (obj._members_ || [])) {
+        if ("_error_" in m || !nests(m))
+            continue;
+        const v = m._value_;
+        const id = `${path}/${m._name_}`;
+        nodes.push({id, kind: "nested", label: v._short_type_ || v._name_ || m._name_,
+                    type: v._canonical_type_, obj: v, small: true, group});
+        edge(owner, id, "nests");
+        add_nested_boxes(id, v, group, nodes, edge, id);
+    }
+}
+
+/** @p v's short type, for display **/
+function short_type_of(v) {
+    return v._short_type_ || v._name_ || "struct";
+}
+
+/** ELK's children for drawn boxes @p nodes, each made by @p elk_node: a
+ *  box with drawn nested boxes becomes a group -- a
+ *  compound node holding it and them, drawn as an outline
+ **/
+function elk_children(nodes, elk_node) {
+    const in_group = new Map();   // group (its top box) -> [nested box]
+    for (const d of nodes)
+        if (d.group !== undefined) {
+            if (!in_group.has(d.group))
+                in_group.set(d.group, []);
+            in_group.get(d.group).push(d);
+        }
+
+    const out = [];
+    for (const d of nodes) {
+        if (d.group !== undefined)
+            continue;   // inside its group, below
+        const nested = in_group.get(d.id);
+        if (nested)
+            out.push({id: `grp:${d.id}`,
+                      layoutOptions: {"elk.padding": "[top=12,left=12,bottom=12,right=12]"},
+                      children: [elk_node(d), ...nested.map(elk_node)]});
+        else
+            out.push(elk_node(d));
+    }
+    return out;
+}
+
+/** the group outlines, @p groups ({id, x, y, w, h}), under everything else
+ *  in @p camera: one moving with its boxes, a new one fading in
+ **/
+function draw_groups(camera, groups) {
+    const layer = camera.selectAll(":scope > g.groups").data([0])
+          .join(enter => enter.insert("g", ":first-child").attr("class", "groups"));
+    layer.selectAll("rect.group")
+        .data(groups, g => g.id)
+        .join(enter => enter.append("rect").attr("class", "group").attr("rx", 10)
+                  .attr("x", g => g.x).attr("y", g => g.y)
+                  .attr("width", g => g.w).attr("height", g => g.h)
+                  .style("opacity", 0)
+                  .call(e => e.transition("fade").delay(t_move).duration(t_show).style("opacity", 1)),
+              update => update.call(u => u.transition("move").duration(t_move).ease(d3.easeCubicInOut)
+                  .attr("x", g => g.x).attr("y", g => g.y)
+                  .attr("width", g => g.w).attr("height", g => g.h)),
+              exit => exit.transition("fade").duration(t_fade).style("opacity", 0).remove());
+}
+
+/** an ownership edge kind: orders the layers, and makes a child **/
+function is_ownership(kind) {
+    return kind === "link" || kind === "owns" || kind === "nests";
+}
+
 /** the ownership tree of @p edges: {kids: owner -> [child], parent: child -> owner} **/
 function ownership(edges) {
     const kids = new Map();
     const parent = new Map();
     for (const e of edges)
-        if (e.kind === "link" || e.kind === "owns") {
+        if (is_ownership(e.kind)) {
             if (!kids.has(e.source))
                 kids.set(e.source, []);
             kids.get(e.source).push(e.target);
@@ -317,7 +420,10 @@ function all_refs(members, path, label, out) {
             all_refs(Object.entries(v).map(([k, x]) => ({_name_: `[${JSON.stringify(k)}]`, _value_: x})),
                      key, lab, out);
         } else if (has_members(v)) {
-            all_refs(v._members_, key, lab, out);
+            if (nests(m))
+                out.push({key, label: lab, nested: key});   // its own box: refs inside are its
+            else
+                all_refs(v._members_, key, lab, out);
         }
     }
 }
@@ -332,14 +438,17 @@ function showable_edges(nodes, own_edges) {
         if (d.obj)
             all_refs(d.obj._members_, d.id, "", refs);
         for (const r of refs) {
-            const target = box_of_id.get(r.ref);
+            const target = r.nested !== undefined ? r.nested : box_of_id.get(r.ref);
             if (target !== undefined && target !== d.id)
                 out.push({key: r.key, source: d.id, target, kind: "member", label: r.label});
         }
     }
-    // an owned box no ref of its owner reaches: the ownership edge stands in
+    // an owned box no ref of its owner (or of the owner's nested boxes)
+    // reaches: the ownership edge stands in
+    const nested = new Set(nodes.filter(d => d.kind === "nested").map(d => d.id));
+    const within_ = (s, owner) => s === owner || (nested.has(s) && s.startsWith(owner + "/"));
     for (const e of own_edges)
-        if (!out.some(x => x.source === e.source && x.target === e.target))
+        if (!out.some(x => within_(x.source, e.source) && x.target === e.target))
             out.push({key: `own:${e.source}>${e.target}`, source: e.source, target: e.target,
                       kind: e.kind, label: e.kind});
     return out;
@@ -359,12 +468,65 @@ function drawn_ids() {
     return drawn;
 }
 
+/** ownership tree @p tree, re-parented through nested boxes: a child its
+ *  owner reaches only by a ref from one of the owner's nested boxes (the
+ *  server's endpoints, from its url_router_) becomes that nested box's
+ *  child, so the tree matches the boxes drawn.  A child the owner refs
+ *  directly stays the owner's.  @p edges: showable edges
+ **/
+function reparent_via_nested(tree, edges) {
+    for (const [kid, owner] of [...tree.parent]) {
+        if (edges.some(e => e.kind === "member" && e.source === owner && e.target === kid))
+            continue;
+
+        const e = edges.find(e => e.kind === "member" && e.target === kid
+                             && e.source !== owner && within(e.source, owner));
+        if (!e)
+            continue;
+
+        tree.parent.set(kid, e.source);
+        tree.kids.set(owner, tree.kids.get(owner).filter(k => k !== kid));
+        if (!tree.kids.has(e.source))
+            tree.kids.set(e.source, []);
+        tree.kids.get(e.source).push(kid);
+    }
+    return tree;
+}
+
 /** the key of the edge from owner @p owner to its child @p kid **/
 function child_edge(owner, kid) {
-    const e = showable.find(x => x.source === owner && x.target === kid && x.kind === "member")
-          || showable.find(x => x.source === owner && x.target === kid);
-    return e ? e.key : null;
+    const keys = child_edges(owner, kid);
+    return keys.length ? keys[0] : null;
 }
+
+/** box @p s is @p owner, or one of its nested boxes **/
+function within(s, owner) {
+    return s === owner || (nested_ids.has(s) && s.startsWith(owner + "/"));
+}
+
+/** keys of the edges that show child @p kid of @p owner: the owner's ref to
+ *  it -- or a ref from one of the owner's nested boxes
+ *  (e.g. the server's endpoints are reached from its url_router_), with the
+ *  edges from the owner down to that nested box.  Else the ownership edge
+ **/
+function child_edges(owner, kid) {
+    const e = showable.find(x => x.target === kid && x.kind === "member" && within(x.source, owner))
+          || showable.find(x => x.source === owner && x.target === kid);
+    if (!e)
+        return [];
+
+    const keys = [e.key];
+    for (let x = e.source; x !== owner && tree.parent.has(x); x = tree.parent.get(x)) {
+        const up = showable.find(y => y.source === tree.parent.get(x) && y.target === x && y.kind === "member");
+        if (!up)
+            break;
+        keys.push(up.key);
+    }
+    return keys;
+}
+
+/** ids of nested boxes this draw **/
+let nested_ids = new Set();
 
 function redraw() {
     if (last_event)
@@ -373,11 +535,8 @@ function redraw() {
 
 /** want the edges down the ownership path from the server to box @p id **/
 function show_box(id) {
-    for (let x = id; tree.parent.has(x); x = tree.parent.get(x)) {
-        const k = child_edge(tree.parent.get(x), x);
-        if (k)
-            wanted.add(k);
-    }
+    for (let x = id; tree.parent.has(x); x = tree.parent.get(x))
+        child_edges(tree.parent.get(x), x).forEach(k => wanted.add(k));
     redraw();
 }
 
@@ -403,11 +562,8 @@ function toggle_children(id) {
 /** want the edges from box @p id to its children not drawn **/
 function show_children(id) {
     for (const k of (tree.kids.get(id) || []))
-        if (!shown_box_ids.has(k)) {
-            const key = child_edge(id, k);
-            if (key)
-                wanted.add(key);
-        }
+        if (!shown_box_ids.has(k))
+            child_edges(id, k).forEach(key => wanted.add(key));
     redraw();
 }
 
@@ -576,6 +732,12 @@ function member_rows(members, depth, path, out) {
                 row.open = expanded.has(key);
                 row.tri = row.open ? "▾" : "▸";
                 val = ` {${Object.keys(v).length}}`;
+            } else if (nests(m)) {
+                // its own box (nested boxes): a ref row to it
+                row.cls = "ref";
+                row.ref_box = key;
+                row.ref_tip = `its own box, nested: ${short_type_of(v)}`;
+                val = " (→)";
             } else if (typeof v === "object") {
                 row.expandable = has_members(v);
                 row.open = row.expandable && expanded.has(key);
@@ -804,6 +966,7 @@ const legend_groups = [
     {kinds: ["sender"],                                   sample: "sender"},
     {kinds: ["subscription", "subscription astray"],      sample: "subscription"},
     {kinds: ["sink"],                                     sample: "sink"},
+    {kinds: ["nested"],                                   sample: "nested", label: "nested struct"},
 ];
 
 /** the legend above the graph: for each colour a kind in snapshot @p all
@@ -817,7 +980,7 @@ function draw_legend(all) {
     for (const grp of legend_groups) {
         const d = all.nodes.find(n => grp.kinds.includes(n.kind));
         if (d)
-            entries.push({sample: grp.sample, type: (d.obj && d.obj._short_type_) || d.kind,
+            entries.push({sample: grp.sample, type: grp.label || (d.obj && d.obj._short_type_) || d.kind,
                           canonical: d.type || ""});
     }
 
@@ -883,7 +1046,6 @@ async function draw_aux(event) {
     const anchor = pending_anchor;
     pending_anchor = null;
     const all = layout(event);
-    tree = ownership(all.edges);
     draw_legend(all);
 
     // every box -- shown or not -- for joining refs; only shown ones drawn
@@ -893,7 +1055,9 @@ async function draw_aux(event) {
         if (d.obj)
             note_nested(d.obj._members_, d.id);
 
-    showable = showable_edges(all.nodes, all.edges.filter(e => e.kind === "link" || e.kind === "owns"));
+    nested_ids = new Set(all.nodes.filter(d => d.kind === "nested").map(d => d.id));
+    showable = showable_edges(all.nodes, all.edges.filter(e => is_ownership(e.kind)));
+    tree = reparent_via_nested(ownership(all.edges), showable);
     shown_box_ids = drawn_ids();
 
     box_label = new Map(all.nodes.map(d => [d.id, d.label]));
@@ -1174,7 +1338,7 @@ async function draw_aux(event) {
     const drawn_own = new Set(showable.filter(e => e.kind !== "member" && wanted.has(e.key))
                               .map(e => `${e.source}>${e.target}`));
     for (const e of edges)
-        if ((e.kind === "link" || e.kind === "owns") && drawn_own.has(`${e.source}>${e.target}`))
+        if (is_ownership(e.kind) && drawn_own.has(`${e.source}>${e.target}`))
             e.drawn = true;
 
     // boxes a member edge arrives at: each gets one entry port
@@ -1203,8 +1367,11 @@ async function draw_aux(event) {
             // (greedy) strategy put session 1 above the Webserver once sinks
             // added sink -> sender back-edges, priority notwithstanding
             "elk.layered.cycleBreaking.strategy": "MODEL_ORDER",
+            // nested boxes: groups are compound nodes, and edges cross into
+            // them -- laid out together
+            "elk.hierarchyHandling": "INCLUDE_CHILDREN",
         },
-        children: nodes.map(d => ({
+        children: elk_children(nodes, d => ({
             id: d.id, width: d.w, height: d.h,
             // a ref member's edge leaves the box's bottom edge, near its left,
             // in row order; and enters the box it refers to on its top edge,
@@ -1230,7 +1397,7 @@ async function draw_aux(event) {
             id: `e${i}`, sources: [e.source],
             targets: [e.kind === "member" ? `${e.target}#in` : e.target],
             layoutOptions: {"elk.layered.priority.direction":
-                            (e.kind === "link" || e.kind === "owns") ? "10" : "0"},
+                            is_ownership(e.kind) ? "10" : "0"},
         })),
     };
 
@@ -1239,8 +1406,18 @@ async function draw_aux(event) {
     if (seq !== draw_seq)
         return;   // superseded while laying out
 
-    // 3. place the boxes; keep the anchor box where it was on screen
-    const at = new Map(laid.children.map(c => [c.id, c]));
+    // 3. place the boxes; keep the anchor box where it was on screen.  A
+    // group's children come back relative to the group: made absolute here
+    const at = new Map();          // box / group id -> {x, y}, drawing coordinates
+    const groups = [];             // the group outlines to draw
+    for (const c of laid.children) {
+        at.set(c.id, {x: c.x, y: c.y});
+        if (c.children) {
+            groups.push({id: c.id, x: c.x + pad, y: c.y + pad, w: c.width, h: c.height});
+            for (const k of c.children)
+                at.set(k.id, {x: c.x + k.x, y: c.y + k.y});
+        }
+    }
     const camera_to = camera_target(anchor, at, pad,
                                     {w: laid.width + 2 * pad, h: laid.height + 2 * pad});
     for (const d of nodes) {
@@ -1273,21 +1450,27 @@ async function draw_aux(event) {
             .call(zoom.transform, camera_to.t);
     drawing_size = {w: laid.width + 2 * pad, h: laid.height + 2 * pad};
 
-    // 4. the edges, as ELK routed them
+    draw_groups(camera, groups);
+
+    // 4. the edges, as ELK routed them -- in the frame of their `container`
+    // (an edge inside one group comes back relative to that group)
     const laid_edge = new Map(laid.edges.map(le => [le.id, le]));
     const routed = edges.map((e, i) => {
         const le = laid_edge.get(`e${i}`);
+        const off = (le.container && le.container !== "root" && at.get(le.container)) || {x: 0, y: 0};
         const pts = [];
         for (const sec of (le.sections || [])) {
             pts.push(sec.startPoint, ...(sec.bendPoints || []), sec.endPoint);
         }
+        for (const i in pts)
+            pts[i] = {x: pts[i].x + off.x, y: pts[i].y + off.y};
         return {...e, key: `${e.kind}:${e.source}>${e.target}`, pts};
     });
 
     // ownership edges (link, owns) only order the layers: not drawn, but
     // for a wanted fallback
     const paths = edge_layer.selectAll("path.edge")
-        .data(routed.filter(d => (d.kind !== "link" && d.kind !== "owns") || d.drawn), d => d.key)
+        .data(routed.filter(d => !is_ownership(d.kind) || d.drawn), d => d.key)
         .join("path");
     // the new routes fade in once the boxes have moved
     paths.interrupt("fade").style("opacity", 0)
@@ -1373,8 +1556,8 @@ function menu_items(d) {
         // one entry per child, in ownership order: Hide if drawn, else Show
         ...(d.children || []).map(k => shown_box_ids.has(k)
             ? [`Hide ▸ ${box_label.get(k) || k}`, () => { hide_box(k); redraw(); }, null]
-            : [`Show ▸ ${box_label.get(k) || k}`, () => { const key = child_edge(d.id, k);
-                                                         if (key) wanted.add(key); redraw(); }, null]),
+            : [`Show ▸ ${box_label.get(k) || k}`, () => { child_edges(d.id, k).forEach(key => wanted.add(key));
+                                                         redraw(); }, null]),
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _canonical_type_ reported"],
