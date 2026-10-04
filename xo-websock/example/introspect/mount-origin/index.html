@@ -65,6 +65,14 @@
     rect.tbtn.hot { fill-opacity: 0.85; }
     path.edge.member { stroke: #7a4fa0; stroke-width: 1.4px; marker-end: url(#arrow-member); }
     path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; marker-end: url(#arrow-hot); }
+    /* where a member edge leaves its holder: ■ includes, ◆ owns, ○ shares; refers: none */
+    :is(path.edge.member, path.sample).from-includes { marker-start: url(#start-includes-member); }
+    :is(path.edge.member, path.sample).from-owns     { marker-start: url(#start-owns-member); }
+    :is(path.edge.member, path.sample).from-shares   { marker-start: url(#start-shares-member); }
+    path.edge.member.hot.from-includes { marker-start: url(#start-includes-hot); }
+    path.edge.member.hot.from-owns     { marker-start: url(#start-owns-hot); }
+    path.edge.member.hot.from-shares   { marker-start: url(#start-shares-hot); }
+    g.legend path.sample { fill: none; stroke: #7a4fa0; stroke-width: 1.4px; }   /* an edge kind's sample */
     text.row.hot .mname { fill: #e0730b; }
     .node:focus { outline: none; }
     .node.leaving { pointer-events: none; }   /* fading out: not clickable */

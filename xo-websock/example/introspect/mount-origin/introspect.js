@@ -398,11 +398,41 @@ function ownership(edges) {
     return {kids, parent};
 }
 
-/** every ref in member values @p members, open or not, appended to @p out
- *  as {key, label, ref}: key as member_rows() makes it (under @p path),
- *  label the member path for display (e.g. session_map_["1"])
+/** how a holder relates to what a ref names, from the ref's declared
+ *  (canonical) type -- for an element, its container's: the outermost
+ *  smart pointer wins.  "owns": std::unique_ptr; "shares": an intrusive
+ *  (rp) or std::shared_ptr; "refers": anything else (T*, T&, unknown).  A
+ *  nested struct is "includes" -- by value, not through here
  **/
-function all_refs(members, path, label, out) {
+function ref_kind(type) {
+    if (!type)
+        return "refers";
+
+    let best = null;
+    for (const [pat, kind] of [["std::unique_ptr<", "owns"], ["intrusive_ptr<", "shares"],
+                               ["std::shared_ptr<", "shares"]]) {
+        const i = type.indexOf(pat);
+        if (i >= 0 && (best === null || i < best.i))
+            best = {i, kind};
+    }
+    return best ? best.kind : "refers";
+}
+
+/** the strongest of ref kinds @p kinds: includes > owns > shares > refers **/
+function strongest_ref_kind(kinds) {
+    for (const k of ["includes", "owns", "shares"])
+        if (kinds.includes(k))
+            return k;
+    return "refers";
+}
+
+/** every ref in member values @p members, open or not, appended to @p out
+ *  as {key, label, ref, ref_kind}: key as member_rows() makes it (under
+ *  @p path), label the member path for display (e.g. session_map_["1"]),
+ *  ref_kind by ref_kind() from the declared type -- @p type, the
+ *  container's, for elements (which declare none)
+ **/
+function all_refs(members, path, label, out, type = null) {
     for (const m of (members || [])) {
         if ("_error_" in m)
             continue;
@@ -411,17 +441,18 @@ function all_refs(members, path, label, out) {
         const lab = m._name_.startsWith("[") ? `${label}${m._name_}`
               : label ? `${label}.${m._name_}` : m._name_;
         const v = m._value_;
+        const t = m._canonical_type_ || type;
 
         if (is_ref(v)) {
-            out.push({key, label: lab, ref: v.ref});
+            out.push({key, label: lab, ref: v.ref, ref_kind: ref_kind(t)});
         } else if (Array.isArray(v)) {
-            all_refs(v.map((x, i) => ({_name_: `[${i}]`, _value_: x})), key, lab, out);
+            all_refs(v.map((x, i) => ({_name_: `[${i}]`, _value_: x})), key, lab, out, t);
         } else if (is_ref_map(v)) {
             all_refs(Object.entries(v).map(([k, x]) => ({_name_: `[${JSON.stringify(k)}]`, _value_: x})),
-                     key, lab, out);
+                     key, lab, out, t);
         } else if (has_members(v)) {
-            if (nests(m))
-                out.push({key, label: lab, nested: key});   // its own box: refs inside are its
+            if (nests(m))   // its own box: refs inside are its
+                out.push({key, label: lab, nested: key, ref_kind: "includes"});
             else
                 all_refs(v._members_, key, lab, out);
         }
@@ -440,7 +471,8 @@ function showable_edges(nodes, own_edges) {
         for (const r of refs) {
             const target = r.nested !== undefined ? r.nested : box_of_id.get(r.ref);
             if (target !== undefined && target !== d.id)
-                out.push({key: r.key, source: d.id, target, kind: "member", label: r.label});
+                out.push({key: r.key, source: d.id, target, kind: "member", label: r.label,
+                          ref_kind: r.ref_kind});
         }
     }
     // an owned box no ref of its owner (or of the owner's nested boxes)
@@ -998,6 +1030,7 @@ const legend_row = 18;     // one entry
 const swatch_w = 20;
 const swatch_h = 12;
 const swatch_gap = 8;      // between swatch and type
+const legend_gap = 8;      // between the colours and the edge kinds
 
 /** the legend's width, with its margins: Fit, Center and the first draw
  *  keep the drawing right of it
@@ -1049,9 +1082,30 @@ function draw_legend(all) {
         .style("stroke", x => x.colour ? x.colour.stroke : null);
     e.select(":scope > text").text(x => x.type);
 
-    const text_w = d3.max(e.select(":scope > text").nodes(), t => t.getComputedTextLength()) || 0;
+    // below the colours: how an edge leaves its holder, by its marker
+    const edge_kinds = entries.length === 0 ? []
+          : [{kind: "includes", text: "includes (by value)"},
+             {kind: "owns", text: "owns (unique_ptr)"},
+             {kind: "shares", text: "shares (rp, shared_ptr)"},
+             {kind: "refers", text: "refers (T*, T&)"}];
+    const top = legend_pad + entries.length * legend_row + legend_gap;
+    const ek = lg.selectAll(":scope > g.edge-entry")
+          .data(edge_kinds, x => x.kind)
+          .join(enter => {
+              const g = enter.append("g").attr("class", "edge-entry");
+              g.append("path").attr("d", `M2,${swatch_h / 2} L${swatch_w + 4},${swatch_h / 2}`);
+              g.append("text").attr("x", swatch_w + swatch_gap).attr("y", swatch_h - 2);
+              return g;
+          });
+    ek.attr("transform", (x, i) => `translate(${legend_pad},${top + i * legend_row})`);
+    ek.select(":scope > path").attr("class", x => `sample from-${x.kind}`);   // not .edge: no edge's data
+    ek.select(":scope > text").text(x => x.text);
+
+    const text_w = d3.max([...e.select(":scope > text").nodes(), ...ek.select(":scope > text").nodes()],
+                          t => t.getComputedTextLength()) || 0;
     const w = swatch_w + swatch_gap + text_w + 2 * legend_pad;
-    const h = (entries.length - 1) * legend_row + swatch_h + 2 * legend_pad;
+    const h = edge_kinds.length === 0 ? (entries.length - 1) * legend_row + swatch_h + 2 * legend_pad
+          : top + (edge_kinds.length - 1) * legend_row + swatch_h + legend_pad;
     lg.select(":scope > rect.panel").attr("width", w).attr("height", h);
     lg.attr("display", entries.length ? null : "none");
     legend_w = entries.length ? w + 2 * legend_margin : 0;
@@ -1400,7 +1454,7 @@ async function draw_aux(event) {
     const drawn_members = merge_parallel(member_edges(nodes));
     for (const e of drawn_members)
         edges.push({source: e.port, target: e.target, kind: "member",
-                    from: e.source, row_keys: e.keys, labels: e.labels});
+                    from: e.source, row_keys: e.keys, labels: e.labels, ref_kind: e.ref_kind});
     // a wanted fallback (an owned box no ref reaches): its ownership edge drawn
     const drawn_own = new Set(showable.filter(e => e.kind !== "member" && wanted.has(e.key))
                               .map(e => `${e.source}>${e.target}`));
@@ -1554,7 +1608,7 @@ async function draw_aux(event) {
     edge_gs.select(":scope > path.casing").attr("d", route);
     const paths = edge_gs.select(":scope > path:not(.casing)");
     paths
-        .attr("class", d => `edge ${d.kind}`)
+        .attr("class", d => `edge ${d.kind}` + (d.ref_kind ? ` from-${d.ref_kind}` : ""))
         .attr("d", route)
         // a member edge: hovering it lights its row too
         .on("mouseenter", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, true))
@@ -1562,7 +1616,8 @@ async function draw_aux(event) {
         // a member edge says which members it stands for: their rows may not be open
         .each(function (d) {
             d3.select(this).selectAll("title").data(d.kind === "member" ? [d] : [])
-                .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.labels.join(", ")}`);
+                .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.labels.join(", ")}`
+                                    + ` (${e.ref_kind})`);
         });
 }
 
@@ -1570,16 +1625,39 @@ async function draw_aux(event) {
  *  class with marker-end): a filled triangle, its tip at the edge's end,
  *  sized in drawing units -- the hot edge's wider stroke doesn't grow it
  **/
+const start_scale = 0.75;   // exit markers: drawn at this fraction of their 12x10 viewBox
+
 function define_arrowheads(svg) {
     const kinds = [["member", "#7a4fa0"], ["hot", "#e0730b"], ["uses", "#3c8a4f"], ["own", "#999"]];
-    svg.selectAll(":scope > defs.arrows").data([0]).join("defs").attr("class", "arrows")
-        .selectAll("marker").data(kinds, k => k[0])
-        .join(enter => enter.append("marker")
+    const defs = svg.selectAll(":scope > defs.arrows").data([0]).join("defs").attr("class", "arrows");
+    defs.selectAll("marker.arrow").data(kinds, k => k[0])
+        .join(enter => enter.append("marker").attr("class", "arrow")
               .attr("id", k => `arrow-${k[0]}`)
               .attr("viewBox", "0 0 10 10").attr("refX", 10).attr("refY", 5)
               .attr("markerWidth", 9).attr("markerHeight", 9)
               .attr("markerUnits", "userSpaceOnUse").attr("orient", "auto")
               .call(m => m.append("path").attr("d", "M0,0 L10,5 L0,10 Z").attr("fill", k => k[1])));
+
+    // where a member edge leaves its holder: how the holder relates to the
+    // target -- ■ includes (by value), ◆ owns, ○ shares; refers: none.
+    // Drawn from the exit point outward, along the edge
+    const shapes = [["includes", "M0,1 L8,1 L8,9 L0,9 Z", true],
+                    ["owns", "M0,5 L6,1.5 L12,5 L6,8.5 Z", true],
+                    ["shares", "M1,5 A4,4 0 1 1 9,5 A4,4 0 1 1 1,5 Z", false]];
+    const starts = [];
+    for (const [name, colour] of [["member", "#7a4fa0"], ["hot", "#e0730b"]])
+        for (const [kind, d, filled] of shapes)
+            starts.push({id: `start-${kind}-${name}`, d, colour, filled});
+    defs.selectAll("marker.start").data(starts, x => x.id)
+        .join(enter => enter.append("marker").attr("class", "start")
+              .attr("id", x => x.id)
+              .attr("viewBox", "0 0 12 10").attr("refX", 0).attr("refY", 5)
+              .attr("markerWidth", 12 * start_scale).attr("markerHeight", 10 * start_scale)
+              .attr("markerUnits", "userSpaceOnUse").attr("orient", "auto")
+              // the outline as wide as the edge's, whatever the scale
+              .call(m => m.append("path").attr("d", x => x.d)
+                    .attr("fill", x => x.filled ? x.colour : "#fafafa")
+                    .attr("stroke", x => x.colour).attr("stroke-width", 1.4 / start_scale)));
 }
 
 const edge_corner_r = 6;   // an edge's bends: rounded, this radius at most
@@ -1613,7 +1691,8 @@ function rounded_path(pts, r) {
 }
 
 /** @p member_edges merged per (source box, target box): {source, target,
- *  port, keys, labels}, in order of each pair's first member
+ *  port, keys, labels, ref_kind -- the strongest}, in order of each pair's
+ *  first member
  **/
 function merge_parallel(member_edges) {
     const by_pair = new Map();
@@ -1621,11 +1700,14 @@ function merge_parallel(member_edges) {
         const pair = `${e.source}>${e.target}`;
         if (!by_pair.has(pair))
             by_pair.set(pair, {source: e.source, target: e.target, port: `${pair}#port`,
-                               keys: [], labels: []});
+                               keys: [], labels: [], ref_kinds: []});
         const m = by_pair.get(pair);
         m.keys.push(e.key);
         m.labels.push(e.label);
+        m.ref_kinds.push(e.ref_kind);
     }
+    for (const m of by_pair.values())
+        m.ref_kind = strongest_ref_kind(m.ref_kinds);
     return [...by_pair.values()];
 }
 
