@@ -708,6 +708,8 @@ let pending_anchor = null;
 let drawn_at = new Map();
 /** the next draw puts the camera back at the origin, scale 1 **/
 let camera_reset = true;
+/** the first draw: the camera centres the drawing, at once **/
+let first_draw = true;
 /** the drawing's size, last draw -- for "Fit" **/
 let drawing_size = {w: 0, h: 0};
 
@@ -770,12 +772,65 @@ function size_view() {
 size_view();
 window.addEventListener("resize", size_view);
 
+/** box kinds, by colour -- one colour per C++ type; the kinds that share
+ *  one (an endpoint is http or stream) share a legend entry.  Order: as
+ *  the graph reads, top down
+ **/
+const legend_groups = [
+    {kinds: ["server"],                                   sample: "server"},
+    {kinds: ["http", "stream"],                           sample: "http"},
+    {kinds: ["session", "session closed"],                sample: "session"},
+    {kinds: ["sender"],                                   sample: "sender"},
+    {kinds: ["subscription", "subscription astray"],      sample: "subscription"},
+];
+
+/** the legend above the graph: for each colour a kind in snapshot @p all
+ *  has (drawn or not -- so it doesn't flicker as boxes show and hide), a
+ *  swatch styled exactly as that kind's boxes (the same CSS rules match
+ *  .swatch.<kind> -- not .node: it is no box) and the short type, as the
+ *  snapshot names it
+ **/
+function draw_legend(all) {
+    const entries = [];
+    for (const grp of legend_groups) {
+        const d = all.nodes.find(n => grp.kinds.includes(n.kind));
+        if (d)
+            entries.push({sample: grp.sample, type: (d.obj && d.obj._short_type_) || d.kind,
+                          canonical: d.type || ""});
+    }
+
+    const e = d3.select("#legend").selectAll("span.entry")
+          .data(entries, x => x.sample)
+          .join(enter => {
+              const sp = enter.append("span").attr("class", "entry");
+              sp.append("svg").attr("width", 22).attr("height", 14)
+                  .append("g").attr("class", x => `swatch ${x.sample}`)
+                  .append("rect").attr("x", 1).attr("y", 1).attr("width", 20).attr("height", 12);
+              sp.append("span").attr("class", "type");
+              return sp;
+          });
+    e.attr("title", x => x.canonical);
+    e.select("span.type").text(x => x.type);
+    size_view();   // the legend sits above the viewport: refit it to the window
+}
+
 /** the magnification, beside the controls (Shift + wheel zooms) **/
 function show_zoom_level(k) {
     const el = document.getElementById("zoom-level");
     if (el)
         el.textContent = `zoom ${Math.round(k * 100)}%`;
 }
+
+/** "Center": the drawing's centre at the viewport's, at the current zoom **/
+const center_btn = document.getElementById("center");
+if (center_btn) center_btn.onclick = () => {
+    const r = graph_svg.node().getBoundingClientRect();
+    const k = d3.zoomTransform(graph_svg.node()).k;
+    graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
+        .call(zoom.transform, d3.zoomIdentity
+              .translate(r.width / 2 - k * drawing_size.w / 2, r.height / 2 - k * drawing_size.h / 2)
+              .scale(k));
+};
 
 /** "Fit": the whole drawing in view, top-left, scale <= 1 **/
 const fit_btn = document.getElementById("fit");
@@ -807,6 +862,7 @@ async function draw_aux(event) {
     pending_anchor = null;
     const all = layout(event);
     tree = ownership(all.edges);
+    draw_legend(all);
 
     // every box -- shown or not -- for joining refs; only shown ones drawn
     box_of_id = new Map(all.nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
@@ -1155,7 +1211,8 @@ async function draw_aux(event) {
 
     // 3. place the boxes; keep the anchor box where it was on screen
     const at = new Map(laid.children.map(c => [c.id, c]));
-    const camera_to = camera_target(anchor, at, pad);
+    const camera_to = camera_target(anchor, at, pad,
+                                    {w: laid.width + 2 * pad, h: laid.height + 2 * pad});
     for (const d of nodes) {
         const c = at.get(d.id);
         d.x = c.x + pad;
@@ -1177,10 +1234,13 @@ async function draw_aux(event) {
     settled_at = performance.now() + t_move + t_show + 50;
     drawn_at = new Map(nodes.map(d => [d.id, {x: d.x, y: d.y, w: d.w, h: d.h}]));
 
-    // the camera moves in step with the boxes: the anchor stays put
-    if (camera_to)
+    // the camera moves in step with the boxes: the anchor stays put.  The
+    // first draw: at once -- nothing on screen yet to move from
+    if (camera_to && camera_to.instant)
+        svg.interrupt("move").call(zoom.transform, camera_to.t);
+    else if (camera_to)
         svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
-            .call(zoom.transform, camera_to);
+            .call(zoom.transform, camera_to.t);
     drawing_size = {w: laid.width + 2 * pad, h: laid.height + 2 * pad};
 
     // 4. the edges, as ELK routed them
@@ -1377,15 +1437,23 @@ function eq_x(text) {
     return null;
 }
 
-/** where the camera should go this draw: back to the origin after a reset;
- *  for anchor box @p anchor, laid out at @p at (ELK positions), moved by
- *  as much as the box moved, scaled -- so on screen (k * x + t) the box
- *  stays put; else null, the camera stays
+/** where the camera should go this draw, {t, instant}: the first draw,
+ *  the drawing (size @p size) centred in the viewport at scale 1, at once;
+ *  after a reset, back to the origin; for anchor box @p anchor, laid out at
+ *  @p at (ELK positions), moved by as much as the box moved, scaled -- so
+ *  on screen (k * x + t) the box stays put; else null, the camera stays
  **/
-function camera_target(anchor, at, pad) {
+function camera_target(anchor, at, pad, size) {
+    if (first_draw) {
+        first_draw = false;
+        camera_reset = false;
+        const r = graph_svg.node().getBoundingClientRect();
+        return {t: d3.zoomIdentity.translate((r.width - size.w) / 2, (r.height - size.h) / 2),
+                instant: true};
+    }
     if (camera_reset) {
         camera_reset = false;
-        return d3.zoomIdentity;
+        return {t: d3.zoomIdentity};
     }
 
     const was = anchor !== null && drawn_at.get(anchor);
@@ -1395,7 +1463,7 @@ function camera_target(anchor, at, pad) {
 
     const t = d3.zoomTransform(graph_svg.node());
     const dx = was.x - (c.x + pad), dy = was.y - (c.y + pad);
-    return d3.zoomIdentity.translate(t.x + t.k * dx, t.y + t.k * dy).scale(t.k);
+    return {t: d3.zoomIdentity.translate(t.x + t.k * dx, t.y + t.k * dy).scale(t.k)};
 }
 
 /** what object @p id (a ref's target) is, for its row's tooltip: the box
