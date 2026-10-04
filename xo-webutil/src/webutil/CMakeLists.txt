@@ -10,6 +10,8 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 # external dependencies
 
 xo_dependency(${SELF_LIB} refcnt)
+# PUBLIC: StreamReceiver.hpp derives from reflect::SelfTagging
+xo_dependency(${SELF_LIB} reflect)
 xo_dependency(${SELF_LIB} callback)
 # PUBLIC: StreamEndpointDescr.hpp / HttpEndpointDescr.hpp name xo::pp::PpSink
 # and include Prettifier.hpp, so consumers need ppsink too.

@@ -144,6 +144,9 @@ namespace xo {
             public:
                 explicit BoxReceiver(std::shared_ptr<SinkBox> box) : box_{std::move(box)} {}
 
+                /* a StreamReceiver is SelfTagging; not reflected in full */
+                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+
                 void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
                     box_->receive(sink, msg);
                 }

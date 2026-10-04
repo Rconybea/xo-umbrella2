@@ -104,6 +104,8 @@ namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::TaggedRcptr;
+    using xo::reflect::TypeDescrTable;
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
     using xo::pp::quot;
@@ -180,6 +182,20 @@ namespace xo {
         public:
             explicit IntrospectReceiver(Webserver * websrv)
                 : websrv_{websrv} {}
+
+            /** describe IntrospectReceiver to xo-reflect, using @p table.
+             *  No members yet: websrv_ printed generically would nest the
+             *  whole Webserver inside its own endpoint
+             **/
+            static void reflect_self(TypeDescrTable * /*table*/) {
+                StructReflector<IntrospectReceiver> sr;
+            }
+
+            // ----- Inherited from SelfTagging -----
+
+            TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+
+            // ----- Inherited from StreamReceiver -----
 
             void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
                 if (!msg.isString() || msg.asString() != "refresh")
@@ -499,6 +515,7 @@ main(int argc, char * argv[])
     Subsystem::initialize_all();
 
     IntrospectSnapshot::reflect_self();
+    IntrospectReceiver::reflect_self(app_cx.cx<S_reflect_tag>().type_table());
 
     /* the ticker: each /demo subscriber gets a counter once a second.  Made
      * before /introspect, whose receiver reports its holds

@@ -104,6 +104,9 @@ namespace xo {
             public:
                 explicit RecordingReceiver(Recorder * rec) : rec_{rec} {}
 
+                /* a StreamReceiver is SelfTagging; not reflected in full */
+                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+
                 void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
                     rec_->received_v_.push_back({sink, msg});
                 }
@@ -115,6 +118,9 @@ namespace xo {
             /** fails every message **/
             class ThrowingReceiver : public StreamReceiver {
             public:
+                /* a StreamReceiver is SelfTagging; not reflected in full */
+                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+
                 void receive(rp<WebsocketSink> const &, Json::Value const &) override {
                     throw std::runtime_error("boom");
                 }
@@ -126,6 +132,9 @@ namespace xo {
             class FrameReceiver : public StreamReceiver {
             public:
                 explicit FrameReceiver(int * p_frame) : p_frame_{p_frame} {}
+
+                /* a StreamReceiver is SelfTagging; not reflected in full */
+                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
 
                 void receive(rp<WebsocketSink> const & sink, Json::Value const &) override {
                     sink->notify_ev_tp(Reflect::make_tp(p_frame_));

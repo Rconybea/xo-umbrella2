@@ -142,7 +142,7 @@ const elk = new ELK();
 
 /** the object graph for snapshot @p event: {nodes, edges}.  Edge kinds:
  *  "link"  the server's endpoints and sessions
- *  "owns"  a session's sender and subscriptions
+ *  "owns"  a session's sender and subscriptions; an endpoint's receiver
  *  "uses"  a subscription -> the stream endpoint it holds
  **/
 function layout(event) {
@@ -164,6 +164,15 @@ function layout(event) {
         nodes.push({id: id, kind: ep.kind, label: ep.pattern,
                     type: ep._canonical_type_, obj: ep});
         edge("server", id, "link");
+
+        // its receiver (a stream endpoint's, if any): owned by the endpoint,
+        // named by its most-derived type; the receiver_ member refers to it
+        if (ep.receiver) {
+            const rid = `${id}:receiver`;
+            nodes.push({id: rid, kind: "receiver", label: ep.receiver._short_type_ || "receiver",
+                        type: ep.receiver._canonical_type_, obj: ep.receiver, small: true});
+            edge(id, rid, "owns");
+        }
     }
 
     for (const s of (snap.sessions || [])) {
@@ -225,7 +234,8 @@ const expanded = new Set();
 // A box's REF EDGES: one per {"ref": id} anywhere in its members -- open or
 // not -- to the box drawing that object; keyed by the ref's row key
 // ("<box>/<member>/..").  A box's CHILDREN are the boxes it owns ("link" /
-// "owns": server -> endpoints, sessions; session -> sender, subscriptions);
+// "owns": server -> endpoints, sessions; session -> sender, subscriptions;
+// endpoint -> receiver);
 // the edge to a child is the owner's ref edge to it (e.g. session_map_["1"]
 // -> session 1), or failing one, the ownership edge itself, drawn grey.
 //
@@ -779,6 +789,7 @@ window.addEventListener("resize", size_view);
 const legend_groups = [
     {kinds: ["server"],                                   sample: "server"},
     {kinds: ["http", "stream"],                           sample: "http"},
+    {kinds: ["receiver"],                                 sample: "receiver"},
     {kinds: ["session", "session closed"],                sample: "session"},
     {kinds: ["sender"],                                   sample: "sender"},
     {kinds: ["subscription", "subscription astray"],      sample: "subscription"},

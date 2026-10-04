@@ -8,7 +8,7 @@
   xo-indentlog2,
   xo-callback,
   xo-refcnt,
-#  xo-reflect,
+  xo-reflect,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -27,6 +27,6 @@ stdenv.mkDerivation (finalattrs:
       xo-indentlog2
       xo-callback
       xo-refcnt
-#      xo-reflect
+      xo-reflect
     ];
   })

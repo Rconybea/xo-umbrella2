@@ -17,6 +17,7 @@
 #include <catch2/catch.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/reflectutil/type_name.hpp>
 #include <json/json.h>
 #include <functional>
 #include <memory>
@@ -179,6 +180,59 @@ namespace xo {
 
             REQUIRE(most.td()->canonical_name() == "xo::web::WebserverImpl");
             REQUIRE(most.address() == static_cast<void *>(w));
+        }
+
+        namespace {
+            /* a stream receiver; SelfTagging, not reflected in full */
+            class NamedReceiver : public xo::web::StreamReceiver {
+            public:
+                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+                void receive(rp<WebsocketSink> const &, Json::Value const &) override {}
+            };
+        }
+
+        TEST_CASE("webserver-json-names-each-receiver", "[websock][Webserver][json]")
+        {
+            /* an endpoint's receiver printed in full: named by its most-
+             * derived type (StreamReceiver is SelfTagging), with the id the
+             * receiver_ member's ref uses
+             */
+            HoldsServer::reflect_self();
+
+            rp<Webserver> websrv = make_idle_server();
+            rp<NamedReceiver> recv(new NamedReceiver());
+            websrv->register_http_endpoint(http_descr("/status"));
+            websrv->register_stream_endpoint(
+                StreamEndpointDescr("/fw/${id}",
+                                    [](rp<WebsocketSink> const &) { return CallbackId(1); },
+                                    [](CallbackId) {},
+                                    recv));
+
+            HoldsServer holder;
+            holder.server_ = websrv.get();
+
+            std::stringstream ss;
+            PrintJsonSingleton::instance()->print(holder, &ss);
+            Json::Value root = parse_json(ss.str());
+            Json::Value const & eps = root["server"]["endpoints"];
+            REQUIRE(eps.size() == 2);
+
+            /* http /status: none */
+            REQUIRE(eps[0]["receiver"].isNull());
+
+            /* stream /fw: the receiver, by its own type */
+            Json::Value const & r = eps[1]["receiver"];
+            REQUIRE(r.isObject());
+            REQUIRE(r["_canonical_type_"].asString() == std::string(xo::reflect::type_name<NamedReceiver>()));
+            REQUIRE(r["_short_type_"].asString() == "NamedReceiver");
+            REQUIRE(r["_name_"].asString() == "NamedReceiver");
+            /* the endpoint's hold and this test's */
+            REQUIRE(r["refcount"].asUInt() == 2);
+
+            /* the receiver_ member refers to it */
+            Json::Value const & m = eps[1]["_members_"];
+            REQUIRE(m[7]["_name_"].asString() == "receiver_");
+            REQUIRE(m[7]["_value_"]["ref"].asString() == r["id"].asString());
         }
 
         TEST_CASE("webserver-prints-as-json", "[websock][Webserver][json]")

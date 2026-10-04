@@ -40,6 +40,7 @@ namespace xo {
     using xo::json::JsonMembers;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::TaggedRcptr;
     using xo::pp::quot;
 
     namespace web {
@@ -70,11 +71,31 @@ namespace xo {
                       << ", " << quot("pattern") << ": " << quot(ep->uri_pattern())
                       << ", " << quot("has_receive") << ": " << (ep->has_receive() ? "true" : "false");
 
+                /* the receiver, printed here in full -- its identity, named
+                 * by its most-derived type (SelfTagging); members later.
+                 * Its "id" is what the receiver_ member's ref writes below
+                 */
+                *p_os << ", " << quot("receiver") << ": ";
+                if (StreamReceiver * r = ep->receiver_.get()) {
+                    /* before self_tp(): the TaggedRcptr it returns holds one more */
+                    auto refcount = r->reference_counter();
+                    TaggedRcptr self = r->self_tp();
+
+                    *p_os << "{" << quot("_name_") << ": " << quot(self.td()->short_name())
+                          << ", " << json::type_keys(self.td())
+                          << ", " << quot("id") << ": " << quot(json_id(dynamic_cast<void const *>(r)))
+                          /* the endpoint's hold, plus whatever the application keeps */
+                          << ", " << quot("refcount") << ": " << refcount
+                          << "}";
+                } else {
+                    *p_os << "null";
+                }
+
                 /* chosen C++ members (.xo-backlog/xo-websock/issues/13).
                  * Not printable as themselves -- the enum, the compiled
                  * regex, the std::functions -- so their names, capture
                  * count, presence, under their declared types.  The
-                 * receiver is printed nowhere: a ref
+                 * receiver is printed in full above: here a ref
                  */
                 JsonMembers mem(this->pjson(), p_os);
                 mem.member_as<EndpointKind>("kind_", std::string(endpoint_kind_descr(ep->kind_)))

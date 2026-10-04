@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xo/refcnt/Refcounted.hpp>
+#include <xo/reflect/SelfTagging.hpp>
 
 /* jsoncpp's parsed-value type, only named here: receive() takes one by const
  * reference, so a declaration is enough and xo-webutil needs no jsoncpp
@@ -38,8 +38,15 @@ namespace xo {
          *  (e.g. ws_sink->notify_ev_tp()) but must NOT block -- the whole
          *  server stalls while it runs.  The flip side is useful: whatever it
          *  mutates, and the frame it sends, happen on one thread.
+         *
+         *  SELF-DESCRIBING: a SelfTagging object, so introspection can name
+         *  and show the concrete receiver (.xo-backlog/xo-webutil/issues/).
+         *  A derived class implements self_tp() -- typically
+         *    TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+         *  -- and, to be reflected in full, a static reflect_self(TypeDescrTable*)
+         *  called from its subsystem's appcx setup.
          **/
-        class StreamReceiver : public ref::Refcount {
+        class StreamReceiver : public reflect::SelfTagging {
         public:
             /** handle @p msg from one subscriber.
              *
