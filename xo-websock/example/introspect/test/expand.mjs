@@ -48,7 +48,8 @@ await sleep(800);
 const rows = await ev(`[...document.querySelectorAll("g.node.server text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 console.log(" =  rows:", JSON.stringify(rows));
 check(rows.length === 6 && rows[0] === "ws_config_: ▾ (→)", "left-click opens: 6 member rows");
-check(rows[1] === `listen_port_: ${port}`, "scalar row");
+// reflected members first, then listen_port_ and state_ (xo-printjson#06)
+check(rows[4] === `listen_port_: ${port}`, "scalar row: " + rows[4]);
 const b2 = await box("g.node.server");
 const zk = await ev(`d3.zoomTransform(document.getElementById("graph")).k`);   // on screen: drawing units * k
 check((b2.h - b.h) / zk > 6 * 18 - 1, `box grew: ${b.h} -> ${b2.h} (zoom ${zk.toFixed(2)})`);

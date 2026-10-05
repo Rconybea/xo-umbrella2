@@ -276,28 +276,40 @@ namespace xo {
                     REQUIRE((m.isMember("_value_") != m.isMember("_error_")));
                 }
 
-                REQUIRE(names == std::vector<std::string>{"ws_config_", "listen_port_", "state_",
-                                                          "pjson_", "url_router_", "session_table_"});
+                /* reflected members first, then the two read through
+                 * accessors (xo-printjson#06)
+                 */
+                REQUIRE(names == std::vector<std::string>{"ws_config_", "pjson_", "url_router_",
+                                                          "session_table_", "listen_port_", "state_"});
+
+                /* an entry by name: robust to member order */
+                auto entry_of = [](Json::Value const & m, std::string const & name) -> Json::Value const & {
+                    for (Json::Value const & x : m)
+                        if (x["_name_"].asString() == name)
+                            return x;
+                    static Json::Value const none;
+                    return none;
+                };
 
                 /* each declared type's xo-reflect metatype */
                 std::vector<std::string> metatypes;
                 for (Json::Value const & m : mem)
                     metatypes.push_back(m["_metatype_"].asString());
 
-                REQUIRE(metatypes == std::vector<std::string>{"struct", "atomic", "atomic",
-                                                              "pointer", "struct", "struct"});
+                REQUIRE(metatypes == std::vector<std::string>{"struct", "pointer", "struct",
+                                                              "struct", "atomic", "atomic"});
 
-                REQUIRE(mem[1]["_canonical_type_"].asString() == "std::atomic<int>");
-                REQUIRE(mem[1]["_short_type_"].asString() == "atomic<int>");
-                REQUIRE(mem[1]["_value_"].asInt() == 0);
-                REQUIRE(mem[2]["_canonical_type_"].asString() == "xo::web::Runstate");
-                REQUIRE(mem[2]["_value_"].asString() == "stopped");
+                REQUIRE(entry_of(mem, "listen_port_")["_canonical_type_"].asString() == "std::atomic<int>");
+                REQUIRE(entry_of(mem, "listen_port_")["_short_type_"].asString() == "atomic<int>");
+                REQUIRE(entry_of(mem, "listen_port_")["_value_"].asInt() == 0);
+                REQUIRE(entry_of(mem, "state_")["_canonical_type_"].asString() == "xo::web::Runstate");
+                REQUIRE(entry_of(mem, "state_")["_value_"].asString() == "stopped");
 
                 /* the config: a value with its own members, so the page can
                  * open it -- a default WebserverConfig
                  */
                 {
-                    Json::Value const & cfg = mem[0]["_value_"];
+                    Json::Value const & cfg = entry_of(mem, "ws_config_")["_value_"];
                     REQUIRE(cfg["_short_type_"].asString() == "WebserverConfig");
                     REQUIRE(!cfg.isMember("id"));   /* a value: printed here only */
 
@@ -310,14 +322,14 @@ namespace xo {
                     REQUIRE(cfg["_members_"][1]["_value_"].asBool() == false);
                     REQUIRE(cfg["_members_"][4]["_value_"].asString() == "./mount-origin");
                 }
-                REQUIRE(mem[4]["_canonical_type_"].asString() == "xo::web::UrlRouter");
-                REQUIRE(mem[4]["_value_"]["_canonical_type_"].asString() == "xo::web::UrlRouter");
-                REQUIRE(mem[4]["_value_"]["_short_type_"].asString() == "UrlRouter");
+                REQUIRE(entry_of(mem, "url_router_")["_canonical_type_"].asString() == "xo::web::UrlRouter");
+                REQUIRE(entry_of(mem, "url_router_")["_value_"]["_canonical_type_"].asString() == "xo::web::UrlRouter");
+                REQUIRE(entry_of(mem, "url_router_")["_value_"]["_short_type_"].asString() == "UrlRouter");
 
                 /* the url router: an id, and its maps -- stem -> a ref to
                  * the very endpoint printed in the server's list
                  */
-                Json::Value const & ur = mem[4]["_value_"];
+                Json::Value const & ur = entry_of(mem, "url_router_")["_value_"];
                 REQUIRE(ur["_id_"].isInt());
                 REQUIRE(ur["_members_"][0]["_name_"].asString() == "http_map_");
                 REQUIRE(ur["_members_"][1]["_name_"].asString() == "stream_map_");
@@ -335,7 +347,7 @@ namespace xo {
                                   + ur["_members_"][1]["_value_"].size());
 
                 /* the session table: an id; no session yet -- ids from 1 */
-                Json::Value const & st = mem[5]["_value_"];
+                Json::Value const & st = entry_of(mem, "session_table_")["_value_"];
                 REQUIRE(st["_id_"].isInt());
                 REQUIRE(st["_members_"][0]["_name_"].asString() == "next_id_");
                 REQUIRE(st["_members_"][0]["_value_"].asUInt64() == 1);
