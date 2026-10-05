@@ -4,6 +4,8 @@
  **/
 
 #include "JsonMembers.hpp"
+#include <xo/reflect/struct/StructMember.hpp>
+#include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <cassert>
 #include <exception>
@@ -15,6 +17,9 @@ namespace xo {
     using xo::reflect::TypeDescr;
 
     namespace json {
+        /* one scope in from namespace xo: see PrintJson.cpp */
+        using xo::pp::tostr;
+
         JsonMembers::JsonMembers(JsonPrintState & state)
             : state_{&state}, p_os_{state.p_os()}, n_uncaught_{std::uncaught_exceptions()}
         {
@@ -40,6 +45,55 @@ namespace xo {
         {
             return (state_->has_printer(td)
                     || (td->is_struct() && td->complete_flag()));
+        }
+
+        bool
+        JsonMembers::printable_value(TaggedPtr v) const
+        {
+            TypeDescr td = v.td();
+
+            if (!td)
+                return false;
+
+            /* as member_target<V> unwraps a declared type: a printer for
+             * the wrapper itself wins, as it would in print()
+             */
+            if (state_->has_printer(td))
+                return true;
+
+            switch (td->metatype()) {
+            case Metatype::mt_pointer:
+            case Metatype::mt_vector:
+                return (v.n_child() == 0) || this->printable_value(v.get_child(0));
+            default:
+                return this->printable(td);
+            }
+        }
+
+        JsonMembers &
+        JsonMembers::reflected_members(TaggedPtr obj)
+        {
+            TypeDescr td = obj.td();
+
+            if (!td || !td->is_struct())
+                return *this;
+
+            for (std::uint32_t i = 0, n = obj.n_child(); i < n; ++i) {
+                reflect::StructMember const & sm = td->struct_member(i);
+                TypeDescr mtd = sm.get_member_td();
+                DeclaredType declared{mtd->canonical_name(), std::string(mtd->short_name()),
+                                      mtd->metatype()};
+                TaggedPtr value = sm.get_member_tp(obj.address());
+
+                if (this->printable_value(value)) {
+                    this->write_value(sm.member_name(), declared, value, true /*identity*/);
+                } else {
+                    this->write_error(sm.member_name(), declared,
+                                      tostr("type not reflected: ", mtd->canonical_name()));
+                }
+            }
+
+            return *this;
         }
 
         void

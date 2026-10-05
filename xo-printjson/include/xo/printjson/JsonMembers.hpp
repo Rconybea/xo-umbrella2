@@ -137,6 +137,14 @@ namespace xo {
                 return *this;
             }
 
+            /** one entry per member reflected for @p obj's type
+             *  (StructReflector), in the order xo-reflect holds them -- each
+             *  as member() would write it: the declared type and metatype
+             *  from reflection, the value with identity.  O(1) per member.
+             *  Nothing, if @p obj's type is not a reflected struct
+             **/
+            JsonMembers & reflected_members(reflect::TaggedPtr obj);
+
             /** close the array **/
             void end();
 
@@ -195,6 +203,11 @@ namespace xo {
              *  it, or it is a complete reflected struct
              **/
             bool printable(reflect::TypeDescr td) const;
+            /** printable(), for a value: through a pointer to its target,
+             *  through a vector to its first element (null and empty are
+             *  printable)
+             **/
+            bool printable_value(reflect::TaggedPtr v) const;
 
             void write_value(std::string_view name, DeclaredType const & declared,
                              reflect::TaggedPtr value, bool identity);

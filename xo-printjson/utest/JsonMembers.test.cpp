@@ -44,6 +44,40 @@ namespace xo {
                 }
             }
 
+            /* members of a reflected struct, for reflected_members(): a
+             * value, a pointer to it, a vector of them; literal names
+             */
+            struct JmHolder {
+                JmReflected r_;
+                JmReflected * p_ = nullptr;
+                std::vector<JmReflected> v_;
+            };
+
+            /* a reflected struct with a member whose type is not */
+            struct JmBad {
+                JmUnreflected u_;
+            };
+
+            void reflect_jm_holder() {
+                reflect_jm_types();
+
+                {
+                    StructReflector<JmHolder> sr;
+
+                    if (sr.is_incomplete()) {
+                        REFLECT_LITERAL_MEMBER(sr, r_);
+                        REFLECT_LITERAL_MEMBER(sr, p_);
+                        REFLECT_LITERAL_MEMBER(sr, v_);
+                    }
+                }
+                {
+                    StructReflector<JmBad> sr;
+
+                    if (sr.is_incomplete())
+                        REFLECT_LITERAL_MEMBER(sr, u_);
+                }
+            }
+
             /** the "_canonical_type_" text for T: its canonical name **/
             template <typename T>
             std::string type_of() {
@@ -254,6 +288,74 @@ namespace xo {
                             "{\"/a/\": {\"_ref_\": 1}, "
                             "\"/b/\": {\"_ref_\": 2}, "
                             "\"/z/\": null}") + "]");
+        }
+        TEST_CASE("json-members-reflected-members-as-member-would", "[printjson][JsonMembers]") {
+            /* each reflected member, in reflection order, exactly as
+             * member() writes it -- a ref and ids included: p_ points at
+             * r_, printed already
+             */
+            reflect_jm_holder();
+
+            PrintJson pjson;
+
+            JmHolder h;
+            h.p_ = &h.r_;
+            h.v_.resize(1);
+
+            std::stringstream by_hand;
+            {
+                JsonPrintState state(&pjson, &by_hand);
+                JsonMembers mem(state);
+                mem.member("r_", h.r_).member("p_", h.p_).member("v_", h.v_);
+                mem.end();
+            }
+
+            std::stringstream reflected;
+            {
+                JsonPrintState state(&pjson, &reflected);
+                JsonMembers mem(state);
+                mem.reflected_members(xo::reflect::Reflect::make_tp(&h));
+                mem.end();
+            }
+
+            INFO("by hand:   " << by_hand.str());
+            INFO("reflected: " << reflected.str());
+            REQUIRE(reflected.str() == by_hand.str());
+            REQUIRE(reflected.str().find("{\"_ref_\": 1}") != std::string::npos);
+        }
+
+        TEST_CASE("json-members-reflected-member-not-printable", "[printjson][JsonMembers]") {
+            /* a reflected member whose type cannot print: an error entry,
+             * as member() writes one
+             */
+            reflect_jm_holder();
+
+            PrintJson pjson;
+            std::stringstream ss;
+
+            JmBad b;
+
+            JsonPrintState state(&pjson, &ss);
+            JsonMembers mem(state);
+            mem.reflected_members(xo::reflect::Reflect::make_tp(&b));
+            mem.end();
+
+            REQUIRE(ss.str().find("\"_name_\": \"u_\"") != std::string::npos);
+            REQUIRE(ss.str().find("\"_error_\": \"type not reflected: ") != std::string::npos);
+        }
+
+        TEST_CASE("json-members-reflected-members-of-a-non-struct", "[printjson][JsonMembers]") {
+            PrintJson pjson;
+            std::stringstream ss;
+
+            int x = 7;
+
+            JsonPrintState state(&pjson, &ss);
+            JsonMembers mem(state);
+            mem.reflected_members(xo::reflect::Reflect::make_tp(&x));
+            mem.end();
+
+            REQUIRE(ss.str() == ", \"_members_\": []");
         }
     } /*namespace ut*/
 } /*namespace xo*/
