@@ -380,6 +380,11 @@ namespace xo {
              */
             void close_sender() { this->sender_->close(); }
 
+            /* describe this record to xo-reflect; a member, so it can name
+             * private members.  See Webserver::reflect_self
+             */
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             /* for introspection (JsonPrinter_WsSession) */
             std::uint64_t session_id() const { return this->sender_->session_id(); }
             WsSessionSenderImpl const & sender() const { return *(this->sender_.get()); }
@@ -1110,7 +1115,8 @@ namespace xo {
                     *p_os << "]";
 
                     /* chosen C++ members, for the page's "expand"
-                     * (.xo-backlog/xo-websock/issues/13).  output_buf_ and
+                     * (.xo-backlog/xo-websock/issues/13): the reflected one
+                     * (router_), then the rest.  output_buf_ and
                      * outbound_q_ are guarded by the session's mutex.
                      * sender_ is printed in full above, so a ref here.
                      * outbound_q_: xo-reflect has no std::deque -- its size,
@@ -1126,9 +1132,9 @@ namespace xo {
                     }
 
                     obj.members()
+                        .reflected_members(tp, "_")
                         .member_as<OutputBuffer *>("output_buf_", output_buf)
                         .member_ref<rp<WsSessionSenderImpl>>("sender_", recd->sender_.get())
-                        .member("router_", recd->router_)
                         .member_as<std::deque<std::string>>("outbound_q_",
                                                             std::to_string(n_queued) + " queued")
                         .end();
@@ -2292,6 +2298,22 @@ namespace xo {
         } /*reflect_self*/
 
         void
+        WebsocketSessionRecd::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            StructReflector<WebsocketSessionRecd> sr;
+
+            if (sr.is_incomplete()) {
+                /* not output_buf_ or outbound_q_: guarded by mutex_, so the
+                 * printer copies them under it (.xo-backlog/xo-websock/issues/15);
+                 * outbound_q_ is a deque, not reflectable yet
+                 * (.xo-backlog/xo-reflect/issues/04).  Not sender_: printed
+                 * in full above ("sender") -- a ref
+                 */
+                REFLECT_MEMBER(sr, router);
+            }
+        } /*reflect_self*/
+
+        void
         Webserver::reflect_self(reflect::TypeDescrTable * table)
         {
             /* no members yet: a member is added as a printer opts in to
@@ -2299,7 +2321,7 @@ namespace xo {
              */
             { StructReflector<Webserver> sr; }
             { StructReflector<WebserverImpl> sr; }
-            { StructReflector<WebsocketSessionRecd> sr; }
+            WebsocketSessionRecd::reflect_self(table);
             WsSessionSenderImpl::reflect_self(table);
             { StructReflector<WsSessionTable<WebsocketSessionRecd>> sr; }
             { StructReflector<OutputBuffer> sr; }

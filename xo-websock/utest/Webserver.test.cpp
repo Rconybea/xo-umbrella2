@@ -384,27 +384,39 @@ namespace xo {
                 for (Json::Value const & x : m)
                     names.push_back(x["_name_"].asString());
 
-                REQUIRE(names == std::vector<std::string>{"kind_", "uri_pattern_", "uri_regex_",
-                                                          "var_v_", "http_handler_", "subscribe_fn_",
+                /* reflected members first (uri_pattern_, var_v_), then the
+                 * summaries and the ref (xo-printjson#06)
+                 */
+                REQUIRE(names == std::vector<std::string>{"uri_pattern_", "var_v_", "kind_",
+                                                          "uri_regex_", "http_handler_", "subscribe_fn_",
                                                           "unsubscribe_fn_", "receiver_"});
-                REQUIRE(m[0]["_value_"].asString() == "http");
-                REQUIRE(m[1]["_value_"].asString() == "/status");
-                REQUIRE(m[2]["_value_"].asString() == "0 captures");
-                REQUIRE(m[3]["_value_"].isArray());
-                REQUIRE(m[3]["_value_"].empty());
-                REQUIRE(m[4]["_value_"].asString() == "set");
-                REQUIRE(m[5]["_value_"].asString() == "empty");
-                REQUIRE(m[7]["_value_"].isNull());
+
+                /* by name: robust to member order */
+                auto value_of = [](Json::Value const & mem, std::string const & name) {
+                    for (Json::Value const & x : mem)
+                        if (x["_name_"].asString() == name)
+                            return x["_value_"];
+                    return Json::Value();
+                };
+
+                REQUIRE(value_of(m, "kind_").asString() == "http");
+                REQUIRE(value_of(m, "uri_pattern_").asString() == "/status");
+                REQUIRE(value_of(m, "uri_regex_").asString() == "0 captures");
+                REQUIRE(value_of(m, "var_v_").isArray());
+                REQUIRE(value_of(m, "var_v_").empty());
+                REQUIRE(value_of(m, "http_handler_").asString() == "set");
+                REQUIRE(value_of(m, "subscribe_fn_").asString() == "empty");
+                REQUIRE(value_of(m, "receiver_").isNull());
 
                 Json::Value const & s = eps[1]["_members_"];    /* the stream endpoint */
-                REQUIRE(s[0]["_value_"].asString() == "stream");
-                REQUIRE(s[1]["_value_"].asString() == "/fw/${id}");
-                REQUIRE(s[2]["_value_"].asString() == "1 captures");
-                REQUIRE(s[3]["_value_"].size() == 1);
-                REQUIRE(s[3]["_value_"][0].asString() == "id");
-                REQUIRE(s[4]["_value_"].asString() == "empty");
-                REQUIRE(s[5]["_value_"].asString() == "set");
-                REQUIRE(s[6]["_value_"].asString() == "set");
+                REQUIRE(value_of(s, "kind_").asString() == "stream");
+                REQUIRE(value_of(s, "uri_pattern_").asString() == "/fw/${id}");
+                REQUIRE(value_of(s, "uri_regex_").asString() == "1 captures");
+                REQUIRE(value_of(s, "var_v_").size() == 1);
+                REQUIRE(value_of(s, "var_v_")[0].asString() == "id");
+                REQUIRE(value_of(s, "http_handler_").asString() == "empty");
+                REQUIRE(value_of(s, "subscribe_fn_").asString() == "set");
+                REQUIRE(value_of(s, "unsubscribe_fn_").asString() == "set");
             }
             REQUIRE(eps[1]["kind"].asString() == "stream");
             REQUIRE(eps[1]["stem"].asString() == "/fw/");

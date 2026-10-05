@@ -76,7 +76,7 @@
       "_value_" : 
       {
         "_canonical_type_" : "xo::json::PrintJson",
-        "_id_" : 10,
+        "_id_" : 9,
         "_name_" : "PrintJson",
         "_short_type_" : "PrintJson"
       }
@@ -89,7 +89,7 @@
       "_value_" : 
       {
         "_canonical_type_" : "xo::web::UrlRouter",
-        "_id_" : 9,
+        "_id_" : 8,
         "_members_" : 
         [
           {
@@ -331,23 +331,6 @@
       "_members_" : 
       [
         {
-          "_canonical_type_" : "xo::web::{anonymous}::OutputBuffer*",
-          "_metatype_" : "pointer",
-          "_name_" : "output_buf_",
-          "_short_type_" : "OutputBuffer*",
-          "_value_" : "<redacted>"
-        },
-        {
-          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",
-          "_metatype_" : "pointer",
-          "_name_" : "sender_",
-          "_short_type_" : "rp<WsSessionSender<WebserverImpl>>",
-          "_value_" : 
-          {
-            "_ref_" : 6
-          }
-        },
-        {
           "_canonical_type_" : "xo::web::WsSessionRouter",
           "_metatype_" : "struct",
           "_name_" : "router_",
@@ -355,7 +338,7 @@
           "_value_" : 
           {
             "_canonical_type_" : "xo::web::WsSessionRouter",
-            "_id_" : 8,
+            "_id_" : 7,
             "_members_" : 
             [
               {
@@ -365,7 +348,7 @@
                 "_short_type_" : "const UrlRouter&",
                 "_value_" : 
                 {
-                  "_ref_" : 9
+                  "_ref_" : 8
                 }
               },
               {
@@ -385,7 +368,7 @@
                 "_short_type_" : "rp<PrintJson>",
                 "_value_" : 
                 {
-                  "_ref_" : 10
+                  "_ref_" : 9
                 }
               },
               {
@@ -405,6 +388,23 @@
             ],
             "_name_" : "WsSessionRouter",
             "_short_type_" : "WsSessionRouter"
+          }
+        },
+        {
+          "_canonical_type_" : "xo::web::{anonymous}::OutputBuffer*",
+          "_metatype_" : "pointer",
+          "_name_" : "output_buf_",
+          "_short_type_" : "OutputBuffer*",
+          "_value_" : "<redacted>"
+        },
+        {
+          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",
+          "_metatype_" : "pointer",
+          "_name_" : "sender_",
+          "_short_type_" : "rp<WsSessionSender<WebserverImpl>>",
+          "_value_" : 
+          {
+            "_ref_" : 6
           }
         },
         {
@@ -463,23 +463,6 @@
       "_members_" : 
       [
         {
-          "_canonical_type_" : "xo::web::{anonymous}::OutputBuffer*",
-          "_metatype_" : "pointer",
-          "_name_" : "output_buf_",
-          "_short_type_" : "OutputBuffer*",
-          "_value_" : "<redacted>"
-        },
-        {
-          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",
-          "_metatype_" : "pointer",
-          "_name_" : "sender_",
-          "_short_type_" : "rp<WsSessionSender<WebserverImpl>>",
-          "_value_" : 
-          {
-            "_ref_" : 12
-          }
-        },
-        {
           "_canonical_type_" : "xo::web::WsSessionRouter",
           "_metatype_" : "struct",
           "_name_" : "router_",
@@ -487,7 +470,7 @@
           "_value_" : 
           {
             "_canonical_type_" : "xo::web::WsSessionRouter",
-            "_id_" : 16,
+            "_id_" : 15,
             "_members_" : 
             [
               {
@@ -497,7 +480,7 @@
                 "_short_type_" : "const UrlRouter&",
                 "_value_" : 
                 {
-                  "_ref_" : 9
+                  "_ref_" : 8
                 }
               },
               {
@@ -517,7 +500,7 @@
                 "_short_type_" : "rp<PrintJson>",
                 "_value_" : 
                 {
-                  "_ref_" : 10
+                  "_ref_" : 9
                 }
               },
               {
@@ -542,6 +525,23 @@
             ],
             "_name_" : "WsSessionRouter",
             "_short_type_" : "WsSessionRouter"
+          }
+        },
+        {
+          "_canonical_type_" : "xo::web::{anonymous}::OutputBuffer*",
+          "_metatype_" : "pointer",
+          "_name_" : "output_buf_",
+          "_short_type_" : "OutputBuffer*",
+          "_value_" : "<redacted>"
+        },
+        {
+          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",
+          "_metatype_" : "pointer",
+          "_name_" : "sender_",
+          "_short_type_" : "rp<WsSessionSender<WebserverImpl>>",
+          "_value_" : 
+          {
+            "_ref_" : 12
           }
         },
         {
@@ -691,7 +691,7 @@
                 "_short_type_" : "rp<PrintJson>",
                 "_value_" : 
                 {
-                  "_ref_" : 10
+                  "_ref_" : 9
                 }
               }
             ],

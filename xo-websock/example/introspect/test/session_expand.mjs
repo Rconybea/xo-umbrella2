@@ -31,8 +31,9 @@ await mouse("mouseMoved", b.x, b.y, "none"); await mouse("mousePressed", b.x, b.
 await sleep(800);
 const rows = await ev(`[...${sel}.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 console.log(" =  rows:", JSON.stringify(rows));
-check(rows.length === 4 && rows[0] === "output_buf_: OutputBuffer", "4 rows; anonymous namespace dropped: " + rows[0]);
-check(rows[1] === "sender_: ▾ (→)", "sender_ a ref: " + rows[1]);
+// reflected members first (router_), then the rest (xo-printjson#06)
+check(rows.length === 4 && rows[1] === "output_buf_: OutputBuffer", "4 rows; anonymous namespace dropped: " + rows[1]);
+check(rows[2] === "sender_: ▾ (→)", "sender_ a ref: " + rows[2]);
 check(rows[3] === "outbound_q_: 0 queued", "outbound_q_ mentioned: " + rows[3]);
 check(await ev(`${VIS}.length`) === 2, "two member edges: sender_, and router_ -- its own (nested) box");
 const geo = await ev(`(() => { const p = ${VIS}.find(p => p.__data__.row_keys.includes("session:1/sender_")).getAttribute("d"); const n = p.match(/-?[0-9.]+/g).map(Number);

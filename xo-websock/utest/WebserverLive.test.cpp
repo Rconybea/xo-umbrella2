@@ -639,6 +639,14 @@ namespace xo {
             /* each session's chosen C++ members (.xo-backlog/xo-websock/issues/13):
              * sender_ a ref to the sender printed in full above
              */
+            /* a "_members_" entry by name: robust to member order */
+            auto entry_of = [](Json::Value const & mem, std::string const & name) {
+                for (Json::Value const & m : mem)
+                    if (m["_name_"].asString() == name)
+                        return m;
+                return Json::Value();
+            };
+
             for (Json::ArrayIndex k = 0; k < 2; ++k) {
                 Json::Value const & mem = v[k]["_members_"];
 
@@ -646,18 +654,20 @@ namespace xo {
                 for (Json::Value const & m : mem)
                     names.push_back(m["_name_"].asString());
 
-                REQUIRE(names == std::vector<std::string>{"output_buf_", "sender_", "router_",
+                /* reflected members first (router_), then the rest */
+                REQUIRE(names == std::vector<std::string>{"router_", "output_buf_", "sender_",
                                                           "outbound_q_"});
-                REQUIRE(mem[1]["_metatype_"].asString() == "pointer");
-                REQUIRE(mem[1]["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
-                REQUIRE(mem[2]["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
-                REQUIRE(mem[3]["_value_"].asString() == "0 queued");
+                REQUIRE(entry_of(mem, "sender_")["_metatype_"].asString() == "pointer");
+                REQUIRE(entry_of(mem, "sender_")["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
+                REQUIRE(entry_of(mem, "router_")["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
+                REQUIRE(entry_of(mem, "outbound_q_")["_value_"].asString() == "0 queued");
 
                 /* the router, nested: its own members.  sender_ the same
                  * sender (by most-derived address); subscription_v_ refs to
                  * exactly the subscriptions printed under the session
                  */
-                Json::Value const & rmem = mem[2]["_value_"]["_members_"];
+                Json::Value const router = entry_of(mem, "router_");   /* a copy: entry_of returns one */
+                Json::Value const & rmem = router["_value_"]["_members_"];
 
                 std::vector<std::string> rnames;
                 for (Json::Value const & m : rmem)
@@ -668,7 +678,7 @@ namespace xo {
                 REQUIRE(rmem[0]["_metatype_"].asString() == "pointer");   /* a reference */
                 /* ... to the server's url router, printed inside the server */
                 REQUIRE(rmem[0]["_value_"]["_ref_"].asInt()
-                        == root["_members_"][4]["_value_"]["_id_"].asInt());
+                        == entry_of(root["_members_"], "url_router_")["_value_"]["_id_"].asInt());
                 REQUIRE(rmem[1]["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
                 REQUIRE(rmem[3]["_value_"].asString() == "set");
 
