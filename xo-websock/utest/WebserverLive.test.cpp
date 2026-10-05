@@ -602,7 +602,7 @@ namespace xo {
             REQUIRE(v[0]["_name_"].asString() == "WsSession");
             REQUIRE(v[0]["_canonical_type_"].asString() == "xo::web::WebsocketSessionRecd");
             REQUIRE(v[0]["session_id"].asUInt64() < v[1]["session_id"].asUInt64());
-            REQUIRE(v[0]["id"].asString() != v[1]["id"].asString());
+            REQUIRE(v[0]["_id_"].asInt() != v[1]["_id_"].asInt());
 
             /* each session's sender, in full: open; its session's id; held
              * by the session record and the router, plus one per sink
@@ -615,7 +615,7 @@ namespace xo {
                 /* its chosen C++ members: target_ a ref to the server */
                 Json::Value const & smem = sender["_members_"];
                 REQUIRE(smem[0]["_name_"].asString() == "target_");
-                REQUIRE(smem[0]["_value_"]["ref"].asString() == root["id"].asString());
+                REQUIRE(smem[0]["_value_"]["_ref_"].asInt() == root["_id_"].asInt());
                 REQUIRE(smem[1]["_name_"].asString() == "session_id_");
                 REQUIRE(smem[1]["_value_"].asUInt64() == v[k]["session_id"].asUInt64());
                 REQUIRE(smem[2]["_name_"].asString() == "open_");
@@ -646,7 +646,7 @@ namespace xo {
                 REQUIRE(names == std::vector<std::string>{"output_buf_", "sender_", "router_",
                                                           "outbound_q_"});
                 REQUIRE(mem[1]["_metatype_"].asString() == "pointer");
-                REQUIRE(mem[1]["_value_"]["ref"].asString() == v[k]["sender"]["id"].asString());
+                REQUIRE(mem[1]["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
                 REQUIRE(mem[2]["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
                 REQUIRE(mem[3]["_value_"].asString() == "0 queued");
 
@@ -664,9 +664,9 @@ namespace xo {
                                                            "readjson_", "subscription_v_"});
                 REQUIRE(rmem[0]["_metatype_"].asString() == "pointer");   /* a reference */
                 /* ... to the server's url router, printed inside the server */
-                REQUIRE(rmem[0]["_value_"]["ref"].asString()
-                        == root["_members_"][4]["_value_"]["id"].asString());
-                REQUIRE(rmem[1]["_value_"]["ref"].asString() == v[k]["sender"]["id"].asString());
+                REQUIRE(rmem[0]["_value_"]["_ref_"].asInt()
+                        == root["_members_"][4]["_value_"]["_id_"].asInt());
+                REQUIRE(rmem[1]["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
                 REQUIRE(rmem[3]["_value_"].asString() == "set");
 
                 Json::Value const & slots = rmem[4]["_value_"];
@@ -675,7 +675,7 @@ namespace xo {
                 REQUIRE(rmem[4]["_metatype_"].asString() == "vector");
                 REQUIRE(slots.size() == subs.size());
                 for (Json::ArrayIndex i = 0; i < subs.size(); ++i)
-                    REQUIRE(slots[i]["ref"].asString() == subs[i]["id"].asString());
+                    REQUIRE(slots[i]["_ref_"].asInt() == subs[i]["_id_"].asInt());
             }
 
             /* the server's session table: session id -> a ref to that
@@ -692,7 +692,7 @@ namespace xo {
                 REQUIRE(smap.size() == v.size());
                 for (Json::ArrayIndex k = 0; k < v.size(); ++k) {
                     std::string const sid = std::to_string(v[k]["session_id"].asUInt64());
-                    REQUIRE(smap[sid]["ref"].asString() == v[k]["id"].asString());
+                    REQUIRE(smap[sid]["_ref_"].asInt() == v[k]["_id_"].asInt());
                 }
                 REQUIRE((*st)["_members_"][0]["_value_"].asUInt64()
                         > v[v.size() - 1]["session_id"].asUInt64());
@@ -722,8 +722,8 @@ namespace xo {
              */
             Json::Value const & sub = v[1]["subscriptions"][0];
 
-            REQUIRE(sub["endpoint"]["ref"].asString() == eps[0]["id"].asString());
-            REQUIRE(sub["sink"]["sender"]["ref"].asString() == v[1]["sender"]["id"].asString());
+            REQUIRE(sub["endpoint"]["_ref_"].asInt() == eps[0]["_id_"].asInt());
+            REQUIRE(sub["sink"]["sender"]["_ref_"].asInt() == v[1]["sender"]["_id_"].asInt());
             REQUIRE(sub["sink"]["refcount"].asUInt() == 2);
 
             /* a closed session leaves the listing */

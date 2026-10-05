@@ -35,6 +35,9 @@ namespace xo {
             /** json printing for DString **/
             class DStringJsonPrinter : public JsonPrinter {
             public:
+                /* a json scalar, not an object: no identity */
+                virtual bool prints_object() const override { return false; }
+
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                 {
                     DString * x = this->check_recover_native<DString>(tp, state);

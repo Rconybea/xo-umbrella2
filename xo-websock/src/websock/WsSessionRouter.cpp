@@ -9,6 +9,7 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/JsonObject.hpp>
 #include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
@@ -406,47 +407,46 @@ namespace xo {
                 using Subscription = WsSessionRouter::Subscription;
 
                 void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    std::ostream * p_os = state.p_os();
-
                     Subscription const * sub = this->check_recover_native<Subscription>(tp, state);
 
                     if (!sub)
                         return;
 
-                    *p_os << "{" << quot("_name_") << ": " << quot("Subscription")
-                          << ", " << json::type_keys(tp.td())
-                          << ", " << quot("id") << ": " << quot(json_id(sub))
-                          << ", " << quot("sub_id") << ": " << sub->sub_id_
-                          << ", " << quot("stream") << ": " << quot(sub->stream_name_)
-                          << ", " << quot("endpoint") << ": {" << quot("ref") << ": "
-                          << quot(json_id(sub->endpoint_.get())) << "}"
-                          << ", " << quot("sink") << ": ";
+                    /* the sink prints through its WebsocketSink view (below):
+                     * a ref to it names that same address
+                     */
+                    WebsocketSink const * sink = sub->sink_.get();
 
-                    if (sub->sink_) {
-                        state.print(TaggedPtr(Reflect::require<WebsocketSink>(),
-                                              sub->sink_.get()));
+                    json::JsonObject obj = state.open_object("Subscription", tp.td());
+
+                    obj.key("sub_id", sub->sub_id_)
+                        .key("stream", sub->stream_name_)
+                        .key_ref("endpoint", sub->endpoint_.get());
+
+                    if (sink) {
+                        obj.child("sink", TaggedPtr(Reflect::require<WebsocketSink>(),
+                                                    const_cast<WebsocketSink *>(sink)));
                     } else {
                         /* in the moment between slot and sink (subscribe) */
-                        *p_os << "null";
+                        obj.key_open("sink") << "null";
                     }
 
                     /* chosen C++ members (.xo-backlog/xo-websock/issues/13).
                      * endpoint_ and sink_ are printed in full elsewhere (the
-                     * server's endpoints; "sink" above): refs, by most-derived
-                     * address -- the id each one's printer writes.
+                     * server's endpoints; "sink" above): refs, each by the
+                     * address it prints at.
                      * callback_id_: CallbackId is not reflected -- its number,
                      * under its declared type
                      */
-                    JsonMembers mem(state);
-                    mem.member("sub_id_", sub->sub_id_)
+                    obj.members()
+                        .member("sub_id_", sub->sub_id_)
                         .member("stream_name_", sub->stream_name_)
                         .member_ref<rp<DynamicEndpoint>>("endpoint_", sub->endpoint_.get())
                         .member_as<CallbackId>("callback_id_", sub->callback_id_.id())
-                        .member_ref<rp<WebsocketSink>>("sink_",
-                                                       dynamic_cast<void const *>(sub->sink_.get()));
-                    mem.end();
+                        .member_ref<rp<WebsocketSink>>("sink_", sink)
+                        .end();
 
-                    *p_os << "}";
+                    obj.close();
                 }
             };
         } /*namespace*/
@@ -462,8 +462,6 @@ namespace xo {
         class JsonPrinter_WsSessionRouter : public JsonPrinter {
         public:
             void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
-
                 WsSessionRouter const * r = this->check_recover_native<WsSessionRouter>(tp, state);
 
                 if (!r)
@@ -478,24 +476,23 @@ namespace xo {
                         sub_v.push_back(sub.get());
                 }
 
-                *p_os << "{" << quot("_name_") << ": " << quot("WsSessionRouter")
-                      << ", " << json::type_keys(tp.td())
-                      << ", " << quot("id") << ": " << quot(json_id(r));
+                json::JsonObject obj = state.open_object("WsSessionRouter", tp.td());
 
-                /* the sender by its most-derived address: the id its own
-                 * printer writes
+                /* the sender by its most-derived address: it prints as its
+                 * actual type, WsSessionSenderImpl, at that address
                  */
-                JsonMembers mem(state);
-                mem.member_ref<UrlRouter const &>("url_router_", &r->url_router_)
+                obj.members()
+                    .member_ref<UrlRouter const &>("url_router_", &r->url_router_)
                     .member_ref<rp<WsSender>>("sender_",
                                               dynamic_cast<void const *>(r->sender_.get()))
-                    .member("pjson_", r->pjson_)
+                    /* the server's, shared: printed in full in the server's members */
+                    .member_ref<rp<PrintJson>>("pjson_", r->pjson_.get())
                     .member_as<std::unique_ptr<Json::CharReader>>("readjson_",
                                                                   std::string(r->readjson_ ? "set" : "null"))
-                    .member_refs<std::vector<std::unique_ptr<WsSessionRouter::Subscription>>>("subscription_v_", sub_v);
-                mem.end();
+                    .member_refs<std::vector<std::unique_ptr<WsSessionRouter::Subscription>>>("subscription_v_", sub_v)
+                    .end();
 
-                *p_os << "}";
+                obj.close();
             }
         };
 

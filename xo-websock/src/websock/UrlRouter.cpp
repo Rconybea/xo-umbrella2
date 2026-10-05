@@ -8,6 +8,7 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/JsonObject.hpp>
 #include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
@@ -266,9 +267,6 @@ namespace xo {
         class JsonPrinter_UrlRouter : public json::JsonPrinter {
         public:
             void print_json(reflect::TaggedPtr tp, json::JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
-
-                using xo::pp::quot;
                 using Entries = std::vector<std::pair<std::string, void const *>>;
 
                 UrlRouter const * r = this->check_recover_native<UrlRouter>(tp, state);
@@ -289,16 +287,14 @@ namespace xo {
                 std::sort(http_v.begin(), http_v.end());
                 std::sort(stream_v.begin(), stream_v.end());
 
-                *p_os << "{" << quot("_name_") << ": " << quot("UrlRouter")
-                      << ", " << json::type_keys(tp.td())
-                      << ", " << quot("id") << ": " << quot(json_id(r));
+                json::JsonObject obj = state.open_object("UrlRouter", tp.td());
 
-                json::JsonMembers mem(state);
-                mem.member_ref_map<EndpointMap>("http_map_", http_v)
-                    .member_ref_map<EndpointMap>("stream_map_", stream_v);
-                mem.end();
+                obj.members()
+                    .member_ref_map<EndpointMap>("http_map_", http_v)
+                    .member_ref_map<EndpointMap>("stream_map_", stream_v)
+                    .end();
 
-                *p_os << "}";
+                obj.close();
             }
         };
 

@@ -27,6 +27,7 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/JsonObject.hpp>
 #include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
@@ -49,74 +50,74 @@ namespace xo {
          *  it as a ref by id.  Not in the anonymous namespace:
          *  DynamicEndpoint's header befriends it by name, for "_members_"
          **/
-        /** a WebserverConfig: a value, printed inside its Webserver -- no
-         *  id, no box of its own; its members, so the page can open it
+        /** a WebserverConfig: a value, printed inside its Webserver --
+         *  no box of its own; its members, so the page can open it
          **/
         class JsonPrinter_WebserverConfig : public JsonPrinter {
         public:
             void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
-
                 WebserverConfig const * cfg = this->check_recover_native<WebserverConfig>(tp, state);
 
                 if (!cfg)
                     return;
 
-                *p_os << "{" << quot("_name_") << ": " << quot("WebserverConfig")
-                      << ", " << json::type_keys(tp.td());
+                json::JsonObject obj = state.open_object("WebserverConfig", tp.td());
 
-                JsonMembers mem(state);
-                mem.member("port_", cfg->port_)
+                obj.members()
+                    .member("port_", cfg->port_)
                     .member("tls_flag_", cfg->tls_flag_)
                     .member("host_check_flag_", cfg->host_check_flag_)
                     .member("use_retry_flag_", cfg->use_retry_flag_)
-                    .member("mount_origin_", cfg->mount_origin_);
-                mem.end();
+                    .member("mount_origin_", cfg->mount_origin_)
+                    .end();
 
-                *p_os << "}";
+                obj.close();
             }
         }; /*JsonPrinter_WebserverConfig*/
 
         class JsonPrinter_DynamicEndpoint : public JsonPrinter {
         public:
             void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
-
                 DynamicEndpoint const * ep = this->check_recover_native<DynamicEndpoint>(tp, state);
 
                 if (!ep)
                     return;
 
-                *p_os << "{" << quot("_name_") << ": " << quot("DynamicEndpoint")
-                      << ", " << json::type_keys(tp.td())
-                      << ", " << quot("id") << ": " << quot(json_id(ep))
-                      /* held by the router's map, plus one per live
-                       * subscription served (each holds it by rp<>)
-                       */
-                      << ", " << quot("refcount") << ": " << ep->reference_counter()
-                      << ", " << quot("kind") << ": " << quot(endpoint_kind_descr(ep->kind()))
-                      << ", " << quot("stem") << ": " << quot(ep->stem())
-                      << ", " << quot("pattern") << ": " << quot(ep->uri_pattern())
-                      << ", " << quot("has_receive") << ": " << (ep->has_receive() ? "true" : "false");
+                /* the receiver: written inline below, at its most-derived
+                 * address; the receiver_ member's ref names the same one
+                 */
+                StreamReceiver * r = ep->receiver_.get();
+                void const * r_addr = dynamic_cast<void const *>(r);
+
+                json::JsonObject obj = state.open_object("DynamicEndpoint", tp.td());
+
+                /* refcount: held by the router's map, plus one per live
+                 * subscription served (each holds it by rp<>)
+                 */
+                obj.key("refcount", ep->reference_counter())
+                    .key("kind", std::string(endpoint_kind_descr(ep->kind())))
+                    .key("stem", ep->stem())
+                    .key("pattern", ep->uri_pattern())
+                    .key("has_receive", ep->has_receive());
 
                 /* the receiver, printed here in full -- its identity, named
-                 * by its most-derived type (SelfTagging); members later.
-                 * Its "id" is what the receiver_ member's ref writes below
+                 * by its most-derived type (SelfTagging); members later
                  */
-                *p_os << ", " << quot("receiver") << ": ";
-                if (StreamReceiver * r = ep->receiver_.get()) {
+                std::ostream & os = obj.key_open("receiver");
+                if (!r) {
+                    os << "null";
+                } else if (state.is_printed(r_addr)) {
+                    state.print_ref(r_addr);
+                } else {
                     /* before self_tp(): the TaggedRcptr it returns holds one more */
                     auto refcount = r->reference_counter();
                     TaggedRcptr self = r->self_tp();
 
-                    *p_os << "{" << quot("_name_") << ": " << quot(self.td()->short_name())
-                          << ", " << json::type_keys(self.td())
-                          << ", " << quot("id") << ": " << quot(json_id(dynamic_cast<void const *>(r)))
-                          /* the endpoint's hold, plus whatever the application keeps */
-                          << ", " << quot("refcount") << ": " << refcount
-                          << "}";
-                } else {
-                    *p_os << "null";
+                    json::JsonObject robj = state.open_object_at(r_addr, self.td()->short_name(),
+                                                                 self.td());
+                    /* the endpoint's hold, plus whatever the application keeps */
+                    robj.key("refcount", refcount);
+                    robj.close();
                 }
 
                 /* chosen C++ members (.xo-backlog/xo-websock/issues/13).
@@ -125,8 +126,8 @@ namespace xo {
                  * count, presence, under their declared types.  The
                  * receiver is printed in full above: here a ref
                  */
-                JsonMembers mem(state);
-                mem.member_as<EndpointKind>("kind_", std::string(endpoint_kind_descr(ep->kind_)))
+                obj.members()
+                    .member_as<EndpointKind>("kind_", std::string(endpoint_kind_descr(ep->kind_)))
                     .member("uri_pattern_", ep->uri_pattern_)
                     .member_as<std::regex>("uri_regex_",
                                            std::to_string(ep->uri_regex_.mark_count()) + " captures")
@@ -137,11 +138,10 @@ namespace xo {
                                                   std::string(ep->subscribe_fn_ ? "set" : "empty"))
                     .member_as<StreamUnsubscribeFn>("unsubscribe_fn_",
                                                     std::string(ep->unsubscribe_fn_ ? "set" : "empty"))
-                    .member_ref<rp<StreamReceiver>>("receiver_",
-                                                    dynamic_cast<void const *>(ep->receiver_.get()));
-                mem.end();
+                    .member_ref<rp<StreamReceiver>>("receiver_", r_addr)
+                    .end();
 
-                *p_os << "}";
+                obj.close();
             }
         }; /*JsonPrinter_DynamicEndpoint*/
 

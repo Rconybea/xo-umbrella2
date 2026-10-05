@@ -38,13 +38,6 @@ namespace xo {
             struct member_target<std::vector<T>> : member_target<T> {};
         }
 
-        /** an object's identity in json output: its address, as a string.
-         *  An object printed in full writes it as its "id"; a reference to it,
-         *  {"ref": json_id(p)}, so a consumer can join the two.  Unique within
-         *  one output; an address may be reused once its object is freed
-         **/
-        std::string json_id(void const * p);
-
         /** @brief writes an object's "_members_" array, for a JsonPrinter that
          *  opts in to showing chosen C++ members:
          *
@@ -81,41 +74,36 @@ namespace xo {
         public:
             /** writes on @p state's output; prints values through it **/
             explicit JsonMembers(JsonPrintState & state);
-            /** asserts that end() was called **/
+            /** asserts that end() was called -- unless a printer threw
+             *  since this began
+             **/
             ~JsonMembers();
 
-            /** member @p name, holding @p value; its declared type is T **/
+            /** member @p name, holding @p value -- the member itself, an
+             *  lvalue in the object, so it takes part in identity
+             *  (JsonPrintState::print); its declared type is T
+             **/
             template <typename T>
             JsonMembers & member(std::string_view name, T const & value) {
-                return this->member_as<T>(name, value);
+                return this->member_impl<T>(name, value, true /*identity*/);
             }
 
             /** member @p name, declared as type Declared, whose value is
-             *  @p value -- e.g. an atomic member read with load()
+             *  @p value -- computed, e.g. an atomic member read with
+             *  load(), or a copy taken under a lock -- so with no identity
+             *  (JsonPrintState::print_value)
              **/
             template <typename Declared, typename V>
             JsonMembers & member_as(std::string_view name, V const & value) {
-                using reflect::Reflect;
-                using target_t = typename detail::member_target<V>::type;
-
-                DeclaredType declared = declared_of<Declared>();
-                reflect::TypeDescr target = Reflect::require<target_t>();
-
-                if (this->printable(target)) {
-                    this->write_value(name, declared,
-                                      Reflect::make_tp(const_cast<V *>(&value)));
-                } else {
-                    this->write_error(name, declared,
-                                      "type not reflected: " + target->canonical_name());
-                }
-
-                return *this;
+                return this->member_impl<Declared>(name, value, false /*!identity*/);
             }
 
             /** member @p name, declared as type Declared, referring to an
-             *  object printed in full elsewhere: _value_ is {"ref":
-             *  json_id(@p p)}, or null.  For an object owned elsewhere, or
-             *  shared -- printing it in full here would repeat it, or recurse
+             *  object printed in full elsewhere: _value_ is {"_ref_": n},
+             *  or null (JsonPrintState::print_ref).  For an object owned
+             *  elsewhere, or shared: it prints in full where it is owned.
+             *  @p p must be the address that object prints at -- typed as
+             *  its printer is keyed, not a dynamic_cast to void const *
              **/
             template <typename Declared>
             JsonMembers & member_ref(std::string_view name, void const * p) {
@@ -126,7 +114,7 @@ namespace xo {
 
             /** member @p name, declared as type Declared, a container of
              *  objects printed in full elsewhere: _value_ is an array, an
-             *  element {"ref": json_id(p)} or (a released slot) null -- so
+             *  element {"_ref_": n} or (a released slot) null -- so
              *  slot positions are kept
              **/
             template <typename Declared>
@@ -138,7 +126,7 @@ namespace xo {
 
             /** member @p name, declared as type Declared, a map to objects
              *  printed in full elsewhere: _value_ is a json object, key ->
-             *  {"ref": json_id(p)} or null, keys in the order given (sort
+             *  {"_ref_": n} or null, keys in the order given (sort
              *  them, for an unordered container)
              **/
             template <typename Declared>
@@ -180,13 +168,36 @@ namespace xo {
                 }
             }
 
+            /** member @p name, declared Declared, holding @p value; with
+             *  @p identity, @p value is a lasting lvalue
+             **/
+            template <typename Declared, typename V>
+            JsonMembers & member_impl(std::string_view name, V const & value, bool identity) {
+                using reflect::Reflect;
+                using target_t = typename detail::member_target<V>::type;
+
+                DeclaredType declared = declared_of<Declared>();
+                reflect::TypeDescr target = Reflect::require<target_t>();
+
+                if (this->printable(target)) {
+                    this->write_value(name, declared,
+                                      Reflect::make_tp(const_cast<V *>(&value)),
+                                      identity);
+                } else {
+                    this->write_error(name, declared,
+                                      "type not reflected: " + target->canonical_name());
+                }
+
+                return *this;
+            }
+
             /** true iff PrintJson can print a @p td: it has a printer for
              *  it, or it is a complete reflected struct
              **/
             bool printable(reflect::TypeDescr td) const;
 
             void write_value(std::string_view name, DeclaredType const & declared,
-                             reflect::TaggedPtr value);
+                             reflect::TaggedPtr value, bool identity);
             void write_error(std::string_view name, DeclaredType const & declared,
                              std::string const & why);
             void write_ref(std::string_view name, DeclaredType const & declared,
@@ -195,7 +206,7 @@ namespace xo {
                             std::vector<void const *> const & ps);
             void write_ref_map(std::string_view name, DeclaredType const & declared,
                                std::vector<std::pair<std::string, void const *>> const & kvs);
-            /** {"ref": json_id(@p p)}, or null **/
+            /** {"_ref_": n}, or null **/
             void write_ref_value(void const * p);
             /** the separator and the entry's _name_, _canonical_type_,
              *  _short_type_, _metatype_
@@ -210,6 +221,8 @@ namespace xo {
             /** no entry written yet: no separator before the next **/
             bool first_ = true;
             bool ended_ = false;
+            /** std::uncaught_exceptions() at construction: see ~JsonMembers **/
+            int n_uncaught_ = 0;
         };
     } /*namespace json*/
 } /*namespace xo*/

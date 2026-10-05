@@ -4,6 +4,7 @@
  */
 
 #include "PrintJson.hpp"
+#include "JsonObject.hpp"
 #include "type_keys.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/StructReflector.hpp>
@@ -145,13 +146,17 @@ namespace xo {
         PrintJson::validate_tp(TaggedPtr tp) const
         {
             /* the throw comes from n_child()/get_child(), which is where
-             * xo-reflectable2 rotates an erased fop to AReflectable.  Nothing
-             * to do per node, so the visitor is empty: this is a reuse of
-             * reflect's walker, not a second traversal implementation.
+             * xo-reflectable2 rotates an erased fop to AReflectable.  The
+             * print's own traversal, into a stream with no buffer: so it
+             * reaches what print_tp reaches, no more and no less, and each
+             * object once.  (Until 2026-10-04 this was reflect's
+             * visit_tree_preorder, which recursed forever on a cycle.)
              */
             EntryGuard guard("validate_tp");
+            std::ostream discard(nullptr);
+            JsonPrintState state(this, &discard);
 
-            TaggedPtr::visit_tree_preorder(tp, [](TaggedPtr) {});
+            state.print(tp);
         } /*validate_tp*/
 
         void
@@ -182,6 +187,9 @@ namespace xo {
          */
         class JsonPrinter_TaggedPtr : public JsonPrinter {
         public:
+            /* delegates: the TaggedPtr it holds has its own printer */
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
                 TaggedPtr * x = this->check_recover_native<TaggedPtr>(tp, state);
 
@@ -207,6 +215,8 @@ namespace xo {
 
         class JsonPrinter_bool : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
                 std::ostream * p_os = state.p_os();
 
@@ -235,6 +245,8 @@ namespace xo {
         template<typename T>
         class JsonPrinter_integer : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
                 std::ostream * p_os = state.p_os();
 
@@ -264,6 +276,8 @@ namespace xo {
         template<typename T>
         class JsonPrinter_floatingpoint : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override
                 {
                     std::ostream * p_os = state.p_os();
@@ -310,6 +324,8 @@ namespace xo {
         template<typename T>
         class JsonPrinter_string : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
                 std::ostream * p_os = state.p_os();
 
@@ -364,6 +380,8 @@ namespace xo {
         template<std::size_t N>
         class JsonPrinter_flatstring : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
                 std::ostream * p_os = state.p_os();
 
@@ -404,6 +422,8 @@ namespace xo {
          **/
         class JsonPrinter_address : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
                 std::ostream * p_os = state.p_os();
 
@@ -501,11 +521,10 @@ namespace xo {
 
                 auto tseq = x->_typeseq();
 
-                *p_os << "{"
-                      << "\"_name_\": " << quot("ObjectSlot")
-                      << ", " << json::type_keys(tp.td())
-                      << ", \"typeseq\": " << tseq.seqno()
-                      << ", \"type\": " << quot(TypeRegistry::id2name(tseq));
+                JsonObject obj = state.open_object("ObjectSlot", tp.td());
+
+                obj.key("typeseq", tseq.seqno())
+                    .key("type", std::string(TypeRegistry::id2name(tseq)));
 
                 /* 0 means no FacetAppcx has been constructed, so there is no
                  * agreed alignment to mask with.  Reporting the absence beats
@@ -523,16 +542,16 @@ namespace xo {
                 std::size_t align_z = DHandleStoreBase::storage_base_align();
 
                 if (align_z == 0) {
-                    *p_os << ", \"offset\": null, \"size\": null}";
+                    obj.key_open("offset") << "null";
+                    obj.key_open("size") << "null";
                 } else {
                     DArena * arena = DArena::obj2arena(data, align_z);
 
-                    *p_os << ", \"offset\": "
-                          << (static_cast<const std::byte *>(data) - arena->_mem_lo())
-                          << ", \"size\": "
-                          << arena->alloc_info(static_cast<std::byte *>(data)).size()
-                          << "}";
+                    obj.key_open("offset") << (static_cast<const std::byte *>(data) - arena->_mem_lo());
+                    obj.key_open("size") << arena->alloc_info(static_cast<std::byte *>(data)).size();
                 }
+
+                obj.close();
             } /*print_json*/
         }; /*JsonPrinter_ObjectSlot*/
 
@@ -583,14 +602,13 @@ namespace xo {
                 if (!rs)
                     return;
 
-                *p_os << "{"
-                      << "\"_name_\": " << quot("RootSet")
-                      << ", " << json::type_keys(tp.td())
-                      << ", \"size\": " << rs->strong_size()
-                      << ", \"capacity\": " << rs->strong_capacity()
-                      << ", \"live\": " << rs->strong_root_count();
+                JsonObject obj = state.open_object("RootSet", tp.td());
 
-                *p_os << ", \"free\": [";
+                obj.key("size", rs->strong_size())
+                    .key("capacity", rs->strong_capacity())
+                    .key("live", rs->strong_root_count());
+
+                obj.key_open("free") << "[";
                 {
                     bool first = true;
 
@@ -608,7 +626,7 @@ namespace xo {
                  * `free' indexes into.  Each element goes through
                  * JsonPrinter_ObjectSlot; a cleared slot renders as null.
                  */
-                *p_os << ", \"slots\": [";
+                obj.key_open("slots") << "[";
                 {
                     bool first = true;
 
@@ -618,12 +636,13 @@ namespace xo {
                                 *p_os << ", ";
                             first = false;
 
-                            state.print(
-                           TaggedPtr(Reflect::require<xo::facet::ObjectSlot>(),
-                                     const_cast<xo::facet::ObjectSlot *>(&slot)));
+                            state.print(TaggedPtr(Reflect::require<xo::facet::ObjectSlot>(),
+                                                  const_cast<xo::facet::ObjectSlot *>(&slot)));
                         });
                 }
-                *p_os << "]}";
+                *p_os << "]";
+
+                obj.close();
             } /*print_json*/
         }; /*JsonPrinter_RootSet*/
 
@@ -670,8 +689,7 @@ namespace xo {
                     return;
 
 
-                *p_os << "{" << "\"_name_\": " << quot("Flywheel")
-                      << ", " << json::type_keys(tp.td());
+                JsonObject obj = state.open_object("Flywheel", tp.td());
 
                 /* every pool the store owns, in the order it reports them:
                  * the storage arena first, then the root set and its free
@@ -683,7 +701,7 @@ namespace xo {
                  * already the right shape, so restating its fields here would
                  * be the very thing this printer exists to stop doing.
                  */
-                *p_os << ", \"pools\": [";
+                obj.key_open("pools") << "[";
                 {
                     bool first = true;
 
@@ -692,24 +710,25 @@ namespace xo {
                                 *p_os << ", ";
                             first = false;
 
-                            state.print(
-                           TaggedPtr(Reflect::require<MemorySizeInfo>(),
-                                     const_cast<MemorySizeInfo *>(&x)));
+                            /* print_value: visit_pools makes each one on its
+                             * own stack, so the next may reuse its address
+                             */
+                            state.print_value(TaggedPtr(Reflect::require<MemorySizeInfo>(),
+                                                        const_cast<MemorySizeInfo *>(&x)));
                         });
                 }
                 *p_os << "]";
 
                 /* the root set, via JsonPrinter_RootSet */
-                *p_os << ", \"strong\": ";
                 {
                     const auto & rs = fw->strong_root_set();
 
-                    state.print(
-                   TaggedPtr(Reflect::require<AllocFlywheel::HandleStore>(),
-                             const_cast<AllocFlywheel::HandleStore *>(&rs)));
+                    obj.child("strong",
+                              TaggedPtr(Reflect::require<AllocFlywheel::HandleStore>(),
+                                        const_cast<AllocFlywheel::HandleStore *>(&rs)));
                 }
 
-                *p_os << "}";
+                obj.close();
             } /*print_json*/
         }; /*JsonPrinter_AllocFlywheel*/
 
@@ -786,6 +805,8 @@ namespace xo {
 
         class JsonPrinter_utc_nanos : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
                 std::ostream * p_os = state.p_os();
 

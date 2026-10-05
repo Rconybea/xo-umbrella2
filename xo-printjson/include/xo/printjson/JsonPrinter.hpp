@@ -33,6 +33,14 @@ namespace xo {
             virtual void print_json(TaggedPtr tp,
                                     JsonPrintState & state) const = 0;
 
+            /** true iff print_json writes a json object, opened with
+             *  JsonPrintState::open_object (or writes null).  Such a value
+             *  takes part in identity: JsonPrintState::print checks for it
+             *  BEFORE calling print_json, so print_json never sees a value
+             *  printed already.  A printer of scalars or arrays says false
+             **/
+            virtual bool prints_object() const { return true; }
+
             void report_internal_type_consistency_error(TypeDescr td1,
                                                         TypeDescr td2,
                                                         JsonPrintState & state) const;
@@ -69,6 +77,8 @@ namespace xo {
         template<typename T>
         class AsStringJsonPrinter : public JsonPrinter {
         public:
+            virtual bool prints_object() const override { return false; }
+
             virtual void print_json(TaggedPtr tp,
                                     JsonPrintState & state) const override
                 {

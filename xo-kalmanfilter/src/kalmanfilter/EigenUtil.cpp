@@ -47,6 +47,9 @@ namespace xo {
             template<typename EigenVectorType>
             class EigenVectorJsonPrinter : public JsonPrinter {
             public:
+                /* a json array, not an object: no identity */
+                virtual bool prints_object() const override { return false; }
+
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
                         std::ostream * p_os = state.p_os();
@@ -81,6 +84,9 @@ namespace xo {
              */
             class MatrixXdJsonPrinter : public JsonPrinter {
             public:
+                /* a json array, not an object: no identity */
+                virtual bool prints_object() const override { return false; }
+
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
                         std::ostream * p_os = state.p_os();

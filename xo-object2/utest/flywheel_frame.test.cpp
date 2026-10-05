@@ -194,6 +194,11 @@ namespace xo {
 
             REQUIRE(frame ==
                 "{\"_name_\": \"Flywheel\"" + type_member(xo::reflect::type_name<AllocFlywheel>())
+                /* objects print once, numbered: the frame 1, its root set 2.
+                 * The pools are made on the fly by visit_pools, so have no
+                 * lasting identity -- no _id_ (.xo-backlog/xo-printjson/issues/02)
+                 */
+                + ", \"_id_\": 1"
                 + ", \"pools\": ["
                   "{\"_name_\": \"MemorySizeInfo\"" + pool_type
                 + ", \"name\": \"utest.frame.empty.storage\""
@@ -215,6 +220,7 @@ namespace xo {
                  */
                   ", \"strong\": {\"_name_\": \"RootSet\""
                 + type_member(xo::reflect::type_name<xo::facet::DHandleArena<xo::facet::ObjectSlot>>())
+                + ", \"_id_\": 2"
                 + ", \"size\": 0, \"capacity\": INT, \"live\": 0"
                   ", \"free\": [], \"slots\": []}}");
 

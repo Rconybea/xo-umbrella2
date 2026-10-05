@@ -6,7 +6,7 @@
 #include "JsonMembers.hpp"
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <cassert>
-#include <sstream>
+#include <exception>
 
 namespace xo {
     using xo::pp::quot;
@@ -15,16 +15,8 @@ namespace xo {
     using xo::reflect::TypeDescr;
 
     namespace json {
-        std::string
-        json_id(void const * p)
-        {
-            std::ostringstream ss;
-            ss << p;
-            return ss.str();
-        }
-
         JsonMembers::JsonMembers(JsonPrintState & state)
-            : state_{&state}, p_os_{state.p_os()}
+            : state_{&state}, p_os_{state.p_os()}, n_uncaught_{std::uncaught_exceptions()}
         {
             /* the leading comma: the object's _name_ and type keys come first */
             *p_os_ << ", \"_members_\": [";
@@ -32,7 +24,8 @@ namespace xo {
 
         JsonMembers::~JsonMembers()
         {
-            assert(ended_ && "JsonMembers: end() not called");
+            assert((ended_ || std::uncaught_exceptions() > n_uncaught_)
+                   && "JsonMembers: end() not called");
         }
 
         void
@@ -63,12 +56,15 @@ namespace xo {
 
         void
         JsonMembers::write_value(std::string_view name, DeclaredType const & declared,
-                                 TaggedPtr value)
+                                 TaggedPtr value, bool identity)
         {
             this->write_head(name, declared);
 
             *p_os_ << ", " << quot("_value_") << ": ";
-            state_->print(value);
+            if (identity)
+                state_->print(value);
+            else
+                state_->print_value(value);
             *p_os_ << "}";
         }
 
@@ -117,10 +113,7 @@ namespace xo {
         void
         JsonMembers::write_ref_value(void const * p)
         {
-            if (p)
-                *p_os_ << "{" << quot("ref") << ": " << quot(json_id(p)) << "}";
-            else
-                *p_os_ << "null";
+            state_->print_ref(p);
         }
 
         void

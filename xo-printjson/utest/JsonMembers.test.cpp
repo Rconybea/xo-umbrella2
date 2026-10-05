@@ -108,14 +108,20 @@ namespace xo {
             mem.member("r_", r).member("p_", p).member("v_", v);
             mem.end();
 
-            /* the value printed as PrintJson prints any value */
-            std::stringstream rs;
-            pjson.print(r, &rs);
+            /* the value printed as PrintJson prints any value: r_ in full,
+             * object 1; p_ points at r, printed already -- a ref; v_'s
+             * element is another object, 2
+             */
+            auto jm = [](int id) {
+                return "{\"_name_\": \"JmReflected\", \"_canonical_type_\": \"" + type_of<JmReflected>()
+                    + "\", \"_short_type_\": \"JmReflected\", \"_id_\": " + std::to_string(id)
+                    + ", \"a\": 1, \"b\": \"x\"}";
+            };
 
             REQUIRE(ss.str() == ", \"_members_\": ["
-                    + entry("r_", type_of<JmReflected>(), "struct", rs.str()) + ", "
-                    + entry("p_", type_of<JmReflected *>(), "pointer", rs.str()) + ", "
-                    + entry("v_", type_of<std::vector<JmReflected>>(), "vector", "[" + rs.str() + "]")
+                    + entry("r_", type_of<JmReflected>(), "struct", jm(1)) + ", "
+                    + entry("p_", type_of<JmReflected *>(), "pointer", "{\"_ref_\": 1}") + ", "
+                    + entry("v_", type_of<std::vector<JmReflected>>(), "vector", "[" + jm(2) + "]")
                     + "]");
         }
 
@@ -183,13 +189,8 @@ namespace xo {
 
             REQUIRE(ss.str() == ", \"_members_\": ["
                     + entry("r_", type_of<JmReflected *>(), "pointer",
-                            "{\"ref\": \"" + xo::json::json_id(&r) + "\"}") + ", "
+                            "{\"_ref_\": 1}") + ", "
                     + entry("null_", type_of<JmReflected *>(), "pointer", "null") + "]");
-
-            /* the id is the address, as written by ostream */
-            std::stringstream addr;
-            addr << static_cast<void const *>(&r);
-            REQUIRE(xo::json::json_id(&r) == addr.str());
         }
 
         TEST_CASE("json-members-member-ref-to-a-reference", "[printjson][JsonMembers]") {
@@ -210,7 +211,7 @@ namespace xo {
 
             REQUIRE(ss.str() == ", \"_members_\": ["
                     + entry("cr_", type_of<JmReflected const &>(), "pointer",
-                            "{\"ref\": \"" + xo::json::json_id(&r) + "\"}") + "]");
+                            "{\"_ref_\": 1}") + "]");
         }
 
         TEST_CASE("json-members-member-refs", "[printjson][JsonMembers]") {
@@ -230,8 +231,7 @@ namespace xo {
 
             REQUIRE(ss.str() == ", \"_members_\": ["
                     + entry("v_", type_of<std::vector<JmReflected *>>(), "vector",
-                            "[{\"ref\": \"" + xo::json::json_id(&a) + "\"}, null, "
-                            "{\"ref\": \"" + xo::json::json_id(&b) + "\"}]") + "]");
+                            "[{\"_ref_\": 1}, null, {\"_ref_\": 2}]") + "]");
         }
 
         TEST_CASE("json-members-member-ref-map", "[printjson][JsonMembers]") {
@@ -251,8 +251,8 @@ namespace xo {
 
             REQUIRE(ss.str() == ", \"_members_\": ["
                     + entry("m_", type_of<std::map<std::string, JmReflected *>>(), "atomic",
-                            "{\"/a/\": {\"ref\": \"" + xo::json::json_id(&a) + "\"}, "
-                            "\"/b/\": {\"ref\": \"" + xo::json::json_id(&b) + "\"}, "
+                            "{\"/a/\": {\"_ref_\": 1}, "
+                            "\"/b/\": {\"_ref_\": 2}, "
                             "\"/z/\": null}") + "]");
         }
     } /*namespace ut*/

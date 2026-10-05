@@ -40,6 +40,7 @@
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/JsonObject.hpp>
 #include <xo/printjson/type_keys.hpp>
 #include <algorithm>
 #include <atomic>
@@ -1040,33 +1041,30 @@ namespace xo {
         class JsonPrinter_WsSessionSender : public JsonPrinter {
         public:
             void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
-
                 WsSessionSenderImpl const * x
                     = this->check_recover_native<WsSessionSenderImpl>(tp, state);
 
                 if (!x)
                     return;
 
-                *p_os << "{" << quot("_name_") << ": " << quot("WsSessionSender")
-                      << ", " << json::type_keys(tp.td())
-                      << ", " << quot("id") << ": " << quot(json_id(x))
-                      /* session record + router + one per live sink */
-                      << ", " << quot("refcount") << ": " << x->reference_counter()
-                      << ", " << quot("session_id") << ": " << x->session_id()
-                      << ", " << quot("open") << ": " << (x->is_open() ? "true" : "false");
+                json::JsonObject obj = state.open_object("WsSessionSender", tp.td());
+
+                /* session record + router + one per live sink */
+                obj.key("refcount", x->reference_counter())
+                    .key("session_id", x->session_id())
+                    .key("open", x->is_open());
 
                 /* chosen C++ members (.xo-backlog/xo-websock/issues/13).  The
                  * server is printed in full elsewhere: a ref.  open_ an atomic
                  * -- its value, under its declared type
                  */
-                JsonMembers mem(state);
-                mem.member_ref<WebserverImpl *>("target_", x->target_)
+                obj.members()
+                    .member_ref<WebserverImpl *>("target_", x->target_)
                     .member("session_id_", x->session_id_)
-                    .member_as<std::atomic<bool>>("open_", x->open_.load());
-                mem.end();
+                    .member_as<std::atomic<bool>>("open_", x->open_.load())
+                    .end();
 
-                *p_os << "}";
+                obj.close();
             }
         };
 
@@ -1086,19 +1084,17 @@ namespace xo {
                     if (!recd)
                         return;
 
-                    *p_os << "{" << quot("_name_") << ": " << quot("WsSession")
-                          << ", " << json::type_keys(tp.td())
-                          << ", " << quot("id") << ": " << quot(json_id(recd))
-                          << ", " << quot("session_id") << ": " << recd->session_id()
-                          << ", " << quot("sender") << ": ";
+                    json::JsonObject obj = state.open_object("WsSession", tp.td());
 
-                    state.print(TaggedPtr(Reflect::require<WsSessionSenderImpl>(),
-                                          const_cast<WsSessionSenderImpl *>(&recd->sender())));
+                    obj.key("session_id", recd->session_id())
+                        .child("sender",
+                               TaggedPtr(Reflect::require<WsSessionSenderImpl>(),
+                                         const_cast<WsSessionSenderImpl *>(&recd->sender())));
 
                     /* each subscription via its printer (in
                      * WsSessionRouter.cpp), under the router's lock
                      */
-                    *p_os << ", " << quot("subscriptions") << ": [";
+                    obj.key_open("subscriptions") << "[";
                     {
                         bool first = true;
 
@@ -1128,15 +1124,15 @@ namespace xo {
                         n_queued = recd->outbound_q_.size();
                     }
 
-                    JsonMembers mem(state);
-                    mem.member("output_buf_", output_buf)
+                    obj.members()
+                        .member_as<OutputBuffer *>("output_buf_", output_buf)
                         .member_ref<rp<WsSessionSenderImpl>>("sender_", recd->sender_.get())
                         .member("router_", recd->router_)
                         .member_as<std::deque<std::string>>("outbound_q_",
-                                                            std::to_string(n_queued) + " queued");
-                    mem.end();
+                                                            std::to_string(n_queued) + " queued")
+                        .end();
 
-                    *p_os << "}";
+                    obj.close();
                 }
             };
             /** @brief the server, keyed on its actual type: reflection takes a
@@ -1154,15 +1150,13 @@ namespace xo {
                     if (!websrv)
                         return;
 
-                    *p_os << "{" << quot("_name_") << ": " << quot("Webserver")
-                          << ", " << json::type_keys(tp.td())
-                          << ", " << quot("id") << ": " << quot(json_id(websrv))
-                          << ", " << quot("refcount") << ": " << websrv->reference_counter()
-                          << ", " << quot("listen_port") << ": " << websrv->listen_port()
-                          << ", " << quot("state") << ": "
-                          << quot(RunstateUtil::runstate_descr(websrv->state()));
+                    json::JsonObject obj = state.open_object("Webserver", tp.td());
 
-                    *p_os << ", " << quot("endpoints") << ": [";
+                    obj.key("refcount", websrv->reference_counter())
+                        .key("listen_port", websrv->listen_port())
+                        .key("state", std::string(RunstateUtil::runstate_descr(websrv->state())));
+
+                    obj.key_open("endpoints") << "[";
                     {
                         bool first = true;
 
@@ -1180,7 +1174,7 @@ namespace xo {
                     }
                     *p_os << "]";
 
-                    *p_os << ", " << quot("sessions") << ": [";
+                    obj.key_open("sessions") << "[";
                     {
                         bool first = true;
 
@@ -1201,17 +1195,18 @@ namespace xo {
                      * (.xo-backlog/xo-websock/issues/13).  listen_port_ and
                      * state_ are read as the accessors above read them
                      */
-                    JsonMembers mem(state);
-                    mem.member("ws_config_", websrv->ws_config_)
+                    obj.members()
+                        .member("ws_config_", websrv->ws_config_)
                         .member_as<std::atomic<std::int32_t>>("listen_port_", websrv->listen_port())
                         .member_as<Runstate>("state_",
                                              std::string(RunstateUtil::runstate_descr(websrv->state())))
+                        /* in full here, its owner; routers and sinks share it -- refs */
                         .member("pjson_", websrv->pjson_)
                         .member("url_router_", websrv->url_router_)
-                        .member("session_table_", websrv->session_table_);
-                    mem.end();
+                        .member("session_table_", websrv->session_table_)
+                        .end();
 
-                    *p_os << "}";
+                    obj.close();
                 }
             }; /*JsonPrinter_Webserver*/
         } /*namespace*/
@@ -1228,8 +1223,6 @@ namespace xo {
             using Table = WsSessionTable<Recd>;
 
             void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
-
                 Table const * t = this->check_recover_native<Table>(tp, state);
 
                 if (!t)
@@ -1250,16 +1243,14 @@ namespace xo {
                 for (auto const & [id, recd] : by_id)
                     sessions.emplace_back(std::to_string(id), recd);
 
-                *p_os << "{" << quot("_name_") << ": " << quot("WsSessionTable")
-                      << ", " << json::type_keys(tp.td())
-                      << ", " << quot("id") << ": " << quot(json_id(t));
+                json::JsonObject obj = state.open_object("WsSessionTable", tp.td());
 
-                JsonMembers mem(state);
-                mem.member("next_id_", next_id);
-                mem.member_ref_map<decltype(t->session_map_)>("session_map_", sessions);
-                mem.end();
+                obj.members()
+                    .member_as<typename Table::SessionId>("next_id_", next_id)
+                    .template member_ref_map<decltype(t->session_map_)>("session_map_", sessions)
+                    .end();
 
-                *p_os << "}";
+                obj.close();
             }
         };
 

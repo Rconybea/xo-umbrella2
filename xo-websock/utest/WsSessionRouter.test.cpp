@@ -635,9 +635,9 @@ namespace xo {
         {
             /* what the webserver's json shows of a session's subscriptions:
              * each printed natively, its sink in full, its endpoint and the
-             * sink's sender as refs by id (address)
+             * sink's sender as refs ({"_ref_": n}, n another object's "_id_"
+             * in the same print)
              */
-            auto id_of = [](void const * p) { std::ostringstream ss; ss << p; return ss.str(); };
 
             Fixture fx;
             fx.add_endpoint("/a");
@@ -675,11 +675,29 @@ namespace xo {
             REQUIRE(v[1]["sub_id"].asUInt() == 2);
             REQUIRE(v[1]["stream"].asString() == "/fw/8");
 
-            /* the endpoint, as a ref to the very object the url router holds */
-            REQUIRE(v[0]["endpoint"]["ref"].asString()
-                    == id_of(fx.url_router_.find_stream("/a").get()));
-            REQUIRE(v[1]["endpoint"]["ref"].asString()
-                    == id_of(fx.url_router_.find_stream("/fw/8").get()));
+            /* the endpoint, as a ref to the very object the url router
+             * holds: print the subscription, then that endpoint, in one
+             * print -- the endpoint's _id_ is the subscription's ref
+             */
+            REQUIRE(v[0]["endpoint"]["_ref_"].isInt());
+            {
+                std::stringstream ss;
+                xo::json::JsonPrintState state(PrintJsonSingleton::instance().get(), &ss);
+                std::vector<xo::reflect::TaggedPtr> subs;
+                router->visit_subscriptions([&subs](xo::reflect::TaggedPtr sub) { subs.push_back(sub); });
+
+                ss << "[";
+                state.print(subs[1]);
+                ss << ", ";
+                state.print(xo::reflect::TaggedPtr(xo::reflect::Reflect::require<xo::web::DynamicEndpoint>(),
+                                                   fx.url_router_.find_stream("/fw/8").get()));
+                ss << "]";
+
+                Json::Value both = parse(ss.str());
+
+                REQUIRE(both[1]["_name_"].asString() == "DynamicEndpoint");
+                REQUIRE(both[1]["_id_"].asInt() == both[0]["endpoint"]["_ref_"].asInt());
+            }
 
             /* the sink, in full: the one the endpoint's subscribe was handed;
              * held by the router's slot and by the test's recorder
@@ -688,14 +706,13 @@ namespace xo {
 
             REQUIRE(sink["_name_"].asString() == "WebsocketSink");
             REQUIRE(sink["_canonical_type_"].asString() == "xo::web::WebsocketSinkImpl");
-            REQUIRE(sink["id"].asString() == id_of(fx.rec_.subscribed_v_[2].get()));
+            REQUIRE(sink["_id_"].isInt());
             REQUIRE(sink["refcount"].asUInt() == 2);
             REQUIRE(sink["stream"].asString() == "/fw/8");
             REQUIRE(sink["sub_id"].asUInt() == 2);
             REQUIRE(sink["seq"].asUInt() == 0);
-            /* its sender: the router's -- one sender per session */
-            REQUIRE(sink["sender"]["ref"].asString()
-                    == id_of(static_cast<xo::web::WsSender *>(fx.sender_.get())));
+            /* its sender: a ref (printed in full under its session) */
+            REQUIRE(sink["sender"]["_ref_"].isInt());
 
             /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
              * endpoint and sink as refs to the objects printed in full
@@ -710,10 +727,10 @@ namespace xo {
                                                       "callback_id_", "sink_"});
             REQUIRE(mem[0]["_value_"].asUInt() == 2);
             REQUIRE(mem[1]["_value_"].asString() == "/fw/8");
-            REQUIRE(mem[2]["_value_"]["ref"].asString() == v[1]["endpoint"]["ref"].asString());
+            REQUIRE(mem[2]["_value_"]["_ref_"].asInt() == v[1]["endpoint"]["_ref_"].asInt());
             REQUIRE(mem[3]["_canonical_type_"].asString().find("CallbackId") != std::string::npos);
             REQUIRE(mem[3]["_value_"].isUInt());
-            REQUIRE(mem[4]["_value_"]["ref"].asString() == sink["id"].asString());
+            REQUIRE(mem[4]["_value_"]["_ref_"].asInt() == sink["_id_"].asInt());
             REQUIRE(v[1].toStyledString().find("\"_error_\"") == std::string::npos);
         }
 

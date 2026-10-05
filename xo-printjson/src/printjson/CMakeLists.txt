@@ -6,6 +6,7 @@ set(SELF_SRCS
     PrintJsonSingleton.cpp
     PrintJson.cpp
     JsonPrintState.cpp
+    JsonObject.cpp
     JsonMembers.cpp
     type_keys.cpp
     init_printjson.cpp)

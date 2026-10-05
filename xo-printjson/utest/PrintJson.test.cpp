@@ -105,8 +105,9 @@ namespace xo {
             print_json.print(holder, &ss);
 
             REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
+                                 + ", \"_id_\": 1"
                                  + ", \"p\": {\"_name_\": \"DPtrTarget\"" + type_member<DPtrTarget>()
-                                 + ", \"v\": 1.5}}"));
+                                 + ", \"_id_\": 2, \"v\": 1.5}}"));
         } /*TEST_CASE(print-json-raw-pointer-member)*/
 
         TEST_CASE("print-json-null-raw-pointer-member", "[printjson][rawpointer]") {
@@ -124,7 +125,7 @@ namespace xo {
             print_json.print(holder, &ss);
 
             REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
-                                 + ", \"p\": null}"));
+                                 + ", \"_id_\": 1, \"p\": null}"));
         } /*TEST_CASE(print-json-null-raw-pointer-member)*/
 
         TEST_CASE("print-json-null-c-string", "[printjson][rawpointer]") {
@@ -212,7 +213,8 @@ namespace xo {
 
             print_json.print(tp, &ss);
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct0\"" + type_member<TestStruct0>() + "}"));
+            REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct0\"" + type_member<TestStruct0>()
+                                 + ", \"_id_\": 1}"));
         } /*TEST_CASE(print-json-empty-struct)*/
 
         namespace {
@@ -254,7 +256,8 @@ namespace xo {
             print_json.print(tp, &ss);
 
             REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct1\"" + type_member<TestStruct1>()
-                                 + ", \"i16\": -1"
+                                 + ", \"_id_\": 1"
+                                   ", \"i16\": -1"
                                    ", \"u16\": 2"
                                    ", \"i32\": -3"
                                    ", \"u32\": 4"

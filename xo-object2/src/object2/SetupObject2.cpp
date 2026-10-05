@@ -45,6 +45,9 @@ namespace xo {
             /** json printing for DFloat **/
             class DFloatJsonPrinter : public xo::json::JsonPrinter {
             public:
+                /* a json scalar, not an object: no identity */
+                virtual bool prints_object() const override { return false; }
+
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                 {
                     DFloat * x = this->check_recover_native<DFloat>(tp, state);

@@ -8,6 +8,7 @@
 
 #include "xo/printjson/PrintJson.hpp"
 #include "xo/printjson/init_printjson.hpp"
+#include "xo/printjson/JsonPrintState.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
@@ -15,6 +16,7 @@
 #include <csignal>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -43,14 +45,69 @@ namespace xo {
                 (void)s_once;
             }
 
-            /** the type keys the struct printer emits for Node, after
-             *  "_name_" -- as PrintJson.test.cpp's type_member<T>()
+            /** a node with two successors: a diamond when both are one node **/
+            struct Fork {
+                int id_;
+                Fork * left_;
+                Fork * right_;
+            };
+
+            /** an object whose first member is another object: the two
+             *  share an address
              **/
-            std::string node_type_keys() {
-                std::string canonical(xo::reflect::type_name<Node>());
-                return ", \"_canonical_type_\": \"" + canonical + "\""
+            struct Inner {
+                int v_;
+            };
+
+            struct Outer {
+                Inner in_;
+                int x_;
+            };
+
+            void reflect_more() {
+                static bool s_once = []() {
+                    {
+                        StructReflector<Fork> sr;
+                        sr.reflect_member("id", &Fork::id_);
+                        sr.reflect_member("left", &Fork::left_);
+                        sr.reflect_member("right", &Fork::right_);
+                        sr.require_complete();
+                    }
+                    {
+                        StructReflector<Inner> sr;
+                        sr.reflect_member("v", &Inner::v_);
+                        sr.require_complete();
+                    }
+                    {
+                        StructReflector<Outer> sr;
+                        sr.reflect_member("in", &Outer::in_);
+                        sr.reflect_member("x", &Outer::x_);
+                        sr.require_complete();
+                    }
+                    return true;
+                }();
+                (void)s_once;
+            }
+
+            /** an object's head as the struct printer writes it:
+             *  {"_name_": .., its type keys, and "_id_": @p id (none for 0)
+             **/
+            template <typename T>
+            std::string head(char const * name, int id) {
+                std::string canonical(xo::reflect::type_name<T>());
+                return "{\"_name_\": \"" + std::string(name) + "\""
+                    + ", \"_canonical_type_\": \"" + canonical + "\""
                     + ", \"_short_type_\": \""
-                    + xo::reflect::TypeDescrBase::make_short_name(canonical) + "\"";
+                    + xo::reflect::TypeDescrBase::make_short_name(canonical) + "\""
+                    + (id ? ", \"_id_\": " + std::to_string(id) : std::string());
+            }
+
+            /** occurrences of @p pat in @p s **/
+            std::size_t count(std::string const & s, std::string const & pat) {
+                std::size_t n = 0;
+                for (std::size_t i = s.find(pat); i != std::string::npos; i = s.find(pat, i + 1))
+                    ++n;
+                return n;
             }
 
             /** outcome of running a function in a child process **/
@@ -132,9 +189,8 @@ namespace xo {
             std::stringstream ss;
             print_json.print(a, &ss);
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"Node\"" + node_type_keys()
-                                 + ", \"id\": 1, \"next\": {\"_name_\": \"Node\"" + node_type_keys()
-                                 + ", \"id\": 2, \"next\": null}}"));
+            REQUIRE(ss.str() == (head<Node>("Node", 1) + ", \"id\": 1, \"next\": "
+                                 + head<Node>("Node", 2) + ", \"id\": 2, \"next\": null}}"));
         } /*TEST_CASE(print-json-chain-within-depth-limit)*/
 
         TEST_CASE("print-json-depth-limit-aborts", "[printjson][cycle]") {
@@ -157,47 +213,124 @@ namespace xo {
             REQUIRE(x.stderr_.find("PrintJson: nesting would exceed max_depth (3)") != std::string::npos);
         } /*TEST_CASE(print-json-depth-limit-aborts)*/
 
-        TEST_CASE("print-json-cycle-aborts", "[printjson][cycle]") {
-            /* a -> b -> a.  Until each object prints once (issues/02 step
-             * 3), a cycle nests until the limit -- the default one
+        TEST_CASE("print-json-cycle", "[printjson][cycle]") {
+            /* a -> b -> a: b's next is a, printed already -- a ref */
+            reflect_node();
+
+            PrintJson print_json;
+
+            Node a{1, nullptr};
+            Node b{2, &a};
+            a.next_ = &b;
+
+            std::stringstream ss;
+            print_json.print(a, &ss);
+
+            REQUIRE(ss.str() == (head<Node>("Node", 1) + ", \"id\": 1, \"next\": "
+                                 + head<Node>("Node", 2) + ", \"id\": 2, \"next\": {\"_ref_\": 1}}}"));
+        } /*TEST_CASE(print-json-cycle)*/
+
+        TEST_CASE("print-json-self-loop", "[printjson][cycle]") {
+            reflect_node();
+
+            PrintJson print_json;
+
+            Node a{1, nullptr};
+            a.next_ = &a;
+
+            std::stringstream ss;
+            print_json.print(a, &ss);
+
+            REQUIRE(ss.str() == (head<Node>("Node", 1) + ", \"id\": 1, \"next\": {\"_ref_\": 1}}"));
+        } /*TEST_CASE(print-json-self-loop)*/
+
+        TEST_CASE("print-json-diamond", "[printjson][cycle]") {
+            /* a -> {d, d}: d in full under left, a ref under right */
+            reflect_more();
+
+            PrintJson print_json;
+
+            Fork d{2, nullptr, nullptr};
+            Fork a{1, &d, &d};
+
+            std::stringstream ss;
+            print_json.print(a, &ss);
+
+            REQUIRE(ss.str() == (head<Fork>("Fork", 1) + ", \"id\": 1, \"left\": "
+                                 + head<Fork>("Fork", 2) + ", \"id\": 2, \"left\": null, \"right\": null}"
+                                 + ", \"right\": {\"_ref_\": 2}}"));
+        } /*TEST_CASE(print-json-diamond)*/
+
+        TEST_CASE("print-json-diamond-chain-is-linear", "[printjson][cycle]") {
+            /* 40 diamonds in a row: 2^40 paths, so printing each path in
+             * full would never finish.  Each node once: 41 objects, 40 refs
+             */
+            reflect_more();
+
+            constexpr int n = 40;
+            std::vector<Fork> v(n + 1);
+            for (int i = 0; i <= n; ++i)
+                v[i] = Fork{i, i < n ? &v[i + 1] : nullptr, i < n ? &v[i + 1] : nullptr};
+
+            PrintJson print_json;
+
+            std::stringstream ss;
+            print_json.print(v[0], &ss);
+
+            REQUIRE(count(ss.str(), "\"_id_\"") == n + 1);
+            REQUIRE(count(ss.str(), "\"_ref_\"") == n);
+        } /*TEST_CASE(print-json-diamond-chain-is-linear)*/
+
+        TEST_CASE("print-json-ref-before-print", "[printjson][cycle]") {
+            /* a ref made before its object prints: the object, printing
+             * later, takes the ref's id
              */
             reflect_node();
 
-            ChildOutcome x = run_in_child([]() {
-                PrintJson print_json;
+            PrintJson print_json;
+            Node a{1, nullptr};
 
-                Node a{1, nullptr};
-                Node b{2, &a};
-                a.next_ = &b;
+            std::stringstream ss;
+            json::JsonPrintState state(&print_json, &ss);
 
-                std::stringstream ss;
-                print_json.print(a, &ss);
-            });
+            state.print_ref(&a);
+            ss << " ";
+            state.print(xo::reflect::Reflect::make_tp(&a));
 
-            INFO(x.stderr_.substr(0, 2000));
-            REQUIRE(x.signal_ == SIGABRT);
-            REQUIRE(x.stderr_.find("PrintJson: nesting would exceed max_depth ("
-                                   + std::to_string(PrintJson::c_default_max_depth) + ")")
-                    != std::string::npos);
-        } /*TEST_CASE(print-json-cycle-aborts)*/
+            REQUIRE(ss.str() == ("{\"_ref_\": 1} " + head<Node>("Node", 1)
+                                 + ", \"id\": 1, \"next\": null}"));
+        } /*TEST_CASE(print-json-ref-before-print)*/
 
-        TEST_CASE("print-json-self-loop-aborts", "[printjson][cycle]") {
+        TEST_CASE("print-json-first-member-shares-address", "[printjson][cycle]") {
+            /* in_ is at its Outer's address: part of the Outer, so in full
+             * and without an _id_ -- not a ref to the Outer
+             */
+            reflect_more();
+
+            PrintJson print_json;
+            Outer o{Inner{7}, 8};
+
+            REQUIRE(static_cast<void *>(&o) == static_cast<void *>(&o.in_));
+
+            std::stringstream ss;
+            print_json.print(o, &ss);
+
+            REQUIRE(ss.str() == (head<Outer>("Outer", 1) + ", \"in\": "
+                                 + head<Inner>("Inner", 0) + ", \"v\": 7}, \"x\": 8}"));
+        } /*TEST_CASE(print-json-first-member-shares-address)*/
+
+        TEST_CASE("validate-cycle-terminates", "[printjson][cycle]") {
+            /* validate_tp walks as print_tp does: each object once */
             reflect_node();
 
-            ChildOutcome x = run_in_child([]() {
-                PrintJson print_json;
+            PrintJson print_json;
 
-                Node a{1, nullptr};
-                a.next_ = &a;
+            Node a{1, nullptr};
+            Node b{2, &a};
+            a.next_ = &b;
 
-                std::stringstream ss;
-                print_json.print(a, &ss);
-            });
-
-            INFO(x.stderr_.substr(0, 2000));
-            REQUIRE(x.signal_ == SIGABRT);
-            REQUIRE(x.stderr_.find("PrintJson: nesting would exceed max_depth (") != std::string::npos);
-        } /*TEST_CASE(print-json-self-loop-aborts)*/
+            REQUIRE_NOTHROW(print_json.validate_tp(xo::reflect::Reflect::make_tp(&a)));
+        } /*TEST_CASE(validate-cycle-terminates)*/
 
     } /*namespace ut*/
 } /*namespace xo*/

@@ -7,6 +7,7 @@
 #include "webserver_json.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/printjson/JsonMembers.hpp>
+#include <xo/printjson/JsonObject.hpp>
 #include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>  /* display_string */
@@ -142,36 +143,36 @@ namespace xo {
         void
         WebsocketSinkImpl::print_json(json::JsonPrintState & state) const
         {
-            std::ostream * p_os = state.p_os();
-
-            *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
-                  << ", " << json::type_keys(Reflect::require<WebsocketSinkImpl>())
-                  << ", " << quot("id") << ": " << quot(json_id(this))
-                  /* the router's subscription slot, plus whatever the
-                   * application holds (e.g. a source it is attached to)
-                   */
-                  << ", " << quot("refcount") << ": " << this->reference_counter()
-                  << ", " << quot("stream") << ": " << quot(this->stream_name_)
-                  << ", " << quot("sub_id") << ": " << this->sub_id_
-                  /* read without a lock: a source may be sending now */
-                  << ", " << quot("seq") << ": " << this->n_in_ev_
-                  /* held, not owned: printed in full under its session */
-                  << ", " << quot("sender") << ": {" << quot("ref") << ": "
-                  << quot(json_id(this->sender_.get())) << "}";
-
-            /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
-             * sender is printed in full under its session -- here a ref
+            /* the sender: held, not owned -- printed in full under its
+             * session, as its actual type, so a ref by most-derived address
              */
-            json::JsonMembers mem(state);
-            mem.member_ref<rp<WsSender>>("sender_", dynamic_cast<void const *>(this->sender_.get()))
-                .member("pjson_", this->pjson_)
+            void const * sender = dynamic_cast<void const *>(this->sender_.get());
+
+            json::JsonObject obj = state.open_object("WebsocketSink",
+                                                     Reflect::require<WebsocketSinkImpl>());
+
+            /* refcount: the router's subscription slot, plus whatever the
+             * application holds (e.g. a source it is attached to).
+             * seq: read without a lock -- a source may be sending now
+             */
+            obj.key("refcount", this->reference_counter())
+                .key("stream", this->stream_name_)
+                .key("sub_id", this->sub_id_)
+                .key("seq", this->n_in_ev_)
+                .key_ref("sender", sender);
+
+            /* chosen C++ members (.xo-backlog/xo-websock/issues/13) */
+            obj.members()
+                .member_ref<rp<WsSender>>("sender_", sender)
+                /* the server's, shared: printed in full in the server's members */
+                .member_ref<rp<PrintJson>>("pjson_", this->pjson_.get())
                 .member("stream_name_", this->stream_name_)
                 .member("sub_id_", this->sub_id_)
                 /* read without a lock: a source may be sending now */
-                .member("n_in_ev_", this->n_in_ev_);
-            mem.end();
+                .member("n_in_ev_", this->n_in_ev_)
+                .end();
 
-            *p_os << "}";
+            obj.close();
         } /*print_json*/
 
         TaggedRcptr
@@ -185,14 +186,13 @@ namespace xo {
         void
         WebsocketSink::print_json(json::JsonPrintState & state) const
         {
-            std::ostream * p_os = state.p_os();
+            json::JsonObject obj = state.open_object("WebsocketSink",
+                                                     Reflect::require<WebsocketSink>());
 
-            *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
-                  << ", " << json::type_keys(Reflect::require<WebsocketSink>())
-                  << ", " << quot("id") << ": " << quot(json_id(this))
-                  << ", " << quot("refcount") << ": " << this->reference_counter()
-                  << ", " << quot("stream") << ": " << quot(this->stream_name())
-                  << "}";
+            obj.key("refcount", this->reference_counter())
+                .key("stream", this->stream_name());
+
+            obj.close();
         } /*print_json*/
 
         rp<WebsocketSink>

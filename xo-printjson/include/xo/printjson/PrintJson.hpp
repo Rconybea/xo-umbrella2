@@ -22,6 +22,12 @@ namespace xo {
          *  See also PrintJsonSingleton
          *
          *  Contract:
+         *  - any object graph, cycles and sharing included, prints in output
+         *    linear in its size: each object (a value printed as a json
+         *    object) prints in full once, with "_id_": n, and as
+         *    {"_ref_": n} everywhere else.  First encounter wins, unless a
+         *    printer places it explicitly (JsonMembers::member_ref).
+         *    See JsonPrintState
          *  - a print nests at most max_depth() deep.
          *    Past that it prints a diagnosis with backtrace, and aborts.
          *  - a json printer recurses only through the JsonPrintState it is
@@ -108,7 +114,8 @@ namespace xo {
             } /*print_obj*/
 
             /** Walk everything @p tp reaches WITHOUT printing, throwing on the
-             *  same condition @ref print_tp would.
+             *  same condition @ref print_tp would: print_tp's own traversal,
+             *  output discarded.
              *
              *  Exists because that throw happens mid-traversal, so a consumer
              *  is left holding however much was already written.  Validate
@@ -119,8 +126,8 @@ namespace xo {
              *  - it is only meaningful because traversal is synchronous;
              *    nothing may mutate the graph between the two passes
              *
-             *  It does NOT make printing total.  A CYCLIC graph defeats both
-             *  passes alike -- see .xo-backlog/xo-printjson/issues/02.
+             *  A cyclic graph is fine: each object is visited once, as it
+             *  prints once (.xo-backlog/xo-printjson/issues/02).
              **/
             void validate_tp(TaggedPtr tp) const;
 

@@ -7,17 +7,18 @@
 //   <- {"stream": "/introspect", "sub_id": N, "seq": k,
 //       "event": {"server": <Webserver json>}}
 //
-// Webserver json: {id, refcount, listen_port, state,
-//            endpoints: [{id, refcount, kind, stem, pattern, has_receive}],
-//            sessions: [{id, session_id,
-//                        sender: {id, refcount, session_id, open},
-//                        subscriptions: [{id, sub_id, stream,
-//                                         endpoint: {ref},
-//                                         sink: {id, refcount, stream, sub_id,
-//                                                seq, sender: {ref}}}]}]}.
+// Webserver json: {_id_, refcount, listen_port, state,
+//            endpoints: [{_id_, refcount, kind, stem, pattern, has_receive}],
+//            sessions: [{_id_, session_id,
+//                        sender: {_id_, refcount, session_id, open},
+//                        subscriptions: [{_id_, sub_id, stream,
+//                                         endpoint: {_ref_},
+//                                         sink: {_id_, refcount, stream, sub_id,
+//                                                seq, sender: {_ref_}}}]}]}.
 //
-// Each object is printed in full once; elsewhere as {ref: id}.  The page
-// joins refs to objects by id.
+// Each object is printed in full once, with "_id_": n; elsewhere as
+// {"_ref_": n}.  Ids are numbers, 1, 2, .. within one snapshot
+// (.xo-backlog/xo-printjson/issues/02).  The page joins refs to objects by id.
 //
 // Source links (.xo-backlog/xo-websock/issues/12): every object carries
 // _canonical_type_, its C++ type's canonical name (and _short_type_, for
@@ -202,7 +203,7 @@ function layout(event) {
             const sid = `${id}:sub:${sub.sub_id}`;
             const sink = sub.sink || {};
             // the sink's sender should be this session's: flag it if not
-            const astray = s.sender && sink.sender && sink.sender.ref !== s.sender.id;
+            const astray = s.sender && sink.sender && sink.sender._ref_ !== s.sender._id_;
 
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${sub.sub_id} · ${sub.stream}`,
@@ -236,7 +237,7 @@ function layout(event) {
 // show) toggles open on left-click / Enter: a row per member,
 //   name: Type [metatype] = value
 // A member whose value is an object with members of its own toggles open in
-// place, indented.  A {"ref": id} value is an edge from its row to that
+// place, indented.  A {"_ref_": id} value is an edge from its row to that
 // object's box.  Clicking a row's type opens its source.
 
 /** box ids, and member paths ("<box>/<member>/<member>.."), shown open;
@@ -248,7 +249,7 @@ const expanded = new Set();
 //
 // The state is a set of WANTED EDGES; the boxes drawn follow from it.
 //
-// A box's REF EDGES: one per {"ref": id} anywhere in its members -- open or
+// A box's REF EDGES: one per {"_ref_": id} anywhere in its members -- open or
 // not -- to the box drawing that object; keyed by the ref's row key
 // ("<box>/<member>/..").  A box's CHILDREN are the boxes it owns ("link" /
 // "owns": server -> endpoints, sessions; session -> sender, subscriptions;
@@ -444,7 +445,7 @@ function all_refs(members, path, label, out, type = null) {
         const t = m._canonical_type_ || type;
 
         if (is_ref(v)) {
-            out.push({key, label: lab, ref: v.ref, ref_kind: ref_kind(t)});
+            out.push({key, label: lab, ref: v._ref_, ref_kind: ref_kind(t)});
         } else if (Array.isArray(v)) {
             all_refs(v.map((x, i) => ({_name_: `[${i}]`, _value_: x})), key, lab, out, t);
         } else if (is_ref_map(v)) {
@@ -665,10 +666,10 @@ let shown_box_ids = new Set();
 /** box id -> its label, every box this draw (for menu entries) **/
 let box_label = new Map();
 
-/** a json object that is a ref: exactly {"ref": id} **/
+/** a json object that is a ref: exactly {"_ref_": id} **/
 function is_ref(v) {
     return !!v && typeof v === "object" && !Array.isArray(v)
-        && Object.keys(v).length === 1 && "ref" in v;
+        && Object.keys(v).length === 1 && "_ref_" in v;
 }
 
 /** a json object that is a map of refs: no _name_, every value a ref or
@@ -689,8 +690,8 @@ function note_nested(members, box_id) {
         if (Array.isArray(v)) {
             v.forEach(walk);
         } else if (v && typeof v === "object" && !is_ref(v)) {
-            if (typeof v.id === "string" && "_name_" in v && !box_of_id.has(v.id))
-                box_of_id.set(v.id, box_id);
+            if (typeof v._id_ === "number" && "_name_" in v && !box_of_id.has(v._id_))
+                box_of_id.set(v._id_, box_id);
             if (Array.isArray(v._members_))
                 v._members_.forEach(m => walk(m._value_));
             else if (!("_name_" in v))
@@ -751,15 +752,15 @@ function member_rows(members, depth, path, out) {
                 }
             } else if (is_ref(v)) {
                 row.cls = "ref";
-                row.ref = v.ref;
+                row.ref = v._ref_;
                 // a box it refers to, which can be shown / hidden from here
-                const tb = box_of_id.get(v.ref);
+                const tb = box_of_id.get(v._ref_);
                 row.ref_box = (tb !== undefined && tb !== "server") ? tb : null;
                 // "(→)" after its ▸ / ▾: this triangle shows another box,
                 // not rows in place.  What it refers to is in the tooltip
-                val = !box_of_id.has(v.ref) ? "(→ not drawn)"
+                val = !box_of_id.has(v._ref_) ? "(→ not drawn)"
                     : row.ref_box ? " (→)" : "(→)";
-                row.ref_tip = ref_tooltip(v.ref);
+                row.ref_tip = ref_tooltip(v._ref_);
             } else if (is_ref_map(v)) {
                 // a map to objects printed elsewhere: a row per key
                 row.expandable = true;
@@ -1248,7 +1249,8 @@ async function draw_aux(event) {
     draw_legend(all);
 
     // every box -- shown or not -- for joining refs; only shown ones drawn
-    box_of_id = new Map(all.nodes.filter(d => d.obj && d.obj.id).map(d => [d.obj.id, d.id]));
+    box_of_id = new Map(all.nodes.filter(d => d.obj && d.obj._id_ !== undefined)
+                        .map(d => [d.obj._id_, d.id]));
     own_box_ids = new Set(box_of_id.keys());
     for (const d of all.nodes)
         if (d.obj)
@@ -1909,7 +1911,8 @@ function menu_items(d) {
         ["Open source", () => window.open(s.href, "_blank"), no_source],
         ["Show JSON", () => show_detail(d), d.obj ? null : "no object"],
         ["Copy type name", () => copy_text(d.type), d.type ? null : "no _canonical_type_ reported"],
-        ["Copy id", () => copy_text(d.obj.id), (d.obj && d.obj.id) ? null : "no id"],
+        ["Copy id", () => copy_text(String(d.obj._id_)),
+         (d.obj && d.obj._id_ !== undefined) ? null : "no id"],
     ];
 }
 

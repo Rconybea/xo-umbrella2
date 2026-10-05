@@ -232,7 +232,7 @@ namespace xo {
             /* the receiver_ member refers to it */
             Json::Value const & m = eps[1]["_members_"];
             REQUIRE(m[7]["_name_"].asString() == "receiver_");
-            REQUIRE(m[7]["_value_"]["ref"].asString() == r["id"].asString());
+            REQUIRE(m[7]["_value_"]["_ref_"].asInt() == r["_id_"].asInt());
         }
 
         TEST_CASE("webserver-prints-as-json", "[websock][Webserver][json]")
@@ -257,7 +257,7 @@ namespace xo {
             /* the actual type, via self_tp() -- not the interface */
             REQUIRE(srv["_canonical_type_"].asString() == "xo::web::WebserverImpl");
             REQUIRE(srv["_short_type_"].asString() == "WebserverImpl");
-            REQUIRE(srv["id"].isString());
+            REQUIRE(srv["_id_"].isInt());
             REQUIRE(srv["refcount"].asUInt() >= 1);
             REQUIRE(srv["listen_port"].asInt() == 0);
             REQUIRE(srv["state"].asString() == "stopped");
@@ -318,7 +318,7 @@ namespace xo {
                  * the very endpoint printed in the server's list
                  */
                 Json::Value const & ur = mem[4]["_value_"];
-                REQUIRE(ur["id"].isString());
+                REQUIRE(ur["_id_"].isInt());
                 REQUIRE(ur["_members_"][0]["_name_"].asString() == "http_map_");
                 REQUIRE(ur["_members_"][1]["_name_"].asString() == "stream_map_");
 
@@ -328,7 +328,7 @@ namespace xo {
                         = ur["_members_"][ep["kind"].asString() == "http" ? 0 : 1]["_value_"];
 
                     INFO("stem " << ep["stem"].asString());
-                    REQUIRE(map[ep["stem"].asString()]["ref"].asString() == ep["id"].asString());
+                    REQUIRE(map[ep["stem"].asString()]["_ref_"].asInt() == ep["_id_"].asInt());
                     ++n_refs;
                 }
                 REQUIRE(n_refs == ur["_members_"][0]["_value_"].size()
@@ -336,7 +336,7 @@ namespace xo {
 
                 /* the session table: an id; no session yet -- ids from 1 */
                 Json::Value const & st = mem[5]["_value_"];
-                REQUIRE(st["id"].isString());
+                REQUIRE(st["_id_"].isInt());
                 REQUIRE(st["_members_"][0]["_name_"].asString() == "next_id_");
                 REQUIRE(st["_members_"][0]["_value_"].asUInt64() == 1);
                 REQUIRE(st["_members_"][1]["_name_"].asString() == "session_map_");
@@ -412,8 +412,8 @@ namespace xo {
             /* identity and refcount: distinct objects, each held only by the
              * router's map (no subscriptions on an idle server)
              */
-            REQUIRE(eps[0]["id"].isString());
-            REQUIRE(eps[0]["id"].asString() != eps[1]["id"].asString());
+            REQUIRE(eps[0]["_id_"].isInt());
+            REQUIRE(eps[0]["_id_"].asInt() != eps[1]["_id_"].asInt());
             REQUIRE(eps[0]["refcount"].asUInt() == 1);
             REQUIRE(eps[1]["refcount"].asUInt() == 1);
 
