@@ -145,7 +145,8 @@ const elk = new ELK();
  *  "link"  the server's endpoints and sessions
  *  "owns"  a session's sender and subscriptions; an endpoint's receiver;
  *          a subscription's sink
- *  "uses"  a subscription -> the stream endpoint it holds
+ *  (a subscription's endpoint is no edge here: its endpoint_ member's
+ *  ref edge shows it)
  **/
 function layout(event) {
     const snap = event.server;
@@ -158,11 +159,8 @@ function layout(event) {
                 label: `Webserver :${snap.listen_port} (${snap.state})`,
                 type: snap._canonical_type_, obj: snap});
 
-    const endpoint_node = {};   // endpoint object id -> node id
-
     for (const ep of (snap.endpoints || [])) {
         const id = `${ep.kind}:${ep.stem}`;
-        endpoint_node[ep.id] = id;
         nodes.push({id: id, kind: ep.kind, label: ep.pattern,
                     type: ep._canonical_type_, obj: ep});
         edge("server", id, "link");
@@ -212,11 +210,6 @@ function layout(event) {
                             type: sub.sink._canonical_type_, obj: sub.sink, small: true});
                 edge(sid, kid, "owns");
             }
-
-            // joined BY ID: the endpoint object this subscription holds
-            const ep = sub.endpoint && endpoint_node[sub.endpoint.ref];
-            if (ep)
-                edge(sid, ep, "uses");
         }
     }
 
@@ -1510,8 +1503,8 @@ async function draw_aux(event) {
                     : []),
             ],
         })),
-        // ownership (link, owns) decides top-to-bottom; uses / member
-        // edges follow it.  Without this an expanded box's ref edge could
+        // ownership (link, owns) decides top-to-bottom; member edges
+        // follow it.  Without this an expanded box's ref edge could
         // invert the layering -- e.g. a session's router's url_router_ (in
         // the server box) put the session above the server
         edges: edges.map((e, i) => ({
@@ -1632,7 +1625,7 @@ function define_arrowheads(svg) {
     // a member edge's colour is its ref kind's (index.html: --edge-<kind>)
     const kind_colour = k => `var(--edge-${k})`;
     const ref_kinds = ["includes", "owns", "shares", "refers"];
-    const arrows = [["hot", "#e0730b"], ["uses", "#3c8a4f"], ["own", "#999"],
+    const arrows = [["hot", "#e0730b"], ["own", "#999"],
                     ...ref_kinds.map(k => [k, kind_colour(k)])];
     const defs = svg.selectAll(":scope > defs.arrows").data([0]).join("defs").attr("class", "arrows");
     defs.selectAll("marker.arrow").data(arrows, k => k[0])
