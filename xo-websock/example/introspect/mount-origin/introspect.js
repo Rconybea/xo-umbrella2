@@ -123,16 +123,12 @@ refresh_btn.onclick = refresh;
 document.getElementById("show-all").onclick = () => show_all_children(true);
 document.getElementById("hide-all").onclick = () => show_all_children(false);
 
-/** member rows show their types inline -- name: Type [metatype] = value --
- *  else just name = value, the type on the name's tooltip and row menu
+/** ids of the boxes whose member rows show their types inline -- name: Type
+ *  [metatype] = value -- set from each box's menu ("Show types"); other
+ *  boxes show name = value, the type on the name's tooltip and row menu.
+ *  Kept across refreshes and collapse/expand, like `expanded`
  **/
-let show_types = false;
-
-document.getElementById("show-types").onchange = (ev) => {
-    show_types = ev.target.checked;
-    if (last_event)
-        draw(last_event);
-};
+const typed_boxes = new Set();
 
 /** the legend is drawn (checkbox "legend"); hidden, it reserves no column
  *  for Fit and the like
@@ -1358,9 +1354,10 @@ async function draw_aux(event) {
         .text(d => d.kids_open ? "hide its children"
               : `show its children (${d.n_hidden} of ${d.n_children} hidden)`);
 
-    // the member rows: name = value; with "types", name: Type [metatype] = value
+    // the member rows: name = value; with types shown, name: Type [metatype] = value
     node.select(":scope > g.rows").each(function (d) {
         const box_el = this.parentNode;
+        const show_types = typed_boxes.has(d.id);
         const rows = d3.select(this).selectAll("text.row")
               .data(d.rows, r => r.key)
               .join(enter => enter.append("text").property("__arriving", true).style("opacity", 0));
@@ -1387,42 +1384,47 @@ async function draw_aux(event) {
             const typed = !!r.m._canonical_type_;   // an array element has no declared type
             const s = typed ? source_of(r.m._canonical_type_) : null;
 
+            // types replace the value: name: Type [metatype], a ref row
+            // keeping its arrow after; an element row has no declared type,
+            // so keeps its value
+            const as_type = typed && show_types;
+            const tip = row_tooltip(r, as_type);
+
             // the name: hover for its type; ctrl/cmd-click to open its source
             t.append("tspan")
                 .attr("class", "mname" + (s && s.href ? " linked" : ""))
-                .text(typed && show_types ? `${r.m._name_}: ` : r.m._name_)
+                .text(r.m._name_)
                 .on("click", (ev) => {
                     if ((ev.ctrlKey || ev.metaKey) && s && s.href) {
                         ev.stopPropagation();
                         window.open(s.href, "_blank");
                     }
                 })
-                .append("title").text(row_tooltip(r));
+                .append("title").text(tip);
 
-            if (typed && show_types) {
+            // the separator before the value (or type), its x the row's
+            // alignment column
+            t.append("tspan").attr("class", "mval meq").text(row_sep);
+            // opens in place: its triangle, a button of its own (see tri_buttons)
+            if (r.tri)
+                t.append("tspan").attr("class", "tri xtoggle").text(r.tri);
+            append_ref_toggle(t, r);
+            if (as_type) {
                 t.append("tspan")
                     .attr("class", "mtype" + (s && s.href ? " linked" : ""))
-                    .text(r.m._short_type_ || r.m._canonical_type_)
+                    .text((r.tri || r.ref_box ? " " : "") + (r.m._short_type_ || r.m._canonical_type_))
                     .on("click", (ev) => {
                         ev.stopPropagation();
                         if (s && s.href)
                             window.open(s.href, "_blank");
                     })
-                    .append("title").text(row_tooltip(r));
+                    .append("title").text(tip);
                 t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             }
-
-            // the separator before the value, its x the row's alignment
-            // column: "name: value"; with types, "name: Type [metatype] =
-            // value" (a second ":" would be ambiguous there) -- every row
-            // of the types view, element rows included, so they match
-            t.append("tspan").attr("class", "mval meq").text(show_types ? " = " : row_sep);
-            // opens in place: its triangle, a button of its own (see tri_buttons)
-            if (r.tri)
-                t.append("tspan").attr("class", "tri xtoggle").text(r.tri);
-            append_ref_toggle(t, r);
-            if (r.val !== "") {   // a struct that opens: its triangle is all
-                const mv = t.append("tspan").attr("class", "mval").text(r.val);
+            const val = !as_type ? r.val
+                  : r.cls === "ref" ? " " + r.val.trimStart() : "";
+            if (val !== "") {   // a struct that opens: its triangle is all
+                const mv = t.append("tspan").attr("class", "mval").text(val);
                 if (r.ref_tip)
                     mv.append("title").text(r.ref_tip);
             }
@@ -1508,7 +1510,7 @@ async function draw_aux(event) {
         // x0 + row_indent * n, x0 the least that clears every row's name.
         // Names are right-justified against it: a row's text starts at its
         // column less the width of what precedes the separator (its name;
-        // with "types", name: Type [metatype])
+        // with types shown, name: Type [metatype])
         let x0 = null;
         texts.each(function (r) {
             r.eq_natural = eq_x(this);   // where the separator falls, unaligned
@@ -1867,6 +1869,24 @@ function copy_text(text) {
     return Promise.resolve();
 }
 
+/** box @p d's menu item to show or hide its member rows' types; disabled
+ *  while it draws no member rows (collapsed, say), where the change would
+ *  not show
+ **/
+function types_item(d) {
+    const on = typed_boxes.has(d.id);
+    return [on ? "Hide types" : "Show types",
+            () => {
+                if (on)
+                    typed_boxes.delete(d.id);
+                else
+                    typed_boxes.add(d.id);
+                if (last_event)
+                    draw(last_event);
+            },
+            (d.rows && d.rows.length) ? null : "no member rows shown"];
+}
+
 /** the menu's items for box @p d: [label, action, reason-if-disabled] **/
 function menu_items(d) {
     const s = source_of(d.type);
@@ -1878,6 +1898,7 @@ function menu_items(d) {
         [expanded.has(d.id) && d.expandable ? "Collapse" : "Expand",
          () => toggle(d.id), d.expandable ? null : "no members shown by its printer"],
         ...children_items(d),
+        types_item(d),
         [`Hide ${d.label}`, () => { hide_box(d.id); redraw(); },
          d.id === "server" ? "the Webserver box is always shown" : null],
         // one entry per child, in ownership order: Hide if drawn, else Show
@@ -2019,14 +2040,17 @@ function ref_tooltip(id) {
 }
 
 /** member row @p r's tooltip: its type, metatype, canonical type and
- *  source location -- what the row no longer shows inline
+ *  source location -- what the row does not show inline; with
+ *  @p as_type (the row shows its type in place of its value), its value
+ *  first -- not for a ref row, which keeps its arrow, or a struct that opens
  **/
-function row_tooltip(r) {
+function row_tooltip(r, as_type) {
     if (!r.m._canonical_type_)
         return r.m._name_;
 
     const s = source_of(r.m._canonical_type_);
-    return `${r.m._name_}: ${r.m._short_type_ || r.m._canonical_type_}  [${r.m._metatype_ || "?"}]`
+    return (as_type && r.cls !== "ref" && r.val.trim() ? `= ${r.val.trim()}\n` : "")
+        + `${r.m._name_}: ${r.m._short_type_ || r.m._canonical_type_}  [${r.m._metatype_ || "?"}]`
         + `\n${r.m._canonical_type_}`
         + (s ? `\n${s.file}:${s.line}` : "\n(no source location)")
         + (s && s.href ? "\nctrl-click: open source" : "");
