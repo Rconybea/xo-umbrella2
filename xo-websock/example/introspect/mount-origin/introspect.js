@@ -1619,35 +1619,42 @@ async function draw_aux(event) {
                 .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.labels.join(", ")}`
                                     + ` (${e.ref_kind})`);
         });
+    order_edges(edge_gs);
 }
 
 /** arrowhead markers, one per edge colour (index.html picks one per edge
- *  class with marker-end): a filled triangle, its tip at the edge's end,
+ *  class with marker-end), and the member edges' exit markers: a filled triangle, its tip at the edge's end,
  *  sized in drawing units -- the hot edge's wider stroke doesn't grow it
  **/
 const start_scale = 0.75;   // exit markers: drawn at this fraction of their 12x10 viewBox
 
 function define_arrowheads(svg) {
-    const kinds = [["member", "#7a4fa0"], ["hot", "#e0730b"], ["uses", "#3c8a4f"], ["own", "#999"]];
+    // a member edge's colour is its ref kind's (index.html: --edge-<kind>)
+    const kind_colour = k => `var(--edge-${k})`;
+    const ref_kinds = ["includes", "owns", "shares", "refers"];
+    const arrows = [["hot", "#e0730b"], ["uses", "#3c8a4f"], ["own", "#999"],
+                    ...ref_kinds.map(k => [k, kind_colour(k)])];
     const defs = svg.selectAll(":scope > defs.arrows").data([0]).join("defs").attr("class", "arrows");
-    defs.selectAll("marker.arrow").data(kinds, k => k[0])
+    defs.selectAll("marker.arrow").data(arrows, k => k[0])
         .join(enter => enter.append("marker").attr("class", "arrow")
               .attr("id", k => `arrow-${k[0]}`)
               .attr("viewBox", "0 0 10 10").attr("refX", 10).attr("refY", 5)
               .attr("markerWidth", 9).attr("markerHeight", 9)
               .attr("markerUnits", "userSpaceOnUse").attr("orient", "auto")
-              .call(m => m.append("path").attr("d", "M0,0 L10,5 L0,10 Z").attr("fill", k => k[1])));
+              .call(m => m.append("path").attr("d", "M0,0 L10,5 L0,10 Z").style("fill", k => k[1])));
 
     // where a member edge leaves its holder: how the holder relates to the
     // target -- ■ includes (by value), ◆ owns, ○ shares; refers: none.
-    // Drawn from the exit point outward, along the edge
+    // Drawn from the exit point outward, along the edge, in the edge's
+    // colour (orange when hot)
     const shapes = [["includes", "M0,1 L8,1 L8,9 L0,9 Z", true],
                     ["owns", "M0,5 L6,1.5 L12,5 L6,8.5 Z", true],
                     ["shares", "M1,5 A4,4 0 1 1 9,5 A4,4 0 1 1 1,5 Z", false]];
     const starts = [];
-    for (const [name, colour] of [["member", "#7a4fa0"], ["hot", "#e0730b"]])
-        for (const [kind, d, filled] of shapes)
-            starts.push({id: `start-${kind}-${name}`, d, colour, filled});
+    for (const [kind, d, filled] of shapes) {
+        starts.push({id: `start-${kind}`, d, colour: kind_colour(kind), filled});
+        starts.push({id: `start-${kind}-hot`, d, colour: "#e0730b", filled});
+    }
     defs.selectAll("marker.start").data(starts, x => x.id)
         .join(enter => enter.append("marker").attr("class", "start")
               .attr("id", x => x.id)
@@ -1656,8 +1663,8 @@ function define_arrowheads(svg) {
               .attr("markerUnits", "userSpaceOnUse").attr("orient", "auto")
               // the outline as wide as the edge's, whatever the scale
               .call(m => m.append("path").attr("d", x => x.d)
-                    .attr("fill", x => x.filled ? x.colour : "#fafafa")
-                    .attr("stroke", x => x.colour).attr("stroke-width", 1.4 / start_scale)));
+                    .style("fill", x => x.filled ? x.colour : "#fafafa")
+                    .style("stroke", x => x.colour).attr("stroke-width", 1.4 / start_scale)));
 }
 
 const edge_corner_r = 6;   // an edge's bends: rounded, this radius at most
@@ -1721,6 +1728,21 @@ function highlight_ref(row_keys, on) {
     d3.selectAll("path.edge.member").filter(e => e && e.row_keys.some(k => row_keys.includes(k)))
         .classed("hot", on)
         .each(function () { if (on) this.parentNode.parentNode.appendChild(this.parentNode); });   // its group on top
+    if (!on)
+        order_edges(d3.selectAll("g.edges > g.edge-g"));   // back in rank order
+}
+
+/** an edge's stacking rank: member edges over the rest, and among them the
+ *  strongest ref kind on top -- where edges share a box's entry port, the
+ *  shared stretch and its arrowhead show the closest relation
+ **/
+const edge_rank = {refers: 1, shares: 2, owns: 3, includes: 4};
+
+/** put edge groups @p edge_gs in stacking order, by edge_rank (stable:
+ *  equal ranks keep their order)
+ **/
+function order_edges(edge_gs) {
+    edge_gs.sort((a, b) => (edge_rank[a.ref_kind] || 0) - (edge_rank[b.ref_kind] || 0));
 }
 
 // ----- context menu -----------------------------------------------------

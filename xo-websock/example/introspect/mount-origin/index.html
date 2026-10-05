@@ -63,16 +63,20 @@
     text.row .tri { font-size: 125%; fill: #555; cursor: pointer; }
     rect.tbtn { fill: #fff; fill-opacity: 0; cursor: pointer; }
     rect.tbtn.hot { fill-opacity: 0.85; }
-    path.edge.member { stroke: #7a4fa0; stroke-width: 1.4px; marker-end: url(#arrow-member); }
-    path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; marker-end: url(#arrow-hot); }
+    /* a member edge's colour: its ref kind, darker the closer the holder
+       holds what it names -- includes black .. refers light grey */
+    :root { --edge-includes: #1a1a1a; --edge-owns: #555555; --edge-shares: #8c8c8c; --edge-refers: #c4c4c4; }
+    path.edge.member { stroke: var(--edge-refers); stroke-width: 1.4px; marker-end: url(#arrow-refers); }
     /* where a member edge leaves its holder: ■ includes, ◆ owns, ○ shares; refers: none */
-    :is(path.edge.member, path.sample).from-includes { marker-start: url(#start-includes-member); }
-    :is(path.edge.member, path.sample).from-owns     { marker-start: url(#start-owns-member); }
-    :is(path.edge.member, path.sample).from-shares   { marker-start: url(#start-shares-member); }
+    :is(path.edge.member, path.sample).from-includes { stroke: var(--edge-includes); marker-end: url(#arrow-includes); marker-start: url(#start-includes); }
+    :is(path.edge.member, path.sample).from-owns     { stroke: var(--edge-owns);     marker-end: url(#arrow-owns);     marker-start: url(#start-owns); }
+    :is(path.edge.member, path.sample).from-shares   { stroke: var(--edge-shares);   marker-end: url(#arrow-shares);   marker-start: url(#start-shares); }
+    :is(path.edge.member, path.sample).from-refers   { stroke: var(--edge-refers);   marker-end: url(#arrow-refers); }
+    path.edge.member.hot { stroke: #e0730b; stroke-width: 3px; marker-end: url(#arrow-hot); }
     path.edge.member.hot.from-includes { marker-start: url(#start-includes-hot); }
     path.edge.member.hot.from-owns     { marker-start: url(#start-owns-hot); }
     path.edge.member.hot.from-shares   { marker-start: url(#start-shares-hot); }
-    g.legend path.sample { fill: none; stroke: #7a4fa0; stroke-width: 1.4px; }   /* an edge kind's sample */
+    g.legend path.sample { fill: none; stroke-width: 1.4px; }   /* an edge kind's sample: its colour and markers */
     text.row.hot .mname { fill: #e0730b; }
     .node:focus { outline: none; }
     .node.leaving { pointer-events: none; }   /* fading out: not clickable */
