@@ -28,6 +28,8 @@
 #include <cctype>
 #include <condition_variable>
 #include <cstdlib>
+#include <fstream>
+#include <functional>
 #include <future>
 #include <memory>
 #include <mutex>
@@ -732,6 +734,129 @@ namespace xo {
 
             REQUIRE(wait_until([&] { return n_session() == 1; }));
             REQUIRE(server_json()["sessions"][0]["session_id"].asUInt64() == second_id);
+        }
+
+        namespace {
+            /** values in a server snapshot that differ from run to run:
+             *  replaced by "<redacted>" so the rest can be compared exactly.
+             *  Top-level keys by name; _members_ entries by member name
+             **/
+            void redact(Json::Value & v) {
+                static const std::vector<std::string> c_keys = {"listen_port"};
+                static const std::vector<std::string> c_members = {
+                    "listen_port_",    /* the port the kernel chose */
+                    "port_",           /* the config's copy: 0, or the port chosen */
+                    "mount_origin_",   /* a path */
+                    "output_buf_",     /* an address, or null mid-write */
+                };
+
+                if (v.isArray()) {
+                    for (Json::Value & x : v)
+                        redact(x);
+                } else if (v.isObject()) {
+                    for (std::string const & k : c_keys)
+                        if (v.isMember(k))
+                            v[k] = "<redacted>";
+                    if (v.isMember("_value_") && v.isMember("_name_")) {
+                        std::string const name = v["_name_"].asString();
+                        for (std::string const & m : c_members)
+                            if (name == m)
+                                v["_value_"] = "<redacted>";
+                    }
+                    for (std::string const & k : v.getMemberNames())
+                        redact(v[k]);
+                }
+            }
+
+            /** @p text, styled for a line-per-field diff **/
+            std::string styled(Json::Value const & v) {
+                Json::StreamWriterBuilder wb;
+                wb["indentation"] = "  ";
+                return Json::writeString(wb, v) + "\n";
+            }
+
+            /** the checked-in golden file @p name, under utest/golden/ **/
+            std::string golden_path(std::string const & name) {
+                return std::string(XO_WEBSOCK_UTEST_SOURCE_DIR) + "/golden/" + name;
+            }
+
+            std::string read_file(std::string const & path) {
+                std::ifstream in(path);
+                std::stringstream ss;
+                ss << in.rdbuf();
+                return ss.str();
+            }
+        }
+
+        TEST_CASE("live-server-snapshot-matches-golden", "[websock][live][json][golden]")
+        {
+            /* the whole server, as introspection prints it, against a
+             * checked-in expectation: a printer change shows as a diff to
+             * review (.xo-backlog/xo-websock/issues/14).  Every websock
+             * printer appears: server, config, url router, endpoints (one
+             * with a receiver), session table, sessions, senders, routers,
+             * a subscription and its sink.
+             *
+             * To bless a deliberate change:
+             *   XO_UPDATE_GOLDEN=1 utest.websock.live "[golden]"
+             * rewrites utest/golden/server-snapshot.json in the source tree
+             */
+            auto box = std::make_shared<SinkBox>();
+
+            LiveServer srv;
+            srv.websrv_->register_stream_endpoint(box_descr("/fw", box));
+            srv.websrv_->register_http_endpoint
+                (HttpEndpointDescr("/status",
+                                   [](HttpRequest const &) { return HttpResponse::json("{}"); }));
+
+            std::int32_t port = srv.start();
+            REQUIRE(port > 0);
+
+            auto server_json = [&srv] {
+                Webserver * server = srv.websrv_.get();
+                std::stringstream ss;
+                PrintJsonSingleton::instance()->print(server, &ss);
+                return parse(ss.str());
+            };
+
+            /* two sessions, the second subscribed: wait on each step, so
+             * the snapshot is of a settled state
+             */
+            WsTestClient first(port);
+            REQUIRE(first.wait_connected(c_timeout));
+            REQUIRE(wait_until([&] { return server_json()["sessions"].size() == 1; }));
+
+            WsTestClient second(port);
+            REQUIRE(second.wait_connected(c_timeout));
+            REQUIRE(wait_until([&] { return server_json()["sessions"].size() == 2; }));
+
+            second.send(R"({"cmd": "subscribe", "stream": "/fw"})");
+            REQUIRE(second.wait_received(1, c_timeout));
+            REQUIRE(box->wait_sink(0));
+
+            Json::Value snap = server_json();
+            redact(snap);
+            std::string const actual = styled(snap);
+
+            std::string const path = golden_path("server-snapshot.json");
+
+            if (char const * u = std::getenv("XO_UPDATE_GOLDEN"); u && *u && std::string(u) != "0") {
+                std::ofstream(path) << actual;
+                WARN("rewrote " << path);
+                return;
+            }
+
+            std::string const expected = read_file(path);
+
+            if (actual != expected) {
+                std::string const actual_path = "server-snapshot.actual.json";
+                std::ofstream(actual_path) << actual;
+
+                INFO("golden:  " << path);
+                INFO("actual:  " << actual_path << " (in the test's working directory)");
+                INFO("compare: diff -u <golden> <actual>; bless with XO_UPDATE_GOLDEN=1");
+                REQUIRE(actual == expected);
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/

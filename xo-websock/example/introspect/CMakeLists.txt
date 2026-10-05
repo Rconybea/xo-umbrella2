@@ -39,6 +39,18 @@ if (XO_ENABLE_EXAMPLES)
     # when asked (/dyn/types), so the page can link each object to the code
     # defining its type (.xo-backlog/xo-websock/issues/12)
     xo_type_src_map_list(${CMAKE_CURRENT_BINARY_DIR}/type-maps.json)
+
+    # the page's browser tests: headless chrome driven over CDP, against a
+    # fresh server per test (test/run.sh; .xo-backlog/xo-websock/issues/14).
+    # They need node, curl and chrome, which a default build (CI included)
+    # does not have -- so off unless asked for
+    option(XO_ENABLE_BROWSER_TESTS "run the introspect page's browser tests under ctest" OFF)
+
+    if (ENABLE_TESTING AND XO_ENABLE_BROWSER_TESTS)
+        add_test(NAME browser.introspect
+                 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/run.sh $<TARGET_FILE:${SELF_EXE}>)
+        set_tests_properties(browser.introspect PROPERTIES TIMEOUT 900)
+    endif()
 endif()
 
 # end CMakeLists.txt

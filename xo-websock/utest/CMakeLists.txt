@@ -49,6 +49,10 @@ if (ENABLE_TESTING)
     # libwebsockets PRIVATE (see src/websock/CMakeLists.txt), so link it here.
     find_package(Libwebsockets CONFIG REQUIRED)
     target_link_libraries(${LIVE_EXE} PRIVATE websockets_shared)
+    # live-server-snapshot-matches-golden reads (and, with XO_UPDATE_GOLDEN,
+    # rewrites) utest/golden/ in the source tree
+    target_compile_definitions(${LIVE_EXE} PRIVATE
+        XO_WEBSOCK_UTEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # ----------------------------------------------------------------
