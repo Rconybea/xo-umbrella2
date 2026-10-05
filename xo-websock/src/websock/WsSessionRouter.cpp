@@ -405,10 +405,10 @@ namespace xo {
             public:
                 using Subscription = WsSessionRouter::Subscription;
 
-                JsonPrinter_Subscription(PrintJson const * pjson) : JsonPrinter(pjson) {}
+                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                    std::ostream * p_os = state.p_os();
 
-                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                    Subscription const * sub = this->check_recover_native<Subscription>(tp, p_os);
+                    Subscription const * sub = this->check_recover_native<Subscription>(tp, state);
 
                     if (!sub)
                         return;
@@ -423,9 +423,8 @@ namespace xo {
                           << ", " << quot("sink") << ": ";
 
                     if (sub->sink_) {
-                        this->pjson()->print_aux(TaggedPtr(Reflect::require<WebsocketSink>(),
-                                                           sub->sink_.get()),
-                                                 p_os);
+                        state.print(TaggedPtr(Reflect::require<WebsocketSink>(),
+                                              sub->sink_.get()));
                     } else {
                         /* in the moment between slot and sink (subscribe) */
                         *p_os << "null";
@@ -438,7 +437,7 @@ namespace xo {
                      * callback_id_: CallbackId is not reflected -- its number,
                      * under its declared type
                      */
-                    JsonMembers mem(this->pjson(), p_os);
+                    JsonMembers mem(state);
                     mem.member("sub_id_", sub->sub_id_)
                         .member("stream_name_", sub->stream_name_)
                         .member_ref<rp<DynamicEndpoint>>("endpoint_", sub->endpoint_.get())
@@ -462,10 +461,10 @@ namespace xo {
          **/
         class JsonPrinter_WsSessionRouter : public JsonPrinter {
         public:
-            JsonPrinter_WsSessionRouter(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                WsSessionRouter const * r = this->check_recover_native<WsSessionRouter>(tp, p_os);
+                WsSessionRouter const * r = this->check_recover_native<WsSessionRouter>(tp, state);
 
                 if (!r)
                     return;
@@ -486,7 +485,7 @@ namespace xo {
                 /* the sender by its most-derived address: the id its own
                  * printer writes
                  */
-                JsonMembers mem(this->pjson(), p_os);
+                JsonMembers mem(state);
                 mem.member_ref<UrlRouter const &>("url_router_", &r->url_router_)
                     .member_ref<rp<WsSender>>("sender_",
                                               dynamic_cast<void const *>(r->sender_.get()))
@@ -504,9 +503,9 @@ namespace xo {
         provide_router_json_printers(PrintJson * pjson)
         {
             pjson->provide_printer(Reflect::require<WsSessionRouter>(),
-                                   std::make_unique<JsonPrinter_WsSessionRouter>(pjson));
+                                   std::make_unique<JsonPrinter_WsSessionRouter>());
             pjson->provide_printer(Reflect::require<WsSessionRouter::Subscription>(),
-                                   std::make_unique<JsonPrinter_Subscription>(pjson));
+                                   std::make_unique<JsonPrinter_Subscription>());
         }
 
         std::size_t

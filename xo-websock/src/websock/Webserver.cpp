@@ -1039,11 +1039,11 @@ namespace xo {
          **/
         class JsonPrinter_WsSessionSender : public JsonPrinter {
         public:
-            JsonPrinter_WsSessionSender(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
                 WsSessionSenderImpl const * x
-                    = this->check_recover_native<WsSessionSenderImpl>(tp, p_os);
+                    = this->check_recover_native<WsSessionSenderImpl>(tp, state);
 
                 if (!x)
                     return;
@@ -1060,7 +1060,7 @@ namespace xo {
                  * server is printed in full elsewhere: a ref.  open_ an atomic
                  * -- its value, under its declared type
                  */
-                JsonMembers mem(this->pjson(), p_os);
+                JsonMembers mem(state);
                 mem.member_ref<WebserverImpl *>("target_", x->target_)
                     .member("session_id_", x->session_id_)
                     .member_as<std::atomic<bool>>("open_", x->open_.load());
@@ -1077,11 +1077,11 @@ namespace xo {
              **/
             class JsonPrinter_WsSession : public JsonPrinter {
             public:
-                JsonPrinter_WsSession(PrintJson const * pjson) : JsonPrinter(pjson) {}
+                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                    std::ostream * p_os = state.p_os();
 
-                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
                     WebsocketSessionRecd const * recd
-                        = this->check_recover_native<WebsocketSessionRecd>(tp, p_os);
+                        = this->check_recover_native<WebsocketSessionRecd>(tp, state);
 
                     if (!recd)
                         return;
@@ -1092,9 +1092,8 @@ namespace xo {
                           << ", " << quot("session_id") << ": " << recd->session_id()
                           << ", " << quot("sender") << ": ";
 
-                    this->pjson()->print_aux(TaggedPtr(Reflect::require<WsSessionSenderImpl>(),
-                                                       const_cast<WsSessionSenderImpl *>(&recd->sender())),
-                                             p_os);
+                    state.print(TaggedPtr(Reflect::require<WsSessionSenderImpl>(),
+                                          const_cast<WsSessionSenderImpl *>(&recd->sender())));
 
                     /* each subscription via its printer (in
                      * WsSessionRouter.cpp), under the router's lock
@@ -1102,14 +1101,13 @@ namespace xo {
                     *p_os << ", " << quot("subscriptions") << ": [";
                     {
                         bool first = true;
-                        PrintJson const * pjson = this->pjson();
 
-                        recd->router().visit_subscriptions([pjson, p_os, &first](TaggedPtr sub) {
+                        recd->router().visit_subscriptions([&state, p_os, &first](TaggedPtr sub) {
                                 if (!first)
                                     *p_os << ", ";
                                 first = false;
 
-                                pjson->print_aux(sub, p_os);
+                                state.print(sub);
                             });
                     }
                     *p_os << "]";
@@ -1130,7 +1128,7 @@ namespace xo {
                         n_queued = recd->outbound_q_.size();
                     }
 
-                    JsonMembers mem(this->pjson(), p_os);
+                    JsonMembers mem(state);
                     mem.member("output_buf_", output_buf)
                         .member_ref<rp<WsSessionSenderImpl>>("sender_", recd->sender_.get())
                         .member("router_", recd->router_)
@@ -1148,10 +1146,10 @@ namespace xo {
              **/
             class JsonPrinter_Webserver : public JsonPrinter {
             public:
-                JsonPrinter_Webserver(PrintJson const * pjson) : JsonPrinter(pjson) {}
+                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                    std::ostream * p_os = state.p_os();
 
-                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                    WebserverImpl const * websrv = this->check_recover_native<WebserverImpl>(tp, p_os);
+                    WebserverImpl const * websrv = this->check_recover_native<WebserverImpl>(tp, state);
 
                     if (!websrv)
                         return;
@@ -1167,19 +1165,17 @@ namespace xo {
                     *p_os << ", " << quot("endpoints") << ": [";
                     {
                         bool first = true;
-                        PrintJson const * pjson = this->pjson();
 
                         /* under the router's lock; printing never calls back
                          * into the router
                          */
-                        websrv->visit_endpoints([pjson, p_os, &first](DynamicEndpoint const & ep) {
+                        websrv->visit_endpoints([&state, p_os, &first](DynamicEndpoint const & ep) {
                                 if (!first)
                                     *p_os << ", ";
                                 first = false;
 
-                                pjson->print_aux(TaggedPtr(Reflect::require<DynamicEndpoint>(),
-                                                           const_cast<DynamicEndpoint *>(&ep)),
-                                                 p_os);
+                                state.print(TaggedPtr(Reflect::require<DynamicEndpoint>(),
+                                                      const_cast<DynamicEndpoint *>(&ep)));
                             });
                     }
                     *p_os << "]";
@@ -1187,17 +1183,16 @@ namespace xo {
                     *p_os << ", " << quot("sessions") << ": [";
                     {
                         bool first = true;
-                        PrintJson const * pjson = this->pjson();
 
                         /* each session via its own printer (installed by
                          * provide_webserver_json_printers), in id order
                          */
-                        websrv->visit_sessions([pjson, p_os, &first](TaggedPtr session) {
+                        websrv->visit_sessions([&state, p_os, &first](TaggedPtr session) {
                                 if (!first)
                                     *p_os << ", ";
                                 first = false;
 
-                                pjson->print_aux(session, p_os);
+                                state.print(session);
                             });
                     }
                     *p_os << "]";
@@ -1206,7 +1201,7 @@ namespace xo {
                      * (.xo-backlog/xo-websock/issues/13).  listen_port_ and
                      * state_ are read as the accessors above read them
                      */
-                    JsonMembers mem(this->pjson(), p_os);
+                    JsonMembers mem(state);
                     mem.member("ws_config_", websrv->ws_config_)
                         .member_as<std::atomic<std::int32_t>>("listen_port_", websrv->listen_port())
                         .member_as<Runstate>("state_",
@@ -1232,10 +1227,10 @@ namespace xo {
         public:
             using Table = WsSessionTable<Recd>;
 
-            JsonPrinter_WsSessionTable(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                Table const * t = this->check_recover_native<Table>(tp, p_os);
+                Table const * t = this->check_recover_native<Table>(tp, state);
 
                 if (!t)
                     return;
@@ -1259,7 +1254,7 @@ namespace xo {
                       << ", " << json::type_keys(tp.td())
                       << ", " << quot("id") << ": " << quot(json_id(t));
 
-                JsonMembers mem(this->pjson(), p_os);
+                JsonMembers mem(state);
                 mem.member("next_id_", next_id);
                 mem.member_ref_map<decltype(t->session_map_)>("session_map_", sessions);
                 mem.end();
@@ -1272,13 +1267,13 @@ namespace xo {
         provide_webserver_json_printers(PrintJson * pjson)
         {
             pjson->provide_printer(Reflect::require<WsSessionTable<WebsocketSessionRecd>>(),
-                                   std::make_unique<JsonPrinter_WsSessionTable<WebsocketSessionRecd>>(pjson));
+                                   std::make_unique<JsonPrinter_WsSessionTable<WebsocketSessionRecd>>());
             pjson->provide_printer(Reflect::require<WebserverImpl>(),
-                                   std::make_unique<JsonPrinter_Webserver>(pjson));
+                                   std::make_unique<JsonPrinter_Webserver>());
             pjson->provide_printer(Reflect::require<WebsocketSessionRecd>(),
-                                   std::make_unique<JsonPrinter_WsSession>(pjson));
+                                   std::make_unique<JsonPrinter_WsSession>());
             pjson->provide_printer(Reflect::require<WsSessionSenderImpl>(),
-                                   std::make_unique<JsonPrinter_WsSessionSender>(pjson));
+                                   std::make_unique<JsonPrinter_WsSessionSender>());
         } /*provide_webserver_json_printers*/
 
         bool

@@ -54,7 +54,7 @@ namespace xo {
             virtual std::string const & stream_name() const override { return stream_name_; }
             virtual uint32_t n_in_ev() const override { return n_in_ev_; }
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override;
-            virtual void print_json(PrintJson const & pjson, std::ostream * p_os) const override;
+            virtual void print_json(json::JsonPrintState & state) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
             virtual std::string display_string() const override;
             virtual TaggedRcptr self_tp() override;
@@ -140,8 +140,10 @@ namespace xo {
         }
 
         void
-        WebsocketSinkImpl::print_json(PrintJson const & pjson, std::ostream * p_os) const
+        WebsocketSinkImpl::print_json(json::JsonPrintState & state) const
         {
+            std::ostream * p_os = state.p_os();
+
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
                   << ", " << json::type_keys(Reflect::require<WebsocketSinkImpl>())
                   << ", " << quot("id") << ": " << quot(json_id(this))
@@ -160,7 +162,7 @@ namespace xo {
             /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
              * sender is printed in full under its session -- here a ref
              */
-            json::JsonMembers mem(&pjson, p_os);
+            json::JsonMembers mem(state);
             mem.member_ref<rp<WsSender>>("sender_", dynamic_cast<void const *>(this->sender_.get()))
                 .member("pjson_", this->pjson_)
                 .member("stream_name_", this->stream_name_)
@@ -181,8 +183,10 @@ namespace xo {
         // ----- WebsocketSink -----
 
         void
-        WebsocketSink::print_json(PrintJson const & /*pjson*/, std::ostream * p_os) const
+        WebsocketSink::print_json(json::JsonPrintState & state) const
         {
+            std::ostream * p_os = state.p_os();
+
             *p_os << "{" << quot("_name_") << ": " << quot("WebsocketSink")
                   << ", " << json::type_keys(Reflect::require<WebsocketSink>())
                   << ", " << quot("id") << ": " << quot(json_id(this))

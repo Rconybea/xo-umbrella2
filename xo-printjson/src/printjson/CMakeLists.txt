@@ -5,6 +5,7 @@ set(SELF_SRCS
     PrintJsonAppcx.cpp
     PrintJsonSingleton.cpp
     PrintJson.cpp
+    JsonPrintState.cpp
     JsonMembers.cpp
     type_keys.cpp
     init_printjson.cpp)
@@ -22,7 +23,7 @@ xo_dependency(${SELF_LIB} xo_arena)
 xo_dependency(${SELF_LIB} xo_ppsink)
 
 # PrintJson.cpp: abort when a json printer calls a PrintJson entry point
-# instead of print_aux (.xo-backlog/xo-printjson/issues/02).  On for now;
+# instead of JsonPrintState::print (.xo-backlog/xo-printjson/issues/02).  On for now;
 # to be turned off later
 target_compile_definitions(${SELF_LIB} PRIVATE XO_PRINTJSON_REENTRY_CHECK)
 

@@ -107,8 +107,9 @@ namespace xo {
             /* a void pointee has no representation to traverse into, so it
              * reports 0 children even when NON-null.  MemorySizeInfo::lo_/hi_
              * are const void* and reflected; they keep rendering as decimal
-             * addresses because print_aux consults printer_map_ before the
-             * metatype switch, so JsonPrinter_address still wins.
+             * addresses because printjson's JsonPrintState::print consults
+             * the printer table before the metatype switch, so
+             * JsonPrinter_address still wins.
              */
             int x = 7;
             const void * p = &x;

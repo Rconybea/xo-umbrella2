@@ -23,8 +23,8 @@ namespace xo {
             return ss.str();
         }
 
-        JsonMembers::JsonMembers(PrintJson const * pjson, std::ostream * p_os)
-            : pjson_{pjson}, p_os_{p_os}
+        JsonMembers::JsonMembers(JsonPrintState & state)
+            : state_{&state}, p_os_{state.p_os()}
         {
             /* the leading comma: the object's _name_ and type keys come first */
             *p_os_ << ", \"_members_\": [";
@@ -45,7 +45,7 @@ namespace xo {
         bool
         JsonMembers::printable(TypeDescr td) const
         {
-            return (pjson_->has_printer(td)
+            return (state_->has_printer(td)
                     || (td->is_struct() && td->complete_flag()));
         }
 
@@ -68,7 +68,7 @@ namespace xo {
             this->write_head(name, declared);
 
             *p_os_ << ", " << quot("_value_") << ": ";
-            pjson_->print_aux(value, p_os_);
+            state_->print(value);
             *p_os_ << "}";
         }
 

@@ -265,13 +265,13 @@ namespace xo {
          **/
         class JsonPrinter_UrlRouter : public json::JsonPrinter {
         public:
-            JsonPrinter_UrlRouter(json::PrintJson const * pjson) : JsonPrinter(pjson) {}
+            void print_json(reflect::TaggedPtr tp, json::JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            void print_json(reflect::TaggedPtr tp, std::ostream * p_os) const override {
                 using xo::pp::quot;
                 using Entries = std::vector<std::pair<std::string, void const *>>;
 
-                UrlRouter const * r = this->check_recover_native<UrlRouter>(tp, p_os);
+                UrlRouter const * r = this->check_recover_native<UrlRouter>(tp, state);
 
                 if (!r)
                     return;
@@ -293,7 +293,7 @@ namespace xo {
                       << ", " << json::type_keys(tp.td())
                       << ", " << quot("id") << ": " << quot(json_id(r));
 
-                json::JsonMembers mem(this->pjson(), p_os);
+                json::JsonMembers mem(state);
                 mem.member_ref_map<EndpointMap>("http_map_", http_v)
                     .member_ref_map<EndpointMap>("stream_map_", stream_v);
                 mem.end();
@@ -306,7 +306,7 @@ namespace xo {
         provide_url_router_json_printers(json::PrintJson * pjson)
         {
             pjson->provide_printer(reflect::Reflect::require<UrlRouter>(),
-                                   std::make_unique<JsonPrinter_UrlRouter>(pjson));
+                                   std::make_unique<JsonPrinter_UrlRouter>());
         }
     } /*namespace web*/
 } /*namespace xo*/

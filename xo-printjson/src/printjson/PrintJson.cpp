@@ -59,164 +59,27 @@ namespace xo {
         void
         JsonPrinter::report_internal_type_consistency_error(TypeDescr td1,
                                                             TypeDescr td2,
-                                                            std::ostream * p_os) const
+                                                            JsonPrintState & state) const
         {
-            *p_os << "<internal-error: type mismatch between T & S"
+            *state.p_os() << "<internal-error: type mismatch between T & S"
                   << xtag("T", td1->canonical_name())
                   << xtag("S", td2->canonical_name())
                   << ">";
         } /*report_internal_type_consistency_error*/
 
-        namespace {
-            /* this will be used when TaggedPtr refers to a pointer-like value,
-             * e.g.
-             *    xo::ref::rp<T>
-             */
-            void
-            print_generic_pointer(PrintJson const & print_json,
-                                  TaggedPtr tp,
-                                  std::ostream * p_os)
-            {
-                /* e.g. if
-                 *   xo::ref::rp<VanillaOption> opt = ...;
-                 * then expect to print just as we would for
-                 *   VanillaOption & opt = ...;
-                 * if pointer is null,  will print {}
-                 */
-
-                if (tp.n_child()) {
-                    print_json.print_aux(tp.get_child(0), p_os);
-                } else {
-                    /* was "{}" until 2026-09-21, distinguishable from a real
-                     * struct only by the absent _name_ member.  json null says
-                     * the same thing without asking a consumer to notice an
-                     * absence, and it is what the bespoke pointer printers
-                     * (JsonPrinter_ObjectSlot, JsonPrinter_RootSet) already
-                     * emit -- so routing a pointer through this path is no
-                     * longer a change in what a null looks like.
-                     */
-                    *p_os << "null";
-                }
-            } /*print_generic_pointer*/
-
-            /* this will be used when TaggedPtr refers to a vector-like value,
-             * e.g.
-             *    std::vector<T>
-             *    std::array<T, N>
-             */
-            void
-            print_generic_vector(PrintJson const & print_json,
-                                 TaggedPtr tp,
-                                 std::ostream * p_os)
-            {
-                /* e.g. if
-                 *   std::array<double, 3> v{1, 2, 3};
-                 *
-                 * then expect to print
-                 *   [1.0, 2.0, 3.0]
-                 */
-
-                *p_os << "[";
-
-                for (uint32_t i = 0, n = tp.n_child(); i < n; ++i) {
-                    if (i > 0)
-                        *p_os << ", ";
-
-                    print_json.print_aux(tp.get_child(i), p_os);
-                }
-
-                *p_os << "]";
-            } /*print_generic_vector*/
-
-            /* this will be used when TaggedPtr is understood to refer to a struct-like value.
-             */
-            void
-            print_generic_struct(PrintJson const & print_json,
-                                 TaggedPtr tp,
-                                 std::ostream * p_os)
-            {
-                /* e.g. if
-                 *   struct Foo { int x_; double y_; };
-                 *   Foo foo{1, 1.4142};
-                 *
-                 * then expect to print
-                 *   {"_name_": "Foo", "_canonical_type_": "xo::Foo", "_short_type_": "Foo",
-                 *    "x": 1, "y": 1.4142}
-                 *
-                 * see type_keys
-                 *
-                 * note that python json parser requires property names in double quotes
-                 */
-
-                *p_os << "{";
-
-                *p_os << "\"_name_\": \"" << tp.td()->short_name() << "\""
-                      << ", " << json::type_keys(tp.td());
-
-                for (uint32_t i = 0, n = tp.n_child(); i < n; ++i) {
-                    *p_os << ", \"" << tp.struct_member_name(i) << "\": ";
-
-                    print_json.print_aux(tp.get_child(i), p_os);
-                }
-
-                *p_os << "}";
-            } /*print_generic_struct*/
-
-        } /*namespace*/
-
         bool
         PrintJson::has_printer(TypeDescr td) const
         {
-            std::unique_ptr<JsonPrinter> const * printer = this->printer_map_.lookup(td->id());
-
-            return printer && *printer;
+            return this->lookup_printer(td->id()) != nullptr;
         } /*has_printer*/
 
-        void
-        PrintJson::print_aux(TaggedPtr tp,
-                             std::ostream * p_os) const
+        JsonPrinter const *
+        PrintJson::lookup_printer(TypeId id) const
         {
-            if (tp.td()) {
-                TypeId id = tp.td()->id();
+            std::unique_ptr<JsonPrinter> const * printer = this->printer_map_.lookup(id);
 
-                std::unique_ptr<JsonPrinter> const * printer
-                    = this->printer_map_.lookup(id);
-
-                if (printer && *printer) {
-                    (*printer)->print_json(tp, p_os);
-                } else {
-                    /* if no special-case printer,  apply generic printing behavior */
-                    switch (tp.td()->metatype()) {
-                    case Metatype::mt_pointer:
-                        print_generic_pointer(*this, tp, p_os);
-                        return;
-                    case Metatype::mt_vector:
-                        print_generic_vector(*this, tp, p_os);
-                        return;
-                    case Metatype::mt_struct:
-                        print_generic_struct(*this, tp, p_os);
-                        return;
-                    case Metatype::mt_function:
-                        /** new branch (added for xo-expression / xo-jit) **/
-                        (*p_os) << "<error-json-printer-not-implemented"
-                                << xtag("type", tp.td()->canonical_name())
-                                << xtag("metatype", tp.td()->metatype())
-                                << ">";
-                        return;
-                    case Metatype::mt_invalid:
-                    case Metatype::mt_atomic:
-                        break;
-                    }
-
-                    (*p_os) << "<error-json-printer-not-found"
-                            << xtag("type", tp.td()->canonical_name())
-                            << xtag("metatype", tp.td()->metatype())
-                            << ">";
-                }
-            } else {
-                (*p_os) << "<error-null-tp>";
-            }
-        } /*print_aux*/
+            return printer ? printer->get() : nullptr;
+        } /*lookup_printer*/
 
         namespace {
 #ifdef XO_PRINTJSON_REENTRY_CHECK
@@ -224,7 +87,7 @@ namespace xo {
              * More than one means a json printer called an entry point
              * (PrintJson::print, print_tp, print_obj, ...) to print a child,
              * starting a print within a print: a printer must recurse via
-             * print_aux.  See .xo-backlog/xo-printjson/issues/02.
+             * JsonPrintState::print.  See .xo-backlog/xo-printjson/issues/02.
              *
              * thread_local only as an assertion: no printing reads it
              */
@@ -239,7 +102,7 @@ namespace xo {
                     if (s_entry_depth > 0) {
                         std::cerr << "PrintJson::" << entry
                                   << ": entered while a print is in progress on this thread"
-                                  << " -- a json printer must recurse via print_aux"
+                                  << " -- a json printer must recurse via JsonPrintState::print"
                                   << std::endl;
                         print_backtrace(true /*demangle_flag*/);
                         std::abort();
@@ -264,8 +127,9 @@ namespace xo {
                             std::ostream * p_os) const
         {
             EntryGuard guard("print_tp");
+            JsonPrintState state(this, p_os);
 
-            this->print_aux(tp, p_os);
+            state.print(tp);
             //*p_os << std::ends;
         } /*print*/
 
@@ -318,17 +182,14 @@ namespace xo {
          */
         class JsonPrinter_TaggedPtr : public JsonPrinter {
         public:
-            JsonPrinter_TaggedPtr(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                TaggedPtr * x = this->check_recover_native<TaggedPtr>(tp, state);
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
-                TaggedPtr * x = this->check_recover_native<TaggedPtr>(tp, p_os);
-
-                /* print_aux, not print_tp: a printer recurses within the
+                /* state.print, not print_tp: a printer recurses within the
                  * print in progress
                  */
                 if (x) {
-                    this->pjson()->print_aux(*x, p_os);
+                    state.print(*x);
                 }
             } /*print_json*/
         }; /*JsonPrinter_TaggedPtr*/
@@ -337,7 +198,7 @@ namespace xo {
             void
             provide_tagged_ptr_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_TaggedPtr(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_TaggedPtr());
 
                 p_json->provide_printer(Reflect::require<TaggedPtr>(),
                                         std::move(printer));
@@ -346,11 +207,10 @@ namespace xo {
 
         class JsonPrinter_bool : public JsonPrinter {
         public:
-            JsonPrinter_bool(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
-                bool * x = this->check_recover_native<bool>(tp, p_os);
+                bool * x = this->check_recover_native<bool>(tp, state);
 
                 if (x) {
                     /* json boolean format is lower case true/false.
@@ -365,7 +225,7 @@ namespace xo {
             void
             provide_bool_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_bool(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_bool());
 
                 p_json->provide_printer(Reflect::require<bool>(),
                                         std::move(printer));
@@ -375,10 +235,9 @@ namespace xo {
         template<typename T>
         class JsonPrinter_integer : public JsonPrinter {
         public:
-            JsonPrinter_integer(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
                 T * x = tp.recover_native<T>();
 
                 if (x) {
@@ -386,7 +245,7 @@ namespace xo {
                 } else {
                     report_internal_type_consistency_error(Reflect::require<T>(),
                                                            tp.td(),
-                                                           p_os);
+                                                           state);
                 }
             } /*print_json*/
         }; /*JsonPrinter_integer*/
@@ -396,7 +255,7 @@ namespace xo {
             void
             provide_integer_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_integer<T>(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_integer<T>());
 
                 p_json->provide_printer(Reflect::require<T>(), std::move(printer));
             } /*provide_integer_printer*/
@@ -405,11 +264,10 @@ namespace xo {
         template<typename T>
         class JsonPrinter_floatingpoint : public JsonPrinter {
         public:
-            JsonPrinter_floatingpoint(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override
                 {
+                    std::ostream * p_os = state.p_os();
+
                     T * x = tp.recover_native<T>();
 
                     if (x) {
@@ -433,7 +291,7 @@ namespace xo {
                     } else {
                         report_internal_type_consistency_error(Reflect::require<T>(),
                                                                tp.td(),
-                                                               p_os);
+                                                               state);
                     }
                 } /*print_json*/
         }; /*JsonPrinter_floatingpoint*/
@@ -443,7 +301,7 @@ namespace xo {
             void
             provide_floatingpoint_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_floatingpoint<T>(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_floatingpoint<T>());
 
                 p_json->provide_printer(Reflect::require<T>(), std::move(printer));
             } /*provide_floatingpoint_printer*/
@@ -452,10 +310,9 @@ namespace xo {
         template<typename T>
         class JsonPrinter_string : public JsonPrinter {
         public:
-            JsonPrinter_string(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
                 T * x = tp.recover_native<T>();
 
                 if (x) {
@@ -482,7 +339,7 @@ namespace xo {
                 } else {
                     report_internal_type_consistency_error(Reflect::require<T>(),
                                                            tp.td(),
-                                                           p_os);
+                                                           state);
                 }
             } /*print_json*/
         }; /*JsonPrinter_string*/
@@ -492,7 +349,7 @@ namespace xo {
             void
             provide_string_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_string<T>(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_string<T>());
 
                 p_json->provide_printer(Reflect::require<T>(), std::move(printer));
             } /*provide_string_printer*/
@@ -507,10 +364,9 @@ namespace xo {
         template<std::size_t N>
         class JsonPrinter_flatstring : public JsonPrinter {
         public:
-            JsonPrinter_flatstring(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
                 xo::flatstring<N> * x = tp.recover_native<xo::flatstring<N>>();
 
                 if (x) {
@@ -518,7 +374,7 @@ namespace xo {
                 } else {
                     report_internal_type_consistency_error(Reflect::require<xo::flatstring<N>>(),
                                                            tp.td(),
-                                                           p_os);
+                                                           state);
                 }
             } /*print_json*/
         }; /*JsonPrinter_flatstring*/
@@ -528,7 +384,7 @@ namespace xo {
             void
             provide_flatstring_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_flatstring<N>(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_flatstring<N>());
 
                 p_json->provide_printer(Reflect::require<xo::flatstring<N>>(), std::move(printer));
             } /*provide_flatstring_printer*/
@@ -548,10 +404,9 @@ namespace xo {
          **/
         class JsonPrinter_address : public JsonPrinter {
         public:
-            JsonPrinter_address(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
                 const void ** x = tp.recover_native<const void *>();
 
                 if (x) {
@@ -559,7 +414,7 @@ namespace xo {
                 } else {
                     report_internal_type_consistency_error(Reflect::require<const void *>(),
                                                            tp.td(),
-                                                           p_os);
+                                                           state);
                 }
             } /*print_json*/
         }; /*JsonPrinter_address*/
@@ -568,7 +423,7 @@ namespace xo {
             void
             provide_address_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_address(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_address());
 
                 p_json->provide_printer(Reflect::require<const void *>(), std::move(printer));
             } /*provide_address_printer*/
@@ -617,10 +472,9 @@ namespace xo {
          **/
         class JsonPrinter_ObjectSlot : public JsonPrinter {
         public:
-            JsonPrinter_ObjectSlot(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
                 using xo::facet::ObjectSlot;
                 using xo::facet::DHandleStoreBase;
                 using xo::facet::TypeRegistry;
@@ -631,7 +485,7 @@ namespace xo {
                 if (!x) {
                     report_internal_type_consistency_error(Reflect::require<ObjectSlot>(),
                                                            tp.td(),
-                                                           p_os);
+                                                           state);
                     return;
                 }
 
@@ -721,11 +575,10 @@ namespace xo {
         public:
             using RootSet = xo::facet::DHandleArena<xo::facet::ObjectSlot>;
 
-            JsonPrinter_RootSet(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
-                const RootSet * rs = this->check_recover_native<RootSet>(tp, p_os);
+                const RootSet * rs = this->check_recover_native<RootSet>(tp, state);
 
                 if (!rs)
                     return;
@@ -758,18 +611,16 @@ namespace xo {
                 *p_os << ", \"slots\": [";
                 {
                     bool first = true;
-                    PrintJson const * pjson = this->pjson();
 
                     rs->visit_object_slots(
-                        [pjson, p_os, &first](const xo::facet::ObjectSlot & slot) {
+                        [&state, p_os, &first](const xo::facet::ObjectSlot & slot) {
                             if (!first)
                                 *p_os << ", ";
                             first = false;
 
-                            pjson->print_aux(
-                                TaggedPtr(Reflect::require<xo::facet::ObjectSlot>(),
-                                          const_cast<xo::facet::ObjectSlot *>(&slot)),
-                                p_os);
+                            state.print(
+                           TaggedPtr(Reflect::require<xo::facet::ObjectSlot>(),
+                                     const_cast<xo::facet::ObjectSlot *>(&slot)));
                         });
                 }
                 *p_os << "]}";
@@ -807,19 +658,17 @@ namespace xo {
         public:
             using AllocFlywheel = xo::facet::AllocFlywheel;
 
-            JsonPrinter_AllocFlywheel(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
                 using xo::mm::MemorySizeInfo;
 
                 const AllocFlywheel * fw
-                    = this->check_recover_native<AllocFlywheel>(tp, p_os);
+                    = this->check_recover_native<AllocFlywheel>(tp, state);
 
                 if (!fw)
                     return;
 
-                PrintJson const * pjson = this->pjson();
 
                 *p_os << "{" << "\"_name_\": " << quot("Flywheel")
                       << ", " << json::type_keys(tp.td());
@@ -838,15 +687,14 @@ namespace xo {
                 {
                     bool first = true;
 
-                    fw->visit_pools([pjson, p_os, &first](const MemorySizeInfo & x) {
+                    fw->visit_pools([&state, p_os, &first](const MemorySizeInfo & x) {
                             if (!first)
                                 *p_os << ", ";
                             first = false;
 
-                            pjson->print_aux(
-                                TaggedPtr(Reflect::require<MemorySizeInfo>(),
-                                          const_cast<MemorySizeInfo *>(&x)),
-                                p_os);
+                            state.print(
+                           TaggedPtr(Reflect::require<MemorySizeInfo>(),
+                                     const_cast<MemorySizeInfo *>(&x)));
                         });
                 }
                 *p_os << "]";
@@ -856,10 +704,9 @@ namespace xo {
                 {
                     const auto & rs = fw->strong_root_set();
 
-                    pjson->print_aux(
-                        TaggedPtr(Reflect::require<AllocFlywheel::HandleStore>(),
-                                  const_cast<AllocFlywheel::HandleStore *>(&rs)),
-                        p_os);
+                    state.print(
+                   TaggedPtr(Reflect::require<AllocFlywheel::HandleStore>(),
+                             const_cast<AllocFlywheel::HandleStore *>(&rs)));
                 }
 
                 *p_os << "}";
@@ -917,12 +764,12 @@ namespace xo {
                 }
 
                 {
-                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_ObjectSlot(p_json));
+                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_ObjectSlot());
                     p_json->provide_printer(Reflect::require<xo::facet::ObjectSlot>(),
                                             std::move(printer));
                 }
                 {
-                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_RootSet(p_json));
+                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_RootSet());
                     /* the POINTEE; a const RootSet* reaches it through
                      * print_generic_pointer
                      */
@@ -930,7 +777,7 @@ namespace xo {
                                             std::move(printer));
                 }
                 {
-                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_AllocFlywheel(p_json));
+                    std::unique_ptr<JsonPrinter> printer(new JsonPrinter_AllocFlywheel());
                     p_json->provide_printer(Reflect::require<AllocFlywheel>(),
                                             std::move(printer));
                 }
@@ -939,10 +786,9 @@ namespace xo {
 
         class JsonPrinter_utc_nanos : public JsonPrinter {
         public:
-            JsonPrinter_utc_nanos(PrintJson * pjson) : JsonPrinter(pjson) {}
+            virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            virtual void print_json(TaggedPtr tp,
-                                    std::ostream * p_os) const override {
                 utc_nanos * x = tp.recover_native<utc_nanos>();
 
                 if (x) {
@@ -954,7 +800,7 @@ namespace xo {
                 } else {
                     report_internal_type_consistency_error(Reflect::require<utc_nanos>(),
                                                            tp.td(),
-                                                           p_os);
+                                                           state);
                 }
             } /*print_json*/
         }; /*JsonPrinter_utc_nanos*/
@@ -963,7 +809,7 @@ namespace xo {
             void
             provide_utc_nanos_printer(PrintJson * p_json)
             {
-                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_utc_nanos(p_json));
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_utc_nanos());
 
                 p_json->provide_printer(Reflect::require<utc_nanos>(),
                                         std::move(printer));

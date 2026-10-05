@@ -47,12 +47,11 @@ namespace xo {
             template<typename EigenVectorType>
             class EigenVectorJsonPrinter : public JsonPrinter {
             public:
-                EigenVectorJsonPrinter(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-                virtual void print_json(TaggedPtr tp,
-                                        std::ostream * p_os) const override
+                virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
-                        EigenVectorType * pv = this->check_recover_native<EigenVectorType>(tp, p_os);
+                        std::ostream * p_os = state.p_os();
+
+                        EigenVectorType * pv = this->check_recover_native<EigenVectorType>(tp, state);
 
                         if (pv) {
                             /* EigenVectorType (VectorXb, VectorXd, ..)
@@ -69,8 +68,7 @@ namespace xo {
                                 /* note: need to dispatch via json printer for vector elements,
                                  *       to get special treatment for non-finite values
                                  */
-                                this->pjson()->print_aux(Reflect::make_tp(&(*pv)[i]), p_os);
-                                //*p_os << jsonp((*pv)[i], this->pjson());
+                                state.print(Reflect::make_tp(&(*pv)[i]));
                             }
 
                             *p_os << "]";
@@ -83,12 +81,11 @@ namespace xo {
              */
             class MatrixXdJsonPrinter : public JsonPrinter {
             public:
-                MatrixXdJsonPrinter(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-                virtual void print_json(TaggedPtr tp,
-                                        std::ostream * p_os) const override
+                virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
-                        MatrixXd * pm = this->check_recover_native<MatrixXd>(tp, p_os);
+                        std::ostream * p_os = state.p_os();
+
+                        MatrixXd * pm = this->check_recover_native<MatrixXd>(tp, state);
 
                         if (pm) {
                             /* MatrixXd is reflected as atomic for now, out of expedience */
@@ -105,8 +102,7 @@ namespace xo {
                                     /* note: need to dispatch via json printer for matrix elements,
                                      *       to get special treatment for non-finite values
                                      */
-                                    this->pjson()->print_aux(Reflect::make_tp(&(*pm)(i, j)), p_os);
-                                    //*p_os << jsonp((*pm)(i, j), this->pjson());
+                                    state.print(Reflect::make_tp(&(*pm)(i, j)));
                                 }
                                 *p_os << "]";
                             }
@@ -121,7 +117,7 @@ namespace xo {
             provide_eigen_vector_printer(PrintJson * p_pjson)
             {
                 TypeDescr td = Reflect::require<EigenVectorType>();
-                std::unique_ptr<JsonPrinter> pr(new EigenVectorJsonPrinter<EigenVectorType>(p_pjson));
+                std::unique_ptr<JsonPrinter> pr(new EigenVectorJsonPrinter<EigenVectorType>());
 
                 p_pjson->provide_printer(td, std::move(pr));
             } /*provide_eigen_vector_printer*/
@@ -146,7 +142,7 @@ namespace xo {
 
             {
                 TypeDescr td = Reflect::require<MatrixXd>();
-                std::unique_ptr<JsonPrinter> pr(new MatrixXdJsonPrinter(p_pjson));
+                std::unique_ptr<JsonPrinter> pr(new MatrixXdJsonPrinter());
 
                 p_pjson->provide_printer(td, std::move(pr));
             }

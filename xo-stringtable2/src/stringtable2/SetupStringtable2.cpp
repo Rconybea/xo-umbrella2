@@ -35,13 +35,9 @@ namespace xo {
             /** json printing for DString **/
             class DStringJsonPrinter : public JsonPrinter {
             public:
-                DStringJsonPrinter(const PrintJson * pjson)
-                    : JsonPrinter(pjson) {}
-
-                virtual void print_json(TaggedPtr tp,
-                                        std::ostream * p_os) const override
+                virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                 {
-                    DString * x = this->check_recover_native<DString>(tp, p_os);
+                    DString * x = this->check_recover_native<DString>(tp, state);
 
                     if (x) {
                         /* through the json printer for string_view, not <<, so
@@ -58,7 +54,7 @@ namespace xo {
                          */
                         std::string_view sv(x->chars(), x->size());
 
-                        this->pjson()->print_aux(Reflect::make_tp(&sv), p_os);
+                        state.print(Reflect::make_tp(&sv));
                     }
                 } /*print_json*/
             }; /*DStringJsonPrinter*/
@@ -72,7 +68,7 @@ namespace xo {
             p_pjson->provide_printer
                 (xo::reflect::Reflect::require<DString>(),
                  std::unique_ptr<xo::json::JsonPrinter>
-                     (new DStringJsonPrinter(p_pjson)));
+                     (new DStringJsonPrinter()));
         } /*provide_json_printers*/
 
         bool

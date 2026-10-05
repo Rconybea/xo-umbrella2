@@ -45,13 +45,9 @@ namespace xo {
             /** json printing for DFloat **/
             class DFloatJsonPrinter : public xo::json::JsonPrinter {
             public:
-                DFloatJsonPrinter(const xo::json::PrintJson * pjson)
-                    : xo::json::JsonPrinter(pjson) {}
-
-                virtual void print_json(TaggedPtr tp,
-                                        std::ostream * p_os) const override
+                virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                 {
-                    DFloat * x = this->check_recover_native<DFloat>(tp, p_os);
+                    DFloat * x = this->check_recover_native<DFloat>(tp, state);
 
                     if (x) {
                         /* through the json printer for double, not <<:
@@ -59,7 +55,7 @@ namespace xo {
                          */
                         double v = x->value();
 
-                        this->pjson()->print_aux(Reflect::make_tp(&v), p_os);
+                        state.print(Reflect::make_tp(&v));
                     }
                 } /*print_json*/
             }; /*DFloatJsonPrinter*/
@@ -87,7 +83,7 @@ namespace xo {
             p_pjson->provide_printer
                 (xo::reflect::Reflect::require<DFloat>(),
                  std::unique_ptr<xo::json::JsonPrinter>
-                     (new DFloatJsonPrinter(p_pjson)));
+                     (new DFloatJsonPrinter()));
         } /*provide_json_printers*/
 
         bool

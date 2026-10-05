@@ -21,6 +21,7 @@
 
 namespace xo {
     using xo::json::JsonMembers;
+    using xo::json::JsonPrintState;
     using xo::json::PrintJson;
     using xo::reflect::StructReflector;
 
@@ -65,7 +66,9 @@ namespace xo {
             PrintJson pjson;
             std::stringstream ss;
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.end();
 
             REQUIRE(ss.str() == ", \"_members_\": []");
@@ -78,7 +81,9 @@ namespace xo {
             int n = 7;
             std::string s = "hello";
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member("n_", n).member("s_", s);
             mem.end();
 
@@ -97,7 +102,9 @@ namespace xo {
             JmReflected * p = &r;
             std::vector<JmReflected> v(1);
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member("r_", r).member("p_", p).member("v_", v);
             mem.end();
 
@@ -119,7 +126,9 @@ namespace xo {
             JmUnreflected u;
             JmUnreflected * pu = &u;
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member("u_", u).member("pu_", pu).member("n_", 3);
             mem.end();
 
@@ -145,7 +154,9 @@ namespace xo {
 
             std::atomic<std::int32_t> port{8080};
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member_as<std::atomic<std::int32_t>>("port_", port.load());
             mem.end();
 
@@ -163,7 +174,9 @@ namespace xo {
             JmReflected r;
             JmReflected * null_p = nullptr;
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member_ref<JmReflected *>("r_", &r)
                 .member_ref<JmReflected *>("null_", null_p);
             mem.end();
@@ -189,7 +202,9 @@ namespace xo {
             JmReflected r;
             JmReflected const & cr = r;
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member_ref<JmReflected const &>("cr_", &cr);
             mem.end();
 
@@ -207,7 +222,9 @@ namespace xo {
 
             JmReflected a, b;
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member_refs<std::vector<JmReflected *>>("v_", {&a, nullptr, &b});
             mem.end();
 
@@ -226,7 +243,9 @@ namespace xo {
 
             JmReflected a, b;
 
-            JsonMembers mem(&pjson, &ss);
+            JsonPrintState state(&pjson, &ss);
+
+            JsonMembers mem(state);
             mem.member_ref_map<std::map<std::string, JmReflected *>>("m_", {{"/a/", &a}, {"/b/", &b}, {"/z/", nullptr}});
             mem.end();
 

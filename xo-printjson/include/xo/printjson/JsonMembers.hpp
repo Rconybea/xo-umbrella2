@@ -68,7 +68,7 @@ namespace xo {
          *  Use, inside a JsonPrinter's print_json, after the printer's own
          *  keys:
          *
-         *    JsonMembers mem(this->pjson(), p_os);   // writes , "_members_": [
+         *    JsonMembers mem(state);                 // writes , "_members_": [
          *    mem.member("url_router_", x->url_router_);
          *    mem.member_as<std::atomic<int>>("port_", x->port_.load());
          *    mem.member_ref<rp<Sender>>("sender_", x->sender_.get());  // printed elsewhere
@@ -79,7 +79,8 @@ namespace xo {
          **/
         class JsonMembers {
         public:
-            JsonMembers(PrintJson const * pjson, std::ostream * p_os);
+            /** writes on @p state's output; prints values through it **/
+            explicit JsonMembers(JsonPrintState & state);
             /** asserts that end() was called **/
             ~JsonMembers();
 
@@ -202,7 +203,9 @@ namespace xo {
             void write_head(std::string_view name, DeclaredType const & declared);
 
         private:
-            PrintJson const * pjson_ = nullptr;
+            /** the print in progress **/
+            JsonPrintState * state_ = nullptr;
+            /** state_'s output **/
             std::ostream * p_os_ = nullptr;
             /** no entry written yet: no separator before the next **/
             bool first_ = true;

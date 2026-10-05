@@ -54,10 +54,10 @@ namespace xo {
          **/
         class JsonPrinter_WebserverConfig : public JsonPrinter {
         public:
-            JsonPrinter_WebserverConfig(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                WebserverConfig const * cfg = this->check_recover_native<WebserverConfig>(tp, p_os);
+                WebserverConfig const * cfg = this->check_recover_native<WebserverConfig>(tp, state);
 
                 if (!cfg)
                     return;
@@ -65,7 +65,7 @@ namespace xo {
                 *p_os << "{" << quot("_name_") << ": " << quot("WebserverConfig")
                       << ", " << json::type_keys(tp.td());
 
-                JsonMembers mem(this->pjson(), p_os);
+                JsonMembers mem(state);
                 mem.member("port_", cfg->port_)
                     .member("tls_flag_", cfg->tls_flag_)
                     .member("host_check_flag_", cfg->host_check_flag_)
@@ -79,10 +79,10 @@ namespace xo {
 
         class JsonPrinter_DynamicEndpoint : public JsonPrinter {
         public:
-            JsonPrinter_DynamicEndpoint(PrintJson const * pjson) : JsonPrinter(pjson) {}
+            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                std::ostream * p_os = state.p_os();
 
-            void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                DynamicEndpoint const * ep = this->check_recover_native<DynamicEndpoint>(tp, p_os);
+                DynamicEndpoint const * ep = this->check_recover_native<DynamicEndpoint>(tp, state);
 
                 if (!ep)
                     return;
@@ -125,7 +125,7 @@ namespace xo {
                  * count, presence, under their declared types.  The
                  * receiver is printed in full above: here a ref
                  */
-                JsonMembers mem(this->pjson(), p_os);
+                JsonMembers mem(state);
                 mem.member_as<EndpointKind>("kind_", std::string(endpoint_kind_descr(ep->kind_)))
                     .member("uri_pattern_", ep->uri_pattern_)
                     .member_as<std::regex>("uri_regex_",
@@ -151,13 +151,11 @@ namespace xo {
              **/
             class JsonPrinter_WebsocketSink : public JsonPrinter {
             public:
-                JsonPrinter_WebsocketSink(PrintJson const * pjson) : JsonPrinter(pjson) {}
-
-                void print_json(TaggedPtr tp, std::ostream * p_os) const override {
-                    WebsocketSink const * sink = this->check_recover_native<WebsocketSink>(tp, p_os);
+                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                    WebsocketSink const * sink = this->check_recover_native<WebsocketSink>(tp, state);
 
                     if (sink)
-                        sink->print_json(*(this->pjson()), p_os);
+                        sink->print_json(state);
                 }
             };
 
@@ -167,11 +165,11 @@ namespace xo {
         provide_websock_json_printers(PrintJson * pjson)
         {
             pjson->provide_printer(Reflect::require<WebserverConfig>(),
-                                   std::make_unique<JsonPrinter_WebserverConfig>(pjson));
+                                   std::make_unique<JsonPrinter_WebserverConfig>());
             pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
-                                   std::make_unique<JsonPrinter_DynamicEndpoint>(pjson));
+                                   std::make_unique<JsonPrinter_DynamicEndpoint>());
             pjson->provide_printer(Reflect::require<WebsocketSink>(),
-                                   std::make_unique<JsonPrinter_WebsocketSink>(pjson));
+                                   std::make_unique<JsonPrinter_WebsocketSink>());
             /* types private to one file, printed there -- including the
              * server: a Webserver* is reflected as its actual type,
              * WebserverImpl (SelfTaggingDisplayable)

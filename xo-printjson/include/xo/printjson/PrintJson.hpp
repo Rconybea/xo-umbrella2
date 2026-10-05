@@ -6,6 +6,7 @@
 #pragma once
 
 #include "JsonPrinter.hpp"
+#include "JsonPrintState.hpp"
 #include <xo/reflectable2/FopTdx.hpp>
 #include <xo/reflect/SelfTagging.hpp>
 #include <xo/reflect/TypeDrivenMap.hpp>
@@ -123,9 +124,6 @@ namespace xo {
                 this->provide_printer(td->id(), std::move(p));
             }
 
-            /* write json representation for tp on *p_os */
-            void print_aux(TaggedPtr tp, std::ostream * p_os) const;
-
             /** true iff a printer was provided for @p td (provide_printer) **/
             bool has_printer(TypeDescr td) const;
 
@@ -134,6 +132,12 @@ namespace xo {
             virtual TaggedRcptr self_tp();
 
         private:
+            /* finds a type's printer */
+            friend class JsonPrintState;
+
+            /** the printer provided for type @p id, or nullptr **/
+            JsonPrinter const * lookup_printer(TypeId id) const;
+
             /* provide printers for common basic types */
             void provide_std_printers();
 
