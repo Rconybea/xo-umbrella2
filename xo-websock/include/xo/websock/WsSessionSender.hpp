@@ -11,6 +11,8 @@
 #include <string>
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     namespace web {
         /** @brief sends to one websocket session of a webserver: its router's
          *  replies, and frames from every sink that router makes.
@@ -52,6 +54,12 @@ namespace xo {
 
             /** stop delivering; idempotent **/
             void close() { open_.store(false); }
+
+            /** describe this sender to xo-reflect.  Defined only for the
+             *  production target, WebserverImpl (Webserver.cpp); a member
+             *  of the class, so it can name private members
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
 
         private:
             /* reads private members, for "_members_" (Webserver.cpp) */

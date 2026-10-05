@@ -424,6 +424,13 @@
         "_members_" : 
         [
           {
+            "_canonical_type_" : "long unsigned int",
+            "_metatype_" : "atomic",
+            "_name_" : "session_id_",
+            "_short_type_" : "long unsigned int",
+            "_value_" : 1
+          },
+          {
             "_canonical_type_" : "xo::web::WebserverImpl*",
             "_metatype_" : "pointer",
             "_name_" : "target_",
@@ -432,13 +439,6 @@
             {
               "_ref_" : 1
             }
-          },
-          {
-            "_canonical_type_" : "long unsigned int",
-            "_metatype_" : "atomic",
-            "_name_" : "session_id_",
-            "_short_type_" : "long unsigned int",
-            "_value_" : 1
           },
           {
             "_canonical_type_" : "std::atomic<bool>",
@@ -561,6 +561,13 @@
         "_members_" : 
         [
           {
+            "_canonical_type_" : "long unsigned int",
+            "_metatype_" : "atomic",
+            "_name_" : "session_id_",
+            "_short_type_" : "long unsigned int",
+            "_value_" : 2
+          },
+          {
             "_canonical_type_" : "xo::web::WebserverImpl*",
             "_metatype_" : "pointer",
             "_name_" : "target_",
@@ -569,13 +576,6 @@
             {
               "_ref_" : 1
             }
-          },
-          {
-            "_canonical_type_" : "long unsigned int",
-            "_metatype_" : "atomic",
-            "_name_" : "session_id_",
-            "_short_type_" : "long unsigned int",
-            "_value_" : 2
           },
           {
             "_canonical_type_" : "std::atomic<bool>",

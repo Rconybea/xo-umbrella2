@@ -616,10 +616,11 @@ namespace xo {
 
                 /* its chosen C++ members: target_ a ref to the server */
                 Json::Value const & smem = sender["_members_"];
-                REQUIRE(smem[0]["_name_"].asString() == "target_");
-                REQUIRE(smem[0]["_value_"]["_ref_"].asInt() == root["_id_"].asInt());
-                REQUIRE(smem[1]["_name_"].asString() == "session_id_");
-                REQUIRE(smem[1]["_value_"].asUInt64() == v[k]["session_id"].asUInt64());
+                /* reflected members first (session_id_), then the rest */
+                REQUIRE(smem[0]["_name_"].asString() == "session_id_");
+                REQUIRE(smem[0]["_value_"].asUInt64() == v[k]["session_id"].asUInt64());
+                REQUIRE(smem[1]["_name_"].asString() == "target_");
+                REQUIRE(smem[1]["_value_"]["_ref_"].asInt() == root["_id_"].asInt());
                 REQUIRE(smem[2]["_name_"].asString() == "open_");
                 REQUIRE(smem[2]["_value_"].asBool());
                 /* a template: its arguments follow */

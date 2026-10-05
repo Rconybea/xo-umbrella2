@@ -31,7 +31,8 @@ check(await ev(`${box("session:1:sender")}.classList.contains("expandable")`), "
 await ev(`${box("session:1:sender")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 const r = await rows_of("session:1:sender");
 console.log(" =  rows:", JSON.stringify(r));
-check(JSON.stringify(r) === JSON.stringify(["target_: (→)", "session_id_: 1", "open_: true"]), "three rows");
+// reflected members first (session_id_), then the rest (xo-printjson#06)
+check(JSON.stringify(r) === JSON.stringify(["session_id_: 1", "target_: (→)", "open_: true"]), "three rows");
 const ends = await ends_from("session:1:sender");
 check(JSON.stringify(ends) === JSON.stringify(["server"]), "target_ -> the server box: " + JSON.stringify(ends));
 // ownership still decides the layering: the server above its sessions

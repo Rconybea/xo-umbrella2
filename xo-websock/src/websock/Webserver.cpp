@@ -1054,13 +1054,14 @@ namespace xo {
                     .key("session_id", x->session_id())
                     .key("open", x->is_open());
 
-                /* chosen C++ members (.xo-backlog/xo-websock/issues/13).  The
-                 * server is printed in full elsewhere: a ref.  open_ an atomic
-                 * -- its value, under its declared type
+                /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
+                 * reflected one (session_id_); the server, printed in full
+                 * elsewhere, as a ref; open_ an atomic -- its value, under its
+                 * declared type
                  */
                 obj.members()
+                    .reflected_members(tp, "_")
                     .member_ref<WebserverImpl *>("target_", x->target_)
-                    .member("session_id_", x->session_id_)
                     .member_as<std::atomic<bool>>("open_", x->open_.load())
                     .end();
 
@@ -2275,8 +2276,23 @@ namespace xo {
 
             return tostr(rp<Webserver>(self));
         }
+        template <>
         void
-        Webserver::reflect_self(reflect::TypeDescrTable * /*table*/)
+        WsSessionSender<WebserverImpl>::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            StructReflector<WsSessionSenderImpl> sr;
+
+            if (sr.is_incomplete()) {
+                /* not target_: the server, printed in full elsewhere -- a
+                 * ref.  Not open_: an atomic, not reflectable yet
+                 * (.xo-backlog/xo-reflect/issues/04)
+                 */
+                REFLECT_MEMBER(sr, session_id);
+            }
+        } /*reflect_self*/
+
+        void
+        Webserver::reflect_self(reflect::TypeDescrTable * table)
         {
             /* no members yet: a member is added as a printer opts in to
              * show it (.xo-backlog/xo-websock/issues/13)
@@ -2284,7 +2300,7 @@ namespace xo {
             { StructReflector<Webserver> sr; }
             { StructReflector<WebserverImpl> sr; }
             { StructReflector<WebsocketSessionRecd> sr; }
-            { StructReflector<WsSessionSenderImpl> sr; }
+            WsSessionSenderImpl::reflect_self(table);
             { StructReflector<WsSessionTable<WebsocketSessionRecd>> sr; }
             { StructReflector<OutputBuffer> sr; }
         } /*reflect_self*/
