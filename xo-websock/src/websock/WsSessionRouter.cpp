@@ -431,7 +431,8 @@ namespace xo {
                         obj.key_open("sink") << "null";
                     }
 
-                    /* chosen C++ members (.xo-backlog/xo-websock/issues/13).
+                    /* chosen C++ members (.xo-backlog/xo-websock/issues/13):
+                     * the reflected ones (sub_id_, stream_name_), then the rest.
                      * endpoint_ and sink_ are printed in full elsewhere (the
                      * server's endpoints; "sink" above): refs, each by the
                      * address it prints at.
@@ -439,8 +440,7 @@ namespace xo {
                      * under its declared type
                      */
                     obj.members()
-                        .member("sub_id_", sub->sub_id_)
-                        .member("stream_name_", sub->stream_name_)
+                        .reflected_members(tp, "_")
                         .member_ref<rp<DynamicEndpoint>>("endpoint_", sub->endpoint_.get())
                         .member_as<CallbackId>("callback_id_", sub->callback_id_.id())
                         .member_ref<rp<WebsocketSink>>("sink_", sink)
@@ -521,10 +521,16 @@ namespace xo {
         void
         WsSessionRouter::Subscription::reflect_self(reflect::TypeDescrTable * /*table*/)
         {
-            /* no members yet: a member is added as a printer opts in to
-             * show it (.xo-backlog/xo-websock/issues/13)
-             */
             StructReflector<Subscription> sr;
+
+            if (sr.is_incomplete()) {
+                /* not endpoint_ or sink_: each printed in full elsewhere
+                 * (the server's endpoints; the subscription's "sink") -- refs.
+                 * Not callback_id_: CallbackId is not reflected
+                 */
+                REFLECT_MEMBER(sr, sub_id);
+                REFLECT_MEMBER(sr, stream_name);
+            }
         } /*reflect_self*/
 
         void
