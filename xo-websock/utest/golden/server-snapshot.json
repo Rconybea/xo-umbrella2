@@ -55,20 +55,6 @@
       }
     },
     {
-      "_canonical_type_" : "std::atomic<int>",
-      "_metatype_" : "atomic",
-      "_name_" : "listen_port_",
-      "_short_type_" : "atomic<int>",
-      "_value_" : "<redacted>"
-    },
-    {
-      "_canonical_type_" : "xo::web::Runstate",
-      "_metatype_" : "atomic",
-      "_name_" : "state_",
-      "_short_type_" : "Runstate",
-      "_value_" : "running"
-    },
-    {
       "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
       "_metatype_" : "pointer",
       "_name_" : "pjson_",
@@ -162,6 +148,20 @@
         "_name_" : "WsSessionTable",
         "_short_type_" : "WsSessionTable<WebsocketSessionRecd>"
       }
+    },
+    {
+      "_canonical_type_" : "std::atomic<int>",
+      "_metatype_" : "atomic",
+      "_name_" : "listen_port_",
+      "_short_type_" : "atomic<int>",
+      "_value_" : "<redacted>"
+    },
+    {
+      "_canonical_type_" : "xo::web::Runstate",
+      "_metatype_" : "atomic",
+      "_name_" : "state_",
+      "_short_type_" : "Runstate",
+      "_value_" : "running"
     }
   ],
   "_name_" : "Webserver",

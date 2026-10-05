@@ -623,6 +623,11 @@ namespace xo {
             friend JsonPrinter_Webserver;
 
         public:
+            /* describe the server to xo-reflect; a member, so it can name
+             * private members.  See Webserver::reflect_self
+             */
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             WebserverImpl(WebserverConfig const & ws_config,
                           rp<PrintJson> const & pjson)
                 : ws_config_{ws_config},
@@ -1199,18 +1204,17 @@ namespace xo {
                     *p_os << "]";
 
                     /* chosen C++ members, for the page's "expand"
-                     * (.xo-backlog/xo-websock/issues/13).  listen_port_ and
-                     * state_ are read as the accessors above read them
+                     * (.xo-backlog/xo-websock/issues/13): the reflected ones
+                     * (ws_config_, pjson_ -- in full here, its owner; routers
+                     * and sinks share it as refs -- url_router_,
+                     * session_table_), then listen_port_ and state_, read as
+                     * the accessors above read them
                      */
                     obj.members()
-                        .member("ws_config_", websrv->ws_config_)
+                        .reflected_members(tp, "_")
                         .member_as<std::atomic<std::int32_t>>("listen_port_", websrv->listen_port())
                         .member_as<Runstate>("state_",
                                              std::string(RunstateUtil::runstate_descr(websrv->state())))
-                        /* in full here, its owner; routers and sinks share it -- refs */
-                        .member("pjson_", websrv->pjson_)
-                        .member("url_router_", websrv->url_router_)
-                        .member("session_table_", websrv->session_table_)
                         .end();
 
                     obj.close();
@@ -2314,13 +2318,32 @@ namespace xo {
         } /*reflect_self*/
 
         void
+        WebserverImpl::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            StructReflector<WebserverImpl> sr;
+
+            if (sr.is_incomplete()) {
+                /* not listen_port_ (an atomic) or state_ (an enum): not
+                 * reflectable yet (.xo-backlog/xo-reflect/issues/04); the
+                 * printer reads them through their accessors.  pjson_ in
+                 * full: the server owns it; routers and sinks print refs
+                 */
+                REFLECT_MEMBER(sr, ws_config);
+                REFLECT_MEMBER(sr, pjson);
+                REFLECT_MEMBER(sr, url_router);
+                REFLECT_MEMBER(sr, session_table);
+            }
+        } /*reflect_self*/
+
+        void
         Webserver::reflect_self(reflect::TypeDescrTable * table)
         {
-            /* no members yet: a member is added as a printer opts in to
-             * show it (.xo-backlog/xo-websock/issues/13)
+            /* the interface, the session table and OutputBuffer: no
+             * members yet (.xo-backlog/xo-websock/issues/13).  The rest
+             * reflect their own, each in its own reflect_self
              */
             { StructReflector<Webserver> sr; }
-            { StructReflector<WebserverImpl> sr; }
+            WebserverImpl::reflect_self(table);
             WebsocketSessionRecd::reflect_self(table);
             WsSessionSenderImpl::reflect_self(table);
             { StructReflector<WsSessionTable<WebsocketSessionRecd>> sr; }
