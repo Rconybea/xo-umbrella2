@@ -71,7 +71,7 @@ namespace xo {
         }
 
         JsonMembers &
-        JsonMembers::reflected_members(TaggedPtr obj)
+        JsonMembers::reflected_members(TaggedPtr obj, std::string_view name_suffix)
         {
             TypeDescr td = obj.td();
 
@@ -84,11 +84,12 @@ namespace xo {
                 DeclaredType declared{mtd->canonical_name(), std::string(mtd->short_name()),
                                       mtd->metatype()};
                 TaggedPtr value = sm.get_member_tp(obj.address());
+                std::string name = tostr(sm.member_name(), name_suffix);
 
                 if (this->printable_value(value)) {
-                    this->write_value(sm.member_name(), declared, value, true /*identity*/);
+                    this->write_value(name, declared, value, true /*identity*/);
                 } else {
-                    this->write_error(sm.member_name(), declared,
+                    this->write_error(name, declared,
                                       tostr("type not reflected: ", mtd->canonical_name()));
                 }
             }

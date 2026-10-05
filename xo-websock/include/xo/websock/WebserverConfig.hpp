@@ -44,10 +44,6 @@ namespace xo {
             }
 
         private:
-            /* reads private members, for "_members_" (websock_json.cpp) */
-            friend class JsonPrinter_WebserverConfig;
-
-        private:
             /* accept incoming http requests on this port# */
             std::int32_t port_ = 0;
             /* if true,  support https */

@@ -141,9 +141,14 @@ namespace xo {
              *  (StructReflector), in the order xo-reflect holds them -- each
              *  as member() would write it: the declared type and metatype
              *  from reflection, the value with identity.  O(1) per member.
-             *  Nothing, if @p obj's type is not a reflected struct
+             *  Nothing, if @p obj's type is not a reflected struct.
+             *
+             *  Each entry's _name_ is its reflected name followed by
+             *  @p name_suffix: e.g. "_" restores the C++ name of a member
+             *  reflected by REFLECT_MEMBER (port_ reflects as "port")
              **/
-            JsonMembers & reflected_members(reflect::TaggedPtr obj);
+            JsonMembers & reflected_members(reflect::TaggedPtr obj,
+                                            std::string_view name_suffix = {});
 
             /** close the array **/
             void end();

@@ -63,12 +63,9 @@ namespace xo {
 
                 json::JsonObject obj = state.open_object("WebserverConfig", tp.td());
 
+                /* reflected as port, ..: "_members_" names C++ members, port_ */
                 obj.members()
-                    .member("port_", cfg->port_)
-                    .member("tls_flag_", cfg->tls_flag_)
-                    .member("host_check_flag_", cfg->host_check_flag_)
-                    .member("use_retry_flag_", cfg->use_retry_flag_)
-                    .member("mount_origin_", cfg->mount_origin_)
+                    .reflected_members(tp, "_")
                     .end();
 
                 obj.close();

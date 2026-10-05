@@ -344,6 +344,38 @@ namespace xo {
             REQUIRE(ss.str().find("\"_error_\": \"type not reflected: ") != std::string::npos);
         }
 
+        TEST_CASE("json-members-reflected-members-name-suffix", "[printjson][JsonMembers]") {
+            /* JmReflected reflects a_ as "a" (REFLECT_MEMBER): the suffix
+             * restores the C++ name
+             */
+            reflect_jm_types();
+
+            PrintJson pjson;
+
+            JmReflected r;
+
+            std::stringstream plain, suffixed;
+            {
+                JsonPrintState state(&pjson, &plain);
+                JsonMembers mem(state);
+                mem.reflected_members(xo::reflect::Reflect::make_tp(&r));
+                mem.end();
+            }
+            {
+                JsonPrintState state(&pjson, &suffixed);
+                JsonMembers mem(state);
+                mem.reflected_members(xo::reflect::Reflect::make_tp(&r), "_");
+                mem.end();
+            }
+
+            REQUIRE(plain.str() == ", \"_members_\": ["
+                    + entry("a", type_of<int>(), "atomic", "1") + ", "
+                    + entry("b", type_of<std::string>(), "atomic", "\"x\"") + "]");
+            REQUIRE(suffixed.str() == ", \"_members_\": ["
+                    + entry("a_", type_of<int>(), "atomic", "1") + ", "
+                    + entry("b_", type_of<std::string>(), "atomic", "\"x\"") + "]");
+        }
+
         TEST_CASE("json-members-reflected-members-of-a-non-struct", "[printjson][JsonMembers]") {
             PrintJson pjson;
             std::stringstream ss;
