@@ -654,26 +654,6 @@
             "_members_" : 
             [
               {
-                "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSender>",
-                "_metatype_" : "pointer",
-                "_name_" : "sender_",
-                "_short_type_" : "rp<WsSender>",
-                "_value_" : 
-                {
-                  "_ref_" : 12
-                }
-              },
-              {
-                "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
-                "_metatype_" : "pointer",
-                "_name_" : "pjson_",
-                "_short_type_" : "rp<PrintJson>",
-                "_value_" : 
-                {
-                  "_ref_" : 10
-                }
-              },
-              {
                 "_canonical_type_" : "std::__cxx11::basic_string<char>",
                 "_metatype_" : "atomic",
                 "_name_" : "stream_name_",
@@ -693,6 +673,26 @@
                 "_name_" : "n_in_ev_",
                 "_short_type_" : "unsigned int",
                 "_value_" : 0
+              },
+              {
+                "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSender>",
+                "_metatype_" : "pointer",
+                "_name_" : "sender_",
+                "_short_type_" : "rp<WsSender>",
+                "_value_" : 
+                {
+                  "_ref_" : 12
+                }
+              },
+              {
+                "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
+                "_metatype_" : "pointer",
+                "_name_" : "pjson_",
+                "_short_type_" : "rp<PrintJson>",
+                "_value_" : 
+                {
+                  "_ref_" : 10
+                }
               }
             ],
             "_name_" : "WebsocketSink",

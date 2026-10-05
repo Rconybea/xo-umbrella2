@@ -22,7 +22,9 @@ const rowtext = (id, name) => ev(`(() => { const t = [...${G(id)}.querySelectorA
 const SUB = "session:1:sub:0", K = "session:1:sub:0:sink";
 // the snapshot: the sink, with its members
 const mem = await ev(`last_event.server.sessions[0].subscriptions[0].sink._members_.map(m => m._name_)`);
-check(JSON.stringify(mem) === JSON.stringify(["sender_", "pjson_", "stream_name_", "sub_id_", "n_in_ev_"]), "the sink's printer lists its members: " + JSON.stringify(mem));
+// reflected members first (stream_name_, sub_id_, n_in_ev_), then the two
+// printed elsewhere, as refs (xo-printjson#06)
+check(JSON.stringify(mem) === JSON.stringify(["stream_name_", "sub_id_", "n_in_ev_", "sender_", "pjson_"]), "the sink's printer lists its members: " + JSON.stringify(mem));
 // hidden by default; the subscription's triangle shows it
 await ev(`show_box(${JSON.stringify(SUB)}); 1`); await ev(`settled()`);
 check(!(await ev(`!!${G(K)}`)), "hidden by default (a child of its subscription)");

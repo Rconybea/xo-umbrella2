@@ -161,15 +161,16 @@ namespace xo {
                 .key("seq", this->n_in_ev_)
                 .key_ref("sender", sender);
 
-            /* chosen C++ members (.xo-backlog/xo-websock/issues/13) */
+            /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
+             * reflected ones (stream_name_, sub_id_, n_in_ev_ -- the last
+             * read without a lock: a source may be sending now), then two
+             * printed in full elsewhere, as refs
+             */
             obj.members()
+                .reflected_members(Reflect::make_tp(const_cast<WebsocketSinkImpl *>(this)), "_")
                 .member_ref<rp<WsSender>>("sender_", sender)
                 /* the server's, shared: printed in full in the server's members */
                 .member_ref<rp<PrintJson>>("pjson_", this->pjson_.get())
-                .member("stream_name_", this->stream_name_)
-                .member("sub_id_", this->sub_id_)
-                /* read without a lock: a source may be sending now */
-                .member("n_in_ev_", this->n_in_ev_)
                 .end();
 
             obj.close();
@@ -224,8 +225,12 @@ namespace xo {
                 if (sr.is_incomplete()) {
                     sr.adopt_ancestors<WebsocketSink>();
 
-                    REFLECT_MEMBER(sr, sender);
-                    REFLECT_MEMBER(sr, pjson);
+                    /* not sender_ or pjson_ for now: each is printed in
+                     * full elsewhere (its session; the server), and print
+                     * places an object at first encounter -- so the
+                     * printer writes them as refs (member_ref)
+                     * (.xo-backlog/xo-printjson/issues/06)
+                     */
                     REFLECT_MEMBER(sr, stream_name);
                     REFLECT_MEMBER(sr, sub_id);
                     REFLECT_MEMBER(sr, n_in_ev);
