@@ -142,10 +142,17 @@ namespace xo {
         void
         DynamicEndpoint::reflect_self(reflect::TypeDescrTable * /*table*/)
         {
-            /* no members yet: a member is added as a printer opts in to
-             * show it (.xo-backlog/xo-websock/issues/13)
-             */
             StructReflector<DynamicEndpoint> sr;
+
+            if (sr.is_incomplete()) {
+                /* not kind_ (an enum), uri_regex_ or the std::functions:
+                 * not reflectable yet (.xo-backlog/xo-reflect/issues/04);
+                 * the printer summarizes them.  Not receiver_: printed in
+                 * full inline by the printer -- a ref
+                 */
+                REFLECT_MEMBER(sr, uri_pattern);
+                REFLECT_MEMBER(sr, var_v);
+            }
         } /*reflect_self*/
     } /*namespace web*/
 } /*namespace xo*/

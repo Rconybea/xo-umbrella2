@@ -117,18 +117,18 @@ namespace xo {
                     robj.close();
                 }
 
-                /* chosen C++ members (.xo-backlog/xo-websock/issues/13).
+                /* chosen C++ members (.xo-backlog/xo-websock/issues/13):
+                 * the reflected ones (uri_pattern_, var_v_), then the rest.
                  * Not printable as themselves -- the enum, the compiled
                  * regex, the std::functions -- so their names, capture
                  * count, presence, under their declared types.  The
                  * receiver is printed in full above: here a ref
                  */
                 obj.members()
+                    .reflected_members(tp, "_")
                     .member_as<EndpointKind>("kind_", std::string(endpoint_kind_descr(ep->kind_)))
-                    .member("uri_pattern_", ep->uri_pattern_)
                     .member_as<std::regex>("uri_regex_",
                                            std::to_string(ep->uri_regex_.mark_count()) + " captures")
-                    .member("var_v_", ep->var_v_)
                     .member_as<HttpHandler>("http_handler_",
                                             std::string(ep->http_handler_ ? "set" : "empty"))
                     .member_as<StreamSubscribeFn>("subscribe_fn_",

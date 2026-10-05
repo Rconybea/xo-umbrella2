@@ -174,13 +174,6 @@
       "_members_" : 
       [
         {
-          "_canonical_type_" : "xo::web::EndpointKind",
-          "_metatype_" : "atomic",
-          "_name_" : "kind_",
-          "_short_type_" : "EndpointKind",
-          "_value_" : "http"
-        },
-        {
           "_canonical_type_" : "std::__cxx11::basic_string<char>",
           "_metatype_" : "atomic",
           "_name_" : "uri_pattern_",
@@ -188,18 +181,25 @@
           "_value_" : "/status"
         },
         {
-          "_canonical_type_" : "std::__cxx11::basic_regex<char>",
-          "_metatype_" : "atomic",
-          "_name_" : "uri_regex_",
-          "_short_type_" : "basic_regex<char>",
-          "_value_" : "0 captures"
-        },
-        {
           "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
           "_metatype_" : "vector",
           "_name_" : "var_v_",
           "_short_type_" : "vector<string>",
           "_value_" : []
+        },
+        {
+          "_canonical_type_" : "xo::web::EndpointKind",
+          "_metatype_" : "atomic",
+          "_name_" : "kind_",
+          "_short_type_" : "EndpointKind",
+          "_value_" : "http"
+        },
+        {
+          "_canonical_type_" : "std::__cxx11::basic_regex<char>",
+          "_metatype_" : "atomic",
+          "_name_" : "uri_regex_",
+          "_short_type_" : "basic_regex<char>",
+          "_value_" : "0 captures"
         },
         {
           "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
@@ -245,13 +245,6 @@
       "_members_" : 
       [
         {
-          "_canonical_type_" : "xo::web::EndpointKind",
-          "_metatype_" : "atomic",
-          "_name_" : "kind_",
-          "_short_type_" : "EndpointKind",
-          "_value_" : "stream"
-        },
-        {
           "_canonical_type_" : "std::__cxx11::basic_string<char>",
           "_metatype_" : "atomic",
           "_name_" : "uri_pattern_",
@@ -259,18 +252,25 @@
           "_value_" : "/fw"
         },
         {
-          "_canonical_type_" : "std::__cxx11::basic_regex<char>",
-          "_metatype_" : "atomic",
-          "_name_" : "uri_regex_",
-          "_short_type_" : "basic_regex<char>",
-          "_value_" : "0 captures"
-        },
-        {
           "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
           "_metatype_" : "vector",
           "_name_" : "var_v_",
           "_short_type_" : "vector<string>",
           "_value_" : []
+        },
+        {
+          "_canonical_type_" : "xo::web::EndpointKind",
+          "_metatype_" : "atomic",
+          "_name_" : "kind_",
+          "_short_type_" : "EndpointKind",
+          "_value_" : "stream"
+        },
+        {
+          "_canonical_type_" : "std::__cxx11::basic_regex<char>",
+          "_metatype_" : "atomic",
+          "_name_" : "uri_regex_",
+          "_short_type_" : "basic_regex<char>",
+          "_value_" : "0 captures"
         },
         {
           "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
