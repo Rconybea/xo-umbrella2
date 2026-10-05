@@ -21,6 +21,8 @@ namespace xo {
         json::PrintJson::reflect_self(reflect_appcx.type_table());
 
         this->print_json_ = PrintJsonSingleton::instance();
+        /* the singleton: an application has one PrintJson */
+        this->print_json_->assign_max_depth(cfg.max_depth_);
     }
 
 } /*namespace xo*/

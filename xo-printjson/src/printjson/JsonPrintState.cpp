@@ -6,7 +6,11 @@
 #include "JsonPrintState.hpp"
 #include "PrintJson.hpp"
 #include "type_keys.hpp"
+#include <xo/indentlog2/print/tostr.hpp>
+#include <xo/arena/backtrace.hpp>
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
+#include <cstdlib>
+#include <iostream>
 
 namespace xo {
     using xo::reflect::Metatype;
@@ -16,11 +20,29 @@ namespace xo {
 
     namespace json {
         /* one scope in from namespace xo: see PrintJson.cpp */
+        using xo::pp::tostr;
         using xo::pp::xtag;
 
         JsonPrintState::JsonPrintState(PrintJson const * pjson, std::ostream * p_os)
-            : pjson_{pjson}, p_os_{p_os}
+            : pjson_{pjson}, p_os_{p_os}, max_depth_{pjson->max_depth()}
         {}
+
+        void
+        JsonPrintState::abort_too_deep(TaggedPtr tp) const
+        {
+            std::string why
+                = tostr("PrintJson: nesting would exceed max_depth (",
+                        this->max_depth_,
+                        ") printing ",
+                        (tp.td() ? tp.td()->canonical_name() : std::string("<null td>")),
+                        ". Cyclic object graph, or graph nested deeper than this limit");
+
+            std::cerr << why << std::endl;
+            print_backtrace(true /*demangle_flag*/);
+            /* again, below what may be thousands of frames */
+            std::cerr << why << std::endl;
+            std::abort();
+        } /*abort_too_deep*/
 
         bool
         JsonPrintState::has_printer(TypeDescr td) const
@@ -29,6 +51,21 @@ namespace xo {
         } /*has_printer*/
 
         namespace {
+            /** one print() call in progress, for its lifetime: also when a
+             *  printer throws (see PrintJson::validate_tp)
+             **/
+            class DepthScope {
+            public:
+                explicit DepthScope(std::uint32_t * p_depth) : p_depth_{p_depth} { ++*p_depth_; }
+                ~DepthScope() { --*p_depth_; }
+
+                DepthScope(DepthScope const &) = delete;
+                DepthScope & operator=(DepthScope const &) = delete;
+
+            private:
+                std::uint32_t * p_depth_;
+            };
+
             /* this will be used when TaggedPtr refers to a pointer-like value,
              * e.g.
              *    xo::ref::rp<T>
@@ -131,6 +168,10 @@ namespace xo {
         void
         JsonPrintState::print(TaggedPtr tp)
         {
+            if (this->depth_ >= this->max_depth_)
+                this->abort_too_deep(tp);
+
+            DepthScope scope(&this->depth_);
             std::ostream * p_os = this->p_os_;
 
             if (tp.td()) {

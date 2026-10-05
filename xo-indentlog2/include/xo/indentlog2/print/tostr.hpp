@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "../LogStreambuf.hpp"
-#include "../LogBuffer.hpp"
-#include "../TempArena.hpp"
+#include "xo/indentlog2/LogStreambuf.hpp"
+#include "xo/indentlog2/LogBuffer.hpp"
+#include "xo/indentlog2/TempArena.hpp"
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/pretty.hpp>
 #include <xo/reflectutil/typeseq.hpp>
@@ -18,23 +18,6 @@
 #include <streambuf>
 
 namespace xo::pp {
-
-#ifdef OBSOLETE
-    struct fixed_streambuf : std::streambuf {
-        fixed_streambuf(char* p, std::size_t n) {
-            this->setp(p, p + n);        // put area: [p, p+n)
-            this->setg(p, p, p + n);     // get area, if you also read
-        }
-        // Non-expandable: signal failure instead of growing.
-        int_type overflow(int_type) override { return traits_type::eof(); }
-
-        // Expose what was written.
-        std::string str() const {
-            return std::string(pbase(), pptr());   // [start, current)
-        }
-        std::size_t size() const { return pptr() - pbase(); }
-    };
-#endif
 
     /** Render @p args (concatenated, no separator) to a std::string,
      *  This implementation relies on a thread-local temporary arena

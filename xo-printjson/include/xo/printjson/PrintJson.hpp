@@ -20,6 +20,13 @@ namespace xo {
          *
          *  Expect to need at most one of these in an application.
          *  See also PrintJsonSingleton
+         *
+         *  Contract:
+         *  - a print nests at most max_depth() deep.
+         *    Past that it prints a diagnosis with backtrace, and aborts.
+         *  - a json printer recurses only through the JsonPrintState it is
+         *    given; calling an entry point from a printer is a bug, and
+         *    aborts where XO_PRINTJSON_REENTRY_CHECK is defined
          **/
         class PrintJson : public reflect::SelfTagging {
         public:
@@ -39,8 +46,19 @@ namespace xo {
              **/
             static void reflect_self(reflect::TypeDescrTable * table);
 
+            /** nesting limit for a new PrintJson: see max_depth() **/
+            static constexpr std::uint32_t c_default_max_depth = 1000;
+
             PrintJson();
             ~PrintJson() = default;
+
+            /** a print aborts, with a backtrace, rather than nest deeper
+             *  than this (JsonPrintState::print).  Depth counts
+             *  JsonPrintState::print calls in progress: a struct holding a
+             *  pointer to a struct nests two deep (struct, pointer)
+             **/
+            std::uint32_t max_depth() const { return max_depth_; }
+            void assign_max_depth(std::uint32_t z) { max_depth_ = z; }
 
             template<typename T>
             void print(T const & x_arg, std::ostream * p_os) const {
@@ -144,6 +162,8 @@ namespace xo {
         private:
             /* map contains specialized printers for specific c++ types */
             TypeDrivenMap printer_map_;
+            /* see max_depth() */
+            std::uint32_t max_depth_ = c_default_max_depth;
         }; /*PrintJson*/
 
     } /*namespace json*/
