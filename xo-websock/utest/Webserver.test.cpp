@@ -57,6 +57,17 @@ namespace xo {
                 Webserver * server_ = nullptr;
             };
 
+            /** the value of member @p name of a reflected struct's json:
+             *  its "_members_" entry (.xo-backlog/xo-printjson/issues/07)
+             **/
+            Json::Value const & member_value(Json::Value const & obj, std::string const & name) {
+                for (Json::Value const & m : obj["_members_"])
+                    if (m["_name_"].asString() == name)
+                        return m["_value_"];
+                static Json::Value const none;
+                return none;
+            }
+
             Json::Value parse_json(std::string const & text) {
                 Json::Value root;
                 JSONCPP_STRING err;
@@ -214,7 +225,7 @@ namespace xo {
             std::stringstream ss;
             PrintJsonSingleton::instance()->print(holder, &ss);
             Json::Value root = parse_json(ss.str());
-            Json::Value const & eps = root["server"]["endpoints"];
+            Json::Value const & eps = member_value(root, "server")["endpoints"];
             REQUIRE(eps.size() == 2);
 
             /* http /status: none */
@@ -250,7 +261,7 @@ namespace xo {
             PrintJsonSingleton::instance()->print(holder, &ss);
 
             Json::Value root = parse_json(ss.str());
-            Json::Value const & srv = root["server"];
+            Json::Value const & srv = member_value(root, "server");
 
             INFO("json: " << ss.str());
             REQUIRE(srv["_name_"].asString() == "Webserver");

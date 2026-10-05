@@ -16,7 +16,7 @@ await sleep(500);
 const G = (id) => `[...document.querySelectorAll("g.node")].find(g => g.__data__.id === ${JSON.stringify(id)})`;
 const R = "stream:/introspect:receiver";
 // the snapshot carries it; /demo (no receiver) doesn't
-const recv = await ev(`last_event.server.endpoints.map(e => [e.pattern, e.receiver && e.receiver._short_type_, e.receiver && e.receiver._canonical_type_])`);
+const recv = await ev(`member_value(last_event, "server").endpoints.map(e => [e.pattern, e.receiver && e.receiver._short_type_, e.receiver && e.receiver._canonical_type_])`);
 console.log("   receivers:", JSON.stringify(recv));
 check(recv.some(r => r[0] === "/introspect" && r[1] === "IntrospectReceiver" && /IntrospectReceiver$/.test(r[2])), "/introspect's receiver: IntrospectReceiver, by its own type");
 check(recv.filter(r => r[0] !== "/introspect").every(r => r[1] === null), "the other endpoints: no receiver");

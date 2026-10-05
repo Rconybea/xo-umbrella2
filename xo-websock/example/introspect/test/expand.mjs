@@ -58,9 +58,10 @@ fs.writeFileSync(out1, Buffer.from((await call("Page.captureScreenshot", {format
 
 // constructed: a ref member (to an endpoint), and a nested member with members
 await ev(`(() => { const e = JSON.parse(JSON.stringify(last_event));
-  const ep = e.server.endpoints[0];
-  e.server._members_.push({_name_: "first_endpoint_", _canonical_type_: "xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>", _short_type_: "rp<DynamicEndpoint>", _metatype_: "pointer", _value_: {_ref_: ep._id_}});
-  e.server._members_.push({_name_: "nested_", _canonical_type_: "xo::web::Outer", _short_type_: "Outer", _metatype_: "struct",
+  const srv = member_value(e, "server");
+  const ep = srv.endpoints[0];
+  srv._members_.push({_name_: "first_endpoint_", _canonical_type_: "xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>", _short_type_: "rp<DynamicEndpoint>", _metatype_: "pointer", _value_: {_ref_: ep._id_}});
+  srv._members_.push({_name_: "nested_", _canonical_type_: "xo::web::Outer", _short_type_: "Outer", _metatype_: "struct",
      _value_: {_name_: "Outer", _canonical_type_: "xo::web::Outer", _short_type_: "Outer", _members_: [{_name_: "inner_", _canonical_type_: "int", _short_type_: "int", _metatype_: "atomic", _value_: 42}]}});
   last_event = e; draw(e); return 1; })()`);
 await sleep(800);

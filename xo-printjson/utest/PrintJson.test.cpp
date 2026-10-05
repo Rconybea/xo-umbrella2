@@ -43,6 +43,21 @@ namespace xo {
                 + xo::reflect::TypeDescrBase::make_short_name(canonical) + "\"";
         }
 
+        /** one "_members_" entry, as the struct printer writes it: member
+         *  @p name, declared type T (metatype @p metatype), printed as
+         *  @p value
+         **/
+        template <typename T>
+        std::string mentry(char const * name, char const * metatype, std::string const & value) {
+            std::string canonical(xo::reflect::type_name<T>());
+            return "{\"_name_\": \"" + std::string(name) + "\""
+                + ", \"_canonical_type_\": \"" + canonical + "\""
+                + ", \"_short_type_\": \""
+                + xo::reflect::TypeDescrBase::make_short_name(canonical) + "\""
+                + ", \"_metatype_\": \"" + metatype + "\""
+                + ", \"_value_\": " + value + "}";
+        }
+
         namespace {
             struct TestStruct0 {};
 
@@ -104,10 +119,13 @@ namespace xo {
             std::stringstream ss;
             print_json.print(holder, &ss);
 
+            std::string const target_json
+                = ("{\"_name_\": \"DPtrTarget\"" + type_member<DPtrTarget>()
+                   + ", \"_id_\": 2, \"_members_\": [" + mentry<double>("v", "atomic", "1.5") + "]}");
+
             REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
-                                 + ", \"_id_\": 1"
-                                 + ", \"p\": {\"_name_\": \"DPtrTarget\"" + type_member<DPtrTarget>()
-                                 + ", \"_id_\": 2, \"v\": 1.5}}"));
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<const DPtrTarget *>("p", "pointer", target_json) + "]}"));
         } /*TEST_CASE(print-json-raw-pointer-member)*/
 
         TEST_CASE("print-json-null-raw-pointer-member", "[printjson][rawpointer]") {
@@ -125,7 +143,8 @@ namespace xo {
             print_json.print(holder, &ss);
 
             REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
-                                 + ", \"_id_\": 1, \"p\": null}"));
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<const DPtrTarget *>("p", "pointer", "null") + "]}"));
         } /*TEST_CASE(print-json-null-raw-pointer-member)*/
 
         TEST_CASE("print-json-null-c-string", "[printjson][rawpointer]") {
@@ -213,8 +232,9 @@ namespace xo {
 
             print_json.print(tp, &ss);
 
+            /* no members: still "_members_", so the shape never varies */
             REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct0\"" + type_member<TestStruct0>()
-                                 + ", \"_id_\": 1}"));
+                                 + ", \"_id_\": 1, \"_members_\": []}"));
         } /*TEST_CASE(print-json-empty-struct)*/
 
         namespace {
@@ -256,16 +276,16 @@ namespace xo {
             print_json.print(tp, &ss);
 
             REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct1\"" + type_member<TestStruct1>()
-                                 + ", \"_id_\": 1"
-                                   ", \"i16\": -1"
-                                   ", \"u16\": 2"
-                                   ", \"i32\": -3"
-                                   ", \"u32\": 4"
-                                   ", \"i64\": -5"
-                                   ", \"u64\": 6"
-                                   ", \"f32\": 1.23"
-                                   ", \"f64\": 4.56"
-                                   ", \"s\": \"hello, world\"}"));
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<std::int16_t>("i16", "atomic", "-1") + ", "
+                                 + mentry<std::uint16_t>("u16", "atomic", "2") + ", "
+                                 + mentry<std::int32_t>("i32", "atomic", "-3") + ", "
+                                 + mentry<std::uint32_t>("u32", "atomic", "4") + ", "
+                                 + mentry<std::int64_t>("i64", "atomic", "-5") + ", "
+                                 + mentry<std::uint64_t>("u64", "atomic", "6") + ", "
+                                 + mentry<float>("f32", "atomic", "1.23") + ", "
+                                 + mentry<double>("f64", "atomic", "4.56") + ", "
+                                 + mentry<std::string>("s", "atomic", "\"hello, world\"") + "]}"));
         } /*TEST_CASE(print-json-s1)*/
 
         TEST_CASE("print-json-v1", "[printjson]") {

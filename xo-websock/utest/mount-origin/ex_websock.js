@@ -721,14 +721,24 @@ class TimeseriesCtl extends Controller {
 
 }; /*TimeseriesCtl*/
 
+/* the value of member `name` of reflected struct `obj`, as printjson writes
+ * it: its "_members_" entry (.xo-backlog/xo-printjson/issues/07).  An event
+ * such as UpxEvent prints {"_name_", .., "_members_": [{"_name_": "tm", ..,
+ * "_value_": ..}, ..]}
+ */
+function mv(obj, name) {
+    const m = (obj && obj._members_ || []).find(x => x._name_ === name);
+    return m ? m._value_ : undefined;
+}
+
 /* controller for timeseries graph,  from uri [/dyn/uls/snap] + [/ws/uls] */
 var uls_ctl = false;
 var uls_ctl_enabled = true;
 
 if (uls_ctl_enabled) {
     uls_ctl = new TimeseriesCtl('/dyn/uls/snap',
-				[new DataTraits([(ev) => ev.tm, "datetime"],
-						[(ev) => ev.upx, "float"])]);
+				[new DataTraits([(ev) => mv(ev, "tm"), "datetime"],
+						[(ev) => mv(ev, "upx"), "float"])]);
 
     uls_ctl.require_gui(d3.select("#uls"));
     uls_ctl.request();
@@ -740,19 +750,19 @@ var kfs_ctl_enabled = true;
 
 if (kfs_ctl_enabled) {
     kfs_ctl = new TimeseriesCtl('/dyn/kfs/snap',
-				[new DataTraits([(ev) => ev.tk,
+				[new DataTraits([(ev) => mv(ev, "tk"),
 						 "datetime"],
-						[(ev) => { return ev.x[0]; },
+						[(ev) => { return mv(ev, "x")[0]; },
 						 "float"]),
 				 /* 2.sigma below estimate */
-				 new DataTraits([(ev) => ev.tk,
+				 new DataTraits([(ev) => mv(ev, "tk"),
 						 "datetime"],
-						[(ev) => { return Math.max(0.0, ev.x[0] - 2.0 * Math.sqrt(ev.P[0][0])); },
+						[(ev) => { return Math.max(0.0, mv(ev, "x")[0] - 2.0 * Math.sqrt(mv(ev, "P")[0][0])); },
 						 "float"]),
 				 /* 2.sigma above estimate */
-				 new DataTraits([(ev) => ev.tk,
+				 new DataTraits([(ev) => mv(ev, "tk"),
 						 "datetime"],
-						[(ev) => { return Math.min(1.0, ev.x[0] + 2.0 * Math.sqrt(ev.P[0][0])); },
+						[(ev) => { return Math.min(1.0, mv(ev, "x")[0] + 2.0 * Math.sqrt(mv(ev, "P")[0][0])); },
 						 "float"])
 				]);
     

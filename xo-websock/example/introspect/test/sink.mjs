@@ -21,7 +21,7 @@ const rowtext = (id, name) => ev(`(() => { const t = [...${G(id)}.querySelectorA
   return t ? [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join("") : null; })()`);
 const SUB = "session:1:sub:0", K = "session:1:sub:0:sink";
 // the snapshot: the sink, with its members
-const mem = await ev(`last_event.server.sessions[0].subscriptions[0].sink._members_.map(m => m._name_)`);
+const mem = await ev(`member_value(last_event, "server").sessions[0].subscriptions[0].sink._members_.map(m => m._name_)`);
 // reflected members first (stream_name_, sub_id_, n_in_ev_), then the two
 // printed elsewhere, as refs (xo-printjson#06)
 check(JSON.stringify(mem) === JSON.stringify(["stream_name_", "sub_id_", "n_in_ev_", "sender_", "pjson_"]), "the sink's printer lists its members: " + JSON.stringify(mem));

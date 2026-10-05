@@ -102,6 +102,35 @@ namespace xo {
                     + (id ? ", \"_id_\": " + std::to_string(id) : std::string());
             }
 
+            /** one "_members_" entry: member @p name, declared type T
+             *  (metatype @p metatype), printed as @p value
+             **/
+            template <typename T>
+            std::string entry(char const * name, char const * metatype, std::string const & value) {
+                std::string canonical(xo::reflect::type_name<T>());
+                return "{\"_name_\": \"" + std::string(name) + "\""
+                    + ", \"_canonical_type_\": \"" + canonical + "\""
+                    + ", \"_short_type_\": \""
+                    + xo::reflect::TypeDescrBase::make_short_name(canonical) + "\""
+                    + ", \"_metatype_\": \"" + metatype + "\""
+                    + ", \"_value_\": " + value + "}";
+            }
+
+            /** a whole object: @p head (from head()), then its members **/
+            std::string object(std::string const & head, std::vector<std::string> const & entries) {
+                std::string retval = head + ", \"_members_\": [";
+                for (std::size_t i = 0; i < entries.size(); ++i)
+                    retval += (i ? ", " : "") + entries[i];
+                return retval + "]}";
+            }
+
+            /** a Node, members-style **/
+            std::string node(int id, int value, std::string const & next) {
+                return object(head<Node>("Node", id),
+                              {entry<int>("id", "atomic", std::to_string(value)),
+                               entry<Node *>("next", "pointer", next)});
+            }
+
             /** occurrences of @p pat in @p s **/
             std::size_t count(std::string const & s, std::string const & pat) {
                 std::size_t n = 0;
@@ -189,8 +218,7 @@ namespace xo {
             std::stringstream ss;
             print_json.print(a, &ss);
 
-            REQUIRE(ss.str() == (head<Node>("Node", 1) + ", \"id\": 1, \"next\": "
-                                 + head<Node>("Node", 2) + ", \"id\": 2, \"next\": null}}"));
+            REQUIRE(ss.str() == node(1, 1, node(2, 2, "null")));
         } /*TEST_CASE(print-json-chain-within-depth-limit)*/
 
         TEST_CASE("print-json-depth-limit-aborts", "[printjson][cycle]") {
@@ -226,8 +254,7 @@ namespace xo {
             std::stringstream ss;
             print_json.print(a, &ss);
 
-            REQUIRE(ss.str() == (head<Node>("Node", 1) + ", \"id\": 1, \"next\": "
-                                 + head<Node>("Node", 2) + ", \"id\": 2, \"next\": {\"_ref_\": 1}}}"));
+            REQUIRE(ss.str() == node(1, 1, node(2, 2, "{\"_ref_\": 1}")));
         } /*TEST_CASE(print-json-cycle)*/
 
         TEST_CASE("print-json-self-loop", "[printjson][cycle]") {
@@ -241,7 +268,7 @@ namespace xo {
             std::stringstream ss;
             print_json.print(a, &ss);
 
-            REQUIRE(ss.str() == (head<Node>("Node", 1) + ", \"id\": 1, \"next\": {\"_ref_\": 1}}"));
+            REQUIRE(ss.str() == node(1, 1, "{\"_ref_\": 1}"));
         } /*TEST_CASE(print-json-self-loop)*/
 
         TEST_CASE("print-json-diamond", "[printjson][cycle]") {
@@ -256,9 +283,14 @@ namespace xo {
             std::stringstream ss;
             print_json.print(a, &ss);
 
-            REQUIRE(ss.str() == (head<Fork>("Fork", 1) + ", \"id\": 1, \"left\": "
-                                 + head<Fork>("Fork", 2) + ", \"id\": 2, \"left\": null, \"right\": null}"
-                                 + ", \"right\": {\"_ref_\": 2}}"));
+            auto fork = [](int id, std::string const & left, std::string const & right) {
+                return object(head<Fork>("Fork", id),
+                              {entry<int>("id", "atomic", std::to_string(id)),
+                               entry<Fork *>("left", "pointer", left),
+                               entry<Fork *>("right", "pointer", right)});
+            };
+
+            REQUIRE(ss.str() == fork(1, fork(2, "null", "null"), "{\"_ref_\": 2}"));
         } /*TEST_CASE(print-json-diamond)*/
 
         TEST_CASE("print-json-diamond-chain-is-linear", "[printjson][cycle]") {
@@ -297,8 +329,7 @@ namespace xo {
             ss << " ";
             state.print(xo::reflect::Reflect::make_tp(&a));
 
-            REQUIRE(ss.str() == ("{\"_ref_\": 1} " + head<Node>("Node", 1)
-                                 + ", \"id\": 1, \"next\": null}"));
+            REQUIRE(ss.str() == "{\"_ref_\": 1} " + node(1, 1, "null"));
         } /*TEST_CASE(print-json-ref-before-print)*/
 
         TEST_CASE("print-json-first-member-shares-address", "[printjson][cycle]") {
@@ -315,8 +346,11 @@ namespace xo {
             std::stringstream ss;
             print_json.print(o, &ss);
 
-            REQUIRE(ss.str() == (head<Outer>("Outer", 1) + ", \"in\": "
-                                 + head<Inner>("Inner", 0) + ", \"v\": 7}, \"x\": 8}"));
+            REQUIRE(ss.str() == object(head<Outer>("Outer", 1),
+                                       {entry<Inner>("in", "struct",
+                                                     object(head<Inner>("Inner", 0),
+                                                            {entry<int>("v", "atomic", "7")})),
+                                        entry<int>("x", "atomic", "8")}));
         } /*TEST_CASE(print-json-first-member-shares-address)*/
 
         TEST_CASE("validate-cycle-terminates", "[printjson][cycle]") {

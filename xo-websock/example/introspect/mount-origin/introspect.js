@@ -149,6 +149,15 @@ document.getElementById("show-legend").onchange = (ev) => {
 // graph both need this.  .xo-backlog/xo-websock/issues/13, step 2.
 const elk = new ELK();
 
+/** the value of member @p name of reflected struct @p obj, as printjson
+ *  writes it: its "_members_" entry (.xo-backlog/xo-printjson/issues/07);
+ *  undefined if there is none
+ **/
+function member_value(obj, name) {
+    const m = (obj && obj._members_ || []).find(x => x._name_ === name);
+    return m ? m._value_ : undefined;
+}
+
 /** the object graph for snapshot @p event: {nodes, edges}.  Edge kinds:
  *  "link"  the server's endpoints and sessions
  *  "owns"  a session's sender and subscriptions; an endpoint's receiver;
@@ -157,7 +166,7 @@ const elk = new ELK();
  *  ref edge shows it)
  **/
 function layout(event) {
-    const snap = event.server;
+    const snap = member_value(event, "server");   // an IntrospectSnapshot
 
     const nodes = [];
     const edges = [];

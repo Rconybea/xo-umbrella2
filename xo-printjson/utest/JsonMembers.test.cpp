@@ -149,7 +149,9 @@ namespace xo {
             auto jm = [](int id) {
                 return "{\"_name_\": \"JmReflected\", \"_canonical_type_\": \"" + type_of<JmReflected>()
                     + "\", \"_short_type_\": \"JmReflected\", \"_id_\": " + std::to_string(id)
-                    + ", \"a\": 1, \"b\": \"x\"}";
+                    + ", \"_members_\": ["
+                    + entry("a", type_of<int>(), "atomic", "1") + ", "
+                    + entry("b", type_of<std::string>(), "atomic", "\"x\"") + "]}";
             };
 
             REQUIRE(ss.str() == ", \"_members_\": ["

@@ -9,10 +9,12 @@
  * can be filled with a REAL representation (DFloat) and then rendered --
  * xo-printjson's own utest has facet but no D-type worth putting in a slot.
  *
- * What is pinned here is a WIRE CONTRACT: the key names below are what a
- * consumer outside this process parses.  So they are asserted literally rather
- * than derived from the c++ member names -- a member rename must not silently
- * rename a key.
+ * What is pinned here is the frame's json shape, so that changing it is a
+ * deliberate act.  Nothing outside this repo relies on it (RC, 2026-10-05:
+ * when MemorySizeInfo moved to the members-style "_members_" format,
+ * .xo-backlog/xo-printjson/issues/07).  Its member names are still asserted
+ * literally rather than derived from the c++ member names -- a member rename
+ * must not silently rename a key.
  *
  * Expectations are OBSERVED, never predicted.
  */
@@ -105,7 +107,7 @@ namespace xo {
             REQUIRE(td->metatype() == Metatype::mt_struct);
             REQUIRE(td->n_child_fixed() == 7);
 
-            /* the wire keys, asserted literally: "name", not "resource_name".
+            /* the member names, asserted literally: "name", not "resource_name".
              * Members are named explicitly at registration so house style for
              * a c++ member cannot leak into the schema.
              *
@@ -127,9 +129,9 @@ namespace xo {
             std::stringstream ss;
             print_json.print(*fw.get(), &ss);
 
-            /* the whole frame, byte for byte.  Brittle on purpose: this IS the
-             * wire contract, so any change to it should require someone to
-             * look at what a consumer would now receive.  508 bytes for an
+            /* the whole frame, byte for byte.  Brittle on purpose: any change
+             * to it should require someone to look at what a consumer would
+             * now receive.  508 bytes for an
              * empty flywheel -- worth knowing before choosing a frame rate.
              *
              * Note "_name_": printjson tags every struct with its c++ type.
@@ -138,13 +140,17 @@ namespace xo {
              */
             /* addresses are not reproducible under ASLR, so the frame cannot
              * be compared byte-for-byte as it stands.  Redact just those, and
-             * compare the rest exactly -- the wire contract stays pinned, and
-             * a changed key or a reordered field still fails.
+             * compare the rest exactly -- the shape stays pinned, and a
+             * changed key or a reordered field still fails.
+             */
+            /* a pool's members are "_members_" entries (members-style,
+             * .xo-backlog/xo-printjson/issues/07): its value follows its
+             * "_name_" within one entry, with no nested object between
              */
             std::string frame
                 = std::regex_replace(ss.str(),
-                                     std::regex("\"(lo|hi)\": [0-9]+"),
-                                     "\"$1\": ADDR");
+                                     std::regex("(\"_name_\": \"(lo|hi)\"[^{}]*\"_value_\": )[0-9]+"),
+                                     "$1ADDR");
 
             /* reserved/capacity are not reproducible across HOSTS: arenas
              * round up to a VM page, and that page is 4k on linux and 16k on
@@ -164,8 +170,8 @@ namespace xo {
              * reservation (and is one short of a round number because the
              * per-allocation overhead costs a slot).
              *
-             * None of that is the wire contract, so redact the VALUES and
-             * keep the KEYS.  Note [0-9]+ still carries real coverage: a
+             * None of that is the shape, so redact the VALUES and keep the
+             * KEYS.  Note [0-9]+ still carries real coverage: a
              * value that is not an integer does not match, so the
              * substitution does not fire and the comparison below fails --
              * which is how a missing json printer for size_t showed up on
@@ -173,8 +179,11 @@ namespace xo {
              * The magnitudes are asserted structurally after the frame.
              */
             frame = std::regex_replace(frame,
-                                       std::regex("\"(reserved|capacity)\": [0-9]+"),
-                                       "\"$1\": INT");
+                                       std::regex("(\"_name_\": \"reserved\"[^{}]*\"_value_\": )[0-9]+"),
+                                       "$1INT");
+            frame = std::regex_replace(frame,
+                                       std::regex("\"capacity\": [0-9]+"),
+                                       "\"capacity\": INT");
 
             INFO("frame: " << frame);
 
@@ -192,6 +201,30 @@ namespace xo {
             std::string const pool_type
                 = type_member(xo::reflect::type_name<xo::mm::MemorySizeInfo>());
 
+            /* one pool, members-style (.xo-backlog/xo-printjson/issues/07):
+             * each member a "_members_" entry, under its declared type
+             */
+            using xo::mm::MemorySizeInfo;
+            auto entry = [&type_member](char const * name, std::string_view type,
+                                        char const * metatype, std::string const & value) {
+                return "{\"_name_\": \"" + std::string(name) + "\"" + type_member(type)
+                    + ", \"_metatype_\": \"" + metatype + "\", \"_value_\": " + value + "}";
+            };
+            auto pool = [&](char const * name) {
+                auto const size_t_name = xo::reflect::type_name<decltype(MemorySizeInfo::used_)>();
+                auto const ptr_name = xo::reflect::type_name<decltype(MemorySizeInfo::lo_)>();
+
+                return "{\"_name_\": \"MemorySizeInfo\"" + pool_type + ", \"_members_\": ["
+                    + entry("name", xo::reflect::type_name<decltype(MemorySizeInfo::resource_name_)>(),
+                            "atomic", "\"" + std::string(name) + "\"") + ", "
+                    + entry("used", size_t_name, "atomic", "0") + ", "
+                    + entry("allocated", size_t_name, "atomic", "0") + ", "
+                    + entry("committed", size_t_name, "atomic", "0") + ", "
+                    + entry("reserved", size_t_name, "atomic", "INT") + ", "
+                    + entry("lo", ptr_name, "pointer", "ADDR") + ", "
+                    + entry("hi", ptr_name, "pointer", "ADDR") + "]}";
+            };
+
             REQUIRE(frame ==
                 "{\"_name_\": \"Flywheel\"" + type_member(xo::reflect::type_name<AllocFlywheel>())
                 /* objects print once, numbered: the frame 1, its root set 2.
@@ -200,23 +233,13 @@ namespace xo {
                  */
                 + ", \"_id_\": 1"
                 + ", \"pools\": ["
-                  "{\"_name_\": \"MemorySizeInfo\"" + pool_type
-                + ", \"name\": \"utest.frame.empty.storage\""
-                  ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
-                  ", \"lo\": ADDR, \"hi\": ADDR}"
-                  ", {\"_name_\": \"MemorySizeInfo\"" + pool_type
-                + ", \"name\": \"utest.frame.empty.strong\""
-                  ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
-                  ", \"lo\": ADDR, \"hi\": ADDR}"
-                  ", {\"_name_\": \"MemorySizeInfo\"" + pool_type
-                + ", \"name\": \"utest.frame.empty.strong-free\""
-                  ", \"used\": 0, \"allocated\": 0, \"committed\": 0, \"reserved\": INT"
-                  ", \"lo\": ADDR, \"hi\": ADDR}]"
+                + pool("utest.frame.empty.storage") + ", "
+                + pool("utest.frame.empty.strong") + ", "
+                + pool("utest.frame.empty.strong-free") + "]"
                 /* "RootSet", not "RootSetInfo", and "Flywheel" above rather
                  * than "FlywheelInfo": neither struct exists any more.  Both
                  * are now bespoke printers reading the live flywheel.  Every
-                 * other key and value here is unchanged by that -- deliberately,
-                 * since they are the wire contract
+                 * other key and value here was unchanged by that, deliberately
                  */
                   ", \"strong\": {\"_name_\": \"RootSet\""
                 + type_member(xo::reflect::type_name<xo::facet::DHandleArena<xo::facet::ObjectSlot>>())

@@ -63,6 +63,7 @@
       {
         "_canonical_type_" : "xo::json::PrintJson",
         "_id_" : 9,
+        "_members_" : [],
         "_name_" : "PrintJson",
         "_short_type_" : "PrintJson"
       }

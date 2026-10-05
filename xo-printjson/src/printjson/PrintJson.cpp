@@ -745,10 +745,12 @@ namespace xo {
              *  consumer.
              *
              *  Member names are given EXPLICITLY rather than through
-             *  REFLECT_MEMBER, which would derive the json key from the c++
-             *  member name (`resource_name_' -> "resource_name").  The keys
-             *  are a wire contract with a browser; house style for a member
-             *  must not be able to rename them.
+             *  REFLECT_MEMBER, which would derive the json name from the c++
+             *  member name (`resource_name_' -> "resource_name"): house style
+             *  for a member must not be able to rename them.  They print as
+             *  "_members_" entries, like any reflected struct
+             *  (.xo-backlog/xo-printjson/issues/07); xo-object2's
+             *  flywheel_frame.test.cpp pins the frame.
              *
              *  @c detail_ is deliberately absent: a pointer into the stack
              *  frame of whoever ran the visit, and almost always null.  If the

@@ -166,12 +166,20 @@ namespace xo {
                                  TaggedPtr tp)
             {
                 /* e.g. if
-                 *   struct Foo { int x_; double y_; };
+                 *   struct Foo { int x_; double y_; };   // REFLECT_MEMBER(sr, x), (sr, y)
                  *   Foo foo{1, 1.4142};
                  *
                  * then expect to print
                  *   {"_name_": "Foo", "_canonical_type_": "xo::Foo", "_short_type_": "Foo",
-                 *    "_id_": 1, "x": 1, "y": 1.4142}
+                 *    "_id_": 1,
+                 *    "_members_": [{"_name_": "x", "_canonical_type_": "int", "_short_type_": "int",
+                 *                   "_metatype_": "atomic", "_value_": 1},
+                 *                  {"_name_": "y", .., "_value_": 1.4142}]}
+                 *
+                 * Members-style, as JsonMembers writes them, under their
+                 * reflected names: so a member may be called _id_ or _ref_
+                 * without ambiguity.  Until 2026-10-05 members were top-level
+                 * keys ("x": 1) -- .xo-backlog/xo-printjson/issues/07.
                  *
                  * see type_keys
                  *
@@ -179,8 +187,9 @@ namespace xo {
                  */
                 JsonObject obj = state.open_object(tp);
 
-                for (uint32_t i = 0, n = tp.n_child(); i < n; ++i)
-                    obj.child(tp.struct_member_name(i), tp.get_child(i));
+                obj.members()
+                    .reflected_members(tp)
+                    .end();
 
                 obj.close();
             } /*print_generic_struct*/

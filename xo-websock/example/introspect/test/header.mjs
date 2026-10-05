@@ -17,7 +17,7 @@ const hd = await ev(`Object.fromEntries([...document.querySelectorAll("g.node")]
   return [g.__data__.id, {type: l.textContent, sub: s.getAttribute("display") === "none" ? null : s.textContent, short: g.__data__.obj && g.__data__.obj._short_type_}]; }))`);
 console.log("   headers:", JSON.stringify(Object.entries(hd).map(([k, v]) => [k, v.type, v.sub])));
 check(Object.values(hd).every(h => h.type === h.short), "line 1: every box's short type");
-const lport = await ev(`last_event.server.listen_port`);
+const lport = await ev(`member_value(last_event, "server").listen_port`);
 check(hd.server.sub === `:${lport} (running)`, "server: :port (running): " + hd.server.sub);
 check(hd["http:/types"].sub === "/types" && hd["stream:/introspect"].sub === "/introspect", "endpoints: their pattern");
 check(hd["session:1"].sub === "session 1", "session: session 1");
