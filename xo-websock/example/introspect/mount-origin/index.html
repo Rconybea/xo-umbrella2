@@ -42,10 +42,16 @@
     .node.sink text { font-size: 12px; }
     .node.receiver text { font-size: 12px; }
     path.edge { fill: none; stroke: #999; stroke-width: 1.2px; marker-end: url(#arrow-own); }
-    /* under each edge, in the graph's background colour: where a later edge
-       crosses an earlier one, the earlier shows a gap */
-    path.casing { fill: none; stroke: #fafafa; stroke-width: 5px; pointer-events: none; }
+    /* under each edge, in the drawing sheet's colour (g.extent): where a
+       later edge crosses an earlier one, the earlier shows a gap */
+    path.casing { fill: none; stroke: #fff; stroke-width: 5px; pointer-events: none; }
+    /* the drawing's extent (what Fit / Center place): a white sheet on the
+       viewport's grey; its border 1px at any zoom */
+    g.extent > rect { fill: #fff; stroke: #dcdcdc; stroke-width: 1px; vector-effect: non-scaling-stroke; }
     .node text { font-size: 14px; font-family: ui-monospace, monospace; }
+    /* a box's title, below its type: one size smaller */
+    .node text.sub { font-size: 12px; }
+    :is(.node.nested, .node.sender, .node.subscription, .node.sink, .node.receiver) text.sub { font-size: 11px; }
     .node.expandable { cursor: pointer; }
     text.kids { font-size: 16px; fill: #555; cursor: pointer; font-family: ui-monospace, monospace; }
     text.kids:hover { fill: #000; }
@@ -108,6 +114,7 @@
     <button id="center" title="the graph's centre at the viewport's centre, at the current zoom">Center</button>
     <span id="zoom-level" title="the graph's magnification: Shift + wheel zooms the graph, Shift + drag its background pans">zoom 100%</span>
     <label title="show member types inline: name: Type [metatype] = value"><input type="checkbox" id="show-types"> types</label>
+    <label title="draw the legend: box colours and edge kinds"><input type="checkbox" id="show-legend" checked> legend</label>
     <span id="status">connecting...</span>
   </div>
   <div id="srcinfo">source links: (loading)</div>

@@ -134,6 +134,17 @@ document.getElementById("show-types").onchange = (ev) => {
         draw(last_event);
 };
 
+/** the legend is drawn (checkbox "legend"); hidden, it reserves no column
+ *  for Fit and the like
+ **/
+let show_legend = true;
+
+document.getElementById("show-legend").onchange = (ev) => {
+    show_legend = ev.target.checked;
+    if (last_event)
+        draw(last_event);
+};
+
 // layout: automatic, by ELK (elkjs, its layered algorithm) -- the page builds
 // the object graph (boxes and edges) from the snapshot; ELK places the boxes,
 // sized to their content, and routes the edges.  Hand-placed columns could
@@ -631,6 +642,8 @@ function show_all_children(on) {
 }
 
 const row_h = 18;          // a member row
+const sub_h = 16;          // a box's title line, below its type
+const sub_h_small = 14;    // ... in a small box
 const mbtn_w = 21;         // the menu button after a box's label: square
 const mbtn_h = 21;
 const mbtn_gap = 8;        // between label and menu button
@@ -875,7 +888,7 @@ let draw_seq = 0;
 // camera moves -- in step with the boxes' own move -- so that box keeps its
 // place in the viewport.  Browsers cannot move the mouse pointer, so the
 // drawing moves instead.  No anchor (Refresh): the camera stays; Show all /
-// Hide all (and the first draw) reset it.
+// Hide all (and the first draw) centre the drawing at 100%, as Center does.
 
 // ----- transitions (issue 13, step 3) ------------------------------------
 //
@@ -913,7 +926,7 @@ let pending_draws = 0;
 let pending_anchor = null;
 /** box id -> where it was last drawn, and its size (drawing coordinates) **/
 let drawn_at = new Map();
-/** the next draw puts the camera back at the origin (right of the legend), scale 1 **/
+/** the next draw centres the drawing again, scale 1 (Show all / Hide all) **/
 let camera_reset = true;
 /** the first draw: the camera centres the drawing, at once **/
 let first_draw = true;
@@ -939,6 +952,18 @@ const zoom = d3.zoom()
           show_zoom_level(ev.transform.k);
       });
 graph_svg.call(zoom).on("dblclick.zoom", null);
+// Shift + press on the background starts a pan -- to the browser it would
+// extend any text selection (d3.zoom only stops a new one starting), and
+// dragging that toward the window's edge scrolls the page.  Cancel it, and
+// drop the selection.  Capture, on the document: d3.zoom's own handler
+// stops the event from reaching any other on the svg
+document.addEventListener("mousedown", (ev) => {
+    const t = ev.target;
+    if (ev.shiftKey && t.closest && t.closest("#graph") && !t.closest("g.node")) {
+        ev.preventDefault();
+        window.getSelection().removeAllRanges();
+    }
+}, true);
 
 // the hand cursor only while Shift is held: it advertises the gesture
 for (const type of ["keydown", "keyup"])
@@ -978,6 +1003,23 @@ function size_view() {
 }
 size_view();
 window.addEventListener("resize", size_view);
+
+/** box @p d's header line: its short type **/
+function box_type_label(d) {
+    return (d.obj && d.obj._short_type_) || d.label;
+}
+
+/** box @p d's title, the header's second line -- what tells it apart from
+ *  other boxes of its type -- or null where the type says it all: a
+ *  sender, sink or receiver (one per holder), a nested struct
+ **/
+function box_subtitle(d) {
+    if (d.kind === "server")
+        return `:${d.obj.listen_port} (${d.obj.state})`;
+    if (["sender", "sink", "receiver", "nested"].includes(d.kind))
+        return null;
+    return d.label !== box_type_label(d) ? d.label : null;
+}
 
 /** box kinds, by colour -- one colour per C++ type; the kinds that share
  *  one (an endpoint is http or stream) share a legend entry.  Order: as
@@ -1025,10 +1067,11 @@ const swatch_h = 12;
 const swatch_gap = 8;      // between swatch and type
 const legend_gap = 8;      // between the colours and the edge kinds
 
-/** the legend's width, with its margins: Fit, Center and the first draw
- *  keep the drawing right of it
+/** the legend's width, with its margins (0 while hidden): Fit keeps the
+ *  drawing clear of it
  **/
 let legend_w = 0;
+let legend_h = 0;   // ... and height
 
 /** the legend, fixed in the viewport's top-left corner (not panned or
  *  zoomed): for each colour a box in snapshot @p all has (drawn or not --
@@ -1100,8 +1143,10 @@ function draw_legend(all) {
     const h = edge_kinds.length === 0 ? (entries.length - 1) * legend_row + swatch_h + 2 * legend_pad
           : top + (edge_kinds.length - 1) * legend_row + swatch_h + legend_pad;
     lg.select(":scope > rect.panel").attr("width", w).attr("height", h);
-    lg.attr("display", entries.length ? null : "none");
-    legend_w = entries.length ? w + 2 * legend_margin : 0;
+    const shown = show_legend && entries.length > 0;
+    lg.attr("display", shown ? null : "none");
+    legend_w = shown ? w + 2 * legend_margin : 0;
+    legend_h = shown ? h + 2 * legend_margin : 0;
 }
 
 /** the magnification, beside the controls (Shift + wheel zooms) **/
@@ -1111,28 +1156,77 @@ function show_zoom_level(k) {
         el.textContent = `zoom ${Math.round(k * 100)}%`;
 }
 
-/** "Center": the drawing's centre at the centre of the viewport right of
- *  the legend, at the current zoom
+/** the viewport's inner size, {width, height}: inside the svg's border,
+ *  where the camera's coordinates start
  **/
+function view_size() {
+    const el = graph_svg.node();
+    return {width: el.clientWidth, height: el.clientHeight};
+}
+
+/** the drawing's extent -- what Fit and Center place -- as a sheet under
+ *  everything in camera @p camera, size @p size; resized in step with the
+ *  boxes, or at once (@p instant)
+ **/
+function draw_extent(camera, size, instant) {
+    const layer = camera.selectAll(":scope > g.extent").data([0])
+          .join(enter => enter.insert("g", ":first-child").attr("class", "extent"));   // under the groups
+    const r = layer.selectAll(":scope > rect").data([size])
+          .join(enter => enter.append("rect").attr("width", size.w).attr("height", size.h));
+    (instant ? r : r.transition("size").duration(t_move).ease(d3.easeCubicInOut))
+        .attr("width", size.w).attr("height", size.h);
+}
+
+/** the camera putting a drawing of size @p size, at zoom @p k, centred in
+ *  the viewport -- the legend, over the drawing, not counted
+ **/
+function centred(size, k) {
+    const r = view_size();
+    return d3.zoomIdentity.translate(r.width / 2 - k * size.w / 2, r.height / 2 - k * size.h / 2).scale(k);
+}
+
+/** "Center": the drawing centred, at the current zoom **/
 const center_btn = document.getElementById("center");
 if (center_btn) center_btn.onclick = () => {
-    const r = graph_svg.node().getBoundingClientRect();
-    const k = d3.zoomTransform(graph_svg.node()).k;
     graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
-        .call(zoom.transform, d3.zoomIdentity
-              .translate(legend_w + (r.width - legend_w) / 2 - k * drawing_size.w / 2,
-                         r.height / 2 - k * drawing_size.h / 2)
-              .scale(k));
+        .call(zoom.transform, centred(drawing_size, d3.zoomTransform(graph_svg.node()).k));
 };
 
-/** "Fit": the whole drawing in view right of the legend, top-left, scale <= 1 **/
+/** the camera for "Fit": drawing @p size as large as fits in the viewport
+ *  (at most the zoom's maximum), centred -- as Center would, unless that
+ *  would overlap the legend.  Then slid clear of it (right, or down) if
+ *  the slack allows; else as large as fits right of the legend, or below
+ *  it -- whichever is larger -- centred there
+ **/
+function fit_camera(size) {
+    const r = view_size();
+    const w = Math.max(1, size.w), h = Math.max(1, size.h);
+    const k_max = zoom.scaleExtent()[1];
+    // as large as fits in area [x0, x1] x [y0, y1], centred there
+    const fit_in = (x0, y0, x1, y1) => {
+        const k = Math.min(k_max, (x1 - x0) / w, (y1 - y0) / h);
+        return {k, x: x0 + (x1 - x0 - k * w) / 2, y: y0 + (y1 - y0 - k * h) / 2};
+    };
+    const at = (f) => d3.zoomIdentity.translate(f.x, f.y).scale(f.k);
+
+    const f = fit_in(0, 0, r.width, r.height);
+    if (legend_w === 0 || f.x >= legend_w || f.y >= legend_h)
+        return at(f);   // clear of the legend
+    // slide clear, along whichever axis has the slack
+    if (legend_w + f.k * w <= r.width)
+        return at({...f, x: legend_w});
+    if (legend_h + f.k * h <= r.height)
+        return at({...f, y: legend_h});
+    const right = fit_in(legend_w, 0, r.width, r.height);
+    const below = fit_in(0, legend_h, r.width, r.height);
+    return at(right.k >= below.k ? right : below);
+}
+
+/** "Fit": the whole drawing as large as fits; see fit_camera() **/
 const fit_btn = document.getElementById("fit");
 if (fit_btn) fit_btn.onclick = () => {
-    const r = graph_svg.node().getBoundingClientRect();
-    const k = Math.min(1, (r.width - legend_w) / Math.max(1, drawing_size.w),
-                       r.height / Math.max(1, drawing_size.h));
     graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
-        .call(zoom.transform, d3.zoomIdentity.translate(legend_w, 0).scale(k));
+        .call(zoom.transform, fit_camera(drawing_size));
 };
 
 for (const type of ["click", "keydown"])   // keydown: Enter / arrows on a focused box
@@ -1200,6 +1294,7 @@ async function draw_aux(event) {
             g.append("title");   // the type and its source; see below
             g.append("rect");
             g.append("text").attr("class", "label").attr("x", 12).attr("y", 25);
+            g.append("text").attr("class", "sub").attr("x", 12);   // its title, below the type
             // menu button, just after the label: left-click opens the box menu
             const mb = g.append("g").attr("class", "mbtn");
             mb.append("rect").attr("width", mbtn_w).attr("height", mbtn_h).attr("rx", 3);
@@ -1238,7 +1333,11 @@ async function draw_aux(event) {
     node.select(":scope > rect")   // a nested box: its type's colour
         .style("fill", d => d.kind === "nested" ? nested_colour(d.type).fill : null)
         .style("stroke", d => d.kind === "nested" ? nested_colour(d.type).stroke : null);
-    node.select(":scope > text.label").text(d => d.label);
+    // the header: the short type, then -- where it says more -- the box's
+    // own title (box_subtitle()); menus and tooltips still name a box by
+    // its label
+    node.select(":scope > text.label").text(d => box_type_label(d));
+    node.select(":scope > text.sub").text(d => box_subtitle(d) ?? "");
 
     // the menu button: opens the box menu below it; not a click on the box
     node.select(":scope > g.mbtn").on("click", function (ev, d) {
@@ -1383,16 +1482,22 @@ async function draw_aux(event) {
          });
     });
 
-    // size each box to its label
+    // size each box to its header: the type's line (with the menu button
+    // and, outside, the children triangle), and the title's below it
     node.each(function (d) {
         const g = d3.select(this);
-        const head_h = d.small ? 30 : box_h;
+        const has_sub = box_subtitle(d) !== null;
+        const type_h = d.small ? 30 : box_h;                  // the type's line
+        const head_h = type_h + (has_sub ? (d.small ? sub_h_small : sub_h) : 0);
         g.select(":scope > text.label").attr("y", d.small ? 20 : 25);
+        g.select(":scope > text.sub").attr("y", d.small ? 20 + sub_h_small : 25 + sub_h)
+            .attr("display", has_sub ? null : "none");
 
         const label_w = g.select(":scope > text.label").node().getComputedTextLength();
+        const sub_w = has_sub ? g.select(":scope > text.sub").node().getComputedTextLength() : 0;
         g.select(":scope > g.mbtn")
-            .attr("transform", `translate(${12 + label_w + mbtn_gap},${(head_h - mbtn_h) / 2})`);
-        d.w = 12 + label_w + mbtn_gap + mbtn_w + 12;
+            .attr("transform", `translate(${12 + label_w + mbtn_gap},${(type_h - mbtn_h) / 2})`);
+        d.w = Math.max(12 + label_w + mbtn_gap + mbtn_w + 12, 12 + sub_w + 12);
         const texts = g.selectAll(":scope > g.rows > text.row");
         texts.each(function (r, i) {
             d3.select(this).attr("y", head_h + i * row_h + 13);
@@ -1422,7 +1527,7 @@ async function draw_aux(event) {
         });
 
         d.head_h = head_h;
-        g.select(":scope > text.kids").attr("y", head_h / 2 + 5);
+        g.select(":scope > text.kids").attr("y", type_h / 2 + 5);
         tri_buttons(g.select(":scope > g.rows"));
         d.h = head_h + (d.rows.length ? d.rows.length * row_h + row_pad : 0);
         // resize: animated, but for a box not yet on screen
@@ -1565,6 +1670,7 @@ async function draw_aux(event) {
     drawing_size = {w: laid.width + 2 * pad, h: laid.height + 2 * pad};
 
     draw_groups(camera, groups);
+    draw_extent(camera, drawing_size, camera_to && camera_to.instant);
 
     // 4. the edges, as ELK routed them -- in the frame of their `container`
     // (an edge inside one group comes back relative to that group)
@@ -1656,7 +1762,7 @@ function define_arrowheads(svg) {
               .attr("markerUnits", "userSpaceOnUse").attr("orient", "auto")
               // the outline as wide as the edge's, whatever the scale
               .call(m => m.append("path").attr("d", x => x.d)
-                    .style("fill", x => x.filled ? x.colour : "#fafafa")
+                    .style("fill", x => x.filled ? x.colour : "#fff")
                     .style("stroke", x => x.colour).attr("stroke-width", 1.4 / start_scale)));
 }
 
@@ -1872,9 +1978,9 @@ function eq_x(text) {
 }
 
 /** where the camera should go this draw, {t, instant}: the first draw,
- *  the drawing (size @p size) centred in the viewport right of the legend,
- *  at scale 1, at once; after a reset, back to the origin -- just right of
- *  the legend -- at scale 1; for anchor box @p anchor, laid out at
+ *  the drawing (size @p size) centred in the viewport (as Center) at scale
+ *  1, at once; after a reset (Show all / Hide all), the same, animated; for
+ *  anchor box @p anchor, laid out at
  *  @p at (ELK positions), moved by as much as the box moved, scaled -- so
  *  on screen (k * x + t) the box stays put; else null, the camera stays
  **/
@@ -1882,14 +1988,11 @@ function camera_target(anchor, at, pad, size) {
     if (first_draw) {
         first_draw = false;
         camera_reset = false;
-        const r = graph_svg.node().getBoundingClientRect();
-        return {t: d3.zoomIdentity.translate(legend_w + (r.width - legend_w - size.w) / 2,
-                                             (r.height - size.h) / 2),
-                instant: true};
+        return {t: centred(size, 1), instant: true};
     }
     if (camera_reset) {
         camera_reset = false;
-        return {t: d3.zoomIdentity.translate(legend_w, 0)};   // right of the legend
+        return {t: centred(size, 1)};
     }
 
     const was = anchor !== null && drawn_at.get(anchor);
