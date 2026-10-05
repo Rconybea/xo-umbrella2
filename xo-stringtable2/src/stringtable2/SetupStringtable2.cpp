@@ -56,9 +56,9 @@ namespace xo {
                          * NOT the operator std::string_view(), which stops at
                          * the first null: size_ is the authority on extent.
                          */
-                        this->pjson()->print(std::string_view(x->chars(),
-                                                              x->size()),
-                                             p_os);
+                        std::string_view sv(x->chars(), x->size());
+
+                        this->pjson()->print_aux(Reflect::make_tp(&sv), p_os);
                     }
                 } /*print_json*/
             }; /*DStringJsonPrinter*/

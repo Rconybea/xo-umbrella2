@@ -69,7 +69,7 @@ namespace xo {
                                 /* note: need to dispatch via json printer for vector elements,
                                  *       to get special treatment for non-finite values
                                  */
-                                this->pjson()->print((*pv)[i], p_os);
+                                this->pjson()->print_aux(Reflect::make_tp(&(*pv)[i]), p_os);
                                 //*p_os << jsonp((*pv)[i], this->pjson());
                             }
 
@@ -105,7 +105,7 @@ namespace xo {
                                     /* note: need to dispatch via json printer for matrix elements,
                                      *       to get special treatment for non-finite values
                                      */
-                                    this->pjson()->print((*pm)(i, j), p_os);
+                                    this->pjson()->print_aux(Reflect::make_tp(&(*pm)(i, j)), p_os);
                                     //*p_os << jsonp((*pm)(i, j), this->pjson());
                                 }
                                 *p_os << "]";

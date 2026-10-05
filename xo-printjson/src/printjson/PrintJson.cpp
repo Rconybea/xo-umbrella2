@@ -13,6 +13,7 @@
 #include <xo/facet/handlestore/DHandleStore.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/DArena.hpp>
+#include <xo/arena/backtrace.hpp>
 #include <xo/flatstring/flatstring.hpp>     /* os << quot(..) */
 #include <xo/ppsink/quoted_ostream.hpp>
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
@@ -217,10 +218,53 @@ namespace xo {
             }
         } /*print_aux*/
 
+        namespace {
+#ifdef XO_PRINTJSON_REENTRY_CHECK
+            /* entry points (print_tp, validate_tp) active on this thread.
+             * More than one means a json printer called an entry point
+             * (PrintJson::print, print_tp, print_obj, ...) to print a child,
+             * starting a print within a print: a printer must recurse via
+             * print_aux.  See .xo-backlog/xo-printjson/issues/02.
+             *
+             * thread_local only as an assertion: no printing reads it
+             */
+            thread_local int s_entry_depth = 0;
+
+            /** marks one entry point active for its lifetime; aborts, with a
+             *  backtrace, if another is already active on this thread
+             **/
+            class EntryGuard {
+            public:
+                explicit EntryGuard(char const * entry) {
+                    if (s_entry_depth > 0) {
+                        std::cerr << "PrintJson::" << entry
+                                  << ": entered while a print is in progress on this thread"
+                                  << " -- a json printer must recurse via print_aux"
+                                  << std::endl;
+                        print_backtrace(true /*demangle_flag*/);
+                        std::abort();
+                    }
+                    ++s_entry_depth;
+                }
+                ~EntryGuard() { --s_entry_depth; }
+
+                EntryGuard(EntryGuard const &) = delete;
+                EntryGuard & operator=(EntryGuard const &) = delete;
+            };
+#else
+            class EntryGuard {
+            public:
+                explicit EntryGuard(char const *) {}
+            };
+#endif
+        } /*namespace*/
+
         void
         PrintJson::print_tp(TaggedPtr tp,
                             std::ostream * p_os) const
         {
+            EntryGuard guard("print_tp");
+
             this->print_aux(tp, p_os);
             //*p_os << std::ends;
         } /*print*/
@@ -241,6 +285,8 @@ namespace xo {
              * to do per node, so the visitor is empty: this is a reuse of
              * reflect's walker, not a second traversal implementation.
              */
+            EntryGuard guard("validate_tp");
+
             TaggedPtr::visit_tree_preorder(tp, [](TaggedPtr) {});
         } /*validate_tp*/
 
@@ -278,8 +324,11 @@ namespace xo {
                                     std::ostream * p_os) const override {
                 TaggedPtr * x = this->check_recover_native<TaggedPtr>(tp, p_os);
 
+                /* print_aux, not print_tp: a printer recurses within the
+                 * print in progress
+                 */
                 if (x) {
-                    this->pjson()->print_tp(*x, p_os);
+                    this->pjson()->print_aux(*x, p_os);
                 }
             } /*print_json*/
         }; /*JsonPrinter_TaggedPtr*/

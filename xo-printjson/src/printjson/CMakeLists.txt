@@ -21,4 +21,9 @@ xo_dependency(${SELF_LIB} xo_arena)
 # PrintJson.cpp uses xo::pp::{xtag,iso8601}; no public header needs it.
 xo_dependency(${SELF_LIB} xo_ppsink)
 
+# PrintJson.cpp: abort when a json printer calls a PrintJson entry point
+# instead of print_aux (.xo-backlog/xo-printjson/issues/02).  On for now;
+# to be turned off later
+target_compile_definitions(${SELF_LIB} PRIVATE XO_PRINTJSON_REENTRY_CHECK)
+
 # end CMakeLists.txt

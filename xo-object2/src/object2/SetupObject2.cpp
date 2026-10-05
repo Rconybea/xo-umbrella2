@@ -57,7 +57,9 @@ namespace xo {
                         /* through the json printer for double, not <<:
                          * non-finite values get special treatment there
                          */
-                        this->pjson()->print(x->value(), p_os);
+                        double v = x->value();
+
+                        this->pjson()->print_aux(Reflect::make_tp(&v), p_os);
                     }
                 } /*print_json*/
             }; /*DFloatJsonPrinter*/
