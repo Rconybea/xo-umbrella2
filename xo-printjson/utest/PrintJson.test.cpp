@@ -7,6 +7,7 @@
 #include "xo/printjson/init_printjson.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/reflect/EnumReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << tag(..) */
 #include <xo/arena/DArenaVector.hpp>
@@ -303,6 +304,81 @@ namespace xo {
 
             REQUIRE(ss.str() == std::string("[1, 2, 3]"));
         } /*TEST_CASE(print-json-v1)*/
+
+        namespace {
+            /* a reflected enum, and one never reflected */
+            enum class Mood { calm, cross };
+            enum class Unlisted { x, y };
+
+            /* reflected struct holding them */
+            struct EnumHolder {
+                Mood m_;
+                Mood odd_;
+            };
+
+            struct UnlistedHolder {
+                Unlisted u_;
+            };
+
+            void reflect_enum_types() {
+                {
+                    xo::reflect::EnumReflector<Mood> er;
+
+                    if (er.is_incomplete()) {
+                        REFLECT_ENUM(er, calm);
+                        REFLECT_ENUM(er, cross);
+                    }
+                }
+                {
+                    StructReflector<EnumHolder> sr;
+
+                    if (sr.is_incomplete()) {
+                        REFLECT_MEMBER(sr, m);
+                        REFLECT_MEMBER(sr, odd);
+                    }
+                }
+                {
+                    StructReflector<UnlistedHolder> sr;
+
+                    if (sr.is_incomplete())
+                        REFLECT_MEMBER(sr, u);
+                }
+            }
+        }
+
+        TEST_CASE("print-json-reflected-enum", "[printjson][enum]") {
+            /* an enumerator's name, a json string; a value no enumerator
+             * has, its integer, a json number (.xo-backlog/xo-reflect/issues/06)
+             */
+            reflect_enum_types();
+
+            PrintJson print_json;
+            EnumHolder h{Mood::cross, static_cast<Mood>(9)};
+
+            std::stringstream ss;
+            print_json.print(h, &ss);
+
+            REQUIRE(ss.str() == ("{\"_name_\": \"EnumHolder\"" + type_member<EnumHolder>()
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<Mood>("m", "atomic", "\"cross\"") + ", "
+                                 + mentry<Mood>("odd", "atomic", "9") + "]}"));
+        } /*TEST_CASE(print-json-reflected-enum)*/
+
+        TEST_CASE("print-json-unreflected-enum-member", "[printjson][enum]") {
+            /* an enum never reflected cannot print: an error entry, so the
+             * json stays valid
+             */
+            reflect_enum_types();
+
+            PrintJson print_json;
+            UnlistedHolder h{Unlisted::y};
+
+            std::stringstream ss;
+            print_json.print(h, &ss);
+
+            REQUIRE(ss.str().find("\"_name_\": \"u\"") != std::string::npos);
+            REQUIRE(ss.str().find("\"_error_\": \"type not reflected: ") != std::string::npos);
+        } /*TEST_CASE(print-json-unreflected-enum-member)*/
 
         /* also see tests:
          *   [option_util/utest/Px2.test.cpp]

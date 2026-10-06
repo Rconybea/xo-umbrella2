@@ -7,6 +7,7 @@
 #include "JsonObject.hpp"
 #include "PrintJson.hpp"
 #include "type_keys.hpp"
+#include <xo/reflect/enum/EnumTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
@@ -15,6 +16,7 @@
 #include <iostream>
 
 namespace xo {
+    using xo::reflect::EnumTdx;
     using xo::reflect::Metatype;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
@@ -194,6 +196,22 @@ namespace xo {
                 obj.close();
             } /*print_generic_struct*/
 
+            /* a reflected enum (EnumReflector): its enumerator's name, a
+             * json string; or, a value no enumerator has, its integer, a
+             * json number -- so a consumer can tell them apart
+             * (.xo-backlog/xo-reflect/issues/06)
+             */
+            void
+            print_reflected_enum(EnumTdx const & ei,
+                                 TaggedPtr tp,
+                                 std::ostream * p_os)
+            {
+                if (std::string const * name = ei.name_of(tp.address()))
+                    *p_os << quot(*name);
+                else
+                    *p_os << ei.value_of(tp.address());
+            } /*print_reflected_enum*/
+
         } /*namespace*/
 
         void
@@ -353,8 +371,13 @@ namespace xo {
                                 << xtag("metatype", tp.td()->metatype())
                                 << ">";
                         return;
-                    case Metatype::mt_invalid:
                     case Metatype::mt_atomic:
+                        if (EnumTdx const * ei = tp.td()->enum_info()) {
+                            print_reflected_enum(*ei, tp, p_os);
+                            return;
+                        }
+                        break;
+                    case Metatype::mt_invalid:
                         break;
                     }
 

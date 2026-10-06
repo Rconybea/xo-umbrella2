@@ -44,7 +44,8 @@ namespace xo {
         JsonMembers::printable(TypeDescr td) const
         {
             return (state_->has_printer(td)
-                    || (td->is_struct() && td->complete_flag()));
+                    || (td->is_struct() && td->complete_flag())
+                    || td->is_enum());
         }
 
         bool
