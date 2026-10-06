@@ -20,12 +20,22 @@ const recv = await ev(`member_value(last_event, "server").endpoints.map(e => [e.
 console.log("   receivers:", JSON.stringify(recv));
 check(recv.some(r => r[0] === "/introspect" && r[1] === "IntrospectReceiver" && /IntrospectReceiver$/.test(r[2])), "/introspect's receiver: IntrospectReceiver, by its own type");
 check(recv.filter(r => r[0] !== "/introspect").every(r => r[1] === null), "the other endpoints: no receiver");
+// its reflected member websrv_: a ref to the server, printed once, first (xo-printjson#02)
+const wsrv = await ev(`(() => { const srv = member_value(last_event, "server");
+  const r = srv.endpoints.find(e => e.pattern === "/introspect").receiver;
+  return {server_id: srv._id_, websrv: member_value(r, "websrv_")}; })()`);
+check(wsrv.websrv && wsrv.websrv._ref_ === wsrv.server_id, "the receiver's websrv_: a ref to the server: " + JSON.stringify(wsrv));
 // not drawn by default; the endpoint's triangle shows it
 await ev(`show_box("stream:/introspect"); 1`); await ev(`settled()`);
 check(!(await ev(`!!${G(R)}`)), "hidden by default (a child of its endpoint)");
 await ev(`toggle_children("stream:/introspect"); 1`); await ev(`settled()`);
 check(await ev(`!!${G(R)}`), "the endpoint's triangle shows it");
 check(await ev(`${G(R)}.querySelector("text.label").textContent`) === "IntrospectReceiver", "labelled by its short type");
+// expanded: its websrv_ row, a ref into the server box
+await ev(`expanded.add(${JSON.stringify(R)}); redraw(); 1`); await ev(`settled()`);
+const rrows = await ev(`[...${G(R)}.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join(""))`);
+check(rrows.length === 1 && rrows[0].startsWith("websrv_:") && rrows[0].endsWith("(→)"), "receiver row: websrv_ (→): " + JSON.stringify(rrows));
+await ev(`expanded.delete(${JSON.stringify(R)}); redraw(); 1`); await ev(`settled()`);
 // the endpoint's receiver_ row: a ▾ (→) and the edge
 await ev(`expanded.add("stream:/introspect"); redraw(); 1`); await ev(`settled()`);
 const row = await ev(`(() => { const t = [...${G("stream:/introspect")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "receiver_");
