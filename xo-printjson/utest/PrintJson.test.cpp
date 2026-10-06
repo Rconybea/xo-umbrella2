@@ -13,6 +13,7 @@
 #include <xo/arena/DArenaVector.hpp>
 #include <catch2/catch.hpp>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 //#define STRINGIFY(x) #x
@@ -147,6 +148,57 @@ namespace xo {
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<const DPtrTarget *>("p", "pointer", "null") + "]}"));
         } /*TEST_CASE(print-json-null-raw-pointer-member)*/
+
+        namespace {
+            /** a struct with a std::unique_ptr member (.xo-backlog/xo-reflect/issues/04) **/
+            struct UPtrHolder {
+                std::unique_ptr<DPtrTarget> p_;
+            };
+
+            void reflect_uptr_types() {
+                reflect_ptr_types();
+
+                StructReflector<UPtrHolder> sr;
+
+                if (sr.is_incomplete())
+                    REFLECT_MEMBER(sr, p);
+            }
+        }
+
+        TEST_CASE("print-json-unique-ptr-member", "[printjson][uniqueptr]") {
+            /* as a raw pointer member prints: its pointee, in full */
+            reflect_uptr_types();
+
+            PrintJson print_json;
+
+            UPtrHolder holder{std::make_unique<DPtrTarget>(DPtrTarget{2.5})};
+
+            std::stringstream ss;
+            print_json.print(holder, &ss);
+
+            std::string const target_json
+                = ("{\"_name_\": \"DPtrTarget\"" + type_member<DPtrTarget>()
+                   + ", \"_id_\": 2, \"_members_\": [" + mentry<double>("v", "atomic", "2.5") + "]}");
+
+            REQUIRE(ss.str() == ("{\"_name_\": \"UPtrHolder\"" + type_member<UPtrHolder>()
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<std::unique_ptr<DPtrTarget>>("p", "pointer", target_json) + "]}"));
+        } /*TEST_CASE(print-json-unique-ptr-member)*/
+
+        TEST_CASE("print-json-null-unique-ptr-member", "[printjson][uniqueptr]") {
+            reflect_uptr_types();
+
+            PrintJson print_json;
+
+            UPtrHolder holder;
+
+            std::stringstream ss;
+            print_json.print(holder, &ss);
+
+            REQUIRE(ss.str() == ("{\"_name_\": \"UPtrHolder\"" + type_member<UPtrHolder>()
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<std::unique_ptr<DPtrTarget>>("p", "pointer", "null") + "]}"));
+        } /*TEST_CASE(print-json-null-unique-ptr-member)*/
 
         TEST_CASE("print-json-null-c-string", "[printjson][rawpointer]") {
             /* REGRESSION: quot(nullptr) segfaulted.  char* and const char*

@@ -14,6 +14,7 @@
 #include "vector/VectorTdx.hpp"
 #include <xo/refcnt/Refcounted.hpp>
 #include <array>
+#include <memory>       // for std::unique_ptr<>
 #include <utility> // for std::pair<>
 #include <vector>
 
@@ -89,6 +90,29 @@ namespace xo {
         public:
             /* note: definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- std::unique_ptr<T, D> -----
+
+        /** a std::unique_ptr reflects as a pointer, like rp<T>: 0 children
+         *  when null, else its pointee.  The deleter is not reflected.
+         *  See .xo-backlog/xo-reflect/issues/04.
+         **/
+        template<typename T, typename D>
+        class EstablishTdx<std::unique_ptr<T, D>> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        /** std::unique_ptr<T[]> stays atomic: it owns an array whose length
+         *  it does not know, not one pointee.  More specialised than the
+         *  unique_ptr<T, D> partial specialisation above, so it wins
+         **/
+        template<typename T, typename D>
+        class EstablishTdx<std::unique_ptr<T[], D>> {
+        public:
+            static std::unique_ptr<TypeDescrExtra> make() { return AtomicTdx::make(); }
         };
 
         /* char strings are TEXT, not pointers-to-char.  Full specialisations,
@@ -405,6 +429,22 @@ namespace xo {
             Reflect::require<std::remove_cv_t<T>>();
 
             return RawPointerTdx<T>::make();
+        } /*make*/
+
+        // ----- std::unique_ptr<T, D> -----
+
+        /* declared above before
+         *   class Reflect { .. }
+         */
+        template<typename T, typename D>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<std::unique_ptr<T, D>>::make() {
+            /* the pointee must be reflected, cv stripped -- as for T* and
+             * rp<T>; see RefPointerTdx::pointee_t
+             */
+            Reflect::require<std::remove_cv_t<T>>();
+
+            return RefPointerTdx<std::unique_ptr<T, D>>::make();
         } /*make*/
 
         // ----- xo::mm::DArenaVector<Element> -----

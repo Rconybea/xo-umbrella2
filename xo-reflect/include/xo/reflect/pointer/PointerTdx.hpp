@@ -38,11 +38,16 @@ namespace xo {
 
         // ----- RefPointerTdx -----
 
-        /* Pointer = xo::ref::intrusive_ptr<T> for some T */
+        /* Pointer = a smart pointer to one object: xo::ref::intrusive_ptr<T>,
+         * or std::unique_ptr<T, D> (.xo-backlog/xo-reflect/issues/04) -- any
+         * type with element_type, get() and a test for null.
+         */
         template<typename Pointer>
         class RefPointerTdx : public PointerTdx {
         public:
             using target_t = Pointer;
+            /* the pointee AS REFLECTED, cv stripped: see RawPointerTdx::pointee_t */
+            using pointee_t = std::remove_cv_t<typename Pointer::element_type>;
 
             static std::unique_ptr<RefPointerTdx> make() {
                 return std::unique_ptr<RefPointerTdx>(new RefPointerTdx());
@@ -61,7 +66,7 @@ namespace xo {
             } /*n_child*/
 
             virtual TypeDescrBase * fixed_child_td(uint32_t /*i*/) const override {
-                return EstablishTypeDescr::establish<typename Pointer::element_type>();
+                return EstablishTypeDescr::establish<pointee_t>();
             }
 
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
@@ -78,7 +83,8 @@ namespace xo {
                                                    xtag("n", this->n_child(object))));
                 }
 
-                return establish_most_derived_tp(ptr->get());
+                /* const_cast: see RawPointerTdx::child_tp */
+                return establish_most_derived_tp(const_cast<pointee_t *>(ptr->get()));
             } /*child_tp*/
         }; /*RefPointerTdx*/
 

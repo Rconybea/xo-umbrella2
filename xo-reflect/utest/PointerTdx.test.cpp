@@ -13,6 +13,7 @@
 
 #include "xo/reflect/Reflect.hpp"
 #include <catch2/catch.hpp>
+#include <memory>
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -131,6 +132,67 @@ namespace xo {
             REQUIRE(td->metatype() == Metatype::mt_function);
             REQUIRE(td->metatype() != Metatype::mt_pointer);
         } /*TEST_CASE(function-pointer-keeps-its-own-tdx)*/
+
+        // ----- std::unique_ptr (.xo-backlog/xo-reflect/issues/04) -----
+
+        namespace {
+            /* a deleter that is not std::default_delete */
+            struct ProbeDeleter {
+                void operator()(DPtrProbe * p) const { delete p; }
+            };
+        }
+
+        TEST_CASE("unique-ptr-reflects-as-a-pointer", "[reflect][uniqueptr]") {
+            /* like rp<T>: 0 children when null, else its pointee */
+            std::unique_ptr<DPtrProbe> u;
+
+            TaggedPtr tp = Reflect::make_tp(&u);
+
+            REQUIRE(tp.td()->metatype() == Metatype::mt_pointer);
+            REQUIRE(tp.n_child() == 0);
+
+            u = std::make_unique<DPtrProbe>(DPtrProbe{2.5});
+
+            REQUIRE(tp.n_child() == 1);
+
+            TaggedPtr child = tp.get_child(0);
+
+            REQUIRE(child.td() == Reflect::require<DPtrProbe>());
+            REQUIRE(child.address() == u.get());
+            REQUIRE(child.recover_native<DPtrProbe>()->x_ == 2.5);
+        } /*TEST_CASE(unique-ptr-reflects-as-a-pointer)*/
+
+        TEST_CASE("unique-ptr-to-const-shares-its-pointee", "[reflect][uniqueptr]") {
+            /* cv stripped: the pointee is DPtrProbe's own descriptor, as for
+             * a const T* (RawPointerTdx)
+             */
+            auto u = std::make_unique<const DPtrProbe>(DPtrProbe{1.0});
+
+            TaggedPtr tp = Reflect::make_tp(&u);
+
+            REQUIRE(tp.td()->metatype() == Metatype::mt_pointer);
+            REQUIRE(tp.td()->fixed_child_td(0) == Reflect::require<DPtrProbe>());
+            REQUIRE(tp.n_child() == 1);
+            REQUIRE(tp.get_child(0).td() == Reflect::require<DPtrProbe>());
+        } /*TEST_CASE(unique-ptr-to-const-shares-its-pointee)*/
+
+        TEST_CASE("unique-ptr-with-a-deleter", "[reflect][uniqueptr]") {
+            /* the deleter is not reflected; the pointee is */
+            std::unique_ptr<DPtrProbe, ProbeDeleter> u(new DPtrProbe{3.0});
+
+            TaggedPtr tp = Reflect::make_tp(&u);
+
+            REQUIRE(tp.td()->metatype() == Metatype::mt_pointer);
+            REQUIRE(tp.n_child() == 1);
+            REQUIRE(tp.get_child(0).recover_native<DPtrProbe>()->x_ == 3.0);
+        } /*TEST_CASE(unique-ptr-with-a-deleter)*/
+
+        TEST_CASE("unique-ptr-to-array-stays-atomic", "[reflect][uniqueptr]") {
+            /* it owns an array of unknown length, not one pointee */
+            auto td = Reflect::require<std::unique_ptr<int[]>>();
+
+            REQUIRE(td->metatype() == Metatype::mt_atomic);
+        } /*TEST_CASE(unique-ptr-to-array-stays-atomic)*/
 
     } /*namespace ut*/
 } /*namespace xo*/

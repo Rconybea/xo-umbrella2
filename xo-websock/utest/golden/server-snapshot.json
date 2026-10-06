@@ -374,7 +374,7 @@
               },
               {
                 "_canonical_type_" : "std::unique_ptr<Json::CharReader>",
-                "_metatype_" : "atomic",
+                "_metatype_" : "pointer",
                 "_name_" : "readjson_",
                 "_short_type_" : "unique_ptr<CharReader>",
                 "_value_" : "set"
@@ -506,7 +506,7 @@
               },
               {
                 "_canonical_type_" : "std::unique_ptr<Json::CharReader>",
-                "_metatype_" : "atomic",
+                "_metatype_" : "pointer",
                 "_name_" : "readjson_",
                 "_short_type_" : "unique_ptr<CharReader>",
                 "_value_" : "set"
