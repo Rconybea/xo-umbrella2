@@ -196,6 +196,13 @@
           "_value_" : []
         },
         {
+          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
+          "_metatype_" : "pointer",
+          "_name_" : "receiver_",
+          "_short_type_" : "rp<StreamReceiver>",
+          "_value_" : null
+        },
+        {
           "_canonical_type_" : "std::__cxx11::basic_regex<char>",
           "_metatype_" : "atomic",
           "_name_" : "uri_regex_",
@@ -222,13 +229,6 @@
           "_name_" : "unsubscribe_fn_",
           "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
           "_value_" : "empty"
-        },
-        {
-          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
-          "_metatype_" : "pointer",
-          "_name_" : "receiver_",
-          "_short_type_" : "rp<StreamReceiver>",
-          "_value_" : null
         }
       ],
       "_name_" : "DynamicEndpoint",
@@ -267,6 +267,16 @@
           "_value_" : []
         },
         {
+          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
+          "_metatype_" : "pointer",
+          "_name_" : "receiver_",
+          "_short_type_" : "rp<StreamReceiver>",
+          "_value_" : 
+          {
+            "_ref_" : 4
+          }
+        },
+        {
           "_canonical_type_" : "std::__cxx11::basic_regex<char>",
           "_metatype_" : "atomic",
           "_name_" : "uri_regex_",
@@ -293,16 +303,6 @@
           "_name_" : "unsubscribe_fn_",
           "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
           "_value_" : "set"
-        },
-        {
-          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
-          "_metatype_" : "pointer",
-          "_name_" : "receiver_",
-          "_short_type_" : "rp<StreamReceiver>",
-          "_value_" : 
-          {
-            "_ref_" : 4
-          }
         }
       ],
       "_name_" : "DynamicEndpoint",

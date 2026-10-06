@@ -81,7 +81,8 @@ namespace xo {
                     return;
 
                 /* the receiver: written inline below, at its most-derived
-                 * address; the receiver_ member's ref names the same one
+                 * address -- the address the reflected receiver_ member
+                 * reaches through self_tp(), so it prints as a ref to this
                  */
                 StreamReceiver * r = ep->receiver_.get();
                 void const * r_addr = dynamic_cast<void const *>(r);
@@ -125,11 +126,11 @@ namespace xo {
                 }
 
                 /* chosen C++ members (.xo-backlog/xo-websock/issues/13):
-                 * the reflected ones (kind_, uri_pattern_, var_v_), then the rest.
-                 * Not printable as themselves -- the enum, the compiled
-                 * regex, the std::functions -- so their names, capture
-                 * count, presence, under their declared types.  The
-                 * receiver is printed in full above: here a ref
+                 * the reflected ones (kind_, uri_pattern_, var_v_,
+                 * receiver_ -- a ref: the receiver printed in full above),
+                 * then the rest.  Not printable as themselves -- the
+                 * compiled regex, the std::functions -- so their capture
+                 * count, presence, under their declared types
                  */
                 obj.members()
                     .reflected_members(tp, "_")
@@ -141,7 +142,6 @@ namespace xo {
                                                   std::string(ep->subscribe_fn_ ? "set" : "empty"))
                     .member_as<StreamUnsubscribeFn>("unsubscribe_fn_",
                                                     std::string(ep->unsubscribe_fn_ ? "set" : "empty"))
-                    .member_ref<rp<StreamReceiver>>("receiver_", r_addr)
                     .end();
 
                 obj.close();

@@ -241,9 +241,7 @@ namespace xo {
             REQUIRE(r["refcount"].asUInt() == 2);
 
             /* the receiver_ member refers to it */
-            Json::Value const & m = eps[1]["_members_"];
-            REQUIRE(m[7]["_name_"].asString() == "receiver_");
-            REQUIRE(m[7]["_value_"]["_ref_"].asInt() == r["_id_"].asInt());
+            REQUIRE(member_value(eps[1], "receiver_")["_ref_"].asInt() == r["_id_"].asInt());
         }
 
         TEST_CASE("webserver-prints-as-json", "[websock][Webserver][json]")
@@ -408,13 +406,13 @@ namespace xo {
                 for (Json::Value const & x : m)
                     names.push_back(x["_name_"].asString());
 
-                /* reflected members first (kind_, uri_pattern_, var_v_),
+                /* reflected members first (kind_, uri_pattern_, var_v_, receiver_),
                  * then the summaries and the ref (xo-printjson#06,
                  * xo-reflect#06)
                  */
                 REQUIRE(names == std::vector<std::string>{"kind_", "uri_pattern_", "var_v_",
-                                                          "uri_regex_", "http_handler_", "subscribe_fn_",
-                                                          "unsubscribe_fn_", "receiver_"});
+                                                          "receiver_", "uri_regex_", "http_handler_",
+                                                          "subscribe_fn_", "unsubscribe_fn_"});
 
                 /* by name: robust to member order */
                 auto value_of = [](Json::Value const & mem, std::string const & name) {

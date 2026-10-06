@@ -105,6 +105,11 @@ namespace xo {
             /** true iff the object at @p p has printed in full, in this print **/
             bool is_printed(void const * p) const;
 
+            /** true iff print(@p tp) would print a ref: an object of @p tp's
+             *  type has printed in full at @p tp's address, in this print
+             **/
+            bool is_printed(TaggedPtr tp) const;
+
             /** open a json object for the object at @p p, one the printer
              *  writes inline itself rather than through print(): it takes
              *  part in identity like any other, "_id_" included.  Ask

@@ -64,6 +64,17 @@ namespace xo {
 
             switch (td->metatype()) {
             case Metatype::mt_pointer:
+                if (v.n_child() == 0)
+                    return true;
+                {
+                    TaggedPtr target = v.get_child(0);
+
+                    /* printed already: a ref, which needs no printer for
+                     * its type -- e.g. a receiver an endpoint writes inline
+                     * (.xo-backlog/xo-reflect/issues/04)
+                     */
+                    return state_->is_printed(target) || this->printable_value(target);
+                }
             case Metatype::mt_vector:
                 return (v.n_child() == 0) || this->printable_value(v.get_child(0));
             default:

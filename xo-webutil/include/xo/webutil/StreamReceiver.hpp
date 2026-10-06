@@ -15,6 +15,8 @@
 namespace Json { class Value; }
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     namespace web {
         /* the outbound end of one websocket subscription.  Defined in
          * xo-websock (xo/websock/WebsocketSink.hpp); only named here.
@@ -48,6 +50,15 @@ namespace xo {
          **/
         class StreamReceiver : public reflect::SelfTagging {
         public:
+            /** describe StreamReceiver to xo-reflect: a struct with no
+             *  members.  Reflected so an rp<StreamReceiver> reflects through
+             *  self_tp() to the receiver's actual type -- reflection follows a
+             *  pointer to its most-derived type only for a base reflected as
+             *  a self-tagging struct (.xo-backlog/xo-reflect/issues/04).
+             *  Called by xo-websock's websock_reflect_types()
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
+
             /** handle @p msg from one subscriber.
              *
              *  @p ws_sink is the SAME sink the stream's subscribe function

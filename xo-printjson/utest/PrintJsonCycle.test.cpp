@@ -9,6 +9,7 @@
 #include "xo/printjson/PrintJson.hpp"
 #include "xo/printjson/init_printjson.hpp"
 #include "xo/printjson/JsonPrintState.hpp"
+#include "xo/printjson/JsonObject.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
@@ -352,6 +353,61 @@ namespace xo {
                                                             {entry<int>("v", "atomic", "7")})),
                                         entry<int>("x", "atomic", "8")}));
         } /*TEST_CASE(print-json-first-member-shares-address)*/
+
+        namespace {
+            /* never reflected: an atomic, with no printer */
+            struct Opaque {
+                int z_;
+            };
+        }
+
+        TEST_CASE("print-json-ref-to-an-object-a-printer-wrote", "[printjson][cycle]") {
+            /* an object a printer writes inline itself (open_object_at),
+             * of a type with no printer and no reflection: a later pointer
+             * to it is a ref, not an unprintable atomic -- refs need no
+             * printer for their target's type (.xo-backlog/xo-reflect/issues/04)
+             */
+            PrintJson print_json;
+            Opaque x{3};
+            Opaque * px = &x;
+
+            std::stringstream ss;
+            json::JsonPrintState state(&print_json, &ss);
+
+            {
+                json::JsonObject obj = state.open_object_at(&x, "Opaque",
+                                                            xo::reflect::Reflect::require<Opaque>());
+                obj.close();
+            }
+            ss << " ";
+            state.print(xo::reflect::Reflect::make_tp(&px));
+
+            REQUIRE(ss.str() == head<Opaque>("Opaque", 1) + "} {\"_ref_\": 1}");
+        } /*TEST_CASE(print-json-ref-to-an-object-a-printer-wrote)*/
+
+        TEST_CASE("json-members-ref-to-an-object-a-printer-wrote", "[printjson][cycle]") {
+            /* JsonMembers counts such a pointer printable: its value is a
+             * ref (was: a "type not reflected" error entry)
+             */
+            PrintJson print_json;
+            Opaque x{3};
+            Opaque * px = &x;
+
+            std::stringstream ss;
+            json::JsonPrintState state(&print_json, &ss);
+
+            {
+                json::JsonObject obj = state.open_object_at(&x, "Opaque",
+                                                            xo::reflect::Reflect::require<Opaque>());
+                obj.members()
+                    .member("self_", px)
+                    .end();
+                obj.close();
+            }
+
+            REQUIRE(ss.str() == object(head<Opaque>("Opaque", 1),
+                                       {entry<Opaque *>("self_", "pointer", "{\"_ref_\": 1}")}));
+        } /*TEST_CASE(json-members-ref-to-an-object-a-printer-wrote)*/
 
         TEST_CASE("validate-cycle-terminates", "[printjson][cycle]") {
             /* validate_tp walks as print_tp does: each object once */

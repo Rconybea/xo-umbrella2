@@ -9,6 +9,7 @@
 #include "WsSessionRouter.hpp"
 #include "DynamicEndpoint.hpp"
 #include "UrlRouter.hpp"
+#include <xo/webutil/StreamReceiver.hpp>
 
 namespace xo {
     namespace web {
@@ -18,6 +19,9 @@ namespace xo {
             /* enums first: the structs below hold them */
             RunstateUtil::reflect_self(table);
             reflect_endpoint_kind(table);
+
+            /* interfaces whose pointers should reach the actual type */
+            StreamReceiver::reflect_self(table);
 
             WebserverConfig::reflect_self(table);
             Webserver::reflect_self(table);

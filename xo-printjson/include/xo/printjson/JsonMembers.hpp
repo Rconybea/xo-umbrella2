@@ -191,11 +191,14 @@ namespace xo {
 
                 DeclaredType declared = declared_of<Declared>();
                 reflect::TypeDescr target = Reflect::require<target_t>();
+                reflect::TaggedPtr tp = Reflect::make_tp(const_cast<V *>(&value));
 
-                if (this->printable(target)) {
-                    this->write_value(name, declared,
-                                      Reflect::make_tp(const_cast<V *>(&value)),
-                                      identity);
+                /* by the VALUE, as reflected_members() decides: a null
+                 * pointer, an empty vector, a ref to an object printed
+                 * already -- each printable, whatever the target's type
+                 */
+                if (this->printable_value(tp)) {
+                    this->write_value(name, declared, tp, identity);
                 } else {
                     this->write_error(name, declared,
                                       "type not reflected: " + target->canonical_name());

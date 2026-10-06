@@ -158,13 +158,16 @@ namespace xo {
 
             if (sr.is_incomplete()) {
                 /* not uri_regex_ or the std::functions: not reflectable
-                 * yet; the printer summarizes them.  Not receiver_: printed
-                 * in full inline by the printer -- a ref.  kind_: an enum,
-                 * reflected by reflect_endpoint_kind
+                 * yet; the printer summarizes them.  kind_: an enum,
+                 * reflected by reflect_endpoint_kind.  receiver_: printed in
+                 * full inline by the endpoint's printer first ("receiver"),
+                 * so a ref here -- each object prints once
+                 * (.xo-backlog/xo-printjson/issues/02)
                  */
                 REFLECT_MEMBER(sr, kind);
                 REFLECT_MEMBER(sr, uri_pattern);
                 REFLECT_MEMBER(sr, var_v);
+                REFLECT_MEMBER(sr, receiver);
             }
         } /*reflect_self*/
     } /*namespace web*/

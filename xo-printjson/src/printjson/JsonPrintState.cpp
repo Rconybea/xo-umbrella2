@@ -275,6 +275,15 @@ namespace xo {
             return (ix != this->objects_.end()) && (ix->second.type_ != nullptr);
         } /*is_printed*/
 
+        bool
+        JsonPrintState::is_printed(TaggedPtr tp) const
+        {
+            auto ix = this->objects_.find(tp.address());
+
+            /* as print_node decides to print a ref */
+            return (ix != this->objects_.end()) && (ix->second.type_ == tp.td());
+        } /*is_printed*/
+
         JsonObject
         JsonPrintState::open_object_at(void const * p, std::string_view name, TypeDescr td)
         {
@@ -329,22 +338,31 @@ namespace xo {
                                   : tp.td()->metatype() == Metatype::mt_struct);
                 void const * address = nullptr;
 
-                if (identity && is_object && tp.address()) {
+                if (identity && tp.address()) {
                     auto ix = this->objects_.find(tp.address());
 
-                    if (ix == this->objects_.end() || ix->second.type_ == nullptr) {
-                        /* first time printed (perhaps referred to already) */
-                        address = tp.address();
-                    } else if (ix->second.type_ == tp.td()) {
-                        /* printed already: refer to it */
+                    if (ix != this->objects_.end() && ix->second.type_ == tp.td()) {
+                        /* printed already: refer to it.  Whatever its type
+                         * says: entries come only from open_object /
+                         * open_object_at, so it printed as a json object --
+                         * e.g. an unreflected receiver an endpoint writes
+                         * inline (.xo-backlog/xo-reflect/issues/04)
+                         */
                         *p_os << "{" << quot("_ref_") << ": " << ix->second.id_ << "}";
                         return;
-                    } else {
-                        /* another type at a printed object's address: part
-                         * of that object (its first member, say).  In full,
-                         * without identity
-                         */
                     }
+
+                    if (is_object
+                        && (ix == this->objects_.end() || ix->second.type_ == nullptr))
+                    {
+                        /* first time printed (perhaps referred to already) */
+                        address = tp.address();
+                    }
+
+                    /* else: another type at a printed object's address --
+                     * part of that object (its first member, say) -- or a
+                     * value that is not an object.  In full, without identity
+                     */
                 }
 
                 RestoreScope<Pending> restore(&this->pending_);
