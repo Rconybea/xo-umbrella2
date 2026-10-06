@@ -34,7 +34,8 @@ await ev(`${RB}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await
 r = await rows_of(RB);
 console.log(" =  router rows:", JSON.stringify(r));
 check(r.some(t => t.trimStart().startsWith("url_router_:") && t.endsWith("▾ (→)")), "url_router_: a drawn ref (to the UrlRouter box)");
-check(r.some(t => t.startsWith("readjson_:") && t.endsWith(': set')), "readjson_ presence");
+// a unique_ptr to a reflected struct with no members: its name shows presence (xo-reflect#04)
+check(r.some(t => t === "readjson_: CharReader"), "readjson_ presence");
 check(r.some(t => t.startsWith("subscription_v_:") && t.endsWith("▸ [1]")), "subscription_v_ closed, 1 slot");
 await click_in(RB, "subscription_v_:"); await sleep(700);
 r = await rows_of(RB);

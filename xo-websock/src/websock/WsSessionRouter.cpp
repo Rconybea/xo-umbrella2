@@ -478,17 +478,17 @@ namespace xo {
 
                 json::JsonObject obj = state.open_object("WsSessionRouter", tp.td());
 
-                /* the sender by its most-derived address: it prints as its
+                /* the reflected member (readjson_), then the rest.  The
+                 * sender by its most-derived address: it prints as its
                  * actual type, WsSessionSenderImpl, at that address
                  */
                 obj.members()
+                    .reflected_members(tp, "_")
                     .member_ref<UrlRouter const &>("url_router_", &r->url_router_)
                     .member_ref<rp<WsSender>>("sender_",
                                               dynamic_cast<void const *>(r->sender_.get()))
                     /* the server's, shared: printed in full in the server's members */
                     .member_ref<rp<PrintJson>>("pjson_", r->pjson_.get())
-                    .member_as<std::unique_ptr<Json::CharReader>>("readjson_",
-                                                                  std::string(r->readjson_ ? "set" : "null"))
                     .member_refs<std::vector<std::unique_ptr<WsSessionRouter::Subscription>>>("subscription_v_", sub_v)
                     .end();
 
@@ -536,7 +536,25 @@ namespace xo {
         void
         WsSessionRouter::reflect_self(reflect::TypeDescrTable * table)
         {
-            { StructReflector<WsSessionRouter> sr; }
+            /* jsoncpp's reader, held by readjson_: a third-party type,
+             * reflected with no members -- so readjson_ prints as an empty
+             * object (or null), showing whether the router has one
+             * (.xo-backlog/xo-reflect/issues/04)
+             */
+            { StructReflector<Json::CharReader> sr; }
+
+            {
+                StructReflector<WsSessionRouter> sr;
+
+                if (sr.is_incomplete()) {
+                    /* not url_router_ (a reference: no member pointer),
+                     * sender_ or pjson_ (printed in full elsewhere -- refs),
+                     * subscription_v_ (copied under the router's lock --
+                     * .xo-backlog/xo-websock/issues/15)
+                     */
+                    REFLECT_MEMBER(sr, readjson);
+                }
+            }
 
             Subscription::reflect_self(table);
         } /*reflect_self*/

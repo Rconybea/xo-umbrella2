@@ -673,19 +673,30 @@ namespace xo {
                 for (Json::Value const & m : rmem)
                     rnames.push_back(m["_name_"].asString());
 
-                REQUIRE(rnames == std::vector<std::string>{"url_router_", "sender_", "pjson_",
-                                                           "readjson_", "subscription_v_"});
-                REQUIRE(rmem[0]["_metatype_"].asString() == "pointer");   /* a reference */
-                /* ... to the server's url router, printed inside the server */
-                REQUIRE(rmem[0]["_value_"]["_ref_"].asInt()
-                        == entry_of(root["_members_"], "url_router_")["_value_"]["_id_"].asInt());
-                REQUIRE(rmem[1]["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
-                REQUIRE(rmem[3]["_value_"].asString() == "set");
+                /* reflected members first (readjson_), then the rest */
+                REQUIRE(rnames == std::vector<std::string>{"readjson_", "url_router_", "sender_",
+                                                           "pjson_", "subscription_v_"});
 
-                Json::Value const & slots = rmem[4]["_value_"];
+                Json::Value const url_router = entry_of(rmem, "url_router_");
+                REQUIRE(url_router["_metatype_"].asString() == "pointer");   /* a reference */
+                /* ... to the server's url router, printed inside the server */
+                REQUIRE(url_router["_value_"]["_ref_"].asInt()
+                        == entry_of(root["_members_"], "url_router_")["_value_"]["_id_"].asInt());
+                REQUIRE(entry_of(rmem, "sender_")["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
+
+                /* a unique_ptr to jsoncpp's reader, reflected with no members:
+                 * present, so an empty object (xo-reflect#04)
+                 */
+                Json::Value const readjson = entry_of(rmem, "readjson_");
+                REQUIRE(readjson["_metatype_"].asString() == "pointer");
+                REQUIRE(readjson["_value_"]["_name_"].asString() == "CharReader");
+                REQUIRE(readjson["_value_"]["_members_"].empty());
+
+                Json::Value const subscription_v = entry_of(rmem, "subscription_v_");
+                Json::Value const & slots = subscription_v["_value_"];
                 Json::Value const & subs = v[k]["subscriptions"];
 
-                REQUIRE(rmem[4]["_metatype_"].asString() == "vector");
+                REQUIRE(subscription_v["_metatype_"].asString() == "vector");
                 REQUIRE(slots.size() == subs.size());
                 for (Json::ArrayIndex i = 0; i < subs.size(); ++i)
                     REQUIRE(slots[i]["_ref_"].asInt() == subs[i]["_id_"].asInt());
