@@ -291,7 +291,7 @@ namespace xo {
                  * accessors (xo-printjson#06)
                  */
                 REQUIRE(names == std::vector<std::string>{"ws_config_", "pjson_", "url_router_",
-                                                          "session_table_", "listen_port_", "state_"});
+                                                          "session_table_", "state_", "listen_port_"});
 
                 /* an entry by name: robust to member order */
                 auto entry_of = [](Json::Value const & m, std::string const & name) -> Json::Value const & {
@@ -309,6 +309,7 @@ namespace xo {
 
                 REQUIRE(metatypes == std::vector<std::string>{"struct", "pointer", "struct",
                                                               "struct", "atomic", "atomic"});
+                /* state_: a reflected enum (xo-reflect#06) -- printed by name */
 
                 REQUIRE(entry_of(mem, "listen_port_")["_canonical_type_"].asString() == "std::atomic<int>");
                 REQUIRE(entry_of(mem, "listen_port_")["_short_type_"].asString() == "atomic<int>");
@@ -407,10 +408,11 @@ namespace xo {
                 for (Json::Value const & x : m)
                     names.push_back(x["_name_"].asString());
 
-                /* reflected members first (uri_pattern_, var_v_), then the
-                 * summaries and the ref (xo-printjson#06)
+                /* reflected members first (kind_, uri_pattern_, var_v_),
+                 * then the summaries and the ref (xo-printjson#06,
+                 * xo-reflect#06)
                  */
-                REQUIRE(names == std::vector<std::string>{"uri_pattern_", "var_v_", "kind_",
+                REQUIRE(names == std::vector<std::string>{"kind_", "uri_pattern_", "var_v_",
                                                           "uri_regex_", "http_handler_", "subscribe_fn_",
                                                           "unsubscribe_fn_", "receiver_"});
 

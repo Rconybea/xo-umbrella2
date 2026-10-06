@@ -5,6 +5,7 @@
 
 #include "DynamicEndpoint.hpp"
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/reflect/EnumReflector.hpp>
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
@@ -140,16 +141,28 @@ namespace xo {
             this->receiver_->receive(ws_sink, msg);
         } /*receive*/
         void
+        reflect_endpoint_kind(reflect::TypeDescrTable * /*table*/)
+        {
+            reflect::EnumReflector<EndpointKind> er;
+
+            if (er.is_incomplete()) {
+                REFLECT_ENUM(er, http);
+                REFLECT_ENUM(er, stream);
+            }
+        } /*reflect_endpoint_kind*/
+
+        void
         DynamicEndpoint::reflect_self(reflect::TypeDescrTable * /*table*/)
         {
             StructReflector<DynamicEndpoint> sr;
 
             if (sr.is_incomplete()) {
-                /* not kind_ (an enum), uri_regex_ or the std::functions:
-                 * not reflectable yet (.xo-backlog/xo-reflect/issues/04);
-                 * the printer summarizes them.  Not receiver_: printed in
-                 * full inline by the printer -- a ref
+                /* not uri_regex_ or the std::functions: not reflectable
+                 * yet; the printer summarizes them.  Not receiver_: printed
+                 * in full inline by the printer -- a ref.  kind_: an enum,
+                 * reflected by reflect_endpoint_kind
                  */
+                REFLECT_MEMBER(sr, kind);
                 REFLECT_MEMBER(sr, uri_pattern);
                 REFLECT_MEMBER(sr, var_v);
             }

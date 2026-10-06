@@ -26,6 +26,12 @@ namespace xo {
         class RunstateUtil {
         public:
             static char const * runstate_descr(Runstate x);
+
+            /** describe Runstate to xo-reflect: its enumerators, so json
+             *  prints them by name (.xo-backlog/xo-reflect/issues/06).
+             *  Called by websock_reflect_types()
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
         }; /*RunstateUtil*/
 
         /* libwebsocket:

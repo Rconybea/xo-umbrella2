@@ -118,7 +118,7 @@ namespace xo {
                 }
 
                 /* chosen C++ members (.xo-backlog/xo-websock/issues/13):
-                 * the reflected ones (uri_pattern_, var_v_), then the rest.
+                 * the reflected ones (kind_, uri_pattern_, var_v_), then the rest.
                  * Not printable as themselves -- the enum, the compiled
                  * regex, the std::functions -- so their names, capture
                  * count, presence, under their declared types.  The
@@ -126,7 +126,6 @@ namespace xo {
                  */
                 obj.members()
                     .reflected_members(tp, "_")
-                    .member_as<EndpointKind>("kind_", std::string(endpoint_kind_descr(ep->kind_)))
                     .member_as<std::regex>("uri_regex_",
                                            std::to_string(ep->uri_regex_.mark_count()) + " captures")
                     .member_as<HttpHandler>("http_handler_",

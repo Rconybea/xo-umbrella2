@@ -8,6 +8,8 @@
 #include <functional>
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     namespace web {
         /* which kind of endpoint a DynamicEndpoint is; fixed at construction
          * by make_http() / make_stream()
@@ -29,6 +31,13 @@ namespace xo {
             }
             return "???";
         }
+
+        /** describe EndpointKind to xo-reflect: its enumerators, so json
+         *  prints them by name (.xo-backlog/xo-reflect/issues/06).  An enum
+         *  has no member functions to hold this.  Defined in
+         *  DynamicEndpoint.cpp; called by websock_reflect_types()
+         **/
+        void reflect_endpoint_kind(reflect::TypeDescrTable * table);
 
         class DynamicEndpoint;
 

@@ -39,6 +39,7 @@
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/reflect/EnumReflector.hpp>
 #include <xo/printjson/JsonMembers.hpp>
 #include <xo/printjson/JsonObject.hpp>
 #include <xo/printjson/type_keys.hpp>
@@ -76,6 +77,18 @@ namespace xo {
 
             return "???";
         } /*runstate_descr*/
+
+        void
+        RunstateUtil::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            reflect::EnumReflector<Runstate> er;
+
+            if (er.is_incomplete()) {
+                REFLECT_ENUM(er, stopped);
+                REFLECT_ENUM(er, stop_requested);
+                REFLECT_ENUM(er, running);
+            }
+        } /*reflect_self*/
 
         /* both websocket and appl thread can obtain this token.
          * see WebsocketSessionRecd.  Posession of this token is evidence
@@ -1207,14 +1220,12 @@ namespace xo {
                      * (.xo-backlog/xo-websock/issues/13): the reflected ones
                      * (ws_config_, pjson_ -- in full here, its owner; routers
                      * and sinks share it as refs -- url_router_,
-                     * session_table_), then listen_port_ and state_, read as
-                     * the accessors above read them
+                     * session_table_, state_), then listen_port_, read as its
+                     * accessor above reads it
                      */
                     obj.members()
                         .reflected_members(tp, "_")
                         .member_as<std::atomic<std::int32_t>>("listen_port_", websrv->listen_port())
-                        .member_as<Runstate>("state_",
-                                             std::string(RunstateUtil::runstate_descr(websrv->state())))
                         .end();
 
                     obj.close();
@@ -2323,15 +2334,17 @@ namespace xo {
             StructReflector<WebserverImpl> sr;
 
             if (sr.is_incomplete()) {
-                /* not listen_port_ (an atomic) or state_ (an enum): not
-                 * reflectable yet (.xo-backlog/xo-reflect/issues/04); the
-                 * printer reads them through their accessors.  pjson_ in
-                 * full: the server owns it; routers and sinks print refs
+                /* not listen_port_: an atomic, not reflectable yet
+                 * (.xo-backlog/xo-reflect/issues/04); the printer reads it
+                 * through its accessor.  pjson_ in full: the server owns
+                 * it; routers and sinks print refs.  state_: an enum,
+                 * reflected by RunstateUtil::reflect_self
                  */
                 REFLECT_MEMBER(sr, ws_config);
                 REFLECT_MEMBER(sr, pjson);
                 REFLECT_MEMBER(sr, url_router);
                 REFLECT_MEMBER(sr, session_table);
+                REFLECT_MEMBER(sr, state);
             }
         } /*reflect_self*/
 

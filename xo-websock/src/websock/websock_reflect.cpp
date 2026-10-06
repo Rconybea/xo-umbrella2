@@ -15,6 +15,10 @@ namespace xo {
         void
         websock_reflect_types(reflect::TypeDescrTable * table)
         {
+            /* enums first: the structs below hold them */
+            RunstateUtil::reflect_self(table);
+            reflect_endpoint_kind(table);
+
             WebserverConfig::reflect_self(table);
             Webserver::reflect_self(table);
             WebsocketSink::reflect_self(table);
