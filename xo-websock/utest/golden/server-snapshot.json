@@ -314,6 +314,7 @@
       {
         "_canonical_type_" : "xo::ut::{anonymous}::BoxReceiver",
         "_id_" : 4,
+        "_members_" : [],
         "_name_" : "BoxReceiver",
         "_short_type_" : "BoxReceiver",
         "refcount" : 1

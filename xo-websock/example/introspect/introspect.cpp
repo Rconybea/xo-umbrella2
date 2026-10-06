@@ -184,11 +184,18 @@ namespace xo {
                 : websrv_{websrv} {}
 
             /** describe IntrospectReceiver to xo-reflect, using @p table.
-             *  No members yet: websrv_ printed generically would nest the
-             *  whole Webserver inside its own endpoint
+             *
+             *  websrv_ prints as a ref to the server: a snapshot prints the
+             *  server first, and each object prints once
+             *  (.xo-backlog/xo-printjson/issues/02).  Until that, it was left
+             *  out -- printed in full, it nested the whole Webserver inside
+             *  its own endpoint
              **/
             static void reflect_self(TypeDescrTable * /*table*/) {
                 StructReflector<IntrospectReceiver> sr;
+
+                if (sr.is_incomplete())
+                    REFLECT_MEMBER(sr, websrv);
             }
 
             // ----- Inherited from SelfTagging -----

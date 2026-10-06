@@ -98,7 +98,8 @@ namespace xo {
                     .key("has_receive", ep->has_receive());
 
                 /* the receiver, printed here in full -- its identity, named
-                 * by its most-derived type (SelfTagging); members later
+                 * by its most-derived type (SelfTagging), and its reflected
+                 * members
                  */
                 std::ostream & os = obj.key_open("receiver");
                 if (!r) {
@@ -114,6 +115,12 @@ namespace xo {
                                                                  self.td());
                     /* the endpoint's hold, plus whatever the application keeps */
                     robj.key("refcount", refcount);
+                    /* whatever its actual type reflects -- through self_tp(),
+                     * so an application's receiver shows its own members
+                     */
+                    robj.members()
+                        .reflected_members(self, "_")
+                        .end();
                     robj.close();
                 }
 
