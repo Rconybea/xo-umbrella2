@@ -10,6 +10,7 @@ set(SELF_SRCS
     pointer/PointerTdx.cpp
     vector/VectorTdx.cpp
     struct/StructTdx.cpp struct/StructMember.cpp
+    enum/EnumTdx.cpp
     function/FunctionTdx.cpp)
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

@@ -12,6 +12,7 @@ namespace xo {
         /* forward-declaring here.  see [reflect/struct/StructMember.hpp] */
         class StructMember;
         class FunctionTdxInfo;
+        class EnumTdx;
         class TypeDescrBase;
         class TaggedPtr;
 
@@ -47,6 +48,10 @@ namespace xo {
             bool is_vector() const { return this->metatype() == Metatype::mt_vector; }
             bool is_struct() const { return this->metatype() == Metatype::mt_struct; }
             bool is_function() const { return this->metatype() == Metatype::mt_function; }
+            /** true iff a reflected enum (EnumReflector): metatype mt_atomic,
+             *  with enumerator names in enum_info()
+             **/
+            bool is_enum() const { return this->enum_info() != nullptr; }
 
             virtual Metatype metatype() const = 0;
             /* given a T-instance,  report most-derived subtype of T to which *object belongs.
@@ -84,6 +89,13 @@ namespace xo {
             virtual uint32_t n_fn_arg() const { return 0; }
             virtual const TypeDescrBase * fn_arg(uint32_t /*i_arg*/) const { return nullptr; }
             virtual bool fn_is_noexcept() const { return false; }
+
+            // methods for working with reflected enums
+
+            /** enumerators of a reflected enum (EnumReflector); nullptr
+             *  for any other type, an enum not reflected included
+             **/
+            virtual const EnumTdx * enum_info() const { return nullptr; }
         }; /*TypeDescrExtra*/
     } /*namespace reflect*/
 } /*namespace xo*/

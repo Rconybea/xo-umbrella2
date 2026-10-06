@@ -351,6 +351,8 @@ namespace xo {
             bool is_vector() const { return this->tdextra_->is_vector(); }
             bool is_struct() const { return this->tdextra_->is_struct(); }
             bool is_function() const { return this->tdextra_->is_function(); }
+            /** true iff a reflected enum: see EnumReflector, enum_info() **/
+            bool is_enum() const { return this->tdextra_->is_enum(); }
 
             /* given a T-instance object,  return tagged pointer with T replaced
              * by the most-derived-subtype of T to which *object belongs.
@@ -401,6 +403,8 @@ namespace xo {
 
             /** nullptr for non-function types **/
             const FunctionTdxInfo * fn_info() const { return this->tdextra_->fn_info(); }
+            /** enumerators of a reflected enum; nullptr otherwise **/
+            const EnumTdx * enum_info() const { return this->tdextra_->enum_info(); }
             uint32_t n_fn_arg() const { return this->tdextra_->n_fn_arg(); }
 
             /* require:
