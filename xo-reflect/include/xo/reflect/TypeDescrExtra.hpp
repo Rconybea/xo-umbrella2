@@ -13,6 +13,7 @@ namespace xo {
         class StructMember;
         class FunctionTdxInfo;
         class EnumTdx;
+        class StdAtomicTdx;
         class TypeDescrBase;
         class TaggedPtr;
 
@@ -52,6 +53,10 @@ namespace xo {
              *  with enumerator names in enum_info()
              **/
             bool is_enum() const { return this->enum_info() != nullptr; }
+            /** true iff a std::atomic<T>: metatype mt_atomic, with a load
+             *  and T's description in std_atomic_info()
+             **/
+            bool is_std_atomic() const { return this->std_atomic_info() != nullptr; }
 
             virtual Metatype metatype() const = 0;
             /* given a T-instance,  report most-derived subtype of T to which *object belongs.
@@ -96,6 +101,13 @@ namespace xo {
              *  for any other type, an enum not reflected included
              **/
             virtual const EnumTdx * enum_info() const { return nullptr; }
+
+            // methods for working with std::atomic<T>
+
+            /** load and value type of a std::atomic<T>; nullptr for any
+             *  other type
+             **/
+            virtual const StdAtomicTdx * std_atomic_info() const { return nullptr; }
         }; /*TypeDescrExtra*/
     } /*namespace reflect*/
 } /*namespace xo*/

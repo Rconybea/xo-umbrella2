@@ -7,6 +7,7 @@ set(SELF_SRCS
     TypeDescr.cpp TypeDescrExtra.cpp TaggedRcptr.cpp
     Metatype.cpp
     atomic/AtomicTdx.cpp
+    atomic/StdAtomicTdx.cpp
     pointer/PointerTdx.cpp
     vector/VectorTdx.cpp
     struct/StructTdx.cpp struct/StructMember.cpp

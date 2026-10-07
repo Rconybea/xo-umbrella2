@@ -8,12 +8,15 @@
 #include "EstablishTypeDescr.hpp"
 #include "SelfTagging.hpp"
 #include "atomic/AtomicTdx.hpp"
+#include "atomic/StdAtomicTdx.hpp"
 #include "function/FunctionTdx.hpp"
 #include "pointer/PointerTdx.hpp"
 #include "struct/StructTdx.hpp"
 #include "vector/VectorTdx.hpp"
 #include <xo/refcnt/Refcounted.hpp>
 #include <array>
+#include <atomic>
+#include <cstring>      // for std::memcpy
 #include <memory>       // for std::unique_ptr<>
 #include <utility> // for std::pair<>
 #include <vector>
@@ -100,6 +103,19 @@ namespace xo {
          **/
         template<typename T, typename D>
         class EstablishTdx<std::unique_ptr<T, D>> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- std::atomic<T> -----
+
+        /** a std::atomic<T> reflects as mt_atomic, with no children, plus a
+         *  load into a buffer and T's description: StdAtomicTdx,
+         *  TypeDescr::std_atomic_info().  See .xo-backlog/xo-reflect/issues/04.
+         **/
+        template<typename T>
+        class EstablishTdx<std::atomic<T>> {
         public:
             /* note: definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
@@ -429,6 +445,28 @@ namespace xo {
             Reflect::require<std::remove_cv_t<T>>();
 
             return RawPointerTdx<T>::make();
+        } /*make*/
+
+        // ----- std::atomic<T> -----
+
+        /* declared above before
+         *   class Reflect { .. }
+         */
+        template<typename T>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<std::atomic<T>>::make() {
+            /* std::atomic requires a trivially copyable T: so a load can be
+             * copied into any buffer, and reflected there as a T
+             */
+            static_assert(std::is_trivially_copyable_v<T>);
+
+            auto load = [](void const * atomic, void * dst) {
+                T value = static_cast<std::atomic<T> const *>(atomic)->load();
+
+                std::memcpy(dst, &value, sizeof(T));
+            };
+
+            return StdAtomicTdx::make(Reflect::require<T>(), sizeof(T), alignof(T), load);
         } /*make*/
 
         // ----- std::unique_ptr<T, D> -----

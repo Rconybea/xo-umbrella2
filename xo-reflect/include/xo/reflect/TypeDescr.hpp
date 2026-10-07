@@ -353,6 +353,8 @@ namespace xo {
             bool is_function() const { return this->tdextra_->is_function(); }
             /** true iff a reflected enum: see EnumReflector, enum_info() **/
             bool is_enum() const { return this->tdextra_->is_enum(); }
+            /** true iff a std::atomic<T>: see std_atomic_info() **/
+            bool is_std_atomic() const { return this->tdextra_->is_std_atomic(); }
 
             /* given a T-instance object,  return tagged pointer with T replaced
              * by the most-derived-subtype of T to which *object belongs.
@@ -405,6 +407,8 @@ namespace xo {
             const FunctionTdxInfo * fn_info() const { return this->tdextra_->fn_info(); }
             /** enumerators of a reflected enum; nullptr otherwise **/
             const EnumTdx * enum_info() const { return this->tdextra_->enum_info(); }
+            /** load and value type of a std::atomic<T>; nullptr otherwise **/
+            const StdAtomicTdx * std_atomic_info() const { return this->tdextra_->std_atomic_info(); }
             uint32_t n_fn_arg() const { return this->tdextra_->n_fn_arg(); }
 
             /* require:
