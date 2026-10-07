@@ -728,11 +728,10 @@ namespace xo {
                                                       "endpoint_", "sink_"});
             REQUIRE(mem[0]["_value_"].asUInt() == 2);
             REQUIRE(mem[1]["_value_"].asString() == "/fw/8");
-            /* callback_id_: a reflected CallbackId -- a struct, its id a member */
+            /* callback_id_: a transparent wrapper -- its number (xo-reflect#04) */
             REQUIRE(mem[2]["_canonical_type_"].asString().find("CallbackId") != std::string::npos);
-            REQUIRE(mem[2]["_metatype_"].asString() == "struct");
-            REQUIRE(mem[2]["_value_"]["_members_"][0]["_name_"].asString() == "id");
-            REQUIRE(mem[2]["_value_"]["_members_"][0]["_value_"].isUInt());
+            REQUIRE(mem[2]["_metatype_"].asString() == "atomic");
+            REQUIRE(mem[2]["_value_"].isUInt());
             REQUIRE(mem[3]["_value_"]["_ref_"].asInt() == v[1]["endpoint"]["_ref_"].asInt());
             REQUIRE(mem[4]["_value_"]["_ref_"].asInt() == sink["_id_"].asInt());
             REQUIRE(v[1].toStyledString().find("\"_error_\"") == std::string::npos);

@@ -630,6 +630,13 @@
               "_value_" : "/fw"
             },
             {
+              "_canonical_type_" : "xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>",
+              "_metatype_" : "atomic",
+              "_name_" : "callback_id_",
+              "_short_type_" : "CallbackIdImpl<CallbackId_tag>",
+              "_value_" : 1
+            },
+            {
               "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>",
               "_metatype_" : "pointer",
               "_name_" : "endpoint_",
@@ -638,13 +645,6 @@
               {
                 "_ref_" : 3
               }
-            },
-            {
-              "_canonical_type_" : "xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>",
-              "_metatype_" : "atomic",
-              "_name_" : "callback_id_",
-              "_short_type_" : "CallbackIdImpl<CallbackId_tag>",
-              "_value_" : 1
             },
             {
               "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WebsocketSink>",

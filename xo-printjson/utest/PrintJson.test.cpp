@@ -8,6 +8,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflect/EnumReflector.hpp>
+#include <xo/reflect/WrapperReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << tag(..) */
 #include <xo/arena/DArenaVector.hpp>
@@ -473,6 +474,53 @@ namespace xo {
                                  + mentry<std::atomic<bool>>("on", "atomic", "true") + ", "
                                  + mentry<std::atomic<Mood>>("mood", "atomic", "\"calm\"") + "]}"));
         } /*TEST_CASE(print-json-std-atomic-members)*/
+
+        namespace {
+            /* a transparent wrapper, and a struct holding one
+             * (.xo-backlog/xo-reflect/issues/04)
+             */
+            class Ticket {
+            public:
+                explicit Ticket(std::uint32_t n) : n_{n} {}
+                static constexpr std::uint32_t Ticket::* n_address() { return &Ticket::n_; }
+            private:
+                std::uint32_t n_ = 0;
+            };
+
+            struct TicketHolder {
+                Ticket t_{0};
+            };
+
+            void reflect_ticket_types() {
+                {
+                    xo::reflect::WrapperReflector<Ticket> wr;
+
+                    if (wr.is_incomplete())
+                        wr.reflect_wrapped(Ticket::n_address());
+                }
+                {
+                    StructReflector<TicketHolder> sr;
+
+                    if (sr.is_incomplete())
+                        REFLECT_MEMBER(sr, t);
+                }
+            }
+        }
+
+        TEST_CASE("print-json-transparent-wrapper", "[printjson][wrapper]") {
+            /* as the value it stands for -- not a struct holding it */
+            reflect_ticket_types();
+
+            PrintJson print_json;
+            TicketHolder h{Ticket{42}};
+
+            std::stringstream ss;
+            print_json.print(h, &ss);
+
+            REQUIRE(ss.str() == ("{\"_name_\": \"TicketHolder\"" + type_member<TicketHolder>()
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<Ticket>("t", "atomic", "42") + "]}"));
+        } /*TEST_CASE(print-json-transparent-wrapper)*/
 
         /* also see tests:
          *   [option_util/utest/Px2.test.cpp]
