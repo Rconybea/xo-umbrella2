@@ -8,15 +8,20 @@
 #include "PrintJson.hpp"
 #include "type_keys.hpp"
 #include <xo/reflect/enum/EnumTdx.hpp>
+#include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
 #include <cstdlib>
 #include <iostream>
+#include <cstddef>
+#include <memory>
+#include <new>
 
 namespace xo {
     using xo::reflect::EnumTdx;
+    using xo::reflect::StdAtomicTdx;
     using xo::reflect::Metatype;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
@@ -195,6 +200,39 @@ namespace xo {
 
                 obj.close();
             } /*print_generic_struct*/
+
+            /* a std::atomic<T>: its value, load()ed into a buffer and printed
+             * as the T it is -- a copy, so with no identity
+             * (.xo-backlog/xo-reflect/issues/04)
+             */
+            void
+            print_std_atomic(JsonPrintState & state,
+                             StdAtomicTdx const & ai,
+                             TaggedPtr tp)
+            {
+                std::size_t z = ai.value_size();
+                std::size_t align = ai.value_align();
+
+                /* small enough: on the stack; else an aligned allocation */
+                constexpr std::size_t c_small_z = 64;
+                alignas(std::max_align_t) std::byte small[c_small_z];
+
+                struct AlignedFree {
+                    std::size_t align_;
+                    void operator()(std::byte * p) const { ::operator delete(p, std::align_val_t(align_)); }
+                };
+                std::unique_ptr<std::byte, AlignedFree> big(nullptr, AlignedFree{align});
+
+                std::byte * buf = small;
+                if ((z > c_small_z) || (align > alignof(std::max_align_t))) {
+                    big.reset(static_cast<std::byte *>(::operator new(z, std::align_val_t(align))));
+                    buf = big.get();
+                }
+
+                ai.load(tp.address(), buf);
+
+                state.print_value(TaggedPtr(ai.value_td(), buf));
+            } /*print_std_atomic*/
 
             /* a reflected enum (EnumReflector): its enumerator's name, a
              * json string; or, a value no enumerator has, its integer, a
@@ -390,6 +428,10 @@ namespace xo {
                                 << ">";
                         return;
                     case Metatype::mt_atomic:
+                        if (StdAtomicTdx const * ai = tp.td()->std_atomic_info()) {
+                            print_std_atomic(*this, *ai, tp);
+                            return;
+                        }
                         if (EnumTdx const * ei = tp.td()->enum_info()) {
                             print_reflected_enum(*ei, tp, p_os);
                             return;

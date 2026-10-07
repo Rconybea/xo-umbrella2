@@ -5,6 +5,7 @@
 
 #include "JsonMembers.hpp"
 #include <xo/reflect/struct/StructMember.hpp>
+#include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <cassert>
@@ -43,6 +44,14 @@ namespace xo {
         bool
         JsonMembers::printable(TypeDescr td) const
         {
+            if (reflect::StdAtomicTdx const * ai = td->std_atomic_info()) {
+                /* a std::atomic<T> prints its load()ed T.  (An atomic
+                 * pointer would need its target, which a type cannot say:
+                 * not printable)
+                 */
+                return this->printable(ai->value_td());
+            }
+
             return (state_->has_printer(td)
                     || (td->is_struct() && td->complete_flag())
                     || td->is_enum());

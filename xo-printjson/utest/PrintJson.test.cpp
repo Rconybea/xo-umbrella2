@@ -12,6 +12,7 @@
 #include <xo/ppsink/tag_ostream.hpp>   /* os << tag(..) */
 #include <xo/arena/DArenaVector.hpp>
 #include <catch2/catch.hpp>
+#include <atomic>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -431,6 +432,47 @@ namespace xo {
             REQUIRE(ss.str().find("\"_name_\": \"u\"") != std::string::npos);
             REQUIRE(ss.str().find("\"_error_\": \"type not reflected: ") != std::string::npos);
         } /*TEST_CASE(print-json-unreflected-enum-member)*/
+
+        namespace {
+            /* std::atomic members (.xo-backlog/xo-reflect/issues/04) */
+            struct AtomicHolder {
+                std::atomic<int> n_{5};
+                std::atomic<bool> on_{true};
+                std::atomic<Mood> mood_{Mood::calm};
+            };
+
+            void reflect_atomic_types() {
+                reflect_enum_types();
+
+                StructReflector<AtomicHolder> sr;
+
+                if (sr.is_incomplete()) {
+                    REFLECT_MEMBER(sr, n);
+                    REFLECT_MEMBER(sr, on);
+                    REFLECT_MEMBER(sr, mood);
+                }
+            }
+        }
+
+        TEST_CASE("print-json-std-atomic-members", "[printjson][stdatomic]") {
+            /* each prints its load()ed value, under its declared type: an
+             * atomic enum by its enumerator's name
+             */
+            reflect_atomic_types();
+
+            PrintJson print_json;
+            AtomicHolder h;
+            h.n_.store(7);
+
+            std::stringstream ss;
+            print_json.print(h, &ss);
+
+            REQUIRE(ss.str() == ("{\"_name_\": \"AtomicHolder\"" + type_member<AtomicHolder>()
+                                 + ", \"_id_\": 1, \"_members_\": ["
+                                 + mentry<std::atomic<int>>("n", "atomic", "7") + ", "
+                                 + mentry<std::atomic<bool>>("on", "atomic", "true") + ", "
+                                 + mentry<std::atomic<Mood>>("mood", "atomic", "\"calm\"") + "]}"));
+        } /*TEST_CASE(print-json-std-atomic-members)*/
 
         /* also see tests:
          *   [option_util/utest/Px2.test.cpp]
