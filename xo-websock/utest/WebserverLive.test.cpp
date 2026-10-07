@@ -616,13 +616,15 @@ namespace xo {
 
                 /* its chosen C++ members: target_ a ref to the server */
                 Json::Value const & smem = sender["_members_"];
-                /* reflected members first (session_id_), then the rest */
+                /* reflected members first (session_id_, open_), then the rest */
                 REQUIRE(smem[0]["_name_"].asString() == "session_id_");
                 REQUIRE(smem[0]["_value_"].asUInt64() == v[k]["session_id"].asUInt64());
-                REQUIRE(smem[1]["_name_"].asString() == "target_");
-                REQUIRE(smem[1]["_value_"]["_ref_"].asInt() == root["_id_"].asInt());
-                REQUIRE(smem[2]["_name_"].asString() == "open_");
-                REQUIRE(smem[2]["_value_"].asBool());
+                /* a std::atomic<bool>: its load()ed value (xo-reflect#04) */
+                REQUIRE(smem[1]["_name_"].asString() == "open_");
+                REQUIRE(smem[1]["_canonical_type_"].asString() == "std::atomic<bool>");
+                REQUIRE(smem[1]["_value_"].asBool());
+                REQUIRE(smem[2]["_name_"].asString() == "target_");
+                REQUIRE(smem[2]["_value_"]["_ref_"].asInt() == root["_id_"].asInt());
                 /* a template: its arguments follow */
                 REQUIRE(sender["_canonical_type_"].asString().starts_with("xo::web::WsSessionSender<"));
                 REQUIRE(sender["_short_type_"].asString().starts_with("WsSessionSender<"));

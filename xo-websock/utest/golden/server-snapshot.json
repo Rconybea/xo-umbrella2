@@ -440,6 +440,13 @@
             "_value_" : 1
           },
           {
+            "_canonical_type_" : "std::atomic<bool>",
+            "_metatype_" : "atomic",
+            "_name_" : "open_",
+            "_short_type_" : "atomic<bool>",
+            "_value_" : true
+          },
+          {
             "_canonical_type_" : "xo::web::WebserverImpl*",
             "_metatype_" : "pointer",
             "_name_" : "target_",
@@ -448,13 +455,6 @@
             {
               "_ref_" : 1
             }
-          },
-          {
-            "_canonical_type_" : "std::atomic<bool>",
-            "_metatype_" : "atomic",
-            "_name_" : "open_",
-            "_short_type_" : "atomic<bool>",
-            "_value_" : true
           }
         ],
         "_name_" : "WsSessionSender",
@@ -584,6 +584,13 @@
             "_value_" : 2
           },
           {
+            "_canonical_type_" : "std::atomic<bool>",
+            "_metatype_" : "atomic",
+            "_name_" : "open_",
+            "_short_type_" : "atomic<bool>",
+            "_value_" : true
+          },
+          {
             "_canonical_type_" : "xo::web::WebserverImpl*",
             "_metatype_" : "pointer",
             "_name_" : "target_",
@@ -592,13 +599,6 @@
             {
               "_ref_" : 1
             }
-          },
-          {
-            "_canonical_type_" : "std::atomic<bool>",
-            "_metatype_" : "atomic",
-            "_name_" : "open_",
-            "_short_type_" : "atomic<bool>",
-            "_value_" : true
           }
         ],
         "_name_" : "WsSessionSender",

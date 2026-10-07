@@ -1078,14 +1078,12 @@ namespace xo {
                     .key("open", x->is_open());
 
                 /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
-                 * reflected one (session_id_); the server, printed in full
-                 * elsewhere, as a ref; open_ an atomic -- its value, under its
-                 * declared type
+                 * reflected ones (session_id_, open_), then the server,
+                 * printed in full elsewhere, as a ref
                  */
                 obj.members()
                     .reflected_members(tp, "_")
                     .member_ref<WebserverImpl *>("target_", x->target_)
-                    .member_as<std::atomic<bool>>("open_", x->open_.load())
                     .end();
 
                 obj.close();
@@ -1218,14 +1216,12 @@ namespace xo {
 
                     /* chosen C++ members, for the page's "expand"
                      * (.xo-backlog/xo-websock/issues/13): the reflected ones
-                     * (ws_config_, pjson_ -- in full here, its owner; routers
-                     * and sinks share it as refs -- url_router_,
-                     * session_table_, state_), then listen_port_, read as its
-                     * accessor above reads it
+                     * -- ws_config_, pjson_ (in full here, its owner; routers
+                     * and sinks share it as refs), url_router_,
+                     * session_table_, state_, listen_port_
                      */
                     obj.members()
                         .reflected_members(tp, "_")
-                        .member_as<std::atomic<std::int32_t>>("listen_port_", websrv->listen_port())
                         .end();
 
                     obj.close();
@@ -2305,10 +2301,11 @@ namespace xo {
 
             if (sr.is_incomplete()) {
                 /* not target_: the server, printed in full elsewhere -- a
-                 * ref.  Not open_: an atomic, not reflectable yet
+                 * ref.  open_: a std::atomic, printed by its load()ed value
                  * (.xo-backlog/xo-reflect/issues/04)
                  */
                 REFLECT_MEMBER(sr, session_id);
+                REFLECT_MEMBER(sr, open);
             }
         } /*reflect_self*/
 
@@ -2334,17 +2331,18 @@ namespace xo {
             StructReflector<WebserverImpl> sr;
 
             if (sr.is_incomplete()) {
-                /* not listen_port_: an atomic, not reflectable yet
-                 * (.xo-backlog/xo-reflect/issues/04); the printer reads it
-                 * through its accessor.  pjson_ in full: the server owns
-                 * it; routers and sinks print refs.  state_: an enum,
-                 * reflected by RunstateUtil::reflect_self
+                /* pjson_ in full: the server owns it; routers and sinks
+                 * print refs.  state_: an enum, reflected by
+                 * RunstateUtil::reflect_self.  listen_port_: a std::atomic,
+                 * printed by its load()ed value
+                 * (.xo-backlog/xo-reflect/issues/04)
                  */
                 REFLECT_MEMBER(sr, ws_config);
                 REFLECT_MEMBER(sr, pjson);
                 REFLECT_MEMBER(sr, url_router);
                 REFLECT_MEMBER(sr, session_table);
                 REFLECT_MEMBER(sr, state);
+                REFLECT_MEMBER(sr, listen_port);
             }
         } /*reflect_self*/
 
