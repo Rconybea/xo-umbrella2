@@ -6,6 +6,7 @@
 #include "JsonMembers.hpp"
 #include <xo/reflect/struct/StructMember.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
+#include <xo/reflect/wrapper/WrapperTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <cassert>
@@ -50,6 +51,11 @@ namespace xo {
                  * not printable)
                  */
                 return this->printable(ai->value_td());
+            }
+
+            if (reflect::WrapperTdx const * wi = td->wrapper_info()) {
+                /* a transparent wrapper prints as its wrapped value */
+                return this->printable(wi->wrapped_td());
             }
 
             return (state_->has_printer(td)

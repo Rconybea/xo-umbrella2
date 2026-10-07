@@ -10,6 +10,7 @@
 #include "DynamicEndpoint.hpp"
 #include "UrlRouter.hpp"
 #include <xo/webutil/StreamReceiver.hpp>
+#include <xo/webutil/StreamEndpointDescr.hpp>
 
 namespace xo {
     namespace web {
@@ -22,6 +23,8 @@ namespace xo {
 
             /* interfaces whose pointers should reach the actual type */
             StreamReceiver::reflect_self(table);
+            /* value types the structs below hold */
+            reflect_callback_id(table);
 
             WebserverConfig::reflect_self(table);
             Webserver::reflect_self(table);

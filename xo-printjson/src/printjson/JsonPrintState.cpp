@@ -9,6 +9,7 @@
 #include "type_keys.hpp"
 #include <xo/reflect/enum/EnumTdx.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
+#include <xo/reflect/wrapper/WrapperTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
@@ -22,6 +23,7 @@
 namespace xo {
     using xo::reflect::EnumTdx;
     using xo::reflect::StdAtomicTdx;
+    using xo::reflect::WrapperTdx;
     using xo::reflect::Metatype;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
@@ -430,6 +432,14 @@ namespace xo {
                     case Metatype::mt_atomic:
                         if (StdAtomicTdx const * ai = tp.td()->std_atomic_info()) {
                             print_std_atomic(*this, *ai, tp);
+                            return;
+                        }
+                        if (WrapperTdx const * wi = tp.td()->wrapper_info()) {
+                            /* a transparent wrapper (WrapperReflector): as
+                             * the value it stands for, in place
+                             * (.xo-backlog/xo-reflect/issues/04)
+                             */
+                            this->print(wi->wrapped_tp(tp.address()));
                             return;
                         }
                         if (EnumTdx const * ei = tp.td()->enum_info()) {

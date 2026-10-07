@@ -14,6 +14,7 @@ namespace xo {
         class FunctionTdxInfo;
         class EnumTdx;
         class StdAtomicTdx;
+        class WrapperTdx;
         class TypeDescrBase;
         class TaggedPtr;
 
@@ -57,6 +58,10 @@ namespace xo {
              *  and T's description in std_atomic_info()
              **/
             bool is_std_atomic() const { return this->std_atomic_info() != nullptr; }
+            /** true iff a transparent wrapper (WrapperReflector): metatype
+             *  mt_atomic, standing for one member it holds, wrapper_info()
+             **/
+            bool is_wrapper() const { return this->wrapper_info() != nullptr; }
 
             virtual Metatype metatype() const = 0;
             /* given a T-instance,  report most-derived subtype of T to which *object belongs.
@@ -108,6 +113,13 @@ namespace xo {
              *  other type
              **/
             virtual const StdAtomicTdx * std_atomic_info() const { return nullptr; }
+
+            // methods for working with transparent wrappers
+
+            /** the wrapped member of a transparent wrapper
+             *  (WrapperReflector); nullptr for any other type
+             **/
+            virtual const WrapperTdx * wrapper_info() const { return nullptr; }
         }; /*TypeDescrExtra*/
     } /*namespace reflect*/
 } /*namespace xo*/

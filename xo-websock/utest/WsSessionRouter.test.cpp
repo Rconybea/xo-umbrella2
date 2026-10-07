@@ -723,13 +723,17 @@ namespace xo {
             for (Json::Value const & m : mem)
                 names.push_back(m["_name_"].asString());
 
-            REQUIRE(names == std::vector<std::string>{"sub_id_", "stream_name_", "endpoint_",
-                                                      "callback_id_", "sink_"});
+            /* reflected members first (sub_id_, stream_name_, callback_id_) */
+            REQUIRE(names == std::vector<std::string>{"sub_id_", "stream_name_", "callback_id_",
+                                                      "endpoint_", "sink_"});
             REQUIRE(mem[0]["_value_"].asUInt() == 2);
             REQUIRE(mem[1]["_value_"].asString() == "/fw/8");
-            REQUIRE(mem[2]["_value_"]["_ref_"].asInt() == v[1]["endpoint"]["_ref_"].asInt());
-            REQUIRE(mem[3]["_canonical_type_"].asString().find("CallbackId") != std::string::npos);
-            REQUIRE(mem[3]["_value_"].isUInt());
+            /* callback_id_: a reflected CallbackId -- a struct, its id a member */
+            REQUIRE(mem[2]["_canonical_type_"].asString().find("CallbackId") != std::string::npos);
+            REQUIRE(mem[2]["_metatype_"].asString() == "struct");
+            REQUIRE(mem[2]["_value_"]["_members_"][0]["_name_"].asString() == "id");
+            REQUIRE(mem[2]["_value_"]["_members_"][0]["_value_"].isUInt());
+            REQUIRE(mem[3]["_value_"]["_ref_"].asInt() == v[1]["endpoint"]["_ref_"].asInt());
             REQUIRE(mem[4]["_value_"]["_ref_"].asInt() == sink["_id_"].asInt());
             REQUIRE(v[1].toStyledString().find("\"_error_\"") == std::string::npos);
         }

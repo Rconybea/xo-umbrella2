@@ -1,12 +1,26 @@
 /* @file StreamEndpointDescr.cpp */
 
 #include "StreamEndpointDescr.hpp"
+#include <xo/reflect/WrapperReflector.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/quoted.hpp>
 
 namespace xo {
     namespace web {
+        void
+        reflect_callback_id(reflect::TypeDescrTable * /*table*/)
+        {
+            /* a transparent wrapper, not a struct: a CallbackId shows as
+             * its number (RC: a struct holding one number is too busy on
+             * the page)
+             */
+            reflect::WrapperReflector<fn::CallbackId> wr;
+
+            if (wr.is_incomplete())
+                wr.reflect_wrapped(fn::CallbackId::id_address());
+        } /*reflect_callback_id*/
+
         StreamEndpointDescr::StreamEndpointDescr(std::string uri_pattern,
                                                  StreamSubscribeFn subscribe_fn,
                                                  StreamUnsubscribeFn unsubscribe_fn,

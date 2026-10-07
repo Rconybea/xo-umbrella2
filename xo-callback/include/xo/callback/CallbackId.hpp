@@ -35,6 +35,14 @@ namespace xo::fn {
 
         uint32_t id() const { return id_; }
 
+        /** member pointer to the private id_: so a subsystem with
+         *  reflection can describe CallbackIdImpl (e.g.
+         *  sr.reflect_member("id", CallbackId::id_address())) without
+         *  xo-callback depending on xo-reflect.  See
+         *  xo-webutil's reflect_callback_id()
+         **/
+        static constexpr uint32_t CallbackIdImpl::* id_address() { return &CallbackIdImpl::id_; }
+
     private:
         uint32_t id_ = 0;
     }; /*CallbackIdImpl*/

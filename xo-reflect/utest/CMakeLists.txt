@@ -12,7 +12,8 @@ set(SELF_SOURCE_FILES
     ostream_baseline.test.cpp
     ShortName.test.cpp
     EnumReflector.test.cpp
-    StdAtomic.test.cpp)
+    StdAtomic.test.cpp
+    WrapperReflector.test.cpp)
 
 xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)

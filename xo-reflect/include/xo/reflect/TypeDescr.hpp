@@ -355,6 +355,8 @@ namespace xo {
             bool is_enum() const { return this->tdextra_->is_enum(); }
             /** true iff a std::atomic<T>: see std_atomic_info() **/
             bool is_std_atomic() const { return this->tdextra_->is_std_atomic(); }
+            /** true iff a transparent wrapper: see wrapper_info() **/
+            bool is_wrapper() const { return this->tdextra_->is_wrapper(); }
 
             /* given a T-instance object,  return tagged pointer with T replaced
              * by the most-derived-subtype of T to which *object belongs.
@@ -409,6 +411,8 @@ namespace xo {
             const EnumTdx * enum_info() const { return this->tdextra_->enum_info(); }
             /** load and value type of a std::atomic<T>; nullptr otherwise **/
             const StdAtomicTdx * std_atomic_info() const { return this->tdextra_->std_atomic_info(); }
+            /** the wrapped member of a transparent wrapper; nullptr otherwise **/
+            const WrapperTdx * wrapper_info() const { return this->tdextra_->wrapper_info(); }
             uint32_t n_fn_arg() const { return this->tdextra_->n_fn_arg(); }
 
             /* require:

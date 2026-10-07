@@ -209,7 +209,8 @@ namespace xo {
 
             /** true iff PrintJson can print a @p td: it has a printer for
              *  it, or it is a complete reflected struct, or a reflected enum,
-             *  or a std::atomic<T> of a printable T
+             *  or a std::atomic<T> of a printable T, or a transparent wrapper
+             *  of a printable value
              **/
             bool printable(reflect::TypeDescr td) const;
             /** printable(), for a value: through a pointer to its target,

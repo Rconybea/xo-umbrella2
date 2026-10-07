@@ -432,17 +432,14 @@ namespace xo {
                     }
 
                     /* chosen C++ members (.xo-backlog/xo-websock/issues/13):
-                     * the reflected ones (sub_id_, stream_name_), then the rest.
-                     * endpoint_ and sink_ are printed in full elsewhere (the
-                     * server's endpoints; "sink" above): refs, each by the
-                     * address it prints at.
-                     * callback_id_: CallbackId is not reflected -- its number,
-                     * under its declared type
+                     * the reflected ones (sub_id_, stream_name_, callback_id_),
+                     * then the rest.  endpoint_ and sink_ are printed in full
+                     * elsewhere (the server's endpoints; "sink" above): refs,
+                     * each by the address it prints at
                      */
                     obj.members()
                         .reflected_members(tp, "_")
                         .member_ref<rp<DynamicEndpoint>>("endpoint_", sub->endpoint_.get())
-                        .member_as<CallbackId>("callback_id_", sub->callback_id_.id())
                         .member_ref<rp<WebsocketSink>>("sink_", sink)
                         .end();
 
@@ -525,11 +522,13 @@ namespace xo {
 
             if (sr.is_incomplete()) {
                 /* not endpoint_ or sink_: each printed in full elsewhere
-                 * (the server's endpoints; the subscription's "sink") -- refs.
-                 * Not callback_id_: CallbackId is not reflected
+                 * (the server's endpoints; the subscription's "sink") --
+                 * refs.  callback_id_: a transparent wrapper of its number,
+                 * reflected by xo-webutil's reflect_callback_id
                  */
                 REFLECT_MEMBER(sr, sub_id);
                 REFLECT_MEMBER(sr, stream_name);
+                REFLECT_MEMBER(sr, callback_id);
             }
         } /*reflect_self*/
 

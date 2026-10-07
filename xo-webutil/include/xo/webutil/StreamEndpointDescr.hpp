@@ -19,6 +19,15 @@ namespace xo {
         using StreamSubscribeFn = std::function<fn::CallbackId (rp<WebsocketSink> const & ws_sink)>;
         using StreamUnsubscribeFn = std::function<void (fn::CallbackId id)>;
 
+        /** describe fn::CallbackId to xo-reflect: a transparent wrapper
+         *  (WrapperReflector) of its uint32 id, so it shows as that number.
+         *  Here rather than in xo-callback, which does not depend on
+         *  xo-reflect: CallbackIdImpl::id_address() gives the member
+         *  pointer.  Called by xo-websock's websock_reflect_types()
+         *  (.xo-backlog/xo-reflect/issues/04)
+         **/
+        void reflect_callback_id(reflect::TypeDescrTable * table);
+
         /* describes a stream endpoint
          * this comprises
          * - a uri pattern (matches stream name)
