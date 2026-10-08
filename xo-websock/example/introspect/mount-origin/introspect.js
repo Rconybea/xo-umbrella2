@@ -657,6 +657,18 @@ const tri_button = 16;     // the square behind a row's triangle
 const row_indent = 14;     // a nested member row, further right per level
 const row_sep = ": ";      // between a row's name and its value
 const in_port_x = 24;      // a member edge enters a box this far from its left
+const out_port_gap = 10;   // between member edges leaving one box
+
+/** ELK ports for member edges @p out leaving box @p d: on its bottom edge,
+ *  out_port_gap apart in row order, the group centred on the edge's midpoint
+ **/
+function out_ports(d, out) {
+    const x0 = d.w / 2 - out_port_gap * (out.length - 1) / 2;
+
+    return out.map((e, k) => ({id: e.port, width: 1, height: 1,
+                               x: Math.round(x0 + out_port_gap * k), y: d.h,
+                               layoutOptions: {"elk.port.side": "SOUTH"}}));
+}
 
 /** object id -> the box drawing it this draw: a box's own object, or an
  *  object printed nested inside a box (a member's value).  A ref to any
@@ -1605,16 +1617,12 @@ async function draw_aux(event) {
         },
         children: elk_children(nodes, d => ({
             id: d.id, width: d.w, height: d.h,
-            // a ref member's edge leaves the box's bottom edge, near its left,
-            // in row order; and enters the box it refers to on its top edge,
-            // near the left -- so an edge descending from a box's left part
-            // need not dogleg left to reach it
+            // a ref member's edge leaves the box's bottom edge, in row order,
+            // the group centred on the edge's midpoint; and enters the box it
+            // refers to on its top edge, near the left
             layoutOptions: {"elk.portConstraints": "FIXED_POS"},
             ports: [
-                ...drawn_members.filter(e => e.source === d.id)
-                    .map((e, k) => ({id: e.port, width: 1, height: 1,
-                                     x: 12 + 10 * k, y: d.h,
-                                     layoutOptions: {"elk.port.side": "SOUTH"}})),
+                ...out_ports(d, drawn_members.filter(e => e.source === d.id)),
                 ...(member_in.has(d.id)
                     ? [{id: `${d.id}#in`, width: 1, height: 1, x: in_port_x, y: -1,
                         layoutOptions: {"elk.port.side": "NORTH"}}]

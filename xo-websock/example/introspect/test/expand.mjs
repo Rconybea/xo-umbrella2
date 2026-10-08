@@ -74,10 +74,11 @@ const geo = await ev(`(() => { const p = ${FE}[0].getAttribute("d");
    const rowy = st.f + (+row.getAttribute("y")) - 4;
    const ep = document.querySelector("g.node.http"); const et = ep.transform.baseVal[0].matrix; const ew = +ep.querySelector("rect").getAttribute("width"); const eh = +ep.querySelector("rect").getAttribute("height");
    const sh = +srv.querySelector("rect").getAttribute("height");
-   return {start_at_bottom_edge: Math.abs(sy - (st.f + sh)) < 2, start_near_left: sx >= st.e && sx <= st.e + 12 + 10 * 8,
+   return {start_at_bottom_edge: Math.abs(sy - (st.f + sh)) < 2, start_near_middle: Math.abs(sx - (st.e + sw / 2)) <= 10 * 8 / 2,
            end_on_endpoint: ex >= et.e - 2 && ex <= et.e + ew + 2 && ey >= et.f - 2 && ey <= et.f + eh + 2,
            end_top_left: Math.abs(ey - et.f) < 3 && Math.abs(ex - (et.e + 24)) < 3}; })()`);
-check(geo.start_at_bottom_edge && geo.start_near_left, `member edge leaves the box's bottom edge, near its left: ${JSON.stringify(geo)}`);
+// exits are centred on the bottom edge's midpoint, 10px apart
+check(geo.start_at_bottom_edge && geo.start_near_middle, `member edge leaves the box's bottom edge, near its middle: ${JSON.stringify(geo)}`);
 // hovering the row lights its edge; leaving restores it
 const row_c = await ev(`(() => { const t = [...document.querySelectorAll("g.node.server text.row")].find(t => t.querySelector("tspan").firstChild.nodeValue.startsWith("first_endpoint_")).getBoundingClientRect(); return {x: t.left + 20, y: t.top + t.height / 2}; })()`);
 await call("Input.dispatchMouseEvent", {type: "mouseMoved", x: row_c.x, y: row_c.y, button: "none"}); await sleep(150);
