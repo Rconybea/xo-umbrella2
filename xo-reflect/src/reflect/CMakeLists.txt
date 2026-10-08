@@ -6,6 +6,7 @@ set(SELF_SRCS
     ReflectAppcx.cpp
     TypeDescr.cpp TypeDescrExtra.cpp TaggedRcptr.cpp
     Metatype.cpp
+    Ownership.cpp
     atomic/AtomicTdx.cpp
     atomic/StdAtomicTdx.cpp
     pointer/PointerTdx.cpp

@@ -394,7 +394,7 @@ namespace xo {
              */
             Reflect::require<Object>();
 
-            return RefPointerTdx<rp<Object>>::make();
+            return RefPointerTdx<rp<Object>>::make(Ownership::shared);
         } /*make*/
 
         // ----- std::array<Element, N> -----
@@ -482,7 +482,7 @@ namespace xo {
              */
             Reflect::require<std::remove_cv_t<T>>();
 
-            return RefPointerTdx<std::unique_ptr<T, D>>::make();
+            return RefPointerTdx<std::unique_ptr<T, D>>::make(Ownership::owning);
         } /*make*/
 
         // ----- xo::mm::DArenaVector<Element> -----

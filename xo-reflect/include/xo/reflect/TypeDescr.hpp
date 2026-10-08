@@ -405,6 +405,11 @@ namespace xo {
                 return *sm;
             } /*struct_member*/
 
+            /** how lifetime of an instance of this type
+             *  relates to lifetime of its children.
+             **/
+            Ownership child_edge_ownership() const { return this->tdextra_->child_edge_ownership(); }
+
             /** nullptr for non-function types **/
             const FunctionTdxInfo * fn_info() const { return this->tdextra_->fn_info(); }
             /** enumerators of a reflected enum; nullptr otherwise **/

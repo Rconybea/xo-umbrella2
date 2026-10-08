@@ -3,8 +3,10 @@
 #pragma once
 
 #include "xo/reflect/EstablishTypeDescr.hpp"
+#include "xo/reflect/Ownership.hpp"
 #include "xo/reflect/TaggedPtr.hpp"
 #include "xo/reflect/TypeDescr.hpp"
+#include <cassert>
 #include <memory>
 #include <string>
 
@@ -179,22 +181,37 @@ namespace xo {
             std::unique_ptr<AbstractStructMemberAccessor> ancestor_accessor_;
         }; /*AncestorStructMemberAccessor*/
 
+        template <typename StructT> class StructMemberDecl;
+
         /* describes a member of a struct/class
          * see [reflect/StructReflector.hpp]
          */
         class StructMember {
         public:
             StructMember() = default;
+            /* ownership: the member type's default (child_edge_ownership()), so
+             * that type must be described already -- Reflect::require'd, not
+             * just established
+             */
             StructMember(std::string const & name,
                          std::unique_ptr<AbstractStructMemberAccessor> accessor)
-                : member_name_{name}, accessor_{std::move(accessor)} {}
+                : member_name_{name},
+                  accessor_{std::move(accessor)},
+                  ownership_{default_ownership(accessor_.get())} {}
             StructMember(StructMember && x)
                 : member_name_{std::move(x.member_name_)},
-                  accessor_{std::move(x.accessor_)} {}
+                  accessor_{std::move(x.accessor_)},
+                  ownership_{x.ownership_} {}
 
             static StructMember null();
 
             std::string const & member_name() const { return member_name_; }
+            /** how the struct relates to what this member leads to: the
+             *  member itself if held by value (always owning), its pointee
+             *  if a pointer.  The member type's default unless the struct's
+             *  reflection overrode it (StructMemberDecl).  See Ownership.hpp
+             **/
+            Ownership ownership() const { return ownership_; }
 
             TaggedPtr get_member_tp(void * struct_addr) const { return this->accessor_->member_tp(struct_addr); }
             TypeDescr get_struct_td() const { return this->accessor_->struct_td(); }
@@ -209,15 +226,34 @@ namespace xo {
             StructMember for_descendant() const {
                 assert(EstablishTypeDescr::establish<StructT>() == this->get_struct_td());
 
-                return StructMember(this->member_name(),
+                StructMember retval(this->member_name(),
                                     std::move(AncestorStructMemberAccessor<DescendantT, StructT>::adopt
                                               (this->accessor_->clone())));
+                /* keep an override from the ancestor's reflection */
+                retval.ownership_ = this->ownership_;
+
+                return retval;
             } /*for_descendant*/
 
             StructMember & operator=(StructMember && x) {
                 this->member_name_ = std::move(x.member_name_);
                 this->accessor_ = std::move(x.accessor_);
+                this->ownership_ = x.ownership_;
                 return *this;
+            }
+
+        private:
+            template <typename StructT> friend class StructMemberDecl;
+
+            static Ownership default_ownership(AbstractStructMemberAccessor const * accessor) {
+                if (!accessor)
+                    return Ownership::owning;
+
+                TypeDescr td = accessor->member_td();
+
+                assert(td->tdextra() && "StructMember: member type must be described (Reflect::require)");
+
+                return td->tdextra() ? td->child_edge_ownership() : Ownership::owning;
             }
 
         private:
@@ -229,6 +265,8 @@ namespace xo {
              * this->accessor_->address_impl(&recd) ==> &(recd.member)
              */
             std::unique_ptr<AbstractStructMemberAccessor> accessor_;
+            /* see .ownership() */
+            Ownership ownership_ = Ownership::owning;
         }; /*StructMember*/
     } /*namespace reflect*/
 } /*namespace xo*/

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Metatype.hpp"
+#include "Ownership.hpp"
 #include <string>
 /* note: this file #include'd into TypeDescr.hpp */
 #include <cstdint>
@@ -87,6 +88,10 @@ namespace xo {
             virtual std::string const & struct_member_name(uint32_t i) const = 0;
             /* nullptr unless *this represents a struct/class type */
             virtual StructMember const * struct_member(uint32_t i) const;
+            /** relationship between lifetime of an instance of this type,
+             *  relative to lifetime of a child.
+             **/
+            virtual Ownership child_edge_ownership() const { return Ownership::owning; }
 
             // methods for working with reflected functions/methods
 

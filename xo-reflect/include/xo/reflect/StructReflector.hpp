@@ -26,6 +26,39 @@ namespace xo {
             static TaggedPtr self_tp(void * /*object*/) { assert(false); return TaggedPtr::universal_null(); }
         };
 
+        /** @brief one member just declared to a StructReflector<StructT>:
+         *  qualifies it, e.g.
+         *
+         *    REFLECT_MEMBER(sr, sender).owning();
+         *    REFLECT_MEMBER(sr, pjson).borrowed();
+         *
+         *  Use within the declaring statement only: it refers into the
+         *  reflector's member list, which a later declaration may move.
+         **/
+        template <typename StructT>
+        class StructMemberDecl {
+        public:
+            explicit StructMemberDecl(StructMember * member) : member_{member} {}
+
+            /** override the member type's default ownership (Ownership.hpp).
+             *  Only a pointer member: an object held by value has no other
+             *  home
+             **/
+            StructMemberDecl & ownership(Ownership x) {
+                assert(member_->get_member_td()->is_pointer()
+                       && "StructMemberDecl: ownership override on a non-pointer member");
+
+                member_->ownership_ = x;
+                return *this;
+            }
+            StructMemberDecl & owning() { return this->ownership(Ownership::owning); }
+            StructMemberDecl & shared() { return this->ownership(Ownership::shared); }
+            StructMemberDecl & borrowed() { return this->ownership(Ownership::borrowed); }
+
+        private:
+            StructMember * member_ = nullptr;
+        }; /*StructMemberDecl*/
+
         /* RAII pattern for reflecting a struct.
          *
          * Use:
@@ -53,19 +86,24 @@ namespace xo {
             bool is_incomplete() const { return !s_reflected_flag; }
             TypeDescr td() const { return td_; }
 
+            /** declare member @p member_name; qualify it through the
+             *  returned StructMemberDecl, or ignore it
+             **/
             template<typename OwnerT, typename MemberT>
-            void reflect_member(std::string const & member_name,
-                                MemberT OwnerT::* member_addr) {
+            StructMemberDecl<StructT> reflect_member(std::string const & member_name,
+                                                     MemberT OwnerT::* member_addr) {
+                /* used to do this in GeneralStructMemberAccessor<> ctor,
+                 * but that introduces #include cycle.  Before StructMember's
+                 * ctor, which reads the member type's default ownership
+                 */
+                Reflect::require<MemberT>();
 
                 auto accessor
                     (GeneralStructMemberAccessor<StructT, OwnerT, MemberT>::make(member_addr));
 
-                /* used to do this in GeneralStructMemberAccessor<> ctor,
-                 * but that introduces #include cycle
-                 */
-                Reflect::require<MemberT>();
-
                 this->member_v_.emplace_back(member_name, std::move(accessor));
+
+                return StructMemberDecl<StructT>(&this->member_v_.back());
             } /*reflect_member*/
 
             void require_complete() {

@@ -49,9 +49,11 @@ namespace xo {
             /* the pointee AS REFLECTED, cv stripped: see RawPointerTdx::pointee_t */
             using pointee_t = std::remove_cv_t<typename Pointer::element_type>;
 
-            static std::unique_ptr<RefPointerTdx> make() {
-                return std::unique_ptr<RefPointerTdx>(new RefPointerTdx());
+            static std::unique_ptr<RefPointerTdx> make(Ownership ownership) {
+                return std::unique_ptr<RefPointerTdx>(new RefPointerTdx(ownership));
             } /*make*/
+
+            virtual Ownership child_edge_ownership() const override { return ownership_; }
 
             virtual uint32_t n_child(void * object) const override {
                 /* e.g:
@@ -86,6 +88,13 @@ namespace xo {
                 /* const_cast: see RawPointerTdx::child_tp */
                 return establish_most_derived_tp(const_cast<pointee_t *>(ptr->get()));
             } /*child_tp*/
+
+        private:
+            explicit RefPointerTdx(Ownership ownership) : ownership_{ownership} {}
+
+        private:
+            /* how a Pointer relates to its pointee */
+            Ownership ownership_;
         }; /*RefPointerTdx*/
 
         // ----- RawPointerTdx -----
@@ -124,6 +133,9 @@ namespace xo {
             static std::unique_ptr<RawPointerTdx> make() {
                 return std::unique_ptr<RawPointerTdx>(new RawPointerTdx());
             } /*make*/
+
+            /* a T* does not own its destination. */
+            virtual Ownership child_edge_ownership() const override { return Ownership::borrowed; }
 
             virtual uint32_t n_child(void * object) const override {
                 if constexpr (std::is_void_v<T>) {
