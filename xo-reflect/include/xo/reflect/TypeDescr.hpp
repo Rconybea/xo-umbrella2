@@ -357,6 +357,8 @@ namespace xo {
             bool is_std_atomic() const { return this->tdextra_->is_std_atomic(); }
             /** true iff a transparent wrapper: see wrapper_info() **/
             bool is_wrapper() const { return this->tdextra_->is_wrapper(); }
+            /** true iff a lockable: see lockable_info() **/
+            bool is_lockable() const { return this->tdextra_->is_lockable(); }
 
             /* given a T-instance object,  return tagged pointer with T replaced
              * by the most-derived-subtype of T to which *object belongs.
@@ -410,6 +412,11 @@ namespace xo {
              **/
             Ownership child_edge_ownership() const { return this->tdextra_->child_edge_ownership(); }
 
+            /** number of distinct lockables guarding this struct's members **/
+            uint32_t n_guard() const { return this->tdextra_->n_guard(); }
+            /** lockable @p g of the struct at @p object.  require: g < n_guard() **/
+            TaggedPtr guard_tp(uint32_t g, void * object) const;
+
             /** nullptr for non-function types **/
             const FunctionTdxInfo * fn_info() const { return this->tdextra_->fn_info(); }
             /** enumerators of a reflected enum; nullptr otherwise **/
@@ -418,6 +425,8 @@ namespace xo {
             const StdAtomicTdx * std_atomic_info() const { return this->tdextra_->std_atomic_info(); }
             /** the wrapped member of a transparent wrapper; nullptr otherwise **/
             const WrapperTdx * wrapper_info() const { return this->tdextra_->wrapper_info(); }
+            /** reader lock operations of a lockable; nullptr otherwise **/
+            const LockableTdx * lockable_info() const { return this->tdextra_->lockable_info(); }
             uint32_t n_fn_arg() const { return this->tdextra_->n_fn_arg(); }
 
             /* require:

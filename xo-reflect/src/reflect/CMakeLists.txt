@@ -9,6 +9,7 @@ set(SELF_SRCS
     Ownership.cpp
     atomic/AtomicTdx.cpp
     atomic/StdAtomicTdx.cpp
+    lockable/LockableTdx.cpp
     pointer/PointerTdx.cpp
     vector/VectorTdx.cpp
     struct/StructTdx.cpp struct/StructMember.cpp

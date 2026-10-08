@@ -8,6 +8,7 @@
 #include "xo/reflect/TypeDescr.hpp"
 #include <cassert>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace xo {
@@ -36,6 +37,11 @@ namespace xo {
             virtual void * address(void * struct_addr) const = 0;
 
             virtual std::unique_ptr<AbstractStructMemberAccessor> clone() const = 0;
+
+            /* true iff @p x reaches the same member, by the same route:
+             * how StructReflector interns guards (StructMemberDecl::guarded_by)
+             */
+            virtual bool same_member(AbstractStructMemberAccessor const & x) const = 0;
         }; /*AbstractStructMemberAccessor*/
 
         /* GeneralStructMemberAccessor
@@ -107,6 +113,12 @@ namespace xo {
                     (new GeneralStructMemberAccessor(*this));
             } /*clone*/
 
+            virtual bool same_member(AbstractStructMemberAccessor const & x) const override {
+                auto const * other = dynamic_cast<GeneralStructMemberAccessor const *>(&x);
+
+                return other && (other->memptr_ == this->memptr_);
+            } /*same_member*/
+
         private:
             /* type description for MemberT; .memptr is pointer-to-member-of-OwnerT,
              * where that member has type MemberT
@@ -176,12 +188,19 @@ namespace xo {
                     (new AncestorStructMemberAccessor(this->ancestor_accessor_->clone()));
             } /*clone*/
 
+            virtual bool same_member(AbstractStructMemberAccessor const & x) const override {
+                auto const * other = dynamic_cast<AncestorStructMemberAccessor const *>(&x);
+
+                return other && this->ancestor_accessor_->same_member(*(other->ancestor_accessor_));
+            } /*same_member*/
+
         private:
             /* .ancestor_accessor fetches some particular member of AncestorT */
             std::unique_ptr<AbstractStructMemberAccessor> ancestor_accessor_;
         }; /*AncestorStructMemberAccessor*/
 
         template <typename StructT> class StructMemberDecl;
+        template <typename StructT> class StructReflector;
 
         /* describes a member of a struct/class
          * see [reflect/StructReflector.hpp]
@@ -201,7 +220,8 @@ namespace xo {
             StructMember(StructMember && x)
                 : member_name_{std::move(x.member_name_)},
                   accessor_{std::move(x.accessor_)},
-                  ownership_{x.ownership_} {}
+                  ownership_{x.ownership_},
+                  guard_ix_{x.guard_ix_} {}
 
             static StructMember null();
 
@@ -212,6 +232,11 @@ namespace xo {
              *  reflection overrode it (StructMemberDecl).  See Ownership.hpp
              **/
             Ownership ownership() const { return ownership_; }
+            /** index of the lockable guarding this member, in its struct's
+             *  guard table (TypeDescr::guard_tp()); none if unguarded.  See
+             *  StructMemberDecl::guarded_by
+             **/
+            std::optional<uint32_t> guard_ix() const { return guard_ix_; }
 
             TaggedPtr get_member_tp(void * struct_addr) const { return this->accessor_->member_tp(struct_addr); }
             TypeDescr get_struct_td() const { return this->accessor_->struct_td(); }
@@ -231,6 +256,10 @@ namespace xo {
                                               (this->accessor_->clone())));
                 /* keep an override from the ancestor's reflection */
                 retval.ownership_ = this->ownership_;
+                /* an index into the ancestor's guard table: the adopter
+                 * (StructReflector::adopt_ancestors) remaps it into its own
+                 */
+                retval.guard_ix_ = this->guard_ix_;
 
                 return retval;
             } /*for_descendant*/
@@ -239,11 +268,13 @@ namespace xo {
                 this->member_name_ = std::move(x.member_name_);
                 this->accessor_ = std::move(x.accessor_);
                 this->ownership_ = x.ownership_;
+                this->guard_ix_ = x.guard_ix_;
                 return *this;
             }
 
         private:
             template <typename StructT> friend class StructMemberDecl;
+            template <typename StructT> friend class StructReflector;
 
             static Ownership default_ownership(AbstractStructMemberAccessor const * accessor) {
                 if (!accessor)
@@ -267,6 +298,8 @@ namespace xo {
             std::unique_ptr<AbstractStructMemberAccessor> accessor_;
             /* see .ownership() */
             Ownership ownership_ = Ownership::owning;
+            /* see .guard_ix() */
+            std::optional<uint32_t> guard_ix_;
         }; /*StructMember*/
     } /*namespace reflect*/
 } /*namespace xo*/

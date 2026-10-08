@@ -10,6 +10,7 @@
 #include "atomic/AtomicTdx.hpp"
 #include "atomic/StdAtomicTdx.hpp"
 #include "function/FunctionTdx.hpp"
+#include "lockable/LockableTdx.hpp"
 #include "pointer/PointerTdx.hpp"
 #include "struct/StructTdx.hpp"
 #include "vector/VectorTdx.hpp"
@@ -18,6 +19,8 @@
 #include <atomic>
 #include <cstring>      // for std::memcpy
 #include <memory>       // for std::unique_ptr<>
+#include <mutex>
+#include <shared_mutex>
 #include <utility> // for std::pair<>
 #include <vector>
 
@@ -152,6 +155,37 @@ namespace xo {
         class EstablishTdx<const char *> {
         public:
             static std::unique_ptr<TypeDescrExtra> make() { return AtomicTdx::make(); }
+        };
+
+        // ----- lockables -----
+
+        /** a std::mutex reflects as a lockable: mt_atomic, plus reader lock
+         *  operations (exclusive, for a std::mutex) in LockableTdx,
+         *  TypeDescr::lockable_info().  See .xo-backlog/xo-reflect/issues/08
+         **/
+        template<>
+        class EstablishTdx<std::mutex> {
+        public:
+            static std::unique_ptr<TypeDescrExtra> make() {
+                return LockableTdx::make
+                    ([](void * m) { static_cast<std::mutex *>(m)->lock(); },
+                     [](void * m) { static_cast<std::mutex *>(m)->unlock(); },
+                     [](void * m) { return static_cast<std::mutex *>(m)->try_lock(); });
+            }
+        };
+
+        /** a std::shared_mutex reflects as a lockable, taken shared by a
+         *  reader: a traversal does not exclude other readers
+         **/
+        template<>
+        class EstablishTdx<std::shared_mutex> {
+        public:
+            static std::unique_ptr<TypeDescrExtra> make() {
+                return LockableTdx::make
+                    ([](void * m) { static_cast<std::shared_mutex *>(m)->lock_shared(); },
+                     [](void * m) { static_cast<std::shared_mutex *>(m)->unlock_shared(); },
+                     [](void * m) { return static_cast<std::shared_mutex *>(m)->try_lock_shared(); });
+            }
         };
 
         // ----- xo::mm::DArenaVector<Element> -----

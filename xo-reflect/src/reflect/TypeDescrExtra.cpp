@@ -31,6 +31,14 @@ namespace xo {
 
       return nullptr;
     } /*struct_member*/
+
+    TaggedPtr
+    TypeDescrExtra::guard_tp(uint32_t /*g*/, void * /*object*/) const {
+      /* n_guard() is 0 */
+      assert(false);
+
+      return TaggedPtr::universal_null();
+    } /*guard_tp*/
   } /*namespace reflect*/
 } /*namespace xo*/
 

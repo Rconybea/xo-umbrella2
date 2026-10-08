@@ -403,6 +403,12 @@ namespace xo {
             return this->tdextra_->child_tp(i, object);
         } /*child_tp*/
 
+        TaggedPtr
+        TypeDescrBase::guard_tp(uint32_t g, void * object) const
+        {
+            return this->tdextra_->guard_tp(g, object);
+        } /*guard_tp*/
+
         void
         TypeDescrBase::pretty(xo::pp::PpSink & sink) const
         {

@@ -7,6 +7,7 @@
 #include "TypeDescr.hpp"
 #include "struct/StructMember.hpp"
 #include "struct/StructTdx.hpp"
+#include <type_traits>
 #include <vector>
 
 namespace xo {
@@ -31,32 +32,66 @@ namespace xo {
          *
          *    REFLECT_MEMBER(sr, sender).owning();
          *    REFLECT_MEMBER(sr, pjson).borrowed();
+         *    REFLECT_MEMBER(sr, outbound_q).guarded_by(&Recd::mutex_);
          *
-         *  Use within the declaring statement only: it refers into the
-         *  reflector's member list, which a later declaration may move.
+         *  Valid while its StructReflector is: it holds the reflector and
+         *  the member's position.
          **/
         template <typename StructT>
         class StructMemberDecl {
         public:
-            explicit StructMemberDecl(StructMember * member) : member_{member} {}
+            StructMemberDecl(StructReflector<StructT> * reflector, uint32_t member_ix)
+                : reflector_{reflector}, member_ix_{member_ix} {}
 
             /** override the member type's default ownership (Ownership.hpp).
              *  Only a pointer member: an object held by value has no other
              *  home
              **/
             StructMemberDecl & ownership(Ownership x) {
-                assert(member_->get_member_td()->is_pointer()
+                StructMember & m = this->member();
+
+                assert(m.get_member_td()->is_pointer()
                        && "StructMemberDecl: ownership override on a non-pointer member");
 
-                member_->ownership_ = x;
+                m.ownership_ = x;
                 return *this;
             }
             StructMemberDecl & owning() { return this->ownership(Ownership::owning); }
             StructMemberDecl & shared() { return this->ownership(Ownership::shared); }
             StructMemberDecl & borrowed() { return this->ownership(Ownership::borrowed); }
 
+            /** this member is read only with lockable @p guard held: a
+             *  member of StructT (or of a base), not necessarily reflected.
+             *  Members guarded by the same lockable share one guard.  Once
+             *  per member.  See .xo-backlog/xo-reflect/issues/08
+             **/
+            template <typename MutexT, typename OwnerT>
+            StructMemberDecl & guarded_by(MutexT OwnerT::* guard) {
+                static_assert(std::is_base_of_v<OwnerT, StructT>,
+                              "StructMemberDecl::guarded_by: guard must be a member of StructT or a base");
+
+                StructMember & m = this->member();
+
+                assert(!m.guard_ix_ && "StructMemberDecl: member already guarded");
+
+                [[maybe_unused]] TypeDescr guard_td = Reflect::require<MutexT>();
+
+                assert(guard_td->is_lockable()
+                       && "StructMemberDecl::guarded_by: guard type is not a reflected lockable");
+
+                m.guard_ix_ = reflector_->intern_guard
+                                  (GeneralStructMemberAccessor<StructT, OwnerT, MutexT>::make(guard));
+                return *this;
+            }
+
         private:
-            StructMember * member_ = nullptr;
+            StructMember & member() { return reflector_->member_v_.at(member_ix_); }
+
+        private:
+            /* reflector this member was declared to */
+            StructReflector<StructT> * reflector_ = nullptr;
+            /* the member's position in .reflector's member list */
+            uint32_t member_ix_ = 0;
         }; /*StructMemberDecl*/
 
         /* RAII pattern for reflecting a struct.
@@ -103,7 +138,7 @@ namespace xo {
 
                 this->member_v_.emplace_back(member_name, std::move(accessor));
 
-                return StructMemberDecl<StructT>(&this->member_v_.back());
+                return StructMemberDecl<StructT>(this, this->member_v_.size() - 1);
             } /*reflect_member*/
 
             void require_complete() {
@@ -125,6 +160,7 @@ namespace xo {
                     static detail::InvokerAux<StructT> s_final_invoker;
 
                     auto tdx = StructTdx::make(std::move(this->member_v_),
+                                               std::move(this->guard_v_),
                                                have_to_self_tp,
                                                to_self_tp_fn);
 
@@ -145,15 +181,51 @@ namespace xo {
                     assert(ancestor_td->complete_flag());
                 }
 
+                /* the ancestor's guards, reached from StructT: appended, so an
+                 * adopted member's guard index shifts by .guard_v's size before.
+                 *
+                 * Not interned against guards StructT declares itself: a
+                 * mutex both declare would be two guards, taken in turn
+                 * (never nested) by a traversal, splitting what could be one
+                 * snapshot.
+                 */
+                StructTdx const * ancestor_tdx = static_cast<StructTdx const *>(ancestor_td->tdextra());
+                uint32_t guard_offset = this->guard_v_.size();
+
+                for (uint32_t g = 0, n = ancestor_tdx->n_guard(); g < n; ++g) {
+                    this->guard_v_.push_back(AncestorStructMemberAccessor<StructT, AncestorT>::adopt
+                                             (ancestor_tdx->guard(g).clone()));
+                }
+
                 /* for structs,
                  * we know that object argument to TypeDescr::n_child() is unused
                  */
                 for (uint32_t i = 0, n = ancestor_td->n_child(nullptr); i < n; ++i) {
                     StructMember const & member = ancestor_td->struct_member(i);
 
-                    this->member_v_.push_back(member.for_descendant<StructT, AncestorT>());
+                    StructMember adopted = member.for_descendant<StructT, AncestorT>();
+
+                    if (adopted.guard_ix_)
+                        adopted.guard_ix_ = *adopted.guard_ix_ + guard_offset;
+
+                    this->member_v_.push_back(std::move(adopted));
                 }
             } /*adopt_ancestors*/
+
+        private:
+            friend class StructMemberDecl<StructT>;
+
+            /* index of @p guard in .guard_v, appending it if new */
+            uint32_t intern_guard(std::unique_ptr<AbstractStructMemberAccessor> guard) {
+                for (uint32_t g = 0, n = this->guard_v_.size(); g < n; ++g) {
+                    if (this->guard_v_[g]->same_member(*guard))
+                        return g;
+                }
+
+                this->guard_v_.push_back(std::move(guard));
+
+                return this->guard_v_.size() - 1;
+            } /*intern_guard*/
 
         private:
             /* set irrevocably to true when .complete() runs.
@@ -168,6 +240,8 @@ namespace xo {
 
             /* members of StructT (at least those we're choosing to reflect) */
             std::vector<StructMember> member_v_;
+            /* lockables guarding members of StructT; StructMember::guard_ix() indexes it */
+            StructTdx::GuardVector guard_v_;
         }; /*StructReflector*/
 
         template<typename StructT>

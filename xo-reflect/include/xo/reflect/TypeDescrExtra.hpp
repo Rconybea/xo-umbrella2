@@ -16,6 +16,7 @@ namespace xo {
         class EnumTdx;
         class StdAtomicTdx;
         class WrapperTdx;
+        class LockableTdx;
         class TypeDescrBase;
         class TaggedPtr;
 
@@ -63,6 +64,10 @@ namespace xo {
              *  mt_atomic, standing for one member it holds, wrapper_info()
              **/
             bool is_wrapper() const { return this->wrapper_info() != nullptr; }
+            /** true iff a lockable (std::mutex, std::shared_mutex): metatype
+             *  mt_atomic, with reader lock operations in lockable_info()
+             **/
+            bool is_lockable() const { return this->lockable_info() != nullptr; }
 
             virtual Metatype metatype() const = 0;
             /* given a T-instance,  report most-derived subtype of T to which *object belongs.
@@ -92,6 +97,17 @@ namespace xo {
              *  relative to lifetime of a child.
              **/
             virtual Ownership child_edge_ownership() const { return Ownership::owning; }
+
+            // methods for working with guards (StructMemberDecl::guarded_by)
+
+            /** number of distinct lockables guarding this struct's members;
+             *  0 unless a reflected struct declared some
+             **/
+            virtual uint32_t n_guard() const { return 0; }
+            /** lockable @p g, of the struct at @p object; its type has
+             *  lockable_info().  require: g < n_guard()
+             **/
+            virtual TaggedPtr guard_tp(uint32_t g, void * object) const;
 
             // methods for working with reflected functions/methods
 
@@ -125,6 +141,13 @@ namespace xo {
              *  (WrapperReflector); nullptr for any other type
              **/
             virtual const WrapperTdx * wrapper_info() const { return nullptr; }
+
+            // methods for working with lockables
+
+            /** reader lock operations of a lockable; nullptr for any other
+             *  type
+             **/
+            virtual const LockableTdx * lockable_info() const { return nullptr; }
         }; /*TypeDescrExtra*/
     } /*namespace reflect*/
 } /*namespace xo*/
