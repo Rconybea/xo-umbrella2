@@ -55,7 +55,7 @@ namespace xo {
                 StructReflector<DerivedHolder> sr;
 
                 if (sr.is_incomplete())
-                    sr.adopt_ancestors<Holder>();
+                    sr.adopt_parent<Holder>();
             }
 
             /* ownership of member @p name of the reflected struct @p td */
@@ -105,7 +105,7 @@ namespace xo {
             REQUIRE(member_ownership(td, "shared_borrowed") == Ownership::borrowed);
         }
 
-        TEST_CASE("ownership-override-survives-adopt-ancestors", "[reflect][ownership]") {
+        TEST_CASE("ownership-override-survives-adopt-parent", "[reflect][ownership]") {
             reflect_derived_holder();
 
             TypeDescr td = Reflect::require<DerivedHolder>();

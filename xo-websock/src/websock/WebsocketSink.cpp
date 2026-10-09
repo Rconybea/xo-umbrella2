@@ -215,7 +215,7 @@ namespace xo {
                 StructReflector<WebsocketSink> sr;
 
                 if (sr.is_incomplete()) {
-                    //sr.adopt_ancestors<SelfTaggingDisplayable>();  // need SelfTaggingDisplayable reflected
+                    //sr.adopt_parent<SelfTaggingDisplayable>();  // need SelfTaggingDisplayable reflected
                 }
             }
 
@@ -223,7 +223,7 @@ namespace xo {
                 StructReflector<WebsocketSinkImpl> sr;
 
                 if (sr.is_incomplete()) {
-                    sr.adopt_ancestors<WebsocketSink>();
+                    sr.adopt_parent<WebsocketSink>();
 
                     /* not sender_ or pjson_ for now: each is printed in
                      * full elsewhere (its session; the server), and print

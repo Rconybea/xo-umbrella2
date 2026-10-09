@@ -412,6 +412,16 @@ namespace xo {
              **/
             Ownership child_edge_ownership() const { return this->tdextra_->child_edge_ownership(); }
 
+            /** number of parent types declared (StructReflector::adopt_parent) **/
+            uint32_t n_parent() const { return this->tdextra_->n_parent(); }
+            /** parent type @p i.  require: i < n_parent() **/
+            TypeDescr parent_td(uint32_t i) const { return this->tdextra_->parent_td(i); }
+            /** true iff this type is @p base, or derives from it through
+             *  declared parents (transitively).  A base not declared with
+             *  adopt_parent is not seen
+             **/
+            bool is_derived_from(TypeDescr base) const;
+
             /** number of distinct lockables guarding this struct's members **/
             uint32_t n_guard() const { return this->tdextra_->n_guard(); }
             /** lockable @p g of the struct at @p object.  require: g < n_guard() **/

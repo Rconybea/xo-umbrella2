@@ -10,21 +10,25 @@ namespace xo {
         std::unique_ptr<StructTdx>
         StructTdx::make(std::vector<StructMember> member_v,
                         GuardVector guard_v,
+                        std::vector<TypeDescr> parent_v,
                         bool have_to_self_tp,
                         std::function<TaggedPtr (void*)> to_self_tp)
         {
             return std::unique_ptr<StructTdx>(new StructTdx(std::move(member_v),
                                                             std::move(guard_v),
+                                                            std::move(parent_v),
                                                             have_to_self_tp,
                                                             std::move(to_self_tp)));
         } /*make*/
 
         StructTdx::StructTdx(std::vector<StructMember> member_v,
                              GuardVector guard_v,
+                             std::vector<TypeDescr> parent_v,
                              bool have_to_self_tp,
                              std::function<TaggedPtr (void*)> to_self_tp)
             : member_v_{std::move(member_v)},
               guard_v_{std::move(guard_v)},
+              parent_v_{std::move(parent_v)},
               guard_members_v_(guard_v_.size()),
               have_to_self_tp_{have_to_self_tp},
               to_self_tp_{std::move(to_self_tp)}

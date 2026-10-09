@@ -161,6 +161,7 @@ namespace xo {
 
                     auto tdx = StructTdx::make(std::move(this->member_v_),
                                                std::move(this->guard_v_),
+                                               std::move(this->parent_v_),
                                                have_to_self_tp,
                                                to_self_tp_fn);
 
@@ -169,8 +170,19 @@ namespace xo {
                 }
             } /*complete*/
 
+            /** declare @p AncestorT a parent of StructT: record it
+             *  (TypeDescr::is_derived_from), and adopt its reflected members
+             *  and their guards.  Once per base, for multiple inheritance.
+             *
+             *  require: AncestorT reflected, complete.  C++ cannot tell a
+             *  direct base from a more distant one; either serves, since
+             *  derivation is transitive
+             **/
             template<typename AncestorT>
-            void adopt_ancestors() {
+            void adopt_parent() {
+                static_assert(std::is_base_of_v<AncestorT, StructT>,
+                              "StructReflector::adopt_parent: AncestorT must be a base of StructT");
+
                 assert(Reflect::is_reflected<AncestorT>());
 
                 TypeDescr ancestor_td = Reflect::require<AncestorT>();
@@ -180,6 +192,8 @@ namespace xo {
                     assert(ancestor_td->is_struct());
                     assert(ancestor_td->complete_flag());
                 }
+
+                this->parent_v_.push_back(ancestor_td);
 
                 /* the ancestor's guards, reached from StructT: appended, so an
                  * adopted member's guard index shifts by .guard_v's size before.
@@ -210,7 +224,7 @@ namespace xo {
 
                     this->member_v_.push_back(std::move(adopted));
                 }
-            } /*adopt_ancestors*/
+            } /*adopt_parent*/
 
         private:
             friend class StructMemberDecl<StructT>;
@@ -242,6 +256,8 @@ namespace xo {
             std::vector<StructMember> member_v_;
             /* lockables guarding members of StructT; StructMember::guard_ix() indexes it */
             StructTdx::GuardVector guard_v_;
+            /* parents of StructT declared so far (adopt_parent) */
+            std::vector<TypeDescr> parent_v_;
         }; /*StructReflector*/
 
         template<typename StructT>

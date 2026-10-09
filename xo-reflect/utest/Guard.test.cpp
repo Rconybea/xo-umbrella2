@@ -96,7 +96,7 @@ namespace xo {
 
                 if (sr.is_incomplete()) {
                     REFLECT_MEMBER(sr, d).guarded_by(&DerivedGuarded::m3_);
-                    sr.adopt_ancestors<Guarded>();
+                    sr.adopt_parent<Guarded>();
                 }
             }
 
@@ -266,7 +266,7 @@ namespace xo {
             REQUIRE(free_elsewhere(x.m2_));
         }
 
-        TEST_CASE("guard-adopt-ancestors", "[reflect][guard]") {
+        TEST_CASE("guard-adopt-parent", "[reflect][guard]") {
             reflect_derived_guarded();
 
             TypeDescr td = Reflect::require<DerivedGuarded>();

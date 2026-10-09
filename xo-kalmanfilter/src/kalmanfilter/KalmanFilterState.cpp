@@ -121,7 +121,7 @@ namespace xo {
             StructReflector<KalmanFilterStateExt> sr;
 
             if (sr.is_incomplete()) {
-                /* TODO: use sr.adopt_ancestors<KalmanFilterState>() */
+                /* TODO: use sr.adopt_parent<KalmanFilterState>() */
 
                 REFLECT_EXPLICIT_MEMBER(sr, "k", &KalmanFilterState::k_);
                 REFLECT_EXPLICIT_MEMBER(sr, "tk", &KalmanFilterState::tk_);

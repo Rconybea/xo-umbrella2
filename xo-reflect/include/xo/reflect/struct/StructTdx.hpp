@@ -25,10 +25,12 @@ namespace xo {
              *
              * guard_v.  lockables guarding members: StructMember::guard_ix()
              *           indexes it
+             * parent_v. parent types (StructReflector::adopt_parent)
              * to_self_tp.  use this function to support .most_derived_self_tp()
              */
             static std::unique_ptr<StructTdx> make(std::vector<StructMember> member_v,
                                                    GuardVector guard_v,
+                                                   std::vector<TypeDescr> parent_v,
                                                    bool have_to_self_tp,
                                                    std::function<TaggedPtr (void *)> to_self_tp);
 
@@ -59,6 +61,7 @@ namespace xo {
 
                 return make(std::move(mv),
                             GuardVector(),
+                            std::vector<TypeDescr>(),
                             false /*!have_to_self_tp*/,
                             null_to_self_tp);
             } /*pair*/
@@ -81,6 +84,8 @@ namespace xo {
             virtual TypeDescr fixed_child_td(uint32_t i) const override;
             virtual std::string const & struct_member_name(uint32_t i) const override;
             virtual StructMember const * struct_member(uint32_t i) const override;
+            virtual uint32_t n_parent() const override { return this->parent_v_.size(); }
+            virtual TypeDescr parent_td(uint32_t i) const override { return this->parent_v_.at(i); }
             virtual uint32_t n_guard() const override { return this->guard_v_.size(); }
             virtual TaggedPtr guard_tp(uint32_t g, void * object) const override;
 
@@ -96,6 +101,7 @@ namespace xo {
         private:
             StructTdx(std::vector<StructMember> member_v,
                       GuardVector guard_v,
+                      std::vector<TypeDescr> parent_v,
                       bool have_to_self_tp,
                       std::function<TaggedPtr (void*)> to_self_tp);
 
@@ -104,6 +110,8 @@ namespace xo {
             std::vector<StructMember> member_v_;
             /* lockables guarding members; StructMember::guard_ix() indexes it */
             GuardVector guard_v_;
+            /* parent types, as declared by StructReflector::adopt_parent */
+            std::vector<TypeDescr> parent_v_;
             /* indices (into .member_v) of members with no guard */
             std::vector<uint32_t> unguarded_v_;
             /* .guard_members_v[g]: indices (into .member_v) of members guarded by .guard_v[g] */

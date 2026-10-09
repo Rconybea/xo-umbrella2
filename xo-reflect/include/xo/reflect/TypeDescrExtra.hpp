@@ -98,6 +98,15 @@ namespace xo {
              **/
             virtual Ownership child_edge_ownership() const { return Ownership::owning; }
 
+            // methods for working with inheritance (StructReflector::adopt_parent)
+
+            /** number of parent types declared for this struct; 0 unless a
+             *  reflected struct declared some
+             **/
+            virtual uint32_t n_parent() const { return 0; }
+            /** parent type @p i.  require: i < n_parent() **/
+            virtual const TypeDescrBase * parent_td(uint32_t /*i*/) const { return nullptr; }
+
             // methods for working with guards (StructMemberDecl::guarded_by)
 
             /** number of distinct lockables guarding this struct's members;

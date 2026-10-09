@@ -257,7 +257,7 @@ namespace xo {
                 /* keep an override from the ancestor's reflection */
                 retval.ownership_ = this->ownership_;
                 /* an index into the ancestor's guard table: the adopter
-                 * (StructReflector::adopt_ancestors) remaps it into its own
+                 * (StructReflector::adopt_parent) remaps it into its own
                  */
                 retval.guard_ix_ = this->guard_ix_;
 

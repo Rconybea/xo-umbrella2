@@ -403,6 +403,20 @@ namespace xo {
             return this->tdextra_->child_tp(i, object);
         } /*child_tp*/
 
+        bool
+        TypeDescrBase::is_derived_from(TypeDescr base) const
+        {
+            if (this == base)
+                return true;
+
+            for (uint32_t i = 0, n = this->n_parent(); i < n; ++i) {
+                if (this->parent_td(i)->is_derived_from(base))
+                    return true;
+            }
+
+            return false;
+        } /*is_derived_from*/
+
         TaggedPtr
         TypeDescrBase::guard_tp(uint32_t g, void * object) const
         {

@@ -15,7 +15,8 @@ set(SELF_SOURCE_FILES
     StdAtomic.test.cpp
     WrapperReflector.test.cpp
     Ownership.test.cpp
-    Guard.test.cpp)
+    Guard.test.cpp
+    AdoptParent.test.cpp)
 
 xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)
