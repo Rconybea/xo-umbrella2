@@ -167,19 +167,6 @@
   ],
   "_name_" : "Webserver",
   "_short_type_" : "WebserverImpl",
-  "_unplaced_" : 
-  [
-    {
-      "_address_" : "<redacted>",
-      "_ref_" : 11,
-      "_type_" : "OutputBuffer"
-    },
-    {
-      "_address_" : "<redacted>",
-      "_ref_" : 18,
-      "_type_" : "OutputBuffer"
-    }
-  ],
   "endpoints" : 
   [
     {
@@ -420,6 +407,13 @@
           "_value_" : "<redacted>"
         },
         {
+          "_canonical_type_" : "unsigned int",
+          "_metatype_" : "atomic",
+          "_name_" : "last_msg_seq_",
+          "_short_type_" : "unsigned int",
+          "_value_" : 0
+        },
+        {
           "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",
           "_metatype_" : "pointer",
           "_name_" : "sender_",
@@ -562,6 +556,13 @@
           "_name_" : "output_buf_",
           "_short_type_" : "OutputBuffer*",
           "_value_" : "<redacted>"
+        },
+        {
+          "_canonical_type_" : "unsigned int",
+          "_metatype_" : "atomic",
+          "_name_" : "last_msg_seq_",
+          "_short_type_" : "unsigned int",
+          "_value_" : 1
         },
         {
           "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",

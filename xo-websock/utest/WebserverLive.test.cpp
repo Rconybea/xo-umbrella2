@@ -656,9 +656,19 @@ namespace xo {
                 for (Json::Value const & m : mem)
                     names.push_back(m["_name_"].asString());
 
-                /* reflected members first (router_), then the rest */
-                REQUIRE(names == std::vector<std::string>{"router_", "output_buf_", "sender_",
-                                                          "outbound_q_"});
+                /* reflected members first -- router_, then output_buf_ and
+                 * last_msg_seq_ under the session's mutex (xo-websock#15) --
+                 * then the rest
+                 */
+                REQUIRE(names == std::vector<std::string>{"router_", "output_buf_", "last_msg_seq_",
+                                                          "sender_", "outbound_q_"});
+                /* output_buf_ placed here (owning): its OutputBuffer, or null
+                 * between writes -- not a ref
+                 */
+                {
+                    Json::Value const ob = entry_of(mem, "output_buf_")["_value_"];   /* a copy: entry_of returns one */
+                    REQUIRE((ob.isNull() || (ob.isObject() && ob.isMember("_id_"))));
+                }
                 REQUIRE(entry_of(mem, "sender_")["_metatype_"].asString() == "pointer");
                 REQUIRE(entry_of(mem, "sender_")["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
                 REQUIRE(entry_of(mem, "router_")["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
@@ -774,7 +784,7 @@ namespace xo {
                     "listen_port_",    /* the port the kernel chose */
                     "port_",           /* the config's copy: 0, or the port chosen */
                     "mount_origin_",   /* a path */
-                    "output_buf_",     /* an address, or null mid-write */
+                    "output_buf_",     /* its id, or null between writes */
                 };
 
                 if (v.isArray()) {
@@ -862,6 +872,12 @@ namespace xo {
             REQUIRE(box->wait_sink(0));
 
             Json::Value snap = server_json();
+
+            /* every ref's target placed (.xo-backlog/xo-printjson/issues/08):
+             * no trailer
+             */
+            REQUIRE(!snap.isMember("_unplaced_"));
+
             redact(snap);
             std::string const actual = styled(snap);
 
