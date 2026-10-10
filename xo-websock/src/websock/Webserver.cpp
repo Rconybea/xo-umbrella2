@@ -2336,7 +2336,12 @@ namespace xo {
                  * RunstateUtil::reflect_self.  listen_port_: a std::atomic,
                  * printed by its load()ed value
                  * (.xo-backlog/xo-reflect/issues/04)
+                 *
+                 * Webserver its parent: a borrowed Webserver* (a receiver's,
+                 * say) then matches the server placed as a WebserverImpl
+                 * (.xo-backlog/xo-printjson/issues/08)
                  */
+                sr.adopt_parent<Webserver>();
                 REFLECT_MEMBER(sr, ws_config);
                 REFLECT_MEMBER(sr, pjson);
                 REFLECT_MEMBER(sr, url_router);

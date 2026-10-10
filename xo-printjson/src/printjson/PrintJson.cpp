@@ -130,7 +130,7 @@ namespace xo {
             EntryGuard guard("print_tp");
             JsonPrintState state(this, p_os);
 
-            state.print(tp);
+            state.print_root(tp);
             //*p_os << std::ends;
         } /*print*/
 
@@ -156,7 +156,7 @@ namespace xo {
             std::ostream discard(nullptr);
             JsonPrintState state(this, &discard);
 
-            state.print(tp);
+            state.print_root(tp);
         } /*validate_tp*/
 
         void
@@ -563,7 +563,7 @@ namespace xo {
          *  It was keyed on the POINTER until 2026-09-21, doing its own
          *  dereference, because a raw pointer had no @c EstablishTdx
          *  specialisation and so reflected as an atom -- never reaching
-         *  @c print_generic_pointer's dispatch to a child.  Raw pointers are
+         *  the generic pointer path's dispatch to a child (JsonPrintState::print_pointee).  Raw pointers are
          *  reflected now (.xo-backlog/xo-reflect/issues/01), which is what
          *  let the key move to the pointee.
          *
@@ -792,7 +792,7 @@ namespace xo {
                 {
                     std::unique_ptr<JsonPrinter> printer(new JsonPrinter_RootSet());
                     /* the POINTEE; a const RootSet* reaches it through
-                     * print_generic_pointer
+                     * the generic pointer path (JsonPrintState::print_pointee)
                      */
                     p_json->provide_printer(Reflect::require<RootSet>(),
                                             std::move(printer));

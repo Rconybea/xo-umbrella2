@@ -1,4 +1,5 @@
-// every {"_ref_": n} in an introspect snapshot names an "_id_" in the same snapshot
+// every {"_ref_": n} in an introspect snapshot names an "_id_" in the same snapshot,
+// or is listed in its "_unplaced_" trailer (xo-printjson#08); and no "_id_" twice
 const [,, cdp_port, port] = process.argv;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const cl = new WebSocket(`ws://localhost:${port}/`, "lws-minimal");
@@ -14,7 +15,10 @@ const ev = async (expr) => (await call("Runtime.evaluate", {expression: expr, re
 for (let i = 0; i < 100 && !(await ev(`typeof last_event !== "undefined" && !!last_event`)); i++) await sleep(100);
 const r = await ev(`(() => {
   const ids = new Map(), refs = [];
+  // the trailer's entries name objects, as refs do, but are not refs to check
+  const unplaced = new Set((last_event._unplaced_ || []).map(e => e._ref_));
   const walk = (v, path) => {
+    if (path === "$._unplaced_") return;
     if (Array.isArray(v)) { v.forEach((x, i) => walk(x, path + "[" + i + "]")); return; }
     if (v && typeof v === "object") {
       if (typeof v._id_ === "number") ids.set(v._id_, (ids.get(v._id_) || []).concat([path + " " + v._name_]));
@@ -24,7 +28,8 @@ const r = await ev(`(() => {
   };
   walk(last_event, "$");
   const dup = [...ids].filter(([k, v]) => v.length > 1);
-  return {n_ids: ids.size, n_refs: refs.length, dangling: refs.filter(([n]) => !ids.has(n)).map(([n, p]) => n + " at " + p), dup};
+  return {n_ids: ids.size, n_refs: refs.length, n_unplaced: unplaced.size,
+          dangling: refs.filter(([n]) => !ids.has(n) && !unplaced.has(n)).map(([n, p]) => n + " at " + p), dup};
 })()`);
 console.log(JSON.stringify(r, null, 1));
 const ok = r.dangling.length === 0 && r.dup.length === 0;

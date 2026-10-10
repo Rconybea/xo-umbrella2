@@ -221,6 +221,11 @@ namespace xo {
 
             void write_value(std::string_view name, DeclaredType const & declared,
                              reflect::TaggedPtr value, bool identity);
+            /** as write_value, for a pointer @p ptr whose pointee is reached
+             *  by an edge of kind @p edge (JsonPrintState::print_pointee)
+             **/
+            void write_pointee(std::string_view name, DeclaredType const & declared,
+                               reflect::TaggedPtr ptr, reflect::Ownership edge);
             void write_error(std::string_view name, DeclaredType const & declared,
                              std::string const & why);
             void write_ref(std::string_view name, DeclaredType const & declared,

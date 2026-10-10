@@ -5,6 +5,7 @@ set(SELF_SRCS
 	printjson_utest_main.cpp
 	PrintJson.test.cpp
 	PrintJsonCycle.test.cpp
+	PrintJsonOwnership.test.cpp
 	JsonMembers.test.cpp
 	FopJson.test.cpp
 	ObjectSlotJson.test.cpp)

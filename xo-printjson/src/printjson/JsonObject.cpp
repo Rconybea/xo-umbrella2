@@ -59,6 +59,9 @@ namespace xo {
         void
         JsonObject::close()
         {
+            if (is_root_)
+                state_->write_unplaced();
+
             *state_->p_os() << "}";
             closed_ = true;
         }

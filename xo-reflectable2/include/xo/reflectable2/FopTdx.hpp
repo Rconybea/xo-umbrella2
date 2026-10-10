@@ -81,6 +81,17 @@ namespace xo {
                 return TypeDescrExtra::most_derived_self_tp(object_td, object);
             } /*most_derived_self_tp*/
 
+            /** a fop's target lives in a collected heap: any holder keeps it
+             *  alive, and graphs of them share and cycle (DList tails, say).
+             *  So shared -- placed at first appearance, a ref afterwards
+             *  (.xo-backlog/xo-reflect/issues/07)
+             **/
+            virtual Ownership child_edge_ownership() const override { return Ownership::shared; }
+
+            virtual void const * pointee_address(void * object) const override {
+                return reinterpret_cast<target_t *>(object)->data();
+            }
+
             virtual const TypeDescrBase * fixed_child_td(uint32_t /*i*/) const override {
                 if constexpr (c_erased) {
                     return nullptr;

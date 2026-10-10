@@ -32,7 +32,9 @@ await sleep(800);
 const rows = await ev(`[...${sel}.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 console.log(" =  rows:", JSON.stringify(rows));
 // reflected members first (router_), then the rest (xo-printjson#06)
-check(rows.length === 4 && rows[1] === "output_buf_: OutputBuffer", "4 rows; anonymous namespace dropped: " + rows[1]);
+// output_buf_: a raw pointer, borrowed -- a ref, its OutputBuffer unplaced
+// (xo-printjson#08), until xo-websock#15 decides where it prints
+check(rows.length === 4 && rows[1] === "output_buf_: (→ not drawn)", "4 rows; output_buf_ a ref, not drawn: " + rows[1]);
 check(rows[2] === "sender_: ▾ (→)", "sender_ a ref: " + rows[2]);
 check(rows[3] === "outbound_q_: 0 queued", "outbound_q_ mentioned: " + rows[3]);
 check(await ev(`${VIS}.length`) === 2, "two member edges: sender_, and router_ -- its own (nested) box");

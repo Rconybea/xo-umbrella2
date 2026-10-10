@@ -99,7 +99,11 @@ namespace xo {
                     }
                     {
                         StructReflector<DPtrHolder> sr;
-                        sr.reflect_member("p", &DPtrHolder::p_);
+                        /* shared: a raw pointer is borrowed by default,
+                         * printing only a ref (.xo-backlog/xo-printjson/issues/08);
+                         * this case is about rendering the pointee
+                         */
+                        sr.reflect_member("p", &DPtrHolder::p_).shared();
                         sr.require_complete();
                     }
                     return true;

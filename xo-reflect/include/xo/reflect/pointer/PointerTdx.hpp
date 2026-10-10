@@ -32,6 +32,13 @@ namespace xo {
              */
             virtual uint32_t n_child_fixed() const override { return 0; /*unknown*/ }
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override = 0;
+            /* the pointee's address, given the pointer at @p object; nullptr
+             * if null.  Reads only the pointer, never the pointee -- unlike
+             * child_tp(), which asks a self-tagging pointee its type.  For a
+             * traversal that must not read through a borrowed pointer
+             * (.xo-backlog/xo-printjson/issues/08)
+             */
+            virtual void const * pointee_address(void * object) const = 0;
             /* (forbidden) */
             virtual std::string const & struct_member_name(uint32_t i) const override;
         }; /*PointerTdx*/
@@ -54,6 +61,10 @@ namespace xo {
             } /*make*/
 
             virtual Ownership child_edge_ownership() const override { return ownership_; }
+
+            virtual void const * pointee_address(void * object) const override {
+                return reinterpret_cast<target_t *>(object)->get();
+            }
 
             virtual uint32_t n_child(void * object) const override {
                 /* e.g:
@@ -136,6 +147,10 @@ namespace xo {
 
             /* a T* does not own its destination. */
             virtual Ownership child_edge_ownership() const override { return Ownership::borrowed; }
+
+            virtual void const * pointee_address(void * object) const override {
+                return *reinterpret_cast<target_t *>(object);
+            }
 
             virtual uint32_t n_child(void * object) const override {
                 if constexpr (std::is_void_v<T>) {

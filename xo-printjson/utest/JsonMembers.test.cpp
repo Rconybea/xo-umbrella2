@@ -174,7 +174,10 @@ namespace xo {
             mem.member("u_", u).member("pu_", pu).member("n_", 3);
             mem.end();
 
-            /* the entry says why, carries no value, and the rest still prints */
+            /* the entry says why, carries no value, and the rest still prints.
+             * pu_ is a raw pointer -- borrowed: a ref, which needs no
+             * printer for its target's type (.xo-backlog/xo-printjson/issues/08)
+             */
             std::string const why = "type not reflected: " + type_of<JmUnreflected>();
 
             REQUIRE(ss.str() == ", \"_members_\": ["
@@ -183,7 +186,7 @@ namespace xo {
                     + "\", \"_metatype_\": \"atomic\", \"_error_\": \"" + why + "\"}, "
                     "{\"_name_\": \"pu_\", \"_canonical_type_\": \"" + type_of<JmUnreflected *>()
                     + "\", \"_short_type_\": \"" + xo::reflect::TypeDescrBase::make_short_name(type_of<JmUnreflected *>())
-                    + "\", \"_metatype_\": \"pointer\", \"_error_\": \"" + why + "\"}, "
+                    + "\", \"_metatype_\": \"pointer\", \"_value_\": {\"_ref_\": 1}}, "
                     + entry("n_", type_of<int>(), "atomic", "3") + "]");
         }
 

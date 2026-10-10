@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/reflect/Ownership.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 #include <cstdint>
@@ -40,6 +41,29 @@ namespace xo {
          *  printed as.  Another object at the same address -- a struct's
          *  first by-value member -- is part of the first: it prints in
          *  full, with no "_id_", and is never a ref's target.
+         *
+         *  Where an object prints in full follows ownership
+         *  (.xo-backlog/xo-printjson/issues/08): through an owning or shared
+         *  edge -- a member held by value, a std::unique_ptr, an rp<T> -- it
+         *  prints at first appearance, as above.  Through a borrowed edge --
+         *  a raw pointer, unless reflection says otherwise -- only ever as
+         *  {"_ref_": n}, without reading the pointee.  A borrowed ref's
+         *  target that nothing places, or that a different type (not derived
+         *  from the pointee's) occupies, is listed when the top-level object
+         *  closes:
+         *
+         *    "_unplaced_": [{"_ref_": n, "_type_": .., "_address_": ..}, ..]
+         *
+         *  Each names an object, as a ref does, without defining it: every
+         *  ref in the output resolves to an "_id_", or is listed here.
+         *
+         *  absent when empty.  Not written if the top-level value is not a
+         *  json object.
+         *
+         *  A pointer handed to an entry point (PrintJson::print_tp ..) is
+         *  the caller vouching for its target: the top-level edge places it
+         *  (shared), whatever the pointer type's default, and its object is
+         *  the top-level object.
          *
          *  Nesting is bounded: print() aborts, with a backtrace, past
          *  PrintJson::max_depth() -- see print()
@@ -84,6 +108,16 @@ namespace xo {
              *  it points to still takes part
              **/
             void print_value(TaggedPtr tp);
+
+            /** the pointee of the pointer @p ptr, reached by an edge of kind
+             *  @p edge: owning or shared, print() it (null if none); borrowed,
+             *  a ref to it, never reading it.  Nests one deeper, as print()
+             *  of the pointer would.  For a member whose reflection overrides
+             *  its pointer type's ownership (StructMember::ownership()); a
+             *  pointer print()ed takes its type's
+             *  (TypeDescr::child_edge_ownership())
+             **/
+            void print_pointee(TaggedPtr ptr, reflect::Ownership edge);
 
             /** {"_ref_": n} for the object at @p p, printed in full elsewhere
              *  in this print (before or after), or null.  @p p must be the
@@ -131,6 +165,12 @@ namespace xo {
                 std::uint32_t id_ = 0;
                 /** the type it printed as; nullptr while only referred to **/
                 TypeDescr type_ = nullptr;
+                /** the pointee type of the first borrowed ref to it; it is
+                 *  placed for that ref only as this type, or one derived from
+                 *  it.  nullptr if no borrowed ref, or an untyped one
+                 *  (print_ref)
+                 **/
+                TypeDescr ref_type_ = nullptr;
             };
 
             /** the value print_node is dispatching, for open_object **/
@@ -151,8 +191,27 @@ namespace xo {
             [[noreturn]] void abort_too_deep(TaggedPtr tp) const;
             /** printer misuse (open_object twice, or outside print_json): diagnose, abort **/
             [[noreturn]] void abort_misuse(char const * what) const;
-            /** {"_name_": .., type keys, and "_id_" if @p p non-null: owns @p p's entry **/
-            JsonObject open_object_aux(void const * p, std::string_view name, TypeDescr td);
+            /** {"_name_": .., type keys, and "_id_" if @p p non-null: owns @p p's entry.
+             *  @p is_root: the top-level value's own object, which writes
+             *  "_unplaced_" as it closes
+             **/
+            JsonObject open_object_aux(void const * p, std::string_view name, TypeDescr td,
+                                       bool is_root);
+            /** print() of the top-level value, from an entry point
+             *  (PrintJson::print_tp, validate_tp): a pointer's target is
+             *  placed, whatever its type's default
+             **/
+            void print_root(TaggedPtr tp);
+            /** print_pointee, within a depth level already counted **/
+            void print_pointee_aux(TaggedPtr ptr, reflect::Ownership edge);
+            /** , "_unplaced_": [..] -- if any; from the root JsonObject's close() **/
+            void write_unplaced();
+
+        private:
+            /* close() of the root object writes "_unplaced_" */
+            friend class JsonObject;
+            /* entry points print the top-level value via print_root */
+            friend class PrintJson;
 
         private:
             /** the printer table **/
@@ -161,6 +220,10 @@ namespace xo {
             std::ostream * p_os_ = nullptr;
             /** print() calls in progress **/
             std::uint32_t depth_ = 0;
+            /** depth of the top-level object, which writes "_unplaced_":
+             *  1, or 2 when print_root reaches it through a pointer
+             **/
+            std::uint32_t root_depth_ = 1;
             /** print() aborts past this depth **/
             std::uint32_t max_depth_ = 0;
             /** objects met in this print, by address.  A std::unordered_map

@@ -15,6 +15,7 @@
 namespace xo {
     using xo::pp::quot;
     using xo::reflect::Metatype;
+    using xo::reflect::Ownership;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
 
@@ -79,6 +80,11 @@ namespace xo {
 
             switch (td->metatype()) {
             case Metatype::mt_pointer:
+                /* borrowed: a ref, or null -- printable without reading the
+                 * pointee (.xo-backlog/xo-printjson/issues/08)
+                 */
+                if (td->child_edge_ownership() == Ownership::borrowed)
+                    return true;
                 if (v.n_child() == 0)
                     return true;
                 {
@@ -113,7 +119,20 @@ namespace xo {
                 TaggedPtr value = sm.get_member_tp(obj.address());
                 std::string name = tostr(sm.member_name(), name_suffix);
 
-                if (this->printable_value(value)) {
+                if (mtd->is_pointer() && !state_->has_printer(mtd)) {
+                    /* the edge to its pointee as this struct's reflection
+                     * says (StructMember::ownership): it may override the
+                     * pointer type's
+                     */
+                    Ownership edge = sm.ownership();
+
+                    if ((edge == Ownership::borrowed) || this->printable_value(value)) {
+                        this->write_pointee(name, declared, value, edge);
+                    } else {
+                        this->write_error(name, declared,
+                                          tostr("type not reflected: ", mtd->canonical_name()));
+                    }
+                } else if (this->printable_value(value)) {
                     this->write_value(name, declared, value, true /*identity*/);
                 } else {
                     this->write_error(name, declared,
@@ -147,6 +166,17 @@ namespace xo {
                 state_->print(value);
             else
                 state_->print_value(value);
+            *p_os_ << "}";
+        }
+
+        void
+        JsonMembers::write_pointee(std::string_view name, DeclaredType const & declared,
+                                   TaggedPtr ptr, Ownership edge)
+        {
+            this->write_head(name, declared);
+
+            *p_os_ << ", " << quot("_value_") << ": ";
+            state_->print_pointee(ptr, edge);
             *p_os_ << "}";
         }
 

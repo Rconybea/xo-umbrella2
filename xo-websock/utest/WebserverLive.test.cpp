@@ -766,7 +766,10 @@ namespace xo {
              *  Top-level keys by name; _members_ entries by member name
              **/
             void redact(Json::Value & v) {
-                static const std::vector<std::string> c_keys = {"listen_port"};
+                static const std::vector<std::string> c_keys = {
+                    "listen_port",
+                    "_address_",       /* in "_unplaced_": an address */
+                };
                 static const std::vector<std::string> c_members = {
                     "listen_port_",    /* the port the kernel chose */
                     "port_",           /* the config's copy: 0, or the port chosen */

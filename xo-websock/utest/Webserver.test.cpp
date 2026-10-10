@@ -50,8 +50,12 @@ namespace xo {
                 static void reflect_self() {
                     StructReflector<HoldsServer> sr;
 
+                    /* owning: in these tests the holder is where the
+                     * server prints.  A raw pointer is borrowed by default,
+                     * printing only a ref (.xo-backlog/xo-printjson/issues/08)
+                     */
                     if (sr.is_incomplete())
-                        REFLECT_MEMBER(sr, server);
+                        REFLECT_MEMBER(sr, server).owning();
                 }
 
                 Webserver * server_ = nullptr;

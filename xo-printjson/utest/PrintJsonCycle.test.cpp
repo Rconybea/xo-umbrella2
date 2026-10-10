@@ -28,7 +28,10 @@ namespace xo {
     namespace ut {
         namespace {
             /** a node in a singly-linked graph: a raw pointer member, so a
-             *  graph of them can be a chain, or cycle
+             *  graph of them can be a chain, or cycle.  Reflected shared --
+             *  placed at first appearance -- since a raw pointer is borrowed
+             *  by default, and would print only refs
+             *  (.xo-backlog/xo-printjson/issues/08)
              **/
             struct Node {
                 int id_;
@@ -39,7 +42,7 @@ namespace xo {
                 static bool s_once = []() {
                     StructReflector<Node> sr;
                     sr.reflect_member("id", &Node::id_);
-                    sr.reflect_member("next", &Node::next_);
+                    sr.reflect_member("next", &Node::next_).shared();
                     sr.require_complete();
                     return true;
                 }();
@@ -70,8 +73,9 @@ namespace xo {
                     {
                         StructReflector<Fork> sr;
                         sr.reflect_member("id", &Fork::id_);
-                        sr.reflect_member("left", &Fork::left_);
-                        sr.reflect_member("right", &Fork::right_);
+                        /* shared: see Node */
+                        sr.reflect_member("left", &Fork::left_).shared();
+                        sr.reflect_member("right", &Fork::right_).shared();
                         sr.require_complete();
                     }
                     {

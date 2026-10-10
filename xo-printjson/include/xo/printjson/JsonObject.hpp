@@ -38,7 +38,8 @@ namespace xo {
             JsonObject & operator=(JsonObject const &) = delete;
             /** takes over @p x's object: @p x no longer needs closing **/
             JsonObject(JsonObject && x)
-                : state_{x.state_}, closed_{x.closed_}, n_uncaught_{x.n_uncaught_} { x.closed_ = true; }
+                : state_{x.state_}, closed_{x.closed_}, is_root_{x.is_root_},
+                  n_uncaught_{x.n_uncaught_} { x.closed_ = true; }
             /** asserts close() was called -- unless a printer threw
              *  since this object opened
              **/
@@ -73,7 +74,9 @@ namespace xo {
             /** , "_members_": [ .. ] -- after any keys **/
             JsonMembers members();
 
-            /** writes } **/
+            /** writes } -- after "_unplaced_", if this is the top-level
+             *  value's object and any are (JsonPrintState)
+             **/
             void close();
 
             /** the print in progress **/
@@ -82,8 +85,8 @@ namespace xo {
         private:
             friend class JsonPrintState;
 
-            explicit JsonObject(JsonPrintState * state)
-                : state_{state}, n_uncaught_{std::uncaught_exceptions()} {}
+            JsonObject(JsonPrintState * state, bool is_root)
+                : state_{state}, is_root_{is_root}, n_uncaught_{std::uncaught_exceptions()} {}
 
             /** , "@p k": **/
             void write_key(std::string_view k);
@@ -92,6 +95,8 @@ namespace xo {
             /** the print in progress **/
             JsonPrintState * state_ = nullptr;
             bool closed_ = false;
+            /** the top-level value's own object: writes "_unplaced_" **/
+            bool is_root_ = false;
             /** std::uncaught_exceptions() when opened: more at destruction
              *  means unwinding, where close() cannot have run
              **/

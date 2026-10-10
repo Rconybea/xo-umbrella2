@@ -10,21 +10,29 @@
 #include <xo/reflect/enum/EnumTdx.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
+#include <xo/reflect/pointer/PointerTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <cstddef>
 #include <memory>
 #include <new>
+#include <utility>
+#include <vector>
 
 namespace xo {
     using xo::reflect::EnumTdx;
     using xo::reflect::StdAtomicTdx;
     using xo::reflect::WrapperTdx;
     using xo::reflect::Metatype;
+    using xo::reflect::Ownership;
+    using xo::reflect::PointerTdx;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
     using xo::reflect::TypeId;
@@ -105,38 +113,6 @@ namespace xo {
                 T * p_slot_;
                 T saved_;
             };
-
-            /* this will be used when TaggedPtr refers to a pointer-like value,
-             * e.g.
-             *    xo::ref::rp<T>
-             */
-            void
-            print_generic_pointer(JsonPrintState & state,
-                                  TaggedPtr tp)
-            {
-                std::ostream * p_os = state.p_os();
-
-                /* e.g. if
-                 *   xo::ref::rp<VanillaOption> opt = ...;
-                 * then expect to print just as we would for
-                 *   VanillaOption & opt = ...;
-                 * if pointer is null,  will print {}
-                 */
-
-                if (tp.n_child()) {
-                    state.print(tp.get_child(0));
-                } else {
-                    /* was "{}" until 2026-09-21, distinguishable from a real
-                     * struct only by the absent _name_ member.  json null says
-                     * the same thing without asking a consumer to notice an
-                     * absence, and it is what the bespoke pointer printers
-                     * (JsonPrinter_ObjectSlot, JsonPrinter_RootSet) already
-                     * emit -- so routing a pointer through this path is no
-                     * longer a change in what a null looks like.
-                     */
-                    *p_os << "null";
-                }
-            } /*print_generic_pointer*/
 
             /* this will be used when TaggedPtr refers to a vector-like value,
              * e.g.
@@ -266,6 +242,136 @@ namespace xo {
             this->print_node(tp, false /*!identity*/);
         } /*print_value*/
 
+        void
+        JsonPrintState::print_root(TaggedPtr tp)
+        {
+            if (tp.td() && tp.td()->is_pointer() && !this->has_printer(tp.td())) {
+                /* a pointer handed to an entry point: its caller vouches for
+                 * the target, so place it -- the top-level object, one deeper
+                 */
+                Ownership edge = tp.td()->child_edge_ownership();
+
+                this->root_depth_ = 2;
+                this->print_pointee(tp, (edge == Ownership::borrowed) ? Ownership::shared : edge);
+            } else {
+                this->print(tp);
+            }
+        } /*print_root*/
+
+        void
+        JsonPrintState::print_pointee(TaggedPtr ptr, Ownership edge)
+        {
+            /* one level, as print_node(ptr) would count */
+            if (this->depth_ >= this->max_depth_)
+                this->abort_too_deep(ptr);
+
+            DepthScope scope(&this->depth_);
+
+            this->print_pointee_aux(ptr, edge);
+        } /*print_pointee*/
+
+        void
+        JsonPrintState::print_pointee_aux(TaggedPtr ptr, Ownership edge)
+        {
+            /* e.g. if
+             *   xo::ref::rp<VanillaOption> opt = ...;
+             * then expect to print just as we would for
+             *   VanillaOption & opt = ...;
+             * if pointer is null,  will print null
+             */
+            assert(ptr.td()->is_pointer());
+
+            if (edge == Ownership::borrowed) {
+                /* a ref by address: never read the pointee, which this
+                 * holder does not keep alive (.xo-backlog/xo-printjson/issues/08)
+                 */
+                PointerTdx const * ptdx = static_cast<PointerTdx const *>(ptr.td()->tdextra());
+                void const * p = ptdx->pointee_address(ptr.address());
+
+                if (!p) {
+                    *p_os_ << "null";
+                    return;
+                }
+
+                ObjectEntry & e = this->entry_for(p);
+
+                if (!e.ref_type_)
+                    e.ref_type_ = ptr.td()->fixed_child_td(0);
+
+                *p_os_ << "{" << quot("_ref_") << ": " << e.id_ << "}";
+                return;
+            }
+
+            if (ptr.n_child() == 0) {
+                /* was "{}" until 2026-09-21, distinguishable from a real
+                 * struct only by the absent _name_ member.  json null says
+                 * the same thing without asking a consumer to notice an
+                 * absence, and it is what the bespoke pointer printers
+                 * (JsonPrinter_ObjectSlot, JsonPrinter_RootSet) already
+                 * emit
+                 */
+                *p_os_ << "null";
+                return;
+            }
+
+            TaggedPtr target = ptr.get_child(0);
+
+            /* an owning edge is the only way to its target: reaching one
+             * placed already means two owners
+             */
+            assert(((edge != Ownership::owning) || !this->is_printed(target))
+                   && "PrintJson: owning edge reaches an object placed already");
+
+            this->print(target);
+        } /*print_pointee_aux*/
+
+        void
+        JsonPrintState::write_unplaced()
+        {
+            /* borrowed refs' targets nothing placed -- or placed as a type
+             * not derived from the ref's pointee type (e.g. the object
+             * whose first member the ref points to) -- and untyped refs'
+             * targets nothing placed.  In id order, for stable output
+             */
+            std::vector<std::pair<void const *, ObjectEntry const *>> v;
+
+            for (auto const & ix : this->objects_) {
+                ObjectEntry const & e = ix.second;
+
+                bool placed = (e.type_
+                               && (!e.ref_type_ || e.type_->is_derived_from(e.ref_type_)));
+
+                if (!placed)
+                    v.emplace_back(ix.first, &e);
+            }
+
+            if (v.empty())
+                return;
+
+            std::sort(v.begin(), v.end(),
+                      [](auto const & x, auto const & y) { return x.second->id_ < y.second->id_; });
+
+            *p_os_ << ", " << quot("_unplaced_") << ": [";
+            for (std::size_t i = 0, n = v.size(); i < n; ++i) {
+                ObjectEntry const & e = *(v[i].second);
+
+                if (i > 0)
+                    *p_os_ << ", ";
+
+                /* _ref_, not _id_: an entry names its object, it does not
+                 * define it -- which may happen elsewhere, as another type
+                 */
+                *p_os_ << "{" << quot("_ref_") << ": " << e.id_;
+                if (e.ref_type_)
+                    *p_os_ << ", " << quot("_type_") << ": " << quot(e.ref_type_->short_name());
+                /* decimal: json has no hex (see JsonPrinter_address) */
+                *p_os_ << ", " << quot("_address_") << ": "
+                       << reinterpret_cast<std::uintptr_t>(v[i].first)
+                       << "}";
+            }
+            *p_os_ << "]";
+        } /*write_unplaced*/
+
         JsonPrintState::ObjectEntry &
         JsonPrintState::entry_for(void const * p)
         {
@@ -297,9 +403,11 @@ namespace xo {
             this->pending_.open_ = false;
 
             /* the value print_node dispatched: owns its entry under the
-             * type it printed as (pending_.type_), whatever td names
+             * type it printed as (pending_.type_), whatever td names.  At
+             * root_depth_, the top-level value's own object
              */
-            JsonObject retval = this->open_object_aux(this->pending_.address_, name, td);
+            JsonObject retval = this->open_object_aux(this->pending_.address_, name, td,
+                                                      (this->depth_ == this->root_depth_) /*is_root*/);
 
             if (this->pending_.address_)
                 this->objects_[this->pending_.address_].type_ = this->pending_.type_;
@@ -330,11 +438,12 @@ namespace xo {
             if (this->is_printed(p))
                 this->abort_misuse("open_object_at() for an object printed already (ask is_printed())");
 
-            return this->open_object_aux(p, name, td);
+            return this->open_object_aux(p, name, td, false /*!is_root*/);
         } /*open_object_at*/
 
         JsonObject
-        JsonPrintState::open_object_aux(void const * p, std::string_view name, TypeDescr td)
+        JsonPrintState::open_object_aux(void const * p, std::string_view name, TypeDescr td,
+                                        bool is_root)
         {
             *p_os_ << "{" << quot("_name_") << ": " << quot(name)
                    << ", " << json::type_keys(td);
@@ -349,7 +458,7 @@ namespace xo {
                 *p_os_ << ", " << quot("_id_") << ": " << e.id_;
             }
 
-            return JsonObject(this);
+            return JsonObject(this, is_root);
         } /*open_object_aux*/
 
         JsonObject
@@ -414,7 +523,8 @@ namespace xo {
                     /* if no special-case printer,  apply generic printing behavior */
                     switch (tp.td()->metatype()) {
                     case Metatype::mt_pointer:
-                        print_generic_pointer(*this, tp);
+                        /* within this call's depth level */
+                        this->print_pointee_aux(tp, tp.td()->child_edge_ownership());
                         return;
                     case Metatype::mt_vector:
                         print_generic_vector(*this, tp);
