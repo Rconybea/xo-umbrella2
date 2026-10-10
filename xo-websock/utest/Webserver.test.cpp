@@ -289,11 +289,11 @@ namespace xo {
                     REQUIRE((m.isMember("_value_") != m.isMember("_error_")));
                 }
 
-                /* reflected members first, then the two read through
-                 * accessors (xo-printjson#06)
+                /* reflected members, unguarded first; state_ last, read
+                 * under the server's mutex_ (xo-printjson#09, xo-websock#15)
                  */
                 REQUIRE(names == std::vector<std::string>{"ws_config_", "pjson_", "url_router_",
-                                                          "session_table_", "state_", "listen_port_"});
+                                                          "session_table_", "listen_port_", "state_"});
 
                 /* an entry by name: robust to member order */
                 auto entry_of = [](Json::Value const & m, std::string const & name) -> Json::Value const & {

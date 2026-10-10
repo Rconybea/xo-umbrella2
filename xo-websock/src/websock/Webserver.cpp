@@ -2346,7 +2346,7 @@ namespace xo {
                 REFLECT_MEMBER(sr, pjson);
                 REFLECT_MEMBER(sr, url_router);
                 REFLECT_MEMBER(sr, session_table);
-                REFLECT_MEMBER(sr, state);
+                REFLECT_MEMBER(sr, state).guarded_by(&WebserverImpl::mutex_);
                 REFLECT_MEMBER(sr, listen_port);
             }
         } /*reflect_self*/
