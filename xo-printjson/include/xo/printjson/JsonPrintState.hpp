@@ -6,6 +6,7 @@
 #pragma once
 
 #include <xo/reflect/Ownership.hpp>
+#include <xo/reflect/struct/GuardedVisit.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 #include <cstdint>
@@ -67,6 +68,10 @@ namespace xo {
          *
          *  Nesting is bounded: print() aborts, with a backtrace, past
          *  PrintJson::max_depth() -- see print()
+         *
+         *  Printer will acquire locks for a struct's reflected members
+         *  (@see JsonMembers::reflected_members, @see PrintJson::guard_mode()),
+         *  so caller must not already hold them.
          **/
         class JsonPrintState {
         public:
@@ -158,6 +163,9 @@ namespace xo {
             /** nesting limit, from PrintJson::max_depth() **/
             std::uint32_t max_depth() const { return max_depth_; }
 
+            /** how guards are taken, from PrintJson::guard_mode() **/
+            reflect::GuardMode guard_mode() const { return guard_mode_; }
+
         private:
             /** an object met in this print **/
             struct ObjectEntry {
@@ -226,6 +234,8 @@ namespace xo {
             std::uint32_t root_depth_ = 1;
             /** print() aborts past this depth **/
             std::uint32_t max_depth_ = 0;
+            /** see guard_mode() **/
+            reflect::GuardMode guard_mode_ = reflect::GuardMode::blocking;
             /** objects met in this print, by address.  A std::unordered_map
              *  for now; a DArenaHashMap from a pool of temporary arenas is
              *  the intent (.xo-backlog/xo-printjson/issues/02)

@@ -111,49 +111,57 @@ namespace xo {
             if (!td || !td->is_struct())
                 return *this;
 
-            for (std::uint32_t i = 0, n = obj.n_child(); i < n; ++i) {
-                reflect::StructMember const & sm = td->struct_member(i);
-                TypeDescr mtd = sm.get_member_td();
-                DeclaredType declared{mtd->canonical_name(), std::string(mtd->short_name()),
-                                      mtd->metatype()};
-                TaggedPtr value = sm.get_member_tp(obj.address());
-                std::string name = tostr(sm.member_name(), name_suffix);
-
-                if (mtd->is_pointer() && !state_->has_printer(mtd)) {
-                    /* the edge to its pointee as this struct's reflection
-                     * says (StructMember::ownership): it may override the
-                     * pointer type's
-                     */
-                    Ownership edge = sm.ownership();
-
-                    if ((edge == Ownership::borrowed) || this->printable_value(value)) {
-                        this->write_pointee(name, declared, value, edge);
-                    } else {
-                        this->write_error(name, declared,
-                                          tostr("type not reflected: ", mtd->canonical_name()));
-                    }
-                } else if (this->printable_value(value)) {
-                    this->write_value(name, declared, value, true /*identity*/);
-                } else {
-                    this->write_error(name, declared,
-                                      tostr("type not reflected: ", mtd->canonical_name()));
-                }
-            }
+            /* each guard held while its members print -- so an owning or
+             * shared member's own guards nest inside, in ownership order
+             * (.xo-backlog/xo-printjson/issues/09)
+             */
+            reflect::visit_members_guarded(td, obj.address(), state_->guard_mode(),
+                                           [this, obj, name_suffix](std::uint32_t i, bool readable) {
+                                               this->write_reflected(obj, i, name_suffix, readable);
+                                           });
 
             return *this;
         }
 
         void
-        JsonMembers::write_head(std::string_view name, DeclaredType const & declared)
+        JsonMembers::write_reflected(TaggedPtr obj, std::uint32_t i,
+                                     std::string_view name_suffix, bool readable)
         {
-            if (!first_)
-                *p_os_ << ", ";
-            first_ = false;
+            TypeDescr td = obj.td();
+            reflect::StructMember const & sm = td->struct_member(i);
+            TypeDescr mtd = sm.get_member_td();
+            DeclaredType declared{mtd->canonical_name(), std::string(mtd->short_name()),
+                                  mtd->metatype()};
+            std::string name = tostr(sm.member_name(), name_suffix);
 
-            *p_os_ << "{" << quot("_name_") << ": " << quot(name)
-                   << ", " << type_keys(declared.canonical_, declared.short_)
-                   << ", " << quot("_metatype_") << ": " << quot(metatype2str(declared.metatype_));
-        }
+            if (!readable) {
+                /* its guard was busy: not read at all */
+                this->write_locked(name, declared);
+                return;
+            }
+
+            TaggedPtr value = sm.get_member_tp(obj.address());
+
+            if (mtd->is_pointer() && !state_->has_printer(mtd)) {
+                /* the edge to its pointee as this struct's reflection
+                 * says (StructMember::ownership): it may override the
+                 * pointer type's
+                 */
+                Ownership edge = sm.ownership();
+
+                if ((edge == Ownership::borrowed) || this->printable_value(value)) {
+                    this->write_pointee(name, declared, value, edge);
+                } else {
+                    this->write_error(name, declared,
+                                      tostr("type not reflected: ", mtd->canonical_name()));
+                }
+            } else if (this->printable_value(value)) {
+                this->write_value(name, declared, value, true /*identity*/);
+            } else {
+                this->write_error(name, declared,
+                                  tostr("type not reflected: ", mtd->canonical_name()));
+            }
+        } /*write_reflected*/
 
         void
         JsonMembers::write_value(std::string_view name, DeclaredType const & declared,
@@ -167,6 +175,18 @@ namespace xo {
             else
                 state_->print_value(value);
             *p_os_ << "}";
+        }
+
+        void
+        JsonMembers::write_head(std::string_view name, DeclaredType const & declared)
+        {
+            if (!first_)
+                *p_os_ << ", ";
+            first_ = false;
+
+            *p_os_ << "{" << quot("_name_") << ": " << quot(name)
+                   << ", " << type_keys(declared.canonical_, declared.short_)
+                   << ", " << quot("_metatype_") << ": " << quot(metatype2str(declared.metatype_));
         }
 
         void
@@ -226,6 +246,14 @@ namespace xo {
         JsonMembers::write_ref_value(void const * p)
         {
             state_->print_ref(p);
+        }
+
+        void
+        JsonMembers::write_locked(std::string_view name, DeclaredType const & declared)
+        {
+            this->write_head(name, declared);
+
+            *p_os_ << ", " << quot("_locked_") << ": true}";
         }
 
         void

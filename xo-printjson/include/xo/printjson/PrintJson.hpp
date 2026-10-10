@@ -28,11 +28,14 @@ namespace xo {
          *    {"_ref_": n} everywhere else.  First encounter wins, unless a
          *    printer places it explicitly (JsonMembers::member_ref).
          *    See JsonPrintState
-         *  - a print nests at most max_depth() deep.
-         *    Past that it prints a diagnosis with backtrace, and aborts.
-         *  - a json printer recurses only through the JsonPrintState it is
-         *    given; calling an entry point from a printer is a bug, and
-         *    aborts where XO_PRINTJSON_REENTRY_CHECK is defined
+         *  - Nest at most max_depth() levels deep.
+         *    Abort with backtrace if depth would have been exceeded
+         *  - Take locks for memebrs that require synchronization.
+         *    (@see StructMemberDecl::guarded_by, @ref guard_mode).
+         *    Therefore caller must not hold them!
+         *  - Individual json printers receive a JsonPrinState
+         *    argument, and may use JsonPrintState to traverse descendants.
+         *    They may noy use PrintJson members directly.
          **/
         class PrintJson : public reflect::SelfTagging {
         public:
@@ -65,6 +68,14 @@ namespace xo {
              **/
             std::uint32_t max_depth() const { return max_depth_; }
             void assign_max_depth(std::uint32_t z) { max_depth_ = z; }
+
+            /** Controls how to handle struct members that require synchronization.
+             *  Default waits for lock; try_lock takes lock if available,
+             *  otherwise prunes traversal at that point.
+             *  @see JsonMembers::reflected_members
+             **/
+            reflect::GuardMode guard_mode() const { return guard_mode_; }
+            void assign_guard_mode(reflect::GuardMode x) { guard_mode_ = x; }
 
             template<typename T>
             void print(T const & x_arg, std::ostream * p_os) const {
@@ -171,6 +182,8 @@ namespace xo {
             TypeDrivenMap printer_map_;
             /* see max_depth() */
             std::uint32_t max_depth_ = c_default_max_depth;
+            /* see guard_mode() */
+            reflect::GuardMode guard_mode_ = reflect::GuardMode::blocking;
         }; /*PrintJson*/
 
     } /*namespace json*/

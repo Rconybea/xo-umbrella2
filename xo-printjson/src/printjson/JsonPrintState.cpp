@@ -44,7 +44,8 @@ namespace xo {
         using xo::pp::xtag;
 
         JsonPrintState::JsonPrintState(PrintJson const * pjson, std::ostream * p_os)
-            : pjson_{pjson}, p_os_{p_os}, max_depth_{pjson->max_depth()}
+            : pjson_{pjson}, p_os_{p_os}, max_depth_{pjson->max_depth()},
+              guard_mode_{pjson->guard_mode()}
         {}
 
         void

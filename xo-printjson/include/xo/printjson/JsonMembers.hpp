@@ -137,15 +137,22 @@ namespace xo {
                 return *this;
             }
 
-            /** one entry per member reflected for @p obj's type
-             *  (StructReflector), in the order xo-reflect holds them -- each
-             *  as member() would write it: the declared type and metatype
-             *  from reflection, the value with identity.  O(1) per member.
-             *  Nothing, if @p obj's type is not a reflected struct.
+            /** write one entry per reflected member of a struct
+             * described by @p obj.
+             * No-op if @p obj does not refer to a reflected struct.
              *
-             *  Each entry's _name_ is its reflected name followed by
-             *  @p name_suffix: e.g. "_" restores the C++ name of a member
-             *  reflected by REFLECT_MEMBER (port_ reflects as "port")
+             * When reporting a member name, suffix with @p name_suffix.
+             *
+             * reflected_member() safely traverses members that require
+             * locking, provided those relationships have been reflected.
+             * It will acquire a lock L once for each set of members that L guards.
+             *
+             * If mode is @c GuardMode::try_lock, and reflected_members()
+             * encounters a lock that is already held, it will report
+             * @code
+             *   {"_name_": .., .., "_locked_": true}
+             * @endcode
+             * instead of attempting to traverse the locked member.
              **/
             JsonMembers & reflected_members(reflect::TaggedPtr obj,
                                             std::string_view name_suffix = {});
@@ -219,6 +226,12 @@ namespace xo {
              **/
             bool printable_value(reflect::TaggedPtr v) const;
 
+            /** write @p value of a member @p name declared with type @p declared.
+             *  @p identity is true for a value that exists outside
+             *  a PrintJson excursion; false for a temporary
+             *  (e.g. result of loading a @c std::atomic during traverse).
+             *  Will try to traverse a non-leaf @p value.
+             **/
             void write_value(std::string_view name, DeclaredType const & declared,
                              reflect::TaggedPtr value, bool identity);
             /** as write_value, for a pointer @p ptr whose pointee is reached
@@ -228,16 +241,25 @@ namespace xo {
                                reflect::TaggedPtr ptr, reflect::Ownership edge);
             void write_error(std::string_view name, DeclaredType const & declared,
                              std::string const & why);
+            /** member @p name is inaccessible because guard is busy; report as locked **/
+            void write_locked(std::string_view name, DeclaredType const & declared);
+            /** member @p i of reflected struct @p obj, read now **/
+            void write_reflected(reflect::TaggedPtr obj, std::uint32_t i,
+                                 std::string_view name_suffix, bool readable);
             void write_ref(std::string_view name, DeclaredType const & declared,
                            void const * p);
             void write_refs(std::string_view name, DeclaredType const & declared,
                             std::vector<void const *> const & ps);
             void write_ref_map(std::string_view name, DeclaredType const & declared,
                                std::vector<std::pair<std::string, void const *>> const & kvs);
-            /** {"_ref_": n}, or null **/
+            /** write
+             *  @code {"_ref_": n}
+             *  @endcode
+             *  or null
+             **/
             void write_ref_value(void const * p);
-            /** the separator and the entry's _name_, _canonical_type_,
-             *  _short_type_, _metatype_
+            /** write separator and the entry's @c _name_, @c _canonical_type_,
+             *  @c _short_type_, @c _metatype_ attributes
              **/
             void write_head(std::string_view name, DeclaredType const & declared);
 
