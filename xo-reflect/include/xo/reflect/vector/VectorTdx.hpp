@@ -68,6 +68,23 @@ namespace xo {
             }
         }; /*StlVectorTdx*/
 
+        // ----- std::deque<Element> -----
+
+        /** a std::deque: elements by index, like a vector, but stored in
+         *  chunks -- not contiguous.  Coordinates with
+         *  EstablishTdx<std::deque<T, A>>::make(), see [reflect/Reflect.hpp];
+         *  .xo-backlog/xo-reflect/issues/04
+         **/
+        template<typename DequeT>
+        class StdDequeTdx : public StlVectorTdx<DequeT> {
+        public:
+            static std::unique_ptr<StdDequeTdx> make() {
+                return std::unique_ptr<StdDequeTdx>(new StdDequeTdx());
+            } /*make*/
+
+            virtual bool has_contiguous_storage() const override { return false; }
+        }; /*StdDequeTdx*/
+
         // ----- std::array<Element, N> -----
 
         /* coordinates with EstablishTdx<std::array<Element, N>>::make(),

@@ -656,12 +656,12 @@ namespace xo {
                 for (Json::Value const & m : mem)
                     names.push_back(m["_name_"].asString());
 
-                /* reflected members first -- router_, then output_buf_ and
-                 * last_msg_seq_ under the session's mutex (xo-websock#15) --
-                 * then the rest
+                /* reflected members first -- router_, then output_buf_,
+                 * last_msg_seq_ and outbound_q_ under the session's mutex
+                 * (xo-websock#15) -- then sender_
                  */
                 REQUIRE(names == std::vector<std::string>{"router_", "output_buf_", "last_msg_seq_",
-                                                          "sender_", "outbound_q_"});
+                                                          "outbound_q_", "sender_"});
                 /* output_buf_ placed here (owning): its OutputBuffer, or null
                  * between writes -- not a ref
                  */
@@ -672,7 +672,10 @@ namespace xo {
                 REQUIRE(entry_of(mem, "sender_")["_metatype_"].asString() == "pointer");
                 REQUIRE(entry_of(mem, "sender_")["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
                 REQUIRE(entry_of(mem, "router_")["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
-                REQUIRE(entry_of(mem, "outbound_q_")["_value_"].asString() == "0 queued");
+                /* the queued messages themselves (xo-reflect#04): none, settled */
+                REQUIRE(entry_of(mem, "outbound_q_")["_metatype_"].asString() == "vector");
+                REQUIRE(entry_of(mem, "outbound_q_")["_value_"].isArray());
+                REQUIRE(entry_of(mem, "outbound_q_")["_value_"].size() == 0);
 
                 /* the router, nested: its own members.  sender_ the same
                  * sender (by most-derived address); subscription_v_ refs to

@@ -18,6 +18,7 @@
 #include <array>
 #include <atomic>
 #include <cstring>      // for std::memcpy
+#include <deque>
 #include <memory>       // for std::unique_ptr<>
 #include <mutex>
 #include <shared_mutex>
@@ -80,6 +81,19 @@ namespace xo {
         class EstablishTdx<std::vector<Element>> {
         public:
             /* definition provide after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- std::deque<T, A> -----
+
+        /** a std::deque reflects as mt_vector, like std::vector: its
+         *  elements by index (StdDequeTdx).  See
+         *  .xo-backlog/xo-reflect/issues/04
+         **/
+        template<typename T, typename A>
+        class EstablishTdx<std::deque<T, A>> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
         };
 
@@ -457,6 +471,20 @@ namespace xo {
             Reflect::require<Element>();
 
             return StdVectorTdx<Element>::make();
+        } /*make*/
+
+        // ----- std::deque<T, A> -----
+
+        /* declared above before
+         *   class Reflect { .. }
+         */
+        template<typename T, typename A>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<std::deque<T, A>>::make() {
+            /* need to ensure T is properly reflected */
+            Reflect::require<T>();
+
+            return StdDequeTdx<std::deque<T, A>>::make();
         } /*make*/
 
         // ----- T * (raw pointer) -----

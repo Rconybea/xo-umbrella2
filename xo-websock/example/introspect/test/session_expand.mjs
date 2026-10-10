@@ -36,8 +36,10 @@ console.log(" =  rows:", JSON.stringify(rows));
 // namespace dropped; last_msg_seq_ beside it, both under the session mutex
 check(rows.length === 5 && rows[1] === "output_buf_: OutputBuffer", "5 rows; anonymous namespace dropped: " + rows[1]);
 check(/^last_msg_seq_: [0-9]+$/.test(rows[2]), "last_msg_seq_ a number: " + rows[2]);
-check(rows[3] === "sender_: ▾ (→)", "sender_ a ref: " + rows[3]);
-check(rows[4] === "outbound_q_: 0 queued", "outbound_q_ mentioned: " + rows[4]);
+// outbound_q_: the queued messages themselves, under the same mutex
+// (xo-reflect#04) -- none, settled; then sender_
+check(rows[3] === "outbound_q_: []", "outbound_q_ its messages: " + rows[3]);
+check(rows[4] === "sender_: ▾ (→)", "sender_ a ref: " + rows[4]);
 check(await ev(`${VIS}.length`) === 2, "two member edges: sender_, and router_ -- its own (nested) box");
 const geo = await ev(`(() => { const p = ${VIS}.find(p => p.__data__.row_keys.includes("session:1/sender_")).getAttribute("d"); const n = p.match(/-?[0-9.]+/g).map(Number);
    const ex = n[n.length-2], ey = n[n.length-1];

@@ -1132,26 +1132,14 @@ namespace xo {
 
                     /* chosen C++ members, for the page's "expand"
                      * (.xo-backlog/xo-websock/issues/13): the reflected ones
-                     * (router_; output_buf_, last_msg_seq_ under the
-                     * session's mutex, which reflected_members takes), then
-                     * the rest.  sender_ is printed in full above, so a ref
-                     * here.  outbound_q_: xo-reflect has no std::deque -- its
-                     * size, copied under the same mutex, under its declared
-                     * type.  This lock is released before reflected_members
-                     * takes it: one after the other, never nested
+                     * (router_; output_buf_, last_msg_seq_, outbound_q_ under
+                     * the session's mutex, which reflected_members takes),
+                     * then sender_ -- printed in full above, so a ref here.
+                     * This printer takes no lock (.xo-backlog/xo-websock/issues/15)
                      */
-                    std::size_t n_queued = 0;
-                    {
-                        std::lock_guard<std::mutex> lock(const_cast<std::mutex &>(recd->mutex_));
-
-                        n_queued = recd->outbound_q_.size();
-                    }
-
                     obj.members()
                         .reflected_members(tp, "_")
                         .member_ref<rp<WsSessionSenderImpl>>("sender_", recd->sender_.get())
-                        .member_as<std::deque<std::string>>("outbound_q_",
-                                                            std::to_string(n_queued) + " queued")
                         .end();
 
                     obj.close();
@@ -2314,18 +2302,11 @@ namespace xo {
             StructReflector<WebsocketSessionRecd> sr;
 
             if (sr.is_incomplete()) {
-                /* output_buf_, last_msg_seq_: read under mutex_, which
-                 * guards them; output_buf_ is the session's (owning, for
-                 * printing: libws holds the same pointer, but nothing else
-                 * here prints it) -- .xo-backlog/xo-websock/issues/15.
-                 * Not outbound_q_: also guarded, but a deque, not
-                 * reflectable yet (.xo-backlog/xo-reflect/issues/04) -- the
-                 * printer summarises it.  Not sender_: printed in full above
-                 * ("sender") -- a ref
                  */
                 REFLECT_MEMBER(sr, router);
                 REFLECT_MEMBER(sr, output_buf).owning().guarded_by(&WebsocketSessionRecd::mutex_);
                 REFLECT_MEMBER(sr, last_msg_seq).guarded_by(&WebsocketSessionRecd::mutex_);
+                REFLECT_MEMBER(sr, outbound_q).guarded_by(&WebsocketSessionRecd::mutex_);
             }
         } /*reflect_self*/
 

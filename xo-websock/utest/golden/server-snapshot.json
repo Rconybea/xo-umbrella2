@@ -414,6 +414,13 @@
           "_value_" : 0
         },
         {
+          "_canonical_type_" : "std::deque<std::__cxx11::basic_string<char> >",
+          "_metatype_" : "vector",
+          "_name_" : "outbound_q_",
+          "_short_type_" : "deque<string>",
+          "_value_" : []
+        },
+        {
           "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",
           "_metatype_" : "pointer",
           "_name_" : "sender_",
@@ -422,13 +429,6 @@
           {
             "_ref_" : 6
           }
-        },
-        {
-          "_canonical_type_" : "std::deque<std::__cxx11::basic_string<char> >",
-          "_metatype_" : "atomic",
-          "_name_" : "outbound_q_",
-          "_short_type_" : "deque<string>",
-          "_value_" : "0 queued"
         }
       ],
       "_name_" : "WsSession",
@@ -565,6 +565,13 @@
           "_value_" : 1
         },
         {
+          "_canonical_type_" : "std::deque<std::__cxx11::basic_string<char> >",
+          "_metatype_" : "vector",
+          "_name_" : "outbound_q_",
+          "_short_type_" : "deque<string>",
+          "_value_" : []
+        },
+        {
           "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSessionSender<xo::web::WebserverImpl> >",
           "_metatype_" : "pointer",
           "_name_" : "sender_",
@@ -573,13 +580,6 @@
           {
             "_ref_" : 13
           }
-        },
-        {
-          "_canonical_type_" : "std::deque<std::__cxx11::basic_string<char> >",
-          "_metatype_" : "atomic",
-          "_name_" : "outbound_q_",
-          "_short_type_" : "deque<string>",
-          "_value_" : "0 queued"
         }
       ],
       "_name_" : "WsSession",

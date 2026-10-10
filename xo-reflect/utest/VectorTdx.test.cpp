@@ -6,6 +6,8 @@
 #include "xo/reflect/Reflect.hpp"
 #include <xo/arena/DArenaVector.hpp>
 #include <catch2/catch.hpp>
+#include <deque>
+#include <string>
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -280,6 +282,46 @@ namespace xo {
             REQUIRE(tp0.recover_native<DVecProbe>() == &(v[0]));
             REQUIRE(tp0.recover_native<DVecProbe>()->y_ == 4.0);
         } /*TEST_CASE(darena-vector-establishes-its-element-type)*/
+
+        TEST_CASE("std-deque-reflects-as-a-vector", "[reflect][deque]") {
+            /* elements by index, like a vector -- but not contiguous
+             * (.xo-backlog/xo-reflect/issues/04)
+             */
+            std::deque<std::string> q;
+
+            /* grow at both ends: elements in more than one chunk, maybe */
+            for (int i = 0; i < 100; ++i)
+                q.push_back("b" + std::to_string(i));
+            q.push_front("front");
+
+            TaggedPtr tp = Reflect::make_tp(&q);
+            TypeDescr td = tp.td();
+
+            REQUIRE(td->complete_flag());
+            REQUIRE(td->metatype() == Metatype::mt_vector);
+            REQUIRE(td->fixed_child_td(0) == Reflect::require<std::string>());
+            REQUIRE(tp.n_child() == 101);
+
+            /* each element in place */
+            REQUIRE(tp.get_child(0).address() == &q[0]);
+            REQUIRE(*tp.get_child(0).recover_native<std::string>() == "front");
+            REQUIRE(tp.get_child(100).address() == &q[100]);
+            REQUIRE(*tp.get_child(100).recover_native<std::string>() == "b99");
+
+            /* chunked storage */
+            auto const * vtdx = dynamic_cast<xo::reflect::VectorTdx const *>(td->tdextra());
+            REQUIRE(vtdx);
+            REQUIRE(!vtdx->has_contiguous_storage());
+        } /*TEST_CASE(std-deque-reflects-as-a-vector)*/
+
+        TEST_CASE("std-deque-reflect-empty", "[reflect][deque]") {
+            std::deque<int> q;
+
+            TaggedPtr tp = Reflect::make_tp(&q);
+
+            REQUIRE(tp.td()->metatype() == Metatype::mt_vector);
+            REQUIRE(tp.n_child() == 0);
+        } /*TEST_CASE(std-deque-reflect-empty)*/
 
     } /*namespace ut*/
 } /*namespace xo*/
