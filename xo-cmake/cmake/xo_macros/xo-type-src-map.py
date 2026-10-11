@@ -215,7 +215,10 @@ def parse_dump(text, source_dir):
         name = None
 
         if kind == 'NamespaceDecl':
-            tail = line.rstrip()
+            # clang appends flags after the name: "nested" for the inner parts
+            # of `namespace a::b`, "inline" for an inline namespace -- drop
+            # them, else they read as the name (.xo-backlog/xo-cmake/issues/08)
+            tail = re.sub(r'(?: (?:inline|nested))+$', '', line.rstrip())
             m2 = re.search(r' (\w+)$', tail)
             # an anonymous namespace ends at its location, with no name
             name = ANON if (tail.endswith('>') or not m2) else m2.group(1)

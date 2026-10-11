@@ -244,32 +244,38 @@ class TestParseDump(unittest.TestCase):
     def test_file_advances_on_a_non_decl_line(self):
         # clang prints a location's file only when it changed; the change may
         # be on a line that is no decl node (TemplateArgument: no address).
-        # Regression: xo::nested::begin was attributed to the previous file
+        # Regression: ppsink's xo::pp::begin was attributed to the previous
+        # file.  (Until xo-cmake#08 this fixture read "xo::nested": it was
+        # written from the generator's own mis-keyed output, see
+        # test_nested_namespace_definition)
         m = _load_module()
         dump = "\n".join([
-            "Dumping xo::nested:",
-            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, line:40:1> line:1:11 nested",
-            "|-CXXRecordDecl 0x2 <line:5:5, line:9:5> line:5:12 struct first definition",
-            "| `-TemplateArgument </r/sub/b.hpp:60:38> type 'int'",
-            "`-CXXRecordDecl 0x3 <line:83:5, line:87:5> line:83:12 struct begin definition",
+            "Dumping xo:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, line:40:1> line:1:11 xo",
+            "`-NamespaceDecl 0x5 <col:13, line:40:1> line:1:15 pp nested",
+            "  |-CXXRecordDecl 0x2 <line:5:5, line:9:5> line:5:12 struct first definition",
+            "  | `-TemplateArgument </r/sub/b.hpp:60:38> type 'int'",
+            "  `-CXXRecordDecl 0x3 <line:83:5, line:87:5> line:83:12 struct begin definition",
         ])
         found = m.parse_dump(dump, "/r/sub")
-        self.assertEqual(found["xo::nested::first"], ("/r/sub/a.hpp", 5))
-        self.assertEqual(found["xo::nested::begin"], ("/r/sub/b.hpp", 83))
+        self.assertEqual(found["xo::pp::first"], ("/r/sub/a.hpp", 5))
+        self.assertEqual(found["xo::pp::begin"], ("/r/sub/b.hpp", 83))
 
     def test_a_path_inside_a_type_string_is_not_a_location(self):
         # "(lambda at /file:line:col)" inside a quoted type is not a printed
         # location: clang's last-file does not move.  Regression: ppsink's
-        # xo::nested::begin was attributed to xo-process's test .cpp
+        # xo::pp::begin was attributed to xo-process's test .cpp.  (Fixture
+        # read "xo::nested" until xo-cmake#08, as above)
         m = _load_module()
         dump = "\n".join([
-            "Dumping xo::nested:",
-            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, line:40:1> line:1:11 nested",
-            "|-DeclRefExpr 0x4 <col:20> 'Foo<(lambda at /r/other/t.cpp:9:5)>' lvalue",
-            "`-CXXRecordDecl 0x3 <line:83:5, line:87:5> line:83:12 struct begin definition",
+            "Dumping xo:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, line:40:1> line:1:11 xo",
+            "`-NamespaceDecl 0x5 <col:13, line:40:1> line:1:15 pp nested",
+            "  |-DeclRefExpr 0x4 <col:20> 'Foo<(lambda at /r/other/t.cpp:9:5)>' lvalue",
+            "  `-CXXRecordDecl 0x3 <line:83:5, line:87:5> line:83:12 struct begin definition",
         ])
         found = m.parse_dump(dump, "/r/sub")
-        self.assertEqual(found["xo::nested::begin"], ("/r/sub/a.hpp", 83))
+        self.assertEqual(found["xo::pp::begin"], ("/r/sub/a.hpp", 83))
 
     def test_line_carries_over_a_column_only_location(self):
         # clang prints only "col:N" for a location on the line it printed
@@ -293,6 +299,59 @@ class TestParseDump(unittest.TestCase):
         ])
         found = m.parse_dump(dump, "/r/sub")
         self.assertEqual(found["xo::sub::Foo"], ("/r/sub/a.hpp", 6))
+
+    # clang appends flags after a namespace's name: "nested" for the inner
+    # parts of `namespace a::b`, "inline" for an inline namespace.  Dump
+    # lines below captured from clang 18/19 (.xo-backlog/xo-cmake/issues/08)
+
+    def test_nested_namespace_definition(self):
+        # namespace xo::fn { struct A {}; }
+        m = _load_module()
+        dump = "\n".join([
+            "Dumping xo:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, col:33> col:11 xo",
+            "`-NamespaceDecl 0x2 <col:13, col:33> col:15 fn nested",
+            "  `-CXXRecordDecl 0x3 <col:20, col:30> col:27 struct A definition",
+        ])
+        found = m.parse_dump(dump, "/r/sub")
+        self.assertEqual(found, {"xo::fn::A": ("/r/sub/a.hpp", 1)})
+
+    def test_inline_namespace(self):
+        # namespace xo { inline namespace v1 { struct C {}; } }
+        m = _load_module()
+        dump = "\n".join([
+            "Dumping xo:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, col:52> col:11 xo",
+            "`-NamespaceDecl 0x2 <col:16, col:50> col:33 v1 inline",
+            "  `-CXXRecordDecl 0x3 <col:38, col:48> col:45 struct C definition",
+        ])
+        found = m.parse_dump(dump, "/r/sub")
+        self.assertEqual(found, {"xo::v1::C": ("/r/sub/a.hpp", 1)})
+
+    def test_inline_nested_namespace_definition(self):
+        # namespace xo::a::inline b { struct D {}; }
+        m = _load_module()
+        dump = "\n".join([
+            "Dumping xo:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, col:42> col:11 xo",
+            "`-NamespaceDecl 0x2 <col:13, col:42> col:15 a nested",
+            "  `-NamespaceDecl 0x3 <col:16, col:42> col:25 b inline nested",
+            "    `-CXXRecordDecl 0x4 <col:29, col:39> col:36 struct D definition",
+        ])
+        found = m.parse_dump(dump, "/r/sub")
+        self.assertEqual(found, {"xo::a::b::D": ("/r/sub/a.hpp", 1)})
+
+    def test_anonymous_inline_namespace_skipped(self):
+        # namespace xo { inline namespace { struct E {}; } }
+        m = _load_module()
+        dump = "\n".join([
+            "Dumping xo:",
+            "NamespaceDecl 0x1 </r/sub/a.hpp:1:1, col:50> col:11 xo",
+            "`-NamespaceDecl 0x2 <col:16, col:48> col:33 inline",
+            "  `-CXXRecordDecl 0x3 <col:35, col:45> col:42 struct E definition",
+        ])
+        found = m.parse_dump(dump, "/r/sub")
+        self.assertEqual(found, {})
 
     def test_gcc_internal_includes_dropped(self):
         m = _load_module()
