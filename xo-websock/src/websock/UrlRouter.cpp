@@ -250,48 +250,41 @@ namespace xo {
         void
         UrlRouter::reflect_self(reflect::TypeDescrTable * /*table*/)
         {
-            /* no members yet: a member is added as a printer opts in to
-             * show it (.xo-backlog/xo-websock/issues/13)
-             */
             StructReflector<UrlRouter> sr;
+
+            if (sr.is_incomplete()) {
+                /* the maps, under the router's mutex: the generic printer
+                 * takes it (.xo-backlog/xo-websock/issues/15).  rp values
+                 * are shared edges: an endpoint placed already (the
+                 * server's endpoint list) prints as a ref
+                 */
+                REFLECT_MEMBER(sr, http_map).guarded_by(&UrlRouter::mutex_);
+                REFLECT_MEMBER(sr, stream_map).guarded_by(&UrlRouter::mutex_);
+            }
         } /*reflect_self*/
         /** @brief the url router: its chosen C++ members
          *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
          *  namespace: UrlRouter's header befriends it by name.
          *
          *  Printed with an id, so a ref to it (a session router's
-         *  url_router_) can be joined to it.  Its endpoints are printed in
-         *  full in the server's endpoint list: refs here, keyed by stem,
-         *  sorted -- an unordered_map has no stable order
+         *  url_router_) can be joined to it.  Its maps are reflected,
+         *  guarded by the router's mutex, which reflected_members takes --
+         *  so this printer takes no lock (.xo-backlog/xo-websock/issues/15).
+         *  Keys in sorted order (xo-reflect's StdMapTdx); endpoints printed
+         *  in full in the server's endpoint list are refs here
          **/
         class JsonPrinter_UrlRouter : public json::JsonPrinter {
         public:
             void print_json(reflect::TaggedPtr tp, json::JsonPrintState & state) const override {
-                using Entries = std::vector<std::pair<std::string, void const *>>;
-
                 UrlRouter const * r = this->check_recover_native<UrlRouter>(tp, state);
 
                 if (!r)
                     return;
 
-                Entries http_v;
-                Entries stream_v;
-                {
-                    std::lock_guard<std::mutex> lock(r->mutex_);
-
-                    for (auto const & ix : r->http_map_)
-                        http_v.emplace_back(ix.first, ix.second.get());
-                    for (auto const & ix : r->stream_map_)
-                        stream_v.emplace_back(ix.first, ix.second.get());
-                }
-                std::sort(http_v.begin(), http_v.end());
-                std::sort(stream_v.begin(), stream_v.end());
-
                 json::JsonObject obj = state.open_object("UrlRouter", tp.td());
 
                 obj.members()
-                    .member_ref_map<EndpointMap>("http_map_", http_v)
-                    .member_ref_map<EndpointMap>("stream_map_", stream_v)
+                    .reflected_members(tp, "_")
                     .end();
 
                 obj.close();

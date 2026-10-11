@@ -12,7 +12,9 @@
 
 #include "xo/websock/UrlRouter.hpp"
 #include "xo/websock/DynamicEndpoint.hpp"
+#include <xo/reflect/Reflect.hpp>
 #include <catch2/catch.hpp>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 
@@ -399,6 +401,30 @@ namespace xo {
             REQUIRE(r.status().code() == 418);
             REQUIRE(r.content_type() == ContentType::text);
             REQUIRE(r.body() == "teapot");
+        }
+
+        TEST_CASE("url-router-maps-are-reflected-under-its-mutex", "[websock][UrlRouter][reflect]")
+        {
+            /* the generic printer takes a struct's declared guards: the
+             * router's maps print under its mutex, and its printer takes
+             * no lock of its own (.xo-backlog/xo-websock/issues/15)
+             */
+            using xo::reflect::Reflect;
+            using xo::reflect::TaggedPtr;
+
+            UrlRouter::reflect_self(nullptr);
+
+            auto td = Reflect::require<UrlRouter>();
+            UrlRouter router;
+
+            REQUIRE(td->n_guard() == 1);   /* both maps: one mutex */
+
+            TaggedPtr g = td->guard_tp(0, &router);
+            char const * lo = reinterpret_cast<char const *>(&router);
+            char const * at = static_cast<char const *>(g.address());
+
+            REQUIRE(g.td() == Reflect::require<std::mutex>());
+            REQUIRE((lo <= at && at < lo + sizeof(UrlRouter)));   /* the router's own */
         }
     } /*namespace ut*/
 } /*namespace xo*/
