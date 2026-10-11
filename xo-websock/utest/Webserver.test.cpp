@@ -72,6 +72,22 @@ namespace xo {
                 return none;
             }
 
+            /** the server's endpoints, as @p srv (a server's json) prints
+             *  them: in full in url_router_'s maps -- http_map_, then
+             *  stream_map_, each in stem order -- at first encounter.  No
+             *  "endpoints" list (xo-websock#15)
+             **/
+            Json::Value endpoints_of(Json::Value const & srv) {
+                Json::Value const & ur = member_value(srv, "url_router_");
+                Json::Value v(Json::arrayValue);
+                for (char const * map : {"http_map_", "stream_map_"}) {
+                    Json::Value const & m = member_value(ur, map);
+                    for (std::string const & stem : m.getMemberNames())   /* jsoncpp: sorted */
+                        v.append(m[stem]);
+                }
+                return v;
+            }
+
             Json::Value parse_json(std::string const & text) {
                 Json::Value root;
                 JSONCPP_STRING err;
@@ -229,7 +245,7 @@ namespace xo {
             std::stringstream ss;
             PrintJsonSingleton::instance()->print(holder, &ss);
             Json::Value root = parse_json(ss.str());
-            Json::Value const & eps = member_value(root, "server")["endpoints"];
+            Json::Value const eps = endpoints_of(member_value(root, "server"));
             REQUIRE(eps.size() == 2);
 
             /* http /status: none */
@@ -340,25 +356,31 @@ namespace xo {
                 REQUIRE(entry_of(mem, "url_router_")["_value_"]["_canonical_type_"].asString() == "xo::web::UrlRouter");
                 REQUIRE(entry_of(mem, "url_router_")["_value_"]["_short_type_"].asString() == "UrlRouter");
 
-                /* the url router: an id, and its maps -- stem -> a ref to
-                 * the very endpoint printed in the server's list
+                /* the url router: an id, and its maps -- stem -> that
+                 * endpoint in full, placed here (no "endpoints" list,
+                 * xo-websock#15)
                  */
                 Json::Value const & ur = entry_of(mem, "url_router_")["_value_"];
                 REQUIRE(ur["_id_"].isInt());
                 REQUIRE(ur["_members_"][0]["_name_"].asString() == "http_map_");
                 REQUIRE(ur["_members_"][1]["_name_"].asString() == "stream_map_");
 
-                std::size_t n_refs = 0;
-                for (Json::Value const & ep : srv["endpoints"]) {
-                    Json::Value const & map
-                        = ur["_members_"][ep["kind"].asString() == "http" ? 0 : 1]["_value_"];
+                REQUIRE(!srv.isMember("endpoints"));
+                for (Json::ArrayIndex i = 0; i < 2; ++i) {
+                    Json::Value const & map = ur["_members_"][i]["_value_"];
 
-                    INFO("stem " << ep["stem"].asString());
-                    REQUIRE(map[ep["stem"].asString()]["_ref_"].asInt() == ep["_id_"].asInt());
-                    ++n_refs;
+                    for (std::string const & stem : map.getMemberNames()) {
+                        Json::Value const & ep = map[stem];
+
+                        INFO("stem " << stem);
+                        REQUIRE(ep["_name_"].asString() == "DynamicEndpoint");
+                        REQUIRE(ep["_id_"].isInt());
+                        REQUIRE(ep["stem"].asString() == stem);
+                        REQUIRE(ep["kind"].asString() == (i == 0 ? "http" : "stream"));
+                    }
                 }
-                REQUIRE(n_refs == ur["_members_"][0]["_value_"].size()
-                                  + ur["_members_"][1]["_value_"].size());
+                REQUIRE(endpoints_of(srv).size()
+                        == ur["_members_"][0]["_value_"].size() + ur["_members_"][1]["_value_"].size());
 
                 /* the session table: an id; no session yet -- ids from 1 */
                 Json::Value const & st = entry_of(mem, "session_table_")["_value_"];
@@ -394,7 +416,7 @@ namespace xo {
                 REQUIRE(errors.empty());
             }
 
-            Json::Value const & eps = srv["endpoints"];
+            Json::Value const eps = endpoints_of(srv);
             REQUIRE(eps.size() == 2);
             REQUIRE(eps[0]["_name_"].asString() == "DynamicEndpoint");
             REQUIRE(eps[0]["_canonical_type_"].asString() == "xo::web::DynamicEndpoint");

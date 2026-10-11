@@ -1140,8 +1140,6 @@ namespace xo {
             class JsonPrinter_Webserver : public JsonPrinter {
             public:
                 void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    std::ostream * p_os = state.p_os();
-
                     WebserverImpl const * websrv = this->check_recover_native<WebserverImpl>(tp, state);
 
                     if (!websrv)
@@ -1153,28 +1151,12 @@ namespace xo {
                         .key("listen_port", websrv->listen_port())
                         .key("state", std::string(RunstateUtil::runstate_descr(websrv->state())));
 
-                    obj.key_open("endpoints") << "[";
-                    {
-                        bool first = true;
-
-                        /* under the router's lock; printing never calls back
-                         * into the router
-                         */
-                        websrv->visit_endpoints([&state, p_os, &first](DynamicEndpoint const & ep) {
-                                if (!first)
-                                    *p_os << ", ";
-                                first = false;
-
-                                state.print(TaggedPtr(Reflect::require<DynamicEndpoint>(),
-                                                      const_cast<DynamicEndpoint *>(&ep)));
-                            });
-                    }
-                    *p_os << "]";
-
-                    /* no "sessions" list: they print in full in
-                     * session_table_'s session_map_, an owning edge -- a
-                     * list here would place them first, a second owner
-                     * (.xo-backlog/xo-websock/issues/15)
+                    /* no "endpoints" or "sessions" list: endpoints print in
+                     * full in url_router_'s maps (shared edges, first
+                     * encounter), sessions in session_table_'s session_map_
+                     * (owning) -- each under its holder's declared guard, so
+                     * this printer takes no lock, directly or through a
+                     * visitor (.xo-backlog/xo-websock/issues/15)
                      */
 
                     /* chosen C++ members, for the page's "expand"

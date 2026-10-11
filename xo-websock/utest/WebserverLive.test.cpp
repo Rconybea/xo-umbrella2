@@ -85,6 +85,26 @@ namespace xo {
                 return v;
             }
 
+            /** the server's endpoints, as @p srv (a server's json) prints
+             *  them: in full in url_router_'s maps -- http_map_, then
+             *  stream_map_, each in stem order -- at first encounter.  No
+             *  "endpoints" list (xo-websock#15)
+             **/
+            Json::Value endpoints_of(Json::Value const & srv) {
+                Json::Value ur;
+                for (Json::Value const & m : srv["_members_"])
+                    if (m["_name_"].asString() == "url_router_")
+                        ur = m["_value_"];
+
+                Json::Value v(Json::arrayValue);
+                for (char const * map : {"http_map_", "stream_map_"})
+                    for (Json::Value const & m : ur["_members_"])
+                        if (m["_name_"].asString() == map)
+                            for (std::string const & stem : m["_value_"].getMemberNames())   /* jsoncpp: sorted */
+                                v.append(m["_value_"][stem]);
+                return v;
+            }
+
             Json::Value parse(std::string const & text) {
                 Json::Value root;
                 JSONCPP_STRING err;
@@ -793,7 +813,9 @@ namespace xo {
             /* the /fw endpoint is held by the router's map and by the one
              * subscription served: refcount 2
              */
-            Json::Value const & eps = root["endpoints"];
+            Json::Value const eps = endpoints_of(root);
+
+            REQUIRE(!root.isMember("endpoints"));   /* xo-websock#15 */
             REQUIRE(eps.size() == 1);
             REQUIRE(eps[0]["pattern"].asString() == "/fw");
             REQUIRE(eps[0]["refcount"].asUInt() == 2);

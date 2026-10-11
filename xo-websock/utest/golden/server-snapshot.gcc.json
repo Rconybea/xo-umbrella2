@@ -11,7 +11,7 @@
       "_value_" : 
       {
         "_canonical_type_" : "xo::web::WebserverConfig",
-        "_id_" : 5,
+        "_id_" : 2,
         "_members_" : 
         [
           {
@@ -62,7 +62,7 @@
       "_value_" : 
       {
         "_canonical_type_" : "xo::json::PrintJson",
-        "_id_" : 6,
+        "_id_" : 3,
         "_members_" : [],
         "_name_" : "PrintJson",
         "_short_type_" : "PrintJson"
@@ -76,7 +76,7 @@
       "_value_" : 
       {
         "_canonical_type_" : "xo::web::UrlRouter",
-        "_id_" : 7,
+        "_id_" : 4,
         "_members_" : 
         [
           {
@@ -88,7 +88,75 @@
             {
               "/status" : 
               {
-                "_ref_" : 2
+                "_canonical_type_" : "xo::web::DynamicEndpoint",
+                "_id_" : 5,
+                "_members_" : 
+                [
+                  {
+                    "_canonical_type_" : "xo::web::EndpointKind",
+                    "_metatype_" : "atomic",
+                    "_name_" : "kind_",
+                    "_short_type_" : "EndpointKind",
+                    "_value_" : "http"
+                  },
+                  {
+                    "_canonical_type_" : "std::__cxx11::basic_string<char>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "uri_pattern_",
+                    "_short_type_" : "string",
+                    "_value_" : "/status"
+                  },
+                  {
+                    "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
+                    "_metatype_" : "vector",
+                    "_name_" : "var_v_",
+                    "_short_type_" : "vector<string>",
+                    "_value_" : []
+                  },
+                  {
+                    "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
+                    "_metatype_" : "pointer",
+                    "_name_" : "receiver_",
+                    "_short_type_" : "rp<StreamReceiver>",
+                    "_value_" : null
+                  },
+                  {
+                    "_canonical_type_" : "std::__cxx11::basic_regex<char>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "uri_regex_",
+                    "_short_type_" : "basic_regex<char>",
+                    "_value_" : "0 captures"
+                  },
+                  {
+                    "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "http_handler_",
+                    "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
+                    "_value_" : "set"
+                  },
+                  {
+                    "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "subscribe_fn_",
+                    "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
+                    "_value_" : "empty"
+                  },
+                  {
+                    "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "unsubscribe_fn_",
+                    "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
+                    "_value_" : "empty"
+                  }
+                ],
+                "_name_" : "DynamicEndpoint",
+                "_short_type_" : "DynamicEndpoint",
+                "has_receive" : false,
+                "kind" : "http",
+                "pattern" : "/status",
+                "receiver" : null,
+                "refcount" : 1,
+                "stem" : "/status"
               }
             }
           },
@@ -101,7 +169,86 @@
             {
               "/fw" : 
               {
-                "_ref_" : 3
+                "_canonical_type_" : "xo::web::DynamicEndpoint",
+                "_id_" : 6,
+                "_members_" : 
+                [
+                  {
+                    "_canonical_type_" : "xo::web::EndpointKind",
+                    "_metatype_" : "atomic",
+                    "_name_" : "kind_",
+                    "_short_type_" : "EndpointKind",
+                    "_value_" : "stream"
+                  },
+                  {
+                    "_canonical_type_" : "std::__cxx11::basic_string<char>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "uri_pattern_",
+                    "_short_type_" : "string",
+                    "_value_" : "/fw"
+                  },
+                  {
+                    "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
+                    "_metatype_" : "vector",
+                    "_name_" : "var_v_",
+                    "_short_type_" : "vector<string>",
+                    "_value_" : []
+                  },
+                  {
+                    "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
+                    "_metatype_" : "pointer",
+                    "_name_" : "receiver_",
+                    "_short_type_" : "rp<StreamReceiver>",
+                    "_value_" : 
+                    {
+                      "_ref_" : 7
+                    }
+                  },
+                  {
+                    "_canonical_type_" : "std::__cxx11::basic_regex<char>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "uri_regex_",
+                    "_short_type_" : "basic_regex<char>",
+                    "_value_" : "0 captures"
+                  },
+                  {
+                    "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "http_handler_",
+                    "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
+                    "_value_" : "empty"
+                  },
+                  {
+                    "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "subscribe_fn_",
+                    "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
+                    "_value_" : "set"
+                  },
+                  {
+                    "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
+                    "_metatype_" : "atomic",
+                    "_name_" : "unsubscribe_fn_",
+                    "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
+                    "_value_" : "set"
+                  }
+                ],
+                "_name_" : "DynamicEndpoint",
+                "_short_type_" : "DynamicEndpoint",
+                "has_receive" : true,
+                "kind" : "stream",
+                "pattern" : "/fw",
+                "receiver" : 
+                {
+                  "_canonical_type_" : "xo::ut::{anonymous}::BoxReceiver",
+                  "_id_" : 7,
+                  "_members_" : [],
+                  "_name_" : "BoxReceiver",
+                  "_short_type_" : "BoxReceiver",
+                  "refcount" : 1
+                },
+                "refcount" : 2,
+                "stem" : "/fw"
               }
             }
           }
@@ -180,7 +327,7 @@
                           "_short_type_" : "const UrlRouter&",
                           "_value_" : 
                           {
-                            "_ref_" : 7
+                            "_ref_" : 4
                           }
                         },
                         {
@@ -200,7 +347,7 @@
                           "_short_type_" : "rp<PrintJson>",
                           "_value_" : 
                           {
-                            "_ref_" : 6
+                            "_ref_" : 3
                           }
                         }
                       ],
@@ -352,7 +499,7 @@
                                   "_short_type_" : "rp<DynamicEndpoint>",
                                   "_value_" : 
                                   {
-                                    "_ref_" : 3
+                                    "_ref_" : 6
                                   }
                                 },
                                 {
@@ -370,7 +517,7 @@
                               "_short_type_" : "Subscription",
                               "endpoint" : 
                               {
-                                "_ref_" : 3
+                                "_ref_" : 6
                               },
                               "sink" : 
                               {
@@ -416,7 +563,7 @@
                                     "_short_type_" : "rp<PrintJson>",
                                     "_value_" : 
                                     {
-                                      "_ref_" : 6
+                                      "_ref_" : 3
                                     }
                                   }
                                 ],
@@ -443,7 +590,7 @@
                           "_short_type_" : "const UrlRouter&",
                           "_value_" : 
                           {
-                            "_ref_" : 7
+                            "_ref_" : 4
                           }
                         },
                         {
@@ -463,7 +610,7 @@
                           "_short_type_" : "rp<PrintJson>",
                           "_value_" : 
                           {
-                            "_ref_" : 6
+                            "_ref_" : 3
                           }
                         }
                       ],
@@ -568,162 +715,6 @@
   ],
   "_name_" : "Webserver",
   "_short_type_" : "WebserverImpl",
-  "endpoints" : 
-  [
-    {
-      "_canonical_type_" : "xo::web::DynamicEndpoint",
-      "_id_" : 2,
-      "_members_" : 
-      [
-        {
-          "_canonical_type_" : "xo::web::EndpointKind",
-          "_metatype_" : "atomic",
-          "_name_" : "kind_",
-          "_short_type_" : "EndpointKind",
-          "_value_" : "http"
-        },
-        {
-          "_canonical_type_" : "std::__cxx11::basic_string<char>",
-          "_metatype_" : "atomic",
-          "_name_" : "uri_pattern_",
-          "_short_type_" : "string",
-          "_value_" : "/status"
-        },
-        {
-          "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
-          "_metatype_" : "vector",
-          "_name_" : "var_v_",
-          "_short_type_" : "vector<string>",
-          "_value_" : []
-        },
-        {
-          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
-          "_metatype_" : "pointer",
-          "_name_" : "receiver_",
-          "_short_type_" : "rp<StreamReceiver>",
-          "_value_" : null
-        },
-        {
-          "_canonical_type_" : "std::__cxx11::basic_regex<char>",
-          "_metatype_" : "atomic",
-          "_name_" : "uri_regex_",
-          "_short_type_" : "basic_regex<char>",
-          "_value_" : "0 captures"
-        },
-        {
-          "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
-          "_metatype_" : "atomic",
-          "_name_" : "http_handler_",
-          "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
-          "_value_" : "set"
-        },
-        {
-          "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
-          "_metatype_" : "atomic",
-          "_name_" : "subscribe_fn_",
-          "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
-          "_value_" : "empty"
-        },
-        {
-          "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
-          "_metatype_" : "atomic",
-          "_name_" : "unsubscribe_fn_",
-          "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
-          "_value_" : "empty"
-        }
-      ],
-      "_name_" : "DynamicEndpoint",
-      "_short_type_" : "DynamicEndpoint",
-      "has_receive" : false,
-      "kind" : "http",
-      "pattern" : "/status",
-      "receiver" : null,
-      "refcount" : 1,
-      "stem" : "/status"
-    },
-    {
-      "_canonical_type_" : "xo::web::DynamicEndpoint",
-      "_id_" : 3,
-      "_members_" : 
-      [
-        {
-          "_canonical_type_" : "xo::web::EndpointKind",
-          "_metatype_" : "atomic",
-          "_name_" : "kind_",
-          "_short_type_" : "EndpointKind",
-          "_value_" : "stream"
-        },
-        {
-          "_canonical_type_" : "std::__cxx11::basic_string<char>",
-          "_metatype_" : "atomic",
-          "_name_" : "uri_pattern_",
-          "_short_type_" : "string",
-          "_value_" : "/fw"
-        },
-        {
-          "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
-          "_metatype_" : "vector",
-          "_name_" : "var_v_",
-          "_short_type_" : "vector<string>",
-          "_value_" : []
-        },
-        {
-          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
-          "_metatype_" : "pointer",
-          "_name_" : "receiver_",
-          "_short_type_" : "rp<StreamReceiver>",
-          "_value_" : 
-          {
-            "_ref_" : 4
-          }
-        },
-        {
-          "_canonical_type_" : "std::__cxx11::basic_regex<char>",
-          "_metatype_" : "atomic",
-          "_name_" : "uri_regex_",
-          "_short_type_" : "basic_regex<char>",
-          "_value_" : "0 captures"
-        },
-        {
-          "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
-          "_metatype_" : "atomic",
-          "_name_" : "http_handler_",
-          "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
-          "_value_" : "empty"
-        },
-        {
-          "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
-          "_metatype_" : "atomic",
-          "_name_" : "subscribe_fn_",
-          "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
-          "_value_" : "set"
-        },
-        {
-          "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
-          "_metatype_" : "atomic",
-          "_name_" : "unsubscribe_fn_",
-          "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
-          "_value_" : "set"
-        }
-      ],
-      "_name_" : "DynamicEndpoint",
-      "_short_type_" : "DynamicEndpoint",
-      "has_receive" : true,
-      "kind" : "stream",
-      "pattern" : "/fw",
-      "receiver" : 
-      {
-        "_canonical_type_" : "xo::ut::{anonymous}::BoxReceiver",
-        "_id_" : 4,
-        "_members_" : [],
-        "_name_" : "BoxReceiver",
-        "_short_type_" : "BoxReceiver",
-        "refcount" : 1
-      },
-      "refcount" : 2,
-      "stem" : "/fw"
-    }
-  ],
   "listen_port" : "<redacted>",
   "refcount" : 1,
   "state" : "running"
