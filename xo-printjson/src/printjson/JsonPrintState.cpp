@@ -11,6 +11,7 @@
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
 #include <xo/reflect/pointer/PointerTdx.hpp>
+#include <xo/reflect/map/MapTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
@@ -23,11 +24,14 @@
 #include <cstddef>
 #include <memory>
 #include <new>
+#include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 
 namespace xo {
     using xo::reflect::EnumTdx;
+    using xo::reflect::MapTdx;
     using xo::reflect::StdAtomicTdx;
     using xo::reflect::WrapperTdx;
     using xo::reflect::Metatype;
@@ -326,6 +330,82 @@ namespace xo {
             this->print(target);
         } /*print_pointee_aux*/
 
+        std::string
+        JsonPrintState::map_key_string(TaggedPtr key)
+        {
+            /* print the key as a value, into a string: swap the stream */
+            std::stringstream ss;
+            {
+                RestoreScope<std::ostream *> restore(&this->p_os_);
+                this->p_os_ = &ss;
+
+                this->print_value(key);
+            }
+
+            std::string s = ss.str();
+
+            /* a json string already (a std::string, an enum's name): as is.
+             * Else (a number, say) quote it -- json object keys are strings
+             */
+            if (!s.empty() && s.front() == '"')
+                return s;
+
+            return tostr(quot(s));
+        } /*map_key_string*/
+
+        void
+        JsonPrintState::print_map(TaggedPtr tp)
+        {
+            /* e.g. if
+             *   std::map<std::string, int> m{{"a", 1}, {"b", 2}};
+             * then expect to print
+             *   {"a": 1, "b": 2}
+             * and for a std::unordered_map<std::uint64_t, ..>, keys as
+             * strings, sorted as numbers: {"1": .., "7": .., "42": ..}.
+             *
+             * Not an object with identity, like a vector: no "_id_".  Keys
+             * and values are held inline, so each prints with identity
+             * where it is an object (.xo-backlog/xo-reflect/issues/05)
+             */
+            MapTdx const * mi = tp.td()->map_info();
+
+            if (mi->key_td()->metatype() == Metatype::mt_atomic) {
+                *p_os_ << "{";
+
+                bool first = true;
+                mi->visit_entries(tp.address(),
+                                  [this, &first](TaggedPtr key, TaggedPtr value) {
+                                      if (!first)
+                                          *p_os_ << ", ";
+                                      first = false;
+
+                                      *p_os_ << this->map_key_string(key) << ": ";
+                                      this->print(value);
+                                  });
+
+                *p_os_ << "}";
+            } else {
+                /* a key json cannot use as an object key (a struct, say) */
+                *p_os_ << "[";
+
+                bool first = true;
+                mi->visit_entries(tp.address(),
+                                  [this, &first](TaggedPtr key, TaggedPtr value) {
+                                      if (!first)
+                                          *p_os_ << ", ";
+                                      first = false;
+
+                                      *p_os_ << "{" << quot("_key_") << ": ";
+                                      this->print(key);
+                                      *p_os_ << ", " << quot("_value_") << ": ";
+                                      this->print(value);
+                                      *p_os_ << "}";
+                                  });
+
+                *p_os_ << "]";
+            }
+        } /*print_map*/
+
         void
         JsonPrintState::write_unplaced()
         {
@@ -529,6 +609,9 @@ namespace xo {
                         return;
                     case Metatype::mt_vector:
                         print_generic_vector(*this, tp);
+                        return;
+                    case Metatype::mt_map:
+                        this->print_map(tp);
                         return;
                     case Metatype::mt_struct:
                         print_generic_struct(*this, tp);

@@ -6,7 +6,7 @@
 
 namespace xo {
     namespace reflect {
-        enum class Metatype { mt_invalid, mt_atomic, mt_pointer, mt_vector, mt_struct, mt_function };
+        enum class Metatype { mt_invalid, mt_atomic, mt_pointer, mt_vector, mt_struct, mt_function, mt_map };
 
         const char * metatype2str(Metatype x);
     } /*namespace reflect*/

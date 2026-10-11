@@ -288,8 +288,9 @@ namespace xo {
             mem.member_ref_map<std::map<std::string, JmReflected *>>("m_", {{"/a/", &a}, {"/b/", &b}, {"/z/", nullptr}});
             mem.end();
 
+            /* a std::map's metatype is map (xo-reflect#05) */
             REQUIRE(ss.str() == ", \"_members_\": ["
-                    + entry("m_", type_of<std::map<std::string, JmReflected *>>(), "atomic",
+                    + entry("m_", type_of<std::map<std::string, JmReflected *>>(), "map",
                             "{\"/a/\": {\"_ref_\": 1}, "
                             "\"/b/\": {\"_ref_\": 2}, "
                             "\"/z/\": null}") + "]");

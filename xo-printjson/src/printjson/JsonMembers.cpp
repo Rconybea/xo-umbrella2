@@ -7,6 +7,7 @@
 #include <xo/reflect/struct/StructMember.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
+#include <xo/reflect/map/MapTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
 #include <cassert>
@@ -98,6 +99,20 @@ namespace xo {
                 }
             case Metatype::mt_vector:
                 return (v.n_child() == 0) || this->printable_value(v.get_child(0));
+            case Metatype::mt_map:
+                {
+                    /* by its first entry, as a vector by its first element */
+                    bool retval = true;
+                    bool seen = false;
+
+                    td->map_info()->visit_entries(v.address(),
+                                                  [this, &retval, &seen](TaggedPtr key, TaggedPtr value) {
+                                                      if (!seen)
+                                                          retval = this->printable_value(key) && this->printable_value(value);
+                                                      seen = true;
+                                                  });
+                    return retval;
+                }
             default:
                 return this->printable(td);
             }

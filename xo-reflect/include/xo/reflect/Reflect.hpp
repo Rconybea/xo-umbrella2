@@ -11,6 +11,7 @@
 #include "atomic/StdAtomicTdx.hpp"
 #include "function/FunctionTdx.hpp"
 #include "lockable/LockableTdx.hpp"
+#include "map/MapTdx.hpp"
 #include "pointer/PointerTdx.hpp"
 #include "struct/StructTdx.hpp"
 #include "vector/VectorTdx.hpp"
@@ -19,6 +20,8 @@
 #include <atomic>
 #include <cstring>      // for std::memcpy
 #include <deque>
+#include <map>
+#include <unordered_map>
 #include <memory>       // for std::unique_ptr<>
 #include <mutex>
 #include <shared_mutex>
@@ -92,6 +95,26 @@ namespace xo {
          **/
         template<typename T, typename A>
         class EstablishTdx<std::deque<T, A>> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- std::map<K, V, C, A>, std::unordered_map<K, V, H, E, A> -----
+
+        /** a std::map or std::unordered_map reflects as mt_map: entries in
+         *  key order (StdMapTdx, MapTdx::visit_entries).  See
+         *  .xo-backlog/xo-reflect/issues/05
+         **/
+        template<typename K, typename V, typename C, typename A>
+        class EstablishTdx<std::map<K, V, C, A>> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        template<typename K, typename V, typename H, typename E, typename A>
+        class EstablishTdx<std::unordered_map<K, V, H, E, A>> {
         public:
             /* note: definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
@@ -485,6 +508,29 @@ namespace xo {
             Reflect::require<T>();
 
             return StdDequeTdx<std::deque<T, A>>::make();
+        } /*make*/
+
+        // ----- std::map<K, V, C, A> -----
+
+        template<typename K, typename V, typename C, typename A>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<std::map<K, V, C, A>>::make() {
+            /* need to ensure K, V are properly reflected */
+            Reflect::require<K>();
+            Reflect::require<V>();
+
+            return StdMapTdx<std::map<K, V, C, A>>::make();
+        } /*make*/
+
+        // ----- std::unordered_map<K, V, H, E, A> -----
+
+        template<typename K, typename V, typename H, typename E, typename A>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<std::unordered_map<K, V, H, E, A>>::make() {
+            Reflect::require<K>();
+            Reflect::require<V>();
+
+            return StdMapTdx<std::unordered_map<K, V, H, E, A>>::make();
         } /*make*/
 
         // ----- T * (raw pointer) -----

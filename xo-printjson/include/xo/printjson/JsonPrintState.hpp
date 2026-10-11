@@ -210,6 +210,16 @@ namespace xo {
              *  placed, whatever its type's default
              **/
             void print_root(TaggedPtr tp);
+            /** a map (MapTdx), within print_node's depth level: a json
+             *  object keyed by each key's json -- quoted if not a json
+             *  string already -- when keys are atomic; else an array of
+             *  {"_key_": .., "_value_": ..}.  In key order
+             **/
+            void print_map(TaggedPtr tp);
+            /** @p key's json, as a json object key: its printed form, quoted
+             *  unless already a json string.  No identity: printed as a value
+             **/
+            std::string map_key_string(TaggedPtr key);
             /** print_pointee, within a depth level already counted **/
             void print_pointee_aux(TaggedPtr ptr, reflect::Ownership edge);
             /** , "_unplaced_": [..] -- if any; from the root JsonObject's close() **/

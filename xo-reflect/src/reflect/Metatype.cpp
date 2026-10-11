@@ -16,6 +16,7 @@ namespace xo::reflect {
         case Metatype::mt_vector: return "vector";
         case Metatype::mt_struct: return "struct";
         case Metatype::mt_function: return "function";
+        case Metatype::mt_map: return "map";
         }
 
         return "?metatype";

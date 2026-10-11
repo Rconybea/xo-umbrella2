@@ -17,6 +17,7 @@ namespace xo {
         class StdAtomicTdx;
         class WrapperTdx;
         class LockableTdx;
+        class MapTdx;
         class TypeDescrBase;
         class TaggedPtr;
 
@@ -52,6 +53,8 @@ namespace xo {
             bool is_vector() const { return this->metatype() == Metatype::mt_vector; }
             bool is_struct() const { return this->metatype() == Metatype::mt_struct; }
             bool is_function() const { return this->metatype() == Metatype::mt_function; }
+            /** true iff an associative container: entries in map_info() **/
+            bool is_map() const { return this->metatype() == Metatype::mt_map; }
             /** true iff a reflected enum (EnumReflector): metatype mt_atomic,
              *  with enumerator names in enum_info()
              **/
@@ -157,6 +160,13 @@ namespace xo {
              *  type
              **/
             virtual const LockableTdx * lockable_info() const { return nullptr; }
+
+            // methods for working with maps
+
+            /** key/value types and entries of a map (std::map,
+             *  std::unordered_map); nullptr for any other type
+             **/
+            virtual const MapTdx * map_info() const { return nullptr; }
         }; /*TypeDescrExtra*/
     } /*namespace reflect*/
 } /*namespace xo*/

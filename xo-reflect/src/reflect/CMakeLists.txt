@@ -12,6 +12,7 @@ set(SELF_SRCS
     lockable/LockableTdx.cpp
     pointer/PointerTdx.cpp
     vector/VectorTdx.cpp
+    map/MapTdx.cpp
     struct/StructTdx.cpp struct/StructMember.cpp
     enum/EnumTdx.cpp
     wrapper/WrapperTdx.cpp

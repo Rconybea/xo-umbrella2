@@ -351,6 +351,8 @@ namespace xo {
             bool is_vector() const { return this->tdextra_->is_vector(); }
             bool is_struct() const { return this->tdextra_->is_struct(); }
             bool is_function() const { return this->tdextra_->is_function(); }
+            /** true iff a map: see map_info() **/
+            bool is_map() const { return this->tdextra_->is_map(); }
             /** true iff a reflected enum: see EnumReflector, enum_info() **/
             bool is_enum() const { return this->tdextra_->is_enum(); }
             /** true iff a std::atomic<T>: see std_atomic_info() **/
@@ -437,6 +439,8 @@ namespace xo {
             const WrapperTdx * wrapper_info() const { return this->tdextra_->wrapper_info(); }
             /** reader lock operations of a lockable; nullptr otherwise **/
             const LockableTdx * lockable_info() const { return this->tdextra_->lockable_info(); }
+            /** key/value types and entries of a map; nullptr otherwise **/
+            const MapTdx * map_info() const { return this->tdextra_->map_info(); }
             uint32_t n_fn_arg() const { return this->tdextra_->n_fn_arg(); }
 
             /* require:

@@ -81,6 +81,7 @@ namespace xo {
                 .value("vector", Metatype::mt_vector)
                 .value("struct", Metatype::mt_struct)
                 .value("function", Metatype::mt_function)
+                .value("map", Metatype::mt_map)
                 ;
 
             /* note: possibly move this to pytime/  if/when we provide it */

@@ -2302,7 +2302,6 @@ namespace xo {
             StructReflector<WebsocketSessionRecd> sr;
 
             if (sr.is_incomplete()) {
-                 */
                 REFLECT_MEMBER(sr, router);
                 REFLECT_MEMBER(sr, output_buf).owning().guarded_by(&WebsocketSessionRecd::mutex_);
                 REFLECT_MEMBER(sr, last_msg_seq).guarded_by(&WebsocketSessionRecd::mutex_);
