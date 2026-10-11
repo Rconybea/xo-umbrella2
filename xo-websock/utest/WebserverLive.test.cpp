@@ -820,6 +820,21 @@ namespace xo {
                 return std::string(XO_WEBSOCK_UTEST_SOURCE_DIR) + "/golden/" + name;
             }
 
+            /** the golden snapshot for the compiler this test is built with.
+             *  A snapshot's type names (_canonical_type_, _short_type_) are
+             *  the compiler's own spelling -- xo::reflect::type_name<T>,
+             *  from __PRETTY_FUNCTION__ -- so each compiler has its own
+             *  golden (.xo-backlog/xo-websock/issues/19).  nullptr: none yet
+             **/
+            constexpr char const * c_golden_name =
+#if defined(__clang__)      /* before __GNUC__: clang defines both */
+                "server-snapshot.clang.json";
+#elif defined(__GNUC__)
+                "server-snapshot.gcc.json";
+#else
+                nullptr;
+#endif
+
             std::string read_file(std::string const & path) {
                 std::ifstream in(path);
                 std::stringstream ss;
@@ -837,9 +852,16 @@ namespace xo {
              * with a receiver), session table, sessions, senders, routers,
              * a subscription and its sink.
              *
+             * One golden per compiler: type names are the compiler's
+             * spelling (c_golden_name, .xo-backlog/xo-websock/issues/19).
+             *
              * To bless a deliberate change:
              *   XO_UPDATE_GOLDEN=1 utest.websock.live "[golden]"
-             * rewrites utest/golden/server-snapshot.json in the source tree
+             * rewrites utest/golden/server-snapshot.<compiler>.json in the
+             * source tree -- for the compiler this test was built with.
+             * Bless under BOTH: gcc in an ordinary build; clang as CI builds
+             * it, inside nix-shell ci-nxfs.nix -A xo-builder-shell
+             * (.xo-backlog/ci/issues/03) with CC=clang CXX=clang++
              */
             auto box = std::make_shared<SinkBox>();
 
@@ -884,7 +906,10 @@ namespace xo {
             redact(snap);
             std::string const actual = styled(snap);
 
-            std::string const path = golden_path("server-snapshot.json");
+            if (!c_golden_name)
+                FAIL("no golden snapshot for this compiler: add a case to c_golden_name");
+
+            std::string const path = golden_path(c_golden_name);
 
             if (char const * u = std::getenv("XO_UPDATE_GOLDEN"); u && *u && std::string(u) != "0") {
                 std::ofstream(path) << actual;
@@ -892,6 +917,10 @@ namespace xo {
                 return;
             }
 
+            {
+                INFO("golden:  " << path << " -- missing: bless it with XO_UPDATE_GOLDEN=1, built with this compiler");
+                REQUIRE(std::ifstream(path).good());
+            }
             std::string const expected = read_file(path);
 
             if (actual != expected) {
@@ -900,7 +929,7 @@ namespace xo {
 
                 INFO("golden:  " << path);
                 INFO("actual:  " << actual_path << " (in the test's working directory)");
-                INFO("compare: diff -u <golden> <actual>; bless with XO_UPDATE_GOLDEN=1");
+                INFO("compare: diff -u <golden> <actual>; bless with XO_UPDATE_GOLDEN=1 (this compiler's golden only)");
                 REQUIRE(actual == expected);
             }
         }
