@@ -81,7 +81,7 @@
         [
           {
             "_canonical_type_" : "std::unordered_map<std::__cxx11::basic_string<char>, xo::ref::intrusive_ptr<xo::web::DynamicEndpoint> >",
-            "_metatype_" : "atomic",
+            "_metatype_" : "map",
             "_name_" : "http_map_",
             "_short_type_" : "unordered_map<string, rp<DynamicEndpoint>>",
             "_value_" : 
@@ -94,7 +94,7 @@
           },
           {
             "_canonical_type_" : "std::unordered_map<std::__cxx11::basic_string<char>, xo::ref::intrusive_ptr<xo::web::DynamicEndpoint> >",
-            "_metatype_" : "atomic",
+            "_metatype_" : "map",
             "_name_" : "stream_map_",
             "_short_type_" : "unordered_map<string, rp<DynamicEndpoint>>",
             "_value_" : 
@@ -130,7 +130,7 @@
           },
           {
             "_canonical_type_" : "std::unordered_map<long unsigned int, std::unique_ptr<xo::web::WebsocketSessionRecd, std::default_delete<xo::web::WebsocketSessionRecd> >, std::hash<long unsigned int>, std::equal_to<long unsigned int>, std::allocator<std::pair<const long unsigned int, std::unique_ptr<xo::web::WebsocketSessionRecd, std::default_delete<xo::web::WebsocketSessionRecd> > > > >",
-            "_metatype_" : "atomic",
+            "_metatype_" : "map",
             "_name_" : "session_map_",
             "_short_type_" : "unordered_map<long unsigned int, unique_ptr<WebsocketSessionRecd>>",
             "_value_" : 
