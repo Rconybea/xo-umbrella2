@@ -76,7 +76,7 @@ namespace xo {
             ///@{
 
 #pragma GCC diagnostic push
-#ifndef __APPLE__
+#if defined(__GNUC__) && !defined(__clang__)   /* gcc-only warning group */
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
 #endif
             const input_state<CharT> & input_state() const { return input_state_; }
