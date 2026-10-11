@@ -7,18 +7,23 @@
 //   <- {"stream": "/introspect", "sub_id": N, "seq": k,
 //       "event": {"server": <Webserver json>}}
 //
-// Webserver json: {_id_, refcount, listen_port, state,
-//            endpoints: [{_id_, refcount, kind, stem, pattern, has_receive}],
-//            sessions: [{_id_, session_id,
-//                        sender: {_id_, refcount, session_id, open},
-//                        subscriptions: [{_id_, sub_id, stream,
-//                                         endpoint: {_ref_},
-//                                         sink: {_id_, refcount, stream, sub_id,
-//                                                seq, sender: {_ref_}}}]}]}.
+// Webserver json: a reflected struct, {_id_, _canonical_type_, _members_:
+// [{_name_, _value_, ..}, ..]}.  The page reads "_members_" alone
+// (.xo-backlog/xo-websock/issues/17) -- what it draws, and from where:
+//   server        listen_port_, state_
+//   endpoints     url_router_ -> http_map_, stream_map_ (key: stem);
+//                 each: kind_, uri_pattern_, receiver_
+//   sessions      session_table_ -> session_map_ (key: session id);
+//                 each: sender_ (-> open_), router_ -> subscription_v_
+//   subscriptions sub_id_, stream_name_, sink_ (-> sender_)
+// Other keys beside "_members_" (endpoints, sessions, ..: the websock
+// printers' view model, until .xo-backlog/xo-websock/issues/16) it ignores.
 //
 // Each object is printed in full once, with "_id_": n; elsewhere as
 // {"_ref_": n}.  Ids are numbers, 1, 2, .. within one snapshot
-// (.xo-backlog/xo-printjson/issues/02).  The page joins refs to objects by id.
+// (.xo-backlog/xo-printjson/issues/02).  The page joins refs to objects by
+// id, wherever printjson placed each object: in a member, or in a list
+// beside them.
 //
 // Source links (.xo-backlog/xo-websock/issues/12): every object carries
 // _canonical_type_, its C++ type's canonical name (and _short_type_, for
@@ -158,78 +163,149 @@ function member_value(obj, name) {
     return m ? m._value_ : undefined;
 }
 
+/** every object printed in full in @p v (one with "_id_"), wherever it
+ *  landed, as a map id -> object
+ **/
+function objects_by_id(v, out = new Map()) {
+    if (Array.isArray(v)) {
+        v.forEach(x => objects_by_id(x, out));
+    } else if (v && typeof v === "object" && !is_ref(v)) {
+        if (typeof v._id_ === "number")
+            out.set(v._id_, v);
+        for (const [k, x] of Object.entries(v))
+            if (k === "_members_")
+                x.forEach(m => objects_by_id(m._value_, out));
+            else if (!k.startsWith("_"))
+                objects_by_id(x, out);
+    }
+    return out;
+}
+
+/** replace, in the members of every object in @p roots, each object whose
+ *  id is in @p hoist by a ref to it -- so a row refers to the object's own
+ *  box, wherever the object landed.  Recurses through member values,
+ *  arrays and maps; not into a replaced object (a root itself)
+ **/
+function hoist_to_refs(roots, hoist) {
+    const fix = (v) => {
+        if (Array.isArray(v)) {
+            v.forEach((x, i) => { v[i] = fix(x); });
+        } else if (v && typeof v === "object" && !is_ref(v)) {
+            if (hoist.has(v._id_))
+                return {_ref_: v._id_};
+            if (Array.isArray(v._members_))
+                v._members_.forEach(m => { if ("_value_" in m) m._value_ = fix(m._value_); });
+            else if (!("_name_" in v))
+                for (const k of Object.keys(v))
+                    v[k] = fix(v[k]);
+        }
+        return v;
+    };
+    for (const r of roots)
+        (r._members_ || []).forEach(m => { if ("_value_" in m) m._value_ = fix(m._value_); });
+}
+
 /** the object graph for snapshot @p event: {nodes, edges}.  Edge kinds:
  *  "link"  the server's endpoints and sessions
  *  "owns"  a session's sender and subscriptions; an endpoint's receiver;
  *          a subscription's sink
  *  (a subscription's endpoint is no edge here: its endpoint_ member's
  *  ref edge shows it)
+ *
+ *  Reads "_members_" only (.xo-backlog/xo-websock/issues/17): structure
+ *  from where each object is held -- endpoints in the url router's maps,
+ *  sessions in the session table's, a session's subscriptions in its
+ *  router's subscription_v_ -- and each object, by id, wherever printjson
+ *  placed it (first encounter: in a member, or in a list beside them).
+ *  Works on a copy of @p event: a boxed object found in place inside
+ *  another's members becomes a ref there (hoist_to_refs)
  **/
 function layout(event) {
+    event = structuredClone(event);
+
     const snap = member_value(event, "server");   // an IntrospectSnapshot
+    const by_id = objects_by_id(event);
+    /* the object @p v names: itself, or its ref's target; null if none */
+    const deref = (v) => is_ref(v) ? (by_id.get(v._ref_) || null) : (v || null);
+    /* @p v's id: a ref's target id, or an object's own */
+    const id_of = (v) => is_ref(v) ? v._ref_ : (v ? v._id_ : undefined);
+    /* member @p name of the object @p v names */
+    const mv = (v, name) => member_value(deref(v), name);
+    /* the [key, object] entries of map member @p name of @p obj, key order */
+    const map_entries = (obj, name) =>
+        Object.entries(mv(obj, name) || {}).map(([k, v]) => [k, deref(v)]).filter(([, v]) => v);
+
+    const server = deref(snap);
 
     const nodes = [];
     const edges = [];
     const edge = (source, target, kind) => edges.push({source, target, kind});
 
     nodes.push({id: "server", kind: "server",
-                label: `Webserver :${snap.listen_port} (${snap.state})`,
-                type: snap._canonical_type_, obj: snap});
+                label: `Webserver :${mv(server, "listen_port_")} (${mv(server, "state_")})`,
+                type: server._canonical_type_, obj: server});
 
-    for (const ep of (snap.endpoints || [])) {
-        const id = `${ep.kind}:${ep.stem}`;
-        nodes.push({id: id, kind: ep.kind, label: ep.pattern,
+    const router = mv(server, "url_router_");
+    for (const [stem, ep] of [...map_entries(router, "http_map_"), ...map_entries(router, "stream_map_")]) {
+        const id = `${mv(ep, "kind_")}:${stem}`;
+        nodes.push({id: id, kind: mv(ep, "kind_"), label: mv(ep, "uri_pattern_"),
                     type: ep._canonical_type_, obj: ep});
         edge("server", id, "link");
 
         // its receiver (a stream endpoint's, if any): owned by the endpoint,
         // named by its most-derived type; the receiver_ member refers to it
-        if (ep.receiver) {
+        const receiver = deref(mv(ep, "receiver_"));
+        if (receiver) {
             const rid = `${id}:receiver`;
-            nodes.push({id: rid, kind: "receiver", label: ep.receiver._short_type_ || "receiver",
-                        type: ep.receiver._canonical_type_, obj: ep.receiver, small: true});
+            nodes.push({id: rid, kind: "receiver", label: receiver._short_type_ || "receiver",
+                        type: receiver._canonical_type_, obj: receiver, small: true});
             edge(id, rid, "owns");
         }
     }
 
-    for (const s of (snap.sessions || [])) {
-        const id = `session:${s.session_id}`;
-        const open = s.sender && s.sender.open;
+    for (const [session_id, s] of map_entries(mv(server, "session_table_"), "session_map_")) {
+        const id = `session:${session_id}`;
+        const sender = deref(mv(s, "sender_"));
+        const open = sender && mv(sender, "open_");
 
         nodes.push({id: id, kind: open ? "session" : "session closed",
-                    label: `session ${s.session_id}`, type: s._canonical_type_, obj: s});
+                    label: `session ${session_id}`, type: s._canonical_type_, obj: s});
         edge("server", id, "link");
 
-        if (s.sender) {
+        if (sender) {
             const snd = `${id}:sender`;
             nodes.push({id: snd, kind: "sender", label: "sender",
-                        type: s.sender._canonical_type_, obj: s.sender,
-                        small: true});
+                        type: sender._canonical_type_, obj: sender, small: true});
             edge(id, snd, "owns");
         }
 
-        for (const sub of (s.subscriptions || [])) {
-            const sid = `${id}:sub:${sub.sub_id}`;
-            const sink = sub.sink || {};
+        for (const sub of (mv(mv(s, "router_"), "subscription_v_") || []).map(deref).filter(x => x)) {
+            const sid = `${id}:sub:${mv(sub, "sub_id_")}`;
+            const sink = deref(mv(sub, "sink_"));
             // the sink's sender should be this session's: flag it if not
-            const astray = s.sender && sink.sender && sink.sender._ref_ !== s.sender._id_;
+            const astray = sender && sink && mv(sink, "sender_")
+                && id_of(mv(sink, "sender_")) !== sender._id_;
 
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
-                        label: `sub ${sub.sub_id} · ${sub.stream}`,
+                        label: `sub ${mv(sub, "sub_id_")} · ${mv(sub, "stream_name_")}`,
                         type: sub._canonical_type_, obj: sub, small: true});
             edge(id, sid, "owns");
 
             // its sink, owned by the subscription (the router's slot holds
             // it); the subscription's sink_ member refers to it
-            if (sub.sink) {
+            if (sink) {
                 const kid = `${sid}:sink`;
                 nodes.push({id: kid, kind: "sink", label: "sink",
-                            type: sub.sink._canonical_type_, obj: sub.sink, small: true});
+                            type: sink._canonical_type_, obj: sink, small: true});
                 edge(sid, kid, "owns");
             }
         }
     }
 
+    // a boxed object printed in place in another's members: a ref there,
+    // so its row is an edge to its box (the server is no one's member)
+    const boxed = nodes.filter(d => d.obj !== server);
+    hoist_to_refs(nodes.map(d => d.obj), new Set(boxed.map(d => d.obj._id_)));
 
     // a struct-valued member gets its own box, nested in a group with its
     // holder -- see "nested boxes" below

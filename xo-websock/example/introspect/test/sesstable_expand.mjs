@@ -39,7 +39,7 @@ r = await rows_of(T);
 check(r.some(t => t.trimStart() === "next_id_: 3"), "next_id_ = 3 (two sessions so far)");
 // its type, on the name's tooltip (types are off)
 const map_tip = await ev(`[...document.querySelectorAll("g.node text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "session_map_")?.querySelector("title")?.textContent`);
-check(map_tip && map_tip.startsWith("session_map_: unordered_map<long unsigned int, unique_ptr<WebsocketSessionRecd>>  [atomic]"), "session_map_ type without default args: " + map_tip);
+check(map_tip && map_tip.startsWith("session_map_: unordered_map<long unsigned int, unique_ptr<WebsocketSessionRecd>>  [map]"), "session_map_ type without default args: " + map_tip);
 check(r.some(t => t.trimStart().startsWith("session_map_:") && t.endsWith("▸ {2}")), "session_map_: 2 sessions");
 await click_row(T, "session_map_:"); await sleep(700);
 r = await rows_of(T);

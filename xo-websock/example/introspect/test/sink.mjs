@@ -21,7 +21,13 @@ const rowtext = (id, name) => ev(`(() => { const t = [...${G(id)}.querySelectorA
   return t ? [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join("") : null; })()`);
 const SUB = "session:1:sub:0", K = "session:1:sub:0:sink";
 // the snapshot: the sink, with its members
-const mem = await ev(`member_value(last_event, "server").sessions[0].subscriptions[0].sink._members_.map(m => m._name_)`);
+// (from members alone, xo-websock#17: session table -> session -> its
+// router's subscription_v_ -> sink_, each a ref or the object, by id)
+const mem = await ev(`(() => { const ids = objects_by_id(last_event), d = (v) => v && "_ref_" in v ? ids.get(v._ref_) : v;
+  const mv = (v, n) => member_value(d(v), n);
+  const s = Object.values(mv(mv(member_value(last_event, "server"), "session_table_"), "session_map_"))[0];
+  const sub = mv(mv(s, "router_"), "subscription_v_")[0];
+  return d(mv(sub, "sink_"))._members_.map(m => m._name_); })()`);
 // reflected members first (stream_name_, sub_id_, n_in_ev_), then the two
 // printed elsewhere, as refs (xo-printjson#06)
 check(JSON.stringify(mem) === JSON.stringify(["stream_name_", "sub_id_", "n_in_ev_", "sender_", "pjson_"]), "the sink's printer lists its members: " + JSON.stringify(mem));

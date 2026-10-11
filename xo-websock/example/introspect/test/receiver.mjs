@@ -15,14 +15,20 @@ for (let i = 0; i < 100 && !(await ev(`typeof last_event !== "undefined" && !!la
 await sleep(500);
 const G = (id) => `[...document.querySelectorAll("g.node")].find(g => g.__data__.id === ${JSON.stringify(id)})`;
 const R = "stream:/introspect:receiver";
-// the snapshot carries it; /demo (no receiver) doesn't
-const recv = await ev(`member_value(last_event, "server").endpoints.map(e => [e.pattern, e.receiver && e.receiver._short_type_, e.receiver && e.receiver._canonical_type_])`);
+// the snapshot carries it; /demo (no receiver) doesn't.  Read from members
+// alone (xo-websock#17): the url router's maps hold the endpoints, each a
+// ref or the object itself, wherever printjson placed it
+const EPS = `(() => { const ids = objects_by_id(last_event), d = (v) => v && "_ref_" in v ? ids.get(v._ref_) : v;
+  const ur = d(member_value(member_value(last_event, "server"), "url_router_"));
+  return ["http_map_", "stream_map_"].flatMap(m => Object.values(member_value(ur, m) || {}).map(d))
+    .map(e => ({pattern: member_value(e, "uri_pattern_"), receiver: d(member_value(e, "receiver_"))})); })()`;
+const recv = await ev(`${EPS}.map(e => [e.pattern, e.receiver && e.receiver._short_type_, e.receiver && e.receiver._canonical_type_])`);
 console.log("   receivers:", JSON.stringify(recv));
 check(recv.some(r => r[0] === "/introspect" && r[1] === "IntrospectReceiver" && /IntrospectReceiver$/.test(r[2])), "/introspect's receiver: IntrospectReceiver, by its own type");
 check(recv.filter(r => r[0] !== "/introspect").every(r => r[1] === null), "the other endpoints: no receiver");
 // its reflected member websrv_: a ref to the server, printed once, first (xo-printjson#02)
 const wsrv = await ev(`(() => { const srv = member_value(last_event, "server");
-  const r = srv.endpoints.find(e => e.pattern === "/introspect").receiver;
+  const r = ${EPS}.find(e => e.pattern === "/introspect").receiver;
   return {server_id: srv._id_, websrv: member_value(r, "websrv_")}; })()`);
 check(wsrv.websrv && wsrv.websrv._ref_ === wsrv.server_id, "the receiver's websrv_: a ref to the server: " + JSON.stringify(wsrv));
 // not drawn by default; the endpoint's triangle shows it
