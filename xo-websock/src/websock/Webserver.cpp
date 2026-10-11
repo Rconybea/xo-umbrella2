@@ -1171,22 +1171,11 @@ namespace xo {
                     }
                     *p_os << "]";
 
-                    obj.key_open("sessions") << "[";
-                    {
-                        bool first = true;
-
-                        /* each session via its own printer (installed by
-                         * provide_webserver_json_printers), in id order
-                         */
-                        websrv->visit_sessions([&state, p_os, &first](TaggedPtr session) {
-                                if (!first)
-                                    *p_os << ", ";
-                                first = false;
-
-                                state.print(session);
-                            });
-                    }
-                    *p_os << "]";
+                    /* no "sessions" list: they print in full in
+                     * session_table_'s session_map_, an owning edge -- a
+                     * list here would place them first, a second owner
+                     * (.xo-backlog/xo-websock/issues/15)
+                     */
 
                     /* chosen C++ members, for the page's "expand"
                      * (.xo-backlog/xo-websock/issues/13): the reflected ones
@@ -1205,9 +1194,11 @@ namespace xo {
 
         /** @brief the session table: its chosen C++ members
          *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
-         *  namespace: WsSessionTable befriends it by name.  Its sessions are
-         *  printed in full in the server's session list: refs here, keyed by
-         *  session id, in id order
+         *  namespace: WsSessionTable befriends it by name.  Its members are
+         *  reflected, guarded by the table's mutex, which reflected_members
+         *  takes: this printer takes no lock.  Its sessions print in full
+         *  in session_map_, keyed by session id, in id order
+         *  (.xo-backlog/xo-websock/issues/15)
          **/
         template <typename Recd>
         class JsonPrinter_WsSessionTable : public JsonPrinter {
@@ -1220,26 +1211,10 @@ namespace xo {
                 if (!t)
                     return;
 
-                typename Table::SessionId next_id = 0;
-                std::vector<std::pair<typename Table::SessionId, void const *>> by_id;
-                {
-                    std::lock_guard<std::mutex> lock(t->mutex_);
-
-                    next_id = t->next_id_;
-                    for (auto const & ix : t->session_map_)
-                        by_id.emplace_back(ix.first, ix.second.get());
-                }
-                std::sort(by_id.begin(), by_id.end());
-
-                std::vector<std::pair<std::string, void const *>> sessions;
-                for (auto const & [id, recd] : by_id)
-                    sessions.emplace_back(std::to_string(id), recd);
-
                 json::JsonObject obj = state.open_object("WsSessionTable", tp.td());
 
                 obj.members()
-                    .member_as<typename Table::SessionId>("next_id_", next_id)
-                    .template member_ref_map<decltype(t->session_map_)>("session_map_", sessions)
+                    .reflected_members(tp, "_")
                     .end();
 
                 obj.close();
@@ -2322,18 +2297,35 @@ namespace xo {
             }
         } /*reflect_self*/
 
+        template <>
+        void
+        WsSessionTable<WebsocketSessionRecd>::reflect_self(reflect::TypeDescrTable * /*table*/)
+        {
+            StructReflector<WsSessionTable<WebsocketSessionRecd>> sr;
+
+            if (sr.is_incomplete()) {
+                /* session_map_ owns its sessions (unique_ptr): they print in
+                 * full here, in id order, under the table's mutex -- one
+                 * acquisition for the map and the sessions in it
+                 * (.xo-backlog/xo-websock/issues/15)
+                 */
+                REFLECT_MEMBER(sr, next_id).guarded_by(&WsSessionTable::mutex_);
+                REFLECT_MEMBER(sr, session_map).guarded_by(&WsSessionTable::mutex_);
+            }
+        } /*reflect_self*/
+
         void
         Webserver::reflect_self(reflect::TypeDescrTable * table)
         {
-            /* the interface, the session table and OutputBuffer: no
-             * members yet (.xo-backlog/xo-websock/issues/13).  The rest
-             * reflect their own, each in its own reflect_self
+            /* the interface and OutputBuffer: no members yet
+             * (.xo-backlog/xo-websock/issues/13).  The rest reflect their
+             * own, each in its own reflect_self
              */
             { StructReflector<Webserver> sr; }
             WebserverImpl::reflect_self(table);
             WebsocketSessionRecd::reflect_self(table);
             WsSessionSenderImpl::reflect_self(table);
-            { StructReflector<WsSessionTable<WebsocketSessionRecd>> sr; }
+            WsSessionTable<WebsocketSessionRecd>::reflect_self(table);
             { StructReflector<OutputBuffer> sr; }
         } /*reflect_self*/
     } /*namespace web*/

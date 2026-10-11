@@ -15,6 +15,8 @@
 #include <algorithm>
 
 namespace xo {
+    namespace reflect { class TypeDescrTable; }
+
     namespace web {
         template <typename Recd> class JsonPrinter_WsSessionTable;
 
@@ -38,6 +40,13 @@ namespace xo {
         class WsSessionTable {
         public:
             using SessionId = std::uint64_t;
+
+            /** reflect next_id_ and session_map_, guarded by mutex_: the
+             *  generic printer takes it (.xo-backlog/xo-websock/issues/15).
+             *  Defined for the one instance, beside the record type, in
+             *  Webserver.cpp
+             **/
+            static void reflect_self(reflect::TypeDescrTable * table);
 
         public:
             /** a fresh id, never returned before by this table.  Starts at 1. **/

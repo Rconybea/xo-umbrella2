@@ -456,8 +456,23 @@ namespace xo {
             REQUIRE(eps[0]["refcount"].asUInt() == 1);
             REQUIRE(eps[1]["refcount"].asUInt() == 1);
 
-            REQUIRE(srv["sessions"].isArray());
-            REQUIRE(srv["sessions"].empty());
+            /* no sessions: the session table's map is empty.  No "sessions"
+             * list -- they print in session_table_'s session_map_
+             * (xo-websock#15)
+             */
+            REQUIRE(!srv.isMember("sessions"));
+            {
+                auto member = [](Json::Value const & obj, std::string const & name) {
+                    for (Json::Value const & x : obj["_members_"])
+                        if (x["_name_"].asString() == name)
+                            return x["_value_"];
+                    return Json::Value();
+                };
+
+                Json::Value const smap = member(member(srv, "session_table_"), "session_map_");
+                REQUIRE(smap.isObject());
+                REQUIRE(smap.empty());
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/

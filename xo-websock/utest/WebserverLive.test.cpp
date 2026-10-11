@@ -24,6 +24,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <algorithm>
 #include <chrono>
 #include <cctype>
 #include <condition_variable>
@@ -58,6 +59,31 @@ namespace xo {
 
             /* generous: these only bound a failure, never pace a pass */
             constexpr auto c_timeout = 5s;
+
+            /** the server's sessions, as @p root (a server snapshot) prints
+             *  them: in full in session_table_'s session_map_, in session-id
+             *  order -- no "sessions" list (xo-websock#15).  jsoncpp orders
+             *  object keys as strings ("10" < "2"): sorted here by number
+             **/
+            Json::Value sessions_of(Json::Value const & root) {
+                Json::Value smap;
+                for (Json::Value const & m : root["_members_"])
+                    if (m["_name_"].asString() == "session_table_")
+                        for (Json::Value const & tm : m["_value_"]["_members_"])
+                            if (tm["_name_"].asString() == "session_map_")
+                                smap = tm["_value_"];
+
+                std::vector<std::string> ids = smap.isObject() ? smap.getMemberNames()
+                                                               : std::vector<std::string>();
+                std::sort(ids.begin(), ids.end(), [](std::string const & x, std::string const & y) {
+                    return std::stoull(x) < std::stoull(y);
+                });
+
+                Json::Value v(Json::arrayValue);
+                for (std::string const & id : ids)
+                    v.append(smap[id]);
+                return v;
+            }
 
             Json::Value parse(std::string const & text) {
                 Json::Value root;
@@ -575,7 +601,7 @@ namespace xo {
                 PrintJsonSingleton::instance()->print(server, &ss);
                 return parse(ss.str());
             };
-            auto n_session = [&] { return server_json()["sessions"].size(); };
+            auto n_session = [&] { return sessions_of(server_json()).size(); };
 
             REQUIRE(n_session() == 0);
 
@@ -595,7 +621,9 @@ namespace xo {
             REQUIRE(box->wait_sink(0));
 
             Json::Value const root = server_json();
-            Json::Value const & v = root["sessions"];
+            Json::Value const v = sessions_of(root);
+
+            REQUIRE(!root.isMember("sessions"));   /* xo-websock#15 */
 
             INFO("json: " << root.toStyledString());
 
@@ -732,8 +760,8 @@ namespace xo {
                 }
             }
 
-            /* the server's session table: session id -> a ref to that
-             * session, printed in full in "sessions"
+            /* the server's session table: session id -> that session, in
+             * full (owning: unique_ptr), keyed by its id (xo-websock#15)
              */
             {
                 Json::Value const * st = nullptr;
@@ -746,7 +774,8 @@ namespace xo {
                 REQUIRE(smap.size() == v.size());
                 for (Json::ArrayIndex k = 0; k < v.size(); ++k) {
                     std::string const sid = std::to_string(v[k]["session_id"].asUInt64());
-                    REQUIRE(smap[sid]["_ref_"].asInt() == v[k]["_id_"].asInt());
+                    REQUIRE(smap[sid].isMember("_id_"));
+                    REQUIRE(smap[sid]["_name_"].asString() == "WsSession");
                 }
                 REQUIRE((*st)["_members_"][0]["_value_"].asUInt64()
                         > v[v.size() - 1]["session_id"].asUInt64());
@@ -785,7 +814,7 @@ namespace xo {
             first.reset();
 
             REQUIRE(wait_until([&] { return n_session() == 1; }));
-            REQUIRE(server_json()["sessions"][0]["session_id"].asUInt64() == second_id);
+            REQUIRE(sessions_of(server_json())[0]["session_id"].asUInt64() == second_id);
         }
 
         namespace {
@@ -901,11 +930,11 @@ namespace xo {
              */
             WsTestClient first(port);
             REQUIRE(first.wait_connected(c_timeout));
-            REQUIRE(wait_until([&] { return server_json()["sessions"].size() == 1; }));
+            REQUIRE(wait_until([&] { return sessions_of(server_json()).size() == 1; }));
 
             WsTestClient second(port);
             REQUIRE(second.wait_connected(c_timeout));
-            REQUIRE(wait_until([&] { return server_json()["sessions"].size() == 2; }));
+            REQUIRE(wait_until([&] { return sessions_of(server_json()).size() == 2; }));
 
             second.send(R"({"cmd": "subscribe", "stream": "/fw"})");
             REQUIRE(second.wait_received(1, c_timeout));
