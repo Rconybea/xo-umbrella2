@@ -75,8 +75,13 @@ function source_of(t) {
     if (!t)
         return null;
 
-    // a template maps under its bare name
-    const loc = src.types[t.replace(/<.*$/, "")];
+    // a template maps under its bare name; a member's declared type keeps
+    // its cv-qualifiers, reference or pointer, which the map's keys don't
+    // (.xo-backlog/xo-websock/issues/18)
+    const bare = t.replace(/^(?:(?:const|volatile)\s+)+/, "")
+                  .replace(/(?:\s*(?:\*|&&?|const|volatile))+$/, "")
+                  .replace(/<.*$/, "");
+    const loc = src.types[bare];
     if (!loc)
         return null;
 

@@ -168,6 +168,23 @@ check(w_types > w_compact * 1.5, `Webserver box ${Math.round(w_compact)}px compa
 await types_menu("Hide types");
 check(await width("server") === w_compact, "types off again: back to compact");
 
+// a member's DECLARED type keeps its cv / reference / pointer: its source
+// link is its bare type's (.xo-backlog/xo-websock/issues/18)
+const decl = await ev(`(() => { const ts = new Set(); const w = (v) => { if (Array.isArray(v)) v.forEach(w);
+  else if (v && typeof v === "object") { if (typeof v._canonical_type_ === "string") ts.add(v._canonical_type_); Object.values(v).forEach(w); } };
+  w(last_event); return [...ts].filter(t => /[&*]$/.test(t)); })()`);
+console.log("   declared ref/pointer types:", JSON.stringify(decl));
+check(decl.includes("const xo::web::UrlRouter&"), "the snapshot has a const& member (WsSessionRouter url_router_)");
+const quals = await ev(`[["const xo::web::UrlRouter&", "xo::web::UrlRouter"],
+  ["xo::web::UrlRouter&&", "xo::web::UrlRouter"],
+  ["xo::web::WebserverImpl*", "xo::web::WebserverImpl"],
+  ["xo::web::WebserverImpl* const", "xo::web::WebserverImpl"],
+  ["volatile xo::web::UrlRouter*", "xo::web::UrlRouter"]]
+  .map(([q, b]) => { const a = source_of(q), c = source_of(b);
+    return [q, !!c && !!a && a.file === c.file && a.line === c.line, a && a.file]; })`);
+for (const [q, same, f] of quals)
+  check(same, `source_of(${JSON.stringify(q)}): its bare type's link: ${f}`);
+
 fs.writeFileSync(out, Buffer.from((await call("Page.captureScreenshot", {format: "png", clip: {x: 0, y: 0, width: 1500, height: 1000, scale: 1}})).result.data, "base64"));
 console.log(ok ? "ALL OK" : "SOME FAILED");
 ws.close(); cl.close(); process.exit(ok ? 0 : 1);
