@@ -91,4 +91,8 @@ in
       xo-userenv
       xo-docs-site
       ;
+
+    # CI's cmake build environment, as a nix-shell (.xo-backlog/ci/issues/03).
+    # nix-shell only: a bare `nix-build ci.nix` would try to build it, and fail
+    xo-builder-shell = xoPkgs.docker-xo-builder.shell;
   }

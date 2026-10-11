@@ -32,9 +32,14 @@
 #    $ docker pull conybeare.us/roland/docker-xo-builder:v2
 #    $ docker image prune -f
 # Will be used on next CI build.  github runners pull ghcr per-run, no step needed.
+#
+# The same contents as a nix-shell -- CI's cmake build environment without
+# docker (.xo-backlog/ci/issues/03):
+#    $ nix-shell ci-nxfs.nix -A xo-builder-shell   # this host (nxfs); ci.nix elsewhere
+#    $ CC=clang CXX=clang++ cmake ..               # CI's clang build; gcc by default
 
 {
-  dockerTools,
+  dockerTools, mkShell,
 
   # miscellaneous
   tree, which,
@@ -147,13 +152,9 @@ let
   # contents of /etc/group
   group = (lib.concatStringsSep "\n" (lib.attrValues (lib.mapAttrs group2group groups)));
 
-in
-
-dockerTools.buildLayeredImage {
-  name = "docker-xo-builder";
-  tag = "v2";
-  created = "now";   # warning: breaks deterministic output!
-
+  # the image's contents -- shared with the nix-shell below (passthru.shell),
+  # so the shell cannot drift from the image.  .xo-backlog/ci/issues/03
+  #
   # use (lib.getDev foo) on a library package foo
   # to request developer support,  for example .cmake files
   #
@@ -216,6 +217,15 @@ dockerTools.buildLayeredImage {
                bash
                coreutils ];
 
+in
+
+(dockerTools.buildLayeredImage {
+  name = "docker-xo-builder";
+  tag = "v2";
+  created = "now";   # warning: breaks deterministic output!
+
+  inherit contents;
+
   enableFakechroot = true;
 
   fakeRootCommands = ''
@@ -275,5 +285,9 @@ dockerTools.buildLayeredImage {
       "NIX_LDFLAGS_${gcc.suffixSalt}=-L/lib"
     ];
   };
-
-}
+}).overrideAttrs (old: {
+  # the same contents as a nix-shell: CI's cmake environment without docker.
+  #   nix-shell ci-nxfs.nix -A xo-builder-shell   (CC=clang CXX=clang++ for clang)
+  # passthru only: the image's .drv is unchanged.  .xo-backlog/ci/issues/03
+  passthru = (old.passthru or {}) // { shell = mkShell { packages = contents; }; };
+})
