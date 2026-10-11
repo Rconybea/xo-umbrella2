@@ -1098,8 +1098,6 @@ namespace xo {
             class JsonPrinter_WsSession : public JsonPrinter {
             public:
                 void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    std::ostream * p_os = state.p_os();
-
                     WebsocketSessionRecd const * recd
                         = this->check_recover_native<WebsocketSessionRecd>(tp, state);
 
@@ -1113,22 +1111,11 @@ namespace xo {
                                TaggedPtr(Reflect::require<WsSessionSenderImpl>(),
                                          const_cast<WsSessionSenderImpl *>(&recd->sender())));
 
-                    /* each subscription via its printer (in
-                     * WsSessionRouter.cpp), under the router's lock
+                    /* no "subscriptions" list: they print in full in
+                     * router_'s subscription_v_, an owning edge -- a list
+                     * here would place them first, a second owner
+                     * (.xo-backlog/xo-websock/issues/15)
                      */
-                    obj.key_open("subscriptions") << "[";
-                    {
-                        bool first = true;
-
-                        recd->router().visit_subscriptions([&state, p_os, &first](TaggedPtr sub) {
-                                if (!first)
-                                    *p_os << ", ";
-                                first = false;
-
-                                state.print(sub);
-                            });
-                    }
-                    *p_os << "]";
 
                     /* chosen C++ members, for the page's "expand"
                      * (.xo-backlog/xo-websock/issues/13): the reflected ones

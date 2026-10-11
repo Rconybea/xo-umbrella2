@@ -358,6 +358,13 @@
                 }
               },
               {
+                "_canonical_type_" : "std::vector<std::unique_ptr<xo::web::WsSessionRouter::Subscription> >",
+                "_metatype_" : "vector",
+                "_name_" : "subscription_v_",
+                "_short_type_" : "vector<unique_ptr<Subscription>>",
+                "_value_" : []
+              },
+              {
                 "_canonical_type_" : "const xo::web::UrlRouter&",
                 "_metatype_" : "pointer",
                 "_name_" : "url_router_",
@@ -386,13 +393,6 @@
                 {
                   "_ref_" : 10
                 }
-              },
-              {
-                "_canonical_type_" : "std::vector<std::unique_ptr<xo::web::WsSessionRouter::Subscription> >",
-                "_metatype_" : "vector",
-                "_name_" : "subscription_v_",
-                "_short_type_" : "vector<unique_ptr<Subscription>>",
-                "_value_" : []
               }
             ],
             "_name_" : "WsSessionRouter",
@@ -470,8 +470,7 @@
         "refcount" : 2,
         "session_id" : 1
       },
-      "session_id" : 1,
-      "subscriptions" : []
+      "session_id" : 1
     },
     {
       "_canonical_type_" : "xo::web::WebsocketSessionRecd",
@@ -486,7 +485,7 @@
           "_value_" : 
           {
             "_canonical_type_" : "xo::web::WsSessionRouter",
-            "_id_" : 16,
+            "_id_" : 14,
             "_members_" : 
             [
               {
@@ -497,11 +496,135 @@
                 "_value_" : 
                 {
                   "_canonical_type_" : "Json::CharReader",
-                  "_id_" : 17,
+                  "_id_" : 15,
                   "_members_" : [],
                   "_name_" : "CharReader",
                   "_short_type_" : "CharReader"
                 }
+              },
+              {
+                "_canonical_type_" : "std::vector<std::unique_ptr<xo::web::WsSessionRouter::Subscription> >",
+                "_metatype_" : "vector",
+                "_name_" : "subscription_v_",
+                "_short_type_" : "vector<unique_ptr<Subscription>>",
+                "_value_" : 
+                [
+                  {
+                    "_canonical_type_" : "xo::web::WsSessionRouter::Subscription",
+                    "_id_" : 16,
+                    "_members_" : 
+                    [
+                      {
+                        "_canonical_type_" : "unsigned int",
+                        "_metatype_" : "atomic",
+                        "_name_" : "sub_id_",
+                        "_short_type_" : "unsigned int",
+                        "_value_" : 0
+                      },
+                      {
+                        "_canonical_type_" : "std::__cxx11::basic_string<char>",
+                        "_metatype_" : "atomic",
+                        "_name_" : "stream_name_",
+                        "_short_type_" : "string",
+                        "_value_" : "/fw"
+                      },
+                      {
+                        "_canonical_type_" : "xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>",
+                        "_metatype_" : "atomic",
+                        "_name_" : "callback_id_",
+                        "_short_type_" : "CallbackIdImpl<CallbackId_tag>",
+                        "_value_" : 1
+                      },
+                      {
+                        "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>",
+                        "_metatype_" : "pointer",
+                        "_name_" : "endpoint_",
+                        "_short_type_" : "rp<DynamicEndpoint>",
+                        "_value_" : 
+                        {
+                          "_ref_" : 3
+                        }
+                      },
+                      {
+                        "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WebsocketSink>",
+                        "_metatype_" : "pointer",
+                        "_name_" : "sink_",
+                        "_short_type_" : "rp<WebsocketSink>",
+                        "_value_" : 
+                        {
+                          "_ref_" : 17
+                        }
+                      }
+                    ],
+                    "_name_" : "Subscription",
+                    "_short_type_" : "Subscription",
+                    "endpoint" : 
+                    {
+                      "_ref_" : 3
+                    },
+                    "sink" : 
+                    {
+                      "_canonical_type_" : "xo::web::WebsocketSinkImpl",
+                      "_id_" : 17,
+                      "_members_" : 
+                      [
+                        {
+                          "_canonical_type_" : "std::__cxx11::basic_string<char>",
+                          "_metatype_" : "atomic",
+                          "_name_" : "stream_name_",
+                          "_short_type_" : "string",
+                          "_value_" : "/fw"
+                        },
+                        {
+                          "_canonical_type_" : "unsigned int",
+                          "_metatype_" : "atomic",
+                          "_name_" : "sub_id_",
+                          "_short_type_" : "unsigned int",
+                          "_value_" : 0
+                        },
+                        {
+                          "_canonical_type_" : "unsigned int",
+                          "_metatype_" : "atomic",
+                          "_name_" : "n_in_ev_",
+                          "_short_type_" : "unsigned int",
+                          "_value_" : 0
+                        },
+                        {
+                          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSender>",
+                          "_metatype_" : "pointer",
+                          "_name_" : "sender_",
+                          "_short_type_" : "rp<WsSender>",
+                          "_value_" : 
+                          {
+                            "_ref_" : 13
+                          }
+                        },
+                        {
+                          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
+                          "_metatype_" : "pointer",
+                          "_name_" : "pjson_",
+                          "_short_type_" : "rp<PrintJson>",
+                          "_value_" : 
+                          {
+                            "_ref_" : 10
+                          }
+                        }
+                      ],
+                      "_name_" : "WebsocketSink",
+                      "_short_type_" : "WebsocketSinkImpl",
+                      "refcount" : 2,
+                      "sender" : 
+                      {
+                        "_ref_" : 13
+                      },
+                      "seq" : 0,
+                      "stream" : "/fw",
+                      "sub_id" : 0
+                    },
+                    "stream" : "/fw",
+                    "sub_id" : 0
+                  }
+                ]
               },
               {
                 "_canonical_type_" : "const xo::web::UrlRouter&",
@@ -532,18 +655,6 @@
                 {
                   "_ref_" : 10
                 }
-              },
-              {
-                "_canonical_type_" : "std::vector<std::unique_ptr<xo::web::WsSessionRouter::Subscription> >",
-                "_metatype_" : "vector",
-                "_name_" : "subscription_v_",
-                "_short_type_" : "vector<unique_ptr<Subscription>>",
-                "_value_" : 
-                [
-                  {
-                    "_ref_" : 14
-                  }
-                ]
               }
             ],
             "_name_" : "WsSessionRouter",
@@ -621,125 +732,7 @@
         "refcount" : 3,
         "session_id" : 2
       },
-      "session_id" : 2,
-      "subscriptions" : 
-      [
-        {
-          "_canonical_type_" : "xo::web::WsSessionRouter::Subscription",
-          "_id_" : 14,
-          "_members_" : 
-          [
-            {
-              "_canonical_type_" : "unsigned int",
-              "_metatype_" : "atomic",
-              "_name_" : "sub_id_",
-              "_short_type_" : "unsigned int",
-              "_value_" : 0
-            },
-            {
-              "_canonical_type_" : "std::__cxx11::basic_string<char>",
-              "_metatype_" : "atomic",
-              "_name_" : "stream_name_",
-              "_short_type_" : "string",
-              "_value_" : "/fw"
-            },
-            {
-              "_canonical_type_" : "xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>",
-              "_metatype_" : "atomic",
-              "_name_" : "callback_id_",
-              "_short_type_" : "CallbackIdImpl<CallbackId_tag>",
-              "_value_" : 1
-            },
-            {
-              "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>",
-              "_metatype_" : "pointer",
-              "_name_" : "endpoint_",
-              "_short_type_" : "rp<DynamicEndpoint>",
-              "_value_" : 
-              {
-                "_ref_" : 3
-              }
-            },
-            {
-              "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WebsocketSink>",
-              "_metatype_" : "pointer",
-              "_name_" : "sink_",
-              "_short_type_" : "rp<WebsocketSink>",
-              "_value_" : 
-              {
-                "_ref_" : 15
-              }
-            }
-          ],
-          "_name_" : "Subscription",
-          "_short_type_" : "Subscription",
-          "endpoint" : 
-          {
-            "_ref_" : 3
-          },
-          "sink" : 
-          {
-            "_canonical_type_" : "xo::web::WebsocketSinkImpl",
-            "_id_" : 15,
-            "_members_" : 
-            [
-              {
-                "_canonical_type_" : "std::__cxx11::basic_string<char>",
-                "_metatype_" : "atomic",
-                "_name_" : "stream_name_",
-                "_short_type_" : "string",
-                "_value_" : "/fw"
-              },
-              {
-                "_canonical_type_" : "unsigned int",
-                "_metatype_" : "atomic",
-                "_name_" : "sub_id_",
-                "_short_type_" : "unsigned int",
-                "_value_" : 0
-              },
-              {
-                "_canonical_type_" : "unsigned int",
-                "_metatype_" : "atomic",
-                "_name_" : "n_in_ev_",
-                "_short_type_" : "unsigned int",
-                "_value_" : 0
-              },
-              {
-                "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSender>",
-                "_metatype_" : "pointer",
-                "_name_" : "sender_",
-                "_short_type_" : "rp<WsSender>",
-                "_value_" : 
-                {
-                  "_ref_" : 13
-                }
-              },
-              {
-                "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
-                "_metatype_" : "pointer",
-                "_name_" : "pjson_",
-                "_short_type_" : "rp<PrintJson>",
-                "_value_" : 
-                {
-                  "_ref_" : 10
-                }
-              }
-            ],
-            "_name_" : "WebsocketSink",
-            "_short_type_" : "WebsocketSinkImpl",
-            "refcount" : 2,
-            "sender" : 
-            {
-              "_ref_" : 13
-            },
-            "seq" : 0,
-            "stream" : "/fw",
-            "sub_id" : 0
-          },
-          "stream" : "/fw",
-          "sub_id" : 0
-        }
-      ]
+      "session_id" : 2
     }
   ],
   "state" : "running"

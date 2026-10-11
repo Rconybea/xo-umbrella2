@@ -634,10 +634,6 @@ namespace xo {
             REQUIRE(v[0]["sender"]["refcount"].asUInt() == 2);
             REQUIRE(v[1]["sender"]["refcount"].asUInt() == 3);
 
-            REQUIRE(v[0]["subscriptions"].empty());
-            REQUIRE(v[1]["subscriptions"].size() == 1);
-            REQUIRE(v[1]["subscriptions"][0]["stream"].asString() == "/fw");
-
             /* each session's chosen C++ members (.xo-backlog/xo-websock/issues/13):
              * sender_ a ref to the sender printed in full above
              */
@@ -648,6 +644,20 @@ namespace xo {
                         return m;
                 return Json::Value();
             };
+
+            /* session @p k's subscriptions: in full in its router's
+             * subscription_v_, slot order (xo-websock#15) -- no
+             * "subscriptions" list
+             */
+            auto subs_of = [&](Json::ArrayIndex k) {
+                Json::Value const router = entry_of(v[k]["_members_"], "router_")["_value_"];
+                return entry_of(router["_members_"], "subscription_v_")["_value_"];
+            };
+
+            REQUIRE(!v[0].isMember("subscriptions"));
+            REQUIRE(subs_of(0).empty());
+            REQUIRE(subs_of(1).size() == 1);
+            REQUIRE(entry_of(subs_of(1)[0]["_members_"], "stream_name_")["_value_"].asString() == "/fw");
 
             for (Json::ArrayIndex k = 0; k < 2; ++k) {
                 Json::Value const & mem = v[k]["_members_"];
@@ -688,9 +698,11 @@ namespace xo {
                 for (Json::Value const & m : rmem)
                     rnames.push_back(m["_name_"].asString());
 
-                /* reflected members first (readjson_), then the rest */
-                REQUIRE(rnames == std::vector<std::string>{"readjson_", "url_router_", "sender_",
-                                                           "pjson_", "subscription_v_"});
+                /* reflected members first -- readjson_, then subscription_v_
+                 * under the router's mutex (xo-websock#15) -- then the rest
+                 */
+                REQUIRE(rnames == std::vector<std::string>{"readjson_", "subscription_v_",
+                                                           "url_router_", "sender_", "pjson_"});
 
                 Json::Value const url_router = entry_of(rmem, "url_router_");
                 REQUIRE(url_router["_metatype_"].asString() == "pointer");   /* a reference */
@@ -707,14 +719,17 @@ namespace xo {
                 REQUIRE(readjson["_value_"]["_name_"].asString() == "CharReader");
                 REQUIRE(readjson["_value_"]["_members_"].empty());
 
+                /* owning (unique_ptr): each subscription placed here, in
+                 * full -- not a ref
+                 */
                 Json::Value const subscription_v = entry_of(rmem, "subscription_v_");
                 Json::Value const & slots = subscription_v["_value_"];
-                Json::Value const & subs = v[k]["subscriptions"];
 
                 REQUIRE(subscription_v["_metatype_"].asString() == "vector");
-                REQUIRE(slots.size() == subs.size());
-                for (Json::ArrayIndex i = 0; i < subs.size(); ++i)
-                    REQUIRE(slots[i]["_ref_"].asInt() == subs[i]["_id_"].asInt());
+                for (Json::Value const & slot : slots) {
+                    REQUIRE(slot.isMember("_id_"));
+                    REQUIRE(slot["_name_"].asString() == "Subscription");
+                }
             }
 
             /* the server's session table: session id -> a ref to that
@@ -759,7 +774,7 @@ namespace xo {
              * is held by the router's slot and by the endpoint's subscriber
              * (the test's SinkBox)
              */
-            Json::Value const & sub = v[1]["subscriptions"][0];
+            Json::Value const sub = subs_of(1)[0];
 
             REQUIRE(sub["endpoint"]["_ref_"].asInt() == eps[0]["_id_"].asInt());
             REQUIRE(sub["sink"]["sender"]["_ref_"].asInt() == v[1]["sender"]["_id_"].asInt());
