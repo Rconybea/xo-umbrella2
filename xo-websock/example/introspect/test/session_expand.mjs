@@ -31,17 +31,19 @@ await mouse("mouseMoved", b.x, b.y, "none"); await mouse("mousePressed", b.x, b.
 await sleep(800);
 const rows = await ev(`[...${sel}.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 console.log(" =  rows:", JSON.stringify(rows));
-// reflected members first (router_), then the rest (xo-printjson#06)
-// output_buf_: placed here (owning, xo-websock#15), so its type, anonymous
-// namespace dropped; last_msg_seq_ beside it, both under the session mutex
-check(rows.length === 5 && rows[1] === "output_buf_: OutputBuffer", "5 rows; anonymous namespace dropped: " + rows[1]);
-check(/^last_msg_seq_: [0-9]+$/.test(rows[2]), "last_msg_seq_ a number: " + rows[2]);
-// outbound_q_: the queued messages themselves, under the same mutex
-// (xo-reflect#04) -- none, settled; then sender_
-check(rows[3] === "outbound_q_: []", "outbound_q_ its messages: " + rows[3]);
-check(rows[4] === "sender_: ▾ (→)", "sender_ a ref: " + rows[4]);
-check(await ev(`${VIS}.length`) === 2, "two member edges: sender_, and router_ -- its own (nested) box");
-const geo = await ev(`(() => { const p = ${VIS}.find(p => p.__data__.row_keys.includes("session:1/sender_")).getAttribute("d"); const n = p.match(/-?[0-9.]+/g).map(Number);
+// from reflection (generic printer, xo-websock#16): unguarded first --
+// router, sender -- then, under the session mutex, output_buf: placed here
+// (owning, xo-websock#15), so its type, anonymous namespace dropped;
+// last_msg_seq beside it
+check(rows.length === 5 && rows[2] === "output_buf: OutputBuffer", "5 rows; anonymous namespace dropped: " + rows[2]);
+check(/^last_msg_seq: [0-9]+$/.test(rows[3]), "last_msg_seq a number: " + rows[3]);
+// outbound_q: the queued messages themselves, under the same mutex
+// (xo-reflect#04) -- none, settled.  sender: shared, placed here; a ref
+// row to its own box
+check(rows[4] === "outbound_q: []", "outbound_q its messages: " + rows[4]);
+check(rows[1] === "sender: ▾ (→)", "sender a ref to its box: " + rows[1]);
+check(await ev(`${VIS}.length`) === 2, "two member edges: sender, and router -- its own (nested) box");
+const geo = await ev(`(() => { const p = ${VIS}.find(p => p.__data__.row_keys.includes("session:1/sender")).getAttribute("d"); const n = p.match(/-?[0-9.]+/g).map(Number);
    const ex = n[n.length-2], ey = n[n.length-1];
    const snd = document.querySelector("g.node.sender"); // the expanded session's sender:
    const senders = [...document.querySelectorAll("g.node.sender")].map(g => { const t = g.transform.baseVal[0].matrix, r = g.querySelector("rect"); return {x: t.e, y: t.f, w: +r.getAttribute("width"), h: +r.getAttribute("height"), id: g.__data__.id}; });

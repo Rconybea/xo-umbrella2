@@ -270,8 +270,8 @@ function layout(event) {
 
     for (const [session_id, s] of map_entries(mv(server, "session_table"), "session_map")) {
         const id = `session:${session_id}`;
-        const sender = deref(mv(s, "sender_"));
-        const open = sender && mv(sender, "open_");
+        const sender = deref(mv(s, "sender"));
+        const open = sender && mv(sender, "open");
 
         nodes.push({id: id, kind: open ? "session" : "session closed",
                     label: `session ${session_id}`, type: s._canonical_type_, obj: s});
@@ -284,7 +284,7 @@ function layout(event) {
             edge(id, snd, "owns");
         }
 
-        for (const sub of (mv(mv(s, "router_"), "subscription_v_") || []).map(deref).filter(x => x)) {
+        for (const sub of (mv(mv(s, "router"), "subscription_v_") || []).map(deref).filter(x => x)) {
             const sid = `${id}:sub:${mv(sub, "sub_id_")}`;
             const sink = deref(mv(sub, "sink_"));
             // the sink's sender should be this session's: flag it if not

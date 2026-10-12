@@ -647,44 +647,6 @@ namespace xo {
 
             INFO("json: " << root.toStyledString());
 
-            /* by id, in connection order; distinct */
-            REQUIRE(v.size() == 2);
-            REQUIRE(v[0]["_name_"].asString() == "WsSession");
-            REQUIRE(v[0]["_canonical_type_"].asString() == "xo::web::WebsocketSessionRecd");
-            REQUIRE(v[0]["session_id"].asUInt64() < v[1]["session_id"].asUInt64());
-            REQUIRE(v[0]["_id_"].asInt() != v[1]["_id_"].asInt());
-
-            /* each session's sender, in full: open; its session's id; held
-             * by the session record and the router, plus one per sink
-             */
-            for (Json::ArrayIndex k = 0; k < 2; ++k) {
-                Json::Value const & sender = v[k]["sender"];
-
-                REQUIRE(sender["_name_"].asString() == "WsSessionSender");
-
-                /* its chosen C++ members: target_ a ref to the server */
-                Json::Value const & smem = sender["_members_"];
-                /* reflected members first (session_id_, open_), then the rest */
-                REQUIRE(smem[0]["_name_"].asString() == "session_id_");
-                REQUIRE(smem[0]["_value_"].asUInt64() == v[k]["session_id"].asUInt64());
-                /* a std::atomic<bool>: its load()ed value (xo-reflect#04) */
-                REQUIRE(smem[1]["_name_"].asString() == "open_");
-                REQUIRE(smem[1]["_canonical_type_"].asString() == "std::atomic<bool>");
-                REQUIRE(smem[1]["_value_"].asBool());
-                REQUIRE(smem[2]["_name_"].asString() == "target_");
-                REQUIRE(smem[2]["_value_"]["_ref_"].asInt() == root["_id_"].asInt());
-                /* a template: its arguments follow */
-                REQUIRE(sender["_canonical_type_"].asString().starts_with("xo::web::WsSessionSender<"));
-                REQUIRE(sender["_short_type_"].asString().starts_with("WsSessionSender<"));
-                REQUIRE(sender["open"].asBool());
-                REQUIRE(sender["session_id"].asUInt64() == v[k]["session_id"].asUInt64());
-            }
-            REQUIRE(v[0]["sender"]["refcount"].asUInt() == 2);
-            REQUIRE(v[1]["sender"]["refcount"].asUInt() == 3);
-
-            /* each session's chosen C++ members (.xo-backlog/xo-websock/issues/13):
-             * sender_ a ref to the sender printed in full above
-             */
             /* a "_members_" entry by name: robust to member order */
             auto entry_of = [](Json::Value const & mem, std::string const & name) {
                 for (Json::Value const & m : mem)
@@ -692,13 +654,59 @@ namespace xo {
                         return m;
                 return Json::Value();
             };
+            /* session @p k's sender: in full in its reflected sender member
+             * (shared, placed here -- xo-websock#16); and its id, the
+             * sender's session_id
+             */
+            auto sender_of = [&](Json::ArrayIndex k) {
+                return entry_of(v[k]["_members_"], "sender")["_value_"];
+            };
+            auto session_id_of = [&](Json::ArrayIndex k) {
+                return entry_of(sender_of(k)["_members_"], "session_id")["_value_"].asUInt64();
+            };
+
+            /* by id, in connection order; distinct.  Printed from reflection
+             * (xo-websock#16): _name_ is the short type, no view-model keys
+             */
+            REQUIRE(v.size() == 2);
+            REQUIRE(v[0]["_name_"].asString() == "WebsocketSessionRecd");
+            REQUIRE(v[0]["_canonical_type_"].asString() == "xo::web::WebsocketSessionRecd");
+            REQUIRE(!v[0].isMember("session_id"));
+            REQUIRE(!v[0].isMember("sender"));
+            REQUIRE(session_id_of(0) < session_id_of(1));
+            REQUIRE(v[0]["_id_"].asInt() != v[1]["_id_"].asInt());
+
+            /* each session's sender, in full: open; its session's id */
+            for (Json::ArrayIndex k = 0; k < 2; ++k) {
+                Json::Value const sender = sender_of(k);   /* a copy: entry_of returns one */
+
+                /* a template: its arguments follow */
+                REQUIRE(sender["_name_"].asString().starts_with("WsSessionSender<"));
+                REQUIRE(sender["_canonical_type_"].asString().starts_with("xo::web::WsSessionSender<"));
+                REQUIRE(sender["_short_type_"].asString().starts_with("WsSessionSender<"));
+                REQUIRE(sender.isMember("_id_"));
+                /* no view-model keys (refcount, open, session_id): members */
+                REQUIRE(!sender.isMember("refcount"));
+                REQUIRE(!sender.isMember("open"));
+
+                Json::Value const & smem = sender["_members_"];
+                REQUIRE(smem[0]["_name_"].asString() == "session_id");
+                REQUIRE(smem[0]["_value_"].asUInt64() > 0);
+                /* a std::atomic<bool>: its load()ed value (xo-reflect#04) */
+                REQUIRE(smem[1]["_name_"].asString() == "open");
+                REQUIRE(smem[1]["_canonical_type_"].asString() == "std::atomic<bool>");
+                REQUIRE(smem[1]["_value_"].asBool());
+                /* target: the server, a raw pointer -- borrowed, a ref */
+                REQUIRE(smem[2]["_name_"].asString() == "target");
+                REQUIRE(smem[2]["_value_"]["_ref_"].asInt() == root["_id_"].asInt());
+            }
 
             /* session @p k's subscriptions: in full in its router's
              * subscription_v_, slot order (xo-websock#15) -- no
              * "subscriptions" list
              */
             auto subs_of = [&](Json::ArrayIndex k) {
-                Json::Value const router = entry_of(v[k]["_members_"], "router_")["_value_"];
+                Json::Value const router = entry_of(v[k]["_members_"], "router")["_value_"];
                 return entry_of(router["_members_"], "subscription_v_")["_value_"];
             };
 
@@ -714,32 +722,34 @@ namespace xo {
                 for (Json::Value const & m : mem)
                     names.push_back(m["_name_"].asString());
 
-                /* reflected members first -- router_, then output_buf_,
-                 * last_msg_seq_ and outbound_q_ under the session's mutex
-                 * (xo-websock#15) -- then sender_
+                /* reflected, from the generic printer (xo-websock#16):
+                 * unguarded first -- router, sender -- then output_buf,
+                 * last_msg_seq and outbound_q under the session's mutex
+                 * (xo-websock#15)
                  */
-                REQUIRE(names == std::vector<std::string>{"router_", "output_buf_", "last_msg_seq_",
-                                                          "outbound_q_", "sender_"});
-                /* output_buf_ placed here (owning): its OutputBuffer, or null
+                REQUIRE(names == std::vector<std::string>{"router", "sender", "output_buf",
+                                                          "last_msg_seq", "outbound_q"});
+                /* output_buf placed here (owning): its OutputBuffer, or null
                  * between writes -- not a ref
                  */
                 {
-                    Json::Value const ob = entry_of(mem, "output_buf_")["_value_"];   /* a copy: entry_of returns one */
+                    Json::Value const ob = entry_of(mem, "output_buf")["_value_"];   /* a copy: entry_of returns one */
                     REQUIRE((ob.isNull() || (ob.isObject() && ob.isMember("_id_"))));
                 }
-                REQUIRE(entry_of(mem, "sender_")["_metatype_"].asString() == "pointer");
-                REQUIRE(entry_of(mem, "sender_")["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
-                REQUIRE(entry_of(mem, "router_")["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
+                /* sender: shared (rp), placed here in full -- not a ref */
+                REQUIRE(entry_of(mem, "sender")["_metatype_"].asString() == "pointer");
+                REQUIRE(entry_of(mem, "sender")["_value_"].isMember("_id_"));
+                REQUIRE(entry_of(mem, "router")["_canonical_type_"].asString() == "xo::web::WsSessionRouter");
                 /* the queued messages themselves (xo-reflect#04): none, settled */
-                REQUIRE(entry_of(mem, "outbound_q_")["_metatype_"].asString() == "vector");
-                REQUIRE(entry_of(mem, "outbound_q_")["_value_"].isArray());
-                REQUIRE(entry_of(mem, "outbound_q_")["_value_"].size() == 0);
+                REQUIRE(entry_of(mem, "outbound_q")["_metatype_"].asString() == "vector");
+                REQUIRE(entry_of(mem, "outbound_q")["_value_"].isArray());
+                REQUIRE(entry_of(mem, "outbound_q")["_value_"].size() == 0);
 
                 /* the router, nested: its own members.  sender_ the same
                  * sender (by most-derived address); subscription_v_ refs to
                  * exactly the subscriptions printed under the session
                  */
-                Json::Value const router = entry_of(mem, "router_");   /* a copy: entry_of returns one */
+                Json::Value const router = entry_of(mem, "router");   /* a copy: entry_of returns one */
                 Json::Value const & rmem = router["_value_"]["_members_"];
 
                 std::vector<std::string> rnames;
@@ -757,7 +767,7 @@ namespace xo {
                 /* ... to the server's url router, printed inside the server */
                 REQUIRE(url_router["_value_"]["_ref_"].asInt()
                         == entry_of(root["_members_"], "url_router")["_value_"]["_id_"].asInt());
-                REQUIRE(entry_of(rmem, "sender_")["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
+                REQUIRE(entry_of(rmem, "sender_")["_value_"]["_ref_"].asInt() == sender_of(k)["_id_"].asInt());
 
                 /* a unique_ptr to jsoncpp's reader, reflected with no members:
                  * present, so an empty object (xo-reflect#04)
@@ -793,12 +803,12 @@ namespace xo {
                 Json::Value const & smap = (*st)["_members_"][1]["_value_"];
                 REQUIRE(smap.size() == v.size());
                 for (Json::ArrayIndex k = 0; k < v.size(); ++k) {
-                    std::string const sid = std::to_string(v[k]["session_id"].asUInt64());
+                    std::string const sid = std::to_string(session_id_of(k));
                     REQUIRE(smap[sid].isMember("_id_"));
-                    REQUIRE(smap[sid]["_name_"].asString() == "WsSession");
+                    REQUIRE(smap[sid]["_id_"].asInt() == v[k]["_id_"].asInt());   /* keyed by its own id */
                 }
                 REQUIRE((*st)["_members_"][0]["_value_"].asUInt64()
-                        > v[v.size() - 1]["session_id"].asUInt64());
+                        > session_id_of(v.size() - 1));
             }
 
             /* nothing a printer opted in to is unprintable */
@@ -808,7 +818,7 @@ namespace xo {
                 REQUIRE(text.find("\"_error_\"") == std::string::npos);
             }
 
-            std::uint64_t second_id = v[1]["session_id"].asUInt64();
+            std::uint64_t second_id = session_id_of(1);
 
             /* the /fw endpoint is held by the router's map and by the one
              * subscription served: refcount 2
@@ -828,7 +838,7 @@ namespace xo {
             Json::Value const sub = subs_of(1)[0];
 
             REQUIRE(sub["endpoint"]["_ref_"].asInt() == eps[0]["_id_"].asInt());
-            REQUIRE(sub["sink"]["sender"]["_ref_"].asInt() == v[1]["sender"]["_id_"].asInt());
+            REQUIRE(sub["sink"]["sender"]["_ref_"].asInt() == sender_of(1)["_id_"].asInt());
             REQUIRE(sub["sink"]["refcount"].asUInt() == 2);
 
             /* a closed session leaves the listing */
@@ -836,7 +846,11 @@ namespace xo {
             first.reset();
 
             REQUIRE(wait_until([&] { return n_session() == 1; }));
-            REQUIRE(sessions_of(server_json())[0]["session_id"].asUInt64() == second_id);
+            {
+                Json::Value const left = sessions_of(server_json())[0];
+                Json::Value const sender = entry_of(left["_members_"], "sender")["_value_"];
+                REQUIRE(entry_of(sender["_members_"], "session_id")["_value_"].asUInt64() == second_id);
+            }
         }
 
         namespace {
@@ -853,7 +867,7 @@ namespace xo {
                     "listen_port",     /* the port the kernel chose (the server: generic printer, no "_") */
                     "port",            /* the config's copy: 0, or the port chosen */
                     "mount_origin",    /* a path */
-                    "output_buf_",     /* its id, or null between writes */
+                    "output_buf",      /* its id, or null between writes */
                 };
 
                 if (v.isArray()) {

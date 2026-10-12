@@ -353,10 +353,6 @@ namespace xo {
                 //int current; /* the current message number we are caching */
             }; /*per_vhost_data__minimal*/
 
-            /* the session record's json printer, defined below: shows chosen
-             * private members
-             */
-            class JsonPrinter_WsSession;
         } /*namespace*/
 
         class WebserverImpl;
@@ -398,9 +394,6 @@ namespace xo {
              */
             static void reflect_self(reflect::TypeDescrTable * table);
 
-            /* for introspection (JsonPrinter_WsSession) */
-            std::uint64_t session_id() const { return this->sender_->session_id(); }
-            WsSessionSenderImpl const & sender() const { return *(this->sender_.get()); }
             WsSessionRouter const & router() const { return router_; }
 
             bool is_output_busy() const {
@@ -540,13 +533,6 @@ namespace xo {
             } /*unsubscribe_all*/
 
         private:
-            /* reads private members, for "_members_".  NOT "friend class
-             * JsonPrinter_WsSession": that form does not look into the
-             * anonymous namespace, and would befriend a new class
-             * xo::web::JsonPrinter_WsSession instead
-             */
-            friend JsonPrinter_WsSession;
-
             uint32_t generate_msg_seq() { return ++(this->last_msg_seq_); }
 
             /* enqueue application-level message.
@@ -1045,97 +1031,6 @@ namespace xo {
                                  const_cast<WebsocketSessionRecd *>(&recd)));
                 });
         } /*visit_sessions*/
-
-        /** @brief a session's sender: owned (held) by the session record,
-         *  its router, and every sink made there.  Printed in full under
-         *  its session; a sink will show it as a ref (5d).  Not in the
-         *  anonymous namespace: WsSessionSender befriends it by name, for
-         *  "_members_"
-         **/
-        class JsonPrinter_WsSessionSender : public JsonPrinter {
-        public:
-            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                WsSessionSenderImpl const * x
-                    = this->check_recover_native<WsSessionSenderImpl>(tp, state);
-
-                if (!x)
-                    return;
-
-                json::JsonObject obj = state.open_object("WsSessionSender", tp.td());
-
-                /* session record + router + one per live sink */
-                obj.key("refcount", x->reference_counter())
-                    .key("session_id", x->session_id())
-                    .key("open", x->is_open());
-
-                /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
-                 * reflected ones (session_id_, open_), then the server,
-                 * printed in full elsewhere, as a ref
-                 */
-                obj.members()
-                    .reflected_members(tp, "_")
-                    .member_ref<WebserverImpl *>("target_", x->target_)
-                    .end();
-
-                obj.close();
-            }
-        };
-
-        namespace {
-
-            /** @brief a live session: its id, its sender (in full), and its
-             *  subscriptions (in full, each with its sink)
-             **/
-            class JsonPrinter_WsSession : public JsonPrinter {
-            public:
-                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    WebsocketSessionRecd const * recd
-                        = this->check_recover_native<WebsocketSessionRecd>(tp, state);
-
-                    if (!recd)
-                        return;
-
-                    json::JsonObject obj = state.open_object("WsSession", tp.td());
-
-                    obj.key("session_id", recd->session_id())
-                        .child("sender",
-                               TaggedPtr(Reflect::require<WsSessionSenderImpl>(),
-                                         const_cast<WsSessionSenderImpl *>(&recd->sender())));
-
-                    /* no "subscriptions" list: they print in full in
-                     * router_'s subscription_v_, an owning edge -- a list
-                     * here would place them first, a second owner
-                     * (.xo-backlog/xo-websock/issues/15)
-                     */
-
-                    /* chosen C++ members, for the page's "expand"
-                     * (.xo-backlog/xo-websock/issues/13): the reflected ones
-                     * (router_; output_buf_, last_msg_seq_, outbound_q_ under
-                     * the session's mutex, which reflected_members takes),
-                     * then sender_ -- printed in full above, so a ref here.
-                     * This printer takes no lock (.xo-backlog/xo-websock/issues/15)
-                     */
-                    obj.members()
-                        .reflected_members(tp, "_")
-                        .member_ref<rp<WsSessionSenderImpl>>("sender_", recd->sender_.get())
-                        .end();
-
-                    obj.close();
-                }
-            };
-        } /*namespace*/
-
-        void
-        provide_webserver_json_printers(PrintJson * pjson)
-        {
-            /* the session table: no printer -- the generic one, from
-             * reflection (.xo-backlog/xo-websock/issues/16)
-             */
-            pjson->provide_printer(Reflect::require<WebsocketSessionRecd>(),
-                                   std::make_unique<JsonPrinter_WsSession>());
-            pjson->provide_printer(Reflect::require<WsSessionSenderImpl>(),
-                                   std::make_unique<JsonPrinter_WsSessionSender>());
-        } /*provide_webserver_json_printers*/
 
         bool
         WebserverImpl::unregister_http_endpoint(std::string const & uri_pattern)
@@ -2152,12 +2047,14 @@ namespace xo {
             StructReflector<WsSessionSenderImpl> sr;
 
             if (sr.is_incomplete()) {
-                /* not target_: the server, printed in full elsewhere -- a
-                 * ref.  open_: a std::atomic, printed by its load()ed value
-                 * (.xo-backlog/xo-reflect/issues/04)
+                /* open_: a std::atomic, printed by its load()ed value
+                 * (.xo-backlog/xo-reflect/issues/04).  target_: the server,
+                 * a raw pointer -- borrowed, so a ref
+                 * (.xo-backlog/xo-printjson/issues/08)
                  */
                 REFLECT_MEMBER(sr, session_id);
                 REFLECT_MEMBER(sr, open);
+                REFLECT_MEMBER(sr, target);
             }
         } /*reflect_self*/
 
@@ -2168,6 +2065,10 @@ namespace xo {
 
             if (sr.is_incomplete()) {
                 REFLECT_MEMBER(sr, router);
+                /* its sender: shared (rp), placed here -- the router's and
+                 * sinks' sender_ are refs (.xo-backlog/xo-websock/issues/16)
+                 */
+                REFLECT_MEMBER(sr, sender);
                 REFLECT_MEMBER(sr, output_buf).owning().guarded_by(&WebsocketSessionRecd::mutex_);
                 REFLECT_MEMBER(sr, last_msg_seq).guarded_by(&WebsocketSessionRecd::mutex_);
                 REFLECT_MEMBER(sr, outbound_q).guarded_by(&WebsocketSessionRecd::mutex_);

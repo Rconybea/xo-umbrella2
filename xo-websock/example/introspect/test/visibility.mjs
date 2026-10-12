@@ -31,8 +31,8 @@ const menu_click = async (label) => { await ev(`[...document.querySelectorAll("#
 const esc = () => ev(`document.body.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}))`);
 // nested structs have boxes of their own, and own what their refs reach:
 // the server owns ws_config, url_router, session_table; the UrlRouter its
-// endpoints; the session table its sessions; a session's router_ its sub
-const U = "server/url_router", T = "server/session_table", R1 = "session:1/router_";
+// endpoints; the session table its sessions; a session's router its sub
+const U = "server/url_router", T = "server/session_table", R1 = "session:1/router";
 
 check(JSON.stringify(await ids()) === JSON.stringify(["server"]), "default: only the Webserver box");
 check(await kids_text("server") === "▸3", "its toggle: 3 hidden children (its nested boxes): " + await kids_text("server"));
@@ -192,14 +192,14 @@ const overl = await ev(`(() => { const r = [...document.querySelectorAll("g.node
 check(overl === 0, "no overlaps");
 
 // a ref row's triangle follows its TARGET: the sender is reached by session
-// 1's sender_, its router's sender_ and its sink's sender_ (all wanted)
+// 1's sender, its router's sender_ and its sink's sender_ (all wanted)
 await set_open("session:1", true);
-const sender_row = async () => ev(`[...${G("session:1")}.querySelectorAll("text.row")].filter(t => t.__data__.m._name_ === "sender_").map(${rowtext})[0]`);
-check((await sender_row()).endsWith(": ▾ (→)"), "sender_ reads ▾: its target drawn");
-await ev(`[...${G("session:1")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "sender_").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(900);
+const sender_row = async () => ev(`[...${G("session:1")}.querySelectorAll("text.row")].filter(t => t.__data__.m._name_ === "sender").map(${rowtext})[0]`);
+check((await sender_row()).endsWith(": ▾ (→)"), "sender reads ▾: its target drawn");
+await ev(`[...${G("session:1")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "sender").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(900);
 check(!(await ids()).includes("session:1:sender") && (await sender_row()).endsWith(": ▸ (→)"),
       "clicking it hides the sender despite the router's and sink's edges, and it reads ▸: " + await sender_row());
-await ev(`[...${G("session:1")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "sender_").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(900);
+await ev(`[...${G("session:1")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "sender").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(900);
 check((await ids()).includes("session:1:sender") && (await sender_row()).endsWith(": ▾ (→)"), "clicking ▸ shows it again, ▾");
 await set_open("session:1", false);
 fs.writeFileSync(out, Buffer.from((await call("Page.captureScreenshot", {format: "png", captureBeyondViewport: true, clip: {x: 0, y: 0, width: 1800, height: 1100, scale: 1}})).result.data, "base64"));

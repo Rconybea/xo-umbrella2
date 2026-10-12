@@ -25,8 +25,8 @@ await ev(`document.getElementById("show-all").click(); 1`); await ev(`settled()`
 const on_ids = await ids();
 const nested = on_ids.filter(x => /^(server|session:\d+)\//.test(x));
 console.log("   nested boxes:", JSON.stringify(nested));
-check(JSON.stringify(nested.sort()) === JSON.stringify(["server/session_table", "server/url_router", "server/ws_config", "session:1/router_", "session:2/router_"]),
-      "the structs get boxes -- url_router, session_table, ws_config, each session's router_");
+check(JSON.stringify(nested.sort()) === JSON.stringify(["server/session_table", "server/url_router", "server/ws_config", "session:1/router", "session:2/router"]),
+      "the structs get boxes -- url_router, session_table, ws_config, each session's router");
 check(await ev(`[...document.querySelectorAll("g.node")].filter(g => g.__data__.kind === "nested").map(g => g.__data__.id).sort().join()`) === nested.join(),
       "... each of kind nested");
 check(!(await ev(`document.getElementById("nested-boxes")`)), "no nested-boxes checkbox: always on");
@@ -40,7 +40,7 @@ console.log("   groups:", JSON.stringify(enc));
 check(enc["server"] === true && enc["session:1"] === true, "each group outline encloses its holder and nested boxes");
 // edges from elsewhere arrive at the nested box
 const into = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.target === "server/url_router").map(p => p.__data__.from).sort()`);
-check(JSON.stringify(into) === JSON.stringify(["server", "session:1/router_", "session:2/router_"]), "UrlRouter's box: edges from the server and from both session routers: " + JSON.stringify(into));
+check(JSON.stringify(into) === JSON.stringify(["server", "session:1/router", "session:2/router"]), "UrlRouter's box: edges from the server and from both session routers: " + JSON.stringify(into));
 check(await ev(`document.querySelectorAll("path.edge.link, path.edge.owns, path.edge.nests").length`) === 0, "no ownership fallback edges drawn (endpoints reached through url_router)");
 // the holder's row is a ref row; its ▾ hides the nested box
 await ev(`expanded.add("server"); redraw(); 1`); await ev(`settled()`);

@@ -3,10 +3,11 @@
  *  @author Roland Conybeare, Sep 2026
  *
  *  INTERNAL to xo-websock (not installed): json printers for types private
- *  to one translation unit, defined where those types are visible --
- *  the server (WebserverImpl), its session record and sender
- *  (Webserver.cpp), a router's subscription
- *  (WsSessionRouter.cpp).  Called from provide_websock_json_printers.
+ *  to one translation unit, defined where those types are visible -- a
+ *  session's router and its subscription (WsSessionRouter.cpp).  Called
+ *  from provide_websock_json_printers.  The server, its session record and
+ *  sender print from reflection, with no printer
+ *  (.xo-backlog/xo-websock/issues/16)
  **/
 
 #pragma once
@@ -15,7 +16,6 @@
 
 namespace xo {
     namespace web {
-        void provide_webserver_json_printers(json::PrintJson * pjson);
         void provide_router_json_printers(json::PrintJson * pjson);
     } /*namespace web*/
 } /*namespace xo*/

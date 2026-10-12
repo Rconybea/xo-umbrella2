@@ -153,11 +153,7 @@ namespace xo {
                                    std::make_unique<JsonPrinter_DynamicEndpoint>());
             pjson->provide_printer(Reflect::require<WebsocketSink>(),
                                    std::make_unique<JsonPrinter_WebsocketSink>());
-            /* types private to one file, printed there -- including the
-             * server: a Webserver* is reflected as its actual type,
-             * WebserverImpl (SelfTaggingDisplayable)
-             */
-            provide_webserver_json_printers(pjson);
+            /* types private to one file, printed there */
             provide_router_json_printers(pjson);
         }
     } /*namespace web*/

@@ -62,10 +62,6 @@ namespace xo {
             static void reflect_self(reflect::TypeDescrTable * table);
 
         private:
-            /* reads private members, for "_members_" (Webserver.cpp) */
-            friend class JsonPrinter_WsSessionSender;
-
-        private:
             /* where text goes; borrowed, see class comment */
             Target * target_ = nullptr;
             /* the session this sender delivers to */

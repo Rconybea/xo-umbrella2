@@ -26,15 +26,16 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
   return [...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from === ${JSON.stringify(from)}).map(p => { const n = p.getAttribute("d").match(/-?[0-9.]+/g).map(Number); const ex = n[n.length-2], ey = n[n.length-1];
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }).sort(); })()`);
 
-// a sender box: target_ is the server -> an edge to the server box
+// a sender box: target is the server -> an edge to the server box
 check(await ev(`${box("session:1:sender")}.classList.contains("expandable")`), "the sender box is expandable");
 await ev(`${box("session:1:sender")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 const r = await rows_of("session:1:sender");
 console.log(" =  rows:", JSON.stringify(r));
-// reflected members first (session_id_, open_ -- a std::atomic), then the rest (xo-printjson#06, xo-reflect#04)
-check(JSON.stringify(r) === JSON.stringify(["session_id_: 1", "open_: true", "target_: (→)"]), "three rows");
+// from reflection (xo-websock#16): session_id, open (a std::atomic,
+// xo-reflect#04), target (a raw pointer: borrowed, a ref)
+check(JSON.stringify(r) === JSON.stringify(["session_id: 1", "open: true", "target: (→)"]), "three rows");
 const ends = await ends_from("session:1:sender");
-check(JSON.stringify(ends) === JSON.stringify(["server"]), "target_ -> the server box: " + JSON.stringify(ends));
+check(JSON.stringify(ends) === JSON.stringify(["server"]), "target -> the server box: " + JSON.stringify(ends));
 // ownership still decides the layering: the server above its sessions
 const ys = await ev(`(() => { const y = id => [...document.querySelectorAll("g.node")].find(g => g.__data__.id === id).transform.baseVal[0].matrix.f; return {server: y("server"), s1: y("session:1"), s2: y("session:2")}; })()`);
 check(ys.server < ys.s1 && ys.server < ys.s2, "server above its sessions: " + JSON.stringify(ys));

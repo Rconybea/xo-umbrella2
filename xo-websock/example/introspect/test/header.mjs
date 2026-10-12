@@ -22,7 +22,7 @@ check(hd.server.sub === `:${lport} (running)`, "server: :port (running): " + hd.
 check(hd["http:/types"].sub === "/types" && hd["stream:/introspect"].sub === "/introspect", "endpoints: their pattern");
 check(hd["session:1"].sub === "session 1", "session: session 1");
 check(hd["session:1:sub:0"].sub.startsWith("sub 0 · /"), "subscription: sub 0 · <stream>: " + hd["session:1:sub:0"].sub);
-check(["session:1:sender", "session:1:sub:0:sink", "stream:/introspect:receiver", "server/url_router", "session:1/router_"].every(id => hd[id].sub === null),
+check(["session:1:sender", "session:1:sub:0:sink", "stream:/introspect:receiver", "server/url_router", "session:1/router"].every(id => hd[id].sub === null),
       "sender, sink, receiver, nested: the type alone");
 // the title: smaller, not grey -- the type's colour
 const st = await ev(`(() => { const f = (id, c) => getComputedStyle([...document.querySelectorAll("g.node")].find(g => g.__data__.id === id).querySelector(":scope > text." + c));
