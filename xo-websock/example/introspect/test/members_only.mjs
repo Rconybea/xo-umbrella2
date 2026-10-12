@@ -70,7 +70,7 @@ const shape = await ev(`(() => {
   const placed = objects_by_id(__mo), unplaced = new Set((__mo._unplaced_ || []).map(x => x._ref_));
   const vm = [...placed.values()].filter(o => Object.keys(o).some(k => !k.startsWith("_"))).length;
   const srv = member_value(__mo, "server");
-  const smap = member_value(member_value(srv, "session_table"), "session_map_");
+  const smap = member_value(member_value(srv, "session_table"), "session_map");
   return {orig: objects_by_id(__orig).size, placed: placed.size, ids_written: n_ids(__mo), vm,
           dangling: refs.filter(r => !placed.has(r) && !unplaced.has(r)),
           sessions_in_map: Object.values(smap).filter(v => typeof v._id_ === "number").length,
@@ -82,7 +82,7 @@ check(shape.placed === shape.orig, `every object placed in members: ${shape.plac
 check(shape.ids_written === shape.placed, `each written once: ${shape.ids_written} _id_s for ${shape.placed} objects`);
 check(shape.dangling.length === 0, "every ref resolves: dangling " + JSON.stringify(shape.dangling));
 check(shape.n_sessions >= 3 && shape.sessions_in_map === shape.n_sessions,
-      `sessions placed in session_map_: ${shape.sessions_in_map} of ${shape.n_sessions}`);
+      `sessions placed in session_map: ${shape.sessions_in_map} of ${shape.n_sessions}`);
 
 // layout: same boxes (id, kind, label, type) and edges
 const lay = await ev(`(() => {

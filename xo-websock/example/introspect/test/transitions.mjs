@@ -75,22 +75,22 @@ const outside = async (action) => ev(`(async () => {
     samples++; await new Promise(r => setTimeout(r, 20));
   }
   return {worst: Math.round(worst * 10) / 10, samples}; })()`);
-await ev(`show_box(${JSON.stringify(U)}); expanded.add(${JSON.stringify(U)}); expanded.delete("${U}/http_map_"); expanded.delete("${U}/stream_map_"); redraw(); 1`); await ev(`settled()`);
-let o = await outside(`expanded.add("${U}/http_map_"); redraw()`);
-check(o.worst <= 1 && o.samples > 20, "opening http_map_ (in place): no row outside the box mid-move: " + JSON.stringify(o));
+await ev(`show_box(${JSON.stringify(U)}); expanded.add(${JSON.stringify(U)}); expanded.delete("${U}/http_map"); expanded.delete("${U}/stream_map"); redraw(); 1`); await ev(`settled()`);
+let o = await outside(`expanded.add("${U}/http_map"); redraw()`);
+check(o.worst <= 1 && o.samples > 20, "opening http_map (in place): no row outside the box mid-move: " + JSON.stringify(o));
 await ev(`settled()`);
-o = await outside(`expanded.add("${U}/stream_map_"); redraw()`);
-check(o.worst <= 1, "opening stream_map_ below it: none outside: " + JSON.stringify(o));
+o = await outside(`expanded.add("${U}/stream_map"); redraw()`);
+check(o.worst <= 1, "opening stream_map below it: none outside: " + JSON.stringify(o));
 await ev(`settled()`);
-o = await outside(`expanded.delete("${U}/http_map_"); redraw()`);
-check(o.worst <= 1, "closing http_map_: the rows below slide up, none outside: " + JSON.stringify(o));
+o = await outside(`expanded.delete("${U}/http_map"); redraw()`);
+check(o.worst <= 1, "closing http_map: the rows below slide up, none outside: " + JSON.stringify(o));
 await ev(`settled()`);
 const slid = await ev(`(async () => { const t = () => [...document.querySelectorAll("g.node")].find(g => g.__data__.id === ${JSON.stringify(U)}).querySelectorAll("text.row");
-  const row = () => [...t()].find(t => t.__data__.m._name_ === "stream_map_");
-  expanded.add("${U}/http_map_"); redraw();
+  const row = () => [...t()].find(t => t.__data__.m._name_ === "stream_map");
+  expanded.add("${U}/http_map"); redraw();
   const ys = []; const t0 = performance.now(); while (performance.now() - t0 < 700) { ys.push(Math.round(row().getBoundingClientRect().top)); await new Promise(r => setTimeout(r, 25)); }
   return [...new Set(ys)].length; })()`);
-check(slid >= 4, "stream_map_'s row slides down through " + slid + " positions, not a jump");
+check(slid >= 4, "stream_map's row slides down through " + slid + " positions, not a jump");
 await ev(`settled()`);
 fs.writeFileSync(out, Buffer.from((await call("Page.captureScreenshot", {format: "png"})).result.data, "base64"));
 console.log(ok ? "ALL OK" : "SOME FAILED");

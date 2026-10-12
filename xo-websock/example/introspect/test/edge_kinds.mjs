@@ -17,8 +17,8 @@ const kinds = await ev(`[...document.querySelectorAll("path.edge.member")].map(p
 console.log("   edges:", JSON.stringify(kinds));
 // (the server's url_router here; the routers' are checked below)
 const want = {ws_config: "includes", url_router: "includes", session_table: "includes", router_: "includes",
-              'session_map_["1"]': "owns", 'session_map_["2"]': "owns", "subscription_v_[0]": "owns",
-              'http_map_["/hello/"]': "shares", 'stream_map_["/introspect"]': "shares", receiver_: "shares",
+              'session_map["1"]': "owns", 'session_map["2"]': "owns", "subscription_v_[0]": "owns",
+              'http_map["/hello/"]': "shares", 'stream_map["/introspect"]': "shares", receiver_: "shares",
               sender_: "shares", endpoint_: "shares", sink_: "shares"};
 const by_label = new Map(kinds.filter(([l, k]) => !(l === "url_router_" && k === "refers")).map(([l, k]) => [l, k]));
 for (const [l, k] of Object.entries(want))

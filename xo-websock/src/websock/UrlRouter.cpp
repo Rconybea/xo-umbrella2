@@ -262,41 +262,6 @@ namespace xo {
                 REFLECT_MEMBER(sr, stream_map).guarded_by(&UrlRouter::mutex_);
             }
         } /*reflect_self*/
-        /** @brief the url router: its chosen C++ members
-         *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
-         *  namespace: UrlRouter's header befriends it by name.
-         *
-         *  Printed with an id, so a ref to it (a session router's
-         *  url_router_) can be joined to it.  Its maps are reflected,
-         *  guarded by the router's mutex, which reflected_members takes --
-         *  so this printer takes no lock (.xo-backlog/xo-websock/issues/15).
-         *  Keys in sorted order (xo-reflect's StdMapTdx); endpoints printed
-         *  in full in the server's endpoint list are refs here
-         **/
-        class JsonPrinter_UrlRouter : public json::JsonPrinter {
-        public:
-            void print_json(reflect::TaggedPtr tp, json::JsonPrintState & state) const override {
-                UrlRouter const * r = this->check_recover_native<UrlRouter>(tp, state);
-
-                if (!r)
-                    return;
-
-                json::JsonObject obj = state.open_object("UrlRouter", tp.td());
-
-                obj.members()
-                    .reflected_members(tp, "_")
-                    .end();
-
-                obj.close();
-            }
-        };
-
-        void
-        provide_url_router_json_printers(json::PrintJson * pjson)
-        {
-            pjson->provide_printer(reflect::Reflect::require<UrlRouter>(),
-                                   std::make_unique<JsonPrinter_UrlRouter>());
-        }
     } /*namespace web*/
 } /*namespace xo*/
 

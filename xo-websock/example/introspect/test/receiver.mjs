@@ -20,7 +20,7 @@ const R = "stream:/introspect:receiver";
 // ref or the object itself, wherever printjson placed it
 const EPS = `(() => { const ids = objects_by_id(last_event), d = (v) => v && "_ref_" in v ? ids.get(v._ref_) : v;
   const ur = d(member_value(member_value(last_event, "server"), "url_router"));
-  return ["http_map_", "stream_map_"].flatMap(m => Object.values(member_value(ur, m) || {}).map(d))
+  return ["http_map", "stream_map"].flatMap(m => Object.values(member_value(ur, m) || {}).map(d))
     .map(e => ({pattern: member_value(e, "uri_pattern_"), receiver: d(member_value(e, "receiver_"))})); })()`;
 const recv = await ev(`${EPS}.map(e => [e.pattern, e.receiver && e.receiver._short_type_, e.receiver && e.receiver._canonical_type_])`);
 console.log("   receivers:", JSON.stringify(recv));

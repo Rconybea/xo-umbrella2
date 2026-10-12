@@ -45,33 +45,11 @@ namespace xo {
     using xo::pp::quot;
 
     namespace web {
-        /** @brief a registered endpoint.  Printed in full where it is
-         *  owned -- the Webserver's endpoint list; a subscription shows
-         *  it as a ref by id.  Not in the anonymous namespace:
+        /** @brief a registered endpoint.  Printed in full where first
+         *  reached -- its url router's map (a shared edge); a subscription
+         *  shows it as a ref by id.  Not in the anonymous namespace:
          *  DynamicEndpoint's header befriends it by name, for "_members_"
          **/
-        /** a WebserverConfig: a value, printed inside its Webserver --
-         *  no box of its own; its members, so the page can open it
-         **/
-        class JsonPrinter_WebserverConfig : public JsonPrinter {
-        public:
-            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                WebserverConfig const * cfg = this->check_recover_native<WebserverConfig>(tp, state);
-
-                if (!cfg)
-                    return;
-
-                json::JsonObject obj = state.open_object("WebserverConfig", tp.td());
-
-                /* reflected as port, ..: "_members_" names C++ members, port_ */
-                obj.members()
-                    .reflected_members(tp, "_")
-                    .end();
-
-                obj.close();
-            }
-        }; /*JsonPrinter_WebserverConfig*/
-
         class JsonPrinter_DynamicEndpoint : public JsonPrinter {
         public:
             void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
@@ -167,8 +145,10 @@ namespace xo {
         void
         provide_websock_json_printers(PrintJson * pjson)
         {
-            pjson->provide_printer(Reflect::require<WebserverConfig>(),
-                                   std::make_unique<JsonPrinter_WebserverConfig>());
+            /* no printer -- the generic one, from reflection
+             * (.xo-backlog/xo-websock/issues/16): WebserverConfig, and in
+             * their own files the server, UrlRouter, WsSessionTable
+             */
             pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
                                    std::make_unique<JsonPrinter_DynamicEndpoint>());
             pjson->provide_printer(Reflect::require<WebsocketSink>(),
@@ -179,7 +159,6 @@ namespace xo {
              */
             provide_webserver_json_printers(pjson);
             provide_router_json_printers(pjson);
-            provide_url_router_json_printers(pjson);
         }
     } /*namespace web*/
 } /*namespace xo*/

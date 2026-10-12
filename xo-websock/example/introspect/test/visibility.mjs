@@ -50,13 +50,13 @@ check((await rows("server")).some(t => t.startsWith("url_router:") && t.endsWith
 await click_at(await center(`${row_sel("server", "url_router:")}.querySelector("tspan.rtoggle")`)); await sleep(900);
 check(JSON.stringify(await ids()) === JSON.stringify(["server", U]), "its ▸ draws the UrlRouter box: " + JSON.stringify(await ids()));
 check(await kids_text(U) === "▸4", "UrlRouter's toggle: its 4 endpoints hidden: " + await kids_text(U));
-// open url_router's stream_map_; its refs carry a ▸
+// open url_router's stream_map; its refs carry a ▸
 await ev(`${G(U)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
-await click_row(U, "stream_map_:"); await sleep(700);
+await click_row(U, "stream_map:"); await sleep(700);
 let r = await rows(U);
 console.log(" =  rows:", JSON.stringify(r.filter(t => t.includes("→"))));
 const intro = r.find(t => t.includes('"/introspect"'));
-check(intro && intro.trim().endsWith(": ▸ (→)"), "stream_map_ /introspect: ▸ (→), its box hidden: " + intro);
+check(intro && intro.trim().endsWith(": ▸ (→)"), "stream_map /introspect: ▸ (→), its box hidden: " + intro);
 
 // a real click on that ▸: shows that endpoint alone, edge drawn
 const pre = intro.trim().slice(0, 8);
@@ -144,13 +144,13 @@ await ev(`document.getElementById("hide-all").click()`); await sleep(800);
 // collapsing a box leaves what is drawn alone (it used to drop the box's edges)
 await ev(`show_box(${JSON.stringify(U)}); 1`); await sleep(900);
 await set_open(U, true);
-await ev(`expanded.add("${U}/stream_map_"); redraw(); 1`); await sleep(800);
+await ev(`expanded.add("${U}/stream_map"); redraw(); 1`); await sleep(800);
 await click_at(await center(`${row_sel(U, '["/demo/"]')}.querySelector("tspan.rtoggle")`)); await sleep(900);
 await click_at(await center(`${row_sel(U, '["/introspect"]')}.querySelector("tspan.rtoggle")`)); await sleep(900);
-await click_row(U, "stream_map_:"); await sleep(800);   // a member row closing keeps the edges
+await click_row(U, "stream_map:"); await sleep(800);   // a member row closing keeps the edges
 v = await ids();
 check(v.length === 4 && await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from === "${U}").length`) === 2,
-      "stream_map_ closed: both endpoints and both edges stay: " + JSON.stringify(v));
+      "stream_map closed: both endpoints and both edges stay: " + JSON.stringify(v));
 await ev(`show_box("session:1:sub:0"); 1`); await sleep(900);
 await set_open("session:1:sub:0", true);
 // a second wanted edge into /demo/ (already drawn): set directly -- the row's
@@ -165,7 +165,7 @@ check(JSON.stringify(await ids()) === JSON.stringify(before), "UrlRouter collaps
 check(await ev(`document.querySelectorAll("path.edge.member").length`) === edges_before
       && await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from === "${U}").length`) === 2,
       "... the same member edges, the UrlRouter's from its collapsed box");
-check(await ev(`wanted.has('${U}/stream_map_/["/introspect"]')`), "... its edges still wanted");
+check(await ev(`wanted.has('${U}/stream_map/["/introspect"]')`), "... its edges still wanted");
 // collapse a sub: its endpoint_ edge stays wanted
 await set_open("session:1:sub:0", true);
 await set_open("session:1:sub:0", false);

@@ -27,14 +27,14 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
   return ${VIS}.filter(p => p.__data__.from === ${JSON.stringify(from)}).map(p => { const n = p.getAttribute("d").match(/-?[0-9.]+/g).map(Number); const ex = n[n.length-2], ey = n[n.length-1];
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }).sort(); })()`);
 
-// (a) the url router is its own (nested) box: open it -> stream_map_ -> a
+// (a) the url router is its own (nested) box: open it -> stream_map -> a
 // row per stem, each an edge to its endpoint box
 const U = "server/url_router", R = "session:1/router_";
 await ev(`${box(U)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 let r = await rows_of(U);
-check(r.some(t => t.trimStart().startsWith("http_map_:") && t.endsWith("▸ {2}")) && r.some(t => t.trimStart().startsWith("stream_map_:") && t.endsWith("▸ {2}")),
+check(r.some(t => t.trimStart().startsWith("http_map:") && t.endsWith("▸ {2}")) && r.some(t => t.trimStart().startsWith("stream_map:") && t.endsWith("▸ {2}")),
       "the UrlRouter box opened: two maps, 2 stems each");
-await click_row(U, "stream_map_:"); await sleep(700);
+await click_row(U, "stream_map:"); await sleep(700);
 r = await rows_of(U);
 console.log(" =  url router rows:", JSON.stringify(r));
 check(r.some(t => t.trim() === '["/demo/"]: ▾ (→)') && r.some(t => t.trim() === '["/introspect"]: ▾ (→)'), "a row per stem, each a drawn ref");

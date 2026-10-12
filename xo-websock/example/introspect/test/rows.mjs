@@ -32,7 +32,7 @@ await ev(`${G("server")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))
 // sits well inside the viewport -- the real mouse moves below reach it
 await ev(`(() => { const b = drawn_at.get("${U}"); d3.select("#graph").call(zoom.transform, d3.zoomIdentity.translate(500 - b.x, 250 - b.y)); })()`); await sleep(200);
 await ev(`${G(U)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-await ev(`${ROW(U, "stream_map_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
+await ev(`${ROW(U, "stream_map")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
 
 // 1. compact rows
 let r = await rows("server");
@@ -42,7 +42,7 @@ check(!r.some(t => t.includes("[atomic]") || t.includes("[struct]") || t.include
 check(await ev(`${G("server")}.querySelectorAll("tspan.mtype, tspan.mtag").length`) === 0, "no type tspans");
 
 // 1b. the separator at x0 + indent * depth: steps in with nesting, as the names do
-await ev(`${ROW(U, "http_map_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
+await ev(`${ROW(U, "http_map")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
 const eqs = await ev(`[...${G(U)}.querySelectorAll("text.row")].map(t => {
     const eq = t.querySelector(":scope > tspan.meq").getBoundingClientRect(), nm = t.querySelector(":scope > tspan.mname").getBoundingClientRect();
     return {depth: t.__data__.depth, x: eq.left, gap: eq.left - nm.right}; })`);
@@ -56,7 +56,7 @@ check(gaps.every(g => Math.abs(g) < 1), "names right-justified: every name ends 
 const starts = await ev(`[...${G(U)}.querySelectorAll("text.row")].map(t => ({d: t.__data__.depth, x: t.querySelector(":scope > tspan.mname").getBoundingClientRect().left - ${G(U)}.querySelector(":scope > rect").getBoundingClientRect().left}))`);
 check(starts.every(s => s.x >= 12 + 14 * s.d - 1), "no name starts left of its depth's indent");
 check(starts.some(s => Math.abs(s.x - (12 + 14 * s.d)) < 1), "the widest name sits at its indent (x0 the least that fits)");
-await ev(`${ROW(U, "http_map_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
+await ev(`${ROW(U, "http_map")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
 
 // 1c. a ref row: ▾ (→); what it refers to is the value's tooltip
 r = await rows(U);
@@ -74,7 +74,7 @@ console.log("   triangles:", JSON.stringify(tri));
 check(tri.n_tri > 0 && tri.n_tri === tri.n_rect, "a square per triangle");
 check(parseFloat(tri.size) === parseFloat(tri.row_size) * 1.25, "triangles at 125% of the row's font");
 check(tri.op === "0" && tri.w === tri.h, "squares are square, and plain until hovered");
-const sq = await ev(`(() => { const ts = ${ROW(U, "stream_map_")}.querySelector("tspan.tri"); const r = ts.getBoundingClientRect(); return {x: r.left + r.width / 2, y: r.top + r.height / 2}; })()`);
+const sq = await ev(`(() => { const ts = ${ROW(U, "stream_map")}.querySelector("tspan.tri"); const r = ts.getBoundingClientRect(); return {x: r.left + r.width / 2, y: r.top + r.height / 2}; })()`);
 await call("Input.dispatchMouseEvent", {type: "mouseMoved", x: sq.x, y: sq.y, button: "none"}); await sleep(150);
 check(await ev(`getComputedStyle(${G(U)}.querySelector("rect.tbtn.hot")).fillOpacity`) === "0.85", "hovering the triangle shows its square (white, 85%)");
 await call("Input.dispatchMouseEvent", {type: "mouseMoved", x: 5, y: 5, button: "none"}); await sleep(150);
@@ -83,14 +83,14 @@ check(await ev(`${G(U)}.querySelectorAll("rect.tbtn.hot").length`) === 0, "... a
 const rect_of = (name) => `(() => { const ts = ${ROW(U, name)}.querySelector("tspan.tri"); const b = ts.getBBox();
   return [...${G(U)}.querySelectorAll("rect.tbtn")].find(r => Math.abs(+r.getAttribute("x") + +r.getAttribute("width") / 2 - (b.x + b.width / 2)) < 0.5
                                                                  && Math.abs(+r.getAttribute("y") + +r.getAttribute("height") / 2 - (b.y + b.height / 2)) < 0.5); })()`;
-await ev(`${rect_of("stream_map_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(!(await ev(`expanded.has("server/url_router/stream_map_")`)), "clicking stream_map_'s square closes it");
-await ev(`${rect_of("stream_map_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(await ev(`expanded.has("server/url_router/stream_map_")`), "... and again opens it");
+await ev(`${rect_of("stream_map")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
+check(!(await ev(`expanded.has("server/url_router/stream_map")`)), "clicking stream_map's square closes it");
+await ev(`${rect_of("stream_map")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
+check(await ev(`expanded.has("server/url_router/stream_map")`), "... and again opens it");
 await ev(`${rect_of('["/introspect"]')}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(!(await ev(`wanted.has('server/url_router/stream_map_/["/introspect"]')`)), "a ref row's square unwants its edge");
+check(!(await ev(`wanted.has('server/url_router/stream_map/["/introspect"]')`)), "a ref row's square unwants its edge");
 await ev(`${rect_of('["/introspect"]')}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(await ev(`wanted.has('server/url_router/stream_map_/["/introspect"]')`), "... and again wants it");
+check(await ev(`wanted.has('server/url_router/stream_map/["/introspect"]')`), "... and again wants it");
 check(await ev(`getComputedStyle(document.querySelector("g.node.server > text.kids")).fontSize`) === "16px", "the box's children triangle is larger too (16px)");
 check(await ev(`document.querySelectorAll("g.node > rect.tbtn, svg > rect.tbtn").length`) === 0, "... with no square: only triangles inside boxes get one");
 
@@ -99,8 +99,8 @@ check((await rows("server")).some(t => t.trim() === "ws_config: ▾ (→)"), "ws
 await ev(`${G("server/ws_config")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
 const cfg_rows = await rows("server/ws_config");
 console.log("   ws_config:", JSON.stringify(cfg_rows));
-check(cfg_rows.some(t => t.trim() === "port_: " + port) && cfg_rows.some(t => t.trim() === "tls_flag_: false") && cfg_rows.some(t => t.includes("mount_origin_: ")),
-      "its box's rows: port_, tls_flag_, ..., mount_origin_");
+check(cfg_rows.some(t => t.trim() === "port: " + port) && cfg_rows.some(t => t.trim() === "tls_flag: false") && cfg_rows.some(t => t.includes("mount_origin: ")),
+      "its box's rows: port, tls_flag, ..., mount_origin");
 await ev(`${G("server/ws_config")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
 
 // 2. tooltip on the name
@@ -130,9 +130,9 @@ check((await ev(`window.__opened`)).length === 3, "menu Open source opens it");
 
 // a member opened in place: Collapse
 await ev(`document.body.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}))`); await sleep(100);
-await ev(`${ROW(U, "stream_map_")}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
+await ev(`${ROW(U, "stream_map")}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
 m = await menu();
-check(m.head.startsWith("stream_map_: ") && m.items[m.items.length - 1] === "Collapse", "stream_map_ (open in place): its menu ends Collapse: " + JSON.stringify(m.items));
+check(m.head.startsWith("stream_map: ") && m.items[m.items.length - 1] === "Collapse", "stream_map (open in place): its menu ends Collapse: " + JSON.stringify(m.items));
 
 // a ref row: no declared type; Hide ▸ / Show ▸ its target
 await ev(`${ROW(U, '["/introspect"]')}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
@@ -140,7 +140,7 @@ m = await menu();
 console.log("   [\"/introspect\"] menu:", JSON.stringify(m));
 check(m.items[0] === "Open source (disabled: no declared type)" && m.items.includes("Hide ▸ /introspect"), "element row: Open source disabled; Hide ▸ its target");
 await ev(`[...document.querySelectorAll("#ctxmenu button")].find(b => b.textContent === "Hide ▸ /introspect").click()`); await sleep(800);
-check(!(await ev(`wanted.has('server/url_router/stream_map_/["/introspect"]')`)), "Hide ▸ unwants its edge");
+check(!(await ev(`wanted.has('server/url_router/stream_map/["/introspect"]')`)), "Hide ▸ unwants its edge");
 await ev(`${ROW(U, '["/introspect"]')}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
 check((await menu()).items.includes("Show ▸ /introspect"), "... and the entry flips to Show ▸");
 await ev(`document.body.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}))`); await sleep(100);

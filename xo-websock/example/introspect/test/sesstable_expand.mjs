@@ -27,7 +27,7 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
   return ${VIS}.filter(p => p.__data__.from === ${JSON.stringify(from)}).map(p => { const n = p.getAttribute("d").match(/-?[0-9.]+/g).map(Number); const ex = n[n.length-2], ey = n[n.length-1];
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }).sort(); })()`);
 
-// the session table is its own (nested) box: open it -> session_map_ ->
+// the session table is its own (nested) box: open it -> session_map ->
 // a row per session id, each an edge to its session box
 const T = "server/session_table";
 await ev(`${box("server")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
@@ -36,12 +36,12 @@ check(r.some(t => t.trimStart().startsWith("session_table:") && t.endsWith("▾ 
 check(await ev(`!!${box(T)} && ${box(T)}.parentNode !== null`), "the table's own box is drawn");
 await ev(`${box(T)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 r = await rows_of(T);
-check(r.some(t => t.trimStart() === "next_id_: 3"), "next_id_ = 3 (two sessions so far)");
+check(r.some(t => t.trimStart() === "next_id: 3"), "next_id = 3 (two sessions so far)");
 // its type, on the name's tooltip (types are off)
-const map_tip = await ev(`[...document.querySelectorAll("g.node text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "session_map_")?.querySelector("title")?.textContent`);
-check(map_tip && map_tip.startsWith("session_map_: unordered_map<long unsigned int, unique_ptr<WebsocketSessionRecd>>  [map]"), "session_map_ type without default args: " + map_tip);
-check(r.some(t => t.trimStart().startsWith("session_map_:") && t.endsWith("▸ {2}")), "session_map_: 2 sessions");
-await click_row(T, "session_map_:"); await sleep(700);
+const map_tip = await ev(`[...document.querySelectorAll("g.node text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "session_map")?.querySelector("title")?.textContent`);
+check(map_tip && map_tip.startsWith("session_map: unordered_map<long unsigned int, unique_ptr<WebsocketSessionRecd>>  [map]"), "session_map type without default args: " + map_tip);
+check(r.some(t => t.trimStart().startsWith("session_map:") && t.endsWith("▸ {2}")), "session_map: 2 sessions");
+await click_row(T, "session_map:"); await sleep(700);
 r = await rows_of(T);
 console.log(" =  table rows:", JSON.stringify(r));
 check(r.some(t => t.trim() === '["1"]: ▾ (→)') && r.some(t => t.trim() === '["2"]: ▾ (→)'), "a row per session id");

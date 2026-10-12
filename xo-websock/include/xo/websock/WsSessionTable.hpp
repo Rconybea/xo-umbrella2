@@ -18,8 +18,6 @@ namespace xo {
     namespace reflect { class TypeDescrTable; }
 
     namespace web {
-        template <typename Recd> class JsonPrinter_WsSessionTable;
-
         /** @brief a webserver's live websocket sessions, by id.
          *
          *  Session ids come from a counter and are NEVER reused: once a
@@ -167,12 +165,6 @@ namespace xo {
 
                 return this->session_map_.size();
             }
-
-        private:
-            /* reads private members, for "_members_" -- its one instance
-             * is defined in Webserver.cpp, beside the record type
-             */
-            template <typename> friend class JsonPrinter_WsSessionTable;
 
         private:
             /* guards everything below */

@@ -70,7 +70,7 @@ namespace xo {
                 for (Json::Value const & m : root["_members_"])
                     if (m["_name_"].asString() == "session_table")
                         for (Json::Value const & tm : m["_value_"]["_members_"])
-                            if (tm["_name_"].asString() == "session_map_")
+                            if (tm["_name_"].asString() == "session_map")
                                 smap = tm["_value_"];
 
                 std::vector<std::string> ids = smap.isObject() ? smap.getMemberNames()
@@ -97,7 +97,7 @@ namespace xo {
                         ur = m["_value_"];
 
                 Json::Value v(Json::arrayValue);
-                for (char const * map : {"http_map_", "stream_map_"})
+                for (char const * map : {"http_map", "stream_map"})
                     for (Json::Value const & m : ur["_members_"])
                         if (m["_name_"].asString() == map)
                             for (std::string const & stem : m["_value_"].getMemberNames())   /* jsoncpp: sorted */
@@ -851,8 +851,8 @@ namespace xo {
                 };
                 static const std::vector<std::string> c_members = {
                     "listen_port",     /* the port the kernel chose (the server: generic printer, no "_") */
-                    "port_",           /* the config's copy: 0, or the port chosen */
-                    "mount_origin_",   /* a path */
+                    "port",            /* the config's copy: 0, or the port chosen */
+                    "mount_origin",    /* a path */
                     "output_buf_",     /* its id, or null between writes */
                 };
 

@@ -1125,40 +1125,12 @@ namespace xo {
             };
         } /*namespace*/
 
-        /** @brief the session table: its chosen C++ members
-         *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
-         *  namespace: WsSessionTable befriends it by name.  Its members are
-         *  reflected, guarded by the table's mutex, which reflected_members
-         *  takes: this printer takes no lock.  Its sessions print in full
-         *  in session_map_, keyed by session id, in id order
-         *  (.xo-backlog/xo-websock/issues/15)
-         **/
-        template <typename Recd>
-        class JsonPrinter_WsSessionTable : public JsonPrinter {
-        public:
-            using Table = WsSessionTable<Recd>;
-
-            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                Table const * t = this->check_recover_native<Table>(tp, state);
-
-                if (!t)
-                    return;
-
-                json::JsonObject obj = state.open_object("WsSessionTable", tp.td());
-
-                obj.members()
-                    .reflected_members(tp, "_")
-                    .end();
-
-                obj.close();
-            }
-        };
-
         void
         provide_webserver_json_printers(PrintJson * pjson)
         {
-            pjson->provide_printer(Reflect::require<WsSessionTable<WebsocketSessionRecd>>(),
-                                   std::make_unique<JsonPrinter_WsSessionTable<WebsocketSessionRecd>>());
+            /* the session table: no printer -- the generic one, from
+             * reflection (.xo-backlog/xo-websock/issues/16)
+             */
             pjson->provide_printer(Reflect::require<WebsocketSessionRecd>(),
                                    std::make_unique<JsonPrinter_WsSession>());
             pjson->provide_printer(Reflect::require<WsSessionSenderImpl>(),

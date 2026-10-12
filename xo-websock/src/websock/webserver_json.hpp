@@ -17,7 +17,6 @@ namespace xo {
     namespace web {
         void provide_webserver_json_printers(json::PrintJson * pjson);
         void provide_router_json_printers(json::PrintJson * pjson);
-        void provide_url_router_json_printers(json::PrintJson * pjson);
     } /*namespace web*/
 } /*namespace xo*/
 

@@ -11,9 +11,9 @@
 // [{_name_, _value_, ..}, ..]}.  The page reads "_members_" alone
 // (.xo-backlog/xo-websock/issues/17) -- what it draws, and from where:
 //   server        listen_port, state (generic printer: no trailing "_")
-//   endpoints     url_router_ -> http_map_, stream_map_ (key: stem);
+//   endpoints     url_router_ -> http_map, stream_map (key: stem);
 //                 each: kind_, uri_pattern_, receiver_
-//   sessions      session_table_ -> session_map_ (key: session id);
+//   sessions      session_table_ -> session_map (key: session id);
 //                 each: sender_ (-> open_), router_ -> subscription_v_
 //   subscriptions sub_id_, stream_name_, sink_ (-> sender_)
 // Other keys beside "_members_" (endpoints, sessions, ..: the websock
@@ -251,7 +251,7 @@ function layout(event) {
                 type: server._canonical_type_, obj: server});
 
     const router = mv(server, "url_router");
-    for (const [stem, ep] of [...map_entries(router, "http_map_"), ...map_entries(router, "stream_map_")]) {
+    for (const [stem, ep] of [...map_entries(router, "http_map"), ...map_entries(router, "stream_map")]) {
         const id = `${mv(ep, "kind_")}:${stem}`;
         nodes.push({id: id, kind: mv(ep, "kind_"), label: mv(ep, "uri_pattern_"),
                     type: ep._canonical_type_, obj: ep});
@@ -268,7 +268,7 @@ function layout(event) {
         }
     }
 
-    for (const [session_id, s] of map_entries(mv(server, "session_table"), "session_map_")) {
+    for (const [session_id, s] of map_entries(mv(server, "session_table"), "session_map")) {
         const id = `session:${session_id}`;
         const sender = deref(mv(s, "sender_"));
         const open = sender && mv(sender, "open_");
@@ -344,7 +344,7 @@ const expanded = new Set();
 // ("<box>/<member>/..").  A box's CHILDREN are the boxes it owns ("link" /
 // "owns": server -> endpoints, sessions; session -> sender, subscriptions;
 // endpoint -> receiver; subscription -> sink);
-// the edge to a child is the owner's ref edge to it (e.g. session_map_["1"]
+// the edge to a child is the owner's ref edge to it (e.g. session_map["1"]
 // -> session 1), or failing one, the ownership edge itself, drawn grey.
 //
 // DRAWN: the Webserver, and every box reachable from it through wanted edges
@@ -519,7 +519,7 @@ function strongest_ref_kind(kinds) {
 
 /** every ref in member values @p members, open or not, appended to @p out
  *  as {key, label, ref, ref_kind}: key as member_rows() makes it (under
- *  @p path), label the member path for display (e.g. session_map_["1"]),
+ *  @p path), label the member path for display (e.g. session_map["1"]),
  *  ref_kind by ref_kind() from the declared type -- @p type, the
  *  container's, for elements (which declare none)
  **/

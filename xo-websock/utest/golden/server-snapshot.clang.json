@@ -17,35 +17,35 @@
           {
             "_canonical_type_" : "int",
             "_metatype_" : "atomic",
-            "_name_" : "port_",
+            "_name_" : "port",
             "_short_type_" : "int",
             "_value_" : "<redacted>"
           },
           {
             "_canonical_type_" : "bool",
             "_metatype_" : "atomic",
-            "_name_" : "tls_flag_",
+            "_name_" : "tls_flag",
             "_short_type_" : "bool",
             "_value_" : false
           },
           {
             "_canonical_type_" : "bool",
             "_metatype_" : "atomic",
-            "_name_" : "host_check_flag_",
+            "_name_" : "host_check_flag",
             "_short_type_" : "bool",
             "_value_" : false
           },
           {
             "_canonical_type_" : "bool",
             "_metatype_" : "atomic",
-            "_name_" : "use_retry_flag_",
+            "_name_" : "use_retry_flag",
             "_short_type_" : "bool",
             "_value_" : false
           },
           {
             "_canonical_type_" : "std::basic_string<char>",
             "_metatype_" : "atomic",
-            "_name_" : "mount_origin_",
+            "_name_" : "mount_origin",
             "_short_type_" : "string",
             "_value_" : "<redacted>"
           }
@@ -82,7 +82,7 @@
           {
             "_canonical_type_" : "std::unordered_map<std::basic_string<char>, xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>>",
             "_metatype_" : "map",
-            "_name_" : "http_map_",
+            "_name_" : "http_map",
             "_short_type_" : "unordered_map<string, rp<DynamicEndpoint>>",
             "_value_" : 
             {
@@ -163,7 +163,7 @@
           {
             "_canonical_type_" : "std::unordered_map<std::basic_string<char>, xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>>",
             "_metatype_" : "map",
-            "_name_" : "stream_map_",
+            "_name_" : "stream_map",
             "_short_type_" : "unordered_map<string, rp<DynamicEndpoint>>",
             "_value_" : 
             {
@@ -271,14 +271,14 @@
           {
             "_canonical_type_" : "unsigned long",
             "_metatype_" : "atomic",
-            "_name_" : "next_id_",
+            "_name_" : "next_id",
             "_short_type_" : "unsigned long",
             "_value_" : 3
           },
           {
             "_canonical_type_" : "std::unordered_map<unsigned long, std::unique_ptr<xo::web::WebsocketSessionRecd>>",
             "_metatype_" : "map",
-            "_name_" : "session_map_",
+            "_name_" : "session_map",
             "_short_type_" : "unordered_map<unsigned long, unique_ptr<WebsocketSessionRecd>>",
             "_value_" : 
             {
@@ -694,7 +694,7 @@
             }
           }
         ],
-        "_name_" : "WsSessionTable",
+        "_name_" : "WsSessionTable<WebsocketSessionRecd>",
         "_short_type_" : "WsSessionTable<WebsocketSessionRecd>"
       }
     },

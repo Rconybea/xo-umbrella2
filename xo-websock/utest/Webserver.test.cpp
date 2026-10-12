@@ -80,7 +80,7 @@ namespace xo {
             Json::Value endpoints_of(Json::Value const & srv) {
                 Json::Value const & ur = member_value(srv, "url_router");
                 Json::Value v(Json::arrayValue);
-                for (char const * map : {"http_map_", "stream_map_"}) {
+                for (char const * map : {"http_map", "stream_map"}) {
                     Json::Value const & m = member_value(ur, map);
                     for (std::string const & stem : m.getMemberNames())   /* jsoncpp: sorted */
                         v.append(m[stem]);
@@ -354,8 +354,8 @@ namespace xo {
                     std::vector<std::string> cnames;
                     for (Json::Value const & m : cfg["_members_"])
                         cnames.push_back(m["_name_"].asString());
-                    REQUIRE(cnames == std::vector<std::string>{"port_", "tls_flag_", "host_check_flag_",
-                                                               "use_retry_flag_", "mount_origin_"});
+                    REQUIRE(cnames == std::vector<std::string>{"port", "tls_flag", "host_check_flag",
+                                                               "use_retry_flag", "mount_origin"});
                     REQUIRE(cfg["_members_"][0]["_value_"].asInt() == 0);
                     REQUIRE(cfg["_members_"][1]["_value_"].asBool() == false);
                     REQUIRE(cfg["_members_"][4]["_value_"].asString() == "./mount-origin");
@@ -370,8 +370,8 @@ namespace xo {
                  */
                 Json::Value const & ur = entry_of(mem, "url_router")["_value_"];
                 REQUIRE(ur["_id_"].isInt());
-                REQUIRE(ur["_members_"][0]["_name_"].asString() == "http_map_");
-                REQUIRE(ur["_members_"][1]["_name_"].asString() == "stream_map_");
+                REQUIRE(ur["_members_"][0]["_name_"].asString() == "http_map");
+                REQUIRE(ur["_members_"][1]["_name_"].asString() == "stream_map");
 
                 REQUIRE(!srv.isMember("endpoints"));
                 for (Json::ArrayIndex i = 0; i < 2; ++i) {
@@ -393,9 +393,9 @@ namespace xo {
                 /* the session table: an id; no session yet -- ids from 1 */
                 Json::Value const & st = entry_of(mem, "session_table")["_value_"];
                 REQUIRE(st["_id_"].isInt());
-                REQUIRE(st["_members_"][0]["_name_"].asString() == "next_id_");
+                REQUIRE(st["_members_"][0]["_name_"].asString() == "next_id");
                 REQUIRE(st["_members_"][0]["_value_"].asUInt64() == 1);
-                REQUIRE(st["_members_"][1]["_name_"].asString() == "session_map_");
+                REQUIRE(st["_members_"][1]["_name_"].asString() == "session_map");
                 REQUIRE(st["_members_"][1]["_value_"].isObject());
                 REQUIRE(st["_members_"][1]["_value_"].empty());
             }
@@ -499,7 +499,7 @@ namespace xo {
                     return Json::Value();
                 };
 
-                Json::Value const smap = member(member(srv, "session_table"), "session_map_");
+                Json::Value const smap = member(member(srv, "session_table"), "session_map");
                 REQUIRE(smap.isObject());
                 REQUIRE(smap.empty());
             }
