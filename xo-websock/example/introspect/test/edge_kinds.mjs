@@ -15,8 +15,8 @@ await ev(`document.getElementById("show-all").click(); 1`); await ev(`settled()`
 // each drawn member edge's kind, by the declared type of what it stands for
 const kinds = await ev(`[...document.querySelectorAll("path.edge.member")].map(p => [p.__data__.labels.join(","), p.__data__.ref_kind, [...p.classList].find(c => c.startsWith("from-"))])`);
 console.log("   edges:", JSON.stringify(kinds));
-// (the server's url_router_ here; the routers' are checked below)
-const want = {ws_config_: "includes", url_router_: "includes", session_table_: "includes", router_: "includes",
+// (the server's url_router here; the routers' are checked below)
+const want = {ws_config: "includes", url_router: "includes", session_table: "includes", router_: "includes",
               'session_map_["1"]': "owns", 'session_map_["2"]': "owns", "subscription_v_[0]": "owns",
               'http_map_["/hello/"]': "shares", 'stream_map_["/introspect"]': "shares", receiver_: "shares",
               sender_: "shares", endpoint_: "shares", sink_: "shares"};
@@ -27,7 +27,7 @@ check(kinds.every(([l, k, c]) => c === `from-${k}`), "each edge's class carries 
 // the sender's target_ (WebserverImpl*) -- into the Webserver, never drawn: its showable edge
 check(await ev(`showable.filter(e => e.key.endsWith("/target_")).every(e => e.ref_kind === "refers") && showable.some(e => e.key.endsWith("/target_"))`), "target_ (WebserverImpl*): refers");
 // the router's url_router_ is a const UrlRouter&: refers, no start marker
-const rr = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from.endsWith("/router_") && p.__data__.target === "server/url_router_").map(p => [p.__data__.ref_kind, getComputedStyle(p).markerStart])`);
+const rr = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from.endsWith("/router_") && p.__data__.target === "server/url_router").map(p => [p.__data__.ref_kind, getComputedStyle(p).markerStart])`);
 check(rr.length === 2 && rr.every(([k, m]) => k === "refers" && m === "none"), "router_.url_router_ (const UrlRouter&): refers, no start marker: " + JSON.stringify(rr));
 // the markers as drawn
 const ms = await ev(`Object.fromEntries(["includes", "owns", "shares"].map(k => { const p = document.querySelector("path.edge.member.from-" + k); return [k, p ? getComputedStyle(p).markerStart : null]; }))`);
@@ -59,7 +59,7 @@ const order = async () => ev(`[...document.querySelectorAll("g.edges > g.edge-g"
 let o = await order();
 const nondecreasing = o => o.every((k, i) => i === 0 || (rank[k] || 0) >= (rank[o[i - 1]] || 0));
 check(nondecreasing(o), "edge groups stacked by kind, strongest last: " + JSON.stringify(o));
-const into_u = await ev(`[...document.querySelectorAll("g.edges > g.edge-g")].filter(g => g.__data__.target === "server/url_router_").map(g => [g.__data__.from, g.__data__.ref_kind])`);
+const into_u = await ev(`[...document.querySelectorAll("g.edges > g.edge-g")].filter(g => g.__data__.target === "server/url_router").map(g => [g.__data__.from, g.__data__.ref_kind])`);
 check(into_u.length === 3 && into_u[into_u.length - 1][1] === "includes" && into_u.slice(0, -1).every(x => x[1] === "refers"),
       "into the UrlRouter: the routers' refers under the server's includes: " + JSON.stringify(into_u));
 // hovering a refers edge raises it; leaving puts it back

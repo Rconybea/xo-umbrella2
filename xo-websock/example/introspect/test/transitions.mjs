@@ -61,7 +61,7 @@ check(await ev(`document.querySelectorAll("g.node.leaving").length === 0 && [...
 // opening / closing a row in place (a map, inside the UrlRouter's own box):
 // the rows below slide with the outline -- no visible row ever outside its
 // box (sampled every 20 ms)
-const U = "server/url_router_";
+const U = "server/url_router";
 const outside = async (action) => ev(`(async () => {
   const box = () => [...document.querySelectorAll("g.node")].find(g => g.__data__.id === ${JSON.stringify(U)});
   let worst = 0, samples = 0; const t0 = performance.now(); ${action};

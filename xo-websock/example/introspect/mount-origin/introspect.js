@@ -10,7 +10,7 @@
 // Webserver json: a reflected struct, {_id_, _canonical_type_, _members_:
 // [{_name_, _value_, ..}, ..]}.  The page reads "_members_" alone
 // (.xo-backlog/xo-websock/issues/17) -- what it draws, and from where:
-//   server        listen_port_, state_
+//   server        listen_port, state (generic printer: no trailing "_")
 //   endpoints     url_router_ -> http_map_, stream_map_ (key: stem);
 //                 each: kind_, uri_pattern_, receiver_
 //   sessions      session_table_ -> session_map_ (key: session id);
@@ -247,10 +247,10 @@ function layout(event) {
     const edge = (source, target, kind) => edges.push({source, target, kind});
 
     nodes.push({id: "server", kind: "server",
-                label: `Webserver :${mv(server, "listen_port_")} (${mv(server, "state_")})`,
+                label: `Webserver :${mv(server, "listen_port")} (${mv(server, "state")})`,
                 type: server._canonical_type_, obj: server});
 
-    const router = mv(server, "url_router_");
+    const router = mv(server, "url_router");
     for (const [stem, ep] of [...map_entries(router, "http_map_"), ...map_entries(router, "stream_map_")]) {
         const id = `${mv(ep, "kind_")}:${stem}`;
         nodes.push({id: id, kind: mv(ep, "kind_"), label: mv(ep, "uri_pattern_"),
@@ -268,7 +268,7 @@ function layout(event) {
         }
     }
 
-    for (const [session_id, s] of map_entries(mv(server, "session_table_"), "session_map_")) {
+    for (const [session_id, s] of map_entries(mv(server, "session_table"), "session_map_")) {
         const id = `session:${session_id}`;
         const sender = deref(mv(s, "sender_"));
         const open = sender && mv(sender, "open_");
@@ -1114,7 +1114,7 @@ function box_type_label(d) {
  **/
 function box_subtitle(d) {
     if (d.kind === "server")
-        return `:${d.obj.listen_port} (${d.obj.state})`;
+        return `:${member_value(d.obj, "listen_port")} (${member_value(d.obj, "state")})`;
     if (["sender", "sink", "receiver", "nested"].includes(d.kind))
         return null;
     return d.label !== box_type_label(d) ? d.label : null;

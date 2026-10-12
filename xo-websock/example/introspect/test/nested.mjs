@@ -25,8 +25,8 @@ await ev(`document.getElementById("show-all").click(); 1`); await ev(`settled()`
 const on_ids = await ids();
 const nested = on_ids.filter(x => /^(server|session:\d+)\//.test(x));
 console.log("   nested boxes:", JSON.stringify(nested));
-check(JSON.stringify(nested.sort()) === JSON.stringify(["server/session_table_", "server/url_router_", "server/ws_config_", "session:1/router_", "session:2/router_"]),
-      "the structs get boxes -- url_router_, session_table_, ws_config_, each session's router_");
+check(JSON.stringify(nested.sort()) === JSON.stringify(["server/session_table", "server/url_router", "server/ws_config", "session:1/router_", "session:2/router_"]),
+      "the structs get boxes -- url_router, session_table, ws_config, each session's router_");
 check(await ev(`[...document.querySelectorAll("g.node")].filter(g => g.__data__.kind === "nested").map(g => g.__data__.id).sort().join()`) === nested.join(),
       "... each of kind nested");
 check(!(await ev(`document.getElementById("nested-boxes")`)), "no nested-boxes checkbox: always on");
@@ -39,20 +39,20 @@ const enc = await ev(`(() => { const out = {}; for (const r of document.querySel
 console.log("   groups:", JSON.stringify(enc));
 check(enc["server"] === true && enc["session:1"] === true, "each group outline encloses its holder and nested boxes");
 // edges from elsewhere arrive at the nested box
-const into = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.target === "server/url_router_").map(p => p.__data__.from).sort()`);
+const into = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.target === "server/url_router").map(p => p.__data__.from).sort()`);
 check(JSON.stringify(into) === JSON.stringify(["server", "session:1/router_", "session:2/router_"]), "UrlRouter's box: edges from the server and from both session routers: " + JSON.stringify(into));
-check(await ev(`document.querySelectorAll("path.edge.link, path.edge.owns, path.edge.nests").length`) === 0, "no ownership fallback edges drawn (endpoints reached through url_router_)");
+check(await ev(`document.querySelectorAll("path.edge.link, path.edge.owns, path.edge.nests").length`) === 0, "no ownership fallback edges drawn (endpoints reached through url_router)");
 // the holder's row is a ref row; its ▾ hides the nested box
 await ev(`expanded.add("server"); redraw(); 1`); await ev(`settled()`);
-const r = await rowtext("server", "url_router_");
-check(r && r.trim().endsWith("▾ (→)"), "server's url_router_ row: ▾ (→): " + JSON.stringify(r));
+const r = await rowtext("server", "url_router");
+check(r && r.trim().endsWith("▾ (→)"), "server's url_router row: ▾ (→): " + JSON.stringify(r));
 await ev(`${G("server")}.querySelector("text.row:nth-of-type(1)") && 1`);
-await ev(`[...${G("server")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "url_router_").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
-check(!(await ids()).includes("server/url_router_"), "its ▾ hides the UrlRouter box");
-await ev(`[...${G("server")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "url_router_").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
-check((await ids()).includes("server/url_router_"), "its ▸ shows it again");
+await ev(`[...${G("server")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "url_router").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
+check(!(await ids()).includes("server/url_router"), "its ▾ hides the UrlRouter box");
+await ev(`[...${G("server")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "url_router").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
+check((await ids()).includes("server/url_router"), "its ▸ shows it again");
 // the box triangle / menu: nested structs are children
-check(await ev(`tree.kids.get("server").includes("server/url_router_")`), "nested boxes are their holder's children (triangle, menu)");
+check(await ev(`tree.kids.get("server").includes("server/url_router")`), "nested boxes are their holder's children (triangle, menu)");
 fs.writeFileSync(out, Buffer.from((await call("Page.captureScreenshot", {format: "png"})).result.data, "base64"));
 console.log(ok ? "ALL OK" : "SOME FAILED");
 ws.close(); cl.close(); process.exit(ok ? 0 : 1);

@@ -24,7 +24,7 @@ const G = (id) => `[...document.querySelectorAll("g.node")].find(g => g.__data__
 const ROW = (id, name) => `[...${G(id)}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === ${JSON.stringify(name)})`;
 const rowtext = `t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join("")`;
 const rows = async (id) => ev(`[...${G(id)}.querySelectorAll("text.row")].map(${rowtext})`);
-const U = "server/url_router_";   // the server's UrlRouter: its own (nested) box
+const U = "server/url_router";   // the server's UrlRouter: its own (nested) box
 const width = async (id) => ev(`+${G(id)}.querySelector("rect").getAttribute("width")`);
 
 await ev(`${G("server")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
@@ -37,7 +37,7 @@ await ev(`${ROW(U, "stream_map_")}.dispatchEvent(new MouseEvent("click", {bubble
 // 1. compact rows
 let r = await rows("server");
 console.log("   rows:", JSON.stringify(r.slice(0, 6)));
-check(r.includes("listen_port_: " + port) && r.some(t => t.trim() === "url_router_: ▾ (→)"), "rows read name: value; url_router_ a ref to its own box");
+check(r.includes("listen_port: " + port) && r.some(t => t.trim() === "url_router: ▾ (→)"), "rows read name: value; url_router a ref to its own box");
 check(!r.some(t => t.includes("[atomic]") || t.includes("[struct]") || t.includes("atomic<int>")), "no type or metatype inline");
 check(await ev(`${G("server")}.querySelectorAll("tspan.mtype, tspan.mtag").length`) === 0, "no type tspans");
 
@@ -84,46 +84,46 @@ const rect_of = (name) => `(() => { const ts = ${ROW(U, name)}.querySelector("ts
   return [...${G(U)}.querySelectorAll("rect.tbtn")].find(r => Math.abs(+r.getAttribute("x") + +r.getAttribute("width") / 2 - (b.x + b.width / 2)) < 0.5
                                                                  && Math.abs(+r.getAttribute("y") + +r.getAttribute("height") / 2 - (b.y + b.height / 2)) < 0.5); })()`;
 await ev(`${rect_of("stream_map_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(!(await ev(`expanded.has("server/url_router_/stream_map_")`)), "clicking stream_map_'s square closes it");
+check(!(await ev(`expanded.has("server/url_router/stream_map_")`)), "clicking stream_map_'s square closes it");
 await ev(`${rect_of("stream_map_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(await ev(`expanded.has("server/url_router_/stream_map_")`), "... and again opens it");
+check(await ev(`expanded.has("server/url_router/stream_map_")`), "... and again opens it");
 await ev(`${rect_of('["/introspect"]')}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(!(await ev(`wanted.has('server/url_router_/stream_map_/["/introspect"]')`)), "a ref row's square unwants its edge");
+check(!(await ev(`wanted.has('server/url_router/stream_map_/["/introspect"]')`)), "a ref row's square unwants its edge");
 await ev(`${rect_of('["/introspect"]')}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
-check(await ev(`wanted.has('server/url_router_/stream_map_/["/introspect"]')`), "... and again wants it");
+check(await ev(`wanted.has('server/url_router/stream_map_/["/introspect"]')`), "... and again wants it");
 check(await ev(`getComputedStyle(document.querySelector("g.node.server > text.kids")).fontSize`) === "16px", "the box's children triangle is larger too (16px)");
 check(await ev(`document.querySelectorAll("g.node > rect.tbtn, svg > rect.tbtn").length`) === 0, "... with no square: only triangles inside boxes get one");
 
-// 1e. ws_config_: a struct with members -- its own box, the row a ref to it
-check((await rows("server")).some(t => t.trim() === "ws_config_: ▾ (→)"), "ws_config_ row: a ref to its own box");
-await ev(`${G("server/ws_config_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
-const cfg_rows = await rows("server/ws_config_");
-console.log("   ws_config_:", JSON.stringify(cfg_rows));
+// 1e. ws_config: a struct with members -- its own box, the row a ref to it
+check((await rows("server")).some(t => t.trim() === "ws_config: ▾ (→)"), "ws_config row: a ref to its own box");
+await ev(`${G("server/ws_config")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
+const cfg_rows = await rows("server/ws_config");
+console.log("   ws_config:", JSON.stringify(cfg_rows));
 check(cfg_rows.some(t => t.trim() === "port_: " + port) && cfg_rows.some(t => t.trim() === "tls_flag_: false") && cfg_rows.some(t => t.includes("mount_origin_: ")),
       "its box's rows: port_, tls_flag_, ..., mount_origin_");
-await ev(`${G("server/ws_config_")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
+await ev(`${G("server/ws_config")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
 
 // 2. tooltip on the name
-const tip = await ev(`${ROW("server", "url_router_")}.querySelector("tspan.mname > title").textContent`);
+const tip = await ev(`${ROW("server", "url_router")}.querySelector("tspan.mname > title").textContent`);
 console.log("   tooltip:", JSON.stringify(tip));
-check(tip.startsWith("url_router_: UrlRouter  [struct]\nxo::web::UrlRouter\n") && /UrlRouter\.hpp:\d+/.test(tip) && tip.endsWith("ctrl-click: open source"),
+check(tip.startsWith("url_router: UrlRouter  [struct]\nxo::web::UrlRouter\n") && /UrlRouter\.hpp:\d+/.test(tip) && tip.endsWith("ctrl-click: open source"),
       "name tooltip: short type, metatype, canonical type, source, ctrl-click hint");
 
 // 3. ctrl-click the name: opens source, does not toggle the row
-await ev(`${ROW("server", "url_router_")}.querySelector("tspan.mname").dispatchEvent(new MouseEvent("click", {bubbles: true, ctrlKey: true}))`); await sleep(300);
+await ev(`${ROW("server", "url_router")}.querySelector("tspan.mname").dispatchEvent(new MouseEvent("click", {bubbles: true, ctrlKey: true}))`); await sleep(300);
 let opened = await ev(`window.__opened`);
 check(opened.length === 1 && /UrlRouter\.hpp#L\d+$/.test(opened[0]), "ctrl-click opens its source: " + JSON.stringify(opened));
-check(await ev(`wanted.has("server/url_router_")`), "... and leaves its edge wanted");
-await ev(`${ROW("server", "url_router_")}.querySelector("tspan.mname").dispatchEvent(new MouseEvent("click", {bubbles: true, metaKey: true}))`); await sleep(300);
+check(await ev(`wanted.has("server/url_router")`), "... and leaves its edge wanted");
+await ev(`${ROW("server", "url_router")}.querySelector("tspan.mname").dispatchEvent(new MouseEvent("click", {bubbles: true, metaKey: true}))`); await sleep(300);
 check((await ev(`window.__opened`)).length === 2, "cmd-click too");
 
 // 4. row menu: right-click a row -- not the box's menu
 const menu = async () => ev(`({hidden: document.getElementById("ctxmenu").hidden, head: document.querySelector("#ctxmenu .ctxhead").textContent,
   items: [...document.querySelectorAll("#ctxmenu button")].map(b => b.textContent + (b.disabled ? " (disabled: " + b.title + ")" : ""))})`);
-await ev(`${ROW("server", "url_router_")}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
+await ev(`${ROW("server", "url_router")}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
 let m = await menu();
-console.log("   url_router_ menu:", JSON.stringify(m));
-check(!m.hidden && m.head === "url_router_: UrlRouter", "row menu, headed name: Type");
+console.log("   url_router menu:", JSON.stringify(m));
+check(!m.hidden && m.head === "url_router: UrlRouter", "row menu, headed name: Type");
 check(JSON.stringify(m.items) === JSON.stringify(["Open source", "Copy type name", "Hide ▸ UrlRouter"]), "a ref to its own box: Open source, Copy type name, Hide ▸ UrlRouter: " + JSON.stringify(m.items));
 await ev(`[...document.querySelectorAll("#ctxmenu button")].find(b => b.textContent === "Open source").click()`); await sleep(200);
 check((await ev(`window.__opened`)).length === 3, "menu Open source opens it");
@@ -140,7 +140,7 @@ m = await menu();
 console.log("   [\"/introspect\"] menu:", JSON.stringify(m));
 check(m.items[0] === "Open source (disabled: no declared type)" && m.items.includes("Hide ▸ /introspect"), "element row: Open source disabled; Hide ▸ its target");
 await ev(`[...document.querySelectorAll("#ctxmenu button")].find(b => b.textContent === "Hide ▸ /introspect").click()`); await sleep(800);
-check(!(await ev(`wanted.has('server/url_router_/stream_map_/["/introspect"]')`)), "Hide ▸ unwants its edge");
+check(!(await ev(`wanted.has('server/url_router/stream_map_/["/introspect"]')`)), "Hide ▸ unwants its edge");
 await ev(`${ROW(U, '["/introspect"]')}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
 check((await menu()).items.includes("Show ▸ /introspect"), "... and the entry flips to Show ▸");
 await ev(`document.body.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}))`); await sleep(100);
@@ -159,9 +159,9 @@ const types_menu = async (label) => {
 const w_compact = await width("server");
 await types_menu("Show types");
 r = await rows("server");
-check(r.some(t => t === "listen_port_: atomic<int> [atomic]") && r.some(t => t.startsWith("url_router_: ") && t.endsWith(" UrlRouter [struct] (→)")),
+check(r.some(t => t === "listen_port: atomic<int> [atomic]") && r.some(t => t.startsWith("url_router: ") && t.endsWith(" UrlRouter [struct] (→)")),
       "types on: name: Type [metatype], the value dropped (a ref keeps its arrow): " + JSON.stringify(r.slice(0, 3)));
-const value_tip = await ev(`[...${G("server")}.querySelectorAll("text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "listen_port_").querySelector("title").textContent`);
+const value_tip = await ev(`[...${G("server")}.querySelectorAll("text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "listen_port").querySelector("title").textContent`);
 check(/^= \d+\n/.test(value_tip), "the value moves to the name's tooltip: " + JSON.stringify(value_tip.split("\n")[0]));
 const w_types = await width("server");
 check(w_types > w_compact * 1.5, `Webserver box ${Math.round(w_compact)}px compact, ${Math.round(w_types)}px with types`);

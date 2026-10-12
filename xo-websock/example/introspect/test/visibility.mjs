@@ -30,9 +30,9 @@ const menu = async (id) => { await ev(`${G(id)}.dispatchEvent(new MouseEvent("co
 const menu_click = async (label) => { await ev(`[...document.querySelectorAll("#ctxmenu button")].find(b => b.textContent === ${JSON.stringify(label)}).click()`); await sleep(800); };
 const esc = () => ev(`document.body.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}))`);
 // nested structs have boxes of their own, and own what their refs reach:
-// the server owns ws_config_, url_router_, session_table_; the UrlRouter its
+// the server owns ws_config, url_router, session_table; the UrlRouter its
 // endpoints; the session table its sessions; a session's router_ its sub
-const U = "server/url_router_", T = "server/session_table_", R1 = "session:1/router_";
+const U = "server/url_router", T = "server/session_table", R1 = "session:1/router_";
 
 check(JSON.stringify(await ids()) === JSON.stringify(["server"]), "default: only the Webserver box");
 check(await kids_text("server") === "▸3", "its toggle: 3 hidden children (its nested boxes): " + await kids_text("server"));
@@ -44,13 +44,13 @@ check(sm.some(t => /^Hide Webserver :\d+ \(running\)$/.test(t)), "Hide <its labe
 check(await ev(`[...document.querySelectorAll("#ctxmenu button")].find(b => b.textContent.startsWith("Hide Webserver")).disabled`) === true, "... disabled on the Webserver");
 await esc();
 
-// the server's url_router_ row: ▸ (→); its ▸ draws the UrlRouter box
+// the server's url_router row: ▸ (→); its ▸ draws the UrlRouter box
 await ev(`${G("server")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
-check((await rows("server")).some(t => t.startsWith("url_router_:") && t.endsWith(": ▸ (→)")), "url_router_ row: ▸ (→), its box hidden");
-await click_at(await center(`${row_sel("server", "url_router_:")}.querySelector("tspan.rtoggle")`)); await sleep(900);
+check((await rows("server")).some(t => t.startsWith("url_router:") && t.endsWith(": ▸ (→)")), "url_router row: ▸ (→), its box hidden");
+await click_at(await center(`${row_sel("server", "url_router:")}.querySelector("tspan.rtoggle")`)); await sleep(900);
 check(JSON.stringify(await ids()) === JSON.stringify(["server", U]), "its ▸ draws the UrlRouter box: " + JSON.stringify(await ids()));
 check(await kids_text(U) === "▸4", "UrlRouter's toggle: its 4 endpoints hidden: " + await kids_text(U));
-// open url_router_'s stream_map_; its refs carry a ▸
+// open url_router's stream_map_; its refs carry a ▸
 await ev(`${G(U)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 await click_row(U, "stream_map_:"); await sleep(700);
 let r = await rows(U);
@@ -128,7 +128,7 @@ check(await ev(`document.querySelectorAll("path.edge.member").length`) === 3
       "3 member edges from the collapsed server, no ownership edges");
 const tips = await ev(`[...document.querySelectorAll("path.edge.member > title")].map(t => t.textContent).sort()`);
 console.log(" =  tooltips:", JSON.stringify(tips));
-check(["ws_config_", "url_router_", "session_table_"].every(n => tips.some(t => t.endsWith(` · ${n} (includes)`))), "each edge's tooltip names its member, and its kind");
+check(["ws_config", "url_router", "session_table"].every(n => tips.some(t => t.endsWith(` · ${n} (includes)`))), "each edge's tooltip names its member, and its kind");
 await click_at(await center(`${G("server")}.querySelector("text.kids")`)); await sleep(900);
 check(JSON.stringify(await ids()) === JSON.stringify(["server"]), "triangle again: hidden");
 

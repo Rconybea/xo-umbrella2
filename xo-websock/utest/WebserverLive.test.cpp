@@ -68,7 +68,7 @@ namespace xo {
             Json::Value sessions_of(Json::Value const & root) {
                 Json::Value smap;
                 for (Json::Value const & m : root["_members_"])
-                    if (m["_name_"].asString() == "session_table_")
+                    if (m["_name_"].asString() == "session_table")
                         for (Json::Value const & tm : m["_value_"]["_members_"])
                             if (tm["_name_"].asString() == "session_map_")
                                 smap = tm["_value_"];
@@ -93,7 +93,7 @@ namespace xo {
             Json::Value endpoints_of(Json::Value const & srv) {
                 Json::Value ur;
                 for (Json::Value const & m : srv["_members_"])
-                    if (m["_name_"].asString() == "url_router_")
+                    if (m["_name_"].asString() == "url_router")
                         ur = m["_value_"];
 
                 Json::Value v(Json::arrayValue);
@@ -756,7 +756,7 @@ namespace xo {
                 REQUIRE(url_router["_metatype_"].asString() == "pointer");   /* a reference */
                 /* ... to the server's url router, printed inside the server */
                 REQUIRE(url_router["_value_"]["_ref_"].asInt()
-                        == entry_of(root["_members_"], "url_router_")["_value_"]["_id_"].asInt());
+                        == entry_of(root["_members_"], "url_router")["_value_"]["_id_"].asInt());
                 REQUIRE(entry_of(rmem, "sender_")["_value_"]["_ref_"].asInt() == v[k]["sender"]["_id_"].asInt());
 
                 /* a unique_ptr to jsoncpp's reader, reflected with no members:
@@ -786,7 +786,7 @@ namespace xo {
             {
                 Json::Value const * st = nullptr;
                 for (Json::Value const & m : root["_members_"])
-                    if (m["_name_"].asString() == "session_table_")
+                    if (m["_name_"].asString() == "session_table")
                         st = &m["_value_"];
                 REQUIRE(st);
 
@@ -850,7 +850,7 @@ namespace xo {
                     "_address_",       /* in "_unplaced_": an address */
                 };
                 static const std::vector<std::string> c_members = {
-                    "listen_port_",    /* the port the kernel chose */
+                    "listen_port",     /* the port the kernel chose (the server: generic printer, no "_") */
                     "port_",           /* the config's copy: 0, or the port chosen */
                     "mount_origin_",   /* a path */
                     "output_buf_",     /* its id, or null between writes */

@@ -47,7 +47,7 @@ const hide_kids = `Hide children (-${n_kids})`;
 check(m.items[1] === hide_kids, `then ${hide_kids}: Show all drew them all, so no Show children: ` + m.items[1]);
 check(m.items[2] === "Show types (disabled: no member rows shown)", "then Show types, disabled while collapsed: " + m.items[2]);
 check(/^Hide Webserver :\d+ \(running\) \(disabled/.test(m.items[3]), "then Hide <its label> (disabled: the Webserver is always shown): " + m.items[3]);
-check(m.items[4] === "Hide ▸ WebserverConfig", "then a Hide ▸ per drawn child (its nested boxes, first ws_config_): " + m.items[4]);
+check(m.items[4] === "Hide ▸ WebserverConfig", "then a Hide ▸ per drawn child (its nested boxes, first ws_config): " + m.items[4]);
 const last_child = m.items.findLastIndex(t => t.startsWith("Hide ▸ "));
 check(m.items[last_child + 1].startsWith("Open source (disabled"), "Open source disabled without a link provider");
 check(m.focus === "Expand", "first enabled item focused");
@@ -153,14 +153,14 @@ const after_kids = (items) => items[items.findLastIndex(t => / children/.test(t)
 check(after_kids(m.items) === "Show types", "expanded: Show types enabled, just under the children items: " + JSON.stringify(m.items.slice(0, 4)));
 await choose("Show types");
 rr = await srv_rows();
-check(rr.includes("listen_port_: atomic<int> [atomic]") && rr.includes("ws_config_: ▾ WebserverConfig [struct] (→)"), "Show types: name: Type [metatype], a ref keeping its arrow: " + JSON.stringify(rr.slice(0, 2)));
+check(rr.includes("listen_port: atomic<int> [atomic]") && rr.includes("ws_config: ▾ WebserverConfig [struct] (→)"), "Show types: name: Type [metatype], a ref keeping its arrow: " + JSON.stringify(rr.slice(0, 2)));
 const others = await ev(`[...document.querySelectorAll("g.node:not(.server) text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 check(others.every(t => !/ \[[a-z]+\]/.test(t)), `only the server shows types (${others.length} rows elsewhere)`);
 m = await srv_menu();
 check(after_kids(m.items) === "Hide types", "the item flips to Hide types: " + after_kids(m.items));
 await choose("Hide types");
 rr = await srv_rows();
-check(rr.every(t => !/ \[[a-z]+\]/.test(t)) && rr.some(t => /^listen_port_: \d+$/.test(t)), "Hide types: plain rows again");
+check(rr.every(t => !/ \[[a-z]+\]/.test(t)) && rr.some(t => /^listen_port: \d+$/.test(t)), "Hide types: plain rows again");
 
 console.log(ok ? "ALL OK" : "SOME FAILED");
 ws.close(); process.exit(ok ? 0 : 1);

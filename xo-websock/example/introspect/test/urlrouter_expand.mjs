@@ -29,7 +29,7 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
 
 // (a) the url router is its own (nested) box: open it -> stream_map_ -> a
 // row per stem, each an edge to its endpoint box
-const U = "server/url_router_", R = "session:1/router_";
+const U = "server/url_router", R = "session:1/router_";
 await ev(`${box(U)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 let r = await rows_of(U);
 check(r.some(t => t.trimStart().startsWith("http_map_:") && t.endsWith("▸ {2}")) && r.some(t => t.trimStart().startsWith("stream_map_:") && t.endsWith("▸ {2}")),

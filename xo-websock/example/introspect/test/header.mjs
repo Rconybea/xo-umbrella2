@@ -17,12 +17,12 @@ const hd = await ev(`Object.fromEntries([...document.querySelectorAll("g.node")]
   return [g.__data__.id, {type: l.textContent, sub: s.getAttribute("display") === "none" ? null : s.textContent, short: g.__data__.obj && g.__data__.obj._short_type_}]; }))`);
 console.log("   headers:", JSON.stringify(Object.entries(hd).map(([k, v]) => [k, v.type, v.sub])));
 check(Object.values(hd).every(h => h.type === h.short), "line 1: every box's short type");
-const lport = await ev(`member_value(member_value(last_event, "server"), "listen_port_")`);
+const lport = await ev(`member_value(member_value(last_event, "server"), "listen_port")`);
 check(hd.server.sub === `:${lport} (running)`, "server: :port (running): " + hd.server.sub);
 check(hd["http:/types"].sub === "/types" && hd["stream:/introspect"].sub === "/introspect", "endpoints: their pattern");
 check(hd["session:1"].sub === "session 1", "session: session 1");
 check(hd["session:1:sub:0"].sub.startsWith("sub 0 · /"), "subscription: sub 0 · <stream>: " + hd["session:1:sub:0"].sub);
-check(["session:1:sender", "session:1:sub:0:sink", "stream:/introspect:receiver", "server/url_router_", "session:1/router_"].every(id => hd[id].sub === null),
+check(["session:1:sender", "session:1:sub:0:sink", "stream:/introspect:receiver", "server/url_router", "session:1/router_"].every(id => hd[id].sub === null),
       "sender, sink, receiver, nested: the type alone");
 // the title: smaller, not grey -- the type's colour
 const st = await ev(`(() => { const f = (id, c) => getComputedStyle([...document.querySelectorAll("g.node")].find(g => g.__data__.id === id).querySelector(":scope > text." + c));

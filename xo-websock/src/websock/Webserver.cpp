@@ -540,8 +540,10 @@ namespace xo {
             } /*unsubscribe_all*/
 
         private:
-            /* reads private members, for "_members_" -- see WebserverImpl's
-             * friend JsonPrinter_Webserver for why not "friend class"
+            /* reads private members, for "_members_".  NOT "friend class
+             * JsonPrinter_WsSession": that form does not look into the
+             * anonymous namespace, and would befriend a new class
+             * xo::web::JsonPrinter_WsSession instead
              */
             friend JsonPrinter_WsSession;
 
@@ -620,20 +622,9 @@ namespace xo {
         /* defined in this translation unit, after WebserverImpl */
         class WebserverImplWsThread;
 
-        namespace {
-            /* its json printer, defined below: shows chosen private members */
-            class JsonPrinter_Webserver;
-        }
-
         class WebserverImpl : public Webserver {
             /* delivers through the protected .send_text() */
             friend class WsSessionSender<WebserverImpl>;
-            /* reads private members, for "_members_".  NOT "friend class
-             * JsonPrinter_Webserver": that form does not look into the
-             * anonymous namespace, and would befriend a new class
-             * xo::web::JsonPrinter_Webserver instead
-             */
-            friend JsonPrinter_Webserver;
 
         public:
             /* describe the server to xo-reflect; a member, so it can name
@@ -1132,46 +1123,6 @@ namespace xo {
                     obj.close();
                 }
             };
-            /** @brief the server, keyed on its actual type: reflection takes a
-             *  Webserver* to WebserverImpl (Webserver is
-             *  SelfTaggingDisplayable), so no printer is looked up on the
-             *  interface
-             **/
-            class JsonPrinter_Webserver : public JsonPrinter {
-            public:
-                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    WebserverImpl const * websrv = this->check_recover_native<WebserverImpl>(tp, state);
-
-                    if (!websrv)
-                        return;
-
-                    json::JsonObject obj = state.open_object("Webserver", tp.td());
-
-                    obj.key("refcount", websrv->reference_counter())
-                        .key("listen_port", websrv->listen_port())
-                        .key("state", std::string(RunstateUtil::runstate_descr(websrv->state())));
-
-                    /* no "endpoints" or "sessions" list: endpoints print in
-                     * full in url_router_'s maps (shared edges, first
-                     * encounter), sessions in session_table_'s session_map_
-                     * (owning) -- each under its holder's declared guard, so
-                     * this printer takes no lock, directly or through a
-                     * visitor (.xo-backlog/xo-websock/issues/15)
-                     */
-
-                    /* chosen C++ members, for the page's "expand"
-                     * (.xo-backlog/xo-websock/issues/13): the reflected ones
-                     * -- ws_config_, pjson_ (in full here, its owner; routers
-                     * and sinks share it as refs), url_router_,
-                     * session_table_, state_, listen_port_
-                     */
-                    obj.members()
-                        .reflected_members(tp, "_")
-                        .end();
-
-                    obj.close();
-                }
-            }; /*JsonPrinter_Webserver*/
         } /*namespace*/
 
         /** @brief the session table: its chosen C++ members
@@ -1208,8 +1159,6 @@ namespace xo {
         {
             pjson->provide_printer(Reflect::require<WsSessionTable<WebsocketSessionRecd>>(),
                                    std::make_unique<JsonPrinter_WsSessionTable<WebsocketSessionRecd>>());
-            pjson->provide_printer(Reflect::require<WebserverImpl>(),
-                                   std::make_unique<JsonPrinter_Webserver>());
             pjson->provide_printer(Reflect::require<WebsocketSessionRecd>(),
                                    std::make_unique<JsonPrinter_WsSession>());
             pjson->provide_printer(Reflect::require<WsSessionSenderImpl>(),

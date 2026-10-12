@@ -19,8 +19,8 @@ ws.onmessage = (ev) => { const m = JSON.parse(ev.data); if (m.id && pending.has(
 const call = (method, params = {}) => new Promise(r => { const id = ++seq; pending.set(id, r); ws.send(JSON.stringify({id, method, params})); });
 const ev = async (expr) => (await call("Runtime.evaluate", {expression: expr, returnByValue: true, awaitPromise: true})).result.result?.value;
 const VIS = `[...document.querySelectorAll("path.edge.member")].filter(p => [...document.querySelectorAll("text.row")].some(t => t.__data__ && p.__data__.row_keys.includes(t.__data__.key)))`;   // edges whose row is open
-// the server's first_endpoint_ edge: its other open rows (ws_config_,
-// url_router_, session_table_) have edges too -- to their nested boxes
+// the server's first_endpoint_ edge: its other open rows (ws_config,
+// url_router, session_table) have edges too -- to their nested boxes
 const FE = `${VIS}.filter(p => p.__data__.row_keys.includes("server/first_endpoint_"))`;
 const mouse = async (type, x, y, button) => call("Input.dispatchMouseEvent", {type, x, y, button, clickCount: 1});
 const click = async (x, y) => { await mouse("mouseMoved", x, y, "none"); await mouse("mousePressed", x, y, "left"); await mouse("mouseReleased", x, y, "left"); };
@@ -47,10 +47,10 @@ await click(b.x, b.y);
 await sleep(800);
 const rows = await ev(`[...document.querySelectorAll("g.node.server text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 console.log(" =  rows:", JSON.stringify(rows));
-check(rows.length === 6 && rows[0] === "ws_config_: ▾ (→)", "left-click opens: 6 member rows");
+check(rows.length === 6 && rows[0] === "ws_config: ▾ (→)", "left-click opens: 6 member rows");
 // by name: member order follows reflection (xo-printjson#06, xo-reflect#06)
-check(rows.includes(`listen_port_: ${port}`), "scalar row: " + JSON.stringify(rows));
-check(rows.includes("state_: running"), "an enum row, by name: " + JSON.stringify(rows));
+check(rows.includes(`listen_port: ${port}`), "scalar row: " + JSON.stringify(rows));
+check(rows.includes("state: running"), "an enum row, by name: " + JSON.stringify(rows));
 const b2 = await box("g.node.server");
 const zk = await ev(`d3.zoomTransform(document.getElementById("graph")).k`);   // on screen: drawing units * k
 check((b2.h - b.h) / zk > 6 * 18 - 1, `box grew: ${b.h} -> ${b2.h} (zoom ${zk.toFixed(2)})`);
@@ -60,7 +60,7 @@ fs.writeFileSync(out1, Buffer.from((await call("Page.captureScreenshot", {format
 // constructed: a ref member (to an endpoint), and a nested member with members
 await ev(`(() => { const e = JSON.parse(JSON.stringify(last_event));
   const srv = member_value(e, "server");
-  const ep0 = Object.values(member_value(member_value(srv, "url_router_"), "http_map_"))[0];   // members alone (xo-websock#17)
+  const ep0 = Object.values(member_value(member_value(srv, "url_router"), "http_map_"))[0];   // members alone (xo-websock#17)
   const ep = {_id_: "_ref_" in ep0 ? ep0._ref_ : ep0._id_};
   srv._members_.push({_name_: "first_endpoint_", _canonical_type_: "xo::ref::intrusive_ptr<xo::web::DynamicEndpoint>", _short_type_: "rp<DynamicEndpoint>", _metatype_: "pointer", _value_: {_ref_: ep._id_}});
   srv._members_.push({_name_: "nested_", _canonical_type_: "xo::web::Outer", _short_type_: "Outer", _metatype_: "struct",

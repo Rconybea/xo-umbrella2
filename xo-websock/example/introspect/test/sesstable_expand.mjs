@@ -29,10 +29,10 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
 
 // the session table is its own (nested) box: open it -> session_map_ ->
 // a row per session id, each an edge to its session box
-const T = "server/session_table_";
+const T = "server/session_table";
 await ev(`${box("server")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 let r = await rows_of("server");
-check(r.some(t => t.trimStart().startsWith("session_table_:") && t.endsWith("▾ (→)")), "server's session_table_ row: a ref to its own box");
+check(r.some(t => t.trimStart().startsWith("session_table:") && t.endsWith("▾ (→)")), "server's session_table row: a ref to its own box");
 check(await ev(`!!${box(T)} && ${box(T)}.parentNode !== null`), "the table's own box is drawn");
 await ev(`${box(T)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 r = await rows_of(T);

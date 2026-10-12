@@ -70,7 +70,7 @@ const shape = await ev(`(() => {
   const placed = objects_by_id(__mo), unplaced = new Set((__mo._unplaced_ || []).map(x => x._ref_));
   const vm = [...placed.values()].filter(o => Object.keys(o).some(k => !k.startsWith("_"))).length;
   const srv = member_value(__mo, "server");
-  const smap = member_value(member_value(srv, "session_table_"), "session_map_");
+  const smap = member_value(member_value(srv, "session_table"), "session_map_");
   return {orig: objects_by_id(__orig).size, placed: placed.size, ids_written: n_ids(__mo), vm,
           dangling: refs.filter(r => !placed.has(r) && !unplaced.has(r)),
           sessions_in_map: Object.values(smap).filter(v => typeof v._id_ === "number").length,
@@ -106,8 +106,11 @@ const drawn = async (which) => {
     if (!n) break;
   }
   return await ev(`(() => {
-    const boxes = [...document.querySelectorAll("g.node")].map(g => [g.__data__.id,
-      [...g.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join(""))]);
+    // each box: its header sub-title (box_subtitle -- it once read view-model
+    // keys, missed by ticket 17) and its rows
+    const boxes = [...document.querySelectorAll("g.node")].map(g => { const sub = g.querySelector(":scope > text.sub");
+      return [g.__data__.id, [sub && sub.getAttribute("display") !== "none" ? "sub: " + sub.textContent : "sub: -",
+      ...[...g.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join(""))]]; });
     const edges = [...document.querySelectorAll("path.edge.member")].map(p => [p.__data__.target, [...p.__data__.row_keys].sort().join(",")]);
     return JSON.stringify({boxes: boxes.sort(), edges: edges.map(String).sort()}); })()`);
 };

@@ -45,7 +45,7 @@ const ends = await ev(`(() => { const boxes = [...document.querySelectorAll("g.n
   return ${VIS}.filter(p => p.__data__.from === "session:1/router_").map(p => { const n = p.getAttribute("d").match(/-?[0-9.]+/g).map(Number); const ex = n[n.length-2], ey = n[n.length-1];
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }).sort(); })()`);
 console.log(" =  router edges end at:", JSON.stringify(ends));
-check(JSON.stringify(ends) === JSON.stringify(["server", "server/url_router_", "session:1:sender", "session:1:sub:0"]),
+check(JSON.stringify(ends) === JSON.stringify(["server", "server/url_router", "session:1:sender", "session:1:sub:0"]),
       "router edges: pjson_ -> the server (shared); url_router_ -> the UrlRouter box; sender_ -> its sender; [0] -> its subscription");
 // edges into the sender -- the session's sender_, the router's, the
 // sink's -- come from three boxes, so not merged; hover pairs each with its row

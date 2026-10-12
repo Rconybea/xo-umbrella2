@@ -33,7 +33,12 @@ check(await ev(`document.querySelectorAll("path.edge.holds").length`) === 0, "no
 // only fed their accounting, gone from the snapshot
 check(await ev(`document.querySelectorAll("g.badge").length`) === 0, "no refcount badges");
 check(await ev(`!("app_holds" in last_event)`), "no app_holds in the snapshot");
-check(await ev(`typeof member_value(last_event, "server").refcount === "number"`), "the printers' refcount fields remain (Show JSON)");
+// the server's went with its printer (xo-websock#16: generic printer, from
+// reflection -- refcount is no member); an endpoint's bespoke printer keeps it
+check(await ev(`(() => { const ids = objects_by_id(last_event);
+  return [...ids.values()].filter(o => o._name_ === "DynamicEndpoint").every(o => typeof o.refcount === "number"); })()`),
+      "the bespoke printers' refcount fields remain (Show JSON): an endpoint's");
+check(await ev(`!("refcount" in member_value(last_event, "server"))`), "the server's is gone with its printer");
 // the legend, on the graph's top-left corner: one entry per colour, top
 // down, the snapshot's short type; swatch = box.  Nested boxes: a colour
 // per type, in the order the types first appear
