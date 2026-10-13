@@ -157,9 +157,11 @@ namespace xo {
             StructReflector<DynamicEndpoint> sr;
 
             if (sr.is_incomplete()) {
-                /* not uri_regex_ or the std::functions: not reflectable
-                 * yet (.xo-backlog/xo-reflect/issues/09); the printer
-                 * summarizes them.  kind_: an enum, reflected by
+                /* not the std::functions: not reflectable yet
+                 * (.xo-backlog/xo-reflect/issues/09); the printer summarizes
+                 * them.  Not uri_regex_: a compiled cache of uri_pattern_,
+                 * shown already -- and a std::regex keeps no source text
+                 * (.xo-backlog/xo-websock/issues/16).  kind_: an enum, reflected by
                  * reflect_endpoint_kind.  receiver_: shared (rp) -- the
                  * receiver prints in full here, as its most-derived type
                  * (.xo-backlog/xo-websock/issues/16)

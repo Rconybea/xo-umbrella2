@@ -67,15 +67,13 @@ namespace xo {
                  * receiver_ -- shared: the receiver prints in full there, as
                  * its most-derived type), then the rest.  No view-model keys
                  * (.xo-backlog/xo-websock/issues/16).  This printer stays only
-                 * for these four, not printable as themselves: the compiled
-                 * regex (its capture count), the std::functions (presence)
-                 * -- until .xo-backlog/xo-reflect/issues/09 and a decision on
-                 * the regex
+                 * for the three std::functions, not printable as themselves:
+                 * their presence -- until .xo-backlog/xo-reflect/issues/09.
+                 * Not uri_regex_: a compiled cache of uri_pattern_, printed
+                 * already (RC, 2026-10-12)
                  */
                 obj.members()
                     .reflected_members(tp, "_")
-                    .member_as<std::regex>("uri_regex_",
-                                           std::to_string(ep->uri_regex_.mark_count()) + " captures")
                     .member_as<HttpHandler>("http_handler_",
                                             std::string(ep->http_handler_ ? "set" : "empty"))
                     .member_as<StreamSubscribeFn>("subscribe_fn_",

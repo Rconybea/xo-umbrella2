@@ -26,11 +26,12 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
   return [...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from === ${JSON.stringify(from)}).map(p => { const n = p.getAttribute("d").match(/-?[0-9.]+/g).map(Number); const ex = n[n.length-2], ey = n[n.length-1];
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }).sort(); })()`);
 
+// no uri_regex_ row: a compiled cache of uri_pattern_, not printed (xo-websock#16)
 for (const [id, expect] of [["stream:/introspect", ['kind_: stream', 'uri_pattern_: "/introspect"',
-                                                     'uri_regex_: 0 captures', 'var_v_: []',
+                                                     'var_v_: []',
                                                      'http_handler_: empty',
                                                      'receiver_: ▾ (→)']],
-                            ["http:/hello/", ['uri_regex_: 1 captures', 'var_v_: ["name"]', 'http_handler_: set',
+                            ["http:/hello/", ['var_v_: ["name"]', 'http_handler_: set',
                                               'receiver_: null']]]) {
     check(await ev(`${box(id)}.classList.contains("expandable")`), id + " expandable");
     await ev(`${box(id)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
@@ -38,6 +39,7 @@ for (const [id, expect] of [["stream:/introspect", ['kind_: stream', 'uri_patter
     console.log(" =  " + id + ":", JSON.stringify(r));
     for (const e of expect)
         check(r.includes(e), id + ": " + e);
+    check(!r.some(t => t.trimStart().startsWith("uri_regex_")), id + ": no uri_regex_ row");
 }
 // ownership still decides the layering: the server above its sessions
 const ys = await ev(`(() => { const y = id => [...document.querySelectorAll("g.node")].find(g => g.__data__.id === id).transform.baseVal[0].matrix.f; return {server: y("server"), s1: y("session:1"), s2: y("session:2")}; })()`);

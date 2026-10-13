@@ -121,13 +121,6 @@
                     "_value_" : null
                   },
                   {
-                    "_canonical_type_" : "std::__cxx11::basic_regex<char>",
-                    "_metatype_" : "atomic",
-                    "_name_" : "uri_regex_",
-                    "_short_type_" : "basic_regex<char>",
-                    "_value_" : "0 captures"
-                  },
-                  {
                     "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
                     "_metatype_" : "atomic",
                     "_name_" : "http_handler_",
@@ -201,13 +194,6 @@
                       "_name_" : "BoxReceiver",
                       "_short_type_" : "BoxReceiver"
                     }
-                  },
-                  {
-                    "_canonical_type_" : "std::__cxx11::basic_regex<char>",
-                    "_metatype_" : "atomic",
-                    "_name_" : "uri_regex_",
-                    "_short_type_" : "basic_regex<char>",
-                    "_value_" : "0 captures"
                   },
                   {
                     "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",

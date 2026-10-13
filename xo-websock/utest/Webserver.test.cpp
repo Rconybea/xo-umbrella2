@@ -453,11 +453,12 @@ namespace xo {
                     names.push_back(x["_name_"].asString());
 
                 /* reflected members first (kind_, uri_pattern_, var_v_, receiver_),
-                 * then the summaries and the ref (xo-printjson#06,
-                 * xo-reflect#06)
+                 * then the std::function summaries (xo-printjson#06,
+                 * xo-reflect#06).  No uri_regex_: a compiled cache of
+                 * uri_pattern_ (xo-websock#16)
                  */
                 REQUIRE(names == std::vector<std::string>{"kind_", "uri_pattern_", "var_v_",
-                                                          "receiver_", "uri_regex_", "http_handler_",
+                                                          "receiver_", "http_handler_",
                                                           "subscribe_fn_", "unsubscribe_fn_"});
 
                 /* by name: robust to member order */
@@ -470,7 +471,6 @@ namespace xo {
 
                 REQUIRE(value_of(m, "kind_").asString() == "http");
                 REQUIRE(value_of(m, "uri_pattern_").asString() == "/status");
-                REQUIRE(value_of(m, "uri_regex_").asString() == "0 captures");
                 REQUIRE(value_of(m, "var_v_").isArray());
                 REQUIRE(value_of(m, "var_v_").empty());
                 REQUIRE(value_of(m, "http_handler_").asString() == "set");
@@ -480,7 +480,6 @@ namespace xo {
                 Json::Value const & s = eps[1]["_members_"];    /* the stream endpoint */
                 REQUIRE(value_of(s, "kind_").asString() == "stream");
                 REQUIRE(value_of(s, "uri_pattern_").asString() == "/fw/${id}");
-                REQUIRE(value_of(s, "uri_regex_").asString() == "1 captures");
                 REQUIRE(value_of(s, "var_v_").size() == 1);
                 REQUIRE(value_of(s, "var_v_")[0].asString() == "id");
                 REQUIRE(value_of(s, "http_handler_").asString() == "empty");
