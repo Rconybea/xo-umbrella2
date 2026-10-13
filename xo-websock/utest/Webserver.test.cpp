@@ -214,10 +214,14 @@ namespace xo {
         }
 
         namespace {
-            /* a stream receiver; SelfTagging, not reflected in full */
+            /* a stream receiver; SelfTagging, reflected with no members */
             class NamedReceiver : public xo::web::StreamReceiver {
             public:
-                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+                /* a StreamReceiver is SelfTagging; reflected (no members) so it
+                 * prints from reflection (.xo-backlog/xo-websock/issues/16)
+                 */
+                static void reflect_self() { xo::reflect::StructReflector<NamedReceiver> sr; }
+                xo::reflect::TaggedRcptr self_tp() override { reflect_self(); return Reflect::make_rctp(this); }
                 void receive(rp<WebsocketSink> const &, Json::Value const &) override {}
             };
         }
@@ -248,20 +252,23 @@ namespace xo {
             Json::Value const eps = endpoints_of(member_value(root, "server"));
             REQUIRE(eps.size() == 2);
 
-            /* http /status: none */
-            REQUIRE(eps[0]["receiver"].isNull());
+            /* no inline "receiver" key: the receiver prints in full in the
+             * reflected receiver_ (shared), as its most-derived type
+             * (xo-websock#16)
+             */
+            REQUIRE(!eps[1].isMember("receiver"));
 
-            /* stream /fw: the receiver, by its own type */
-            Json::Value const & r = eps[1]["receiver"];
+            /* http /status: none */
+            REQUIRE(member_value(eps[0], "receiver_").isNull());
+
+            /* stream /fw: the receiver, by its own type, placed here */
+            Json::Value const & r = member_value(eps[1], "receiver_");
             REQUIRE(r.isObject());
+            REQUIRE(r["_id_"].isInt());
             REQUIRE(r["_canonical_type_"].asString() == std::string(xo::reflect::type_name<NamedReceiver>()));
             REQUIRE(r["_short_type_"].asString() == "NamedReceiver");
             REQUIRE(r["_name_"].asString() == "NamedReceiver");
-            /* the endpoint's hold and this test's */
-            REQUIRE(r["refcount"].asUInt() == 2);
-
-            /* the receiver_ member refers to it */
-            REQUIRE(member_value(eps[1], "receiver_")["_ref_"].asInt() == r["_id_"].asInt());
+            REQUIRE(!r.isMember("refcount"));
         }
 
         TEST_CASE("webserver-prints-as-json", "[websock][Webserver][json]")
@@ -383,8 +390,8 @@ namespace xo {
                         INFO("stem " << stem);
                         REQUIRE(ep["_name_"].asString() == "DynamicEndpoint");
                         REQUIRE(ep["_id_"].isInt());
-                        REQUIRE(ep["stem"].asString() == stem);
-                        REQUIRE(ep["kind"].asString() == (i == 0 ? "http" : "stream"));
+                        REQUIRE(!ep.isMember("stem"));   /* the map key is the stem (xo-websock#16) */
+                        REQUIRE(member_value(ep, "kind_").asString() == (i == 0 ? "http" : "stream"));
                     }
                 }
                 REQUIRE(endpoints_of(srv).size()
@@ -428,9 +435,14 @@ namespace xo {
             REQUIRE(eps.size() == 2);
             REQUIRE(eps[0]["_name_"].asString() == "DynamicEndpoint");
             REQUIRE(eps[0]["_canonical_type_"].asString() == "xo::web::DynamicEndpoint");
-            REQUIRE(eps[0]["kind"].asString() == "http");
-            REQUIRE(eps[0]["pattern"].asString() == "/status");
-            REQUIRE(eps[0]["has_receive"].asBool() == false);
+            /* no view-model keys (refcount, kind, stem, pattern,
+             * has_receive): members (xo-websock#16)
+             */
+            for (char const * k : {"refcount", "kind", "stem", "pattern", "has_receive", "receiver"})
+                REQUIRE(!eps[0].isMember(k));
+            REQUIRE(member_value(eps[0], "kind_").asString() == "http");
+            REQUIRE(member_value(eps[0], "uri_pattern_").asString() == "/status");
+            REQUIRE(member_value(eps[0], "receiver_").isNull());
 
             /* each endpoint's chosen C++ members (.xo-backlog/xo-websock/issues/13) */
             {
@@ -475,16 +487,13 @@ namespace xo {
                 REQUIRE(value_of(s, "subscribe_fn_").asString() == "set");
                 REQUIRE(value_of(s, "unsubscribe_fn_").asString() == "set");
             }
-            REQUIRE(eps[1]["kind"].asString() == "stream");
-            REQUIRE(eps[1]["stem"].asString() == "/fw/");
-            REQUIRE(eps[1]["pattern"].asString() == "/fw/${id}");
-            /* identity and refcount: distinct objects, each held only by the
-             * router's map (no subscriptions on an idle server)
+            REQUIRE(member_value(eps[1], "kind_").asString() == "stream");
+            REQUIRE(member_value(eps[1], "uri_pattern_").asString() == "/fw/${id}");
+            /* identity: distinct objects (refcount no longer shown --
+             * not a member)
              */
             REQUIRE(eps[0]["_id_"].isInt());
             REQUIRE(eps[0]["_id_"].asInt() != eps[1]["_id_"].asInt());
-            REQUIRE(eps[0]["refcount"].asUInt() == 1);
-            REQUIRE(eps[1]["refcount"].asUInt() == 1);
 
             /* no sessions: the session table's map is empty.  No "sessions"
              * list -- they print in session_table_'s session_map_

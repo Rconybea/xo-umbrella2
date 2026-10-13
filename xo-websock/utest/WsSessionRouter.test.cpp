@@ -18,6 +18,7 @@
 #include "xo/websock/WebsocketSink.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/StructReflector.hpp>
 #include <catch2/catch.hpp>
 #include <json/json.h>
 #include <iterator>
@@ -104,8 +105,11 @@ namespace xo {
             public:
                 explicit RecordingReceiver(Recorder * rec) : rec_{rec} {}
 
-                /* a StreamReceiver is SelfTagging; not reflected in full */
-                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+                /* a StreamReceiver is SelfTagging; reflected (no members) so it
+                 * prints from reflection (.xo-backlog/xo-websock/issues/16)
+                 */
+                static void reflect_self() { xo::reflect::StructReflector<RecordingReceiver> sr; }
+                xo::reflect::TaggedRcptr self_tp() override { reflect_self(); return Reflect::make_rctp(this); }
 
                 void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
                     rec_->received_v_.push_back({sink, msg});
@@ -118,8 +122,11 @@ namespace xo {
             /** fails every message **/
             class ThrowingReceiver : public StreamReceiver {
             public:
-                /* a StreamReceiver is SelfTagging; not reflected in full */
-                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+                /* a StreamReceiver is SelfTagging; reflected (no members) so it
+                 * prints from reflection (.xo-backlog/xo-websock/issues/16)
+                 */
+                static void reflect_self() { xo::reflect::StructReflector<ThrowingReceiver> sr; }
+                xo::reflect::TaggedRcptr self_tp() override { reflect_self(); return Reflect::make_rctp(this); }
 
                 void receive(rp<WebsocketSink> const &, Json::Value const &) override {
                     throw std::runtime_error("boom");
@@ -133,8 +140,11 @@ namespace xo {
             public:
                 explicit FrameReceiver(int * p_frame) : p_frame_{p_frame} {}
 
-                /* a StreamReceiver is SelfTagging; not reflected in full */
-                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+                /* a StreamReceiver is SelfTagging; reflected (no members) so it
+                 * prints from reflection (.xo-backlog/xo-websock/issues/16)
+                 */
+                static void reflect_self() { xo::reflect::StructReflector<FrameReceiver> sr; }
+                xo::reflect::TaggedRcptr self_tp() override { reflect_self(); return Reflect::make_rctp(this); }
 
                 void receive(rp<WebsocketSink> const & sink, Json::Value const &) override {
                     sink->notify_ev_tp(Reflect::make_tp(p_frame_));

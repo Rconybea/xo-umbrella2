@@ -158,11 +158,11 @@ namespace xo {
 
             if (sr.is_incomplete()) {
                 /* not uri_regex_ or the std::functions: not reflectable
-                 * yet; the printer summarizes them.  kind_: an enum,
-                 * reflected by reflect_endpoint_kind.  receiver_: printed in
-                 * full inline by the endpoint's printer first ("receiver"),
-                 * so a ref here -- each object prints once
-                 * (.xo-backlog/xo-printjson/issues/02)
+                 * yet (.xo-backlog/xo-reflect/issues/09); the printer
+                 * summarizes them.  kind_: an enum, reflected by
+                 * reflect_endpoint_kind.  receiver_: shared (rp) -- the
+                 * receiver prints in full here, as its most-derived type
+                 * (.xo-backlog/xo-websock/issues/16)
                  */
                 REFLECT_MEMBER(sr, kind);
                 REFLECT_MEMBER(sr, uri_pattern);

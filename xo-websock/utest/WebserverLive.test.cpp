@@ -18,6 +18,7 @@
 #include "xo/websock/WebsocketSink.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/StructReflector.hpp>
 #include <catch2/catch.hpp>
 #include <json/json.h>
 #include <arpa/inet.h>
@@ -192,8 +193,11 @@ namespace xo {
             public:
                 explicit BoxReceiver(std::shared_ptr<SinkBox> box) : box_{std::move(box)} {}
 
-                /* a StreamReceiver is SelfTagging; not reflected in full */
-                xo::reflect::TaggedRcptr self_tp() override { return Reflect::make_rctp(this); }
+                /* a StreamReceiver is SelfTagging; reflected (no members) so it
+                 * prints from reflection (.xo-backlog/xo-websock/issues/16)
+                 */
+                static void reflect_self() { xo::reflect::StructReflector<BoxReceiver> sr; }
+                xo::reflect::TaggedRcptr self_tp() override { reflect_self(); return Reflect::make_rctp(this); }
 
                 void receive(rp<WebsocketSink> const & sink, Json::Value const & msg) override {
                     box_->receive(sink, msg);
@@ -824,15 +828,14 @@ namespace xo {
 
             std::uint64_t second_id = session_id_of(1);
 
-            /* the /fw endpoint is held by the router's map and by the one
-             * subscription served: refcount 2
-             */
+            /* the /fw endpoint, the one subscription served */
             Json::Value const eps = endpoints_of(root);
 
             REQUIRE(!root.isMember("endpoints"));   /* xo-websock#15 */
             REQUIRE(eps.size() == 1);
-            REQUIRE(eps[0]["pattern"].asString() == "/fw");
-            REQUIRE(eps[0]["refcount"].asUInt() == 2);
+            /* no view-model keys (refcount, pattern, ..): members (xo-websock#16) */
+            REQUIRE(!eps[0].isMember("refcount"));
+            REQUIRE(entry_of(eps[0]["_members_"], "uri_pattern_")["_value_"].asString() == "/fw");
 
             /* the edges, joined by id: the subscription's endpoint is THAT
              * endpoint; its sink's sender is ITS session's sender.  The sink

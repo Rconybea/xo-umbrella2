@@ -61,57 +61,16 @@ namespace xo {
                 if (!ep)
                     return;
 
-                /* the receiver: written inline below, at its most-derived
-                 * address -- the address the reflected receiver_ member
-                 * reaches through self_tp(), so it prints as a ref to this
-                 */
-                StreamReceiver * r = ep->receiver_.get();
-                void const * r_addr = dynamic_cast<void const *>(r);
-
                 json::JsonObject obj = state.open_object("DynamicEndpoint", tp.td());
 
-                /* refcount: held by the router's map, plus one per live
-                 * subscription served (each holds it by rp<>)
-                 */
-                obj.key("refcount", ep->reference_counter())
-                    .key("kind", std::string(endpoint_kind_descr(ep->kind())))
-                    .key("stem", ep->stem())
-                    .key("pattern", ep->uri_pattern())
-                    .key("has_receive", ep->has_receive());
-
-                /* the receiver, printed here in full -- its identity, named
-                 * by its most-derived type (SelfTagging), and its reflected
-                 * members
-                 */
-                std::ostream & os = obj.key_open("receiver");
-                if (!r) {
-                    os << "null";
-                } else if (state.is_printed(r_addr)) {
-                    state.print_ref(r_addr);
-                } else {
-                    /* before self_tp(): the TaggedRcptr it returns holds one more */
-                    auto refcount = r->reference_counter();
-                    TaggedRcptr self = r->self_tp();
-
-                    json::JsonObject robj = state.open_object_at(r_addr, self.td()->short_name(),
-                                                                 self.td());
-                    /* the endpoint's hold, plus whatever the application keeps */
-                    robj.key("refcount", refcount);
-                    /* whatever its actual type reflects -- through self_tp(),
-                     * so an application's receiver shows its own members
-                     */
-                    robj.members()
-                        .reflected_members(self, "_")
-                        .end();
-                    robj.close();
-                }
-
-                /* chosen C++ members (.xo-backlog/xo-websock/issues/13):
-                 * the reflected ones (kind_, uri_pattern_, var_v_,
-                 * receiver_ -- a ref: the receiver printed in full above),
-                 * then the rest.  Not printable as themselves -- the
-                 * compiled regex, the std::functions -- so their capture
-                 * count, presence, under their declared types
+                /* the reflected members (kind_, uri_pattern_, var_v_,
+                 * receiver_ -- shared: the receiver prints in full there, as
+                 * its most-derived type), then the rest.  No view-model keys
+                 * (.xo-backlog/xo-websock/issues/16).  This printer stays only
+                 * for these four, not printable as themselves: the compiled
+                 * regex (its capture count), the std::functions (presence)
+                 * -- until .xo-backlog/xo-reflect/issues/09 and a decision on
+                 * the regex
                  */
                 obj.members()
                     .reflected_members(tp, "_")

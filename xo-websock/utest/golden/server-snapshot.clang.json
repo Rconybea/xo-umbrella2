@@ -150,13 +150,7 @@
                   }
                 ],
                 "_name_" : "DynamicEndpoint",
-                "_short_type_" : "DynamicEndpoint",
-                "has_receive" : false,
-                "kind" : "http",
-                "pattern" : "/status",
-                "receiver" : null,
-                "refcount" : 1,
-                "stem" : "/status"
+                "_short_type_" : "DynamicEndpoint"
               }
             }
           },
@@ -201,7 +195,11 @@
                     "_short_type_" : "rp<StreamReceiver>",
                     "_value_" : 
                     {
-                      "_ref_" : 7
+                      "_canonical_type_" : "xo::ut::(anonymous namespace)::BoxReceiver",
+                      "_id_" : 7,
+                      "_members_" : [],
+                      "_name_" : "BoxReceiver",
+                      "_short_type_" : "BoxReceiver"
                     }
                   },
                   {
@@ -234,21 +232,7 @@
                   }
                 ],
                 "_name_" : "DynamicEndpoint",
-                "_short_type_" : "DynamicEndpoint",
-                "has_receive" : true,
-                "kind" : "stream",
-                "pattern" : "/fw",
-                "receiver" : 
-                {
-                  "_canonical_type_" : "xo::ut::(anonymous namespace)::BoxReceiver",
-                  "_id_" : 7,
-                  "_members_" : [],
-                  "_name_" : "BoxReceiver",
-                  "_short_type_" : "BoxReceiver",
-                  "refcount" : 1
-                },
-                "refcount" : 2,
-                "stem" : "/fw"
+                "_short_type_" : "DynamicEndpoint"
               }
             }
           }
