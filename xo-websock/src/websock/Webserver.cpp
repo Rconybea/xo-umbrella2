@@ -2044,9 +2044,19 @@ namespace xo {
         void
         WsSessionSender<WebserverImpl>::reflect_self(reflect::TypeDescrTable * /*table*/)
         {
+            /* the interface: no members.  Reflected so the sender can
+             * adopt it -- a borrowed rp<WsSender> (a router's sender_)
+             * then matches the sender placed as WsSessionSenderImpl at the
+             * same address (.xo-backlog/xo-printjson/issues/08); else it
+             * lands in "_unplaced_" (.xo-backlog/xo-websock/issues/16)
+             */
+            { StructReflector<WsSender> sr; }
+
             StructReflector<WsSessionSenderImpl> sr;
 
             if (sr.is_incomplete()) {
+                sr.adopt_parent<WsSender>();
+
                 /* open_: a std::atomic, printed by its load()ed value
                  * (.xo-backlog/xo-reflect/issues/04).  target_: the server,
                  * a raw pointer -- borrowed, so a ref

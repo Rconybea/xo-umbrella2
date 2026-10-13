@@ -170,12 +170,12 @@ namespace xo {
                              std::uint32_t const * sub_id = nullptr);
 
         private:
-            /* reads private members, for "_members_" (WsSessionRouter.cpp) */
-            friend class JsonPrinter_WsSessionRouter;
-
-        private:
-            /* finds the endpoint serving a stream name.  Borrowed; see ctor */
-            UrlRouter const & url_router_;
+            /* finds the endpoint serving a stream name.  Borrowed; see ctor.
+             * Never null (the ctor takes a reference).  A pointer, not a
+             * reference: reflection names a member by member pointer, which
+             * a reference member has none of (.xo-backlog/xo-websock/issues/16)
+             */
+            UrlRouter const * url_router_ = nullptr;
             /* this session's sender; shared with every sink made here */
             rp<WsSender> sender_;
             /* renders events for the sinks made here */

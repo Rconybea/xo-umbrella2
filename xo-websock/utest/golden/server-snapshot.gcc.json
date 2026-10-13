@@ -302,7 +302,7 @@
                         {
                           "_canonical_type_" : "std::unique_ptr<Json::CharReader>",
                           "_metatype_" : "pointer",
-                          "_name_" : "readjson_",
+                          "_name_" : "readjson",
                           "_short_type_" : "unique_ptr<CharReader>",
                           "_value_" : 
                           {
@@ -314,17 +314,10 @@
                           }
                         },
                         {
-                          "_canonical_type_" : "std::vector<std::unique_ptr<xo::web::WsSessionRouter::Subscription> >",
-                          "_metatype_" : "vector",
-                          "_name_" : "subscription_v_",
-                          "_short_type_" : "vector<unique_ptr<Subscription>>",
-                          "_value_" : []
-                        },
-                        {
-                          "_canonical_type_" : "const xo::web::UrlRouter&",
+                          "_canonical_type_" : "const xo::web::UrlRouter*",
                           "_metatype_" : "pointer",
-                          "_name_" : "url_router_",
-                          "_short_type_" : "const UrlRouter&",
+                          "_name_" : "url_router",
+                          "_short_type_" : "const UrlRouter*",
                           "_value_" : 
                           {
                             "_ref_" : 4
@@ -333,7 +326,7 @@
                         {
                           "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSender>",
                           "_metatype_" : "pointer",
-                          "_name_" : "sender_",
+                          "_name_" : "sender",
                           "_short_type_" : "rp<WsSender>",
                           "_value_" : 
                           {
@@ -343,12 +336,19 @@
                         {
                           "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
                           "_metatype_" : "pointer",
-                          "_name_" : "pjson_",
+                          "_name_" : "pjson",
                           "_short_type_" : "rp<PrintJson>",
                           "_value_" : 
                           {
                             "_ref_" : 3
                           }
+                        },
+                        {
+                          "_canonical_type_" : "std::vector<std::unique_ptr<xo::web::WsSessionRouter::Subscription> >",
+                          "_metatype_" : "vector",
+                          "_name_" : "subscription_v",
+                          "_short_type_" : "vector<unique_ptr<Subscription>>",
+                          "_value_" : []
                         }
                       ],
                       "_name_" : "WsSessionRouter",
@@ -440,7 +440,7 @@
                         {
                           "_canonical_type_" : "std::unique_ptr<Json::CharReader>",
                           "_metatype_" : "pointer",
-                          "_name_" : "readjson_",
+                          "_name_" : "readjson",
                           "_short_type_" : "unique_ptr<CharReader>",
                           "_value_" : 
                           {
@@ -452,15 +452,45 @@
                           }
                         },
                         {
+                          "_canonical_type_" : "const xo::web::UrlRouter*",
+                          "_metatype_" : "pointer",
+                          "_name_" : "url_router",
+                          "_short_type_" : "const UrlRouter*",
+                          "_value_" : 
+                          {
+                            "_ref_" : 4
+                          }
+                        },
+                        {
+                          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSender>",
+                          "_metatype_" : "pointer",
+                          "_name_" : "sender",
+                          "_short_type_" : "rp<WsSender>",
+                          "_value_" : 
+                          {
+                            "_ref_" : 17
+                          }
+                        },
+                        {
+                          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
+                          "_metatype_" : "pointer",
+                          "_name_" : "pjson",
+                          "_short_type_" : "rp<PrintJson>",
+                          "_value_" : 
+                          {
+                            "_ref_" : 3
+                          }
+                        },
+                        {
                           "_canonical_type_" : "std::vector<std::unique_ptr<xo::web::WsSessionRouter::Subscription> >",
                           "_metatype_" : "vector",
-                          "_name_" : "subscription_v_",
+                          "_name_" : "subscription_v",
                           "_short_type_" : "vector<unique_ptr<Subscription>>",
                           "_value_" : 
                           [
                             {
                               "_canonical_type_" : "xo::web::WsSessionRouter::Subscription",
-                              "_id_" : 17,
+                              "_id_" : 18,
                               "_members_" : 
                               [
                                 {
@@ -502,7 +532,7 @@
                                   "_value_" : 
                                   {
                                     "_canonical_type_" : "xo::web::WebsocketSinkImpl",
-                                    "_id_" : 18,
+                                    "_id_" : 19,
                                     "_members_" : 
                                     [
                                       {
@@ -533,7 +563,7 @@
                                         "_short_type_" : "rp<WsSender>",
                                         "_value_" : 
                                         {
-                                          "_ref_" : 19
+                                          "_ref_" : 17
                                         }
                                       },
                                       {
@@ -552,7 +582,7 @@
                                     "refcount" : 2,
                                     "sender" : 
                                     {
-                                      "_ref_" : 19
+                                      "_ref_" : 17
                                     },
                                     "seq" : 0,
                                     "stream" : "/fw",
@@ -564,36 +594,6 @@
                               "_short_type_" : "Subscription"
                             }
                           ]
-                        },
-                        {
-                          "_canonical_type_" : "const xo::web::UrlRouter&",
-                          "_metatype_" : "pointer",
-                          "_name_" : "url_router_",
-                          "_short_type_" : "const UrlRouter&",
-                          "_value_" : 
-                          {
-                            "_ref_" : 4
-                          }
-                        },
-                        {
-                          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::WsSender>",
-                          "_metatype_" : "pointer",
-                          "_name_" : "sender_",
-                          "_short_type_" : "rp<WsSender>",
-                          "_value_" : 
-                          {
-                            "_ref_" : 19
-                          }
-                        },
-                        {
-                          "_canonical_type_" : "xo::ref::intrusive_ptr<xo::json::PrintJson>",
-                          "_metatype_" : "pointer",
-                          "_name_" : "pjson_",
-                          "_short_type_" : "rp<PrintJson>",
-                          "_value_" : 
-                          {
-                            "_ref_" : 3
-                          }
                         }
                       ],
                       "_name_" : "WsSessionRouter",
@@ -608,7 +608,7 @@
                     "_value_" : 
                     {
                       "_canonical_type_" : "xo::web::WsSessionSender<xo::web::WebserverImpl>",
-                      "_id_" : 19,
+                      "_id_" : 17,
                       "_members_" : 
                       [
                         {

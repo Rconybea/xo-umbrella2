@@ -707,7 +707,7 @@ namespace xo {
              */
             auto subs_of = [&](Json::ArrayIndex k) {
                 Json::Value const router = entry_of(v[k]["_members_"], "router")["_value_"];
-                return entry_of(router["_members_"], "subscription_v_")["_value_"];
+                return entry_of(router["_members_"], "subscription_v")["_value_"];
             };
 
             REQUIRE(!v[0].isMember("subscriptions"));
@@ -756,23 +756,27 @@ namespace xo {
                 for (Json::Value const & m : rmem)
                     rnames.push_back(m["_name_"].asString());
 
-                /* reflected members first -- readjson_, then subscription_v_
-                 * under the router's mutex (xo-websock#15) -- then the rest
+                /* from reflection (generic printer, xo-websock#16): unguarded
+                 * first, in reflection order -- readjson, url_router, sender,
+                 * pjson -- then subscription_v under the router's mutex
+                 * (xo-websock#15)
                  */
-                REQUIRE(rnames == std::vector<std::string>{"readjson_", "subscription_v_",
-                                                           "url_router_", "sender_", "pjson_"});
+                REQUIRE(rnames == std::vector<std::string>{"readjson", "url_router", "sender",
+                                                           "pjson", "subscription_v"});
 
-                Json::Value const url_router = entry_of(rmem, "url_router_");
-                REQUIRE(url_router["_metatype_"].asString() == "pointer");   /* a reference */
+                Json::Value const url_router = entry_of(rmem, "url_router");
+                REQUIRE(url_router["_metatype_"].asString() == "pointer");   /* a raw pointer: borrowed */
                 /* ... to the server's url router, printed inside the server */
                 REQUIRE(url_router["_value_"]["_ref_"].asInt()
                         == entry_of(root["_members_"], "url_router")["_value_"]["_id_"].asInt());
-                REQUIRE(entry_of(rmem, "sender_")["_value_"]["_ref_"].asInt() == sender_of(k)["_id_"].asInt());
+                /* sender, pjson: borrowed -- refs (xo-websock#16) */
+                REQUIRE(entry_of(rmem, "sender")["_value_"]["_ref_"].asInt() == sender_of(k)["_id_"].asInt());
+                REQUIRE(entry_of(rmem, "pjson")["_value_"]["_ref_"].isInt());
 
                 /* a unique_ptr to jsoncpp's reader, reflected with no members:
                  * present, so an empty object (xo-reflect#04)
                  */
-                Json::Value const readjson = entry_of(rmem, "readjson_");
+                Json::Value const readjson = entry_of(rmem, "readjson");
                 REQUIRE(readjson["_metatype_"].asString() == "pointer");
                 REQUIRE(readjson["_value_"]["_name_"].asString() == "CharReader");
                 REQUIRE(readjson["_value_"]["_members_"].empty());
@@ -780,7 +784,7 @@ namespace xo {
                 /* owning (unique_ptr): each subscription placed here, in
                  * full -- not a ref
                  */
-                Json::Value const subscription_v = entry_of(rmem, "subscription_v_");
+                Json::Value const subscription_v = entry_of(rmem, "subscription_v");
                 Json::Value const & slots = subscription_v["_value_"];
 
                 REQUIRE(subscription_v["_metatype_"].asString() == "vector");

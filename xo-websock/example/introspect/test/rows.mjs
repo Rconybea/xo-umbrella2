@@ -174,8 +174,11 @@ const decl = await ev(`(() => { const ts = new Set(); const w = (v) => { if (Arr
   else if (v && typeof v === "object") { if (typeof v._canonical_type_ === "string") ts.add(v._canonical_type_); Object.values(v).forEach(w); } };
   w(last_event); return [...ts].filter(t => /[&*]$/.test(t)); })()`);
 console.log("   declared ref/pointer types:", JSON.stringify(decl));
-check(decl.includes("const xo::web::UrlRouter&"), "the snapshot has a const& member (WsSessionRouter url_router_)");
+// (WsSessionRouter::url_router_ was a const UrlRouter&; a pointer since
+// xo-websock#16, which reflection can name)
+check(decl.includes("const xo::web::UrlRouter*"), "the snapshot has a const-qualified pointer member (WsSessionRouter url_router)");
 const quals = await ev(`[["const xo::web::UrlRouter&", "xo::web::UrlRouter"],
+  ["const xo::web::UrlRouter*", "xo::web::UrlRouter"],
   ["xo::web::UrlRouter&&", "xo::web::UrlRouter"],
   ["xo::web::WebserverImpl*", "xo::web::WebserverImpl"],
   ["xo::web::WebserverImpl* const", "xo::web::WebserverImpl"],

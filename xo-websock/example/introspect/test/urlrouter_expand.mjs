@@ -41,18 +41,18 @@ check(r.some(t => t.trim() === '["/demo/"]: ▾ (→)') && r.some(t => t.trim() 
 let ends = await ends_from(U);
 check(JSON.stringify(ends) === JSON.stringify(["stream:/demo/", "stream:/introspect"]), "map edges end at the stream endpoint boxes: " + JSON.stringify(ends));
 
-// (b) session 1's router (its own box): its url_router_ refers to the
+// (b) session 1's router (its own box): its url_router refers to the
 // server's url router -- the edge now ends on the UrlRouter box itself,
 // not on the whole Webserver
 await ev(`${box(R)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 r = await rows_of(R);
-check(r.some(t => t.trimStart().startsWith("url_router_:") && t.endsWith("▾ (→)")), "the router's url_router_: a drawn ref, ▾ (→)");
+check(r.some(t => t.trimStart().startsWith("url_router:") && t.endsWith("▾ (→)")), "the router's url_router: a drawn ref, ▾ (→)");
 ends = await ends_from(R);
-// the router's one edge into the server is pjson_ -- the server's PrintJson,
+// the router's one edge into the server is pjson -- the server's PrintJson,
 // shared (printed in full in the server, a ref elsewhere: xo-printjson#02)
-const pj_into_server = await ev(`${VIS}.filter(p => p.__data__.from === ${JSON.stringify(R)} && p.__data__.row_keys.some(k => /pjson_$/.test(k))).length`);
+const pj_into_server = await ev(`${VIS}.filter(p => p.__data__.from === ${JSON.stringify(R)} && p.__data__.row_keys.some(k => /pjson$/.test(k))).length`);
 check(ends.includes(U) && ends.filter(e => e === "server").length === 1 && pj_into_server === 1,
-      "its url_router_ edge ends on the UrlRouter box; the only edge into the server is pjson_: " + JSON.stringify(ends));
+      "its url_router edge ends on the UrlRouter box; the only edge into the server is pjson: " + JSON.stringify(ends));
 // ownership still decides the layering: the server above its sessions
 const ys = await ev(`(() => { const y = id => [...document.querySelectorAll("g.node")].find(g => g.__data__.id === id).transform.baseVal[0].matrix.f; return {server: y("server"), s1: y("session:1"), s2: y("session:2")}; })()`);
 check(ys.server < ys.s1 && ys.server < ys.s2, "server above its sessions: " + JSON.stringify(ys));

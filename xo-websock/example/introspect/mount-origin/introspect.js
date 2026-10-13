@@ -284,7 +284,7 @@ function layout(event) {
             edge(id, snd, "owns");
         }
 
-        for (const sub of (mv(mv(s, "router"), "subscription_v_") || []).map(deref).filter(x => x)) {
+        for (const sub of (mv(mv(s, "router"), "subscription_v") || []).map(deref).filter(x => x)) {
             const sid = `${id}:sub:${mv(sub, "sub_id")}`;
             const sink = deref(mv(sub, "sink"));
             // the sink's sender should be this session's: flag it if not

@@ -57,7 +57,7 @@ namespace xo {
         WsSessionRouter::WsSessionRouter(UrlRouter const & url_router,
                                          rp<WsSender> sender,
                                          rp<PrintJson> pjson)
-            : url_router_{url_router},
+            : url_router_{&url_router},
               sender_{std::move(sender)},
               pjson_{std::move(pjson)},
               readjson_{Json::CharReaderBuilder().newCharReader()}
@@ -187,7 +187,7 @@ namespace xo {
         {
             scope log(XO_ENTER0_(info), xtag("stream", stream_name));
 
-            rp<DynamicEndpoint> endpoint = url_router_.find_stream(stream_name);
+            rp<DynamicEndpoint> endpoint = url_router_->find_stream(stream_name);
 
             if (!endpoint) {
                 /* was silent until issue 06; a page that subscribes to a
@@ -396,57 +396,6 @@ namespace xo {
             }
         } /*visit_subscriptions*/
 
-
-        /** @brief a session's router: its chosen C++ members
-         *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
-         *  namespace: WsSessionRouter's header befriends it by name.
-         *
-         *  Its subscriptions print in full here, in subscription_v_ --
-         *  reflected, guarded by the router's mutex, which
-         *  reflected_members takes: this printer takes no lock
-         *  (.xo-backlog/xo-websock/issues/15).  Its sender is printed in
-         *  full by the session ("sender") -- a ref here.  url_router_ is
-         *  the server's, printed inside the server.
-         **/
-        class JsonPrinter_WsSessionRouter : public JsonPrinter {
-        public:
-            void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                WsSessionRouter const * r = this->check_recover_native<WsSessionRouter>(tp, state);
-
-                if (!r)
-                    return;
-
-                json::JsonObject obj = state.open_object("WsSessionRouter", tp.td());
-
-                /* the reflected members (readjson_; subscription_v_ in slot
-                 * order, released slots null: index is sub_id), then the
-                 * rest.  The
-                 * sender by its most-derived address: it prints as its
-                 * actual type, WsSessionSenderImpl, at that address
-                 */
-                obj.members()
-                    .reflected_members(tp, "_")
-                    .member_ref<UrlRouter const &>("url_router_", &r->url_router_)
-                    .member_ref<rp<WsSender>>("sender_",
-                                              dynamic_cast<void const *>(r->sender_.get()))
-                    /* the server's, shared: printed in full in the server's members */
-                    .member_ref<rp<PrintJson>>("pjson_", r->pjson_.get())
-                    .end();
-
-                obj.close();
-            }
-        };
-
-        void
-        provide_router_json_printers(PrintJson * pjson)
-        {
-            pjson->provide_printer(Reflect::require<WsSessionRouter>(),
-                                   std::make_unique<JsonPrinter_WsSessionRouter>());
-            /* a subscription: no printer -- the generic one, from
-             * reflection (.xo-backlog/xo-websock/issues/16)
-             */
-        }
-
         std::size_t
         WsSessionRouter::n_subscription() const
         {
@@ -495,15 +444,21 @@ namespace xo {
                 StructReflector<WsSessionRouter> sr;
 
                 if (sr.is_incomplete()) {
-                    /* not url_router_ (a reference: no member pointer),
-                     * sender_ or pjson_ (printed in full elsewhere -- refs).
-                     * subscription_v_ owns its subscriptions (unique_ptr),
+                    /* subscription_v_ owns its subscriptions (unique_ptr),
                      * under the router's mutex: the generic printer takes
                      * it, and they print in full here
-                     * (.xo-backlog/xo-websock/issues/15)
+                     * (.xo-backlog/xo-websock/issues/15).  url_router_ (raw
+                     * pointer), sender_, pjson_: borrowed -- refs.  The
+                     * sender is placed under its session, the url router and
+                     * PrintJson inside the server; borrowed keeps the
+                     * router, printed first, from placing them
+                     * (.xo-backlog/xo-websock/issues/16)
                      */
                     REFLECT_MEMBER(sr, readjson);
                     REFLECT_MEMBER(sr, subscription_v).guarded_by(&WsSessionRouter::mutex_);
+                    REFLECT_MEMBER(sr, url_router);
+                    REFLECT_MEMBER(sr, sender).borrowed();
+                    REFLECT_MEMBER(sr, pjson).borrowed();
                 }
             }
 

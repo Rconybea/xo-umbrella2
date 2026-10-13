@@ -33,11 +33,11 @@ check(r.some(t => t.trimStart().startsWith("router:") && t.endsWith("▾ (→)")
 await ev(`${RB}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 r = await rows_of(RB);
 console.log(" =  router rows:", JSON.stringify(r));
-check(r.some(t => t.trimStart().startsWith("url_router_:") && t.endsWith("▾ (→)")), "url_router_: a drawn ref (to the UrlRouter box)");
+check(r.some(t => t.trimStart().startsWith("url_router:") && t.endsWith("▾ (→)")), "url_router_: a drawn ref (to the UrlRouter box)");
 // a unique_ptr to a reflected struct with no members: its name shows presence (xo-reflect#04)
-check(r.some(t => t === "readjson_: CharReader"), "readjson_ presence");
-check(r.some(t => t.startsWith("subscription_v_:") && t.endsWith("▸ [1]")), "subscription_v_ closed, 1 slot");
-await click_in(RB, "subscription_v_:"); await sleep(700);
+check(r.some(t => t === "readjson: CharReader"), "readjson presence");
+check(r.some(t => t.startsWith("subscription_v:") && t.endsWith("▸ [1]")), "subscription_v_ closed, 1 slot");
+await click_in(RB, "subscription_v:"); await sleep(700);
 r = await rows_of(RB);
 check(r.some(t => t === "[0]: ▾ (→)"), "slot [0] a ref row");
 // edges from the router's box, by where they end
@@ -46,16 +46,16 @@ const ends = await ev(`(() => { const boxes = [...document.querySelectorAll("g.n
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }).sort(); })()`);
 console.log(" =  router edges end at:", JSON.stringify(ends));
 check(JSON.stringify(ends) === JSON.stringify(["server", "server/url_router", "session:1:sender", "session:1:sub:0"]),
-      "router edges: pjson_ -> the server (shared); url_router_ -> the UrlRouter box; sender_ -> its sender; [0] -> its subscription");
+      "router edges: pjson -> the server (borrowed); url_router -> the UrlRouter box; sender -> its sender; [0] -> its subscription");
 // edges into the sender -- the session's sender, the router's, the
 // sink's -- come from three boxes, so not merged; hover pairs each with its row
 const into = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.target === "session:1:sender").map(p => [p.__data__.from, p.__data__.row_keys])`);
-check(JSON.stringify(into.sort()) === JSON.stringify([["session:1", ["session:1/sender"]], ["session:1/router", ["session:1/router/sender_"]], ["session:1:sub:0:sink", ["session:1:sub:0:sink/sender_"]]]),
+check(JSON.stringify(into.sort()) === JSON.stringify([["session:1", ["session:1/sender"]], ["session:1/router", ["session:1/router/sender"]], ["session:1:sub:0:sink", ["session:1:sub:0:sink/sender_"]]]),
       "three edges into the sender, one per box (session, router, sink): " + JSON.stringify(into));
-await ev(`[...document.querySelectorAll("text.row")].find(t => t.__data__.key === "session:1/router/sender_").dispatchEvent(new MouseEvent("mouseenter"))`); await sleep(100);
+await ev(`[...document.querySelectorAll("text.row")].find(t => t.__data__.key === "session:1/router/sender").dispatchEvent(new MouseEvent("mouseenter"))`); await sleep(100);
 let hot = await ev(`({rows: [...document.querySelectorAll("text.row.hot")].map(t => t.__data__.key), edge: [...document.querySelectorAll("path.edge.member.hot")].map(p => p.__data__.from)})`);
-check(JSON.stringify(hot) === JSON.stringify({rows: ["session:1/router/sender_"], edge: ["session:1/router"]}), "router's sender_ row hover: its own edge and row only: " + JSON.stringify(hot));
-await ev(`[...document.querySelectorAll("text.row")].find(t => t.__data__.key === "session:1/router/sender_").dispatchEvent(new MouseEvent("mouseleave"))`); await sleep(100);
+check(JSON.stringify(hot) === JSON.stringify({rows: ["session:1/router/sender"], edge: ["session:1/router"]}), "router's sender row hover: its own edge and row only: " + JSON.stringify(hot));
+await ev(`[...document.querySelectorAll("text.row")].find(t => t.__data__.key === "session:1/router/sender").dispatchEvent(new MouseEvent("mouseleave"))`); await sleep(100);
 const overl = await ev(`(() => { const r = [...document.querySelectorAll("g.node > rect")].map(e => e.getBoundingClientRect()); let n = 0;
   for (let i = 0; i < r.length; i++) for (let j = i + 1; j < r.length; j++) { const a = r[i], b = r[j];
     if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) n++; } return n; })()`);

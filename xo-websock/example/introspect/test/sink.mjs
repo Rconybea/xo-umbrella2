@@ -22,11 +22,11 @@ const rowtext = (id, name) => ev(`(() => { const t = [...${G(id)}.querySelectorA
 const SUB = "session:1:sub:0", K = "session:1:sub:0:sink";
 // the snapshot: the sink, with its members
 // (from members alone, xo-websock#17: session table -> session -> its
-// router's subscription_v_ -> sink, each a ref or the object, by id)
+// router's subscription_v -> sink, each a ref or the object, by id)
 const mem = await ev(`(() => { const ids = objects_by_id(last_event), d = (v) => v && "_ref_" in v ? ids.get(v._ref_) : v;
   const mv = (v, n) => member_value(d(v), n);
   const s = Object.values(mv(mv(member_value(last_event, "server"), "session_table"), "session_map"))[0];
-  const sub = mv(mv(s, "router"), "subscription_v_")[0];
+  const sub = mv(mv(s, "router"), "subscription_v")[0];
   return d(mv(sub, "sink"))._members_.map(m => m._name_); })()`);
 // reflected members first (stream_name_, sub_id_, n_in_ev_), then the two
 // printed elsewhere, as refs (xo-printjson#06)

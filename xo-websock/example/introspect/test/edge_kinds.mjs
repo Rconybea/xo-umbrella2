@@ -17,20 +17,20 @@ const kinds = await ev(`[...document.querySelectorAll("path.edge.member")].map(p
 console.log("   edges:", JSON.stringify(kinds));
 // (the server's url_router here; the routers' are checked below)
 const want = {ws_config: "includes", url_router: "includes", session_table: "includes", router: "includes",
-              'session_map["1"]': "owns", 'session_map["2"]': "owns", "subscription_v_[0]": "owns",
+              'session_map["1"]': "owns", 'session_map["2"]': "owns", "subscription_v[0]": "owns",
               'http_map["/hello/"]': "shares", 'stream_map["/introspect"]': "shares", receiver_: "shares",
               sender: "shares",   // a session's sender (generic printer: no "_", xo-websock#16)
               endpoint: "shares", sink: "shares",   // a subscription's (generic printer)
-              sender_: "shares"};   // a router's / sink's sender_
-const by_label = new Map(kinds.filter(([l, k]) => !(l === "url_router_" && k === "refers")).map(([l, k]) => [l, k]));
+              sender_: "shares"};   // a sink's sender_ (its printer remains)
+const by_label = new Map(kinds.filter(([l, k]) => !(l === "url_router" && k === "refers")).map(([l, k]) => [l, k]));
 for (const [l, k] of Object.entries(want))
     check(by_label.get(l) === k, `${l}: ${k} (${by_label.get(l)})`);
 check(kinds.every(([l, k, c]) => c === `from-${k}`), "each edge's class carries its kind");
 // the sender's target (WebserverImpl*) -- into the Webserver, never drawn: its showable edge
 check(await ev(`showable.filter(e => e.key.endsWith("/target")).every(e => e.ref_kind === "refers") && showable.some(e => e.key.endsWith("/target"))`), "target (WebserverImpl*): refers");
-// the router's url_router_ is a const UrlRouter&: refers, no start marker
+// the router's url_router is a const UrlRouter* (was a reference): refers, no start marker
 const rr = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from.endsWith("/router") && p.__data__.target === "server/url_router").map(p => [p.__data__.ref_kind, getComputedStyle(p).markerStart])`);
-check(rr.length === 2 && rr.every(([k, m]) => k === "refers" && m === "none"), "router.url_router_ (const UrlRouter&): refers, no start marker: " + JSON.stringify(rr));
+check(rr.length === 2 && rr.every(([k, m]) => k === "refers" && m === "none"), "router.url_router (const UrlRouter*): refers, no start marker: " + JSON.stringify(rr));
 // the markers as drawn
 const ms = await ev(`Object.fromEntries(["includes", "owns", "shares"].map(k => { const p = document.querySelector("path.edge.member.from-" + k); return [k, p ? getComputedStyle(p).markerStart : null]; }))`);
 check(ms.includes === 'url("#start-includes")' && ms.owns === 'url("#start-owns")' && ms.shares === 'url("#start-shares")', "start markers by kind: " + JSON.stringify(ms));
