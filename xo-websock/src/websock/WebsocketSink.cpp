@@ -238,6 +238,33 @@ namespace xo {
             }
         } /*reflect_self*/
 
+        namespace {
+            /** @brief a sink reached by its concrete type.  Printing through
+             *  a pointer resolves its most-derived type first (WebsocketSink
+             *  is self-tagging), so a reflected rp<WebsocketSink> -- a
+             *  subscription's sink_ -- arrives here, not at
+             *  JsonPrinter_WebsocketSink (websock_json.cpp).  The same
+             *  virtual print_json, so the same output
+             *  (.xo-backlog/xo-websock/issues/16)
+             **/
+            class JsonPrinter_WebsocketSinkImpl : public json::JsonPrinter {
+            public:
+                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
+                    WebsocketSinkImpl const * sink
+                        = this->check_recover_native<WebsocketSinkImpl>(tp, state);
+
+                    if (sink)
+                        sink->print_json(state);
+                }
+            };
+        } /*namespace*/
+
+        void
+        provide_websocket_sink_json_printers(PrintJson * pjson)
+        {
+            pjson->provide_printer(Reflect::require<WebsocketSinkImpl>(),
+                                   std::make_unique<JsonPrinter_WebsocketSinkImpl>());
+        }
     } /*namespace web*/
 } /*namespace xo*/
 

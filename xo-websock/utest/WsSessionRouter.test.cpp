@@ -634,9 +634,11 @@ namespace xo {
         TEST_CASE("subscriptions-print-as-json", "[websock][router][json]")
         {
             /* what the webserver's json shows of a session's subscriptions:
-             * each printed natively, its sink in full, its endpoint and the
-             * sink's sender as refs ({"_ref_": n}, n another object's "_id_"
-             * in the same print)
+             * each printed from reflection (xo-websock#16), its sink in full,
+             * the sink's sender as a ref ({"_ref_": n}, n another object's
+             * "_id_" in the same print).  Its endpoint is shared (rp): in a
+             * server print the url router places it first, so a ref; printed
+             * alone, as here, the subscription places it
              */
 
             Fixture fx;
@@ -670,16 +672,28 @@ namespace xo {
             REQUIRE(v[0]["_name_"].asString() == "Subscription");
             REQUIRE(v[0]["_canonical_type_"].asString() == "xo::web::WsSessionRouter::Subscription");
             REQUIRE(v[0]["_short_type_"].asString() == "Subscription");
-            REQUIRE(v[0]["sub_id"].asUInt() == 0);
-            REQUIRE(v[0]["stream"].asString() == "/a");
-            REQUIRE(v[1]["sub_id"].asUInt() == 2);
-            REQUIRE(v[1]["stream"].asString() == "/fw/8");
+            /* a "_members_" entry's value by name */
+            auto value_of = [](Json::Value const & obj, std::string const & name) {
+                for (Json::Value const & m : obj["_members_"])
+                    if (m["_name_"].asString() == name)
+                        return m["_value_"];
+                return Json::Value();
+            };
 
-            /* the endpoint, as a ref to the very object the url router
-             * holds: print the subscription, then that endpoint, in one
-             * print -- the endpoint's _id_ is the subscription's ref
+            /* no view-model keys: members */
+            for (char const * k : {"sub_id", "stream", "endpoint", "sink"})
+                REQUIRE(!v[0].isMember(k));
+            REQUIRE(value_of(v[0], "sub_id").asUInt() == 0);
+            REQUIRE(value_of(v[0], "stream_name").asString() == "/a");
+            REQUIRE(value_of(v[1], "sub_id").asUInt() == 2);
+            REQUIRE(value_of(v[1], "stream_name").asString() == "/fw/8");
+
+            /* the endpoint, the very object the url router holds: print the
+             * subscription, then that endpoint, in one print -- the
+             * subscription places it (first encounter, shared), the second
+             * print is a ref to it
              */
-            REQUIRE(v[0]["endpoint"]["_ref_"].isInt());
+            REQUIRE(value_of(v[0], "endpoint")["_id_"].isInt());
             {
                 std::stringstream ss;
                 xo::json::JsonPrintState state(PrintJsonSingleton::instance().get(), &ss);
@@ -695,14 +709,16 @@ namespace xo {
 
                 Json::Value both = parse(ss.str());
 
-                REQUIRE(both[1]["_name_"].asString() == "DynamicEndpoint");
-                REQUIRE(both[1]["_id_"].asInt() == both[0]["endpoint"]["_ref_"].asInt());
+                Json::Value const ep = value_of(both[0], "endpoint");
+
+                REQUIRE(ep["_name_"].asString() == "DynamicEndpoint");
+                REQUIRE(both[1]["_ref_"].asInt() == ep["_id_"].asInt());
             }
 
             /* the sink, in full: the one the endpoint's subscribe was handed;
              * held by the router's slot and by the test's recorder
              */
-            Json::Value const & sink = v[1]["sink"];
+            Json::Value const sink = value_of(v[1], "sink");
 
             REQUIRE(sink["_name_"].asString() == "WebsocketSink");
             REQUIRE(sink["_canonical_type_"].asString() == "xo::web::WebsocketSinkImpl");
@@ -714,8 +730,8 @@ namespace xo {
             /* its sender: a ref (printed in full under its session) */
             REQUIRE(sink["sender"]["_ref_"].isInt());
 
-            /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
-             * endpoint and sink as refs to the objects printed in full
+            /* its members, from reflection: names without the trailing "_"
+             * (the generic printer, xo-websock#16); endpoint and sink in full
              */
             Json::Value const & mem = v[1]["_members_"];
 
@@ -723,17 +739,17 @@ namespace xo {
             for (Json::Value const & m : mem)
                 names.push_back(m["_name_"].asString());
 
-            /* reflected members first (sub_id_, stream_name_, callback_id_) */
-            REQUIRE(names == std::vector<std::string>{"sub_id_", "stream_name_", "callback_id_",
-                                                      "endpoint_", "sink_"});
+            REQUIRE(names == std::vector<std::string>{"sub_id", "stream_name", "callback_id",
+                                                      "endpoint", "sink"});
             REQUIRE(mem[0]["_value_"].asUInt() == 2);
             REQUIRE(mem[1]["_value_"].asString() == "/fw/8");
-            /* callback_id_: a transparent wrapper -- its number (xo-reflect#04) */
+            /* callback_id: a transparent wrapper -- its number (xo-reflect#04) */
             REQUIRE(mem[2]["_canonical_type_"].asString().find("CallbackId") != std::string::npos);
             REQUIRE(mem[2]["_metatype_"].asString() == "atomic");
             REQUIRE(mem[2]["_value_"].isUInt());
-            REQUIRE(mem[3]["_value_"]["_ref_"].asInt() == v[1]["endpoint"]["_ref_"].asInt());
-            REQUIRE(mem[4]["_value_"]["_ref_"].asInt() == sink["_id_"].asInt());
+            REQUIRE(mem[3]["_value_"]["_name_"].asString() == "DynamicEndpoint");
+            REQUIRE(mem[3]["_value_"]["_id_"].isInt());
+            REQUIRE(mem[4]["_value_"]["_id_"].asInt() == sink["_id_"].asInt());
             REQUIRE(v[1].toStyledString().find("\"_error_\"") == std::string::npos);
         }
 

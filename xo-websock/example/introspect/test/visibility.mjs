@@ -155,8 +155,8 @@ await ev(`show_box("session:1:sub:0"); 1`); await sleep(900);
 await set_open("session:1:sub:0", true);
 // a second wanted edge into /demo/ (already drawn): set directly -- the row's
 // triangle follows its target, so clicking ▾ here would hide /demo/
-await ev(`wanted.add("session:1:sub:0/endpoint_"); redraw(); 1`); await sleep(900);
-check(await ev(`wanted.has("session:1:sub:0/endpoint_")`), "sub's endpoint_ edge wanted");
+await ev(`wanted.add("session:1:sub:0/endpoint"); redraw(); 1`); await sleep(900);
+check(await ev(`wanted.has("session:1:sub:0/endpoint")`), "sub's endpoint edge wanted");
 // collapse the UrlRouter: nothing drawn changes -- its edges still leave it
 const before = await ids();
 const edges_before = await ev(`document.querySelectorAll("path.edge.member").length`);
@@ -166,15 +166,15 @@ check(await ev(`document.querySelectorAll("path.edge.member").length`) === edges
       && await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.from === "${U}").length`) === 2,
       "... the same member edges, the UrlRouter's from its collapsed box");
 check(await ev(`wanted.has('${U}/stream_map/["/introspect"]')`), "... its edges still wanted");
-// collapse a sub: its endpoint_ edge stays wanted
+// collapse a sub: its endpoint edge stays wanted
 await set_open("session:1:sub:0", true);
 await set_open("session:1:sub:0", false);
-check(await ev(`wanted.has("session:1:sub:0/endpoint_")`) && JSON.stringify(await ids()) === JSON.stringify(before),
+check(await ev(`wanted.has("session:1:sub:0/endpoint")`) && JSON.stringify(await ids()) === JSON.stringify(before),
       "sub collapsed: its edge still wanted, nothing drawn changes");
 
 // Hide ▸ child hides the child even when another wanted edge reaches it
 await ev(`document.getElementById("hide-all").click()`); await sleep(800);
-await ev(`show_box("stream:/demo/"); show_box("session:1:sub:0"); wanted.add("session:1:sub:0/endpoint_"); redraw(); 1`); await sleep(900);
+await ev(`show_box("stream:/demo/"); show_box("session:1:sub:0"); wanted.add("session:1:sub:0/endpoint"); redraw(); 1`); await sleep(900);
 check((await ids()).includes("stream:/demo/"), "/demo/ reached by the UrlRouter's edge and by the sub's");
 items = await menu(U);
 const hide_demo = items.find(t => t.startsWith("Hide ▸ /demo/"));

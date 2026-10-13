@@ -155,6 +155,7 @@ namespace xo {
                                    std::make_unique<JsonPrinter_WebsocketSink>());
             /* types private to one file, printed there */
             provide_router_json_printers(pjson);
+            provide_websocket_sink_json_printers(pjson);
         }
     } /*namespace web*/
 } /*namespace xo*/

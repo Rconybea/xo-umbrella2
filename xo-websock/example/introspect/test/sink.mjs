@@ -1,5 +1,5 @@
 // a subscription's WebsocketSink drawn as its own box: owned by the
-// subscription, reached by its sink_ row; opens to its members (sender_ ->
+// subscription, reached by its sink row; opens to its members (sender_ ->
 // the session's sender box); in the legend
 import fs from "node:fs";
 const [,, cdp_port, port, out] = process.argv;
@@ -22,12 +22,12 @@ const rowtext = (id, name) => ev(`(() => { const t = [...${G(id)}.querySelectorA
 const SUB = "session:1:sub:0", K = "session:1:sub:0:sink";
 // the snapshot: the sink, with its members
 // (from members alone, xo-websock#17: session table -> session -> its
-// router's subscription_v_ -> sink_, each a ref or the object, by id)
+// router's subscription_v_ -> sink, each a ref or the object, by id)
 const mem = await ev(`(() => { const ids = objects_by_id(last_event), d = (v) => v && "_ref_" in v ? ids.get(v._ref_) : v;
   const mv = (v, n) => member_value(d(v), n);
   const s = Object.values(mv(mv(member_value(last_event, "server"), "session_table"), "session_map"))[0];
   const sub = mv(mv(s, "router"), "subscription_v_")[0];
-  return d(mv(sub, "sink_"))._members_.map(m => m._name_); })()`);
+  return d(mv(sub, "sink"))._members_.map(m => m._name_); })()`);
 // reflected members first (stream_name_, sub_id_, n_in_ev_), then the two
 // printed elsewhere, as refs (xo-printjson#06)
 check(JSON.stringify(mem) === JSON.stringify(["stream_name_", "sub_id_", "n_in_ev_", "sender_", "pjson_"]), "the sink's printer lists its members: " + JSON.stringify(mem));
@@ -36,10 +36,10 @@ await ev(`show_box(${JSON.stringify(SUB)}); 1`); await ev(`settled()`);
 check(!(await ev(`!!${G(K)}`)), "hidden by default (a child of its subscription)");
 await ev(`toggle_children(${JSON.stringify(SUB)}); 1`); await ev(`settled()`);
 check(await ev(`!!${G(K)}`) && await ev(`${G(K)}.querySelector("text.label").textContent`) === "WebsocketSinkImpl" && await ev(`${G(K)}.querySelector("text.sub").getAttribute("display")`) === "none", "the subscription's triangle shows it, headed by its type alone (WebsocketSinkImpl)");
-// the subscription's sink_ row: no longer "not drawn"
+// the subscription's sink row: no longer "not drawn"
 await ev(`expanded.add(${JSON.stringify(SUB)}); redraw(); 1`); await ev(`settled()`);
-const r = await rowtext(SUB, "sink_");
-check(r && r.trim().endsWith("▾ (→)"), "sink_ row: ▾ (→): " + JSON.stringify(r));
+const r = await rowtext(SUB, "sink");
+check(r && r.trim().endsWith("▾ (→)"), "sink row: ▾ (→): " + JSON.stringify(r));
 check(await ev(`[...document.querySelectorAll("path.edge.member")].some(p => p.__data__.target === ${JSON.stringify(K)})`), "an edge from the subscription to it");
 // the sink box opens: its members; sender_ refers to the session's sender
 check(await ev(`${G(K)}.classList.contains("expandable")`), "the sink box opens");

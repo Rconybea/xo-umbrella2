@@ -396,57 +396,6 @@ namespace xo {
             }
         } /*visit_subscriptions*/
 
-        namespace {
-            /** @brief one subscription, printed in full by its router: its
-             *  sink in full (the router's slot is one of the sink's holders);
-             *  the endpoint as a ref -- it is printed in full in the
-             *  webserver's endpoint list
-             **/
-            class JsonPrinter_Subscription : public JsonPrinter {
-            public:
-                using Subscription = WsSessionRouter::Subscription;
-
-                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    Subscription const * sub = this->check_recover_native<Subscription>(tp, state);
-
-                    if (!sub)
-                        return;
-
-                    /* the sink prints through its WebsocketSink view (below):
-                     * a ref to it names that same address
-                     */
-                    WebsocketSink const * sink = sub->sink_.get();
-
-                    json::JsonObject obj = state.open_object("Subscription", tp.td());
-
-                    obj.key("sub_id", sub->sub_id_)
-                        .key("stream", sub->stream_name_)
-                        .key_ref("endpoint", sub->endpoint_.get());
-
-                    if (sink) {
-                        obj.child("sink", TaggedPtr(Reflect::require<WebsocketSink>(),
-                                                    const_cast<WebsocketSink *>(sink)));
-                    } else {
-                        /* in the moment between slot and sink (subscribe) */
-                        obj.key_open("sink") << "null";
-                    }
-
-                    /* chosen C++ members (.xo-backlog/xo-websock/issues/13):
-                     * the reflected ones (sub_id_, stream_name_, callback_id_),
-                     * then the rest.  endpoint_ and sink_ are printed in full
-                     * elsewhere (the server's endpoints; "sink" above): refs,
-                     * each by the address it prints at
-                     */
-                    obj.members()
-                        .reflected_members(tp, "_")
-                        .member_ref<rp<DynamicEndpoint>>("endpoint_", sub->endpoint_.get())
-                        .member_ref<rp<WebsocketSink>>("sink_", sink)
-                        .end();
-
-                    obj.close();
-                }
-            };
-        } /*namespace*/
 
         /** @brief a session's router: its chosen C++ members
          *  (.xo-backlog/xo-websock/issues/13).  Not in the anonymous
@@ -493,8 +442,9 @@ namespace xo {
         {
             pjson->provide_printer(Reflect::require<WsSessionRouter>(),
                                    std::make_unique<JsonPrinter_WsSessionRouter>());
-            pjson->provide_printer(Reflect::require<WsSessionRouter::Subscription>(),
-                                   std::make_unique<JsonPrinter_Subscription>());
+            /* a subscription: no printer -- the generic one, from
+             * reflection (.xo-backlog/xo-websock/issues/16)
+             */
         }
 
         std::size_t
@@ -516,14 +466,18 @@ namespace xo {
             StructReflector<Subscription> sr;
 
             if (sr.is_incomplete()) {
-                /* not endpoint_ or sink_: each printed in full elsewhere
-                 * (the server's endpoints; the subscription's "sink") --
-                 * refs.  callback_id_: a transparent wrapper of its number,
-                 * reflected by xo-webutil's reflect_callback_id
+                /* callback_id_: a transparent wrapper of its number,
+                 * reflected by xo-webutil's reflect_callback_id.  endpoint_,
+                 * sink_: shared (rp) -- the endpoint is placed already, in
+                 * its url router's map, so a ref; the sink placed here, as
+                 * its WebsocketSink view (its own printer:
+                 * WebsocketSink::print_json) -- .xo-backlog/xo-websock/issues/16
                  */
                 REFLECT_MEMBER(sr, sub_id);
                 REFLECT_MEMBER(sr, stream_name);
                 REFLECT_MEMBER(sr, callback_id);
+                REFLECT_MEMBER(sr, endpoint);
+                REFLECT_MEMBER(sr, sink);
             }
         } /*reflect_self*/
 

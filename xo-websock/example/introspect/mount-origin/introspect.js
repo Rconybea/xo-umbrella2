@@ -285,14 +285,14 @@ function layout(event) {
         }
 
         for (const sub of (mv(mv(s, "router"), "subscription_v_") || []).map(deref).filter(x => x)) {
-            const sid = `${id}:sub:${mv(sub, "sub_id_")}`;
-            const sink = deref(mv(sub, "sink_"));
+            const sid = `${id}:sub:${mv(sub, "sub_id")}`;
+            const sink = deref(mv(sub, "sink"));
             // the sink's sender should be this session's: flag it if not
             const astray = sender && sink && mv(sink, "sender_")
                 && id_of(mv(sink, "sender_")) !== sender._id_;
 
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
-                        label: `sub ${mv(sub, "sub_id_")} · ${mv(sub, "stream_name_")}`,
+                        label: `sub ${mv(sub, "sub_id")} · ${mv(sub, "stream_name")}`,
                         type: sub._canonical_type_, obj: sub, small: true});
             edge(id, sid, "owns");
 

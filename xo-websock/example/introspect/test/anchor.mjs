@@ -42,16 +42,16 @@ let after = await at(SUB);
 check(await ev(`expanded.has("${SUB}")`), "the sub box opened");
 check(same(before, after), `sub box stays put opening it: ${JSON.stringify(before)} -> ${JSON.stringify(after)}`);
 
-// 2. its endpoint_ triangle: /demo/ hides -- the layout changes, the sub stays
+// 2. its endpoint triangle: /demo/ hides -- the layout changes, the sub stays
 before = await at(SUB);
 const others0 = await ev(`[...document.querySelectorAll("g.node")].map(g => g.__data__.id).sort().join(",")`);
-await click_at(await center(`[...${G(SUB)}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "endpoint_").querySelector("tspan.rtoggle")`)); await sleep(1000);
+await click_at(await center(`[...${G(SUB)}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "endpoint").querySelector("tspan.rtoggle")`)); await sleep(1000);
 after = await at(SUB);
-check(!(await ev(`shown_box_ids.has("stream:/demo/")`)), "endpoint_'s ▾ hid /demo/");
+check(!(await ev(`shown_box_ids.has("stream:/demo/")`)), "endpoint's ▾ hid /demo/");
 check(same(before, after), `sub box stays put: ${JSON.stringify(before)} -> ${JSON.stringify(after)}`);
 // and back
 before = after;
-await click_at(await center(`[...${G(SUB)}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "endpoint_").querySelector("tspan.rtoggle")`)); await sleep(1000);
+await click_at(await center(`[...${G(SUB)}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "endpoint").querySelector("tspan.rtoggle")`)); await sleep(1000);
 after = await at(SUB);
 check(await ev(`shown_box_ids.has("stream:/demo/")`) && same(before, after), `▸ shows /demo/ again; sub box stays put: ${JSON.stringify(before)} -> ${JSON.stringify(after)}`);
 

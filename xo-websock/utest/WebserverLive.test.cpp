@@ -713,7 +713,7 @@ namespace xo {
             REQUIRE(!v[0].isMember("subscriptions"));
             REQUIRE(subs_of(0).empty());
             REQUIRE(subs_of(1).size() == 1);
-            REQUIRE(entry_of(subs_of(1)[0]["_members_"], "stream_name_")["_value_"].asString() == "/fw");
+            REQUIRE(entry_of(subs_of(1)[0]["_members_"], "stream_name")["_value_"].asString() == "/fw");
 
             for (Json::ArrayIndex k = 0; k < 2; ++k) {
                 Json::Value const & mem = v[k]["_members_"];
@@ -837,9 +837,19 @@ namespace xo {
              */
             Json::Value const sub = subs_of(1)[0];
 
-            REQUIRE(sub["endpoint"]["_ref_"].asInt() == eps[0]["_id_"].asInt());
-            REQUIRE(sub["sink"]["sender"]["_ref_"].asInt() == sender_of(1)["_id_"].asInt());
-            REQUIRE(sub["sink"]["refcount"].asUInt() == 2);
+            /* from reflection (xo-websock#16): endpoint, sink are members.
+             * The endpoint a ref -- the url router placed it first; the sink
+             * in full, still by its own print_json (its keys)
+             */
+            REQUIRE(!sub.isMember("endpoint"));
+            REQUIRE(!sub.isMember("sink"));
+            REQUIRE(entry_of(sub["_members_"], "endpoint")["_value_"]["_ref_"].asInt() == eps[0]["_id_"].asInt());
+            {
+                Json::Value const sink = entry_of(sub["_members_"], "sink")["_value_"];
+                REQUIRE(sink["_name_"].asString() == "WebsocketSink");
+                REQUIRE(sink["sender"]["_ref_"].asInt() == sender_of(1)["_id_"].asInt());
+                REQUIRE(sink["refcount"].asUInt() == 2);
+            }
 
             /* a closed session leaves the listing */
             REQUIRE(first->close(c_timeout));
