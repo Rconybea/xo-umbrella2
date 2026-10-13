@@ -720,15 +720,21 @@ namespace xo {
              */
             Json::Value const sink = value_of(v[1], "sink");
 
-            REQUIRE(sink["_name_"].asString() == "WebsocketSink");
+            /* from reflection (xo-websock#16): its actual type, its
+             * members, no view-model keys (refcount, stream, sub_id, seq,
+             * sender)
+             */
+            REQUIRE(sink["_name_"].asString() == "WebsocketSinkImpl");
             REQUIRE(sink["_canonical_type_"].asString() == "xo::web::WebsocketSinkImpl");
             REQUIRE(sink["_id_"].isInt());
-            REQUIRE(sink["refcount"].asUInt() == 2);
-            REQUIRE(sink["stream"].asString() == "/fw/8");
-            REQUIRE(sink["sub_id"].asUInt() == 2);
-            REQUIRE(sink["seq"].asUInt() == 0);
+            for (char const * k : {"refcount", "stream", "sub_id", "seq", "sender"})
+                REQUIRE(!sink.isMember(k));
+            REQUIRE(value_of(sink, "stream_name").asString() == "/fw/8");
+            REQUIRE(value_of(sink, "sub_id").asUInt() == 2);
+            REQUIRE(value_of(sink, "n_in_ev").asUInt() == 0);
             /* its sender: a ref (printed in full under its session) */
-            REQUIRE(sink["sender"]["_ref_"].isInt());
+            REQUIRE(value_of(sink, "sender")["_ref_"].isInt());
+            REQUIRE(value_of(sink, "pjson")["_ref_"].isInt());
 
             /* its members, from reflection: names without the trailing "_"
              * (the generic printer, xo-websock#16); endpoint and sink in full

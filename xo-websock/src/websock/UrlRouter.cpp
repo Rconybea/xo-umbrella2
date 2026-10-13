@@ -5,7 +5,6 @@
 
 #include "UrlRouter.hpp"
 #include "DynamicEndpoint.hpp"
-#include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
 #include <xo/printjson/JsonObject.hpp>

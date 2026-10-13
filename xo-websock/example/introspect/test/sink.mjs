@@ -1,5 +1,5 @@
 // a subscription's WebsocketSink drawn as its own box: owned by the
-// subscription, reached by its sink row; opens to its members (sender_ ->
+// subscription, reached by its sink row; opens to its members (sender ->
 // the session's sender box); in the legend
 import fs from "node:fs";
 const [,, cdp_port, port, out] = process.argv;
@@ -28,9 +28,9 @@ const mem = await ev(`(() => { const ids = objects_by_id(last_event), d = (v) =>
   const s = Object.values(mv(mv(member_value(last_event, "server"), "session_table"), "session_map"))[0];
   const sub = mv(mv(s, "router"), "subscription_v")[0];
   return d(mv(sub, "sink"))._members_.map(m => m._name_); })()`);
-// reflected members first (stream_name_, sub_id_, n_in_ev_), then the two
-// printed elsewhere, as refs (xo-printjson#06)
-check(JSON.stringify(mem) === JSON.stringify(["stream_name_", "sub_id_", "n_in_ev_", "sender_", "pjson_"]), "the sink's printer lists its members: " + JSON.stringify(mem));
+// from reflection (generic printer, xo-websock#16): stream_name, sub_id,
+// n_in_ev, then sender and pjson -- borrowed, so refs
+check(JSON.stringify(mem) === JSON.stringify(["stream_name", "sub_id", "n_in_ev", "sender", "pjson"]), "the sink's members: " + JSON.stringify(mem));
 // hidden by default; the subscription's triangle shows it
 await ev(`show_box(${JSON.stringify(SUB)}); 1`); await ev(`settled()`);
 check(!(await ev(`!!${G(K)}`)), "hidden by default (a child of its subscription)");
@@ -41,11 +41,11 @@ await ev(`expanded.add(${JSON.stringify(SUB)}); redraw(); 1`); await ev(`settled
 const r = await rowtext(SUB, "sink");
 check(r && r.trim().endsWith("▾ (→)"), "sink row: ▾ (→): " + JSON.stringify(r));
 check(await ev(`[...document.querySelectorAll("path.edge.member")].some(p => p.__data__.target === ${JSON.stringify(K)})`), "an edge from the subscription to it");
-// the sink box opens: its members; sender_ refers to the session's sender
+// the sink box opens: its members; sender refers to the session's sender
 check(await ev(`${G(K)}.classList.contains("expandable")`), "the sink box opens");
 await ev(`expanded.add(${JSON.stringify(K)}); show_box("session:1:sender"); redraw(); 1`); await ev(`settled()`);
-const s1 = await rowtext(K, "sender_"), s2 = await rowtext(K, "stream_name_");
-check(s1 && s1.trim().endsWith("▾ (→)") && s2 && s2.includes('"/demo/1"'), "its rows: sender_ ▾ (→), stream_name_ /demo/1: " + JSON.stringify([s1, s2]));
+const s1 = await rowtext(K, "sender"), s2 = await rowtext(K, "stream_name");
+check(s1 && s1.trim().endsWith("▾ (→)") && s2 && s2.includes('"/demo/1"'), "its rows: sender ▾ (→), stream_name /demo/1: " + JSON.stringify([s1, s2]));
 check(await ev(`[...document.querySelectorAll("path.edge.member")].some(p => p.__data__.from === ${JSON.stringify(K)} && p.__data__.target === "session:1:sender")`), "an edge from the sink to its session's sender");
 // colour + legend
 const fill = await ev(`getComputedStyle(${G(K)}.querySelector(":scope > rect")).fill`);

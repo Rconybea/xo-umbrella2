@@ -50,7 +50,7 @@ check(JSON.stringify(ends) === JSON.stringify(["server", "server/url_router", "s
 // edges into the sender -- the session's sender, the router's, the
 // sink's -- come from three boxes, so not merged; hover pairs each with its row
 const into = await ev(`[...document.querySelectorAll("path.edge.member")].filter(p => p.__data__.target === "session:1:sender").map(p => [p.__data__.from, p.__data__.row_keys])`);
-check(JSON.stringify(into.sort()) === JSON.stringify([["session:1", ["session:1/sender"]], ["session:1/router", ["session:1/router/sender"]], ["session:1:sub:0:sink", ["session:1:sub:0:sink/sender_"]]]),
+check(JSON.stringify(into.sort()) === JSON.stringify([["session:1", ["session:1/sender"]], ["session:1/router", ["session:1/router/sender"]], ["session:1:sub:0:sink", ["session:1:sub:0:sink/sender"]]]),
       "three edges into the sender, one per box (session, router, sink): " + JSON.stringify(into));
 await ev(`[...document.querySelectorAll("text.row")].find(t => t.__data__.key === "session:1/router/sender").dispatchEvent(new MouseEvent("mouseenter"))`); await sleep(100);
 let hot = await ev(`({rows: [...document.querySelectorAll("text.row.hot")].map(t => t.__data__.key), edge: [...document.querySelectorAll("path.edge.member.hot")].map(p => p.__data__.from)})`);

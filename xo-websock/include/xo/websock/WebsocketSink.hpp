@@ -76,13 +76,6 @@ namespace xo {
              **/
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) = 0;
 
-            /** print this sink as json, within print @p state, for
-             *  introspection (.xo-backlog/xo-websock/issues/10).  Default:
-             *  id, refcount, stream.  The webserver's sink adds sub_id, seq,
-             *  and its sender as a ref
-             **/
-            virtual void print_json(json::JsonPrintState & state) const;
-
             /* pretty(), display_string(): from ref::Displayable */
         }; /*WebsocketSink*/
     } /*namespace web*/

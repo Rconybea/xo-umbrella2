@@ -26,7 +26,6 @@
 #include "WsSessionSender.hpp"
 #include "WsSessionTable.hpp"
 #include "cx/WebsockAppcx.hpp"
-#include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */

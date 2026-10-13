@@ -9,15 +9,16 @@
 //
 // Webserver json: a reflected struct, {_id_, _canonical_type_, _members_:
 // [{_name_, _value_, ..}, ..]}.  The page reads "_members_" alone
-// (.xo-backlog/xo-websock/issues/17) -- what it draws, and from where:
-//   server        listen_port, state (generic printer: no trailing "_")
-//   endpoints     url_router_ -> http_map, stream_map (key: stem);
+// (.xo-backlog/xo-websock/issues/17) -- what it draws, and from where.
+// Members printed from reflection carry no trailing "_" (the generic
+// printer; .xo-backlog/xo-websock/issues/16); DynamicEndpoint's own
+// printer still writes kind_, uri_pattern_, receiver_:
+//   server        listen_port, state
+//   endpoints     url_router -> http_map, stream_map (key: stem);
 //                 each: kind_, uri_pattern_, receiver_
-//   sessions      session_table_ -> session_map (key: session id);
-//                 each: sender_ (-> open_), router_ -> subscription_v_
-//   subscriptions sub_id_, stream_name_, sink_ (-> sender_)
-// Other keys beside "_members_" (endpoints, sessions, ..: the websock
-// printers' view model, until .xo-backlog/xo-websock/issues/16) it ignores.
+//   sessions      session_table -> session_map (key: session id);
+//                 each: sender (-> open), router -> subscription_v
+//   subscriptions sub_id, stream_name, sink (-> sender)
 //
 // Each object is printed in full once, with "_id_": n; elsewhere as
 // {"_ref_": n}.  Ids are numbers, 1, 2, .. within one snapshot
@@ -288,8 +289,8 @@ function layout(event) {
             const sid = `${id}:sub:${mv(sub, "sub_id")}`;
             const sink = deref(mv(sub, "sink"));
             // the sink's sender should be this session's: flag it if not
-            const astray = sender && sink && mv(sink, "sender_")
-                && id_of(mv(sink, "sender_")) !== sender._id_;
+            const astray = sender && sink && mv(sink, "sender")
+                && id_of(mv(sink, "sender")) !== sender._id_;
 
             nodes.push({id: sid, kind: astray ? "subscription astray" : "subscription",
                         label: `sub ${mv(sub, "sub_id")} · ${mv(sub, "stream_name")}`,
@@ -382,7 +383,7 @@ let tree = {kids: new Map(), parent: new Map()};
 // ----- nested boxes (issue 13) ---------------------------------------------
 //
 // A declared member whose value is a struct with members of its own -- the
-// Webserver's url_router_, session_table_, ws_config_; a session's router_
+// Webserver's url_router, session_table, ws_config; a session's router
 // -- is drawn as a box of its own, not opened in place: its row is a ref
 // row (▸ / ▾ (→)) to that box, which is the holder's child (a "nests"
 // edge).  The holder and its drawn nested boxes sit inside a group outline
@@ -593,7 +594,7 @@ function drawn_ids() {
 
 /** ownership tree @p tree, re-parented through nested boxes: a child its
  *  owner reaches only by a ref from one of the owner's nested boxes (the
- *  server's endpoints, from its url_router_) becomes that nested box's
+ *  server's endpoints, from its url_router) becomes that nested box's
  *  child, so the tree matches the boxes drawn.  A child the owner refs
  *  directly stays the owner's.  @p edges: showable edges
  **/
@@ -629,7 +630,7 @@ function within(s, owner) {
 
 /** keys of the edges that show child @p kid of @p owner: the owner's ref to
  *  it -- or a ref from one of the owner's nested boxes
- *  (e.g. the server's endpoints are reached from its url_router_), with the
+ *  (e.g. the server's endpoints are reached from its url_router), with the
  *  edges from the owner down to that nested box.  Else the ownership edge
  **/
 function child_edges(owner, kid) {
@@ -925,7 +926,7 @@ function toggle(key) {
 /** ref row @p r's target: drawn -> hide it (as menu "Hide ▸ <child>":
  *  unwant every edge into it); not drawn -> want this row's edge.  It
  *  follows the target box, not the row's own edge -- another edge into the
- *  target (a parallel one, e.g. a session's sender_ and router_.sender_, or
+ *  target (a parallel one, e.g. a session's sender and router.sender, or
  *  another box's) would otherwise keep it drawn while the row said hidden
  **/
 function toggle_ref(r) {
@@ -1654,7 +1655,7 @@ async function draw_aux(event) {
     // a ref member's edge: from its box to the box drawing the referenced
     // object -- its own box, or the box it is printed nested in.  Parallel
     // ones merge: one line per pair of boxes, carrying every member it
-    // stands for (e.g. a session's sender_ and router_.sender_)
+    // stands for (e.g. a session's sender and router.sender)
     const drawn_members = merge_parallel(member_edges(nodes));
     for (const e of drawn_members)
         edges.push({source: e.port, target: e.target, kind: "member",
@@ -1685,7 +1686,7 @@ async function draw_aux(event) {
             // the Webserver box 200px right.  Network simplex keeps boxes put
             "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
             // a cycle (a member edge back up the ownership tree -- a sink's
-            // sender_, a sender's target_) is broken by reversing the edges
+            // sender, a sender's target) is broken by reversing the edges
             // that point from a later box to an earlier one in the input
             // order -- and layout() lists parents before children.  So
             // ownership decides the layering by construction: the default
@@ -1712,7 +1713,7 @@ async function draw_aux(event) {
         })),
         // ownership (link, owns) decides top-to-bottom; member edges
         // follow it.  Without this an expanded box's ref edge could
-        // invert the layering -- e.g. a session's router's url_router_ (in
+        // invert the layering -- e.g. a session's router's url_router (in
         // the server box) put the session above the server
         edges: edges.map((e, i) => ({
             id: `e${i}`, sources: [e.source],

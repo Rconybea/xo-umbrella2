@@ -843,16 +843,19 @@ namespace xo {
 
             /* from reflection (xo-websock#16): endpoint, sink are members.
              * The endpoint a ref -- the url router placed it first; the sink
-             * in full, still by its own print_json (its keys)
+             * in full
              */
             REQUIRE(!sub.isMember("endpoint"));
             REQUIRE(!sub.isMember("sink"));
             REQUIRE(entry_of(sub["_members_"], "endpoint")["_value_"]["_ref_"].asInt() == eps[0]["_id_"].asInt());
             {
                 Json::Value const sink = entry_of(sub["_members_"], "sink")["_value_"];
-                REQUIRE(sink["_name_"].asString() == "WebsocketSink");
-                REQUIRE(sink["sender"]["_ref_"].asInt() == sender_of(1)["_id_"].asInt());
-                REQUIRE(sink["refcount"].asUInt() == 2);
+                /* from reflection (xo-websock#16): its actual type; its
+                 * sender a borrowed ref to the session's sender
+                 */
+                REQUIRE(sink["_name_"].asString() == "WebsocketSinkImpl");
+                REQUIRE(!sink.isMember("refcount"));
+                REQUIRE(entry_of(sink["_members_"], "sender")["_value_"]["_ref_"].asInt() == sender_of(1)["_id_"].asInt());
             }
 
             /* a closed session leaves the listing */

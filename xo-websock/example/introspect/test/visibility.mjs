@@ -192,7 +192,7 @@ const overl = await ev(`(() => { const r = [...document.querySelectorAll("g.node
 check(overl === 0, "no overlaps");
 
 // a ref row's triangle follows its TARGET: the sender is reached by session
-// 1's sender, its router's sender and its sink's sender_ (all wanted)
+// 1's sender, its router's sender and its sink's sender (all wanted)
 await set_open("session:1", true);
 const sender_row = async () => ev(`[...${G("session:1")}.querySelectorAll("text.row")].filter(t => t.__data__.m._name_ === "sender").map(${rowtext})[0]`);
 check((await sender_row()).endsWith(": ▾ (→)"), "sender reads ▾: its target drawn");

@@ -4,7 +4,6 @@
  */
 
 #include "WebsocketSink.hpp"
-#include "webserver_json.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/printjson/JsonMembers.hpp>
 #include <xo/printjson/JsonObject.hpp>
@@ -55,7 +54,6 @@ namespace xo {
             virtual std::string const & stream_name() const override { return stream_name_; }
             virtual uint32_t n_in_ev() const override { return n_in_ev_; }
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override;
-            virtual void print_json(json::JsonPrintState & state) const override;
             virtual void pretty(xo::pp::PpSink & sink) const override;
             virtual std::string display_string() const override;
             virtual TaggedRcptr self_tp() override;
@@ -140,42 +138,6 @@ namespace xo {
             return tostr(rp<WebsocketSinkImpl>(self));
         }
 
-        void
-        WebsocketSinkImpl::print_json(json::JsonPrintState & state) const
-        {
-            /* the sender: held, not owned -- printed in full under its
-             * session, as its actual type, so a ref by most-derived address
-             */
-            void const * sender = dynamic_cast<void const *>(this->sender_.get());
-
-            json::JsonObject obj = state.open_object("WebsocketSink",
-                                                     Reflect::require<WebsocketSinkImpl>());
-
-            /* refcount: the router's subscription slot, plus whatever the
-             * application holds (e.g. a source it is attached to).
-             * seq: read without a lock -- a source may be sending now
-             */
-            obj.key("refcount", this->reference_counter())
-                .key("stream", this->stream_name_)
-                .key("sub_id", this->sub_id_)
-                .key("seq", this->n_in_ev_)
-                .key_ref("sender", sender);
-
-            /* chosen C++ members (.xo-backlog/xo-websock/issues/13): the
-             * reflected ones (stream_name_, sub_id_, n_in_ev_ -- the last
-             * read without a lock: a source may be sending now), then two
-             * printed in full elsewhere, as refs
-             */
-            obj.members()
-                .reflected_members(Reflect::make_tp(const_cast<WebsocketSinkImpl *>(this)), "_")
-                .member_ref<rp<WsSender>>("sender_", sender)
-                /* the server's, shared: printed in full in the server's members */
-                .member_ref<rp<PrintJson>>("pjson_", this->pjson_.get())
-                .end();
-
-            obj.close();
-        } /*print_json*/
-
         TaggedRcptr
         WebsocketSinkImpl::self_tp()
         {
@@ -183,18 +145,6 @@ namespace xo {
         }
 
         // ----- WebsocketSink -----
-
-        void
-        WebsocketSink::print_json(json::JsonPrintState & state) const
-        {
-            json::JsonObject obj = state.open_object("WebsocketSink",
-                                                     Reflect::require<WebsocketSink>());
-
-            obj.key("refcount", this->reference_counter())
-                .key("stream", this->stream_name());
-
-            obj.close();
-        } /*print_json*/
 
         rp<WebsocketSink>
         WebsocketSink::make(rp<WsSender> sender,
@@ -225,46 +175,22 @@ namespace xo {
                 if (sr.is_incomplete()) {
                     sr.adopt_parent<WebsocketSink>();
 
-                    /* not sender_ or pjson_ for now: each is printed in
-                     * full elsewhere (its session; the server), and print
-                     * places an object at first encounter -- so the
-                     * printer writes them as refs (member_ref)
-                     * (.xo-backlog/xo-printjson/issues/06)
+                    /* n_in_ev_: read without a lock -- a source may be
+                     * sending now.  sender_, pjson_: borrowed -- refs; the
+                     * sender is placed under its session (WsSender reflected
+                     * as its parent, so the ref resolves), PrintJson inside
+                     * the server.  The sink prints from reflection, with no
+                     * printer (.xo-backlog/xo-websock/issues/16)
                      */
                     REFLECT_MEMBER(sr, stream_name);
                     REFLECT_MEMBER(sr, sub_id);
                     REFLECT_MEMBER(sr, n_in_ev);
+                    REFLECT_MEMBER(sr, sender).borrowed();
+                    REFLECT_MEMBER(sr, pjson).borrowed();
                 }
             }
         } /*reflect_self*/
 
-        namespace {
-            /** @brief a sink reached by its concrete type.  Printing through
-             *  a pointer resolves its most-derived type first (WebsocketSink
-             *  is self-tagging), so a reflected rp<WebsocketSink> -- a
-             *  subscription's sink_ -- arrives here, not at
-             *  JsonPrinter_WebsocketSink (websock_json.cpp).  The same
-             *  virtual print_json, so the same output
-             *  (.xo-backlog/xo-websock/issues/16)
-             **/
-            class JsonPrinter_WebsocketSinkImpl : public json::JsonPrinter {
-            public:
-                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    WebsocketSinkImpl const * sink
-                        = this->check_recover_native<WebsocketSinkImpl>(tp, state);
-
-                    if (sink)
-                        sink->print_json(state);
-                }
-            };
-        } /*namespace*/
-
-        void
-        provide_websocket_sink_json_printers(PrintJson * pjson)
-        {
-            pjson->provide_printer(Reflect::require<WebsocketSinkImpl>(),
-                                   std::make_unique<JsonPrinter_WebsocketSinkImpl>());
-        }
     } /*namespace web*/
 } /*namespace xo*/
 

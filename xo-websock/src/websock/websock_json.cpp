@@ -5,26 +5,29 @@
  *  json printers for xo-websock's own objects, for introspection.
  *  See .xo-backlog/xo-websock/issues/10.
  *
- *  Every object is printed in full once, where it is owned, and elsewhere
- *  as {"ref": id} -- so neither cycles nor shared objects reach PrintJson.
+ *  One bespoke printer is left: DynamicEndpoint's.  Every other websock
+ *  type prints from reflection, with the generic printer
+ *  (.xo-backlog/xo-websock/issues/16).  Each object prints in full once --
+ *  where an owning or shared edge first reaches it -- and elsewhere as
+ *  {"_ref_": id} (.xo-backlog/xo-printjson/issues/08):
  *
- *    WebserverImpl (Webserver.cpp: a Webserver* is reflected as its actual
- *                   type)
- *     +- endpoints: DynamicEndpoint (here)
- *     +- sessions: WsSession, and its WsSessionSender (Webserver.cpp)
- *         +- subscriptions: Subscription (WsSessionRouter.cpp)
- *             +- endpoint: ref
- *             +- sink: WebsocketSink (here -> its virtual print_json)
- *                 +- sender: ref
- *
- *  Types private to one file are printed there (webserver_json.hpp).
+ *    WebserverImpl (a Webserver* is reflected as its actual type)
+ *     +- url_router: UrlRouter
+ *     |   +- http_map, stream_map: DynamicEndpoint (here)
+ *     +- session_table: WsSessionTable
+ *         +- session_map: WebsocketSessionRecd
+ *             +- router: WsSessionRouter
+ *             |   +- subscription_v: Subscription
+ *             |       +- endpoint: ref
+ *             |       +- sink: WebsocketSinkImpl
+ *             |           +- sender: ref
+ *             +- sender: WsSessionSender
  **/
 
 #include "websock_json.hpp"
 #include "Webserver.hpp"
 #include "DynamicEndpoint.hpp"
 #include "WebsocketSink.hpp"
-#include "webserver_json.hpp"
 #include <xo/printjson/JsonPrinter.hpp>
 #include <xo/printjson/JsonMembers.hpp>
 #include <xo/printjson/JsonObject.hpp>
@@ -126,35 +129,14 @@ namespace xo {
             }
         }; /*JsonPrinter_DynamicEndpoint*/
 
-        namespace {
-            /** @brief a sink, keyed on the abstract type: delegates to its
-             *  virtual print_json, so each implementation says what it holds
-             **/
-            class JsonPrinter_WebsocketSink : public JsonPrinter {
-            public:
-                void print_json(TaggedPtr tp, json::JsonPrintState & state) const override {
-                    WebsocketSink const * sink = this->check_recover_native<WebsocketSink>(tp, state);
-
-                    if (sink)
-                        sink->print_json(state);
-                }
-            };
-
-        } /*namespace*/
-
         void
         provide_websock_json_printers(PrintJson * pjson)
         {
-            /* no printer -- the generic one, from reflection
-             * (.xo-backlog/xo-websock/issues/16): WebserverConfig, and in
-             * their own files the server, UrlRouter, WsSessionTable
+            /* every other websock type has no printer -- the generic one,
+             * from reflection (.xo-backlog/xo-websock/issues/16)
              */
             pjson->provide_printer(Reflect::require<DynamicEndpoint>(),
                                    std::make_unique<JsonPrinter_DynamicEndpoint>());
-            pjson->provide_printer(Reflect::require<WebsocketSink>(),
-                                   std::make_unique<JsonPrinter_WebsocketSink>());
-            /* types private to one file, printed there */
-            provide_websocket_sink_json_printers(pjson);
         }
     } /*namespace web*/
 } /*namespace xo*/

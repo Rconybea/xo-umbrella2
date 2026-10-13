@@ -20,8 +20,7 @@ const want = {ws_config: "includes", url_router: "includes", session_table: "inc
               'session_map["1"]': "owns", 'session_map["2"]': "owns", "subscription_v[0]": "owns",
               'http_map["/hello/"]': "shares", 'stream_map["/introspect"]': "shares", receiver_: "shares",
               sender: "shares",   // a session's sender (generic printer: no "_", xo-websock#16)
-              endpoint: "shares", sink: "shares",   // a subscription's (generic printer)
-              sender_: "shares"};   // a sink's sender_ (its printer remains)
+              endpoint: "shares", sink: "shares"};   // a subscription's (generic printer)
 const by_label = new Map(kinds.filter(([l, k]) => !(l === "url_router" && k === "refers")).map(([l, k]) => [l, k]));
 for (const [l, k] of Object.entries(want))
     check(by_label.get(l) === k, `${l}: ${k} (${by_label.get(l)})`);
