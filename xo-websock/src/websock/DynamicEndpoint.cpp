@@ -18,7 +18,8 @@ namespace xo {
     namespace web {
         namespace {
             /** compile uri pattern @p pattern: a regex matching the uris
-             *  it covers, and its variables in order.
+             *  it covers, and its variables in order, each with the capture
+             *  group of its first occurrence.
              *
              *    /fixed/stem/${a}/more/${b}  ->  /fixed/stem/([^/]+)/more/([^/]+)
              *    /src/${path...}             ->  /src/(.+)
@@ -30,7 +31,8 @@ namespace xo {
             void
             compile_pattern(std::string const & pattern,
                             std::regex * p_regex,
-                            std::vector<std::string> * p_var_v)
+                            std::vector<std::string> * p_var_v,
+                            std::vector<std::size_t> * p_var_group_v)
             {
                 static std::regex const var_rgx("\\$\\{([[:alnum:]_]+)(\\.\\.\\.)?\\}");
                 static std::regex const special_rgx("[.^$|()\\[\\]{}*+?\\\\]");
@@ -38,6 +40,8 @@ namespace xo {
                 std::string r_pat;
                 std::string::const_iterator pos = pattern.begin();
                 std::smatch match;
+                /* capture groups emitted so far: one per ${..} occurrence */
+                std::size_t n_group = 0;
 
                 auto literal = [&r_pat](std::string const & text) {
                     r_pat += std::regex_replace(text, special_rgx, "\\$&");
@@ -54,14 +58,17 @@ namespace xo {
                                                     + "...} must end the pattern");
 
                     r_pat += (rest ? "(.+)" : "([^/]+)");
+                    ++n_group;
 
                     std::string v = match[1].str();
 
                     /* a variable repeated in the pattern is reported once, at
                      * its first position
                      */
-                    if (std::find(p_var_v->begin(), p_var_v->end(), v) == p_var_v->end())
+                    if (std::find(p_var_v->begin(), p_var_v->end(), v) == p_var_v->end()) {
                         p_var_v->push_back(v);
+                        p_var_group_v->push_back(n_group);
+                    }
 
                     pos = match[0].second;
                 }
@@ -85,7 +92,7 @@ namespace xo {
               unsubscribe_fn_{std::move(unsubscribe_fn)},
               receiver_{std::move(receiver)}
         {
-            compile_pattern(this->uri_pattern_, &this->uri_regex_, &this->var_v_);
+            compile_pattern(this->uri_pattern_, &this->uri_regex_, &this->var_v_, &this->var_group_v_);
         } /*ctor*/
 
         HttpResponse
@@ -109,7 +116,7 @@ namespace xo {
             Alist vars;
 
             for (size_t i = 0, n = this->var_v_.size(); i < n; ++i)
-                vars.push_back(this->var_v_[i], match[1 + i]);
+                vars.push_back(this->var_v_[i], match[this->var_group_v_[i]]);
 
             return this->http_handler_(HttpRequest(incoming_uri, std::move(vars)));
         } /*http_response*/

@@ -98,6 +98,30 @@ namespace xo {
             REQUIRE(ep->http_response("/fw/q7/detail").body() == "fw:/fw/q7/detail");
         }
 
+        TEST_CASE("endpoint-repeated-var-takes-first-and-later-vars-keep-theirs", "[websock][DynamicEndpoint]")
+        {
+            /* a variable repeated in the pattern takes its first
+             * occurrence's value; a variable after the repeat still gets
+             * its own capture.  Regression: b read the second a's text
+             * (.xo-backlog/xo-websock/issues/20)
+             */
+            auto vars_ab = [](HttpRequest const & req) {
+                return HttpResponse::text(std::string(req.vars().lookup("a")) + ","
+                                          + std::string(req.vars().lookup("b")));
+            };
+
+            auto ep = DynamicEndpoint::make_http("/x/${a}/${a}/${b}", vars_ab);
+            REQUIRE(ep->http_response("/x/1/2/3").body() == "1,3");
+
+            /* repeat after b: neither shifts */
+            auto ep2 = DynamicEndpoint::make_http("/y/${a}/${b}/${a}", vars_ab);
+            REQUIRE(ep2->http_response("/y/1/2/3").body() == "1,2");
+
+            /* no repeat: unchanged */
+            auto ep3 = DynamicEndpoint::make_http("/z/${a}/${b}", vars_ab);
+            REQUIRE(ep3->http_response("/z/1/2").body() == "1,2");
+        }
+
         TEST_CASE("url-router-longest-stem-wins", "[websock][UrlRouter]")
         {
             UrlRouter router;

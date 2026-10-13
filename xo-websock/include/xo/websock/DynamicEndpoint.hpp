@@ -166,6 +166,13 @@ namespace xo {
              *   ["a", "b"]
              */
             std::vector<std::string> var_v_;
+            /* for each of .var_v, the regex capture group of its first
+             * occurrence -- a repeated variable adds a group but not a
+             * name, so groups and names cannot be paired by position
+             * (.xo-backlog/xo-websock/issues/20).  For
+             *   /x/${a}/${a}/${b}  ->  [1, 3]
+             */
+            std::vector<std::size_t> var_group_v_;
             /* run this function to produce an http response */
             HttpHandler http_handler_;
             /* run this function to subscribe event stream */
