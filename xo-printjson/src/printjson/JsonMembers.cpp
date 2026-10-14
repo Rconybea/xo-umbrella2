@@ -60,9 +60,12 @@ namespace xo {
                 return this->printable(wi->wrapped_td());
             }
 
+            /* a function value prints as "set" / "empty"
+             */
             return (state_->has_printer(td)
                     || (td->is_struct() && td->complete_flag())
-                    || td->is_enum());
+                    || td->is_enum()
+                    || td->is_function());
         }
 
         bool

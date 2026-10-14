@@ -617,11 +617,11 @@ namespace xo {
                         print_generic_struct(*this, tp);
                         return;
                     case Metatype::mt_function:
-                        /** new branch (added for xo-expression / xo-jit) **/
-                        (*p_os) << "<error-json-printer-not-implemented"
-                                << xtag("type", tp.td()->canonical_name())
-                                << xtag("metatype", tp.td()->metatype())
-                                << ">";
+                        /* a function pointer or std::function: whether it is
+                         * set -- its signature is its declared type
+                         * (.xo-backlog/xo-reflect/issues/09)
+                         */
+                        (*p_os) << quot(tp.td()->fn_is_set(tp.address()) ? "set" : "empty");
                         return;
                     case Metatype::mt_atomic:
                         if (StdAtomicTdx const * ai = tp.td()->std_atomic_info()) {

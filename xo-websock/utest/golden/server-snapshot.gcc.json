@@ -122,21 +122,21 @@
                   },
                   {
                     "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
-                    "_metatype_" : "atomic",
+                    "_metatype_" : "function",
                     "_name_" : "http_handler_",
                     "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
                     "_value_" : "set"
                   },
                   {
                     "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
-                    "_metatype_" : "atomic",
+                    "_metatype_" : "function",
                     "_name_" : "subscribe_fn_",
                     "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
                     "_value_" : "empty"
                   },
                   {
                     "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
-                    "_metatype_" : "atomic",
+                    "_metatype_" : "function",
                     "_name_" : "unsubscribe_fn_",
                     "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
                     "_value_" : "empty"
@@ -197,21 +197,21 @@
                   },
                   {
                     "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
-                    "_metatype_" : "atomic",
+                    "_metatype_" : "function",
                     "_name_" : "http_handler_",
                     "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
                     "_value_" : "empty"
                   },
                   {
                     "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
-                    "_metatype_" : "atomic",
+                    "_metatype_" : "function",
                     "_name_" : "subscribe_fn_",
                     "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
                     "_value_" : "set"
                   },
                   {
                     "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
-                    "_metatype_" : "atomic",
+                    "_metatype_" : "function",
                     "_name_" : "unsubscribe_fn_",
                     "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
                     "_value_" : "set"
