@@ -129,6 +129,21 @@ namespace xo {
                 virtual uint32_t size() const override { return 0; }
                 virtual void dtor(void *) const override {}
             };
+
+            /** no sizeof(), no dtor for references: not objects
+             *  (.xo-backlog/std-function-reflection/spec.md, 1b)
+             **/
+            template <typename T>
+            struct InvokerAux<T &> : public Invoker {
+                virtual uint32_t size() const override { return 0; }
+                virtual void dtor(void *) const override {}
+            };
+
+            template <typename T>
+            struct InvokerAux<T &&> : public Invoker {
+                virtual uint32_t size() const override { return 0; }
+                virtual void dtor(void *) const override {}
+            };
         } /*namespace detail*/
     } /*namespace reflect*/
 } /*namespace xo*/
@@ -159,17 +174,21 @@ namespace xo {
 #endif
 
         /* hashable contents of a FunctionTdx instance (without requiring decl of TypeDescrExtra),
-         * for unique-ification of manually-constructed function types
+         * for unique-ification of function types.  The representation is
+         * part of the key: R (*)(A..) and std::function<R (A..)> are two C++
+         * types, so two entries (.xo-backlog/xo-reflect/issues/09)
          */
         class FunctionTdxInfo {
         public:
             FunctionTdxInfo() = default;
             FunctionTdxInfo(TypeDescr retval_td,
                             const std::vector<TypeDescr> & arg_td_v,
-                            bool is_noexcept)
+                            bool is_noexcept,
+                            FunctionRepr repr = FunctionRepr::pointer)
                 : retval_td_{retval_td},
                   arg_td_v_{arg_td_v},
-                  is_noexcept_{is_noexcept}
+                  is_noexcept_{is_noexcept},
+                  repr_{repr}
                 {}
 
             /** compare two FunctionTdxInfo objects for equality
@@ -188,12 +207,16 @@ namespace xo {
                 if (is_noexcept_ != other.is_noexcept_)
                     return false;
 
+                if (repr_ != other.repr_)
+                    return false;
+
                 return true;
             }
 
             /** construct canonical description for this type
              *  will be like
-             *    Retval(*)(Arg1,..,Argn)
+             *    Retval(*)(Arg1,..,Argn)                (pointer)
+             *    std::function<Retval (Arg1,..,Argn)>    (std_function)
              **/
             std::string make_canonical_name() const;
 
@@ -204,6 +227,8 @@ namespace xo {
             std::vector<TypeDescr> arg_td_v_;
             /** true iff function promises never to throw **/
             bool is_noexcept_ = false;
+            /** function pointer or std::function **/
+            FunctionRepr repr_ = FunctionRepr::pointer;
         }; /*FunctionTdxInfo*/
 
         class TypeDescrExtra;
@@ -449,6 +474,14 @@ namespace xo {
             TypeDescr fn_retval() const { return this->tdextra_->fn_retval(); }
             TypeDescr fn_arg(uint32_t i) const { return this->tdextra_->fn_arg(i); }
             bool fn_is_noexcept() const { return this->tdextra_->fn_is_noexcept(); }
+            /** function pointer or std::function **/
+            FunctionRepr fn_repr() const { return this->tdextra_->fn_repr(); }
+            /** true iff the function at @p object is set: a non-null
+             *  function pointer, a non-empty std::function
+             **/
+            bool fn_is_set(void * object) const { return this->tdextra_->fn_is_set(object); }
+            /** which kind of pointer-like type (mt_pointer): raw, smart, reference **/
+            PointerRepr pointer_repr() const { return this->tdextra_->pointer_repr(); }
 
             /** structured pretty-printing: render this type description into
              *  @p sink as  <TypeDescr :id .. :canonical_name .. ..>
@@ -689,6 +722,7 @@ namespace std {
             }
 
             h = (h << 1) ^ (x.is_noexcept_ ? 1 : 0);
+            h = (h << 1) ^ static_cast<std::size_t>(x.repr_);
 
             return h;
         }

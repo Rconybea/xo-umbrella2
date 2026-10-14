@@ -13,6 +13,13 @@ namespace xo {
         /** Additional type-associated information for a function/procedure **/
         class FunctionTdx : public TypeDescrExtra {
         public:
+            /** true iff the std::function at the given address is non-empty
+             *  -- supplied per std::function type (repr std_function), the
+             *  one representation whose emptiness needs the concrete type
+             **/
+            using IsSetFn = bool (*)(void * object);
+
+        public:
             virtual ~FunctionTdx() = default;
 
             /** create instance.  Will be invoked exactly once for each reflected function type
@@ -29,6 +36,13 @@ namespace xo {
              **/
             static std::unique_ptr<FunctionTdx> make_function(const FunctionTdxInfo & fn_info);
 
+            /** create instance for a std::function type (fn_info.repr_ is
+             *  FunctionRepr::std_function), with @p is_set answering
+             *  fn_is_set().  See .xo-backlog/xo-reflect/issues/09
+             **/
+            static std::unique_ptr<FunctionTdx> make_function(const FunctionTdxInfo & fn_info,
+                                                              IsSetFn is_set);
+
             // ----- Inherited from TypeDescrExtra -----
 
             virtual Metatype metatype() const override { return Metatype::mt_function; }
@@ -43,13 +57,17 @@ namespace xo {
             virtual uint32_t n_fn_arg() const override { return info_.arg_td_v_.size(); }
             virtual TypeDescr fn_arg(uint32_t i) const override { return info_.arg_td_v_[i]; }
             virtual bool fn_is_noexcept() const override { return info_.is_noexcept_; }
+            virtual FunctionRepr fn_repr() const override { return info_.repr_; }
+            virtual bool fn_is_set(void * object) const override;
 
         private:
-            FunctionTdx(const FunctionTdxInfo & fn_info);
+            FunctionTdx(const FunctionTdxInfo & fn_info, IsSetFn is_set);
 
         private:
             /** ingredients in complete function type description **/
             FunctionTdxInfo info_;
+            /** repr std_function: answers fn_is_set; nullptr for a pointer **/
+            IsSetFn is_set_ = nullptr;
         }; /*FunctionTdx*/
     } /*namespace reflect*/
 } /*namespace xo*/

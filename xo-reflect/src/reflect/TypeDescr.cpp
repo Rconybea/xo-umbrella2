@@ -34,14 +34,20 @@ namespace xo {
 
             std::ostringstream ss;
 
+            bool is_std_function = (repr_ == FunctionRepr::std_function);
+
+            if (is_std_function)
+                ss << "std::function<";
             ss << retval_td_->canonical_name();
-            ss << " (*)(";
+            ss << (is_std_function ? " (" : " (*)(");
             for (std::size_t i = 0, n = arg_td_v_.size(); i < n; ++i) {
                 if (i > 0)
                     ss << ",";
                 ss << arg_td_v_[i]->canonical_name();
             }
             ss << ")";
+            if (is_std_function)
+                ss << ">";
 
             return ss.str();
         } /*make_canonical_name*/
@@ -200,6 +206,13 @@ namespace xo {
 
         TypeDescrW
         TypeDescrBase::require_by_fn_info(const FunctionTdxInfo & fn_info) {
+            /* a std::function always has a native C++ type: it enters
+             * through Reflect::require<T>, once.  Built from ingredients
+             * too, it could get a second entry (.xo-backlog/xo-reflect/issues/09)
+             */
+            assert((fn_info.repr_ == FunctionRepr::pointer)
+                   && "TypeDescrBase::require_by_fn_info: function pointers only");
+
             auto ix = s_function_type_map.find(fn_info);
 
             if (ix != s_function_type_map.end())

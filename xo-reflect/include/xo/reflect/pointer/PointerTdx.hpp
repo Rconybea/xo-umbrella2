@@ -60,6 +60,7 @@ namespace xo {
                 return std::unique_ptr<RefPointerTdx>(new RefPointerTdx(ownership));
             } /*make*/
 
+            virtual PointerRepr pointer_repr() const override { return PointerRepr::smart; }
             virtual Ownership child_edge_ownership() const override { return ownership_; }
 
             virtual void const * pointee_address(void * object) const override {
@@ -145,6 +146,7 @@ namespace xo {
                 return std::unique_ptr<RawPointerTdx>(new RawPointerTdx());
             } /*make*/
 
+            virtual PointerRepr pointer_repr() const override { return PointerRepr::raw; }
             /* a T* does not own its destination. */
             virtual Ownership child_edge_ownership() const override { return Ownership::borrowed; }
 

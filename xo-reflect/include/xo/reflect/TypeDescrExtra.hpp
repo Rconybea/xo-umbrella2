@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "function/FunctionRepr.hpp"
+#include "pointer/PointerRepr.hpp"
 #include "Metatype.hpp"
 #include "Ownership.hpp"
 #include <string>
@@ -132,6 +134,16 @@ namespace xo {
             virtual uint32_t n_fn_arg() const { return 0; }
             virtual const TypeDescrBase * fn_arg(uint32_t /*i_arg*/) const { return nullptr; }
             virtual bool fn_is_noexcept() const { return false; }
+            /** function pointer or std::function; pointer unless overridden **/
+            virtual FunctionRepr fn_repr() const { return FunctionRepr::pointer; }
+            /** true iff the function at @p object is set (non-null pointer,
+             *  non-empty std::function); false for a non-function
+             **/
+            virtual bool fn_is_set(void * /*object*/) const { return false; }
+            /** which kind of pointer-like type (mt_pointer): raw, smart,
+             *  reference; raw unless overridden
+             **/
+            virtual PointerRepr pointer_repr() const { return PointerRepr::raw; }
 
             // methods for working with reflected enums
 

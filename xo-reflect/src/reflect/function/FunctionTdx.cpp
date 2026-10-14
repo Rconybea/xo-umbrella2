@@ -20,16 +20,47 @@ namespace xo {
         std::unique_ptr<FunctionTdx>
         FunctionTdx::make_function(const FunctionTdxInfo & fn_info)
         {
-            return std::unique_ptr<FunctionTdx>(new FunctionTdx(fn_info));
+            return std::unique_ptr<FunctionTdx>(new FunctionTdx(fn_info, nullptr));
         }
 
-        FunctionTdx::FunctionTdx(const FunctionTdxInfo & fn_info)
-            : info_{fn_info}
+        std::unique_ptr<FunctionTdx>
+        FunctionTdx::make_function(const FunctionTdxInfo & fn_info,
+                                   IsSetFn is_set)
+        {
+            return std::unique_ptr<FunctionTdx>(new FunctionTdx(fn_info, is_set));
+        }
+
+        FunctionTdx::FunctionTdx(const FunctionTdxInfo & fn_info, IsSetFn is_set)
+            : info_{fn_info}, is_set_{is_set}
         {
             if (!info_.retval_td_) {
                 throw std::runtime_error("FunctionTdx::ctor: null return type?");
             }
+
+            /* a std::function's emptiness needs its concrete type: the
+             * caller (EstablishTdx<std::function<..>>) supplies it
+             */
+            if ((info_.repr_ == FunctionRepr::std_function) && !is_set_) {
+                throw std::runtime_error("FunctionTdx::ctor: std::function type without is_set?");
+            }
         }
+
+        bool
+        FunctionTdx::fn_is_set(void * object) const
+        {
+            switch (info_.repr_) {
+            case FunctionRepr::pointer:
+                /* a function pointer's storage is a function pointer,
+                 * whatever its signature: read it and compare -- for
+                 * ingredient-built types too, which have no native type
+                 */
+                return *reinterpret_cast<void (* const *)()>(object) != nullptr;
+            case FunctionRepr::std_function:
+                return is_set_(object);
+            }
+
+            return false;
+        } /*fn_is_set*/
 
         TaggedPtr
         FunctionTdx::child_tp(uint32_t /*i*/, void * /*object*/) const

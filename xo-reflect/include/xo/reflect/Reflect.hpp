@@ -13,10 +13,12 @@
 #include "lockable/LockableTdx.hpp"
 #include "map/MapTdx.hpp"
 #include "pointer/PointerTdx.hpp"
+#include "pointer/ReferenceTdx.hpp"
 #include "struct/StructTdx.hpp"
 #include "vector/VectorTdx.hpp"
 #include <xo/refcnt/Refcounted.hpp>
 #include <array>
+#include <functional>
 #include <atomic>
 #include <cstring>      // for std::memcpy
 #include <deque>
@@ -243,6 +245,26 @@ namespace xo {
             static std::unique_ptr<TypeDescrExtra> make();
         };
 
+        // ----- T &, T && (references) -----
+
+        /** @brief a reference reflects as mt_pointer, a ReferenceTdx: its
+         *  referent's description, borrowed -- described, not traversed.
+         *  See .xo-backlog/std-function-reflection/spec.md, section 1b
+         **/
+        template<typename T>
+        class EstablishTdx<T &> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        template<typename T>
+        class EstablishTdx<T &&> {
+        public:
+            /* note: definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
         // ----- Retval (*)(A1 .. An) -----
 
         template<typename Retval, typename... Args>
@@ -256,6 +278,20 @@ namespace xo {
 
         template<typename Retval, typename... Args>
         class EstablishTdx<Retval (*)(Args...) noexcept> {
+        public:
+            /* definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- std::function<Retval (A1 .. An)> -----
+
+        /** @brief a std::function reflects as Metatype::mt_function, repr
+         *  FunctionRepr::std_function: its signature as a function
+         *  pointer's (fn_retval(), fn_arg(i)), and whether a value is set.
+         *  See .xo-backlog/xo-reflect/issues/09
+         **/
+        template<typename Retval, typename... Args>
+        class EstablishTdx<std::function<Retval (Args...)>> {
         public:
             /* definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
@@ -555,6 +591,23 @@ namespace xo {
             return RawPointerTdx<T>::make();
         } /*make*/
 
+        template<typename T>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<T &>::make() {
+            /* the referent, cv-stripped: shared with T * -- as EstablishTdx<T *> */
+            Reflect::require<std::remove_cv_t<T>>();
+
+            return ReferenceTdx<T &>::make();
+        } /*make*/
+
+        template<typename T>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<T &&>::make() {
+            Reflect::require<std::remove_cv_t<T>>();
+
+            return ReferenceTdx<T &&>::make();
+        } /*make*/
+
         // ----- std::atomic<T> -----
 
         /* declared above before
@@ -704,6 +757,27 @@ namespace xo {
             return FunctionTdx::make_function(Reflect::require<Retval>(),
                                               std::move(argv),
                                               true /*is_noexcept*/);
+        }
+
+        /* declared above before
+         *   class Reflect { ... }
+         */
+        template <typename Retval, typename... Args>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<std::function<Retval (Args...)>>::make() {
+            using Function = std::function<Retval (Args...)>;
+
+            std::vector<TypeDescr> argv;
+            detail::AssembleArgv<Args...>::append_argv(&argv);
+
+            /* a std::function signature cannot be noexcept */
+            return FunctionTdx::make_function(FunctionTdxInfo(Reflect::require<Retval>(),
+                                                              std::move(argv),
+                                                              false /*!is_noexcept*/,
+                                                              FunctionRepr::std_function),
+                                              [](void * object) {
+                                                  return static_cast<bool>(*static_cast<Function *>(object));
+                                              });
         }
 
     } /*namespace reflect*/

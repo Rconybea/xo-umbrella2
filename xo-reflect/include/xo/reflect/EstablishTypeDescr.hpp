@@ -7,6 +7,7 @@
 
 #include "TaggedPtr.hpp"
 #include "TypeDescr.hpp"
+#include <type_traits>
 
 namespace xo {
     namespace reflect {
@@ -39,7 +40,15 @@ namespace xo {
 
             template<typename T>
             static TypeDescrW establish() {
-                static TypeDescrW td = TypeDescrBase::require(&typeid(T),
+                /* typeid ignores references (and top-level cv):
+                 * typeid(const Foo &) is typeid(Foo).  So a reference type
+                 * carries no native typeinfo -- keyed by its canonical name
+                 * alone, never colliding with its referent
+                 * (.xo-backlog/std-function-reflection/spec.md, 1b)
+                 */
+                static TypeDescrW td = TypeDescrBase::require((std::is_reference_v<T>
+                                                               ? nullptr
+                                                               : &typeid(T)),
                                                               std::string(type_name<T>()),
                                                               nullptr /*tdextra*/,
                                                               nullptr /*invoker*/);
