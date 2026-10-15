@@ -23,6 +23,11 @@ namespace xo {
             lvalue_reference,
             /** T && -- described, not traversed **/
             rvalue_reference,
+            /** a faceted object pointer, xo::facet::obj<AFacet, DRepr>: a facet
+             *  pointer plus a data pointer.  Says nothing of how the data is
+             *  managed -- that is the representation's business
+             **/
+            fop,
         };
     } /*namespace reflect*/
 } /*namespace xo*/

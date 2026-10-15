@@ -8,6 +8,7 @@
 #include "detail/AReflectable.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/pointer/PointerTdx.hpp>
+#include <xo/reflect/pointer/PointerRepr.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
@@ -87,6 +88,9 @@ namespace xo {
              *  (.xo-backlog/xo-reflect/issues/07)
              **/
             virtual Ownership child_edge_ownership() const override { return Ownership::shared; }
+
+            /** {facet pointer, data pointer} pair **/
+            virtual PointerRepr pointer_repr() const override { return PointerRepr::fop; }
 
             virtual void const * pointee_address(void * object) const override {
                 return reinterpret_cast<target_t *>(object)->data();

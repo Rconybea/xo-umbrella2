@@ -19,6 +19,7 @@
 namespace xo {
     using xo::reflect::FopTdx;
     using xo::reflect::Metatype;
+    using xo::reflect::PointerRepr;
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
     using xo::reflect::TaggedPtr;
@@ -128,6 +129,18 @@ namespace xo {
             REQUIRE(td->n_child_fixed() == 0);
             REQUIRE(td->fixed_child_td(0) == Reflect::require<DPoint>());
         } /*TEST_CASE(fop-reflects-as-a-pointer)*/
+
+        /* its own kind of pointer: not raw, and not smart -- a fop does not
+         * manage its data
+         */
+        TEST_CASE("fop-pointer-repr", "[reflectable2]") {
+            require_reflected();
+
+            REQUIRE(Reflect::require<obj<AReflectable, DPoint>>()->pointer_repr()
+                    == PointerRepr::fop);
+            REQUIRE(Reflect::require<obj<AReflectable>>()->pointer_repr()
+                    == PointerRepr::fop);
+        } /*TEST_CASE(fop-pointer-repr)*/
 
         TEST_CASE("fop-child-is-its-representation", "[reflectable2]") {
             require_reflected();
