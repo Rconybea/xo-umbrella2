@@ -13,6 +13,7 @@ set(SELF_SOURCE_FILES
     PrettySink_move.test.cpp
     FlatSink.test.cpp
     toppstr.test.cpp
+    tojsonstr.test.cpp
     Prettifier.test.cpp
     PrettyVector.test.cpp
     scope.test.cpp

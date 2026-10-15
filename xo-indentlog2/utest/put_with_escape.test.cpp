@@ -9,6 +9,7 @@
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/ppsink/escape.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <cstdint>
 #include <string>
@@ -18,6 +19,8 @@ namespace ut {
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
     using xo::pp::Escape;
+    using xo::pp::PpStyle;
+    using xo::pp::escapestyle;
     using xo::mm::ArenaConfig;
     using xo::flatstring;
     using std::string;
@@ -141,7 +144,30 @@ namespace ut {
 
         string out = pp_escape(input, true);
 
-        REQUIRE(out.size() == 1 + c_n * Escape::c_max_char_expand + 1);
+        REQUIRE(out.size() == 1 + c_n * Escape::fallback_expand(escapestyle::display) + 1);
+        REQUIRE(out == expected);
+    }
+
+    TEST_CASE("ppstate-put-with-escape-json", "[put_with_escape][json]") {
+        /* A json-styled PrettySink: PpState sizes its token for json's 6-byte
+         * \u00NN, not display's 4.  Sizing that ignored the vocabulary would
+         * under-allocate exactly here -- a token of nothing but control
+         * characters (.xo-backlog/xo-printjson/issues/04)
+         */
+        constexpr std::size_t c_n = 64;
+
+        string input(c_n, '\x1b');
+
+        string expected = "\"";
+        for (std::size_t i = 0; i < c_n; ++i)
+            expected += "\\u001b";
+        expected += "\"";
+
+        PrettySink pp(escape_test_config(0).with_style(PpStyle::json()), nullptr /*out*/);
+        pp.put_with_escape(input, true);
+        string out(pp.output());
+
+        REQUIRE(out.size() == 1 + c_n * Escape::fallback_expand(escapestyle::json) + 1);
         REQUIRE(out == expected);
     }
 } /*namespace ut*/

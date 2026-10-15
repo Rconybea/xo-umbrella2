@@ -9,6 +9,11 @@
  *  mechanics differ, so only the *rules* are shared here.  Two hand-written
  *  escape switches would drift.
  *
+ *  Two vocabularies (@ref escapestyle): display, for readable diagnostics,
+ *  and json.  They escape the same characters and differ only in how a
+ *  character with no short form is spelled -- @c \xNN vs @c \u00NN.  A sink
+ *  carries its choice in @c PpStyle::escape.
+ *
  *  Escaping only; no surrounding quotes.  Whether to quote (never / only when
  *  ambiguous / always) is a separate policy that belongs above this layer.
  *  Note in particular that space is NOT escaped: an embedded space is a reason
@@ -23,6 +28,19 @@
 #include <string_view>
 
 namespace xo::pp {
+    /** @brief how @ref Escape spells a character with no short form.
+     *
+     *  Both vocabularies escape the same set (see @ref Escape::pair_char,
+     *  @ref Escape::needs_hex); only that fallback spelling differs.
+     *  See .xo-backlog/xo-printjson/issues/04
+     **/
+    enum class escapestyle {
+        /** @c \xNN -- readable diagnostics.  NOT valid JSON **/
+        display,
+        /** @c \u00NN -- JSON (RFC 8259 section 7) **/
+        json,
+    };
+
     /** @class Escape
      *  @brief Escape rules for @ref PpSink::put_with_escape.
      *
@@ -42,13 +60,14 @@ namespace xo::pp {
         /** @defgroup escape-constants constants **/
         ///@{
 
-        /** longest expansion of a single input character, in bytes.
-         *  Attained by the @c \xNN form (see @ref needs_hex).
+        /** longest expansion of a single input character, in bytes, under
+         *  ANY vocabulary.  Attained by json's @c \u00NN form (see
+         *  @ref fallback_expand).
          *
          *  A caller expanding incrementally into a fixed buffer must keep this
          *  many bytes in reserve before handling the next character.
          **/
-        static constexpr std::uint32_t c_max_char_expand = 4;
+        static constexpr std::uint32_t c_max_char_expand = 6;
 
         /** surrounding quote character, when a caller asks to quote.
          *
@@ -107,10 +126,10 @@ namespace xo::pp {
          *  form is preferred.
          *
          *  This is exactly the set JSON spells with a backslash pair, minus
-         *  @c \/ (which needs no escaping here).  The remaining control
-         *  characters still go to @c \xNN, which is NOT valid JSON -- making
-         *  ppsink output valid JSON needs @c \uXXXX and is a separate question,
-         *  see .xo-backlog/xo-printjson/issues/01-ppsink-api.md.
+         *  @c \/ (which needs no escaping here), so it serves both
+         *  vocabularies.  The remaining control characters take
+         *  @ref fallback_expand's form: @c \xNN for display, @c \u00NN for
+         *  json (.xo-backlog/xo-printjson/issues/04).
          *
          *  Note the set is wider than what xo-reader accepts back
          *  (@c \n \r \" \\ only), so an escaped string is not automatically a
@@ -131,7 +150,16 @@ namespace xo::pp {
             }
         }
 
-        /** @brief true iff @p uc must be escaped as @c \xNN (no short form).
+        /** @brief bytes written for a character with no short form:
+         *  @c \xNN (4) for display, @c \u00NN (6) for json
+         **/
+        static constexpr std::uint32_t
+        fallback_expand(escapestyle style) noexcept {
+            return (style == escapestyle::json) ? 6 : 4;
+        }
+
+        /** @brief true iff @p uc must be escaped in its fallback form
+         *  (@c \xNN or @c \u00NN -- it has no short form).
          *
          *  Control characters have no printable representation, and one of them
          *  -- ESC (0x1b) -- actively corrupts layout: PpState::count_visible_chars
@@ -142,6 +170,9 @@ namespace xo::pp {
          *  Bytes >= 0x80 are deliberately left alone so UTF-8 passes through
          *  intact; note the unsigned char parameter, since plain char is signed
          *  on the platforms xo builds for.
+         *
+         *  DEL (0x7f) is escaped in json too, though JSON permits it raw: raw,
+         *  it is invisible in terminals, diffs and the browser.
          **/
         static constexpr bool
         needs_hex(unsigned char uc) noexcept {
@@ -161,7 +192,7 @@ namespace xo::pp {
          *  and is what unq() branches on.
          **/
         static constexpr size_result
-        str_size(std::string_view s) noexcept {
+        str_size(std::string_view s, escapestyle style = escapestyle::display) noexcept {
             size_result retval;
 
             /* bare, an empty string would print as nothing at all */
@@ -174,7 +205,7 @@ namespace xo::pp {
                     retval.size += 2;
                     retval.escape_flag = true;
                 } else if (needs_hex(uc)) {
-                    retval.size += c_max_char_expand;   /* \xNN */
+                    retval.size += fallback_expand(style);   /* \xNN or \u00NN */
                     retval.escape_flag = true;
                 } else {
                     retval.size += 1;
@@ -195,7 +226,8 @@ namespace xo::pp {
          *  predicates in the same order, and the tests pin the equality.
          **/
         static constexpr char *
-        str_copy(std::string_view s, char * dest) noexcept {
+        str_copy(std::string_view s, char * dest,
+                 escapestyle style = escapestyle::display) noexcept {
             for (char ch : s) {
                 auto uc = static_cast<unsigned char>(ch);
 
@@ -204,7 +236,13 @@ namespace xo::pp {
                     *dest++ = pair;
                 } else if (needs_hex(uc)) {
                     *dest++ = '\\';
-                    *dest++ = 'x';
+                    if (style == escapestyle::json) {
+                        *dest++ = 'u';
+                        *dest++ = '0';
+                        *dest++ = '0';
+                    } else {
+                        *dest++ = 'x';
+                    }
                     *dest++ = c_hex_digit[(uc >> 4) & 0x0f];
                     *dest++ = c_hex_digit[uc & 0x0f];
                 } else {
@@ -218,7 +256,7 @@ namespace xo::pp {
         ///@}
 
     private:
-        /** lowercase nibble -> hex digit, for the @c \xNN form **/
+        /** lowercase nibble -> hex digit, for the @c \xNN / @c \u00NN forms **/
         static constexpr char c_hex_digit[] = "0123456789abcdef";
     };
 } /*namespace xo::pp*/

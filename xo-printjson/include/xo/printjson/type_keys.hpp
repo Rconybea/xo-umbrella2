@@ -20,7 +20,7 @@ namespace xo {
          *
          *  Use in a JsonPrinter, after the object's "_name_":
          *
-         *    *p_os << "{" << quot("_name_") << ": " << quot("Foo")
+         *    *p_os << "{" << json_quot("_name_") << ": " << json_quot("Foo")
          *          << ", " << type_keys(tp.td());
          *
          *  Holds views: use it within the expression that creates it.

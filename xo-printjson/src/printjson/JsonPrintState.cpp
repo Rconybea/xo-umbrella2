@@ -7,14 +7,15 @@
 #include "JsonObject.hpp"
 #include "PrintJson.hpp"
 #include "type_keys.hpp"
+#include "json_quoted.hpp"
 #include <xo/reflect/enum/EnumTdx.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
 #include <xo/reflect/pointer/PointerTdx.hpp>
 #include <xo/reflect/map/MapTdx.hpp>
-#include <xo/indentlog2/print/tostr.hpp>
+#include <xo/indentlog2/print/tostr.hpp>   /* tostr(..), tojsonstr(..) */
 #include <xo/arena/backtrace.hpp>
-#include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
+#include <xo/ppsink/quoted.hpp>             /* quot(..) */
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
 #include <algorithm>
 #include <cassert>
@@ -43,8 +44,9 @@ namespace xo {
 
     namespace json {
         /* one scope in from namespace xo: see PrintJson.cpp */
-        using xo::pp::quot;
         using xo::pp::tostr;
+        using xo::pp::tojsonstr;
+        using xo::pp::quot;
         using xo::pp::xtag;
 
         JsonPrintState::JsonPrintState(PrintJson const * pjson, std::ostream * p_os)
@@ -228,7 +230,7 @@ namespace xo {
                                  std::ostream * p_os)
             {
                 if (std::string const * name = ei.name_of(tp.address()))
-                    *p_os << quot(*name);
+                    *p_os << json_quot(*name);
                 else
                     *p_os << ei.value_of(tp.address());
             } /*print_reflected_enum*/
@@ -303,7 +305,7 @@ namespace xo {
                 if (!e.ref_type_)
                     e.ref_type_ = ptr.td()->fixed_child_td(0);
 
-                *p_os_ << "{" << quot("_ref_") << ": " << e.id_ << "}";
+                *p_os_ << "{" << json_quot("_ref_") << ": " << e.id_ << "}";
                 return;
             }
 
@@ -350,7 +352,7 @@ namespace xo {
             if (!s.empty() && s.front() == '"')
                 return s;
 
-            return tostr(quot(s));
+            return tojsonstr(quot(s));
         } /*map_key_string*/
 
         void
@@ -395,9 +397,9 @@ namespace xo {
                                           *p_os_ << ", ";
                                       first = false;
 
-                                      *p_os_ << "{" << quot("_key_") << ": ";
+                                      *p_os_ << "{" << json_quot("_key_") << ": ";
                                       this->print(key);
-                                      *p_os_ << ", " << quot("_value_") << ": ";
+                                      *p_os_ << ", " << json_quot("_value_") << ": ";
                                       this->print(value);
                                       *p_os_ << "}";
                                   });
@@ -432,7 +434,7 @@ namespace xo {
             std::sort(v.begin(), v.end(),
                       [](auto const & x, auto const & y) { return x.second->id_ < y.second->id_; });
 
-            *p_os_ << ", " << quot("_unplaced_") << ": [";
+            *p_os_ << ", " << json_quot("_unplaced_") << ": [";
             for (std::size_t i = 0, n = v.size(); i < n; ++i) {
                 ObjectEntry const & e = *(v[i].second);
 
@@ -442,11 +444,11 @@ namespace xo {
                 /* _ref_, not _id_: an entry names its object, it does not
                  * define it -- which may happen elsewhere, as another type
                  */
-                *p_os_ << "{" << quot("_ref_") << ": " << e.id_;
+                *p_os_ << "{" << json_quot("_ref_") << ": " << e.id_;
                 if (e.ref_type_)
-                    *p_os_ << ", " << quot("_type_") << ": " << quot(e.ref_type_->short_name());
+                    *p_os_ << ", " << json_quot("_type_") << ": " << json_quot(e.ref_type_->short_name());
                 /* decimal: json has no hex (see JsonPrinter_address) */
-                *p_os_ << ", " << quot("_address_") << ": "
+                *p_os_ << ", " << json_quot("_address_") << ": "
                        << reinterpret_cast<std::uintptr_t>(v[i].first)
                        << "}";
             }
@@ -472,7 +474,7 @@ namespace xo {
                 return;
             }
 
-            *p_os_ << "{" << quot("_ref_") << ": " << this->entry_for(p).id_ << "}";
+            *p_os_ << "{" << json_quot("_ref_") << ": " << this->entry_for(p).id_ << "}";
         } /*print_ref*/
 
         JsonObject
@@ -526,7 +528,7 @@ namespace xo {
         JsonPrintState::open_object_aux(void const * p, std::string_view name, TypeDescr td,
                                         bool is_root)
         {
-            *p_os_ << "{" << quot("_name_") << ": " << quot(name)
+            *p_os_ << "{" << json_quot("_name_") << ": " << json_quot(name)
                    << ", " << json::type_keys(td);
 
             if (p) {
@@ -536,7 +538,7 @@ namespace xo {
                 ObjectEntry & e = this->entry_for(p);
 
                 e.type_ = td;
-                *p_os_ << ", " << quot("_id_") << ": " << e.id_;
+                *p_os_ << ", " << json_quot("_id_") << ": " << e.id_;
             }
 
             return JsonObject(this, is_root);
@@ -578,7 +580,7 @@ namespace xo {
                          * e.g. an unreflected receiver an endpoint writes
                          * inline (.xo-backlog/xo-reflect/issues/04)
                          */
-                        *p_os << "{" << quot("_ref_") << ": " << ix->second.id_ << "}";
+                        *p_os << "{" << json_quot("_ref_") << ": " << ix->second.id_ << "}";
                         return;
                     }
 
@@ -621,7 +623,7 @@ namespace xo {
                          * set -- its signature is its declared type
                          * (.xo-backlog/xo-reflect/issues/09)
                          */
-                        (*p_os) << quot(tp.td()->fn_is_set(tp.address()) ? "set" : "empty");
+                        (*p_os) << json_quot(tp.td()->fn_is_set(tp.address()) ? "set" : "empty");
                         return;
                     case Metatype::mt_atomic:
                         if (StdAtomicTdx const * ai = tp.td()->std_atomic_info()) {

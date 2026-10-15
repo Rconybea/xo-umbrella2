@@ -45,12 +45,10 @@ namespace xo {
                     if (x) {
                         /* through the json printer for string_view, not <<, so
                          * DString shares whatever quoting and escaping every
-                         * other string gets.  That escaping is currently
-                         * ppsink's rather than JSON's -- an embedded NUL comes
-                         * back \x00, not \u0000 -- which is
-                         * .xo-backlog/xo-printjson/issues/04, and routing
-                         * through the shared printer is what makes it one fix
-                         * there rather than a second one here.
+                         * other string gets -- JSON's escapes, an embedded
+                         * NUL as \u0000 (.xo-backlog/xo-printjson/issues/04).
+                         * Routing through the shared printer made that one
+                         * fix there rather than a second one here.
                          *
                          * NOT the operator std::string_view(), which stops at
                          * the first null: size_ is the authority on extent.

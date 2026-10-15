@@ -189,7 +189,8 @@ namespace xo {
         PpSink &
         PrettySink::put_with_escape(std::string_view x, bool quote_flag)
         {
-            pps_.put_with_escape(x, quote_flag);
+            /* PpState holds no PpStyle: the sink's vocabulary goes with the call */
+            pps_.put_with_escape(x, quote_flag, style_.escape);
             return *this;
         }
 

@@ -27,6 +27,7 @@ namespace ut {
     using xo::pp::color_encoding;
     using xo::pp::color_spec_type;
     using xo::pp::default_style_guard;
+    using xo::pp::escapestyle;
     using xo::pp::field;
     using xo::pp::tag;
     using std::stringstream;
@@ -49,6 +50,9 @@ namespace ut {
         REQUIRE(dflt.struct_tag_color.code() == 33);
 
         REQUIRE(dflt.tag_value_offset == 1);
+
+        /* display escaping: \xNN, readable diagnostics */
+        REQUIRE(dflt.escape == escapestyle::display);
     }
 
     TEST_CASE("PpStyle-plain-is-colorless", "[PpStyle]")
@@ -60,6 +64,21 @@ namespace ut {
 
         /* layout is NOT a color decision: plain() must not disturb it */
         REQUIRE(plain.tag_value_offset == PpStyle().tag_value_offset);
+        /* nor is escaping: every utest main installs plain() */
+        REQUIRE(plain.escape == escapestyle::display);
+    }
+
+    /* json: json escapes, and no colour -- a coloured sink would write ANSI
+     * sequences into the document (.xo-backlog/xo-printjson/issues/04)
+     */
+    TEST_CASE("PpStyle-json", "[PpStyle]")
+    {
+        PpStyle json = PpStyle::json();
+
+        REQUIRE(json.escape == escapestyle::json);
+        REQUIRE(json.color_enabled == false);
+        REQUIRE(json.tag_color.encoding() == color_encoding::none);
+        REQUIRE(json.struct_tag_color.encoding() == color_encoding::none);
     }
 
     TEST_CASE("PpStyle-tag-vs-struct-field", "[PpStyle]")

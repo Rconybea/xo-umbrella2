@@ -91,7 +91,7 @@ namespace xo {
         }
 
         void
-        PpState::put_with_escape(std::string_view str, bool quote_flag)
+        PpState::put_with_escape(std::string_view str, bool quote_flag, escapestyle style)
         {
             // Escaping expands, so the token is not str.size() bytes: scan for
             // the expanded size first, then allocate, then expand into the
@@ -100,7 +100,7 @@ namespace xo {
             // c_max_char_expand per character, which would drive tk_buffer_ to
             // expand for strings that don't need it.
 
-            uint32_t esc_z = (Escape::str_size(str).size
+            uint32_t esc_z = (Escape::str_size(str, style).size
                               + (quote_flag ? Escape::c_quote_expand : 0));
             uint32_t tk_z = PpStringToken::alloc_size(esc_z);
 
@@ -131,7 +131,7 @@ namespace xo {
             if (quote_flag)
                 *p++ = Escape::c_quote;
 
-            p = Escape::str_copy(str, p);
+            p = Escape::str_copy(str, p, style);
 
             if (quote_flag)
                 *p++ = Escape::c_quote;

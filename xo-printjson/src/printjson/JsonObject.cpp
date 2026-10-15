@@ -4,11 +4,10 @@
  **/
 
 #include "JsonObject.hpp"
-#include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
+#include "json_quoted.hpp"
 #include <cassert>
 
 namespace xo {
-    using xo::pp::quot;
     using xo::reflect::TaggedPtr;
 
     namespace json {
@@ -21,7 +20,7 @@ namespace xo {
         void
         JsonObject::write_key(std::string_view k)
         {
-            *state_->p_os() << ", " << quot(k) << ": ";
+            *state_->p_os() << ", " << json_quot(k) << ": ";
         }
 
         JsonObject &

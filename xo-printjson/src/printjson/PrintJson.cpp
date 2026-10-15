@@ -6,6 +6,7 @@
 #include "PrintJson.hpp"
 #include "JsonObject.hpp"
 #include "type_keys.hpp"
+#include "json_quoted.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
@@ -15,8 +16,7 @@
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/backtrace.hpp>
-#include <xo/flatstring/flatstring.hpp>     /* os << quot(..) */
-#include <xo/ppsink/quoted_ostream.hpp>
+#include <xo/flatstring/flatstring.hpp>     /* os << json_quot(..) */
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
 #include <xo/ppsink/pp_time_ostream.hpp>    /* os << iso8601(..) */
 #include <xo/timeutil/timeutil.hpp>
@@ -38,7 +38,6 @@ namespace xo {
          * have not migrated) rather than shadowing it.
          */
         using xo::pp::iso8601;
-        using xo::pp::quot;
         using xo::pp::xtag;
 
         void
@@ -336,7 +335,7 @@ namespace xo {
                         /* a null char pointer.  Rendering it as json null
                          * rather than "" keeps it distinguishable from an
                          * empty string, and -- the reason this branch exists
-                         * -- quot(nullptr) SEGFAULTS.  Measured 2026-09-21;
+                         * -- json_quot(nullptr) SEGFAULTS.  Measured 2026-09-21;
                          * both char pointer types have been registered here
                          * since before that, so this was live.
                          *
@@ -350,8 +349,7 @@ namespace xo {
                         }
                     }
 
-                    /* TODO: escapes special characters */
-                    *p_os << quot(*x);
+                    *p_os << json_quot(*x);
                 } else {
                     report_internal_type_consistency_error(Reflect::require<T>(),
                                                            tp.td(),
@@ -375,7 +373,7 @@ namespace xo {
          *
          *  Separate from JsonPrinter_string because the conversion has to be
          *  explicit: flatstring has BOTH operator std::string_view() and
-         *  operator const char*(), so quot(*x) is ambiguous.
+         *  operator const char*(), so json_quot(*x) is ambiguous.
          **/
         template<std::size_t N>
         class JsonPrinter_flatstring : public JsonPrinter {
@@ -388,7 +386,7 @@ namespace xo {
                 xo::flatstring<N> * x = tp.recover_native<xo::flatstring<N>>();
 
                 if (x) {
-                    *p_os << quot(std::string_view(*x));
+                    *p_os << json_quot(std::string_view(*x));
                 } else {
                     report_internal_type_consistency_error(Reflect::require<xo::flatstring<N>>(),
                                                            tp.td(),

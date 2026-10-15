@@ -127,15 +127,10 @@ namespace xo {
              * the EXTENT is stringtable2's half of this, and is what this case
              * exists to pin.
              *
-             * The escaping is xo-ppsink's: JsonPrinter_string renders through
-             * quot(), so PrintJson.cpp:367's "TODO: escapes special
-             * characters" is stale.  Two notes on what comes back, neither of
-             * them stringtable2's to fix:
-             *   - \x00 is ppsink's escape vocabulary, not JSON's, which wants
-             *     \u0000.  A strict parser rejects it.
-             *   - so this expectation will change when printjson grows a
-             *     json-specific escape.  It is recorded as OBSERVED, and a
-             *     failure here means that happened -- not that DString broke.
+             * The escaping is printjson's: JSON's \u0000, not ppsink's display
+             * \x00 (.xo-backlog/xo-printjson/issues/04).  Not stringtable2's
+             * half -- a failure in the escape alone means printjson changed,
+             * not that DString broke.
              */
             PrintJson print_json;
             require_stringtable2_setup(&print_json);
@@ -151,7 +146,7 @@ namespace xo {
             std::stringstream ss;
             print_json.print_obj(x, &ss);
 
-            REQUIRE(ss.str() == std::string("\"a\\x00b\""));
+            REQUIRE(ss.str() == std::string("\"a\\u0000b\""));
         } /*TEST_CASE(DString-json-uses-size-not-nul)*/
     } /*namespace ut*/
 } /*namespace xo*/

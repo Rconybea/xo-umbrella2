@@ -7,6 +7,7 @@
  **/
 
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/escape.hpp>
 #include <xo/ppsink/quoted_char_ostream.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>
@@ -19,6 +20,8 @@
 namespace ut {
     using xo::pp::Escape;
     using xo::pp::FlatSink;
+    using xo::pp::PpStyle;
+    using xo::pp::escapestyle;
     using xo::pp::quoted_char;
     using xo::pp::quot;
     using xo::pp::unq;
@@ -37,7 +40,15 @@ namespace ut {
     static_assert(Escape::str_size("\t").size == 2);
     static_assert(Escape::str_size("\b").size == 2);
     static_assert(Escape::str_size("\f").size == 2);
-    static_assert(Escape::str_size("\v").size == Escape::c_max_char_expand);
+    static_assert(Escape::str_size("\v").size == Escape::fallback_expand(escapestyle::display));
+    /* json spells the same set: short forms unchanged, \u00NN for the rest */
+    static_assert(Escape::fallback_expand(escapestyle::display) == 4);   /* \xNN */
+    static_assert(Escape::fallback_expand(escapestyle::json) == 6);      /* \u00NN */
+    static_assert(Escape::str_size("\t", escapestyle::json).size == 2);
+    static_assert(Escape::str_size("\v", escapestyle::json).size == 6);
+    /* the bound covers every vocabulary */
+    static_assert(Escape::c_max_char_expand >= Escape::fallback_expand(escapestyle::display));
+    static_assert(Escape::c_max_char_expand >= Escape::fallback_expand(escapestyle::json));
     /* escape_flag is the "needs quotes" predicate, so these are set with
      * nothing escaped
      */
@@ -51,11 +62,11 @@ namespace ut {
      *  exactly str_size().size bytes.
      **/
     static string
-    escape_str(string_view input) {
-        auto [esc_z, esc_flag] = Escape::str_size(input);
+    escape_str(string_view input, escapestyle style = escapestyle::display) {
+        auto [esc_z, esc_flag] = Escape::str_size(input, style);
 
         string buf(esc_z, '\0');
-        char * end = Escape::str_copy(input, buf.data());
+        char * end = Escape::str_copy(input, buf.data(), style);
 
         REQUIRE(static_cast<std::uint32_t>(end - buf.data()) == esc_z);
         /* nothing to check against esc_flag here: it reports whether quotes
@@ -133,6 +144,25 @@ namespace ut {
          */
         REQUIRE(escape_str("\x1b") == "\\x1b");
         REQUIRE(escape_str("\x1b[31m") == "\\x1b[31m");
+    }
+
+    TEST_CASE("escape-json-control-chars", "[escape][json]") {
+        /* json: the characters display escapes, in JSON's spelling (RFC 8259
+         * section 7).  No \x in JSON; a strict parser rejects it.
+         */
+        REQUIRE(escape_str(string_view("\0", 1), escapestyle::json) == "\\u0000");
+        REQUIRE(escape_str("\v", escapestyle::json) == "\\u000b");
+        REQUIRE(escape_str("\x1b", escapestyle::json) == "\\u001b");
+        REQUIRE(escape_str("\x1f", escapestyle::json) == "\\u001f");
+        /* DEL may be raw in JSON, but raw is invisible; escaped stays visible */
+        REQUIRE(escape_str("\x7f", escapestyle::json) == "\\u007f");
+
+        /* short forms and quote/backslash: the same in both vocabularies */
+        REQUIRE(escape_str("a\nb\tc", escapestyle::json) == "a\\nb\\tc");
+        REQUIRE(escape_str("q\"b\\", escapestyle::json) == "q\\\"b\\\\");
+
+        /* UTF-8 passes through: JSON permits it raw */
+        REQUIRE(escape_str("\xc3\xa9", escapestyle::json) == "\xc3\xa9");
     }
 
     TEST_CASE("escape-leaves-utf8-alone", "[escape]") {
@@ -250,8 +280,49 @@ namespace ut {
         FlatSink sink(ss.rdbuf());
         sink.put_with_escape(input, true);
 
-        REQUIRE(ss.str().size() == 1 + c_n * Escape::c_max_char_expand + 1);
+        REQUIRE(ss.str().size() == 1 + c_n * Escape::fallback_expand(escapestyle::display) + 1);
         REQUIRE(ss.str() == expected);
+    }
+
+    /* a json-styled FlatSink: the sink's style picks the vocabulary */
+    TEST_CASE("flatsink-put-with-escape-json", "[escape][flatsink][json]") {
+        std::stringstream ss;
+        FlatSink sink(PpStyle::json(), ss.rdbuf());
+        sink.put_with_escape(string_view("a\0b", 3), true);
+
+        REQUIRE(ss.str() == "\"a\\u0000b\"");
+    }
+
+    /* json's 6-byte expansion through the flush path: the buffer reserve
+     * must cover the widest vocabulary
+     */
+    TEST_CASE("flatsink-put-with-escape-json-spans-buffer", "[escape][flatsink][json]") {
+        constexpr std::size_t c_n = 400;
+
+        string input(c_n, '\x1b');
+
+        string expected = "\"";
+        for (std::size_t i = 0; i < c_n; ++i)
+            expected += "\\u001b";
+        expected += "\"";
+
+        std::stringstream ss;
+        FlatSink sink(PpStyle::json(), ss.rdbuf());
+        sink.put_with_escape(input, true);
+
+        REQUIRE(ss.str().size() == 1 + c_n * Escape::fallback_expand(escapestyle::json) + 1);
+        REQUIRE(ss.str() == expected);
+    }
+
+    /* quot() renders through the sink it reaches, so it escapes per that
+     * sink's style
+     */
+    TEST_CASE("quot-follows-sink-style", "[escape][quoted][json]") {
+        std::stringstream ss;
+        FlatSink sink(PpStyle::json(), ss.rdbuf());
+        sink.pp(quot(string_view("a\x7f", 2)));
+
+        REQUIRE(ss.str() == "\"a\\u007f\"");
     }
 } /*namespace ut*/
 

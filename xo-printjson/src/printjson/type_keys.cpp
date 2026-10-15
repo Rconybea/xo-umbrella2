@@ -4,17 +4,16 @@
  **/
 
 #include "type_keys.hpp"
-#include <xo/ppsink/quoted_ostream.hpp>   /* quot(..) */
+#include "json_quoted.hpp"
 
 namespace xo {
-    using xo::pp::quot;
 
     namespace json {
         std::ostream &
         operator<<(std::ostream & os, type_keys const & k)
         {
-            os << quot("_canonical_type_") << ": " << quot(k.canonical_)
-               << ", " << quot("_short_type_") << ": " << quot(k.short_);
+            os << json_quot("_canonical_type_") << ": " << json_quot(k.canonical_)
+               << ", " << json_quot("_short_type_") << ": " << json_quot(k.short_);
             return os;
         }
     } /*namespace json*/

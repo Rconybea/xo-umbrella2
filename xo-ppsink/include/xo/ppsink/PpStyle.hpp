@@ -13,6 +13,7 @@
 #pragma once
 
 #include "color_spec.hpp"
+#include "escape.hpp"
 #include <cstdint>
 
 namespace xo::pp {
@@ -60,6 +61,11 @@ namespace xo::pp {
          **/
         std::int32_t tag_value_offset = 1;
 
+        /** how put_with_escape() spells a character with no short form:
+         *  display (@c \xNN) or json (@c \u00NN).  See escape.hpp
+         **/
+        escapestyle escape = escapestyle::display;
+
         /** a style with no color at all, layout defaults unchanged.
          *
          *  For anything pinning rendered TEXT -- a unit test, a log file, a pipe.
@@ -70,6 +76,20 @@ namespace xo::pp {
             retval.color_enabled = false;
             retval.tag_color = color_spec_type::none();
             retval.struct_tag_color = color_spec_type::none();
+
+            return retval;
+        }
+
+        /** a style for writing JSON: json escapes, no color.
+         *
+         *  Color is off because a colored sink writes ANSI sequences INTO
+         *  its output, which in a JSON document is corruption.
+         *  See .xo-backlog/xo-printjson/issues/04
+         **/
+        static PpStyle json() {
+            PpStyle retval = plain();
+
+            retval.escape = escapestyle::json;
 
             return retval;
         }

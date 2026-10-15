@@ -85,7 +85,7 @@ namespace xo::pp {
                 p = buf;
             }
 
-            p = Escape::str_copy(std::string_view(&ch, 1), p);
+            p = Escape::str_copy(std::string_view(&ch, 1), p, style_.escape);
         }
 
         if (quote_flag) {
