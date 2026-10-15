@@ -64,31 +64,6 @@ namespace xo {
                 return x;
             } /*check_recover_native*/
         }; /*JsonPrinter*/
-
-        /* AsStringJsonPrinter<T>
-         * prints a T-instance by using operator<< and surrounding in quotes.
-         *
-         * e.g:
-         *   T & x = ..;
-         *
-         *   *state.p_os() << "\"" << x << "\""
-         *
-         */
-        template<typename T>
-        class AsStringJsonPrinter : public JsonPrinter {
-        public:
-            virtual bool prints_object() const override { return false; }
-
-            virtual void print_json(TaggedPtr tp,
-                                    JsonPrintState & state) const override
-                {
-                    T * x = this->check_recover_native<T>(tp, state);
-
-                    if(x) {
-                        *state.p_os() << "\"" << *x << "\"";
-                    }
-                } /*print_json*/
-        }; /*AsStringJsonPrinter*/
     } /*namespace json*/
 } /*namespace xo*/
 
