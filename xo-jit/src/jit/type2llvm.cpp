@@ -29,7 +29,13 @@ namespace xo {
         type2llvm::td_to_llvm_type(xo::bp<LlvmContext> llvm_cx, TypeDescr td) {
             auto & llvm_cx_ref = llvm_cx->llvm_cx_ref();
 
-            if (td->is_function()) {
+            /* a function POINTER only.  A std::function (fn_repr std_function)
+             * is a type-erased object, opaque to compiled code -- likely
+             * permanently: it takes the final "no llvm type available" branch
+             * (.xo-backlog/std-function-reflection/spec.md, section 3).  Not
+             * tested: nothing reaches here with a std::function today
+             */
+            if (td->is_function() && (td->fn_repr() == xo::reflect::FunctionRepr::pointer)) {
                 /* in this context,  we're looking for a representation for a value,
                  * i.e. something that can be stored in a variable
                  */

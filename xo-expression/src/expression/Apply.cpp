@@ -30,6 +30,17 @@ namespace xo {
                                  xtag("F", fn_valuetype)));
             }
 
+            /* a deferral, not a limit: an interpreter could call a
+             * std::function through its operator(); nothing here does yet
+             * (.xo-backlog/std-function-reflection/spec.md, section 3)
+             */
+            if (fn_valuetype->fn_repr() != xo::reflect::FunctionRepr::pointer) {
+                throw std::runtime_error
+                          (tostr("Apply::make: a std::function is not supported in function position;"
+                                 " a function pointer is",
+                                 xtag("FT", fn_valuetype->short_name())));
+            }
+
             TypeDescr fn_retval_type = fn_valuetype->fn_retval();
 
             return new Apply(fn_retval_type, fn, argv);

@@ -116,6 +116,11 @@ namespace xo {
                 {
                     if (!value_td_->is_function())
                         throw std::runtime_error("PrimitiveExpr: expected function pointer");
+                    /* a deferral, not a limit: a std::function primitive is
+                     * callable in principle (.xo-backlog/std-function-reflection/spec.md, 3)
+                     */
+                    if (value_td_->fn_repr() != xo::reflect::FunctionRepr::pointer)
+                        throw std::runtime_error("PrimitiveExpr: a std::function is not supported here; a function pointer is");
                     if (!value_td_->fn_retval())
                         throw std::runtime_error("PrimitiveExpr: expected non-null function return value");
                 }
