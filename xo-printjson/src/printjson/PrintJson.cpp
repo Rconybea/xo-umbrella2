@@ -9,11 +9,11 @@
 #include "json_quoted.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/StructReflector.hpp>
-#include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/facet/handlestore/ObjectSlot.hpp>
 #include <xo/facet/handlestore/DHandleStore.hpp>
 #include <xo/facet/TypeRegistry.hpp>
+#include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/flatstring/flatstring.hpp>     /* os << json_quot(..) */
