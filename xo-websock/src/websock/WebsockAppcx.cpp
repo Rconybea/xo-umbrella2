@@ -4,7 +4,6 @@
  **/
 
 #include "cx/WebsockAppcx.hpp"
-#include "websock_json.hpp"
 #include "websock_reflect.hpp"
 
 namespace xo {
@@ -20,9 +19,8 @@ namespace xo {
           config_{cfg},
           print_json_{printjson_appcx.print_json()}
     {
-        /* types first: a printer is found by its type's TypeDescr */
+        /* PrintJson prints xo-websock's types from their reflection */
         web::websock_reflect_types(reflect_appcx.type_table());
-        web::provide_websock_json_printers(this->print_json_.get());
     }
 } /*namespace xo*/
 

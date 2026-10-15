@@ -14,12 +14,11 @@ namespace xo {
     /** @brief application-level state for the websock subsystem.
      *
      *  Establishing one describes xo-websock's types to xo-reflect
-     *  (xo/websock/websock_reflect.hpp), then registers xo-websock's json
-     *  printers with the printjson context's PrintJson
-     *  (xo/websock/websock_json.hpp).  A
+     *  (xo/websock/websock_reflect.hpp); the printjson context's PrintJson
+     *  prints them from that reflection.  A
      *  Webserver is made FROM a WebsockAppcx (Webserver::make), so a server
-     *  cannot exist without its printers.  See
-     *  .xo-backlog/xo-websock/issues/11.
+     *  cannot exist without its reflection.  See
+     *  .xo-backlog/xo-websock/issues/11, .xo-backlog/xo-websock/issues/16.
      **/
     class WebsockAppcx {
     public:

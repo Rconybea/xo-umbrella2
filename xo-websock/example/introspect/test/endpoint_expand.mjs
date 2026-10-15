@@ -27,12 +27,12 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }).sort(); })()`);
 
 // no uri_regex_ row: a compiled cache of uri_pattern_, not printed (xo-websock#16)
-for (const [id, expect] of [["stream:/introspect", ['kind_: stream', 'uri_pattern_: "/introspect"',
-                                                     'var_v_: []',
-                                                     'http_handler_: empty',
-                                                     'receiver_: ▾ (→)']],
-                            ["http:/hello/", ['var_v_: ["name"]', 'http_handler_: set',
-                                              'receiver_: null']]]) {
+for (const [id, expect] of [["stream:/introspect", ['kind: stream', 'uri_pattern: "/introspect"',
+                                                     'var_v: []',
+                                                     'http_handler: empty',
+                                                     'receiver: ▾ (→)']],
+                            ["http:/hello/", ['var_v: ["name"]', 'http_handler: set',
+                                              'receiver: null']]]) {
     check(await ev(`${box(id)}.classList.contains("expandable")`), id + " expandable");
     await ev(`${box(id)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
     const r = await rows_of(id);

@@ -18,7 +18,7 @@ console.log("   edges:", JSON.stringify(kinds));
 // (the server's url_router here; the routers' are checked below)
 const want = {ws_config: "includes", url_router: "includes", session_table: "includes", router: "includes",
               'session_map["1"]': "owns", 'session_map["2"]': "owns", "subscription_v[0]": "owns",
-              'http_map["/hello/"]': "shares", 'stream_map["/introspect"]': "shares", receiver_: "shares",
+              'http_map["/hello/"]': "shares", 'stream_map["/introspect"]': "shares", receiver: "shares",
               sender: "shares",   // a session's sender (generic printer: no "_", xo-websock#16)
               endpoint: "shares", sink: "shares"};   // a subscription's (generic printer)
 const by_label = new Map(kinds.filter(([l, k]) => !(l === "url_router" && k === "refers")).map(([l, k]) => [l, k]));

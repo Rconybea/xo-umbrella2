@@ -11,7 +11,6 @@ set(SELF_SRCS
 	UrlRouter.cpp
 	Webserver.cpp
 	WebserverConfig.cpp
-	websock_json.cpp
 	websock_reflect.cpp
 	WebsockAppcx.cpp
 )

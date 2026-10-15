@@ -95,49 +95,49 @@
                   {
                     "_canonical_type_" : "xo::web::EndpointKind",
                     "_metatype_" : "atomic",
-                    "_name_" : "kind_",
+                    "_name_" : "kind",
                     "_short_type_" : "EndpointKind",
                     "_value_" : "http"
                   },
                   {
                     "_canonical_type_" : "std::__cxx11::basic_string<char>",
                     "_metatype_" : "atomic",
-                    "_name_" : "uri_pattern_",
+                    "_name_" : "uri_pattern",
                     "_short_type_" : "string",
                     "_value_" : "/status"
                   },
                   {
                     "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
                     "_metatype_" : "vector",
-                    "_name_" : "var_v_",
+                    "_name_" : "var_v",
                     "_short_type_" : "vector<string>",
                     "_value_" : []
                   },
                   {
                     "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
                     "_metatype_" : "pointer",
-                    "_name_" : "receiver_",
+                    "_name_" : "receiver",
                     "_short_type_" : "rp<StreamReceiver>",
                     "_value_" : null
                   },
                   {
                     "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
                     "_metatype_" : "function",
-                    "_name_" : "http_handler_",
+                    "_name_" : "http_handler",
                     "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
                     "_value_" : "set"
                   },
                   {
                     "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
                     "_metatype_" : "function",
-                    "_name_" : "subscribe_fn_",
+                    "_name_" : "subscribe_fn",
                     "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
                     "_value_" : "empty"
                   },
                   {
                     "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
                     "_metatype_" : "function",
-                    "_name_" : "unsubscribe_fn_",
+                    "_name_" : "unsubscribe_fn",
                     "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
                     "_value_" : "empty"
                   }
@@ -163,28 +163,28 @@
                   {
                     "_canonical_type_" : "xo::web::EndpointKind",
                     "_metatype_" : "atomic",
-                    "_name_" : "kind_",
+                    "_name_" : "kind",
                     "_short_type_" : "EndpointKind",
                     "_value_" : "stream"
                   },
                   {
                     "_canonical_type_" : "std::__cxx11::basic_string<char>",
                     "_metatype_" : "atomic",
-                    "_name_" : "uri_pattern_",
+                    "_name_" : "uri_pattern",
                     "_short_type_" : "string",
                     "_value_" : "/fw"
                   },
                   {
                     "_canonical_type_" : "std::vector<std::__cxx11::basic_string<char> >",
                     "_metatype_" : "vector",
-                    "_name_" : "var_v_",
+                    "_name_" : "var_v",
                     "_short_type_" : "vector<string>",
                     "_value_" : []
                   },
                   {
                     "_canonical_type_" : "xo::ref::intrusive_ptr<xo::web::StreamReceiver>",
                     "_metatype_" : "pointer",
-                    "_name_" : "receiver_",
+                    "_name_" : "receiver",
                     "_short_type_" : "rp<StreamReceiver>",
                     "_value_" : 
                     {
@@ -198,21 +198,21 @@
                   {
                     "_canonical_type_" : "std::function<xo::web::HttpResponse(const xo::web::HttpRequest&)>",
                     "_metatype_" : "function",
-                    "_name_" : "http_handler_",
+                    "_name_" : "http_handler",
                     "_short_type_" : "function<HttpResponse(const HttpRequest&)>",
                     "_value_" : "empty"
                   },
                   {
                     "_canonical_type_" : "std::function<xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>(const xo::ref::intrusive_ptr<xo::web::WebsocketSink>&)>",
                     "_metatype_" : "function",
-                    "_name_" : "subscribe_fn_",
+                    "_name_" : "subscribe_fn",
                     "_short_type_" : "function<CallbackIdImpl<CallbackId_tag>(const rp<WebsocketSink>&)>",
                     "_value_" : "set"
                   },
                   {
                     "_canonical_type_" : "std::function<void(xo::fn::CallbackIdImpl<xo::fn::CallbackId_tag>)>",
                     "_metatype_" : "function",
-                    "_name_" : "unsubscribe_fn_",
+                    "_name_" : "unsubscribe_fn",
                     "_short_type_" : "function<void(CallbackIdImpl<CallbackId_tag>)>",
                     "_value_" : "set"
                   }

@@ -10,12 +10,11 @@
 // Webserver json: a reflected struct, {_id_, _canonical_type_, _members_:
 // [{_name_, _value_, ..}, ..]}.  The page reads "_members_" alone
 // (.xo-backlog/xo-websock/issues/17) -- what it draws, and from where.
-// Members printed from reflection carry no trailing "_" (the generic
-// printer; .xo-backlog/xo-websock/issues/16); DynamicEndpoint's own
-// printer still writes kind_, uri_pattern_, receiver_:
+// Members print from reflection, with no trailing "_" (the generic
+// printer; .xo-backlog/xo-websock/issues/16):
 //   server        listen_port, state
 //   endpoints     url_router -> http_map, stream_map (key: stem);
-//                 each: kind_, uri_pattern_, receiver_
+//                 each: kind, uri_pattern, receiver
 //   sessions      session_table -> session_map (key: session id);
 //                 each: sender (-> open), router -> subscription_v
 //   subscriptions sub_id, stream_name, sink (-> sender)
@@ -253,14 +252,14 @@ function layout(event) {
 
     const router = mv(server, "url_router");
     for (const [stem, ep] of [...map_entries(router, "http_map"), ...map_entries(router, "stream_map")]) {
-        const id = `${mv(ep, "kind_")}:${stem}`;
-        nodes.push({id: id, kind: mv(ep, "kind_"), label: mv(ep, "uri_pattern_"),
+        const id = `${mv(ep, "kind")}:${stem}`;
+        nodes.push({id: id, kind: mv(ep, "kind"), label: mv(ep, "uri_pattern"),
                     type: ep._canonical_type_, obj: ep});
         edge("server", id, "link");
 
         // its receiver (a stream endpoint's, if any): owned by the endpoint,
-        // named by its most-derived type; the receiver_ member refers to it
-        const receiver = deref(mv(ep, "receiver_"));
+        // named by its most-derived type; the receiver member refers to it
+        const receiver = deref(mv(ep, "receiver"));
         if (receiver) {
             const rid = `${id}:receiver`;
             nodes.push({id: rid, kind: "receiver", label: receiver._short_type_ || "receiver",

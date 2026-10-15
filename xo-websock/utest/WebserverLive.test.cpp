@@ -835,7 +835,7 @@ namespace xo {
             REQUIRE(eps.size() == 1);
             /* no view-model keys (refcount, pattern, ..): members (xo-websock#16) */
             REQUIRE(!eps[0].isMember("refcount"));
-            REQUIRE(entry_of(eps[0]["_members_"], "uri_pattern_")["_value_"].asString() == "/fw");
+            REQUIRE(entry_of(eps[0]["_members_"], "uri_pattern")["_value_"].asString() == "/fw");
 
             /* the edges, joined by id: the subscription's endpoint is THAT
              * endpoint; its sink's sender is ITS session's sender.  The sink

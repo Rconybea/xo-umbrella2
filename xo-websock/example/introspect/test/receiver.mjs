@@ -1,5 +1,5 @@
 // an endpoint's StreamReceiver drawn as its own box: owned by the endpoint,
-// named by its most-derived type, reached by the receiver_ row; in the legend
+// named by its most-derived type, reached by the receiver row; in the legend
 import fs from "node:fs";
 const [,, cdp_port, port, out] = process.argv;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -21,7 +21,7 @@ const R = "stream:/introspect:receiver";
 const EPS = `(() => { const ids = objects_by_id(last_event), d = (v) => v && "_ref_" in v ? ids.get(v._ref_) : v;
   const ur = d(member_value(member_value(last_event, "server"), "url_router"));
   return ["http_map", "stream_map"].flatMap(m => Object.values(member_value(ur, m) || {}).map(d))
-    .map(e => ({pattern: member_value(e, "uri_pattern_"), receiver: d(member_value(e, "receiver_"))})); })()`;
+    .map(e => ({pattern: member_value(e, "uri_pattern"), receiver: d(member_value(e, "receiver"))})); })()`;
 const recv = await ev(`${EPS}.map(e => [e.pattern, e.receiver && e.receiver._short_type_, e.receiver && e.receiver._canonical_type_])`);
 console.log("   receivers:", JSON.stringify(recv));
 check(recv.some(r => r[0] === "/introspect" && r[1] === "IntrospectReceiver" && /IntrospectReceiver$/.test(r[2])), "/introspect's receiver: IntrospectReceiver, by its own type");
@@ -43,11 +43,11 @@ await ev(`expanded.add(${JSON.stringify(R)}); redraw(); 1`); await ev(`settled()
 const rrows = await ev(`[...${G(R)}.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join(""))`);
 check(rrows.length === 1 && rrows[0].startsWith("websrv:") && rrows[0].endsWith("(→)"), "receiver row: websrv (→): " + JSON.stringify(rrows));
 await ev(`expanded.delete(${JSON.stringify(R)}); redraw(); 1`); await ev(`settled()`);
-// the endpoint's receiver_ row: a ▾ (→) and the edge
+// the endpoint's receiver row: a ▾ (→) and the edge
 await ev(`expanded.add("stream:/introspect"); redraw(); 1`); await ev(`settled()`);
-const row = await ev(`(() => { const t = [...${G("stream:/introspect")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "receiver_");
+const row = await ev(`(() => { const t = [...${G("stream:/introspect")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "receiver");
   return [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join(""); })()`);
-check(row.trim().endsWith("▾ (→)"), "receiver_ row: ▾ (→): " + JSON.stringify(row));
+check(row.trim().endsWith("▾ (→)"), "receiver row: ▾ (→): " + JSON.stringify(row));
 check(await ev(`[...document.querySelectorAll("path.edge.member")].some(p => p.__data__.target === ${JSON.stringify(R)})`), "an edge from the endpoint to it");
 // colour + legend
 const fill = await ev(`getComputedStyle(${G(R)}.querySelector(":scope > rect")).fill`);

@@ -43,8 +43,8 @@ namespace xo {
     namespace ut {
         namespace {
             /** what the introspect example sends: a reflected struct holding
-             *  a Webserver*.  PrintJson follows the pointer to the Webserver
-             *  printer (xo/websock/websock_json.hpp)
+             *  a Webserver*.  PrintJson follows the pointer and prints the
+             *  Webserver from its reflection
              **/
             struct HoldsServer {
                 static void reflect_self() {
@@ -230,7 +230,7 @@ namespace xo {
         {
             /* an endpoint's receiver printed in full: named by its most-
              * derived type (StreamReceiver is SelfTagging), with the id the
-             * receiver_ member's ref uses
+             * receiver member's ref uses
              */
             HoldsServer::reflect_self();
 
@@ -253,16 +253,16 @@ namespace xo {
             REQUIRE(eps.size() == 2);
 
             /* no inline "receiver" key: the receiver prints in full in the
-             * reflected receiver_ (shared), as its most-derived type
+             * reflected receiver member (shared), as its most-derived type
              * (xo-websock#16)
              */
             REQUIRE(!eps[1].isMember("receiver"));
 
             /* http /status: none */
-            REQUIRE(member_value(eps[0], "receiver_").isNull());
+            REQUIRE(member_value(eps[0], "receiver").isNull());
 
             /* stream /fw: the receiver, by its own type, placed here */
-            Json::Value const & r = member_value(eps[1], "receiver_");
+            Json::Value const & r = member_value(eps[1], "receiver");
             REQUIRE(r.isObject());
             REQUIRE(r["_id_"].isInt());
             REQUIRE(r["_canonical_type_"].asString() == std::string(xo::reflect::type_name<NamedReceiver>()));
@@ -391,7 +391,7 @@ namespace xo {
                         REQUIRE(ep["_name_"].asString() == "DynamicEndpoint");
                         REQUIRE(ep["_id_"].isInt());
                         REQUIRE(!ep.isMember("stem"));   /* the map key is the stem (xo-websock#16) */
-                        REQUIRE(member_value(ep, "kind_").asString() == (i == 0 ? "http" : "stream"));
+                        REQUIRE(member_value(ep, "kind").asString() == (i == 0 ? "http" : "stream"));
                     }
                 }
                 REQUIRE(endpoints_of(srv).size()
@@ -440,9 +440,9 @@ namespace xo {
              */
             for (char const * k : {"refcount", "kind", "stem", "pattern", "has_receive", "receiver"})
                 REQUIRE(!eps[0].isMember(k));
-            REQUIRE(member_value(eps[0], "kind_").asString() == "http");
-            REQUIRE(member_value(eps[0], "uri_pattern_").asString() == "/status");
-            REQUIRE(member_value(eps[0], "receiver_").isNull());
+            REQUIRE(member_value(eps[0], "kind").asString() == "http");
+            REQUIRE(member_value(eps[0], "uri_pattern").asString() == "/status");
+            REQUIRE(member_value(eps[0], "receiver").isNull());
 
             /* each endpoint's chosen C++ members (.xo-backlog/xo-websock/issues/13) */
             {
@@ -452,14 +452,14 @@ namespace xo {
                 for (Json::Value const & x : m)
                     names.push_back(x["_name_"].asString());
 
-                /* reflected members first (kind_, uri_pattern_, var_v_, receiver_),
-                 * then the std::function summaries (xo-printjson#06,
-                 * xo-reflect#06).  No uri_regex_: a compiled cache of
-                 * uri_pattern_ (xo-websock#16)
+                /* every member reflected, in reflection order, named
+                 * without the trailing '_'; the std::functions print
+                 * "set" / "empty" (xo-reflect#09).  No uri_regex_: a
+                 * compiled cache of uri_pattern_ (xo-websock#16)
                  */
-                REQUIRE(names == std::vector<std::string>{"kind_", "uri_pattern_", "var_v_",
-                                                          "receiver_", "http_handler_",
-                                                          "subscribe_fn_", "unsubscribe_fn_"});
+                REQUIRE(names == std::vector<std::string>{"kind", "uri_pattern", "var_v",
+                                                          "receiver", "http_handler",
+                                                          "subscribe_fn", "unsubscribe_fn"});
 
                 /* by name: robust to member order */
                 auto value_of = [](Json::Value const & mem, std::string const & name) {
@@ -469,25 +469,25 @@ namespace xo {
                     return Json::Value();
                 };
 
-                REQUIRE(value_of(m, "kind_").asString() == "http");
-                REQUIRE(value_of(m, "uri_pattern_").asString() == "/status");
-                REQUIRE(value_of(m, "var_v_").isArray());
-                REQUIRE(value_of(m, "var_v_").empty());
-                REQUIRE(value_of(m, "http_handler_").asString() == "set");
-                REQUIRE(value_of(m, "subscribe_fn_").asString() == "empty");
-                REQUIRE(value_of(m, "receiver_").isNull());
+                REQUIRE(value_of(m, "kind").asString() == "http");
+                REQUIRE(value_of(m, "uri_pattern").asString() == "/status");
+                REQUIRE(value_of(m, "var_v").isArray());
+                REQUIRE(value_of(m, "var_v").empty());
+                REQUIRE(value_of(m, "http_handler").asString() == "set");
+                REQUIRE(value_of(m, "subscribe_fn").asString() == "empty");
+                REQUIRE(value_of(m, "receiver").isNull());
 
                 Json::Value const & s = eps[1]["_members_"];    /* the stream endpoint */
-                REQUIRE(value_of(s, "kind_").asString() == "stream");
-                REQUIRE(value_of(s, "uri_pattern_").asString() == "/fw/${id}");
-                REQUIRE(value_of(s, "var_v_").size() == 1);
-                REQUIRE(value_of(s, "var_v_")[0].asString() == "id");
-                REQUIRE(value_of(s, "http_handler_").asString() == "empty");
-                REQUIRE(value_of(s, "subscribe_fn_").asString() == "set");
-                REQUIRE(value_of(s, "unsubscribe_fn_").asString() == "set");
+                REQUIRE(value_of(s, "kind").asString() == "stream");
+                REQUIRE(value_of(s, "uri_pattern").asString() == "/fw/${id}");
+                REQUIRE(value_of(s, "var_v").size() == 1);
+                REQUIRE(value_of(s, "var_v")[0].asString() == "id");
+                REQUIRE(value_of(s, "http_handler").asString() == "empty");
+                REQUIRE(value_of(s, "subscribe_fn").asString() == "set");
+                REQUIRE(value_of(s, "unsubscribe_fn").asString() == "set");
             }
-            REQUIRE(member_value(eps[1], "kind_").asString() == "stream");
-            REQUIRE(member_value(eps[1], "uri_pattern_").asString() == "/fw/${id}");
+            REQUIRE(member_value(eps[1], "kind").asString() == "stream");
+            REQUIRE(member_value(eps[1], "uri_pattern").asString() == "/fw/${id}");
             /* identity: distinct objects (refcount no longer shown --
              * not a member)
              */
