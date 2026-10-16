@@ -47,6 +47,7 @@ namespace xo {
             using TaggedRcptr = xo::reflect::TaggedRcptr;
             using TypeDescr = xo::reflect::TypeDescr;
             using TypeId = xo::reflect::TypeId;
+            using GuardMode = xo::reflect::GuardMode;
 
         public:
             /** describe PrintJson to xo-reflect.  Called by PrintJsonAppcx.
@@ -61,19 +62,9 @@ namespace xo {
             PrintJson();
             ~PrintJson() = default;
 
-            /** a print aborts, with a backtrace, rather than nest deeper
-             *  than this (JsonPrintState::print).  Depth counts
-             *  JsonPrintState::print calls in progress: a struct holding a
-             *  pointer to a struct nests two deep (struct, pointer)
-             **/
             std::uint32_t max_depth() const { return max_depth_; }
             void assign_max_depth(std::uint32_t z) { max_depth_ = z; }
 
-            /** Controls how to handle struct members that require synchronization.
-             *  Default waits for lock; try_lock takes lock if available,
-             *  otherwise prunes traversal at that point.
-             *  @see JsonMembers::reflected_members
-             **/
             reflect::GuardMode guard_mode() const { return guard_mode_; }
             void assign_guard_mode(reflect::GuardMode x) { guard_mode_ = x; }
 
@@ -178,69 +169,22 @@ namespace xo {
             void provide_std_printers();
 
         private:
-            /* map contains specialized printers for specific c++ types */
+            /** map contains specialized printers for specific c++ types **/
             TypeDrivenMap printer_map_;
-            /* see max_depth() */
+            /** a print() call aborts with backtrace
+             *  if continuing would nest deeper than this.
+             *  See @ref JsonPrintState::print.
+             **/
             std::uint32_t max_depth_ = c_default_max_depth;
-            /* see guard_mode() */
-            reflect::GuardMode guard_mode_ = reflect::GuardMode::blocking;
+            /** Controls how to handle struct members that require synchronization.
+             *  Default waits for lock; try_lock takes lock if available,
+             *  otherwise prunes traversal at that point.
+             *  @see JsonMembers::reflected_members
+             **/
+            GuardMode guard_mode_ = GuardMode::blocking;
         }; /*PrintJson*/
 
     } /*namespace json*/
-
-#ifdef NOT_USING
-    namespace print {
-        using PrintJson = xo::json::PrintJson;
-
-        /* stream inserter for printing a T-instance in json format */
-        template<typename T>
-        class jsonp_impl {
-        public:
-            jsonp_impl(T const & x, PrintJson const * pjson) : value_(x), pjson_{pjson} {}
-            //jsonp_impl(T const & x, PrintJson const * pjson) : value_{x}, pjson_{pjson} {}
-            //jsonp_impl(T && x, PrintJson const * pjson) : value_(std::move(x)), pjson_{pjson} {}
-
-            void print(std::ostream & os) const {
-                using xo::reflect::Reflect;
-
-                this->pjson_->print_tp(Reflect::make_tp(&value_), &os);
-            } /*print*/
-
-        private:
-            /* value, to be printed, in json format */
-            T value_;
-            /* json printer (bc we don't care for singletons) */
-            PrintJson const * pjson_ = nullptr;
-        }; /*jsonp_impl*/
-
-        template<typename T>
-        inline
-        std::ostream & operator<<(std::ostream & os, jsonp_impl<T> const & x) {
-            x.print(os);
-            return os;
-        } /*operator<<*/
-
-        /* writing out std::forward<T> behavior for completeness' sake:
-         *
-         * 1. call jsonp(x) with rvalue std::string x, then:
-         *    - T will be deduced to [std::string]
-         *        (in particular: _not_ std::string &, std::string const &, std::string &&)
-         *    - rvalue std::string passed to jsonp_impl ctor
-         *
-         * 2a. call jsonp(x) with std::string & x, then:
-         *    - T deduced to [std::string &]
-         *    - std::string & passed to jsonp_impl ctor
-         *
-         * 2b. call jsonp(x) with std::string const & x, then:
-         *    - T deduced to [std::string const &]
-         *    - std::string const & passed to jsonp_impl ctor
-         */
-        template<typename T>
-        auto jsonp(T && x, PrintJson const * pjson) {
-            return jsonp_impl<T>(std::forward<T>(x), pjson);
-        } /*jsonp*/
-    } /*namespace print*/
-#endif
 } /*namespace xo*/
 
 /* end JsonPrinter.hpp */

@@ -77,6 +77,7 @@ namespace xo {
         public:
             using TaggedPtr = xo::reflect::TaggedPtr;
             using TypeDescr = xo::reflect::TypeDescr;
+            using GuardMode = xo::reflect::GuardMode;
 
         public:
             /** a print of json on @p p_os, through @p pjson's printers,
@@ -159,11 +160,7 @@ namespace xo {
 
             /** current nesting: print() calls in progress **/
             std::uint32_t depth() const { return depth_; }
-
-            /** nesting limit, from PrintJson::max_depth() **/
             std::uint32_t max_depth() const { return max_depth_; }
-
-            /** how guards are taken, from PrintJson::guard_mode() **/
             reflect::GuardMode guard_mode() const { return guard_mode_; }
 
         private:
@@ -245,7 +242,7 @@ namespace xo {
             /** print() aborts past this depth **/
             std::uint32_t max_depth_ = 0;
             /** see guard_mode() **/
-            reflect::GuardMode guard_mode_ = reflect::GuardMode::blocking;
+            GuardMode guard_mode_ = GuardMode::blocking;
             /** objects met in this print, by address.  A std::unordered_map
              *  for now; a DArenaHashMap from a pool of temporary arenas is
              *  the intent (.xo-backlog/xo-printjson/issues/02)
