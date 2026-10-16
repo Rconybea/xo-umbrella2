@@ -10,6 +10,7 @@
 #include <xo/reflectable2/FopTdx.hpp>
 #include <xo/reflect/SelfTagging.hpp>
 #include <xo/reflect/TypeDrivenMap.hpp>
+#include <xo/ppsink/PpSink.hpp>
 #include <iostream>
 #include <memory>
 #include <type_traits>
@@ -75,8 +76,19 @@ namespace xo {
                 this->print_tp(Reflect::make_tp(x), p_os);
             } /*print*/
 
-            /* print object tp on stream *p_os, in JSON format;
-             */
+            /** print object @p tp into @p sink, in JSON format.
+             *
+             *  Throws std::runtime_error unless @p sink escapes for json
+             *  (e.g. PpStyle::json(); see JsonPrintState).  Does not call
+             *  @c sink->complete(): the sink, and finishing it, are the
+             *  caller's.  See .xo-backlog/xo-printjson/issues/01
+             **/
+            void print_tp(TaggedPtr tp, xo::pp::PpSink * sink) const;
+
+            /** print object @p tp on stream @p *p_os, in JSON format:
+             *  print_tp(tp, sink) through a FlatSink(PpStyle::json()) over
+             *  @c p_os->rdbuf()
+             **/
             void print_tp(TaggedPtr tp, std::ostream * p_os) const;
 
             /* convenience -- shorthand for

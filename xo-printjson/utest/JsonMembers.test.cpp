@@ -12,6 +12,8 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <atomic>
 #include <map>
@@ -100,7 +102,8 @@ namespace xo {
             PrintJson pjson;
             std::stringstream ss;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.end();
@@ -115,7 +118,8 @@ namespace xo {
             int n = 7;
             std::string s = "hello";
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member("n_", n).member("s_", s);
@@ -136,7 +140,8 @@ namespace xo {
             JmReflected * p = &r;
             std::vector<JmReflected> v(1);
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member("r_", r).member("p_", p).member("v_", v);
@@ -168,7 +173,8 @@ namespace xo {
             JmUnreflected u;
             JmUnreflected * pu = &u;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member("u_", u).member("pu_", pu).member("n_", 3);
@@ -199,7 +205,8 @@ namespace xo {
 
             std::atomic<std::int32_t> port{8080};
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member_as<std::atomic<std::int32_t>>("port_", port.load());
@@ -219,7 +226,8 @@ namespace xo {
             JmReflected r;
             JmReflected * null_p = nullptr;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member_ref<JmReflected *>("r_", &r)
@@ -242,7 +250,8 @@ namespace xo {
             JmReflected r;
             JmReflected const & cr = r;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member_ref<JmReflected const &>("cr_", &cr);
@@ -262,7 +271,8 @@ namespace xo {
 
             JmReflected a, b;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member_refs<std::vector<JmReflected *>>("v_", {&a, nullptr, &b});
@@ -282,7 +292,8 @@ namespace xo {
 
             JmReflected a, b;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
 
             JsonMembers mem(state);
             mem.member_ref_map<std::map<std::string, JmReflected *>>("m_", {{"/a/", &a}, {"/b/", &b}, {"/z/", nullptr}});
@@ -310,7 +321,8 @@ namespace xo {
 
             std::stringstream by_hand;
             {
-                JsonPrintState state(&pjson, &by_hand);
+                xo::pp::FlatSink by_hand_sink(xo::pp::PpStyle::json(), by_hand.rdbuf());
+                JsonPrintState state(&pjson, &by_hand_sink);
                 JsonMembers mem(state);
                 mem.member("r_", h.r_).member("p_", h.p_).member("v_", h.v_);
                 mem.end();
@@ -318,7 +330,8 @@ namespace xo {
 
             std::stringstream reflected;
             {
-                JsonPrintState state(&pjson, &reflected);
+                xo::pp::FlatSink reflected_sink(xo::pp::PpStyle::json(), reflected.rdbuf());
+                JsonPrintState state(&pjson, &reflected_sink);
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&h));
                 mem.end();
@@ -341,7 +354,8 @@ namespace xo {
 
             JmBad b;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
             JsonMembers mem(state);
             mem.reflected_members(xo::reflect::Reflect::make_tp(&b));
             mem.end();
@@ -362,13 +376,15 @@ namespace xo {
 
             std::stringstream plain, suffixed;
             {
-                JsonPrintState state(&pjson, &plain);
+                xo::pp::FlatSink plain_sink(xo::pp::PpStyle::json(), plain.rdbuf());
+                JsonPrintState state(&pjson, &plain_sink);
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&r));
                 mem.end();
             }
             {
-                JsonPrintState state(&pjson, &suffixed);
+                xo::pp::FlatSink suffixed_sink(xo::pp::PpStyle::json(), suffixed.rdbuf());
+                JsonPrintState state(&pjson, &suffixed_sink);
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&r), "_");
                 mem.end();
@@ -388,7 +404,8 @@ namespace xo {
 
             int x = 7;
 
-            JsonPrintState state(&pjson, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            JsonPrintState state(&pjson, &ss_sink);
             JsonMembers mem(state);
             mem.reflected_members(xo::reflect::Reflect::make_tp(&x));
             mem.end();

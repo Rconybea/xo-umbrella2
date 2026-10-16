@@ -5,12 +5,14 @@
 
 #pragma once
 
+#include "detail/SinkStreambuf.hpp"
 #include <xo/reflect/Ownership.hpp>
 #include <xo/reflect/struct/GuardedVisit.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/reflect/TypeDescr.hpp>
+#include <xo/ppsink/PpSink.hpp>
 #include <cstdint>
-#include <iosfwd>
+#include <ostream>
 #include <string_view>
 #include <unordered_map>
 
@@ -78,18 +80,32 @@ namespace xo {
             using TaggedPtr = xo::reflect::TaggedPtr;
             using TypeDescr = xo::reflect::TypeDescr;
             using GuardMode = xo::reflect::GuardMode;
+            using PpSink = xo::pp::PpSink;
 
         public:
-            /** a print of json on @p p_os, through @p pjson's printers,
-             *  nesting at most @p pjson->max_depth() deep
+            /** a print of json into @p sink, through @p pjson's printers,
+             *  nesting at most @p pjson->max_depth() deep.
+             *
+             *  Throws std::runtime_error unless @p sink escapes for json
+             *  (@c sink->style().escape == escapestyle::json, e.g.
+             *  PpStyle::json()): a display-escaping sink would write \xNN
+             *  into the document.  Colour is not checked -- coloured json,
+             *  for a human to read, is the caller's choice.
+             *  See .xo-backlog/xo-printjson/issues/01
              **/
-            JsonPrintState(PrintJson const * pjson, std::ostream * p_os);
+            JsonPrintState(PrintJson const * pjson, PpSink * sink);
 
             JsonPrintState(JsonPrintState const &) = delete;
             JsonPrintState & operator=(JsonPrintState const &) = delete;
 
             /** where json goes **/
-            std::ostream * p_os() const { return p_os_; }
+            PpSink * sink() const { return sink_; }
+
+            /** where json goes, as an ostream: writes reach sink(), in
+             *  order.  For printers not yet moved to sink() -- goes when
+             *  the last one has (.xo-backlog/xo-printjson/issues/01)
+             **/
+            std::ostream * p_os() const { return &os_; }
 
             /** true iff a printer was provided for @p td (PrintJson::provide_printer) **/
             bool has_printer(TypeDescr td) const;
@@ -231,8 +247,12 @@ namespace xo {
         private:
             /** the printer table **/
             PrintJson const * pjson_ = nullptr;
-            /** where json goes **/
-            std::ostream * p_os_ = nullptr;
+            /** where json goes.  map_key_string redirects it for a while **/
+            PpSink * sink_ = nullptr;
+            /** p_os()'s streambuf: forwards to *sink_ **/
+            detail::SinkStreambuf sbuf_{&sink_};
+            /** p_os(); mutable since p_os() is const and printers write to it **/
+            mutable std::ostream os_{&sbuf_};
             /** print() calls in progress **/
             std::uint32_t depth_ = 0;
             /** depth of the top-level object, which writes "_unplaced_":

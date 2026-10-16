@@ -15,6 +15,7 @@
 #include <xo/reflect/map/MapTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>   /* tostr(..), tojsonstr(..) */
 #include <xo/arena/backtrace.hpp>
+#include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/quoted.hpp>             /* quot(..) */
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
 #include <algorithm>
@@ -26,6 +27,7 @@
 #include <memory>
 #include <new>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -48,11 +50,19 @@ namespace xo {
         using xo::pp::tojsonstr;
         using xo::pp::quot;
         using xo::pp::xtag;
+        using xo::pp::FlatSink;
 
-        JsonPrintState::JsonPrintState(PrintJson const * pjson, std::ostream * p_os)
-            : pjson_{pjson}, p_os_{p_os}, max_depth_{pjson->max_depth()},
+        JsonPrintState::JsonPrintState(PrintJson const * pjson, PpSink * sink)
+            : pjson_{pjson}, sink_{sink}, max_depth_{pjson->max_depth()},
               guard_mode_{pjson->guard_mode()}
-        {}
+        {
+            if (!sink || (sink->style().escape != xo::pp::escapestyle::json)) {
+                throw std::runtime_error
+                    (tostr("JsonPrintState: sink must escape for json"
+                           " (PpStyle::escape == escapestyle::json, e.g. PpStyle::json())",
+                           (sink ? "" : "; sink is null")));
+            }
+        }
 
         void
         JsonPrintState::abort_too_deep(TaggedPtr tp) const
@@ -296,7 +306,7 @@ namespace xo {
                 void const * p = ptdx->pointee_address(ptr.address());
 
                 if (!p) {
-                    *p_os_ << "null";
+                    *this->p_os() << "null";
                     return;
                 }
 
@@ -305,7 +315,7 @@ namespace xo {
                 if (!e.ref_type_)
                     e.ref_type_ = ptr.td()->fixed_child_td(0);
 
-                *p_os_ << "{" << json_quot("_ref_") << ": " << e.id_ << "}";
+                *this->p_os() << "{" << json_quot("_ref_") << ": " << e.id_ << "}";
                 return;
             }
 
@@ -317,7 +327,7 @@ namespace xo {
                  * (JsonPrinter_ObjectSlot, JsonPrinter_RootSet) already
                  * emit
                  */
-                *p_os_ << "null";
+                *this->p_os() << "null";
                 return;
             }
 
@@ -338,8 +348,12 @@ namespace xo {
             /* print the key as a value, into a string: swap the stream */
             std::stringstream ss;
             {
-                RestoreScope<std::ostream *> restore(&this->p_os_);
-                this->p_os_ = &ss;
+                /* capture the key's json: everything written -- through
+                 * the sink, or p_os() -- goes to ss for now
+                 */
+                FlatSink key_sink(this->sink_->style(), ss.rdbuf());
+                RestoreScope<PpSink *> restore(&this->sink_);
+                this->sink_ = &key_sink;
 
                 this->print_value(key);
             }
@@ -372,39 +386,39 @@ namespace xo {
             MapTdx const * mi = tp.td()->map_info();
 
             if (mi->key_td()->metatype() == Metatype::mt_atomic) {
-                *p_os_ << "{";
+                *this->p_os() << "{";
 
                 bool first = true;
                 mi->visit_entries(tp.address(),
                                   [this, &first](TaggedPtr key, TaggedPtr value) {
                                       if (!first)
-                                          *p_os_ << ", ";
+                                          *this->p_os() << ", ";
                                       first = false;
 
-                                      *p_os_ << this->map_key_string(key) << ": ";
+                                      *this->p_os() << this->map_key_string(key) << ": ";
                                       this->print(value);
                                   });
 
-                *p_os_ << "}";
+                *this->p_os() << "}";
             } else {
                 /* a key json cannot use as an object key (a struct, say) */
-                *p_os_ << "[";
+                *this->p_os() << "[";
 
                 bool first = true;
                 mi->visit_entries(tp.address(),
                                   [this, &first](TaggedPtr key, TaggedPtr value) {
                                       if (!first)
-                                          *p_os_ << ", ";
+                                          *this->p_os() << ", ";
                                       first = false;
 
-                                      *p_os_ << "{" << json_quot("_key_") << ": ";
+                                      *this->p_os() << "{" << json_quot("_key_") << ": ";
                                       this->print(key);
-                                      *p_os_ << ", " << json_quot("_value_") << ": ";
+                                      *this->p_os() << ", " << json_quot("_value_") << ": ";
                                       this->print(value);
-                                      *p_os_ << "}";
+                                      *this->p_os() << "}";
                                   });
 
-                *p_os_ << "]";
+                *this->p_os() << "]";
             }
         } /*print_map*/
 
@@ -434,25 +448,25 @@ namespace xo {
             std::sort(v.begin(), v.end(),
                       [](auto const & x, auto const & y) { return x.second->id_ < y.second->id_; });
 
-            *p_os_ << ", " << json_quot("_unplaced_") << ": [";
+            *this->p_os() << ", " << json_quot("_unplaced_") << ": [";
             for (std::size_t i = 0, n = v.size(); i < n; ++i) {
                 ObjectEntry const & e = *(v[i].second);
 
                 if (i > 0)
-                    *p_os_ << ", ";
+                    *this->p_os() << ", ";
 
                 /* _ref_, not _id_: an entry names its object, it does not
                  * define it -- which may happen elsewhere, as another type
                  */
-                *p_os_ << "{" << json_quot("_ref_") << ": " << e.id_;
+                *this->p_os() << "{" << json_quot("_ref_") << ": " << e.id_;
                 if (e.ref_type_)
-                    *p_os_ << ", " << json_quot("_type_") << ": " << json_quot(e.ref_type_->short_name());
+                    *this->p_os() << ", " << json_quot("_type_") << ": " << json_quot(e.ref_type_->short_name());
                 /* decimal: json has no hex (see JsonPrinter_address) */
-                *p_os_ << ", " << json_quot("_address_") << ": "
+                *this->p_os() << ", " << json_quot("_address_") << ": "
                        << reinterpret_cast<std::uintptr_t>(v[i].first)
                        << "}";
             }
-            *p_os_ << "]";
+            *this->p_os() << "]";
         } /*write_unplaced*/
 
         JsonPrintState::ObjectEntry &
@@ -470,11 +484,11 @@ namespace xo {
         JsonPrintState::print_ref(void const * p)
         {
             if (!p) {
-                *p_os_ << "null";
+                *this->p_os() << "null";
                 return;
             }
 
-            *p_os_ << "{" << json_quot("_ref_") << ": " << this->entry_for(p).id_ << "}";
+            *this->p_os() << "{" << json_quot("_ref_") << ": " << this->entry_for(p).id_ << "}";
         } /*print_ref*/
 
         JsonObject
@@ -528,7 +542,7 @@ namespace xo {
         JsonPrintState::open_object_aux(void const * p, std::string_view name, TypeDescr td,
                                         bool is_root)
         {
-            *p_os_ << "{" << json_quot("_name_") << ": " << json_quot(name)
+            *this->p_os() << "{" << json_quot("_name_") << ": " << json_quot(name)
                    << ", " << json::type_keys(td);
 
             if (p) {
@@ -538,7 +552,7 @@ namespace xo {
                 ObjectEntry & e = this->entry_for(p);
 
                 e.type_ = td;
-                *p_os_ << ", " << json_quot("_id_") << ": " << e.id_;
+                *this->p_os() << ", " << json_quot("_id_") << ": " << e.id_;
             }
 
             return JsonObject(this, is_root);
@@ -557,7 +571,7 @@ namespace xo {
                 this->abort_too_deep(tp);
 
             DepthScope scope(&this->depth_);
-            std::ostream * p_os = this->p_os_;
+            std::ostream * p_os = this->p_os();
 
             if (tp.td()) {
                 TypeId id = tp.td()->id();

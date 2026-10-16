@@ -13,6 +13,8 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <csignal>
 #include <sstream>
@@ -328,7 +330,8 @@ namespace xo {
             Node a{1, nullptr};
 
             std::stringstream ss;
-            json::JsonPrintState state(&print_json, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            json::JsonPrintState state(&print_json, &ss_sink);
 
             state.print_ref(&a);
             ss << " ";
@@ -376,7 +379,8 @@ namespace xo {
             Opaque * px = &x;
 
             std::stringstream ss;
-            json::JsonPrintState state(&print_json, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            json::JsonPrintState state(&print_json, &ss_sink);
 
             {
                 json::JsonObject obj = state.open_object_at(&x, "Opaque",
@@ -398,7 +402,8 @@ namespace xo {
             Opaque * px = &x;
 
             std::stringstream ss;
-            json::JsonPrintState state(&print_json, &ss);
+            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+            json::JsonPrintState state(&print_json, &ss_sink);
 
             {
                 json::JsonObject obj = state.open_object_at(&x, "Opaque",

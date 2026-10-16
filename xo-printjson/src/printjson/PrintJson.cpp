@@ -17,6 +17,8 @@
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/backtrace.hpp>
 #include <xo/flatstring/flatstring.hpp>     /* os << json_quot(..) */
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
 #include <xo/ppsink/pp_time_ostream.hpp>    /* os << iso8601(..) */
 #include <xo/timeutil/timeutil.hpp>
@@ -39,6 +41,9 @@ namespace xo {
          */
         using xo::pp::iso8601;
         using xo::pp::xtag;
+        using xo::pp::FlatSink;
+        using xo::pp::PpSink;
+        using xo::pp::PpStyle;
 
         void
         PrintJson::reflect_self(reflect::TypeDescrTable * /*table*/)
@@ -82,6 +87,17 @@ namespace xo {
         } /*lookup_printer*/
 
         namespace {
+            /** drops everything written: validate_tp traverses for its
+             *  throws, not its output
+             **/
+            class DiscardStreambuf : public std::streambuf {
+            protected:
+                virtual int_type overflow(int_type c) override { return traits_type::not_eof(c); }
+                virtual std::streamsize xsputn(const char *, std::streamsize n) override { return n; }
+            };
+        } /*namespace*/
+
+        namespace {
 #ifdef XO_PRINTJSON_REENTRY_CHECK
             /* entry points (print_tp, validate_tp) active on this thread.
              * More than one means a json printer called an entry point
@@ -123,15 +139,23 @@ namespace xo {
         } /*namespace*/
 
         void
+        PrintJson::print_tp(TaggedPtr tp, PpSink * sink) const
+        {
+            EntryGuard guard("print_tp");
+            JsonPrintState state(this, sink);
+
+            state.print_root(tp);
+        } /*print_tp*/
+
+        void
         PrintJson::print_tp(TaggedPtr tp,
                             std::ostream * p_os) const
         {
-            EntryGuard guard("print_tp");
-            JsonPrintState state(this, p_os);
+            /* FlatSink does not buffer: nothing to flush afterwards */
+            FlatSink sink(PpStyle::json(), p_os->rdbuf());
 
-            state.print_root(tp);
-            //*p_os << std::ends;
-        } /*print*/
+            this->print_tp(tp, &sink);
+        } /*print_tp*/
 
         void
         PrintJson::print_obj(rp<SelfTagging> const & obj, std::ostream * p_os) const
@@ -152,8 +176,9 @@ namespace xo {
              * visit_tree_preorder, which recursed forever on a cycle.)
              */
             EntryGuard guard("validate_tp");
-            std::ostream discard(nullptr);
-            JsonPrintState state(this, &discard);
+            DiscardStreambuf discard;
+            FlatSink sink(PpStyle::json(), &discard);
+            JsonPrintState state(this, &sink);
 
             state.print_root(tp);
         } /*validate_tp*/

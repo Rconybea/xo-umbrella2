@@ -19,6 +19,8 @@
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <json/json.h>
 #include <iterator>
@@ -706,7 +708,8 @@ namespace xo {
             REQUIRE(value_of(v[0], "endpoint")["_id_"].isInt());
             {
                 std::stringstream ss;
-                xo::json::JsonPrintState state(PrintJsonSingleton::instance().get(), &ss);
+                xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
+                xo::json::JsonPrintState state(PrintJsonSingleton::instance().get(), &ss_sink);
                 std::vector<xo::reflect::TaggedPtr> subs;
                 router->visit_subscriptions([&subs](xo::reflect::TaggedPtr sub) { subs.push_back(sub); });
 
