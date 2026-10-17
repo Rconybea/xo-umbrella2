@@ -55,10 +55,8 @@ namespace xo {
             /** end the object open_object() began **/
             JsonPpSink & close_object();
 
-            /** begin a list.  @p sep_spaces: spaces after each "," when the
-             *  list fits on a line -- 1 gives "[1, 2]", 0 gives "[1,2]"
-             **/
-            JsonPpSink & open_list(std::uint32_t sep_spaces = 1);
+            /** begin a list **/
+            JsonPpSink & open_list();
             /** end the list open_list() began **/
             JsonPpSink & close_list();
 
@@ -107,8 +105,6 @@ namespace xo {
 
             struct Frame {
                 frame_kind kind_ = frame_kind::document;
-                /** list: spaces after a separator, when the list fits **/
-                std::uint32_t sep_spaces_ = 1;
                 /** no item written yet: no separator before the next **/
                 bool first_ = true;
                 /** object: a key has been written, its value has not **/
@@ -124,14 +120,16 @@ namespace xo {
             void begin_nonkey_value(char const * what);
 
             /** an object or list opens: its bracket, and the layout group **/
-            void open_group(frame_kind kind, char bracket, std::uint32_t sep_spaces);
+            void open_group(frame_kind kind, char bracket);
             /** the group open_group() began closes **/
             void close_group(frame_kind kind, char bracket);
 
             /** "," and a place to break **/
-            void separator(std::uint32_t spaces);
+            void separator();
 
             JsonPpSink & number_signed(std::int64_t x);
+            /** a number already formatted as @p text: a value, or a key **/
+            JsonPpSink & number_text(std::string_view text);
             JsonPpSink & number_unsigned(std::uint64_t x);
 
             [[noreturn]] void misuse(char const * what) const;

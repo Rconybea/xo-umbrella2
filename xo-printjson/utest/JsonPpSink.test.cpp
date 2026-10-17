@@ -12,11 +12,14 @@
 #include <xo/indentlog2/print/TempFlatSink.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
+#include <charconv>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 
 namespace xo {
     namespace ut {
@@ -54,19 +57,6 @@ namespace xo {
                 .close_list();
 
             REQUIRE(out.output() == R"([1, {}, [], {"v": [2, 3]}])");
-        }
-
-        /* a list's separator spacing: "," alone when sep_spaces is 0 */
-        TEST_CASE("json-pp-sink-compact-list", "[JsonPpSink]") {
-            TempFlatSink out(PpStyle::json());
-            JsonPpSink json(&out.sink());
-
-            json.open_list()
-                .open_list(0).number(1).number(2).close_list()
-                .open_list(0).number(3).number(4).close_list()
-                .close_list();
-
-            REQUIRE(out.output() == "[[1,2], [3,4]]");
         }
 
         /* json object keys are strings: a value written where a key is
@@ -139,6 +129,76 @@ namespace xo {
                 JsonPpSink json(&out.sink());
                 REQUIRE_THROWS_AS(json.close_object(), std::logic_error);   /* nothing open */
             }
+        }
+
+        /* doubles: the shortest text that reads back as the same double
+         * (.xo-backlog/xo-printjson/issues/10).  Values already short print
+         * as before; values %.6g truncated now survive
+         */
+        TEST_CASE("json-pp-sink-double-round-trips", "[JsonPpSink][float]") {
+            TempFlatSink out(PpStyle::json());
+            JsonPpSink json(&out.sink());
+
+            json.open_list()
+                .number(1.5).number(0.1)
+                .number(1.23456789).number(123456789.0).number(2.0 / 3.0)
+                .number(9007199254740992.0).number(5e-324)
+                .number(3.0).number(-0.0).number(1e21).number(1e-7)
+                .close_list();
+
+            REQUIRE(out.output()
+                    == "[1.5, 0.1, 1.23456789, 123456789, 0.6666666666666666,"
+                       " 9007199254740992, 5e-324, 3, -0, 1e+21, 1e-07]");
+        }
+
+        /* a float as a float: not widened to double first, which would
+         * write 0.10000000149011612
+         */
+        TEST_CASE("json-pp-sink-float-as-float", "[JsonPpSink][float]") {
+            TempFlatSink out(PpStyle::json());
+            JsonPpSink json(&out.sink());
+
+            json.open_list().number(0.1f).number(16777216.0f).close_list();
+
+            REQUIRE(out.output() == "[0.1, 16777216]");
+        }
+
+        /* every double written reads back as itself */
+        TEST_CASE("json-pp-sink-double-reads-back", "[JsonPpSink][float]") {
+            double xs[] = {1.23456789, 2.0 / 3.0, 1e300, -7.25e-310, 123456789.0};
+
+            for (double x : xs) {
+                TempFlatSink out(PpStyle::json());
+                JsonPpSink json(&out.sink());
+                json.number(x);
+
+                std::string_view s = out.output();
+                double y = 0.0;
+                auto [p, ec] = std::from_chars(s.data(), s.data() + s.size(), y);
+
+                INFO(s);
+                REQUIRE(ec == std::errc());
+                REQUIRE(p == s.data() + s.size());
+                REQUIRE(y == x);
+            }
+        }
+
+        /* non-finite: unchanged for now -- the json extension's bare tokens.
+         * A setting choosing among renderings comes with issues/10's default
+         */
+        TEST_CASE("json-pp-sink-non-finite", "[JsonPpSink][float]") {
+            TempFlatSink out(PpStyle::json());
+            JsonPpSink json(&out.sink());
+
+            double inf = std::numeric_limits<double>::infinity();
+
+            json.open_list()
+                .number(std::numeric_limits<double>::quiet_NaN())
+                .number(inf).number(-inf)
+                .number(std::numeric_limits<float>::infinity())
+                .close_list();
+
+            REQUIRE(out.output() == "[NaN, Infinity, -Infinity, Infinity]");
         }
 
         /* a display-escaping sink would write \xNN into the document */

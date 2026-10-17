@@ -9,6 +9,7 @@
 #include <xo/ppsink/pretty.hpp>
 #include <xo/ppsink/quoted.hpp>
 #include <charconv>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 
@@ -19,6 +20,40 @@ namespace xo {
     using xo::pp::tostr;
 
     namespace json {
+        namespace {
+            /** room for any float or double's shortest text: at most 24 chars
+             *  ("-2.2250738585072014e-308")
+             **/
+            constexpr std::size_t c_float_buf_z = 32;
+
+            /** @p x as json text, in @p buf.
+             *
+             *  Finite: the SHORTEST text that reads back as the same @p x
+             *  (std::to_chars with no format or precision) -- so 0.1 stays
+             *  "0.1" and 1.23456789 is no longer cut to "1.23457".
+             *  Locale-free.  See .xo-backlog/xo-printjson/issues/10
+             *
+             *  Non-finite: the json extension's bare tokens, NaN / Infinity /
+             *  -Infinity -- JSON5, a javascript literal and python's
+             *  json.loads take them; JSON.parse does not.  A setting choosing
+             *  the rendering is to come (issues/10)
+             **/
+            template <typename T>
+            std::string_view
+            float_text(T x, char (&buf)[c_float_buf_z])
+            {
+                if (std::isnan(x))
+                    return "NaN";
+                if (std::isinf(x))
+                    return (x > 0 ? "Infinity" : "-Infinity");
+
+                auto [ptr, ec] = std::to_chars(buf, buf + c_float_buf_z, x);
+                (void)ec;   /* cannot fail: buf holds any float's shortest text */
+
+                return std::string_view(buf, static_cast<std::size_t>(ptr - buf));
+            }
+        } /*namespace*/
+
         JsonPpSink::JsonPpSink(PpSink * sink)
             : sink_{sink}
         {
@@ -38,7 +73,7 @@ namespace xo {
         JsonPpSink::open_object()
         {
             this->begin_nonkey_value("open_object()");
-            this->open_group(frame_kind::object, '{', 1);
+            this->open_group(frame_kind::object, '{');
 
             return *this;
         }
@@ -52,10 +87,10 @@ namespace xo {
         }
 
         JsonPpSink &
-        JsonPpSink::open_list(std::uint32_t sep_spaces)
+        JsonPpSink::open_list()
         {
             this->begin_nonkey_value("open_list()");
-            this->open_group(frame_kind::list, '[', sep_spaces);
+            this->open_group(frame_kind::list, '[');
 
             return *this;
         }
@@ -79,7 +114,7 @@ namespace xo {
                 this->misuse("key() where the previous key's value is expected");
 
             if (!f.first_)
-                this->separator(1);
+                this->separator();
             f.first_ = false;
             f.want_value_ = true;
 
@@ -126,21 +161,31 @@ namespace xo {
         JsonPpSink &
         JsonPpSink::number(double x)
         {
-            /* formatting: ppsink's double printer, for now --
-             * .xo-backlog/xo-printjson/issues/10 decides json's own
-             */
-            if (this->begin_value())
-                return this->key(tojsonstr(x));
+            char buf[c_float_buf_z];
 
-            sink_->pp(x);
-
-            return *this;
+            return this->number_text(float_text(x, buf));
         }
 
         JsonPpSink &
         JsonPpSink::number(float x)
         {
-            return this->number(static_cast<double>(x));
+            /* as a float: widened to double first, 0.1f would print as
+             * 0.10000000149011612
+             */
+            char buf[c_float_buf_z];
+
+            return this->number_text(float_text(x, buf));
+        }
+
+        JsonPpSink &
+        JsonPpSink::number_text(std::string_view text)
+        {
+            if (this->begin_value())
+                return this->key(text);
+
+            sink_->put(text);
+
+            return *this;
         }
 
         JsonPpSink &
@@ -190,7 +235,7 @@ namespace xo {
                 return false;
             case frame_kind::list:
                 if (!f.first_)
-                    this->separator(f.sep_spaces_);
+                    this->separator();
                 f.first_ = false;
                 return false;
             case frame_kind::object:
@@ -213,11 +258,11 @@ namespace xo {
         }
 
         void
-        JsonPpSink::open_group(frame_kind kind, char bracket, std::uint32_t sep_spaces)
+        JsonPpSink::open_group(frame_kind kind, char bracket)
         {
             (*sink_)(json_open{bracket});
 
-            stack_.push_back(Frame{kind, sep_spaces, true, false});
+            stack_.push_back(Frame{kind, true, false});
         }
 
         void
@@ -239,9 +284,9 @@ namespace xo {
         }
 
         void
-        JsonPpSink::separator(std::uint32_t spaces)
+        JsonPpSink::separator()
         {
-            (*sink_)(json_sep{spaces});
+            (*sink_)(json_sep());
         }
 
         void

@@ -22,7 +22,6 @@
 #include <xo/ppsink/tag.hpp>                /* xtag(..) */
 #include <xo/ppsink/pp_time.hpp>            /* iso8601(..) */
 #include <xo/timeutil/timeutil.hpp>
-#include <cmath>
 #include <type_traits>
 
 namespace xo {
@@ -302,23 +301,10 @@ namespace xo {
                     T * x = tp.recover_native<T>();
 
                     if (x) {
-                        if (std::isfinite(*x)) {
-                            json.number(*x);
-                        } else {
-                            /* special cases.
-                             * use javascript-friendly format
-                             *
-                             * Note non-finite floating-point values are not representable in
-                             *      standard json (?!#),  though it's a standard extension
-                             */
-
-                            if (std::isnan(*x))
-                                json.raw("NaN");
-                            else if (*x > 0.0)
-                                json.raw("Infinity");
-                            else
-                                json.raw("-Infinity");
-                        }
+                        /* formatting, non-finite values included, is
+                         * JsonPpSink's (.xo-backlog/xo-printjson/issues/10)
+                         */
+                        json.number(*x);
                     } else {
                         report_internal_type_consistency_error(Reflect::require<T>(),
                                                                tp.td(),

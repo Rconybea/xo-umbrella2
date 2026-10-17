@@ -5,9 +5,11 @@
  *
  * Expectations were READ off the build, before the printers moved from an
  * ostream to a PpSink (.xo-backlog/xo-printjson/issues/01), so the move is
- * checked to be byte-identical.  Elements go through printjson's own
- * printers: non-finite doubles, and the 6-digit precision of
- * .xo-backlog/xo-printjson/issues/10, are theirs.
+ * checked to be byte-identical.  Since JsonPpSink
+ * (.xo-backlog/xo-printjson/issues/11) these lists separate elements with
+ * ", " like every other json list, where they used "," alone (RC: rationalize).
+ * Elements go through printjson's own printers: non-finite doubles, and the
+ * 6-digit precision of .xo-backlog/xo-printjson/issues/10, are theirs.
  */
 
 #include "xo/kalmanfilter/EigenUtil.hpp"
@@ -49,14 +51,14 @@ namespace xo {
             Eigen::VectorXd v(4);
             v << 1.0, 2.5, -0.125, std::numeric_limits<double>::quiet_NaN();
 
-            REQUIRE(to_json(v) == "[1,2.5,-0.125,NaN]");
+            REQUIRE(to_json(v) == "[1, 2.5, -0.125, NaN]");
         }
 
         TEST_CASE("json-eigen-vectorxb", "[kalmanfilter][json]") {
             Eigen::Array<bool, Eigen::Dynamic, 1> b(3);
             b << true, false, true;
 
-            REQUIRE(to_json(b) == "[true,false,true]");
+            REQUIRE(to_json(b) == "[true, false, true]");
         }
 
         TEST_CASE("json-eigen-matrixxd", "[kalmanfilter][json]") {
@@ -64,7 +66,7 @@ namespace xo {
             m << 1, 2, 3,
                  4, 5, std::numeric_limits<double>::infinity();
 
-            REQUIRE(to_json(m) == "[[1,2,3], [4,5,Infinity]]");
+            REQUIRE(to_json(m) == "[[1, 2, 3], [4, 5, Infinity]]");
         }
 
         TEST_CASE("json-eigen-empty", "[kalmanfilter][json]") {
