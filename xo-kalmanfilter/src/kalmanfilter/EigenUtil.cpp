@@ -5,6 +5,7 @@
 
 #include "EigenUtil.hpp"
 #include <xo/printjson/PrintJson.hpp>
+#include <xo/printjson/json_layout.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/pretty.hpp>
 #include <Eigen/Dense>
@@ -15,6 +16,9 @@
 namespace xo {
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
+    using xo::json::json_open;
+    using xo::json::json_sep;
+    using xo::json::json_close;
     using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
     using VectorXb = Eigen::Array<bool, Eigen::Dynamic, 1>;
@@ -66,11 +70,11 @@ namespace xo {
                              *
                              * as soon as we reflect as mt_vector,  will not need this helper.
                              */
-                            sink("[");
+                            sink(json_open{'['});
 
                             for (std::uint32_t i = 0, n = pv->size(); i < n; ++i) {
                                 if (i > 0)
-                                    sink(",");
+                                    sink(json_sep{0});
 
                                 /* note: need to dispatch via json printer for vector elements,
                                  *       to get special treatment for non-finite values
@@ -78,7 +82,7 @@ namespace xo {
                                 state.print(Reflect::make_tp(&(*pv)[i]));
                             }
 
-                            sink("]");
+                            sink(json_close{']'});
                         }
                     } /*print_json*/
             }; /*EigenVectorJsonPrinter*/
@@ -102,25 +106,25 @@ namespace xo {
 
                         if (pm) {
                             /* MatrixXd is reflected as atomic for now, out of expedience */
-                            sink("[");
+                            sink(json_open{'['});
 
                             for(std::uint32_t i=0, m=pm->rows(); i<m; ++i) {
                                 if (i > 0)
-                                    sink(", ");
-                                sink("[");
+                                    sink(json_sep());
+                                sink(json_open{'['});
                                 for(std::uint32_t j=0, n=pm->cols(); j<n; ++j) {
                                     if (j > 0)
-                                        sink(",");
+                                        sink(json_sep{0});
 
                                     /* note: need to dispatch via json printer for matrix elements,
                                      *       to get special treatment for non-finite values
                                      */
                                     state.print(Reflect::make_tp(&(*pm)(i, j)));
                                 }
-                                sink("]");
+                                sink(json_close{']'});
                             }
 
-                            sink("]");
+                            sink(json_close{']'});
                         }
                     } /*print_json*/
             }; /*MatrixXdJsonPrinter*/

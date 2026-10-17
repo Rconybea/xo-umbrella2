@@ -11,6 +11,7 @@ set(SELF_SRCS
 	PrintJsonFunction.test.cpp
 	PrintJsonEscape.test.cpp
 	PrintJsonSink.test.cpp
+	PrintJsonPretty.test.cpp
 	JsonMembers.test.cpp
 	FopJson.test.cpp
 	ObjectSlotJson.test.cpp)

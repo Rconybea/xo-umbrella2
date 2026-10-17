@@ -4,6 +4,7 @@
  **/
 
 #include "JsonObject.hpp"
+#include "json_layout.hpp"
 #include <xo/ppsink/quoted.hpp>
 #include <cassert>
 
@@ -22,7 +23,7 @@ namespace xo {
         void
         JsonObject::write_key(std::string_view k)
         {
-            state_->write(", ", quot(k), ": ");
+            state_->write(json_sep(), quot(k), ": ");
         }
 
         JsonObject &
@@ -63,7 +64,7 @@ namespace xo {
             if (is_root_)
                 state_->write_unplaced();
 
-            state_->write("}");
+            state_->write(json_close{'}'});
             closed_ = true;
         }
     } /*namespace json*/

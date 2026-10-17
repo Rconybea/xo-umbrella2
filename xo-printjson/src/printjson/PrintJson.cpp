@@ -6,6 +6,7 @@
 #include "PrintJson.hpp"
 #include "JsonObject.hpp"
 #include "type_keys.hpp"
+#include "json_layout.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
@@ -624,39 +625,39 @@ namespace xo {
                     .key("capacity", rs->strong_capacity())
                     .key("live", rs->strong_root_count());
 
-                obj.key_open("free")("[");
+                obj.key_open("free")(json_open{'['});
                 {
                     bool first = true;
 
                     rs->visit_free_list([&sink, &first](std::size_t ix) {
                             if (!first)
-                                sink(", ");
+                                sink(json_sep());
                             first = false;
                             sink(ix);
                         });
                 }
-                sink("]");
+                sink(json_close{']'});
 
                 /* every slot, cleared ones included, so a consumer reads a
                  * slot's index from its position here -- which is also what
                  * `free' indexes into.  Each element goes through
                  * JsonPrinter_ObjectSlot; a cleared slot renders as null.
                  */
-                obj.key_open("slots")("[");
+                obj.key_open("slots")(json_open{'['});
                 {
                     bool first = true;
 
                     rs->visit_object_slots(
                         [&state, &sink, &first](const xo::facet::ObjectSlot & slot) {
                             if (!first)
-                                sink(", ");
+                                sink(json_sep());
                             first = false;
 
                             state.print(TaggedPtr(Reflect::require<xo::facet::ObjectSlot>(),
                                                   const_cast<xo::facet::ObjectSlot *>(&slot)));
                         });
                 }
-                sink("]");
+                sink(json_close{']'});
 
                 obj.close();
             } /*print_json*/
@@ -717,13 +718,13 @@ namespace xo {
                  * already the right shape, so restating its fields here would
                  * be the very thing this printer exists to stop doing.
                  */
-                obj.key_open("pools")("[");
+                obj.key_open("pools")(json_open{'['});
                 {
                     bool first = true;
 
                     fw->visit_pools([&state, &sink, &first](const MemorySizeInfo & x) {
                             if (!first)
-                                sink(", ");
+                                sink(json_sep());
                             first = false;
 
                             /* print_value: visit_pools makes each one on its
@@ -733,7 +734,7 @@ namespace xo {
                                                         const_cast<MemorySizeInfo *>(&x)));
                         });
                 }
-                sink("]");
+                sink(json_close{']'});
 
                 /* the root set, via JsonPrinter_RootSet */
                 {

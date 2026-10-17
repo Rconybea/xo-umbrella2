@@ -7,6 +7,7 @@
 #include "JsonObject.hpp"
 #include "PrintJson.hpp"
 #include "type_keys.hpp"
+#include "json_layout.hpp"
 #include <xo/reflect/enum/EnumTdx.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
@@ -146,16 +147,16 @@ namespace xo {
                  *   [1.0, 2.0, 3.0]
                  */
 
-                (*state.sink())("[");
+                (*state.sink())(json_open{'['});
 
                 for (uint32_t i = 0, n = tp.n_child(); i < n; ++i) {
                     if (i > 0)
-                        (*state.sink())(", ");
+                        (*state.sink())(json_sep());
 
                     state.print(tp.get_child(i));
                 }
 
-                (*state.sink())("]");
+                (*state.sink())(json_close{']'});
             } /*print_generic_vector*/
 
             /* this will be used when TaggedPtr is understood to refer to a struct-like value.
@@ -383,39 +384,39 @@ namespace xo {
             MapTdx const * mi = tp.td()->map_info();
 
             if (mi->key_td()->metatype() == Metatype::mt_atomic) {
-                this->write("{");
+                this->write(json_open{'{'});
 
                 bool first = true;
                 mi->visit_entries(tp.address(),
                                   [this, &first](TaggedPtr key, TaggedPtr value) {
                                       if (!first)
-                                          this->write(", ");
+                                          this->write(json_sep());
                                       first = false;
 
                                       this->write(this->map_key_string(key), ": ");
                                       this->print(value);
                                   });
 
-                this->write("}");
+                this->write(json_close{'}'});
             } else {
                 /* a key json cannot use as an object key (a struct, say) */
-                this->write("[");
+                this->write(json_open{'['});
 
                 bool first = true;
                 mi->visit_entries(tp.address(),
                                   [this, &first](TaggedPtr key, TaggedPtr value) {
                                       if (!first)
-                                          this->write(", ");
+                                          this->write(json_sep());
                                       first = false;
 
-                                      this->write("{", quot("_key_"), ": ");
+                                      this->write(json_open{'{'}, quot("_key_"), ": ");
                                       this->print(key);
-                                      this->write(", ", quot("_value_"), ": ");
+                                      this->write(json_sep(), quot("_value_"), ": ");
                                       this->print(value);
-                                      this->write("}");
+                                      this->write(json_close{'}'});
                                   });
 
-                this->write("]");
+                this->write(json_close{']'});
             }
         } /*print_map*/
 
@@ -445,24 +446,24 @@ namespace xo {
             std::sort(v.begin(), v.end(),
                       [](auto const & x, auto const & y) { return x.second->id_ < y.second->id_; });
 
-            this->write(", ", quot("_unplaced_"), ": [");
+            this->write(json_sep(), quot("_unplaced_"), ": ", json_open{'['});
             for (std::size_t i = 0, n = v.size(); i < n; ++i) {
                 ObjectEntry const & e = *(v[i].second);
 
                 if (i > 0)
-                    this->write(", ");
+                    this->write(json_sep());
 
                 /* _ref_, not _id_: an entry names its object, it does not
                  * define it -- which may happen elsewhere, as another type
                  */
-                this->write("{", quot("_ref_"), ": ", e.id_);
+                this->write(json_open{'{'}, quot("_ref_"), ": ", e.id_);
                 if (e.ref_type_)
-                    this->write(", ", quot("_type_"), ": ", quot(e.ref_type_->short_name()));
+                    this->write(json_sep(), quot("_type_"), ": ", quot(e.ref_type_->short_name()));
                 /* decimal: json has no hex (see JsonPrinter_address) */
-                this->write(", ", quot("_address_"), ": ",
-                            reinterpret_cast<std::uintptr_t>(v[i].first), "}");
+                this->write(json_sep(), quot("_address_"), ": ",
+                            reinterpret_cast<std::uintptr_t>(v[i].first), json_close{'}'});
             }
-            this->write("]");
+            this->write(json_close{']'});
         } /*write_unplaced*/
 
         JsonPrintState::ObjectEntry &
@@ -538,7 +539,7 @@ namespace xo {
         JsonPrintState::open_object_aux(void const * p, std::string_view name, TypeDescr td,
                                         bool is_root)
         {
-            this->write("{", quot("_name_"), ": ", quot(name), ", ", type_keys(td));
+            this->write(json_open{'{'}, quot("_name_"), ": ", quot(name), json_sep(), type_keys(td));
 
             if (p) {
                 /* first object printed at this address: it owns the entry,
@@ -547,7 +548,7 @@ namespace xo {
                 ObjectEntry & e = this->entry_for(p);
 
                 e.type_ = td;
-                this->write(", ", quot("_id_"), ": ", e.id_);
+                this->write(json_sep(), quot("_id_"), ": ", e.id_);
             }
 
             return JsonObject(this, is_root);
