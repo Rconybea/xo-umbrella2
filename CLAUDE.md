@@ -20,6 +20,11 @@ far along it is. A milestone is work too big for one ticket; its progress is a
 query over tickets carrying a `Milestone:` line, so it cannot go stale. See the
 Milestones section of `docs/agents/issue-tracker.md`.
 
+### Coding style
+
+C++ conventions -- how to qualify namespaced symbols, include brackets and
+order -- are in `docs/coding-style.rst`.  Follow it when writing code.
+
 ### Domain docs
 
 Single-context — `CONTEXT.md` + `docs/adr/` at the repo root, created lazily by

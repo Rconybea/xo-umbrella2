@@ -190,6 +190,8 @@ xo_umbrella_doxygen_config()
 xo_umbrella_sphinx_config(
     index.rst
     docs/install.rst
+    docs/coding-style.rst
+    docs/internals.rst
     docs/glossary.rst)
 
 # ----------------------------------------------------------------

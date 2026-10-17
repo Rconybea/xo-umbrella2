@@ -12,6 +12,8 @@ Some features: kalman filters, stochastic processes, complex event processing, s
    :caption: XO contents
 
    docs/install
+   docs/coding-style
+   docs/internals
    xo-arena/docs/index
    xo-facet/docs/index
    xo-alloc2/docs/index
@@ -24,6 +26,6 @@ Some features: kalman filters, stochastic processes, complex event processing, s
    xo-tokenizer/docs/index
    xo-reader/docs/index
    xo-jit/docs/index
-   glossary
+   docs/glossary
    genindex
    search
