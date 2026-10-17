@@ -12,7 +12,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
-#include <xo/ppsink/FlatSink.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <map>
@@ -23,10 +23,10 @@
 namespace xo {
     using xo::json::JsonPrintState;
     using xo::json::PrintJson;
-    using xo::pp::FlatSink;
     using xo::pp::PpConfig;
     using xo::pp::PpStyle;
     using xo::pp::PrettySink;
+    using xo::pp::TempFlatSink;
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
 
@@ -64,21 +64,19 @@ namespace xo {
         /* a display-escaping sink would write \xNN into the document */
         TEST_CASE("json-print-state-refuses-display-sink", "[printjson][sink]") {
             PrintJson pjson;
-            std::stringstream ss;
-            FlatSink sink(PpStyle::plain(), ss.rdbuf());
+            TempFlatSink out(PpStyle::plain());
 
-            REQUIRE_THROWS_AS(JsonPrintState(&pjson, &sink), std::runtime_error);
+            REQUIRE_THROWS_AS(JsonPrintState(&pjson, &out.sink()), std::runtime_error);
         }
 
         /* colour is the caller's choice: json for a human to read (RC) */
         TEST_CASE("json-print-state-accepts-colored-json-sink", "[printjson][sink]") {
             PrintJson pjson;
-            std::stringstream ss;
             PpStyle style = PpStyle::json();
             style.color_enabled = true;
-            FlatSink sink(style, ss.rdbuf());
+            TempFlatSink out(style);
 
-            REQUIRE_NOTHROW(JsonPrintState(&pjson, &sink));
+            REQUIRE_NOTHROW(JsonPrintState(&pjson, &out.sink()));
         }
 
         /* the sink entry point and the ostream entry point agree, byte for byte */
@@ -88,12 +86,11 @@ namespace xo {
             PrintJson pjson;
             Sample x;
 
-            std::stringstream ss;
-            FlatSink sink(PpStyle::json(), ss.rdbuf());
-            pjson.print_tp(Reflect::make_tp(&x), &sink);
+            TempFlatSink out(PpStyle::json());
+            pjson.print_tp(Reflect::make_tp(&x), &out.sink());
 
-            INFO(ss.str());
-            REQUIRE(ss.str() == print_to_ostream(pjson, x));
+            INFO(out.output());
+            REQUIRE(out.output() == print_to_ostream(pjson, x));
         }
 
         /* everything a printer writes -- p_os() included -- reaches the sink,

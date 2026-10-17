@@ -13,7 +13,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
-#include <xo/ppsink/FlatSink.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <csignal>
@@ -329,15 +329,14 @@ namespace xo {
             PrintJson print_json;
             Node a{1, nullptr};
 
-            std::stringstream ss;
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            json::JsonPrintState state(&print_json, &ss_sink);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            json::JsonPrintState state(&print_json, &ss.sink());
 
             state.print_ref(&a);
-            ss << " ";
+            ss.sink().put(" ");
             state.print(xo::reflect::Reflect::make_tp(&a));
 
-            REQUIRE(ss.str() == "{\"_ref_\": 1} " + node(1, 1, "null"));
+            REQUIRE(std::string(ss.output()) == "{\"_ref_\": 1} " + node(1, 1, "null"));
         } /*TEST_CASE(print-json-ref-before-print)*/
 
         TEST_CASE("print-json-first-member-shares-address", "[printjson][cycle]") {
@@ -378,19 +377,18 @@ namespace xo {
             Opaque x{3};
             Opaque * px = &x;
 
-            std::stringstream ss;
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            json::JsonPrintState state(&print_json, &ss_sink);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            json::JsonPrintState state(&print_json, &ss.sink());
 
             {
                 json::JsonObject obj = state.open_object_at(&x, "Opaque",
                                                             xo::reflect::Reflect::require<Opaque>());
                 obj.close();
             }
-            ss << " ";
+            ss.sink().put(" ");
             state.print(xo::reflect::Reflect::make_tp(&px));
 
-            REQUIRE(ss.str() == head<Opaque>("Opaque", 1) + "} {\"_ref_\": 1}");
+            REQUIRE(std::string(ss.output()) == head<Opaque>("Opaque", 1) + "} {\"_ref_\": 1}");
         } /*TEST_CASE(print-json-ref-to-an-object-a-printer-wrote)*/
 
         TEST_CASE("json-members-ref-to-an-object-a-printer-wrote", "[printjson][cycle]") {
@@ -401,9 +399,8 @@ namespace xo {
             Opaque x{3};
             Opaque * px = &x;
 
-            std::stringstream ss;
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            json::JsonPrintState state(&print_json, &ss_sink);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            json::JsonPrintState state(&print_json, &ss.sink());
 
             {
                 json::JsonObject obj = state.open_object_at(&x, "Opaque",
@@ -414,7 +411,7 @@ namespace xo {
                 obj.close();
             }
 
-            REQUIRE(ss.str() == object(head<Opaque>("Opaque", 1),
+            REQUIRE(std::string(ss.output()) == object(head<Opaque>("Opaque", 1),
                                        {entry<Opaque *>("self_", "pointer", "{\"_ref_\": 1}")}));
         } /*TEST_CASE(json-members-ref-to-an-object-a-printer-wrote)*/
 

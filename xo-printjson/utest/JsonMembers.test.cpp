@@ -12,12 +12,11 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflectutil/type_name.hpp>
-#include <xo/ppsink/FlatSink.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <atomic>
 #include <map>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -100,32 +99,30 @@ namespace xo {
 
         TEST_CASE("json-members-empty", "[printjson][JsonMembers]") {
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.end();
 
-            REQUIRE(ss.str() == ", \"_members_\": []");
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": []");
         }
 
         TEST_CASE("json-members-scalars-and-strings", "[printjson][JsonMembers]") {
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             int n = 7;
             std::string s = "hello";
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member("n_", n).member("s_", s);
             mem.end();
 
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     + entry("n_", type_of<int>(), "atomic", "7") + ", "
                     + entry("s_", type_of<std::string>(), "atomic", "\"hello\"") + "]");
         }
@@ -134,14 +131,13 @@ namespace xo {
             reflect_jm_types();
 
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             JmReflected r;
             JmReflected * p = &r;
             std::vector<JmReflected> v(1);
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member("r_", r).member("p_", p).member("v_", v);
@@ -159,7 +155,7 @@ namespace xo {
                     + entry("b", type_of<std::string>(), "atomic", "\"x\"") + "]}";
             };
 
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     + entry("r_", type_of<JmReflected>(), "struct", jm(1)) + ", "
                     + entry("p_", type_of<JmReflected *>(), "pointer", "{\"_ref_\": 1}") + ", "
                     + entry("v_", type_of<std::vector<JmReflected>>(), "vector", "[" + jm(2) + "]")
@@ -168,13 +164,12 @@ namespace xo {
 
         TEST_CASE("json-members-unreflected-type-is-an-error-entry", "[printjson][JsonMembers]") {
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             JmUnreflected u;
             JmUnreflected * pu = &u;
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member("u_", u).member("pu_", pu).member("n_", 3);
@@ -186,7 +181,7 @@ namespace xo {
              */
             std::string const why = "type not reflected: " + type_of<JmUnreflected>();
 
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     "{\"_name_\": \"u_\", \"_canonical_type_\": \"" + type_of<JmUnreflected>()
                     + "\", \"_short_type_\": \"" + xo::reflect::TypeDescrBase::make_short_name(type_of<JmUnreflected>())
                     + "\", \"_metatype_\": \"atomic\", \"_error_\": \"" + why + "\"}, "
@@ -201,18 +196,17 @@ namespace xo {
              * value whatever the printer read
              */
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             std::atomic<std::int32_t> port{8080};
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member_as<std::atomic<std::int32_t>>("port_", port.load());
             mem.end();
 
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     + entry("port_", type_of<std::atomic<std::int32_t>>(), "atomic", "8080") + "]");
         }
 
@@ -221,20 +215,19 @@ namespace xo {
              * two -- the same id that object's own printer writes
              */
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             JmReflected r;
             JmReflected * null_p = nullptr;
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member_ref<JmReflected *>("r_", &r)
                 .member_ref<JmReflected *>("null_", null_p);
             mem.end();
 
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     + entry("r_", type_of<JmReflected *>(), "pointer",
                             "{\"_ref_\": 1}") + ", "
                     + entry("null_", type_of<JmReflected *>(), "pointer", "null") + "]");
@@ -245,19 +238,18 @@ namespace xo {
              * references -- reported as pointer, the nearest
              */
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             JmReflected r;
             JmReflected const & cr = r;
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member_ref<JmReflected const &>("cr_", &cr);
             mem.end();
 
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     + entry("cr_", type_of<JmReflected const &>(), "pointer",
                             "{\"_ref_\": 1}") + "]");
         }
@@ -267,18 +259,17 @@ namespace xo {
              * released slot null -- slot positions kept
              */
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             JmReflected a, b;
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member_refs<std::vector<JmReflected *>>("v_", {&a, nullptr, &b});
             mem.end();
 
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     + entry("v_", type_of<std::vector<JmReflected *>>(), "vector",
                             "[{\"_ref_\": 1}, null, {\"_ref_\": 2}]") + "]");
         }
@@ -288,19 +279,18 @@ namespace xo {
              * (or null), keys in the order given
              */
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             JmReflected a, b;
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
 
             JsonMembers mem(state);
             mem.member_ref_map<std::map<std::string, JmReflected *>>("m_", {{"/a/", &a}, {"/b/", &b}, {"/z/", nullptr}});
             mem.end();
 
             /* a std::map's metatype is map (xo-reflect#05) */
-            REQUIRE(ss.str() == ", \"_members_\": ["
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
                     + entry("m_", type_of<std::map<std::string, JmReflected *>>(), "map",
                             "{\"/a/\": {\"_ref_\": 1}, "
                             "\"/b/\": {\"_ref_\": 2}, "
@@ -319,28 +309,26 @@ namespace xo {
             h.p_ = &h.r_;
             h.v_.resize(1);
 
-            std::stringstream by_hand;
+            xo::pp::TempFlatSink by_hand(xo::pp::PpStyle::json());
             {
-                xo::pp::FlatSink by_hand_sink(xo::pp::PpStyle::json(), by_hand.rdbuf());
-                JsonPrintState state(&pjson, &by_hand_sink);
+                JsonPrintState state(&pjson, &by_hand.sink());
                 JsonMembers mem(state);
                 mem.member("r_", h.r_).member("p_", h.p_).member("v_", h.v_);
                 mem.end();
             }
 
-            std::stringstream reflected;
+            xo::pp::TempFlatSink reflected(xo::pp::PpStyle::json());
             {
-                xo::pp::FlatSink reflected_sink(xo::pp::PpStyle::json(), reflected.rdbuf());
-                JsonPrintState state(&pjson, &reflected_sink);
+                JsonPrintState state(&pjson, &reflected.sink());
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&h));
                 mem.end();
             }
 
-            INFO("by hand:   " << by_hand.str());
-            INFO("reflected: " << reflected.str());
-            REQUIRE(reflected.str() == by_hand.str());
-            REQUIRE(reflected.str().find("{\"_ref_\": 1}") != std::string::npos);
+            INFO("by hand:   " << std::string(by_hand.output()));
+            INFO("reflected: " << std::string(reflected.output()));
+            REQUIRE(std::string(reflected.output()) == std::string(by_hand.output()));
+            REQUIRE(std::string(reflected.output()).find("{\"_ref_\": 1}") != std::string::npos);
         }
 
         TEST_CASE("json-members-reflected-member-not-printable", "[printjson][JsonMembers]") {
@@ -350,18 +338,17 @@ namespace xo {
             reflect_jm_holder();
 
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             JmBad b;
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
             JsonMembers mem(state);
             mem.reflected_members(xo::reflect::Reflect::make_tp(&b));
             mem.end();
 
-            REQUIRE(ss.str().find("\"_name_\": \"u_\"") != std::string::npos);
-            REQUIRE(ss.str().find("\"_error_\": \"type not reflected: ") != std::string::npos);
+            REQUIRE(std::string(ss.output()).find("\"_name_\": \"u_\"") != std::string::npos);
+            REQUIRE(std::string(ss.output()).find("\"_error_\": \"type not reflected: ") != std::string::npos);
         }
 
         TEST_CASE("json-members-reflected-members-name-suffix", "[printjson][JsonMembers]") {
@@ -374,43 +361,41 @@ namespace xo {
 
             JmReflected r;
 
-            std::stringstream plain, suffixed;
+            xo::pp::TempFlatSink plain(xo::pp::PpStyle::json());
+            xo::pp::TempFlatSink suffixed(xo::pp::PpStyle::json());
             {
-                xo::pp::FlatSink plain_sink(xo::pp::PpStyle::json(), plain.rdbuf());
-                JsonPrintState state(&pjson, &plain_sink);
+                JsonPrintState state(&pjson, &plain.sink());
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&r));
                 mem.end();
             }
             {
-                xo::pp::FlatSink suffixed_sink(xo::pp::PpStyle::json(), suffixed.rdbuf());
-                JsonPrintState state(&pjson, &suffixed_sink);
+                JsonPrintState state(&pjson, &suffixed.sink());
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&r), "_");
                 mem.end();
             }
 
-            REQUIRE(plain.str() == ", \"_members_\": ["
+            REQUIRE(std::string(plain.output()) == ", \"_members_\": ["
                     + entry("a", type_of<int>(), "atomic", "1") + ", "
                     + entry("b", type_of<std::string>(), "atomic", "\"x\"") + "]");
-            REQUIRE(suffixed.str() == ", \"_members_\": ["
+            REQUIRE(std::string(suffixed.output()) == ", \"_members_\": ["
                     + entry("a_", type_of<int>(), "atomic", "1") + ", "
                     + entry("b_", type_of<std::string>(), "atomic", "\"x\"") + "]");
         }
 
         TEST_CASE("json-members-reflected-members-of-a-non-struct", "[printjson][JsonMembers]") {
             PrintJson pjson;
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
             int x = 7;
 
-            xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-            JsonPrintState state(&pjson, &ss_sink);
+            JsonPrintState state(&pjson, &ss.sink());
             JsonMembers mem(state);
             mem.reflected_members(xo::reflect::Reflect::make_tp(&x));
             mem.end();
 
-            REQUIRE(ss.str() == ", \"_members_\": []");
+            REQUIRE(std::string(ss.output()) == ", \"_members_\": []");
         }
     } /*namespace ut*/
 } /*namespace xo*/

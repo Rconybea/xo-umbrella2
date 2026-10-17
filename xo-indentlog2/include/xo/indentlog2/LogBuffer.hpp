@@ -48,7 +48,9 @@ namespace xo {
         /** visit mapped storage pools **/
         void visit_pools(const MemorySizeVisitor & fn) const;
 
-        /** expand buffered character storage to have space for at least @p new_z characters.
+        /** expand buffered character storage so that this adapter has
+         *  space for at least @p new_z characters.
+         *  Taken relative to @ref buf_ckp_
          *  @return true on success, false if oom
          **/
         bool char_expand_to(size_t new_z);
@@ -103,10 +105,24 @@ namespace xo {
          **/
         void _check_update_local_state(char * pptr);
 
+    protected:
+        /** repoint at @p buf.  For LogBuffer's move ctor ONLY: see @ref buf_v_ **/
+        void reset_buf_v(DArena * buf) noexcept { buf_v_ = buf; }
+
+        /** the arena this adapter writes through **/
+        const DArena * _buf_v() const noexcept { return buf_v_; }
+
     private:
-        /** drain the completed line to @ref dest_ and rewind the buffer to
-         *  @ref porigin_ for reuse.  Valid only at a line boundary (current
-         *  line empty), where it needs no move: see @ref newline_indent.
+        /** drain a completed line (at end-of-record) to @ref dest_,
+         *  and rewind the buffer to @ref buf_ckp_ (= @ref porigin_) for reuse
+         *  from this adapter.
+         *
+         *  @ref lstate_ tracks cursor position relative to @ref porigin_ .
+         *  That accounting assumes @ref porigin_ represents the start of a line.
+         *  It follows that reclaim_line() is only valid at the end of a line
+         *
+         *  Called by @ref LogBufferAdapter::newline_indent and
+         *  @ref LogBufferAdapter::reset_buffer
          **/
         void reclaim_line();
 
@@ -117,14 +133,6 @@ namespace xo {
         /** buffer storage here **/
         DArena * buf_v_;
 
-    protected:
-        /** repoint at @p buf.  For LogBuffer's move ctor ONLY: see @ref buf_v_ **/
-        void reset_buf_v(DArena * buf) noexcept { buf_v_ = buf; }
-
-        /** the arena this adapter writes through **/
-        const DArena * _buf_v() const noexcept { return buf_v_; }
-
-    private:
         /** checkpoint for realloc **/
         DArena::Checkpoint buf_ckp_;
         /** why the last @ref expand_to failed, for @ref _fail_no_room.

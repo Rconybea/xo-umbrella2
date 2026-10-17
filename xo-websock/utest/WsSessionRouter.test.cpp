@@ -19,7 +19,7 @@
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
-#include <xo/ppsink/FlatSink.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <json/json.h>
@@ -662,9 +662,9 @@ namespace xo {
             auto visit = [&router] {
                 std::vector<Json::Value> v;
                 router->visit_subscriptions([&v](xo::reflect::TaggedPtr sub) {
-                        std::stringstream ss;
-                        PrintJsonSingleton::instance()->print_tp(sub, &ss);
-                        v.push_back(parse(ss.str()));
+                        xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                        PrintJsonSingleton::instance()->print_tp(sub, &ss.sink());
+                        v.push_back(parse(std::string(ss.output())));
                     });
                 return v;
             };
@@ -707,20 +707,19 @@ namespace xo {
              */
             REQUIRE(value_of(v[0], "endpoint")["_id_"].isInt());
             {
-                std::stringstream ss;
-                xo::pp::FlatSink ss_sink(xo::pp::PpStyle::json(), ss.rdbuf());
-                xo::json::JsonPrintState state(PrintJsonSingleton::instance().get(), &ss_sink);
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                xo::json::JsonPrintState state(PrintJsonSingleton::instance().get(), &ss.sink());
                 std::vector<xo::reflect::TaggedPtr> subs;
                 router->visit_subscriptions([&subs](xo::reflect::TaggedPtr sub) { subs.push_back(sub); });
 
-                ss << "[";
+                ss.sink().put("[");
                 state.print(subs[1]);
-                ss << ", ";
+                ss.sink().put(", ");
                 state.print(xo::reflect::TaggedPtr(xo::reflect::Reflect::require<xo::web::DynamicEndpoint>(),
                                                    fx.url_router_.find_stream("/fw/8").get()));
-                ss << "]";
+                ss.sink().put("]");
 
-                Json::Value both = parse(ss.str());
+                Json::Value both = parse(std::string(ss.output()));
 
                 Json::Value const ep = value_of(both[0], "endpoint");
 

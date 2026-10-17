@@ -14,6 +14,7 @@ set(SELF_SOURCE_FILES
     FlatSink.test.cpp
     toppstr.test.cpp
     tojsonstr.test.cpp
+    TempFlatSink.test.cpp
     Prettifier.test.cpp
     PrettyVector.test.cpp
     scope.test.cpp

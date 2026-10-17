@@ -77,6 +77,7 @@ namespace xo {
             struct Checkpoint {
                 Checkpoint() = default;
                 explicit Checkpoint(std::byte * x) : free_{x} {}
+
                 std::byte * free_ = nullptr;
             };
 
@@ -288,6 +289,17 @@ namespace xo {
              *  @ref restore
              **/
             Checkpoint checkpoint() noexcept { return Checkpoint(free_); }
+
+            /** Allocated memory in bytes asof checkpoint @p ckp ;
+             *  Promise:
+                for DArena a:
+             *  @code
+             *    a.allocated_before(a.checkpoint()) == a.allocated()
+             *    a.restore(ckp).allocated() == a.allocated_before(ckp)
+             *  @endcode
+             *
+             **/
+            size_type allocated_before(Checkpoint ckp) const noexcept { return ckp.free_ - lo_; }
 
             /** restore arena state to previously-established checkpoint **/
             void restore(Checkpoint ckp) noexcept { free_ = ckp.free_; }

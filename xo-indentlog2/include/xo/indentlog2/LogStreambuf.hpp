@@ -3,6 +3,8 @@
  *  @author Roland Conybeare, Jun 2026
  **/
 
+#pragma once
+
 #include "LogBuffer.hpp"
 
 namespace xo {

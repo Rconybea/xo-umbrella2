@@ -115,7 +115,18 @@ namespace xo {
         auto overhead_z = buf_v_->preamble_z() + buf_v_->per_alloc_overhead_z();
         auto new_mem_z = new_char_z + overhead_z;
 
-        bool ok = buf_v_->expand(new_mem_z, "LogBuffer::expand_to");
+        /* DArena::expand() takes a size from the ARENA's start, not this
+         * buffer's.  Before the first alloc the buffer will start at the
+         * arena's current allocated(); after, at buf_ckp_.  Passing
+         * new_mem_z alone under-commits a buffer that does not start at
+         * offset 0 -- a nested one (a tostr() during a TempFlatSink's
+         * life) gets nothing
+         */
+        auto base_z = (porigin_
+                       ? buf_v_->allocated_before(buf_ckp_)
+                       : buf_v_->allocated());
+
+        bool ok = buf_v_->expand(base_z + new_mem_z, "LogBuffer::expand_to");
 
         if (!ok) {
             expand_fail_ = "DArena::expand refused (see arena last_error)";
