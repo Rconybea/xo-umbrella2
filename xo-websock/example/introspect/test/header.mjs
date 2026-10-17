@@ -66,8 +66,25 @@ check(await kfill() === "0.85", "hovered: its square shows, as the menu button's
 check(await ev(`getComputedStyle([...document.querySelectorAll("g.node")].find(g => g.__data__.id === ${JSON.stringify(kb.id)}).querySelector(":scope > g.kbtn")).cursor`) === "pointer",
       "and a pointer cursor");
 await call("Input.dispatchMouseEvent", {type: "mouseMoved", x: 5, y: 5});
+// the menu button: in the box's top-right corner -- whatever the box's width
+const corner = async () => ev(`(() => { const k = d3.zoomTransform(graph_svg.node()).k;
+  return [...document.querySelectorAll("g.node")].map(g => { const b = g.querySelector(":scope > rect").getBoundingClientRect(), m = g.querySelector(":scope > g.mbtn > rect").getBoundingClientRect();
+    return {id: g.__data__.id, gap: Math.round((b.right - m.right) / k * 10) / 10}; }); })()`);
+const cn = await corner();
+console.log("   corner gaps:", JSON.stringify(cn.map(c => c.gap)));
+check(cn.every(c => Math.abs(c.gap - 12) < 1), "menu button: top-right corner of every box (12 from its right edge)");
 // rows start below the title
 await ev(`expanded.add("session:1"); redraw(); 1`); await ev(`settled()`);
+// expanded, a box can grow wider than its header: the button follows the corner
+{ const w0 = await ev(`Object.fromEntries([...document.querySelectorAll("g.node")].map(g => [g.__data__.id, g.__data__.w]))`);
+  await ev(`for (const g of document.querySelectorAll("g.node")) if (g.__data__.expandable) expanded.add(g.__data__.id); redraw(); 1`); await ev(`settled()`);
+  const w1 = await ev(`Object.fromEntries([...document.querySelectorAll("g.node")].map(g => [g.__data__.id, g.__data__.w]))`);
+  const grew = Object.keys(w1).filter(id => w0[id] !== undefined && w1[id] > w0[id] + 20);
+  check(grew.length > 0, "some box grows wider when expanded: " + JSON.stringify(grew));
+  const c = (await corner()).filter(c => grew.includes(c.id));
+  console.log("   grown boxes' corner gaps:", JSON.stringify(c));
+  check(c.every(c => Math.abs(c.gap - 12) < 1), "expanded, wider: the menu button stays in the corner");
+  await ev(`expanded.clear(); expanded.add("session:1"); redraw(); 1`); await ev(`settled()`); }
 check(await ev(`(() => { const g = [...document.querySelectorAll("g.node")].find(g => g.__data__.id === "session:1");
   return g.querySelector("text.row").getBoundingClientRect().top >= g.querySelector(":scope > text.sub").getBoundingClientRect().bottom - 1; })()`), "an open box's rows start below its title");
 // menus still name a box by its title

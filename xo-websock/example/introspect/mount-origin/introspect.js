@@ -731,9 +731,9 @@ function show_all_children(on) {
 const row_h = 18;          // a member row
 const sub_h = 16;          // a box's title line, below its type
 const sub_h_small = 14;    // ... in a small box
-const mbtn_w = 21;         // the menu button after a box's label: square
+const mbtn_w = 21;         // the menu button, top-right of a box: square
 const mbtn_h = 21;
-const mbtn_gap = 8;        // between label and menu button
+const mbtn_gap = 8;        // least room between label and menu button
 const kbtn_h = 21;         // the children button, first on a box's type line
 const kbtn_x = 8;          // its left edge, inside the box
 const kbtn_pad = 4;        // its glyph's inset; the button is as wide as "▸n" needs
@@ -1623,8 +1623,9 @@ async function draw_aux(event) {
 
         const label_w = g.select(":scope > text.label").node().getComputedTextLength();
         const sub_w = has_sub ? g.select(":scope > text.sub").node().getComputedTextLength() : 0;
-        g.select(":scope > g.mbtn")
-            .attr("transform", `translate(${label_x + label_w + mbtn_gap},${(type_h - mbtn_h) / 2})`);
+        // room on the type's line for the menu button after the type; the
+        // button itself goes in the top-right corner, once the width is
+        // known (below)
         d.w = Math.max(label_x + label_w + mbtn_gap + mbtn_w + 12, label_x + sub_w + 12);
         const texts = g.selectAll(":scope > g.rows > text.row");
         texts.each(function (r, i) {
@@ -1661,6 +1662,11 @@ async function draw_aux(event) {
         const animate = (sel) => this.__arriving ? sel
               : sel.transition("size").duration(t_move).ease(d3.easeCubicInOut);
         animate(g.select("rect")).attr("width", d.w).attr("height", d.h);
+        // the menu button: the top-right corner, whatever made the box this
+        // wide -- its type, its title, or its open rows -- moving with the
+        // outline as it resizes
+        animate(g.select(":scope > g.mbtn"))
+            .attr("transform", `translate(${d.w - 12 - mbtn_w},${(type_h - mbtn_h) / 2})`);
 
         // rows already on screen that moved (a nested row opened or closed
         // above them, or the name column widened): back to where they were,
