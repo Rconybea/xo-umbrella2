@@ -4,19 +4,18 @@
  **/
 
 #include "type_keys.hpp"
-#include "json_quoted.hpp"
+#include <xo/ppsink/pretty.hpp>
+#include <xo/ppsink/quoted.hpp>
 
 namespace xo {
-
-    namespace json {
-        std::ostream &
-        operator<<(std::ostream & os, type_keys const & k)
+    namespace pp {
+        void
+        Prettifier<xo::json::type_keys>::print(PpSink & sink, xo::json::type_keys const & k)
         {
-            os << json_quot("_canonical_type_") << ": " << json_quot(k.canonical_)
-               << ", " << json_quot("_short_type_") << ": " << json_quot(k.short_);
-            return os;
+            sink(quot("_canonical_type_"), ": ", quot(k.canonical_),
+                 ", ", quot("_short_type_"), ": ", quot(k.short_));
         }
-    } /*namespace json*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end type_keys.cpp */

@@ -11,6 +11,7 @@
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/pretty.hpp>
 #include <cstdint>
 #include <ostream>
 #include <string_view>
@@ -210,6 +211,14 @@ namespace xo {
             ObjectEntry & entry_for(void const * p);
             /** past max_depth_: diagnose, backtrace, abort **/
             [[noreturn]] void abort_too_deep(TaggedPtr tp) const;
+
+            /** write @p args, in order, to sink(): text as is, a number in
+             *  decimal, quot(s) as a json string literal (sink() escapes for
+             *  json).  Structure descriptors (begin/split/end) drive layout.
+             *  See PpSink::operator()
+             **/
+            template <typename... Ts>
+            void write(const Ts &... args) { (*this->sink_)(args...); }
             /** printer misuse (open_object twice, or outside print_json): diagnose, abort **/
             [[noreturn]] void abort_misuse(char const * what) const;
             /** {"_name_": .., type keys, and "_id_" if @p p non-null: owns @p p's entry.
@@ -241,6 +250,8 @@ namespace xo {
         private:
             /* close() of the root object writes "_unplaced_" */
             friend class JsonObject;
+            /* writes its entries via write() */
+            friend class JsonMembers;
             /* entry points print the top-level value via print_root */
             friend class PrintJson;
 

@@ -6,7 +6,7 @@
 #pragma once
 
 #include <xo/reflect/TypeDescr.hpp>
-#include <ostream>
+#include <xo/ppsink/Prettifier.hpp>
 #include <string_view>
 
 namespace xo {
@@ -18,10 +18,10 @@ namespace xo {
          *  _canonical_type_ is unique: the key into a type -> source map
          *  (.xo-backlog/xo-websock/issues/12).  _short_type_ is for display.
          *
-         *  Use in a JsonPrinter, after the object's "_name_":
+         *  Use in a JsonPrinter, after the object's "_name_" -- through a
+         *  json-escaping sink:
          *
-         *    *p_os << "{" << json_quot("_name_") << ": " << json_quot("Foo")
-         *          << ", " << type_keys(tp.td());
+         *    sink("{", quot("_name_"), ": ", quot("Foo"), ", ", type_keys(tp.td()));
          *
          *  Holds views: use it within the expression that creates it.
          **/
@@ -36,8 +36,15 @@ namespace xo {
             std::string_view short_;
         };
 
-        std::ostream & operator<<(std::ostream & os, type_keys const & k);
     } /*namespace json*/
+
+    namespace pp {
+        /** writes type_keys' two keys: see xo::json::type_keys **/
+        template <>
+        struct Prettifier<xo::json::type_keys> {
+            static void print(PpSink & sink, xo::json::type_keys const & k);
+        };
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end type_keys.hpp */

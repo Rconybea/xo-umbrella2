@@ -4,12 +4,12 @@
  **/
 
 #include "JsonMembers.hpp"
-#include "json_quoted.hpp"
 #include <xo/reflect/struct/StructMember.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
 #include <xo/reflect/map/MapTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/quoted.hpp>
 #include <cassert>
 #include <exception>
 
@@ -22,12 +22,13 @@ namespace xo {
     namespace json {
         /* one scope in from namespace xo: see PrintJson.cpp */
         using xo::pp::tostr;
+        using xo::pp::quot;
 
         JsonMembers::JsonMembers(JsonPrintState & state)
-            : state_{&state}, p_os_{state.p_os()}, n_uncaught_{std::uncaught_exceptions()}
+            : state_{&state}, n_uncaught_{std::uncaught_exceptions()}
         {
             /* the leading comma: the object's _name_ and type keys come first */
-            *p_os_ << ", \"_members_\": [";
+            this->write(", \"_members_\": [");
         }
 
         JsonMembers::~JsonMembers()
@@ -39,7 +40,7 @@ namespace xo {
         void
         JsonMembers::end()
         {
-            *p_os_ << "]";
+            this->write("]");
             ended_ = true;
         }
 
@@ -186,24 +187,24 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            *p_os_ << ", " << json_quot("_value_") << ": ";
+            this->write(", ", quot("_value_"), ": ");
             if (identity)
                 state_->print(value);
             else
                 state_->print_value(value);
-            *p_os_ << "}";
+            this->write("}");
         }
 
         void
         JsonMembers::write_head(std::string_view name, DeclaredType const & declared)
         {
             if (!first_)
-                *p_os_ << ", ";
+                this->write(", ");
             first_ = false;
 
-            *p_os_ << "{" << json_quot("_name_") << ": " << json_quot(name)
-                   << ", " << type_keys(declared.canonical_, declared.short_)
-                   << ", " << json_quot("_metatype_") << ": " << json_quot(metatype2str(declared.metatype_));
+            this->write("{", quot("_name_"), ": ", quot(name),
+                        ", ", type_keys(declared.canonical_, declared.short_),
+                        ", ", quot("_metatype_"), ": ", quot(metatype2str(declared.metatype_)));
         }
 
         void
@@ -212,9 +213,9 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            *p_os_ << ", " << json_quot("_value_") << ": ";
+            this->write(", ", quot("_value_"), ": ");
             state_->print_pointee(ptr, edge);
-            *p_os_ << "}";
+            this->write("}");
         }
 
         void
@@ -223,9 +224,9 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            *p_os_ << ", " << json_quot("_value_") << ": ";
+            this->write(", ", quot("_value_"), ": ");
             this->write_ref_value(p);
-            *p_os_ << "}";
+            this->write("}");
         }
 
         void
@@ -234,13 +235,13 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            *p_os_ << ", " << json_quot("_value_") << ": [";
+            this->write(", ", quot("_value_"), ": [");
             for (std::size_t i = 0, n = ps.size(); i < n; ++i) {
                 if (i > 0)
-                    *p_os_ << ", ";
+                    this->write(", ");
                 this->write_ref_value(ps[i]);
             }
-            *p_os_ << "]}";
+            this->write("]}");
         }
 
         void
@@ -249,14 +250,14 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            *p_os_ << ", " << json_quot("_value_") << ": {";
+            this->write(", ", quot("_value_"), ": {");
             for (std::size_t i = 0, n = kvs.size(); i < n; ++i) {
                 if (i > 0)
-                    *p_os_ << ", ";
-                *p_os_ << json_quot(kvs[i].first) << ": ";
+                    this->write(", ");
+                this->write(quot(kvs[i].first), ": ");
                 this->write_ref_value(kvs[i].second);
             }
-            *p_os_ << "}}";
+            this->write("}}");
         }
 
         void
@@ -270,7 +271,7 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            *p_os_ << ", " << json_quot("_locked_") << ": true}";
+            this->write(", ", quot("_locked_"), ": true}");
         }
 
         void
@@ -279,7 +280,7 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            *p_os_ << ", " << json_quot("_error_") << ": " << json_quot(why) << "}";
+            this->write(", ", quot("_error_"), ": ", quot(why), "}");
         }
     } /*namespace json*/
 } /*namespace xo*/

@@ -7,7 +7,6 @@
 #include "JsonObject.hpp"
 #include "PrintJson.hpp"
 #include "type_keys.hpp"
-#include "json_quoted.hpp"
 #include <xo/reflect/enum/EnumTdx.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
@@ -140,8 +139,6 @@ namespace xo {
             print_generic_vector(JsonPrintState & state,
                                  TaggedPtr tp)
             {
-                std::ostream * p_os = state.p_os();
-
                 /* e.g. if
                  *   std::array<double, 3> v{1, 2, 3};
                  *
@@ -149,16 +146,16 @@ namespace xo {
                  *   [1.0, 2.0, 3.0]
                  */
 
-                *p_os << "[";
+                (*state.sink())("[");
 
                 for (uint32_t i = 0, n = tp.n_child(); i < n; ++i) {
                     if (i > 0)
-                        *p_os << ", ";
+                        (*state.sink())(", ");
 
                     state.print(tp.get_child(i));
                 }
 
-                *p_os << "]";
+                (*state.sink())("]");
             } /*print_generic_vector*/
 
             /* this will be used when TaggedPtr is understood to refer to a struct-like value.
@@ -237,12 +234,12 @@ namespace xo {
             void
             print_reflected_enum(EnumTdx const & ei,
                                  TaggedPtr tp,
-                                 std::ostream * p_os)
+                                 PpSink & sink)
             {
                 if (std::string const * name = ei.name_of(tp.address()))
-                    *p_os << json_quot(*name);
+                    sink(quot(*name));
                 else
-                    *p_os << ei.value_of(tp.address());
+                    sink(ei.value_of(tp.address()));
             } /*print_reflected_enum*/
 
         } /*namespace*/
@@ -306,7 +303,7 @@ namespace xo {
                 void const * p = ptdx->pointee_address(ptr.address());
 
                 if (!p) {
-                    *this->p_os() << "null";
+                    this->write("null");
                     return;
                 }
 
@@ -315,7 +312,7 @@ namespace xo {
                 if (!e.ref_type_)
                     e.ref_type_ = ptr.td()->fixed_child_td(0);
 
-                *this->p_os() << "{" << json_quot("_ref_") << ": " << e.id_ << "}";
+                this->write("{", quot("_ref_"), ": ", e.id_, "}");
                 return;
             }
 
@@ -327,7 +324,7 @@ namespace xo {
                  * (JsonPrinter_ObjectSlot, JsonPrinter_RootSet) already
                  * emit
                  */
-                *this->p_os() << "null";
+                this->write("null");
                 return;
             }
 
@@ -386,39 +383,39 @@ namespace xo {
             MapTdx const * mi = tp.td()->map_info();
 
             if (mi->key_td()->metatype() == Metatype::mt_atomic) {
-                *this->p_os() << "{";
+                this->write("{");
 
                 bool first = true;
                 mi->visit_entries(tp.address(),
                                   [this, &first](TaggedPtr key, TaggedPtr value) {
                                       if (!first)
-                                          *this->p_os() << ", ";
+                                          this->write(", ");
                                       first = false;
 
-                                      *this->p_os() << this->map_key_string(key) << ": ";
+                                      this->write(this->map_key_string(key), ": ");
                                       this->print(value);
                                   });
 
-                *this->p_os() << "}";
+                this->write("}");
             } else {
                 /* a key json cannot use as an object key (a struct, say) */
-                *this->p_os() << "[";
+                this->write("[");
 
                 bool first = true;
                 mi->visit_entries(tp.address(),
                                   [this, &first](TaggedPtr key, TaggedPtr value) {
                                       if (!first)
-                                          *this->p_os() << ", ";
+                                          this->write(", ");
                                       first = false;
 
-                                      *this->p_os() << "{" << json_quot("_key_") << ": ";
+                                      this->write("{", quot("_key_"), ": ");
                                       this->print(key);
-                                      *this->p_os() << ", " << json_quot("_value_") << ": ";
+                                      this->write(", ", quot("_value_"), ": ");
                                       this->print(value);
-                                      *this->p_os() << "}";
+                                      this->write("}");
                                   });
 
-                *this->p_os() << "]";
+                this->write("]");
             }
         } /*print_map*/
 
@@ -448,25 +445,24 @@ namespace xo {
             std::sort(v.begin(), v.end(),
                       [](auto const & x, auto const & y) { return x.second->id_ < y.second->id_; });
 
-            *this->p_os() << ", " << json_quot("_unplaced_") << ": [";
+            this->write(", ", quot("_unplaced_"), ": [");
             for (std::size_t i = 0, n = v.size(); i < n; ++i) {
                 ObjectEntry const & e = *(v[i].second);
 
                 if (i > 0)
-                    *this->p_os() << ", ";
+                    this->write(", ");
 
                 /* _ref_, not _id_: an entry names its object, it does not
                  * define it -- which may happen elsewhere, as another type
                  */
-                *this->p_os() << "{" << json_quot("_ref_") << ": " << e.id_;
+                this->write("{", quot("_ref_"), ": ", e.id_);
                 if (e.ref_type_)
-                    *this->p_os() << ", " << json_quot("_type_") << ": " << json_quot(e.ref_type_->short_name());
+                    this->write(", ", quot("_type_"), ": ", quot(e.ref_type_->short_name()));
                 /* decimal: json has no hex (see JsonPrinter_address) */
-                *this->p_os() << ", " << json_quot("_address_") << ": "
-                       << reinterpret_cast<std::uintptr_t>(v[i].first)
-                       << "}";
+                this->write(", ", quot("_address_"), ": ",
+                            reinterpret_cast<std::uintptr_t>(v[i].first), "}");
             }
-            *this->p_os() << "]";
+            this->write("]");
         } /*write_unplaced*/
 
         JsonPrintState::ObjectEntry &
@@ -484,11 +480,11 @@ namespace xo {
         JsonPrintState::print_ref(void const * p)
         {
             if (!p) {
-                *this->p_os() << "null";
+                this->write("null");
                 return;
             }
 
-            *this->p_os() << "{" << json_quot("_ref_") << ": " << this->entry_for(p).id_ << "}";
+            this->write("{", quot("_ref_"), ": ", this->entry_for(p).id_, "}");
         } /*print_ref*/
 
         JsonObject
@@ -542,8 +538,7 @@ namespace xo {
         JsonPrintState::open_object_aux(void const * p, std::string_view name, TypeDescr td,
                                         bool is_root)
         {
-            *this->p_os() << "{" << json_quot("_name_") << ": " << json_quot(name)
-                   << ", " << json::type_keys(td);
+            this->write("{", quot("_name_"), ": ", quot(name), ", ", type_keys(td));
 
             if (p) {
                 /* first object printed at this address: it owns the entry,
@@ -552,7 +547,7 @@ namespace xo {
                 ObjectEntry & e = this->entry_for(p);
 
                 e.type_ = td;
-                *this->p_os() << ", " << json_quot("_id_") << ": " << e.id_;
+                this->write(", ", quot("_id_"), ": ", e.id_);
             }
 
             return JsonObject(this, is_root);
@@ -571,7 +566,6 @@ namespace xo {
                 this->abort_too_deep(tp);
 
             DepthScope scope(&this->depth_);
-            std::ostream * p_os = this->p_os();
 
             if (tp.td()) {
                 TypeId id = tp.td()->id();
@@ -594,7 +588,7 @@ namespace xo {
                          * e.g. an unreflected receiver an endpoint writes
                          * inline (.xo-backlog/xo-reflect/issues/04)
                          */
-                        *p_os << "{" << json_quot("_ref_") << ": " << ix->second.id_ << "}";
+                        this->write("{", quot("_ref_"), ": ", ix->second.id_, "}");
                         return;
                     }
 
@@ -637,7 +631,7 @@ namespace xo {
                          * set -- its signature is its declared type
                          * (.xo-backlog/xo-reflect/issues/09)
                          */
-                        (*p_os) << json_quot(tp.td()->fn_is_set(tp.address()) ? "set" : "empty");
+                        this->write(quot(tp.td()->fn_is_set(tp.address()) ? "set" : "empty"));
                         return;
                     case Metatype::mt_atomic:
                         if (StdAtomicTdx const * ai = tp.td()->std_atomic_info()) {
@@ -653,7 +647,7 @@ namespace xo {
                             return;
                         }
                         if (EnumTdx const * ei = tp.td()->enum_info()) {
-                            print_reflected_enum(*ei, tp, p_os);
+                            print_reflected_enum(*ei, tp, *this->sink_);
                             return;
                         }
                         break;
@@ -661,13 +655,13 @@ namespace xo {
                         break;
                     }
 
-                    (*p_os) << "<error-json-printer-not-found"
-                            << xtag("type", tp.td()->canonical_name())
-                            << xtag("metatype", tp.td()->metatype())
-                            << ">";
+                    this->write("<error-json-printer-not-found",
+                                xtag("type", tp.td()->canonical_name()),
+                                xtag("metatype", tp.td()->metatype()),
+                                ">");
                 }
             } else {
-                (*p_os) << "<error-null-tp>";
+                this->write("<error-null-tp>");
             }
         } /*print_node*/
 
