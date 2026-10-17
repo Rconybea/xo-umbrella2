@@ -93,7 +93,7 @@ namespace xo {
             REQUIRE(out.output() == print_to_ostream(pjson, x));
         }
 
-        /* everything a printer writes -- p_os() included -- reaches the sink,
+        /* everything a printer writes reaches the sink,
          * in order.  A PrettySink buffers tokens, so a write that went around
          * it, straight to an underlying streambuf, would be missing or out of
          * order here.  No printer emits structure yet, so pretty == flat

@@ -342,11 +342,11 @@ namespace xo {
         std::string
         JsonPrintState::map_key_string(TaggedPtr key)
         {
-            /* print the key as a value, into a string: swap the stream */
+            /* print the key as a value, into a string: swap the sink */
             std::stringstream ss;
             {
-                /* capture the key's json: everything written -- through
-                 * the sink, or p_os() -- goes to ss for now
+                /* capture the key's json: everything written goes to ss
+                 * for now
                  */
                 FlatSink key_sink(this->sink_->style(), ss.rdbuf());
                 RestoreScope<PpSink *> restore(&this->sink_);
