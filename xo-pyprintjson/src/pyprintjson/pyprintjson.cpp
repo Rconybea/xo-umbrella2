@@ -8,6 +8,8 @@
 #include <xo/reflect/TaggedRcptr.hpp>
 #include <xo/pyarena/CollectPools.hpp>
 #include <xo/pyutil/pyutil.hpp>
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <pybind11/stl.h>   /* std::vector<MemorySizeInfo>, for visit_pools */
 
 namespace xo {
@@ -67,13 +69,17 @@ namespace xo {
                 .def("print",
                      [](PrintJson & pj, TaggedRcptr p)
                          {
-                             pj.print_tp(p, &std::cout); std::cout << "\n";
+                             xo::pp::FlatSink sink(xo::pp::PpStyle::json(), std::cout.rdbuf());
+                             pj.print_tp(p, &sink);
+                             std::cout << "\n";
                          },
                      py::arg("value"))
                 .def("print",
                      [](PrintJson & pj, rp<SelfTagging> const & p)
                          {
-                             pj.print_obj(p, &std::cout); std::cout << "\n";
+                             xo::pp::FlatSink sink(xo::pp::PpStyle::json(), std::cout.rdbuf());
+                             pj.print_obj(p, &sink);
+                             std::cout << "\n";
                          },
                      py::arg("value"));
 

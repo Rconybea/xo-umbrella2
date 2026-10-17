@@ -6,6 +6,7 @@
 #include "LogBuffer.hpp"
 #include <xo/ppsink/tostr0.hpp>  /* not indentlog2 tostr: that includes LogBuffer.hpp */
 #include <xo/ppsink/tag.hpp>
+#include <algorithm>
 #include <stdexcept>
 #include <cassert>
 #include <cstring>
@@ -113,20 +114,57 @@ namespace xo {
     LogBufferAdapter::char_expand_to(size_t new_char_z)
     {
         auto overhead_z = buf_v_->preamble_z() + buf_v_->per_alloc_overhead_z();
-        auto new_mem_z = new_char_z + overhead_z;
 
-        /* DArena::expand() takes a size from the ARENA's start, not this
-         * buffer's.  Before the first alloc the buffer will start at the
-         * arena's current allocated(); after, at buf_ckp_.  Passing
-         * new_mem_z alone under-commits a buffer that does not start at
-         * offset 0 -- a nested one (a tostr() during a TempFlatSink's
-         * life) gets nothing
+        /* 1. DArena::expand(z) applies z to it's own start.
+         * That may be earlier than this buffer's origin,
+         * depending on the arena's state the first time
+         * char_expand_to() runs.
+         *
+         * 2. porigin_ is single-assignment;
+         * captures arena free pointer at that point.
+         *
+         * 3. We don't take all available arena room to ourselves,
+         * so that we can use the same arena from multiple buffers,
+         * as long as their use follows LIFO allocations
+         * (e.g. in nested tostr() calls)
+         *
+         * 4. sizing: take enough to:
+         *    4a. satisfy ask
+         *        (at least new_char_z bytes assigned to this buffer)
+         *    4b. at least a page
+         *    4c. at least 2x this buffer's existing size
+         *        (to mitigate re-alloc frequency)
+         *    4d. but never exceed arena's reservation,
+         *        that's a hard limit.
          */
+
+        /* base_z: current arena use */
         auto base_z = (porigin_
                        ? buf_v_->allocated_before(buf_ckp_)
                        : buf_v_->allocated());
 
-        bool ok = buf_v_->expand(base_z + new_mem_z, "LogBuffer::expand_to");
+        /* cur_z: current amount of memory allocated to this buffer */
+        size_t cur_z = (porigin_ ? static_cast<size_t>(epptr_ - porigin_) : 0);
+        /* z: amount of memory to annex from arena */
+        size_t z = std::max({new_char_z,
+                             2 * cur_z,
+                             size_t(buf_v_->page_z())});
+        /* used_z: memory already used, including overhead for next arena alloc */
+        size_t used_z = base_z + overhead_z;
+        /* room_z: hard cap on how much memory we can obtain **/
+        size_t room_z = (buf_v_->reserved() > used_z ? buf_v_->reserved() - used_z : 0);
+
+        /* by design, z is likely more than we strictly require.
+         * trim to room_z since exceeding that is guaranteed to fail...
+         */
+        z = std::min(z, room_z);
+
+        /* ...however must obtain at least new_char_z
+         * (and signal failure if that's not possible)
+         */
+        z = std::max(new_char_z, z);
+
+        bool ok = buf_v_->expand(base_z + z + overhead_z, "LogBuffer::expand_to");
 
         if (!ok) {
             expand_fail_ = "DArena::expand refused (see arena last_error)";
@@ -137,8 +175,6 @@ namespace xo {
             // first call -> establish porigin_,
             // (arena may prefix with guard bytes / alloc header
             // so possible that available < committed
-
-            auto z = buf_v_->available();
 
             buf_ckp_ = buf_v_->checkpoint();
             porigin_ = reinterpret_cast<char *>(buf_v_->alloc(reflect::typeseq::id<char[]>(), z));
@@ -157,8 +193,6 @@ namespace xo {
              * (+ only need checkpoint if DArena configured with object headers)
              */
             buf_v_->restore(buf_ckp_);
-
-            auto z = buf_v_->available();
 
             auto porigin0 = porigin_;
 

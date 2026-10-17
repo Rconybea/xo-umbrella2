@@ -475,8 +475,13 @@ namespace {
 
     extern "C" void on_signal(int) { s_stop = true; }
 
-    /** capacity for the thread-local scratch arena behind tostr() **/
-    constexpr std::uint32_t c_temp_arena_capacity = 64 * 1024;
+    /** capacity for the thread-local scratch arena behind tostr() and
+     *  TempFlatSink.  1 MB: each websocket message -- a whole server
+     *  snapshot, ~28 KB today -- is built there
+     *  (WebsocketSinkImpl::notify_ev_tp).  Reserved, not committed, so a
+     *  generous limit is cheap
+     **/
+    constexpr std::uint32_t c_temp_arena_capacity = 1024 * 1024;
 }
 
 int

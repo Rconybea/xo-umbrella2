@@ -32,6 +32,8 @@
 #include <xo/printable2/detail/RPrintable.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>
@@ -142,9 +144,9 @@ namespace xo {
             }
 
             std::string render(PrintJson & pj, const ObjectSlot & slot) {
-                std::stringstream ss;
-                pj.print(slot, &ss);
-                return ss.str();
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                pj.print(slot, &ss.sink());
+                return std::string(ss.output());
             }
 
             /** Expect to see this key when json-printing an ObjectSlot;

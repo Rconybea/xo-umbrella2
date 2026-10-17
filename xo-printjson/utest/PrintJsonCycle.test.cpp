@@ -222,10 +222,10 @@ namespace xo {
             Node b{2, nullptr};
             Node a{1, &b};
 
-            std::stringstream ss;
-            print_json.print(a, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(a, &ss.sink());
 
-            REQUIRE(ss.str() == node(1, 1, node(2, 2, "null")));
+            REQUIRE(std::string(ss.output()) == node(1, 1, node(2, 2, "null")));
         } /*TEST_CASE(print-json-chain-within-depth-limit)*/
 
         TEST_CASE("print-json-depth-limit-aborts", "[printjson][cycle]") {
@@ -239,8 +239,8 @@ namespace xo {
                 Node b{2, nullptr};
                 Node a{1, &b};
 
-                std::stringstream ss;
-                print_json.print(a, &ss);
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                print_json.print(a, &ss.sink());
             });
 
             INFO(x.stderr_.substr(0, 2000));
@@ -258,10 +258,10 @@ namespace xo {
             Node b{2, &a};
             a.next_ = &b;
 
-            std::stringstream ss;
-            print_json.print(a, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(a, &ss.sink());
 
-            REQUIRE(ss.str() == node(1, 1, node(2, 2, "{\"_ref_\": 1}")));
+            REQUIRE(std::string(ss.output()) == node(1, 1, node(2, 2, "{\"_ref_\": 1}")));
         } /*TEST_CASE(print-json-cycle)*/
 
         TEST_CASE("print-json-self-loop", "[printjson][cycle]") {
@@ -272,10 +272,10 @@ namespace xo {
             Node a{1, nullptr};
             a.next_ = &a;
 
-            std::stringstream ss;
-            print_json.print(a, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(a, &ss.sink());
 
-            REQUIRE(ss.str() == node(1, 1, "{\"_ref_\": 1}"));
+            REQUIRE(std::string(ss.output()) == node(1, 1, "{\"_ref_\": 1}"));
         } /*TEST_CASE(print-json-self-loop)*/
 
         TEST_CASE("print-json-diamond", "[printjson][cycle]") {
@@ -287,8 +287,8 @@ namespace xo {
             Fork d{2, nullptr, nullptr};
             Fork a{1, &d, &d};
 
-            std::stringstream ss;
-            print_json.print(a, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(a, &ss.sink());
 
             auto fork = [](int id, std::string const & left, std::string const & right) {
                 return object(head<Fork>("Fork", id),
@@ -297,7 +297,7 @@ namespace xo {
                                entry<Fork *>("right", "pointer", right)});
             };
 
-            REQUIRE(ss.str() == fork(1, fork(2, "null", "null"), "{\"_ref_\": 2}"));
+            REQUIRE(std::string(ss.output()) == fork(1, fork(2, "null", "null"), "{\"_ref_\": 2}"));
         } /*TEST_CASE(print-json-diamond)*/
 
         TEST_CASE("print-json-diamond-chain-is-linear", "[printjson][cycle]") {
@@ -313,11 +313,11 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream ss;
-            print_json.print(v[0], &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(v[0], &ss.sink());
 
-            REQUIRE(count(ss.str(), "\"_id_\"") == n + 1);
-            REQUIRE(count(ss.str(), "\"_ref_\"") == n);
+            REQUIRE(count(std::string(ss.output()), "\"_id_\"") == n + 1);
+            REQUIRE(count(std::string(ss.output()), "\"_ref_\"") == n);
         } /*TEST_CASE(print-json-diamond-chain-is-linear)*/
 
         TEST_CASE("print-json-ref-before-print", "[printjson][cycle]") {
@@ -350,10 +350,10 @@ namespace xo {
 
             REQUIRE(static_cast<void *>(&o) == static_cast<void *>(&o.in_));
 
-            std::stringstream ss;
-            print_json.print(o, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(o, &ss.sink());
 
-            REQUIRE(ss.str() == object(head<Outer>("Outer", 1),
+            REQUIRE(std::string(ss.output()) == object(head<Outer>("Outer", 1),
                                        {entry<Inner>("in", "struct",
                                                      object(head<Inner>("Inner", 0),
                                                             {entry<int>("v", "atomic", "7")})),

@@ -149,22 +149,13 @@ namespace xo {
             state.print_root(tp);
         } /*print_tp*/
 
-        void
-        PrintJson::print_tp(TaggedPtr tp,
-                            std::ostream * p_os) const
-        {
-            /* FlatSink does not buffer: nothing to flush afterwards */
-            FlatSink sink(PpStyle::json(), p_os->rdbuf());
-
-            this->print_tp(tp, &sink);
-        } /*print_tp*/
 
         void
-        PrintJson::print_obj(rp<SelfTagging> const & obj, std::ostream * p_os) const
+        PrintJson::print_obj(rp<SelfTagging> const & obj, PpSink * sink) const
         {
             assert(obj.get());
 
-            this->print_tp(obj->self_tp(), p_os);
+            this->print_tp(obj->self_tp(), sink);
         } /*print_obj*/
 
         void

@@ -18,6 +18,8 @@
 #include <xo/printable2/detail/RPrintable.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 
@@ -174,15 +176,15 @@ namespace xo {
              * representation directly, rather than against a literal, so the
              * claim survives a change to struct formatting.
              */
-            std::stringstream via_fop;
-            print_json.print(Reflect::make_tp(&o), &via_fop);
+            xo::pp::TempFlatSink via_fop(xo::pp::PpStyle::json());
+            print_json.print(Reflect::make_tp(&o), &via_fop.sink());
 
-            std::stringstream via_repr;
-            print_json.print(Reflect::make_tp(&pt), &via_repr);
+            xo::pp::TempFlatSink via_repr(xo::pp::PpStyle::json());
+            print_json.print(Reflect::make_tp(&pt), &via_repr.sink());
 
-            REQUIRE(via_fop.str() == via_repr.str());
-            REQUIRE(via_fop.str().find("\"x\"") != std::string::npos);
-            REQUIRE(via_fop.str().find("1.5") != std::string::npos);
+            REQUIRE(std::string(via_fop.output()) == std::string(via_repr.output()));
+            REQUIRE(std::string(via_fop.output()).find("\"x\"") != std::string::npos);
+            REQUIRE(std::string(via_fop.output()).find("1.5") != std::string::npos);
         } /*TEST_CASE(print-json-fop-object)*/
 
         TEST_CASE("print-json-erased-fop-object", "[printjson]") {
@@ -197,13 +199,13 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream via_erased;
-            print_json.print(Reflect::make_tp(&erased), &via_erased);
+            xo::pp::TempFlatSink via_erased(xo::pp::PpStyle::json());
+            print_json.print(Reflect::make_tp(&erased), &via_erased.sink());
 
-            std::stringstream via_repr;
-            print_json.print(Reflect::make_tp(&pt), &via_repr);
+            xo::pp::TempFlatSink via_repr(xo::pp::PpStyle::json());
+            print_json.print(Reflect::make_tp(&pt), &via_repr.sink());
 
-            REQUIRE(via_erased.str() == via_repr.str());
+            REQUIRE(std::string(via_erased.output()) == std::string(via_repr.output()));
         } /*TEST_CASE(print-json-erased-fop-object)*/
 
         TEST_CASE("print-json-empty-fop-object", "[printjson]") {
@@ -213,8 +215,8 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream ss;
-            print_json.print(Reflect::make_tp(&o), &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(Reflect::make_tp(&o), &ss.sink());
 
             /* print_generic_pointer emits json null when there are no
              * children.  It emitted "{}" until 2026-09-21 -- distinguishable
@@ -225,7 +227,7 @@ namespace xo {
              * already was, which matters because an ObjectSlot IS an erased
              * fop: two spellings for one condition was the actual defect.
              */
-            REQUIRE(ss.str() == std::string("null"));
+            REQUIRE(std::string(ss.output()) == std::string("null"));
         } /*TEST_CASE(print-json-empty-fop-object)*/
 
         TEST_CASE("print-obj-matches-a-hand-built-tagged-ptr", "[printjson]") {
@@ -236,13 +238,13 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream via_entry_point;
-            print_json.print_obj(o, &via_entry_point);
+            xo::pp::TempFlatSink via_entry_point(xo::pp::PpStyle::json());
+            print_json.print_obj(o, &via_entry_point.sink());
 
-            std::stringstream via_hand_built;
-            print_json.print_tp(Reflect::make_tp(&o), &via_hand_built);
+            xo::pp::TempFlatSink via_hand_built(xo::pp::PpStyle::json());
+            print_json.print_tp(Reflect::make_tp(&o), &via_hand_built.sink());
 
-            REQUIRE(via_entry_point.str() == via_hand_built.str());
+            REQUIRE(std::string(via_entry_point.output()) == std::string(via_hand_built.output()));
         } /*TEST_CASE(print-obj-matches-a-hand-built-tagged-ptr)*/
 
         TEST_CASE("print-obj-fast-path-agrees-with-the-generic-one", "[printjson]") {
@@ -260,13 +262,13 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream via_fast;
-            print_json.print_obj(fast, &via_fast);
+            xo::pp::TempFlatSink via_fast(xo::pp::PpStyle::json());
+            print_json.print_obj(fast, &via_fast.sink());
 
-            std::stringstream via_generic;
-            print_json.print_tp(Reflect::make_tp(&pt), &via_generic);
+            xo::pp::TempFlatSink via_generic(xo::pp::PpStyle::json());
+            print_json.print_tp(Reflect::make_tp(&pt), &via_generic.sink());
 
-            REQUIRE(via_fast.str() == via_generic.str());
+            REQUIRE(std::string(via_fast.output()) == std::string(via_generic.output()));
         } /*TEST_CASE(print-obj-fast-path-agrees-with-the-generic-one)*/
 
         TEST_CASE("print-obj-renders-an-empty-fop-as-null", "[printjson]") {
@@ -280,11 +282,11 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream ss;
-            print_json.print_obj(empty, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print_obj(empty, &ss.sink());
 
             /* null since 2026-09-21; see print-json-empty-fop-object */
-            REQUIRE(ss.str() == std::string("null"));
+            REQUIRE(std::string(ss.output()) == std::string("null"));
         } /*TEST_CASE(print-obj-renders-an-empty-fop-as-null)*/
 
         TEST_CASE("print-obj-fast-path-skips-the-registry", "[printjson]") {
@@ -307,14 +309,14 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream via_fast;
-            REQUIRE_NOTHROW(print_json.print_obj(erased, &via_fast));
-            REQUIRE(via_fast.str().find("3.25") != std::string::npos);
+            xo::pp::TempFlatSink via_fast(xo::pp::PpStyle::json());
+            REQUIRE_NOTHROW(print_json.print_obj(erased, &via_fast.sink()));
+            REQUIRE(std::string(via_fast.output()).find("3.25") != std::string::npos);
 
             /* same object, generic route: the rotation needs the registry */
-            std::stringstream via_generic;
+            xo::pp::TempFlatSink via_generic(xo::pp::PpStyle::json());
             REQUIRE_THROWS(print_json.print_tp(Reflect::make_tp(&erased),
-                                               &via_generic));
+                                               &via_generic.sink()));
         } /*TEST_CASE(print-obj-fast-path-skips-the-registry)*/
 
         TEST_CASE("validate-then-print-matches-print-alone", "[printjson]") {
@@ -325,14 +327,14 @@ namespace xo {
 
             PrintJson print_json;
 
-            std::stringstream validated;
+            xo::pp::TempFlatSink validated(xo::pp::PpStyle::json());
             print_json.validate_obj(o);
-            print_json.print_obj(o, &validated);
+            print_json.print_obj(o, &validated.sink());
 
-            std::stringstream print_alone;
-            print_json.print_obj(o, &print_alone);
+            xo::pp::TempFlatSink print_alone(xo::pp::PpStyle::json());
+            print_json.print_obj(o, &print_alone.sink());
 
-            REQUIRE(validated.str() == print_alone.str());
+            REQUIRE(std::string(validated.output()) == std::string(print_alone.output()));
         } /*TEST_CASE(validate-then-print-matches-print-alone)*/
 
         TEST_CASE("validation-throws-without-writing", "[printjson]") {
@@ -359,10 +361,10 @@ namespace xo {
             /* and the thing being avoided: printing the same graph DOES write
              * before it throws
              */
-            std::stringstream partial;
+            xo::pp::TempFlatSink partial(xo::pp::PpStyle::json());
             REQUIRE_THROWS(print_json.print_obj(obj<AReflectable, DFopBox>{&box},
-                                                &partial));
-            REQUIRE_FALSE(partial.str().empty());
+                                                &partial.sink()));
+            REQUIRE_FALSE(partial.output().empty());
         } /*TEST_CASE(validation-throws-without-writing)*/
     } /*namespace ut*/
 } /*namespace xo*/

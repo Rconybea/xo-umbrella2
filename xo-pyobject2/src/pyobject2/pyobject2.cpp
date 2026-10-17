@@ -23,7 +23,9 @@
 #include <xo/facet/ObjectHandle.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
 #include <xo/printable2/Printable.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
 #include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/pyutil/pyutil.hpp>
 #include <sstream>
@@ -143,10 +145,10 @@ namespace xo {
                        */
                       static xo::json::PrintJson s_pjson;
 
-                      std::stringstream ss;
-                      s_pjson.print(fw, &ss);
+                      xo::pp::TempFlatSink out(xo::pp::PpStyle::json());
+                      s_pjson.print(fw, &out.sink());
 
-                      return ss.str();
+                      return std::string(out.output());
                   },
                   py::arg("flywheel"),
                   "this flywheel's state as one json frame.\n"

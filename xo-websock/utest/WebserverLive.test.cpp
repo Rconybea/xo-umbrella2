@@ -19,6 +19,8 @@
 #include <xo/printjson/PrintJsonSingleton.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <json/json.h>
 #include <arpa/inet.h>
@@ -621,9 +623,9 @@ namespace xo {
             /* the server as its json printer shows it */
             auto server_json = [&srv] {
                 Webserver * server = srv.websrv_.get();
-                std::stringstream ss;
-                PrintJsonSingleton::instance()->print(server, &ss);
-                return parse(ss.str());
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                PrintJsonSingleton::instance()->print(server, &ss.sink());
+                return parse(std::string(ss.output()));
             };
             auto n_session = [&] { return sessions_of(server_json()).size(); };
 
@@ -976,9 +978,9 @@ namespace xo {
 
             auto server_json = [&srv] {
                 Webserver * server = srv.websrv_.get();
-                std::stringstream ss;
-                PrintJsonSingleton::instance()->print(server, &ss);
-                return parse(ss.str());
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                PrintJsonSingleton::instance()->print(server, &ss.sink());
+                return parse(std::string(ss.output()));
             };
 
             /* two sessions, the second subscribed: wait on each step, so

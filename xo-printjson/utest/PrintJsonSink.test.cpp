@@ -55,9 +55,9 @@ namespace xo {
 
             /** through the std::ostream entry point **/
             std::string print_to_ostream(PrintJson const & pjson, Sample const & x) {
-                std::stringstream ss;
-                pjson.print(x, &ss);
-                return ss.str();
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                pjson.print(x, &ss.sink());
+                return std::string(ss.output());
             }
         } /*namespace*/
 

@@ -19,6 +19,7 @@
  * Expectations are OBSERVED, never predicted.
  */
 
+#include "object2_utest_appcx.hpp"
 #include <xo/object2/Float.hpp>   /* DFloat + IPrintable_DFloat */
 #include <xo/object2/SetupObject2.hpp>
 #include <xo/object2/number/IGCObject_DFloat.hpp>
@@ -27,10 +28,11 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/facet/cx/FacetAppcx.hpp>
-#include <xo/indentlog2/cx/Indentlog2Appcx.hpp>
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflectutil/type_name.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <regex>
@@ -53,21 +55,11 @@ namespace xo {
 
     namespace ut {
         namespace {
-            using FrameAppConfig = AppConfig<S_indentlog2_tag, S_facet_tag>;
-            using FrameAppContext = AppContext<S_indentlog2_tag, S_facet_tag>;
-
-            /** a facet context for this file's flywheels.
-             *
-             *  Local rather than shared: xo-facet's FacetUtestAppcx is not
-             *  installed (it is test-local to that subsystem), so object2's
-             *  tests cannot borrow it.
+            /** a facet context for this file's flywheels: the process's,
+             *  built up front by object2_utest_main.cpp
              **/
             FacetAppcx & facet_appcx() {
-                static FrameAppContext s_cx{
-                    FrameAppConfig(Indentlog2Config::make_default(),
-                                   FacetConfig::make_default())};
-
-                return s_cx.cx<S_facet_tag>();
+                return object2_utest_facet_appcx();
             }
 
             /** flywheel + the registrations a frame needs, once **/
@@ -126,8 +118,8 @@ namespace xo {
             PrintJson print_json;
             rp<AllocFlywheel> fw = make_fw("utest.frame.empty");
 
-            std::stringstream ss;
-            print_json.print(*fw.get(), &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(*fw.get(), &ss.sink());
 
             /* the whole frame, byte for byte.  Brittle on purpose: any change
              * to it should require someone to look at what a consumer would
@@ -148,7 +140,7 @@ namespace xo {
              * "_name_" within one entry, with no nested object between
              */
             std::string frame
-                = std::regex_replace(ss.str(),
+                = std::regex_replace(std::string(ss.output()),
                                      std::regex("(\"_name_\": \"(lo|hi)\"[^{}]*\"_value_\": )[0-9]+"),
                                      "$1ADDR");
 
@@ -270,7 +262,7 @@ namespace xo {
              * printer reports the LIVE one.  Checked against the unredacted
              * text, so a printer that emitted a constant would still fail
              */
-            REQUIRE(ss.str().find("\"capacity\": "
+            REQUIRE(std::string(ss.output()).find("\"capacity\": "
                                   + std::to_string(fw->strong_capacity()))
                     != std::string::npos);
             REQUIRE(fw->strong_capacity() > 0);
@@ -289,10 +281,10 @@ namespace xo {
             auto h1 = HFloat::make_strong_ref
                 (fw, with_facet<APrintable>::mkobj(DFloat::_box(alloc, 2.5)));
 
-            std::stringstream ss;
-            print_json.print(*fw.get(), &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(*fw.get(), &ss.sink());
 
-            const std::string frame = ss.str();
+            const std::string frame = std::string(ss.output());
             INFO("frame: " << frame);
 
             /* substrings, not the whole frame: addresses and `used' are not
@@ -362,10 +354,10 @@ namespace xo {
                 REQUIRE(h.object_ix() == 0);
             }
 
-            std::stringstream ss;
-            print_json.print(*fw.get(), &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(*fw.get(), &ss.sink());
 
-            const std::string frame = ss.str();
+            const std::string frame = std::string(ss.output());
             INFO("frame: " << frame);
 
             /* the slot EMPTIES rather than disappearing: it stays at its
@@ -413,10 +405,10 @@ namespace xo {
              * index 1 is released first and index 0 last
              */
 
-            std::stringstream ss;
-            print_json.print(*fw.get(), &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(*fw.get(), &ss.sink());
 
-            const std::string frame = ss.str();
+            const std::string frame = std::string(ss.output());
             INFO("frame: " << frame);
 
             /* push order: 1 was released first.  Observed, and it is not the

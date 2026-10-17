@@ -65,6 +65,30 @@ namespace xo {
             REQUIRE(out.output() == "before:inner123:after" + big);
         }
 
+        /* nesting still works once the arena's whole reserve has been
+         * committed by an earlier, larger print.  Committed space is a
+         * high-water mark; a sink that claimed all of it would leave a
+         * nested tostr() nothing, and tostr() would return ""
+         */
+        TEST_CASE("temp-flat-sink-nests-after-reserve-committed", "[TempFlatSink]") {
+            auto & arena = TempArena::local();
+
+            {
+                /* commit the whole reserve, then release it */
+                TempFlatSink big(PpStyle::plain());
+                big.sink().put(std::string(arena.reserved() - arena.page_z() / 2, 'z'));
+            }
+            REQUIRE(arena.committed() == arena.reserved());
+
+            TempFlatSink out(PpStyle::plain());
+            out.sink().put("before:");
+            std::string inner = tostr("inner", 1, 2, 3);
+            out.sink().put(inner);
+
+            REQUIRE(inner == "inner123");
+            REQUIRE(out.output() == "before:inner123");
+        }
+
         /* scratch memory goes back when the sink does */
         TEST_CASE("temp-flat-sink-restores-arena", "[TempFlatSink]") {
             auto allocated0 = TempArena::local().allocated();

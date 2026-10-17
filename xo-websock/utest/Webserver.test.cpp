@@ -14,6 +14,8 @@
 #include "xo/websock/Webserver.hpp"
 #include "xo/websock/DynamicEndpoint.hpp"
 #include <xo/printjson/PrintJsonSingleton.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
@@ -246,9 +248,9 @@ namespace xo {
             HoldsServer holder;
             holder.server_ = websrv.get();
 
-            std::stringstream ss;
-            PrintJsonSingleton::instance()->print(holder, &ss);
-            Json::Value root = parse_json(ss.str());
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            PrintJsonSingleton::instance()->print(holder, &ss.sink());
+            Json::Value root = parse_json(std::string(ss.output()));
             Json::Value const eps = endpoints_of(member_value(root, "server"));
             REQUIRE(eps.size() == 2);
 
@@ -282,13 +284,13 @@ namespace xo {
             HoldsServer holder;
             holder.server_ = websrv.get();
 
-            std::stringstream ss;
-            PrintJsonSingleton::instance()->print(holder, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            PrintJsonSingleton::instance()->print(holder, &ss.sink());
 
-            Json::Value root = parse_json(ss.str());
+            Json::Value root = parse_json(std::string(ss.output()));
             Json::Value const & srv = member_value(root, "server");
 
-            INFO("json: " << ss.str());
+            INFO("json: " << std::string(ss.output()));
             /* the actual type, via self_tp() -- not the interface.  Printed
              * by the generic printer, from reflection: _name_ is its short
              * name (xo-websock#16)

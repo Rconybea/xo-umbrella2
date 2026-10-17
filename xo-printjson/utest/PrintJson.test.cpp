@@ -12,6 +12,8 @@
 #include <xo/reflectutil/type_name.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << tag(..) */
 #include <xo/arena/DArenaVector.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <atomic>
 #include <iostream>
@@ -124,14 +126,14 @@ namespace xo {
             DPtrTarget target{1.5};
             DPtrHolder holder{&target};
 
-            std::stringstream ss;
-            print_json.print(holder, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(holder, &ss.sink());
 
             std::string const target_json
                 = ("{\"_name_\": \"DPtrTarget\"" + type_member<DPtrTarget>()
                    + ", \"_id_\": 2, \"_members_\": [" + mentry<double>("v", "atomic", "1.5") + "]}");
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<const DPtrTarget *>("p", "pointer", target_json) + "]}"));
         } /*TEST_CASE(print-json-raw-pointer-member)*/
@@ -147,10 +149,10 @@ namespace xo {
 
             DPtrHolder holder{nullptr};
 
-            std::stringstream ss;
-            print_json.print(holder, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(holder, &ss.sink());
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"DPtrHolder\"" + type_member<DPtrHolder>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<const DPtrTarget *>("p", "pointer", "null") + "]}"));
         } /*TEST_CASE(print-json-null-raw-pointer-member)*/
@@ -179,14 +181,14 @@ namespace xo {
 
             UPtrHolder holder{std::make_unique<DPtrTarget>(DPtrTarget{2.5})};
 
-            std::stringstream ss;
-            print_json.print(holder, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(holder, &ss.sink());
 
             std::string const target_json
                 = ("{\"_name_\": \"DPtrTarget\"" + type_member<DPtrTarget>()
                    + ", \"_id_\": 2, \"_members_\": [" + mentry<double>("v", "atomic", "2.5") + "]}");
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"UPtrHolder\"" + type_member<UPtrHolder>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"UPtrHolder\"" + type_member<UPtrHolder>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<std::unique_ptr<DPtrTarget>>("p", "pointer", target_json) + "]}"));
         } /*TEST_CASE(print-json-unique-ptr-member)*/
@@ -198,10 +200,10 @@ namespace xo {
 
             UPtrHolder holder;
 
-            std::stringstream ss;
-            print_json.print(holder, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(holder, &ss.sink());
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"UPtrHolder\"" + type_member<UPtrHolder>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"UPtrHolder\"" + type_member<UPtrHolder>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<std::unique_ptr<DPtrTarget>>("p", "pointer", "null") + "]}"));
         } /*TEST_CASE(print-json-null-unique-ptr-member)*/
@@ -216,20 +218,20 @@ namespace xo {
 
             const char * s = nullptr;
 
-            std::stringstream ss;
-            print_json.print(s, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(s, &ss.sink());
 
-            REQUIRE(ss.str() == std::string("null"));
+            REQUIRE(std::string(ss.output()) == std::string("null"));
 
             /* a non-null one still renders as a quoted string, i.e. the
              * exemption from T* held
              */
             const char * t = "abc";
 
-            std::stringstream ss2;
-            print_json.print(t, &ss2);
+            xo::pp::TempFlatSink ss2(xo::pp::PpStyle::json());
+            print_json.print(t, &ss2.sink());
 
-            REQUIRE(ss2.str() == std::string("\"abc\""));
+            REQUIRE(std::string(ss2.output()) == std::string("\"abc\""));
         } /*TEST_CASE(print-json-null-c-string)*/
 
         /* DArenaVector reflects as mt_vector since
@@ -251,12 +253,12 @@ namespace xo {
             v.push_back(2.25);
             v.push_back(-3.0);
 
-            std::stringstream ss;
-            print_json.print(v, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(v, &ss.sink());
 
-            INFO("rendered: " << ss.str());
+            INFO("rendered: " << std::string(ss.output()));
 
-            REQUIRE(ss.str() == std::string("[1.5, 2.25, -3]"));
+            REQUIRE(std::string(ss.output()) == std::string("[1.5, 2.25, -3]"));
         } /*TEST_CASE(print-json-darena-vector)*/
 
         TEST_CASE("print-json-darena-vector-empty", "[printjson][darenavector]") {
@@ -264,14 +266,14 @@ namespace xo {
 
             auto v = make_arena_vec<double>("utest.pj.dav.empty");
 
-            std::stringstream ss;
-            print_json.print(v, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(v, &ss.sink());
 
             /* empty, not null: n_child() reports SIZE, and a DArenaVector's
              * capacity is fixed at construction, so a non-zero capacity must
              * not show up here
              */
-            REQUIRE(ss.str() == std::string("[]"));
+            REQUIRE(std::string(ss.output()) == std::string("[]"));
         } /*TEST_CASE(print-json-darena-vector-empty)*/
 
         TEST_CASE("print-json-empty-struct", "[printjson]") {
@@ -287,12 +289,12 @@ namespace xo {
 
             TaggedPtr tp = Reflect::make_tp(&recd0);
 
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
-            print_json.print(tp, &ss);
+            print_json.print(tp, &ss.sink());
 
             /* no members: still "_members_", so the shape never varies */
-            REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct0\"" + type_member<TestStruct0>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"TestStruct0\"" + type_member<TestStruct0>()
                                  + ", \"_id_\": 1, \"_members_\": []}"));
         } /*TEST_CASE(print-json-empty-struct)*/
 
@@ -330,11 +332,11 @@ namespace xo {
 
             TaggedPtr tp = Reflect::make_tp(&recd1);
 
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
-            print_json.print(tp, &ss);
+            print_json.print(tp, &ss.sink());
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"TestStruct1\"" + type_member<TestStruct1>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"TestStruct1\"" + type_member<TestStruct1>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<std::int16_t>("i16", "atomic", "-1") + ", "
                                  + mentry<std::uint16_t>("u16", "atomic", "2") + ", "
@@ -356,11 +358,11 @@ namespace xo {
 
             TaggedPtr tp = Reflect::make_tp(&v1);
 
-            std::stringstream ss;
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
 
-            print_json.print(tp, &ss);
+            print_json.print(tp, &ss.sink());
 
-            REQUIRE(ss.str() == std::string("[1, 2, 3]"));
+            REQUIRE(std::string(ss.output()) == std::string("[1, 2, 3]"));
         } /*TEST_CASE(print-json-v1)*/
 
         namespace {
@@ -413,10 +415,10 @@ namespace xo {
             PrintJson print_json;
             EnumHolder h{Mood::cross, static_cast<Mood>(9)};
 
-            std::stringstream ss;
-            print_json.print(h, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(h, &ss.sink());
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"EnumHolder\"" + type_member<EnumHolder>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"EnumHolder\"" + type_member<EnumHolder>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<Mood>("m", "atomic", "\"cross\"") + ", "
                                  + mentry<Mood>("odd", "atomic", "9") + "]}"));
@@ -431,11 +433,11 @@ namespace xo {
             PrintJson print_json;
             UnlistedHolder h{Unlisted::y};
 
-            std::stringstream ss;
-            print_json.print(h, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(h, &ss.sink());
 
-            REQUIRE(ss.str().find("\"_name_\": \"u\"") != std::string::npos);
-            REQUIRE(ss.str().find("\"_error_\": \"type not reflected: ") != std::string::npos);
+            REQUIRE(std::string(ss.output()).find("\"_name_\": \"u\"") != std::string::npos);
+            REQUIRE(std::string(ss.output()).find("\"_error_\": \"type not reflected: ") != std::string::npos);
         } /*TEST_CASE(print-json-unreflected-enum-member)*/
 
         namespace {
@@ -469,10 +471,10 @@ namespace xo {
             AtomicHolder h;
             h.n_.store(7);
 
-            std::stringstream ss;
-            print_json.print(h, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(h, &ss.sink());
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"AtomicHolder\"" + type_member<AtomicHolder>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"AtomicHolder\"" + type_member<AtomicHolder>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<std::atomic<int>>("n", "atomic", "7") + ", "
                                  + mentry<std::atomic<bool>>("on", "atomic", "true") + ", "
@@ -518,10 +520,10 @@ namespace xo {
             PrintJson print_json;
             TicketHolder h{Ticket{42}};
 
-            std::stringstream ss;
-            print_json.print(h, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print(h, &ss.sink());
 
-            REQUIRE(ss.str() == ("{\"_name_\": \"TicketHolder\"" + type_member<TicketHolder>()
+            REQUIRE(std::string(ss.output()) == ("{\"_name_\": \"TicketHolder\"" + type_member<TicketHolder>()
                                  + ", \"_id_\": 1, \"_members_\": ["
                                  + mentry<Ticket>("t", "atomic", "42") + "]}"));
         } /*TEST_CASE(print-json-transparent-wrapper)*/

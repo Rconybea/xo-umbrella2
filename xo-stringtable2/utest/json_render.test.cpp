@@ -22,6 +22,8 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflectable2/FopTdx.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>
@@ -83,10 +85,10 @@ namespace xo {
 
             auto x = with_facet<AReflectable>::mkobj(DString::from_cstr(alloc, "hello"));
 
-            std::stringstream ss;
-            print_json.print_obj(x, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print_obj(x, &ss.sink());
 
-            REQUIRE(ss.str() == std::string("\"hello\""));
+            REQUIRE(std::string(ss.output()) == std::string("\"hello\""));
         } /*TEST_CASE(DString-renders-as-a-json-string)*/
 
         TEST_CASE("erased-DString-renders-the-same", "[printjson][DString]")
@@ -113,10 +115,10 @@ namespace xo {
             vt<AGCObject> gco
                 = with_facet<AGCObject>::mkobj(DString::from_cstr(alloc, "hello"));
 
-            std::stringstream ss;
-            print_json.print_obj(gco, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print_obj(gco, &ss.sink());
 
-            REQUIRE(ss.str() == std::string("\"hello\""));
+            REQUIRE(std::string(ss.output()) == std::string("\"hello\""));
         } /*TEST_CASE(erased-DString-renders-the-same)*/
 
         TEST_CASE("DString-json-uses-size-not-nul", "[printjson][DString]")
@@ -143,10 +145,10 @@ namespace xo {
             auto x = with_facet<AReflectable>::mkobj
                 (DString::from_view(alloc, std::string_view("a\0b", 3)));
 
-            std::stringstream ss;
-            print_json.print_obj(x, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print_obj(x, &ss.sink());
 
-            REQUIRE(ss.str() == std::string("\"a\\u0000b\""));
+            REQUIRE(std::string(ss.output()) == std::string("\"a\\u0000b\""));
         } /*TEST_CASE(DString-json-uses-size-not-nul)*/
     } /*namespace ut*/
 } /*namespace xo*/

@@ -22,8 +22,12 @@ namespace xo {
 }
 
 namespace {
-    /** capacity for the thread-local scratch arena behind tostr()/toppstr() **/
-    constexpr std::uint32_t c_temp_arena_capacity = 64 * 1024;
+    /** capacity for the thread-local scratch arena behind tostr()/toppstr()
+     *  and TempFlatSink.  1 MB: each websocket message is built there
+     *  (WebsocketSinkImpl::notify_ev_tp), and a server snapshot is ~28 KB
+     *  today.  Reserved, not committed, so a generous limit is cheap
+     **/
+    constexpr std::uint32_t c_temp_arena_capacity = 1024 * 1024;
 }
 
 int

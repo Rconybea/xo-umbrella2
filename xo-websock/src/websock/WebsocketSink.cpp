@@ -10,8 +10,10 @@
 #include <xo/printjson/type_keys.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog2/print/tostr.hpp>  /* display_string */
+#include <xo/indentlog2/print/TempFlatSink.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>   /* ss << quot(..) */
+#include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag_ostream.hpp>      /* ss << xtag(..) */
@@ -25,6 +27,9 @@ namespace xo {
     using xo::reflect::TaggedRcptr;
     using xo::reflect::Reflect;
     using xo::pp::quot;
+    using xo::pp::PpSink;
+    using xo::pp::PpStyle;
+    using xo::pp::TempFlatSink;
     using xo::pp::scope;
     using xo::pp::xtag;
 
@@ -89,27 +94,31 @@ namespace xo {
         {
             scope log(XO_DEBUG_(true /*debug_flag*/));
 
-            std::stringstream ss;
+            /* the message, in scratch memory, through a json sink -- so the
+             * envelope's strings escape for json too
+             */
+            TempFlatSink msg(PpStyle::json());
+            PpSink & sink = msg.sink();
 
             /* format message envelope.  seq is 0-based: this message's seq
              * is the count of messages sent before it
              */
-            ss << "{" << quot("stream") << ": " << quot(this->stream_name_)
-               << ", " << quot("sub_id") << ": " << this->sub_id_
-               << ", " << quot("seq") << ": " << this->n_in_ev_
-               << ", " << quot("event") << ": ";
+            sink("{", quot("stream"), ": ", quot(this->stream_name_),
+                 ", ", quot("sub_id"), ": ", this->sub_id_,
+                 ", ", quot("seq"), ": ", this->n_in_ev_,
+                 ", ", quot("event"), ": ");
 
             /* format event as json */
-            this->pjson_->print_tp(ev_tp, &ss);
+            this->pjson_->print_tp(ev_tp, &sink);
 
-            ss << "}";
+            sink("}");
 
-            log && log("sending", xtag("msg", ss.str()));
+            log && log("sending", xtag("msg", msg.output()));
 
             ++(this->n_in_ev_);
 
             /* send event via associated websocket */
-            this->sender_->send_text(ss.str());
+            this->sender_->send_text(std::string(msg.output()));
 
         } /*notify_ev_tp*/
 

@@ -10,6 +10,8 @@
 #include "xo/printjson/JsonPrinter.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <atomic>
 #include <memory>
@@ -163,13 +165,13 @@ namespace xo {
             s_m2 = &g.m2_;
             s_seen.clear();
 
-            std::stringstream ss;
-            pjson.print(g, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            pjson.print(g, &ss.sink());
 
-            INFO(ss.str());
+            INFO(std::string(ss.output()));
 
             /* unguarded first, then m1's group, then m2's */
-            REQUIRE(member_names(ss.str()) == std::vector<std::string>{"free", "x", "z", "y"});
+            REQUIRE(member_names(std::string(ss.output())) == std::vector<std::string>{"free", "x", "z", "y"});
 
             /* each probe printed with exactly its own guard held */
             REQUIRE(s_seen.size() == 3);
@@ -209,9 +211,9 @@ namespace xo {
                 std::lock_guard<std::mutex> lock(g.m1_);
 
                 std::thread t([&]() {
-                    std::stringstream ss;
-                    pjson.print(g, &ss);
-                    out = ss.str();
+                    xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                    pjson.print(g, &ss.sink());
+                    out = std::string(ss.output());
                 });
                 t.join();
             }
@@ -249,11 +251,11 @@ namespace xo {
             int n_unequal = 0;
             long last = 0;
             for (int i = 0; i < 200; ++i) {
-                std::stringstream ss;
-                pjson.print(p, &ss);
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                pjson.print(p, &ss.sink());
 
-                long a = member_long(ss.str(), "a");
-                long b = member_long(ss.str(), "b");
+                long a = member_long(std::string(ss.output()), "a");
+                long b = member_long(std::string(ss.output()), "b");
 
                 if (a != b)
                     ++n_unequal;

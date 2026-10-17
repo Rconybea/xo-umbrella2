@@ -10,6 +10,8 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 #include <xo/timeutil/timeutil.hpp>
 
@@ -205,7 +207,13 @@ namespace xo {
                  */
                 auto ev_v = this->last_n(100);
 
-                pjson->print_tp(Reflect::make_tp(&ev_v), p_os);
+                /* the http body is an ostream (HttpEndpointFn's choice); json
+                 * goes through a sink over its buffer
+                 * (.xo-backlog/xo-printjson/issues/01)
+                 */
+                xo::pp::FlatSink sink(xo::pp::PpStyle::json(), p_os->rdbuf());
+
+                pjson->print_tp(Reflect::make_tp(&ev_v), &sink);
             } /*http_snapshot*/
 
             virtual void clear() override { this->tree_.clear(); }

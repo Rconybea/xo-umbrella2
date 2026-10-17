@@ -10,6 +10,8 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/SelfTagging.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <memory>
 #include <sstream>
@@ -139,9 +141,9 @@ namespace xo {
             template <typename T>
             std::string print(T const & x) {
                 PrintJson pjson;
-                std::stringstream ss;
-                pjson.print(x, &ss);
-                return ss.str();
+                xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+                pjson.print(x, &ss.sink());
+                return std::string(ss.output());
             }
 
             bool contains(std::string const & s, std::string const & pat) {

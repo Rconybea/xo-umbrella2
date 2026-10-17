@@ -21,6 +21,8 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflectable2/FopTdx.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog2/print/TempFlatSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>
@@ -80,13 +82,13 @@ namespace xo {
 
             auto x = with_facet<AReflectable>::mkobj(DFloat::_box(alloc, 1.5));
 
-            std::stringstream ss;
-            print_json.print_obj(x, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print_obj(x, &ss.sink());
 
             /* NOT {"_name_": "DFloat", "value": 1.5}: the printer decides how a
              * boxed float reads, and reflection is left honest about layout
              */
-            REQUIRE(ss.str() == std::string("1.5"));
+            REQUIRE(std::string(ss.output()) == std::string("1.5"));
         } /*TEST_CASE(DFloat-renders-as-a-bare-number)*/
 
         TEST_CASE("erased-DFloat-renders-the-same", "[printjson][DFloat]")
@@ -112,10 +114,10 @@ namespace xo {
              */
             vt<AGCObject> gco = with_facet<AGCObject>::mkobj(DFloat::_box(alloc, 1.5));
 
-            std::stringstream ss;
-            print_json.print_obj(gco, &ss);
+            xo::pp::TempFlatSink ss(xo::pp::PpStyle::json());
+            print_json.print_obj(gco, &ss.sink());
 
-            REQUIRE(ss.str() == std::string("1.5"));
+            REQUIRE(std::string(ss.output()) == std::string("1.5"));
         } /*TEST_CASE(erased-DFloat-renders-the-same)*/
     } /*namespace ut*/
 } /*namespace xo*/

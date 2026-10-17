@@ -69,11 +69,12 @@ namespace xo {
             reflect::GuardMode guard_mode() const { return guard_mode_; }
             void assign_guard_mode(reflect::GuardMode x) { guard_mode_ = x; }
 
+            /** print @p x_arg into @p sink, in JSON format: see print_tp **/
             template<typename T>
-            void print(T const & x_arg, std::ostream * p_os) const {
+            void print(T const & x_arg, xo::pp::PpSink * sink) const {
                 T * x = const_cast<T *>(&x_arg);
 
-                this->print_tp(Reflect::make_tp(x), p_os);
+                this->print_tp(Reflect::make_tp(x), sink);
             } /*print*/
 
             /** print object @p tp into @p sink, in JSON format.
@@ -85,18 +86,12 @@ namespace xo {
              **/
             void print_tp(TaggedPtr tp, xo::pp::PpSink * sink) const;
 
-            /** print object @p tp on stream @p *p_os, in JSON format:
-             *  print_tp(tp, sink) through a FlatSink(PpStyle::json()) over
-             *  @c p_os->rdbuf()
-             **/
-            void print_tp(TaggedPtr tp, std::ostream * p_os) const;
-
             /* convenience -- shorthand for
-             *   .print(obj->self_tp(), p_os)
+             *   .print_tp(obj->self_tp(), sink)
              */
-            void print_obj(rp<SelfTagging> const & obj, std::ostream * p_os) const;
+            void print_obj(rp<SelfTagging> const & obj, xo::pp::PpSink * sink) const;
 
-            /** print faceted object pointer @p x on @p p_os, in JSON format.
+            /** print faceted object pointer @p x into @p sink, in JSON format.
              *
              *  Templated on @tparam AFacet rather than fixed to AReflectable,
              *  because a caller holds whatever facet it was already using --
@@ -110,7 +105,7 @@ namespace xo {
              *  @ref validate_obj first for all-or-nothing.
              **/
             template <typename AFacet, typename DRepr>
-            void print_obj(xo::facet::obj<AFacet, DRepr> x, std::ostream * p_os) const {
+            void print_obj(xo::facet::obj<AFacet, DRepr> x, xo::pp::PpSink * sink) const {
                 if constexpr (std::is_same_v<AFacet, AReflectable>) {
                     /* fast path: x already carries the capability -- its iface
                      * IS an AReflectable implementation -- so ask it directly,
@@ -121,10 +116,10 @@ namespace xo {
                      * through renders it as {}, matching the generic path.
                      */
                     if (x.data())
-                        return this->print_tp(x.self_tp(), p_os);
+                        return this->print_tp(x.self_tp(), sink);
                 }
 
-                this->print_tp(Reflect::make_tp(&x), p_os);
+                this->print_tp(Reflect::make_tp(&x), sink);
             } /*print_obj*/
 
             /** Walk everything @p tp reaches WITHOUT printing, throwing on the
