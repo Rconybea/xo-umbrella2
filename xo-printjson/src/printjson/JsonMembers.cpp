@@ -4,13 +4,11 @@
  **/
 
 #include "JsonMembers.hpp"
-#include "json_layout.hpp"
 #include <xo/reflect/struct/StructMember.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
 #include <xo/reflect/map/MapTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>
-#include <xo/ppsink/quoted.hpp>
 #include <cassert>
 #include <exception>
 
@@ -23,13 +21,12 @@ namespace xo {
     namespace json {
         /* one scope in from namespace xo: see PrintJson.cpp */
         using xo::pp::tostr;
-        using xo::pp::quot;
 
         JsonMembers::JsonMembers(JsonPrintState & state)
             : state_{&state}, n_uncaught_{std::uncaught_exceptions()}
         {
-            /* the leading comma: the object's _name_ and type keys come first */
-            this->write(json_sep(), quot("_members_"), ": ", json_open{'['});
+            /* after the object's _name_ and type keys */
+            this->json().key("_members_").open_list();
         }
 
         JsonMembers::~JsonMembers()
@@ -41,7 +38,7 @@ namespace xo {
         void
         JsonMembers::end()
         {
-            this->write(json_close{']'});
+            this->json().close_list();
             ended_ = true;
         }
 
@@ -188,24 +185,22 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            this->write(json_sep(), quot("_value_"), ": ");
+            this->json().key("_value_");
             if (identity)
                 state_->print(value);
             else
                 state_->print_value(value);
-            this->write(json_close{'}'});
+            this->json().close_object();
         }
 
         void
         JsonMembers::write_head(std::string_view name, DeclaredType const & declared)
         {
-            if (!first_)
-                this->write(json_sep());
-            first_ = false;
+            JsonPpSink & json = this->json();
 
-            this->write(json_open{'{'}, quot("_name_"), ": ", quot(name),
-                        json_sep(), type_keys(declared.canonical_, declared.short_),
-                        json_sep(), quot("_metatype_"), ": ", quot(metatype2str(declared.metatype_)));
+            json.open_object().key("_name_").string(name);
+            type_keys(declared.canonical_, declared.short_).write(json);
+            json.key("_metatype_").string(metatype2str(declared.metatype_));
         }
 
         void
@@ -214,9 +209,9 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            this->write(json_sep(), quot("_value_"), ": ");
+            this->json().key("_value_");
             state_->print_pointee(ptr, edge);
-            this->write(json_close{'}'});
+            this->json().close_object();
         }
 
         void
@@ -225,9 +220,9 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            this->write(json_sep(), quot("_value_"), ": ");
+            this->json().key("_value_");
             this->write_ref_value(p);
-            this->write(json_close{'}'});
+            this->json().close_object();
         }
 
         void
@@ -236,13 +231,10 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            this->write(json_sep(), quot("_value_"), ": ", json_open{'['});
-            for (std::size_t i = 0, n = ps.size(); i < n; ++i) {
-                if (i > 0)
-                    this->write(json_sep());
+            this->json().key("_value_").open_list();
+            for (std::size_t i = 0, n = ps.size(); i < n; ++i)
                 this->write_ref_value(ps[i]);
-            }
-            this->write(json_close{']'}, json_close{'}'});
+            this->json().close_list().close_object();
         }
 
         void
@@ -251,14 +243,12 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            this->write(json_sep(), quot("_value_"), ": ", json_open{'{'});
+            this->json().key("_value_").open_object();
             for (std::size_t i = 0, n = kvs.size(); i < n; ++i) {
-                if (i > 0)
-                    this->write(json_sep());
-                this->write(quot(kvs[i].first), ": ");
+                this->json().key(kvs[i].first);
                 this->write_ref_value(kvs[i].second);
             }
-            this->write(json_close{'}'}, json_close{'}'});
+            this->json().close_object().close_object();
         }
 
         void
@@ -272,7 +262,7 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            this->write(json_sep(), quot("_locked_"), ": true", json_close{'}'});
+            this->json().key("_locked_").boolean(true).close_object();
         }
 
         void
@@ -281,7 +271,7 @@ namespace xo {
         {
             this->write_head(name, declared);
 
-            this->write(json_sep(), quot("_error_"), ": ", quot(why), json_close{'}'});
+            this->json().key("_error_").string(why).close_object();
         }
     } /*namespace json*/
 } /*namespace xo*/

@@ -5,7 +5,7 @@
 
 #include "EigenUtil.hpp"
 #include <xo/printjson/PrintJson.hpp>
-#include <xo/printjson/json_layout.hpp>
+#include <xo/printjson/JsonPpSink.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/pretty.hpp>
 #include <Eigen/Dense>
@@ -16,9 +16,6 @@
 namespace xo {
     using xo::json::PrintJson;
     using xo::json::JsonPrinter;
-    using xo::json::json_open;
-    using xo::json::json_sep;
-    using xo::json::json_close;
     using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
     using VectorXb = Eigen::Array<bool, Eigen::Dynamic, 1>;
@@ -52,7 +49,7 @@ namespace xo {
             template<typename EigenVectorType>
             class EigenVectorJsonPrinter : public JsonPrinter {
             public:
-                using PpSink = xo::pp::PpSink;
+                using JsonPpSink = xo::json::JsonPpSink;
 
             public:
                 /* a json array, not an object: no identity */
@@ -60,7 +57,7 @@ namespace xo {
 
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
-                        PpSink & sink = *state.sink();
+                        JsonPpSink & json = state.json();
 
                         EigenVectorType * pv = this->check_recover_native<EigenVectorType>(tp, state);
 
@@ -70,19 +67,17 @@ namespace xo {
                              *
                              * as soon as we reflect as mt_vector,  will not need this helper.
                              */
-                            sink(json_open{'['});
+                            /* elements separated by "," alone: "[1,2,3]" */
+                            json.open_list(0);
 
                             for (std::uint32_t i = 0, n = pv->size(); i < n; ++i) {
-                                if (i > 0)
-                                    sink(json_sep{0});
-
                                 /* note: need to dispatch via json printer for vector elements,
                                  *       to get special treatment for non-finite values
                                  */
                                 state.print(Reflect::make_tp(&(*pv)[i]));
                             }
 
-                            sink(json_close{']'});
+                            json.close_list();
                         }
                     } /*print_json*/
             }; /*EigenVectorJsonPrinter*/
@@ -92,7 +87,7 @@ namespace xo {
              */
             class MatrixXdJsonPrinter : public JsonPrinter {
             public:
-                using PpSink = xo::pp::PpSink;
+                using JsonPpSink = xo::json::JsonPpSink;
 
             public:
                 /* a json array, not an object: no identity */
@@ -100,31 +95,29 @@ namespace xo {
 
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
-                        PpSink & sink = *state.sink();
+                        JsonPpSink & json = state.json();
 
                         MatrixXd * pm = this->check_recover_native<MatrixXd>(tp, state);
 
                         if (pm) {
                             /* MatrixXd is reflected as atomic for now, out of expedience */
-                            sink(json_open{'['});
+                            /* rows separated by ", ", elements by "," alone:
+                             * "[[1,2,3], [4,5,6]]"
+                             */
+                            json.open_list();
 
                             for(std::uint32_t i=0, m=pm->rows(); i<m; ++i) {
-                                if (i > 0)
-                                    sink(json_sep());
-                                sink(json_open{'['});
+                                json.open_list(0);
                                 for(std::uint32_t j=0, n=pm->cols(); j<n; ++j) {
-                                    if (j > 0)
-                                        sink(json_sep{0});
-
                                     /* note: need to dispatch via json printer for matrix elements,
                                      *       to get special treatment for non-finite values
                                      */
                                     state.print(Reflect::make_tp(&(*pm)(i, j)));
                                 }
-                                sink(json_close{']'});
+                                json.close_list();
                             }
 
-                            sink(json_close{']'});
+                            json.close_list();
                         }
                     } /*print_json*/
             }; /*MatrixXdJsonPrinter*/

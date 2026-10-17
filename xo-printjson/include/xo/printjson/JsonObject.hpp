@@ -32,7 +32,6 @@ namespace xo {
         public:
             using Reflect = xo::reflect::Reflect;
             using TaggedPtr = xo::reflect::TaggedPtr;
-            using PpSink = xo::pp::PpSink;
 
         public:
             JsonObject(JsonObject const &) = delete;
@@ -66,11 +65,11 @@ namespace xo {
              **/
             JsonObject & key_ref(std::string_view k, void const * p);
 
-            /** , "@p k": -- and the sink, for a value the printer writes
-             *  itself (an array, say), printing any objects in it through
-             *  state()
+            /** , "@p k": -- and the json sink, for a value the printer
+             *  writes itself (a list, say), printing any objects in it
+             *  through state()
              **/
-            PpSink & key_open(std::string_view k);
+            JsonPpSink & key_open(std::string_view k);
 
             /** , "_members_": [ .. ] -- after any keys **/
             JsonMembers members();

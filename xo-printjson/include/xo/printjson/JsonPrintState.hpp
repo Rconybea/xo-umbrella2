@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "JsonPpSink.hpp"
 #include <xo/reflect/Ownership.hpp>
 #include <xo/reflect/struct/GuardedVisit.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/ppsink/PpSink.hpp>
-#include <xo/ppsink/pretty.hpp>
 #include <cstdint>
 #include <string_view>
 #include <unordered_map>
@@ -85,20 +85,18 @@ namespace xo {
             /** a print of json into @p sink, through @p pjson's printers,
              *  nesting at most @p pjson->max_depth() deep.
              *
-             *  Throws std::runtime_error unless @p sink escapes for json
-             *  (@c sink->style().escape == escapestyle::json, e.g.
-             *  PpStyle::json()): a display-escaping sink would write \xNN
-             *  into the document.  Colour is not checked -- coloured json,
-             *  for a human to read, is the caller's choice.
-             *  See .xo-backlog/xo-printjson/issues/01
+             *  Throws std::runtime_error unless @p sink escapes for json:
+             *  see JsonPpSink
              **/
             JsonPrintState(PrintJson const * pjson, PpSink * sink);
 
             JsonPrintState(JsonPrintState const &) = delete;
             JsonPrintState & operator=(JsonPrintState const &) = delete;
 
-            /** where json goes **/
-            PpSink * sink() const { return sink_; }
+            /** where json goes: printers write through it.  See
+             *  .xo-backlog/xo-printjson/issues/11
+             **/
+            JsonPpSink & json() { return json_; }
 
             /** true iff a printer was provided for @p td (PrintJson::provide_printer) **/
             bool has_printer(TypeDescr td) const;
@@ -204,13 +202,6 @@ namespace xo {
             /** past max_depth_: diagnose, backtrace, abort **/
             [[noreturn]] void abort_too_deep(TaggedPtr tp) const;
 
-            /** write @p args, in order, to sink(): text as is, a number in
-             *  decimal, quot(s) as a json string literal (sink() escapes for
-             *  json).  Structure descriptors (begin/split/end) drive layout.
-             *  See PpSink::operator()
-             **/
-            template <typename... Ts>
-            void write(const Ts &... args) { (*this->sink_)(args...); }
             /** printer misuse (open_object twice, or outside print_json): diagnose, abort **/
             [[noreturn]] void abort_misuse(char const * what) const;
             /** {"_name_": .., type keys, and "_id_" if @p p non-null: owns @p p's entry.
@@ -225,15 +216,11 @@ namespace xo {
              **/
             void print_root(TaggedPtr tp);
             /** a map (MapTdx), within print_node's depth level: a json
-             *  object keyed by each key's json -- quoted if not a json
-             *  string already -- when keys are atomic; else an array of
-             *  {"_key_": .., "_value_": ..}.  In key order
+             *  object, each key printed where json_ expects a key -- so a
+             *  number key becomes "3" -- when keys are atomic; else an array
+             *  of {"_key_": .., "_value_": ..}.  In key order
              **/
             void print_map(TaggedPtr tp);
-            /** @p key's json, as a json object key: its printed form, quoted
-             *  unless already a json string.  No identity: printed as a value
-             **/
-            std::string map_key_string(TaggedPtr key);
             /** print_pointee, within a depth level already counted **/
             void print_pointee_aux(TaggedPtr ptr, reflect::Ownership edge);
             /** , "_unplaced_": [..] -- if any; from the root JsonObject's close() **/
@@ -242,16 +229,14 @@ namespace xo {
         private:
             /* close() of the root object writes "_unplaced_" */
             friend class JsonObject;
-            /* writes its entries via write() */
-            friend class JsonMembers;
             /* entry points print the top-level value via print_root */
             friend class PrintJson;
 
         private:
             /** the printer table **/
             PrintJson const * pjson_ = nullptr;
-            /** where json goes.  map_key_string redirects it for a while **/
-            PpSink * sink_ = nullptr;
+            /** where json goes **/
+            JsonPpSink json_;
             /** print() calls in progress **/
             std::uint32_t depth_ = 0;
             /** depth of the top-level object, which writes "_unplaced_":

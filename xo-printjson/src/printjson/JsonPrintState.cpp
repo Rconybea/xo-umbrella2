@@ -7,7 +7,6 @@
 #include "JsonObject.hpp"
 #include "PrintJson.hpp"
 #include "type_keys.hpp"
-#include "json_layout.hpp"
 #include <xo/reflect/enum/EnumTdx.hpp>
 #include <xo/reflect/atomic/StdAtomicTdx.hpp>
 #include <xo/reflect/wrapper/WrapperTdx.hpp>
@@ -15,9 +14,7 @@
 #include <xo/reflect/map/MapTdx.hpp>
 #include <xo/indentlog2/print/tostr.hpp>   /* tostr(..), tojsonstr(..) */
 #include <xo/arena/backtrace.hpp>
-#include <xo/ppsink/FlatSink.hpp>
-#include <xo/ppsink/quoted.hpp>             /* quot(..) */
-#include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
+#include <xo/ppsink/tag.hpp>                /* xtag(..) */
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -48,21 +45,12 @@ namespace xo {
         /* one scope in from namespace xo: see PrintJson.cpp */
         using xo::pp::tostr;
         using xo::pp::tojsonstr;
-        using xo::pp::quot;
         using xo::pp::xtag;
-        using xo::pp::FlatSink;
 
         JsonPrintState::JsonPrintState(PrintJson const * pjson, PpSink * sink)
-            : pjson_{pjson}, sink_{sink}, max_depth_{pjson->max_depth()},
+            : pjson_{pjson}, json_{sink}, max_depth_{pjson->max_depth()},
               guard_mode_{pjson->guard_mode()}
-        {
-            if (!sink || (sink->style().escape != xo::pp::escapestyle::json)) {
-                throw std::runtime_error
-                    (tostr("JsonPrintState: sink must escape for json"
-                           " (PpStyle::escape == escapestyle::json, e.g. PpStyle::json())",
-                           (sink ? "" : "; sink is null")));
-            }
-        }
+        {}
 
         void
         JsonPrintState::abort_too_deep(TaggedPtr tp) const
@@ -147,16 +135,12 @@ namespace xo {
                  *   [1.0, 2.0, 3.0]
                  */
 
-                (*state.sink())(json_open{'['});
+                state.json().open_list();
 
-                for (uint32_t i = 0, n = tp.n_child(); i < n; ++i) {
-                    if (i > 0)
-                        (*state.sink())(json_sep());
-
+                for (uint32_t i = 0, n = tp.n_child(); i < n; ++i)
                     state.print(tp.get_child(i));
-                }
 
-                (*state.sink())(json_close{']'});
+                state.json().close_list();
             } /*print_generic_vector*/
 
             /* this will be used when TaggedPtr is understood to refer to a struct-like value.
@@ -235,12 +219,12 @@ namespace xo {
             void
             print_reflected_enum(EnumTdx const & ei,
                                  TaggedPtr tp,
-                                 PpSink & sink)
+                                 JsonPpSink & json)
             {
                 if (std::string const * name = ei.name_of(tp.address()))
-                    sink(quot(*name));
+                    json.string(*name);
                 else
-                    sink(ei.value_of(tp.address()));
+                    json.number(ei.value_of(tp.address()));
             } /*print_reflected_enum*/
 
         } /*namespace*/
@@ -304,7 +288,7 @@ namespace xo {
                 void const * p = ptdx->pointee_address(ptr.address());
 
                 if (!p) {
-                    this->write("null");
+                    json_.null();
                     return;
                 }
 
@@ -313,7 +297,7 @@ namespace xo {
                 if (!e.ref_type_)
                     e.ref_type_ = ptr.td()->fixed_child_td(0);
 
-                this->write("{", quot("_ref_"), ": ", e.id_, "}");
+                json_.open_object().key("_ref_").number(e.id_).close_object();
                 return;
             }
 
@@ -325,7 +309,7 @@ namespace xo {
                  * (JsonPrinter_ObjectSlot, JsonPrinter_RootSet) already
                  * emit
                  */
-                this->write("null");
+                json_.null();
                 return;
             }
 
@@ -339,33 +323,6 @@ namespace xo {
 
             this->print(target);
         } /*print_pointee_aux*/
-
-        std::string
-        JsonPrintState::map_key_string(TaggedPtr key)
-        {
-            /* print the key as a value, into a string: swap the sink */
-            std::stringstream ss;
-            {
-                /* capture the key's json: everything written goes to ss
-                 * for now
-                 */
-                FlatSink key_sink(this->sink_->style(), ss.rdbuf());
-                RestoreScope<PpSink *> restore(&this->sink_);
-                this->sink_ = &key_sink;
-
-                this->print_value(key);
-            }
-
-            std::string s = ss.str();
-
-            /* a json string already (a std::string, an enum's name): as is.
-             * Else (a number, say) quote it -- json object keys are strings
-             */
-            if (!s.empty() && s.front() == '"')
-                return s;
-
-            return tojsonstr(quot(s));
-        } /*map_key_string*/
 
         void
         JsonPrintState::print_map(TaggedPtr tp)
@@ -384,39 +341,34 @@ namespace xo {
             MapTdx const * mi = tp.td()->map_info();
 
             if (mi->key_td()->metatype() == Metatype::mt_atomic) {
-                this->write(json_open{'{'});
+                /* each key prints where the object expects a key, so
+                 * json_ writes it as one: a json string as is, anything
+                 * else (a number, say) quoted -- json keys are strings.
+                 * No identity: a key prints as a value
+                 */
+                json_.open_object();
 
-                bool first = true;
                 mi->visit_entries(tp.address(),
-                                  [this, &first](TaggedPtr key, TaggedPtr value) {
-                                      if (!first)
-                                          this->write(json_sep());
-                                      first = false;
-
-                                      this->write(this->map_key_string(key), ": ");
+                                  [this](TaggedPtr key, TaggedPtr value) {
+                                      this->print_value(key);
                                       this->print(value);
                                   });
 
-                this->write(json_close{'}'});
+                json_.close_object();
             } else {
                 /* a key json cannot use as an object key (a struct, say) */
-                this->write(json_open{'['});
+                json_.open_list();
 
-                bool first = true;
                 mi->visit_entries(tp.address(),
-                                  [this, &first](TaggedPtr key, TaggedPtr value) {
-                                      if (!first)
-                                          this->write(json_sep());
-                                      first = false;
-
-                                      this->write(json_open{'{'}, quot("_key_"), ": ");
+                                  [this](TaggedPtr key, TaggedPtr value) {
+                                      json_.open_object().key("_key_");
                                       this->print(key);
-                                      this->write(json_sep(), quot("_value_"), ": ");
+                                      json_.key("_value_");
                                       this->print(value);
-                                      this->write(json_close{'}'});
+                                      json_.close_object();
                                   });
 
-                this->write(json_close{']'});
+                json_.close_list();
             }
         } /*print_map*/
 
@@ -446,24 +398,21 @@ namespace xo {
             std::sort(v.begin(), v.end(),
                       [](auto const & x, auto const & y) { return x.second->id_ < y.second->id_; });
 
-            this->write(json_sep(), quot("_unplaced_"), ": ", json_open{'['});
+            json_.key("_unplaced_").open_list();
             for (std::size_t i = 0, n = v.size(); i < n; ++i) {
                 ObjectEntry const & e = *(v[i].second);
-
-                if (i > 0)
-                    this->write(json_sep());
 
                 /* _ref_, not _id_: an entry names its object, it does not
                  * define it -- which may happen elsewhere, as another type
                  */
-                this->write(json_open{'{'}, quot("_ref_"), ": ", e.id_);
+                json_.open_object().key("_ref_").number(e.id_);
                 if (e.ref_type_)
-                    this->write(json_sep(), quot("_type_"), ": ", quot(e.ref_type_->short_name()));
+                    json_.key("_type_").string(e.ref_type_->short_name());
                 /* decimal: json has no hex (see JsonPrinter_address) */
-                this->write(json_sep(), quot("_address_"), ": ",
-                            reinterpret_cast<std::uintptr_t>(v[i].first), json_close{'}'});
+                json_.key("_address_").number(reinterpret_cast<std::uintptr_t>(v[i].first));
+                json_.close_object();
             }
-            this->write(json_close{']'});
+            json_.close_list();
         } /*write_unplaced*/
 
         JsonPrintState::ObjectEntry &
@@ -481,11 +430,11 @@ namespace xo {
         JsonPrintState::print_ref(void const * p)
         {
             if (!p) {
-                this->write("null");
+                json_.null();
                 return;
             }
 
-            this->write("{", quot("_ref_"), ": ", this->entry_for(p).id_, "}");
+            json_.open_object().key("_ref_").number(this->entry_for(p).id_).close_object();
         } /*print_ref*/
 
         JsonObject
@@ -539,7 +488,8 @@ namespace xo {
         JsonPrintState::open_object_aux(void const * p, std::string_view name, TypeDescr td,
                                         bool is_root)
         {
-            this->write(json_open{'{'}, quot("_name_"), ": ", quot(name), json_sep(), type_keys(td));
+            json_.open_object().key("_name_").string(name);
+            type_keys(td).write(json_);
 
             if (p) {
                 /* first object printed at this address: it owns the entry,
@@ -548,7 +498,7 @@ namespace xo {
                 ObjectEntry & e = this->entry_for(p);
 
                 e.type_ = td;
-                this->write(json_sep(), quot("_id_"), ": ", e.id_);
+                json_.key("_id_").number(e.id_);
             }
 
             return JsonObject(this, is_root);
@@ -589,7 +539,7 @@ namespace xo {
                          * e.g. an unreflected receiver an endpoint writes
                          * inline (.xo-backlog/xo-reflect/issues/04)
                          */
-                        this->write("{", quot("_ref_"), ": ", ix->second.id_, "}");
+                        json_.open_object().key("_ref_").number(ix->second.id_).close_object();
                         return;
                     }
 
@@ -632,7 +582,7 @@ namespace xo {
                          * set -- its signature is its declared type
                          * (.xo-backlog/xo-reflect/issues/09)
                          */
-                        this->write(quot(tp.td()->fn_is_set(tp.address()) ? "set" : "empty"));
+                        json_.string(tp.td()->fn_is_set(tp.address()) ? "set" : "empty");
                         return;
                     case Metatype::mt_atomic:
                         if (StdAtomicTdx const * ai = tp.td()->std_atomic_info()) {
@@ -648,7 +598,7 @@ namespace xo {
                             return;
                         }
                         if (EnumTdx const * ei = tp.td()->enum_info()) {
-                            print_reflected_enum(*ei, tp, *this->sink_);
+                            print_reflected_enum(*ei, tp, json_);
                             return;
                         }
                         break;
@@ -656,13 +606,14 @@ namespace xo {
                         break;
                     }
 
-                    this->write("<error-json-printer-not-found",
-                                xtag("type", tp.td()->canonical_name()),
-                                xtag("metatype", tp.td()->metatype()),
-                                ">");
+                    /* not json: a diagnostic, where the value would go */
+                    json_.raw(tojsonstr("<error-json-printer-not-found",
+                                        xtag("type", tp.td()->canonical_name()),
+                                        xtag("metatype", tp.td()->metatype()),
+                                        ">"));
                 }
             } else {
-                this->write("<error-null-tp>");
+                json_.raw("<error-null-tp>");
             }
         } /*print_node*/
 

@@ -6,11 +6,12 @@
 #pragma once
 
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/ppsink/Prettifier.hpp>
 #include <string_view>
 
 namespace xo {
     namespace json {
+        class JsonPpSink;
+
         /** @brief the json keys naming a type, forwarding its TypeDescr:
          *
          *    "_canonical_type_": td->canonical_name(), "_short_type_": td->short_name()
@@ -18,10 +19,10 @@ namespace xo {
          *  _canonical_type_ is unique: the key into a type -> source map
          *  (.xo-backlog/xo-websock/issues/12).  _short_type_ is for display.
          *
-         *  Use in a JsonPrinter, after the object's "_name_" -- through a
-         *  json-escaping sink:
+         *  Use in a JsonPrinter, after the object's "_name_":
          *
-         *    sink("{", quot("_name_"), ": ", quot("Foo"), ", ", type_keys(tp.td()));
+         *    json.open_object().key("_name_").string("Foo");
+         *    type_keys(tp.td()).write(json);
          *
          *  Holds views: use it within the expression that creates it.
          **/
@@ -32,19 +33,13 @@ namespace xo {
             type_keys(std::string_view canonical, std::string_view short_name)
                 : canonical_{canonical}, short_{short_name} {}
 
+            /** the two keys, and their values, into the open object **/
+            void write(JsonPpSink & json) const;
+
             std::string_view canonical_;
             std::string_view short_;
         };
-
     } /*namespace json*/
-
-    namespace pp {
-        /** writes type_keys' two keys: see xo::json::type_keys **/
-        template <>
-        struct Prettifier<xo::json::type_keys> {
-            static void print(PpSink & sink, xo::json::type_keys const & k);
-        };
-    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end type_keys.hpp */

@@ -18,6 +18,7 @@
 #include <atomic>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace xo {
@@ -95,6 +96,19 @@ namespace xo {
                     + "\", \"_metatype_\": \"" + metatype
                     + "\", \"_value_\": " + value + "}";
             }
+
+            /** a members list as these tests pin it.  A list of members
+             *  belongs to an object -- JsonPpSink refuses a key outside one
+             *  -- so each test opens an object around it; this strips that
+             *  object's braces, and restores the ", " a members list follows
+             *  in real output (after the object's _name_ and type keys)
+             **/
+            std::string members_of(std::string_view out) {
+                REQUIRE(out.size() >= 2);
+                REQUIRE(out.front() == '{');
+                REQUIRE(out.back() == '}');
+                return ", " + std::string(out.substr(1, out.size() - 2));
+            }
         }
 
         TEST_CASE("json-members-empty", "[printjson][JsonMembers]") {
@@ -103,10 +117,12 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.end();
+            state.json().close_object();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": []");
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": []");
         }
 
         TEST_CASE("json-members-scalars-and-strings", "[printjson][JsonMembers]") {
@@ -118,11 +134,13 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member("n_", n).member("s_", s);
             mem.end();
+            state.json().close_object();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     + entry("n_", type_of<int>(), "atomic", "7") + ", "
                     + entry("s_", type_of<std::string>(), "atomic", "\"hello\"") + "]");
         }
@@ -139,9 +157,11 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member("r_", r).member("p_", p).member("v_", v);
             mem.end();
+            state.json().close_object();
 
             /* the value printed as PrintJson prints any value: r_ in full,
              * object 1; p_ points at r, printed already -- a ref; v_'s
@@ -155,7 +175,7 @@ namespace xo {
                     + entry("b", type_of<std::string>(), "atomic", "\"x\"") + "]}";
             };
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     + entry("r_", type_of<JmReflected>(), "struct", jm(1)) + ", "
                     + entry("p_", type_of<JmReflected *>(), "pointer", "{\"_ref_\": 1}") + ", "
                     + entry("v_", type_of<std::vector<JmReflected>>(), "vector", "[" + jm(2) + "]")
@@ -171,9 +191,11 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member("u_", u).member("pu_", pu).member("n_", 3);
             mem.end();
+            state.json().close_object();
 
             /* the entry says why, carries no value, and the rest still prints.
              * pu_ is a raw pointer -- borrowed: a ref, which needs no
@@ -181,7 +203,7 @@ namespace xo {
              */
             std::string const why = "type not reflected: " + type_of<JmUnreflected>();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     "{\"_name_\": \"u_\", \"_canonical_type_\": \"" + type_of<JmUnreflected>()
                     + "\", \"_short_type_\": \"" + xo::reflect::TypeDescrBase::make_short_name(type_of<JmUnreflected>())
                     + "\", \"_metatype_\": \"atomic\", \"_error_\": \"" + why + "\"}, "
@@ -202,11 +224,13 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member_as<std::atomic<std::int32_t>>("port_", port.load());
             mem.end();
+            state.json().close_object();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     + entry("port_", type_of<std::atomic<std::int32_t>>(), "atomic", "8080") + "]");
         }
 
@@ -222,12 +246,14 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member_ref<JmReflected *>("r_", &r)
                 .member_ref<JmReflected *>("null_", null_p);
             mem.end();
+            state.json().close_object();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     + entry("r_", type_of<JmReflected *>(), "pointer",
                             "{\"_ref_\": 1}") + ", "
                     + entry("null_", type_of<JmReflected *>(), "pointer", "null") + "]");
@@ -245,11 +271,13 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member_ref<JmReflected const &>("cr_", &cr);
             mem.end();
+            state.json().close_object();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     + entry("cr_", type_of<JmReflected const &>(), "pointer",
                             "{\"_ref_\": 1}") + "]");
         }
@@ -265,11 +293,13 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member_refs<std::vector<JmReflected *>>("v_", {&a, nullptr, &b});
             mem.end();
+            state.json().close_object();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     + entry("v_", type_of<std::vector<JmReflected *>>(), "vector",
                             "[{\"_ref_\": 1}, null, {\"_ref_\": 2}]") + "]");
         }
@@ -285,12 +315,14 @@ namespace xo {
 
             JsonPrintState state(&pjson, &ss.sink());
 
+            state.json().open_object();
             JsonMembers mem(state);
             mem.member_ref_map<std::map<std::string, JmReflected *>>("m_", {{"/a/", &a}, {"/b/", &b}, {"/z/", nullptr}});
             mem.end();
+            state.json().close_object();
 
             /* a std::map's metatype is map (xo-reflect#05) */
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": ["
                     + entry("m_", type_of<std::map<std::string, JmReflected *>>(), "map",
                             "{\"/a/\": {\"_ref_\": 1}, "
                             "\"/b/\": {\"_ref_\": 2}, "
@@ -312,17 +344,21 @@ namespace xo {
             xo::pp::TempFlatSink by_hand(xo::pp::PpStyle::json());
             {
                 JsonPrintState state(&pjson, &by_hand.sink());
+                state.json().open_object();
                 JsonMembers mem(state);
                 mem.member("r_", h.r_).member("p_", h.p_).member("v_", h.v_);
                 mem.end();
+                state.json().close_object();
             }
 
             xo::pp::TempFlatSink reflected(xo::pp::PpStyle::json());
             {
                 JsonPrintState state(&pjson, &reflected.sink());
+                state.json().open_object();
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&h));
                 mem.end();
+                state.json().close_object();
             }
 
             INFO("by hand:   " << std::string(by_hand.output()));
@@ -343,9 +379,11 @@ namespace xo {
             JmBad b;
 
             JsonPrintState state(&pjson, &ss.sink());
+            state.json().open_object();
             JsonMembers mem(state);
             mem.reflected_members(xo::reflect::Reflect::make_tp(&b));
             mem.end();
+            state.json().close_object();
 
             REQUIRE(std::string(ss.output()).find("\"_name_\": \"u_\"") != std::string::npos);
             REQUIRE(std::string(ss.output()).find("\"_error_\": \"type not reflected: ") != std::string::npos);
@@ -365,21 +403,25 @@ namespace xo {
             xo::pp::TempFlatSink suffixed(xo::pp::PpStyle::json());
             {
                 JsonPrintState state(&pjson, &plain.sink());
+                state.json().open_object();
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&r));
                 mem.end();
+                state.json().close_object();
             }
             {
                 JsonPrintState state(&pjson, &suffixed.sink());
+                state.json().open_object();
                 JsonMembers mem(state);
                 mem.reflected_members(xo::reflect::Reflect::make_tp(&r), "_");
                 mem.end();
+                state.json().close_object();
             }
 
-            REQUIRE(std::string(plain.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(plain.output()) == ", \"_members_\": ["
                     + entry("a", type_of<int>(), "atomic", "1") + ", "
                     + entry("b", type_of<std::string>(), "atomic", "\"x\"") + "]");
-            REQUIRE(std::string(suffixed.output()) == ", \"_members_\": ["
+            REQUIRE(members_of(suffixed.output()) == ", \"_members_\": ["
                     + entry("a_", type_of<int>(), "atomic", "1") + ", "
                     + entry("b_", type_of<std::string>(), "atomic", "\"x\"") + "]");
         }
@@ -391,11 +433,13 @@ namespace xo {
             int x = 7;
 
             JsonPrintState state(&pjson, &ss.sink());
+            state.json().open_object();
             JsonMembers mem(state);
             mem.reflected_members(xo::reflect::Reflect::make_tp(&x));
             mem.end();
+            state.json().close_object();
 
-            REQUIRE(std::string(ss.output()) == ", \"_members_\": []");
+            REQUIRE(members_of(ss.output()) == ", \"_members_\": []");
         }
     } /*namespace ut*/
 } /*namespace xo*/

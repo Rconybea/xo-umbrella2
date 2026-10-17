@@ -8,6 +8,7 @@ set(SELF_SRCS
     JsonPrintState.cpp
     JsonObject.cpp
     JsonMembers.cpp
+    JsonPpSink.cpp
     type_keys.cpp
     init_printjson.cpp)
 

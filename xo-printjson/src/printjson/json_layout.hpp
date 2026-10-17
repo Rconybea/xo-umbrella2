@@ -3,9 +3,10 @@
  *  @author Roland Conybeare, Oct 2026
  *
  *  Layout tokens for json written into a PpSink: where an object or array
- *  may break across lines.
+ *  may break across lines.  Private to JsonPpSink, which owns json layout
+ *  (.xo-backlog/xo-printjson/issues/11):
  *
- *    write(json_open('{'), first, json_sep(), second, json_close('}'));
+ *    sink(json_open{'{'}, first, json_sep(), second, json_close{'}'});
  *
  *  A group that fits the margin stays on one line, exactly as flat output
  *  (a FlatSink renders json_sep() as ", " and the open/close as the bare

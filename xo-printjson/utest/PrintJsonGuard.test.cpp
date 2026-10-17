@@ -74,7 +74,7 @@ namespace xo {
 
                     if (x) {
                         s_seen.push_back(ProbeSeen{x->tag_, free_elsewhere(*s_m1), free_elsewhere(*s_m2)});
-                        (*state.sink())(x->tag_);
+                        state.json().number(x->tag_);
                     }
                 }
             };

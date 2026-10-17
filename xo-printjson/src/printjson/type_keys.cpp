@@ -4,22 +4,17 @@
  **/
 
 #include "type_keys.hpp"
-#include "json_layout.hpp"
-#include <xo/ppsink/pretty.hpp>
-#include <xo/ppsink/quoted.hpp>
+#include "JsonPpSink.hpp"
 
 namespace xo {
-    using xo::json::type_keys;
-    using xo::json::json_sep;
-
-    namespace pp {
+    namespace json {
         void
-        Prettifier<type_keys>::print(PpSink & sink, type_keys const & k)
+        type_keys::write(JsonPpSink & json) const
         {
-            sink(quot("_canonical_type_"), ": ", quot(k.canonical_),
-                 json_sep(), quot("_short_type_"), ": ", quot(k.short_));
+            json.key("_canonical_type_").string(canonical_)
+                .key("_short_type_").string(short_);
         }
-    } /*namespace pp*/
+    } /*namespace json*/
 } /*namespace xo*/
 
 /* end type_keys.cpp */

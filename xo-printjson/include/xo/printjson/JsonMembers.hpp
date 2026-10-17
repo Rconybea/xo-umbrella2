@@ -263,15 +263,12 @@ namespace xo {
              **/
             void write_head(std::string_view name, DeclaredType const & declared);
 
-            /** write @p args to the print's sink: see JsonPrintState::write **/
-            template <typename... Ts>
-            void write(const Ts &... args) { state_->write(args...); }
+            /** the print's json sink **/
+            JsonPpSink & json() { return state_->json(); }
 
         private:
             /** the print in progress **/
             JsonPrintState * state_ = nullptr;
-            /** no entry written yet: no separator before the next **/
-            bool first_ = true;
             bool ended_ = false;
             /** std::uncaught_exceptions() at construction: see ~JsonMembers **/
             int n_uncaught_ = 0;

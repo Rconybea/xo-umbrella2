@@ -4,14 +4,10 @@
  **/
 
 #include "JsonObject.hpp"
-#include "json_layout.hpp"
-#include <xo/ppsink/quoted.hpp>
 #include <cassert>
 
 namespace xo {
     using xo::reflect::TaggedPtr;
-    using xo::pp::PpSink;
-    using xo::pp::quot;
 
     namespace json {
         JsonObject::~JsonObject()
@@ -23,7 +19,7 @@ namespace xo {
         void
         JsonObject::write_key(std::string_view k)
         {
-            state_->write(json_sep(), quot(k), ": ");
+            state_->json().key(k);
         }
 
         JsonObject &
@@ -44,12 +40,12 @@ namespace xo {
             return *this;
         }
 
-        PpSink &
+        JsonPpSink &
         JsonObject::key_open(std::string_view k)
         {
             this->write_key(k);
 
-            return *state_->sink();
+            return state_->json();
         }
 
         JsonMembers
@@ -64,7 +60,7 @@ namespace xo {
             if (is_root_)
                 state_->write_unplaced();
 
-            state_->write(json_close{'}'});
+            state_->json().close_object();
             closed_ = true;
         }
     } /*namespace json*/
