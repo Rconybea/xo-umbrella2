@@ -6,6 +6,7 @@
 #include "EigenUtil.hpp"
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/ppsink/pretty.hpp>
 #include <Eigen/Dense>
 #include <cassert>
 #include <cstdint>
@@ -47,12 +48,15 @@ namespace xo {
             template<typename EigenVectorType>
             class EigenVectorJsonPrinter : public JsonPrinter {
             public:
+                using PpSink = xo::pp::PpSink;
+
+            public:
                 /* a json array, not an object: no identity */
                 virtual bool prints_object() const override { return false; }
 
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
-                        std::ostream * p_os = state.p_os();
+                        PpSink & sink = *state.sink();
 
                         EigenVectorType * pv = this->check_recover_native<EigenVectorType>(tp, state);
 
@@ -62,11 +66,11 @@ namespace xo {
                              *
                              * as soon as we reflect as mt_vector,  will not need this helper.
                              */
-                            *p_os << "[";
+                            sink("[");
 
                             for (std::uint32_t i = 0, n = pv->size(); i < n; ++i) {
                                 if (i > 0)
-                                    *p_os << ",";
+                                    sink(",");
 
                                 /* note: need to dispatch via json printer for vector elements,
                                  *       to get special treatment for non-finite values
@@ -74,7 +78,7 @@ namespace xo {
                                 state.print(Reflect::make_tp(&(*pv)[i]));
                             }
 
-                            *p_os << "]";
+                            sink("]");
                         }
                     } /*print_json*/
             }; /*EigenVectorJsonPrinter*/
@@ -84,36 +88,39 @@ namespace xo {
              */
             class MatrixXdJsonPrinter : public JsonPrinter {
             public:
+                using PpSink = xo::pp::PpSink;
+
+            public:
                 /* a json array, not an object: no identity */
                 virtual bool prints_object() const override { return false; }
 
                 virtual void print_json(TaggedPtr tp, json::JsonPrintState & state) const override
                     {
-                        std::ostream * p_os = state.p_os();
+                        PpSink & sink = *state.sink();
 
                         MatrixXd * pm = this->check_recover_native<MatrixXd>(tp, state);
 
                         if (pm) {
                             /* MatrixXd is reflected as atomic for now, out of expedience */
-                            *p_os << "[";
+                            sink("[");
 
                             for(std::uint32_t i=0, m=pm->rows(); i<m; ++i) {
                                 if (i > 0)
-                                    *p_os << ", ";
-                                *p_os << "[";
+                                    sink(", ");
+                                sink("[");
                                 for(std::uint32_t j=0, n=pm->cols(); j<n; ++j) {
                                     if (j > 0)
-                                        *p_os << ",";
+                                        sink(",");
 
                                     /* note: need to dispatch via json printer for matrix elements,
                                      *       to get special treatment for non-finite values
                                      */
                                     state.print(Reflect::make_tp(&(*pm)(i, j)));
                                 }
-                                *p_os << "]";
+                                sink("]");
                             }
 
-                            *p_os << "]";
+                            sink("]");
                         }
                     } /*print_json*/
             }; /*MatrixXdJsonPrinter*/
