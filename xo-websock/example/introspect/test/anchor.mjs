@@ -66,7 +66,7 @@ await ev(`document.getElementById("fit").click()`); await sleep(700);
 check(await ev(`(() => { const v = document.getElementById("graph").getBoundingClientRect(), r = ${G("session:2")}.getBoundingClientRect(); return r.right <= v.right && r.left >= v.left; })()`), "session 2 inside the viewport");
 // a session's children triangle (outside the box, still its anchor)
 before = await at("session:2");
-await click_at(await center(`${G("session:2")}.querySelector(":scope > text.kids")`)); await sleep(1000);
+await click_at(await center(`${G("session:2")}.querySelector(":scope > g.kbtn > text.kids")`)); await sleep(1000);
 after = await at("session:2");
 check(same(before, after), `session 2 stays put toggling its children: ${JSON.stringify(before)} -> ${JSON.stringify(after)}`);
 // a menu item: Hide children from session 1's menu button

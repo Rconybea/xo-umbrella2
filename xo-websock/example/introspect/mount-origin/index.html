@@ -53,8 +53,7 @@
     .node text.sub { font-size: 12px; }
     :is(.node.nested, .node.sender, .node.subscription, .node.sink, .node.receiver) text.sub { font-size: 11px; }
     .node.expandable { cursor: pointer; }
-    text.kids { font-size: 16px; fill: #555; cursor: pointer; font-family: ui-monospace, monospace; }
-    text.kids:hover { fill: #000; }
+    text.kids { font-size: 16px; fill: #555; font-family: ui-monospace, monospace; }
     .node.expandable:hover > rect { stroke-width: 3px; }
     .node.open > rect { fill-opacity: 0.6; }
     text.row { font-size: 12px; font-family: ui-monospace, monospace; fill: #333; }
@@ -85,11 +84,12 @@
     text.row.hot .mname { fill: #e0730b; }
     .node:focus { outline: none; }
     .node.leaving { pointer-events: none; }   /* fading out: not clickable */
-    .mbtn { cursor: pointer; }
+    /* a box's buttons: the menu button, and the children button before the type */
+    :is(.mbtn, .kbtn) { cursor: pointer; }
     /* plain until hovered; the transparent fill still takes the click */
-    .mbtn rect { fill: #fff; fill-opacity: 0; stroke: none; }
+    :is(.mbtn, .kbtn) rect { fill: #fff; fill-opacity: 0; stroke: none; }
     /* hovered: borderless, white, part-transparent -- tinted by the box beneath */
-    .mbtn:hover rect { fill: #fff; fill-opacity: 0.85; }
+    :is(.mbtn, .kbtn):hover rect { fill: #fff; fill-opacity: 0.85; }
     .mbtn circle { fill: #555; }
     .node:focus > rect { stroke-width: 3px; stroke-dasharray: 3 2; }
     #ctxmenu { position: absolute; z-index: 10; min-width: 12em; background: #fff;

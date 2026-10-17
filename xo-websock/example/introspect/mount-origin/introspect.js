@@ -734,6 +734,10 @@ const sub_h_small = 14;    // ... in a small box
 const mbtn_w = 21;         // the menu button after a box's label: square
 const mbtn_h = 21;
 const mbtn_gap = 8;        // between label and menu button
+const kbtn_h = 21;         // the children button, first on a box's type line
+const kbtn_x = 8;          // its left edge, inside the box
+const kbtn_pad = 4;        // its glyph's inset; the button is as wide as "▸n" needs
+const kbtn_gap = 4;        // between it and the label
 const tri_button = 16;     // the square behind a row's triangle
 const row_indent = 14;     // a nested member row, further right per level
 const row_sep = ": ";      // between a row's name and its value
@@ -1403,8 +1407,11 @@ async function draw_aux(event) {
                 mb.append("circle").attr("cx", mbtn_w / 2 + dx).attr("cy", mbtn_h / 2).attr("r", 1.6);
             mb.append("title").text("menu");
             g.append("g").attr("class", "rows");
-            // children toggle, left of the box (only where it owns any)
-            g.append("text").attr("class", "kids").attr("text-anchor", "end").attr("x", -4);
+            // children toggle: first on the type's line (only where it owns
+            // any); a button like the menu button -- its square shows on hover
+            const kb = g.append("g").attr("class", "kbtn");
+            kb.append("rect").attr("height", kbtn_h).attr("rx", 3);
+            kb.append("text").attr("class", "kids").attr("x", kbtn_pad).attr("y", kbtn_h / 2 + 5);
             return g;
         },
         update => update,
@@ -1447,9 +1454,10 @@ async function draw_aux(event) {
                   d.type || d.label, menu_items(d), this.parentNode);
     });
 
-    node.select(":scope > text.kids")
+    node.select(":scope > g.kbtn > text.kids")
+        .text(d => d.kids_open ? "▾" : `▸${d.n_hidden}`);
+    node.select(":scope > g.kbtn")
         .attr("display", d => d.n_children ? null : "none")
-        .text(d => d.kids_open ? "▾" : `▸${d.n_hidden}`)
         .on("click", (ev, d) => {
             ev.stopPropagation();
             toggle_children(d.id);
@@ -1588,8 +1596,9 @@ async function draw_aux(event) {
          });
     });
 
-    // size each box to its header: the type's line (with the menu button
-    // and, outside, the children triangle), and the title's below it
+    // size each box to its header: the type's line (the children button,
+    // where it has children, then the type, then the menu button), and the
+    // title's below it
     node.each(function (d) {
         const g = d3.select(this);
         const has_sub = box_subtitle(d) !== null;
@@ -1599,11 +1608,24 @@ async function draw_aux(event) {
         g.select(":scope > text.sub").attr("y", d.small ? 20 + sub_h_small : 25 + sub_h)
             .attr("display", has_sub ? null : "none");
 
+        // the children button, then the type: no button, no gap -- the
+        // type starts at the margin
+        let label_x = 12;
+        if (d.n_children) {
+            const kb = g.select(":scope > g.kbtn");
+            const kw = kb.select(":scope > text.kids").node().getComputedTextLength() + 2 * kbtn_pad;
+            kb.attr("transform", `translate(${kbtn_x},${(type_h - kbtn_h) / 2})`);
+            kb.select(":scope > rect").attr("width", kw);
+            label_x = kbtn_x + kw + kbtn_gap;
+        }
+        g.select(":scope > text.label").attr("x", label_x);
+        g.select(":scope > text.sub").attr("x", label_x);
+
         const label_w = g.select(":scope > text.label").node().getComputedTextLength();
         const sub_w = has_sub ? g.select(":scope > text.sub").node().getComputedTextLength() : 0;
         g.select(":scope > g.mbtn")
-            .attr("transform", `translate(${12 + label_w + mbtn_gap},${(type_h - mbtn_h) / 2})`);
-        d.w = Math.max(12 + label_w + mbtn_gap + mbtn_w + 12, 12 + sub_w + 12);
+            .attr("transform", `translate(${label_x + label_w + mbtn_gap},${(type_h - mbtn_h) / 2})`);
+        d.w = Math.max(label_x + label_w + mbtn_gap + mbtn_w + 12, label_x + sub_w + 12);
         const texts = g.selectAll(":scope > g.rows > text.row");
         texts.each(function (r, i) {
             d3.select(this).attr("y", head_h + i * row_h + 13);
@@ -1633,7 +1655,6 @@ async function draw_aux(event) {
         });
 
         d.head_h = head_h;
-        g.select(":scope > text.kids").attr("y", type_h / 2 + 5);
         tri_buttons(g.select(":scope > g.rows"));
         d.h = head_h + (d.rows.length ? d.rows.length * row_h + row_pad : 0);
         // resize: animated, but for a box not yet on screen

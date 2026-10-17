@@ -34,9 +34,38 @@ check(st.fill[0] === st.fill[1], "title in the type's colour: " + JSON.stringify
 const lv = await ev(`["server", "session:1", "session:1:sub:0"].map(id => { const g = [...document.querySelectorAll("g.node")].find(g => g.__data__.id === id);
   const c = e => { const r = e.getBoundingClientRect(); return r.top + r.height / 2; };
   const l = g.querySelector(":scope > text.label").getBoundingClientRect(), s = g.querySelector(":scope > text.sub").getBoundingClientRect();
-  return {id, mbtn: Math.abs(c(g.querySelector(":scope > g.mbtn > rect")) - c(g.querySelector(":scope > text.label"))), kids: Math.abs(c(g.querySelector(":scope > text.kids")) - c(g.querySelector(":scope > text.label"))), below: s.top >= l.bottom - 3}; })`);
+  return {id, mbtn: Math.abs(c(g.querySelector(":scope > g.mbtn > rect")) - c(g.querySelector(":scope > text.label"))), kids: Math.abs(c(g.querySelector(":scope > g.kbtn > text.kids")) - c(g.querySelector(":scope > text.label"))), below: s.top >= l.bottom - 3}; })`);
 console.log("   level:", JSON.stringify(lv));
 check(lv.every(x => x.mbtn < 4 && x.kids < 4 && x.below), "menu button and triangle level with the type; the title below it");
+// the children triangle: inside the box, first on the type's line; the type
+// follows it.  A box with no children has none, and no gap
+const tri = await ev(`[...document.querySelectorAll("g.node")].map(g => { const b = g.querySelector(":scope > rect").getBoundingClientRect();
+  const k = g.querySelector(":scope > g.kbtn"), l = g.querySelector(":scope > text.label");
+  const kr = k.getBoundingClientRect(), lr = l.getBoundingClientRect();
+  return {id: g.__data__.id, n: g.__data__.n_children, shown: getComputedStyle(k).display !== "none",
+          inside: kr.left >= b.left && kr.right <= b.right && kr.top >= b.top && kr.bottom <= b.bottom,
+          before: kr.right <= lr.left + 1, label_x: +l.getAttribute("x")}; })`);
+const with_kids = tri.filter(t => t.n > 0), without = tri.filter(t => t.n === 0);
+console.log("   triangles:", JSON.stringify(with_kids.map(t => [t.id, t.inside, t.before, t.label_x])));
+check(with_kids.length > 0 && with_kids.every(t => t.shown && t.inside && t.before && t.label_x > 12),
+      "children triangle: inside its box, before the type, which moves right");
+check(without.length > 0 && without.every(t => !t.shown && t.label_x === 12), "no children: no triangle, type at the margin");
+// hovered, its square shows -- as the menu button's does: a control.  On a
+// box whose button nothing covers (the legend may sit over some)
+const kb = await ev(`(() => { for (const g of document.querySelectorAll("g.node")) {
+    const k = g.querySelector(":scope > g.kbtn"); if (!g.__data__.n_children) continue;
+    const r = k.querySelector(":scope > rect").getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    if (k.contains(document.elementFromPoint(x, y))) return {id: g.__data__.id, x, y}; }
+  return null; })()`);
+check(kb !== null, "a box with children whose button is uncovered: " + (kb && kb.id));
+const kfill = () => ev(`getComputedStyle([...document.querySelectorAll("g.node")].find(g => g.__data__.id === ${JSON.stringify(kb.id)}).querySelector(":scope > g.kbtn > rect")).fillOpacity`);
+check(await kfill() === "0", "triangle's square: clear until hovered");
+await call("Input.dispatchMouseEvent", {type: "mouseMoved", x: kb.x, y: kb.y});
+await sleep(100);
+check(await kfill() === "0.85", "hovered: its square shows, as the menu button's does: " + await kfill());
+check(await ev(`getComputedStyle([...document.querySelectorAll("g.node")].find(g => g.__data__.id === ${JSON.stringify(kb.id)}).querySelector(":scope > g.kbtn")).cursor`) === "pointer",
+      "and a pointer cursor");
+await call("Input.dispatchMouseEvent", {type: "mouseMoved", x: 5, y: 5});
 // rows start below the title
 await ev(`expanded.add("session:1"); redraw(); 1`); await ev(`settled()`);
 check(await ev(`(() => { const g = [...document.querySelectorAll("g.node")].find(g => g.__data__.id === "session:1");

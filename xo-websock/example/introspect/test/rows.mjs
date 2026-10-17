@@ -91,7 +91,7 @@ await ev(`${rect_of('["/introspect"]')}.dispatchEvent(new MouseEvent("click", {b
 check(!(await ev(`wanted.has('server/url_router/stream_map/["/introspect"]')`)), "a ref row's square unwants its edge");
 await ev(`${rect_of('["/introspect"]')}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
 check(await ev(`wanted.has('server/url_router/stream_map/["/introspect"]')`), "... and again wants it");
-check(await ev(`getComputedStyle(document.querySelector("g.node.server > text.kids")).fontSize`) === "16px", "the box's children triangle is larger too (16px)");
+check(await ev(`getComputedStyle(document.querySelector("g.node.server > g.kbtn > text.kids")).fontSize`) === "16px", "the box's children triangle is larger too (16px)");
 check(await ev(`document.querySelectorAll("g.node > rect.tbtn, svg > rect.tbtn").length`) === 0, "... with no square: only triangles inside boxes get one");
 
 // 1e. ws_config: a struct with members -- its own box, the row a ref to it
