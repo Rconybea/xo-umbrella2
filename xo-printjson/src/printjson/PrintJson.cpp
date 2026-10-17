@@ -6,7 +6,6 @@
 #include "PrintJson.hpp"
 #include "JsonObject.hpp"
 #include "type_keys.hpp"
-#include "json_quoted.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/facet/AllocFlywheel.hpp>
@@ -16,11 +15,13 @@
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/backtrace.hpp>
-#include <xo/flatstring/flatstring.hpp>     /* os << json_quot(..) */
+#include <xo/flatstring/flatstring.hpp>     /* quot(std::string_view(..)) */
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/PpStyle.hpp>
-#include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
-#include <xo/ppsink/pp_time_ostream.hpp>    /* os << iso8601(..) */
+#include <xo/ppsink/pretty.hpp>             /* sink(..) */
+#include <xo/ppsink/quoted.hpp>             /* quot(..) */
+#include <xo/ppsink/tag.hpp>                /* xtag(..) */
+#include <xo/ppsink/pp_time.hpp>            /* iso8601(..) */
 #include <xo/timeutil/timeutil.hpp>
 #include <cmath>
 #include <type_traits>
@@ -41,6 +42,7 @@ namespace xo {
          */
         using xo::pp::iso8601;
         using xo::pp::xtag;
+        using xo::pp::quot;
         using xo::pp::FlatSink;
         using xo::pp::PpSink;
         using xo::pp::PpStyle;
@@ -66,10 +68,10 @@ namespace xo {
                                                             TypeDescr td2,
                                                             JsonPrintState & state) const
         {
-            *state.p_os() << "<internal-error: type mismatch between T & S"
-                  << xtag("T", td1->canonical_name())
-                  << xtag("S", td2->canonical_name())
-                  << ">";
+            (*state.sink())("<internal-error: type mismatch between T & S",
+                            xtag("T", td1->canonical_name()),
+                            xtag("S", td2->canonical_name()),
+                            ">");
         } /*report_internal_type_consistency_error*/
 
         bool
@@ -242,7 +244,7 @@ namespace xo {
             virtual bool prints_object() const override { return false; }
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 bool * x = this->check_recover_native<bool>(tp, state);
 
@@ -250,7 +252,7 @@ namespace xo {
                     /* json boolean format is lower case true/false.
                      * (note that this conflicts with python True/False,  achtung!)
                      */
-                    *p_os << (*x ? "true" : "false");
+                    sink((*x ? "true" : "false"));
                 }
             } /*print_json*/
         }; /*JsonPrinter_bool*/
@@ -272,12 +274,12 @@ namespace xo {
             virtual bool prints_object() const override { return false; }
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 T * x = tp.recover_native<T>();
 
                 if (x) {
-                    *p_os << *x;
+                    sink(*x);
                 } else {
                     report_internal_type_consistency_error(Reflect::require<T>(),
                                                            tp.td(),
@@ -304,13 +306,13 @@ namespace xo {
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override
                 {
-                    std::ostream * p_os = state.p_os();
+                    PpSink & sink = *state.sink();
 
                     T * x = tp.recover_native<T>();
 
                     if (x) {
                         if (std::isfinite(*x)) {
-                            *p_os << *x;
+                            sink(*x);
                         } else {
                             /* special cases.
                              * use javascript-friendly format
@@ -320,11 +322,11 @@ namespace xo {
                              */
 
                             if (std::isnan(*x))
-                                *p_os << "NaN";
+                                sink("NaN");
                             else if (*x > 0.0)
-                                *p_os << "Infinity";
+                                sink("Infinity");
                             else
-                                *p_os << "-Infinity";
+                                sink("-Infinity");
                         }
                     } else {
                         report_internal_type_consistency_error(Reflect::require<T>(),
@@ -351,7 +353,7 @@ namespace xo {
             virtual bool prints_object() const override { return false; }
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 T * x = tp.recover_native<T>();
 
@@ -360,7 +362,7 @@ namespace xo {
                         /* a null char pointer.  Rendering it as json null
                          * rather than "" keeps it distinguishable from an
                          * empty string, and -- the reason this branch exists
-                         * -- json_quot(nullptr) SEGFAULTS.  Measured 2026-09-21;
+                         * -- quot(nullptr) SEGFAULTS.  Measured 2026-09-21;
                          * both char pointer types have been registered here
                          * since before that, so this was live.
                          *
@@ -369,12 +371,12 @@ namespace xo {
                          * worth fixing rather than noting.
                          */
                         if (*x == nullptr) {
-                            *p_os << "null";
+                            sink("null");
                             return;
                         }
                     }
 
-                    *p_os << json_quot(*x);
+                    sink(quot(*x));
                 } else {
                     report_internal_type_consistency_error(Reflect::require<T>(),
                                                            tp.td(),
@@ -398,7 +400,7 @@ namespace xo {
          *
          *  Separate from JsonPrinter_string because the conversion has to be
          *  explicit: flatstring has BOTH operator std::string_view() and
-         *  operator const char*(), so json_quot(*x) is ambiguous.
+         *  operator const char*(), so quot(*x) is ambiguous.
          **/
         template<std::size_t N>
         class JsonPrinter_flatstring : public JsonPrinter {
@@ -406,12 +408,12 @@ namespace xo {
             virtual bool prints_object() const override { return false; }
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 xo::flatstring<N> * x = tp.recover_native<xo::flatstring<N>>();
 
                 if (x) {
-                    *p_os << json_quot(std::string_view(*x));
+                    sink(quot(std::string_view(*x)));
                 } else {
                     report_internal_type_consistency_error(Reflect::require<xo::flatstring<N>>(),
                                                            tp.td(),
@@ -448,12 +450,12 @@ namespace xo {
             virtual bool prints_object() const override { return false; }
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 const void ** x = tp.recover_native<const void *>();
 
                 if (x) {
-                    *p_os << reinterpret_cast<std::uintptr_t>(*x);
+                    sink(reinterpret_cast<std::uintptr_t>(*x));
                 } else {
                     report_internal_type_consistency_error(Reflect::require<const void *>(),
                                                            tp.td(),
@@ -516,7 +518,7 @@ namespace xo {
         class JsonPrinter_ObjectSlot : public JsonPrinter {
         public:
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 using xo::facet::ObjectSlot;
                 using xo::facet::DHandleStoreBase;
@@ -538,7 +540,7 @@ namespace xo {
                     /* a released slot.  Emitted rather than skipped, so array
                      * position remains the slot index
                      */
-                    *p_os << "null";
+                    sink("null");
                     return;
                 }
 
@@ -565,13 +567,13 @@ namespace xo {
                 std::size_t align_z = DHandleStoreBase::storage_base_align();
 
                 if (align_z == 0) {
-                    obj.key_open("offset") << "null";
-                    obj.key_open("size") << "null";
+                    obj.key_open("offset")("null");
+                    obj.key_open("size")("null");
                 } else {
                     DArena * arena = DArena::obj2arena(data, align_z);
 
-                    obj.key_open("offset") << (static_cast<const std::byte *>(data) - arena->_mem_lo());
-                    obj.key_open("size") << arena->alloc_info(static_cast<std::byte *>(data)).size();
+                    obj.key_open("offset")(static_cast<const std::byte *>(data) - arena->_mem_lo());
+                    obj.key_open("size")(arena->alloc_info(static_cast<std::byte *>(data)).size());
                 }
 
                 obj.close();
@@ -618,7 +620,7 @@ namespace xo {
             using RootSet = xo::facet::DHandleArena<xo::facet::ObjectSlot>;
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 const RootSet * rs = this->check_recover_native<RootSet>(tp, state);
 
@@ -631,39 +633,39 @@ namespace xo {
                     .key("capacity", rs->strong_capacity())
                     .key("live", rs->strong_root_count());
 
-                obj.key_open("free") << "[";
+                obj.key_open("free")("[");
                 {
                     bool first = true;
 
-                    rs->visit_free_list([p_os, &first](std::size_t ix) {
+                    rs->visit_free_list([&sink, &first](std::size_t ix) {
                             if (!first)
-                                *p_os << ", ";
+                                sink(", ");
                             first = false;
-                            *p_os << ix;
+                            sink(ix);
                         });
                 }
-                *p_os << "]";
+                sink("]");
 
                 /* every slot, cleared ones included, so a consumer reads a
                  * slot's index from its position here -- which is also what
                  * `free' indexes into.  Each element goes through
                  * JsonPrinter_ObjectSlot; a cleared slot renders as null.
                  */
-                obj.key_open("slots") << "[";
+                obj.key_open("slots")("[");
                 {
                     bool first = true;
 
                     rs->visit_object_slots(
-                        [&state, p_os, &first](const xo::facet::ObjectSlot & slot) {
+                        [&state, &sink, &first](const xo::facet::ObjectSlot & slot) {
                             if (!first)
-                                *p_os << ", ";
+                                sink(", ");
                             first = false;
 
                             state.print(TaggedPtr(Reflect::require<xo::facet::ObjectSlot>(),
                                                   const_cast<xo::facet::ObjectSlot *>(&slot)));
                         });
                 }
-                *p_os << "]";
+                sink("]");
 
                 obj.close();
             } /*print_json*/
@@ -701,7 +703,7 @@ namespace xo {
             using AllocFlywheel = xo::facet::AllocFlywheel;
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 using xo::mm::MemorySizeInfo;
 
@@ -724,13 +726,13 @@ namespace xo {
                  * already the right shape, so restating its fields here would
                  * be the very thing this printer exists to stop doing.
                  */
-                obj.key_open("pools") << "[";
+                obj.key_open("pools")("[");
                 {
                     bool first = true;
 
-                    fw->visit_pools([&state, p_os, &first](const MemorySizeInfo & x) {
+                    fw->visit_pools([&state, &sink, &first](const MemorySizeInfo & x) {
                             if (!first)
-                                *p_os << ", ";
+                                sink(", ");
                             first = false;
 
                             /* print_value: visit_pools makes each one on its
@@ -740,7 +742,7 @@ namespace xo {
                                                         const_cast<MemorySizeInfo *>(&x)));
                         });
                 }
-                *p_os << "]";
+                sink("]");
 
                 /* the root set, via JsonPrinter_RootSet */
                 {
@@ -833,7 +835,7 @@ namespace xo {
             virtual bool prints_object() const override { return false; }
 
             virtual void print_json(TaggedPtr tp, JsonPrintState & state) const override {
-                std::ostream * p_os = state.p_os();
+                PpSink & sink = *state.sink();
 
                 utc_nanos * x = tp.recover_native<utc_nanos>();
 
@@ -842,7 +844,7 @@ namespace xo {
                      *   "2012-04-23T18:25:43.511Z"
                      * since that's what javascript uses
                      */
-                    *p_os << "\"" << iso8601(*x) << "\"";
+                    sink("\"", iso8601(*x), "\"");
                 } else {
                     report_internal_type_consistency_error(Reflect::require<utc_nanos>(),
                                                            tp.td(),

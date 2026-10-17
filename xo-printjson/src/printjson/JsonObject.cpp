@@ -9,6 +9,7 @@
 
 namespace xo {
     using xo::reflect::TaggedPtr;
+    using xo::pp::PpSink;
     using xo::pp::quot;
 
     namespace json {
@@ -42,12 +43,12 @@ namespace xo {
             return *this;
         }
 
-        std::ostream &
+        PpSink &
         JsonObject::key_open(std::string_view k)
         {
             this->write_key(k);
 
-            return *state_->p_os();
+            return *state_->sink();
         }
 
         JsonMembers
