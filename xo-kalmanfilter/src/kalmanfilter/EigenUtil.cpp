@@ -44,7 +44,7 @@ namespace xo {
 
         namespace {
             /* prints a VectorXd as json,  in the obvious format, e.g.
-             *   [1,2,3]
+             *   [1, 2, 3]
              */
             template<typename EigenVectorType>
             class EigenVectorJsonPrinter : public JsonPrinter {
@@ -67,8 +67,7 @@ namespace xo {
                              *
                              * as soon as we reflect as mt_vector,  will not need this helper.
                              */
-                            /* elements separated by "," alone: "[1,2,3]" */
-                            json.open_list(0);
+                            json.open_list();
 
                             for (std::uint32_t i = 0, n = pv->size(); i < n; ++i) {
                                 /* note: need to dispatch via json printer for vector elements,
@@ -83,7 +82,7 @@ namespace xo {
             }; /*EigenVectorJsonPrinter*/
 
             /* prints a MatrixXd as json,   in row-major format, e.g.
-             *   [[1,2,3], [4,5,6], [7,8,9]]
+             *   [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
              */
             class MatrixXdJsonPrinter : public JsonPrinter {
             public:
@@ -101,13 +100,10 @@ namespace xo {
 
                         if (pm) {
                             /* MatrixXd is reflected as atomic for now, out of expedience */
-                            /* rows separated by ", ", elements by "," alone:
-                             * "[[1,2,3], [4,5,6]]"
-                             */
                             json.open_list();
 
                             for(std::uint32_t i=0, m=pm->rows(); i<m; ++i) {
-                                json.open_list(0);
+                                json.open_list();
                                 for(std::uint32_t j=0, n=pm->cols(); j<n; ++j) {
                                     /* note: need to dispatch via json printer for matrix elements,
                                      *       to get special treatment for non-finite values
