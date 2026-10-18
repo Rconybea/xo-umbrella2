@@ -154,10 +154,15 @@ document.getElementById("show-legend").onchange = (ev) => {
 
 // layout: automatic, by ELK (elkjs, its layered algorithm) -- the page builds
 // the object graph (boxes and edges) from the snapshot; ELK places the boxes,
-// sized to their content, and routes the edges.  Hand-placed columns could
+// sized to their content, by ownership alone.  Hand-placed columns could
 // not grow a box; an expanded box (issue 13) and showing/hiding parts of the
 // graph both need this.  .xo-backlog/xo-websock/issues/13, step 2.
 const elk = new ELK();
+
+// member edges: routed around the boxes once ELK has placed them, by
+// libavoid (route_edges.js), so they never move a box.  Loading starts now;
+// every draw waits for it.  .xo-backlog/introspect-layout/spec.md
+const edge_router = load_router();
 
 /** the value of member @p name of reflected struct @p obj, as printjson
  *  writes it: its "_members_" entry (.xo-backlog/xo-printjson/issues/07);
@@ -744,15 +749,14 @@ const row_sep = ": ";      // between a row's name and its value
 const in_port_x = 24;      // a member edge enters a box this far from its left
 const out_port_gap = 10;   // between member edges leaving one box
 
-/** ELK ports for member edges @p out leaving box @p d: on its bottom edge,
- *  out_port_gap apart in row order, the group centred on the edge's midpoint
+/** where member edges @p out leave box @p d: on its bottom edge,
+ *  out_port_gap apart in row order, the group centred on the edge's
+ *  midpoint.  [{id: the edge's port, x: from the box's left}]
  **/
 function out_ports(d, out) {
     const x0 = d.w / 2 - out_port_gap * (out.length - 1) / 2;
 
-    return out.map((e, k) => ({id: e.port, width: 1, height: 1,
-                               x: Math.round(x0 + out_port_gap * k), y: d.h,
-                               layoutOptions: {"elk.port.side": "SOUTH"}}));
+    return out.map((e, k) => ({id: e.port, x: Math.round(x0 + out_port_gap * k)}));
 }
 
 /** object id -> the box drawing it this draw: a box's own object, or an
@@ -1338,6 +1342,85 @@ for (const type of ["click", "keydown"])   // keydown: Enter / arrows on a focus
         pending_anchor = g ? g.__data__.id : null;
     }, true);   // capture: before the handler that redraws
 
+/** where boxes @p nodes go: ELK, layered, top to bottom, given only the
+ *  ownership edges (link, owns, nests) among @p edges.  A member edge never
+ *  moves a box -- otherwise opening one box could rearrange distant ones;
+ *  route_edges() goes around the boxes afterwards.
+ *  .xo-backlog/introspect-layout/spec.md
+ *
+ *  @return {at: box / group id -> {x, y};
+ *           groups: the group outlines, [{id, x, y, w, h}];
+ *           size: {w, h};
+ *           own_routes: edge key -> [{x, y}], each ownership edge as ELK
+ *                       routed it}
+ *          all in ELK's frame: the drawing's, before its pad
+ **/
+async function place_boxes(nodes, edges) {
+    const own = edges.filter(e => is_ownership(e.kind));
+    const graph = {
+        id: "root",
+        layoutOptions: {
+            "elk.algorithm": "layered",
+            "elk.direction": "DOWN",
+            "elk.edgeRouting": "ORTHOGONAL",
+            "elk.spacing.nodeNode": "40",
+            "elk.layered.spacing.nodeNodeBetweenLayers": "50",
+            "elk.spacing.edgeNode": "20",
+            // network simplex, not Brandes-Koepf: BK keeps the narrowest of
+            // four candidate placements, and a near-tie between them can flip
+            // when one box changes width -- e.g. opening a subscription moved
+            // the Webserver box 200px right.  Network simplex keeps boxes put
+            "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+            // a cycle is broken by reversing the edges that point from a
+            // later box to an earlier one in the input order -- and layout()
+            // lists parents before children.  Moot while ELK sees ownership
+            // alone (a tree); it mattered when member edges (a sink's sender,
+            // a sender's target) pointed back up the tree
+            "elk.layered.cycleBreaking.strategy": "MODEL_ORDER",
+            // nested boxes: groups are compound nodes, and edges cross into
+            // them -- laid out together
+            "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+        },
+        children: elk_children(nodes, d => ({id: d.id, width: d.w, height: d.h})),
+        // ownership decides top-to-bottom.  The priority is moot while every
+        // edge here is an ownership edge; it outranked member edges when ELK
+        // saw those too
+        edges: own.map((e, i) => ({
+            id: `e${i}`, sources: [e.source], targets: [e.target],
+            layoutOptions: {"elk.layered.priority.direction": "10"},
+        })),
+    };
+
+    const laid = await elk.layout(graph);
+
+    // a group's children come back relative to the group: made absolute here
+    const at = new Map();
+    const groups = [];
+    for (const c of laid.children) {
+        at.set(c.id, {x: c.x, y: c.y});
+        if (c.children) {
+            groups.push({id: c.id, x: c.x, y: c.y, w: c.width, h: c.height});
+            for (const k of c.children)
+                at.set(k.id, {x: c.x + k.x, y: c.y + k.y});
+        }
+    }
+
+    // an edge comes back in the frame of its `container` (an edge inside one
+    // group: relative to that group)
+    const own_routes = new Map();
+    for (const le of laid.edges) {
+        const e = own[Number(le.id.slice(1))];
+        const off = (le.container && le.container !== "root" && at.get(le.container)) || {x: 0, y: 0};
+        const pts = [];
+        for (const sec of (le.sections || []))
+            pts.push(sec.startPoint, ...(sec.bendPoints || []), sec.endPoint);
+        own_routes.set(`${e.kind}:${e.source}>${e.target}`,
+                       pts.map(p => ({x: p.x + off.x, y: p.y + off.y})));
+    }
+
+    return {at, groups, size: {w: laid.width, h: laid.height}, own_routes};
+}
+
 async function draw(event) {
     ++pending_draws;
     try {
@@ -1351,6 +1434,18 @@ async function draw_aux(event) {
     const seq = ++draw_seq;
     const anchor = pending_anchor;
     pending_anchor = null;
+
+    // no edge router, no drawing: the failure shows (spec, "Failure")
+    let avoid;
+    try {
+        avoid = await edge_router;
+    } catch (e) {
+        status_el.textContent = `error: edge router (libavoid) failed to load: ${e.message}`;
+        return;
+    }
+    if (seq !== draw_seq)
+        return;   // superseded while the router loaded
+
     const all = layout(event);
     draw_legend(all);
 
@@ -1693,81 +1788,17 @@ async function draw_aux(event) {
         if (is_ownership(e.kind) && drawn_own.has(`${e.source}>${e.target}`))
             e.drawn = true;
 
-    // boxes a member edge arrives at: each gets one entry port
-    const member_in = new Set(edges.filter(e => e.kind === "member").map(e => e.target));
-
-    // 2. ELK: layered, top to bottom
-    const graph = {
-        id: "root",
-        layoutOptions: {
-            "elk.algorithm": "layered",
-            "elk.direction": "DOWN",
-            "elk.edgeRouting": "ORTHOGONAL",
-            "elk.spacing.nodeNode": "40",
-            "elk.layered.spacing.nodeNodeBetweenLayers": "50",
-            "elk.spacing.edgeNode": "20",
-            // network simplex, not Brandes-Koepf: BK keeps the narrowest of
-            // four candidate placements, and a near-tie between them can flip
-            // when one box changes width -- e.g. opening a subscription moved
-            // the Webserver box 200px right.  Network simplex keeps boxes put
-            "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
-            // a cycle (a member edge back up the ownership tree -- a sink's
-            // sender, a sender's target) is broken by reversing the edges
-            // that point from a later box to an earlier one in the input
-            // order -- and layout() lists parents before children.  So
-            // ownership decides the layering by construction: the default
-            // (greedy) strategy put session 1 above the Webserver once sinks
-            // added sink -> sender back-edges, priority notwithstanding
-            "elk.layered.cycleBreaking.strategy": "MODEL_ORDER",
-            // nested boxes: groups are compound nodes, and edges cross into
-            // them -- laid out together
-            "elk.hierarchyHandling": "INCLUDE_CHILDREN",
-        },
-        children: elk_children(nodes, d => ({
-            id: d.id, width: d.w, height: d.h,
-            // a ref member's edge leaves the box's bottom edge, in row order,
-            // the group centred on the edge's midpoint; and enters the box it
-            // refers to on its top edge, near the left
-            layoutOptions: {"elk.portConstraints": "FIXED_POS"},
-            ports: [
-                ...out_ports(d, drawn_members.filter(e => e.source === d.id)),
-                ...(member_in.has(d.id)
-                    ? [{id: `${d.id}#in`, width: 1, height: 1, x: in_port_x, y: -1,
-                        layoutOptions: {"elk.port.side": "NORTH"}}]
-                    : []),
-            ],
-        })),
-        // ownership (link, owns) decides top-to-bottom; member edges
-        // follow it.  Without this an expanded box's ref edge could
-        // invert the layering -- e.g. a session's router's url_router (in
-        // the server box) put the session above the server
-        edges: edges.map((e, i) => ({
-            id: `e${i}`, sources: [e.source],
-            targets: [e.kind === "member" ? `${e.target}#in` : e.target],
-            layoutOptions: {"elk.layered.priority.direction":
-                            is_ownership(e.kind) ? "10" : "0"},
-        })),
-    };
-
-    const laid = await elk.layout(graph);
+    // 2. ELK places the boxes, by ownership alone: a member edge never
+    // moves one (.xo-backlog/introspect-layout/spec.md)
+    const placed = await place_boxes(nodes, edges);
 
     if (seq !== draw_seq)
         return;   // superseded while laying out
 
-    // 3. place the boxes; keep the anchor box where it was on screen.  A
-    // group's children come back relative to the group: made absolute here
-    const at = new Map();          // box / group id -> {x, y}, drawing coordinates
-    const groups = [];             // the group outlines to draw
-    for (const c of laid.children) {
-        at.set(c.id, {x: c.x, y: c.y});
-        if (c.children) {
-            groups.push({id: c.id, x: c.x + pad, y: c.y + pad, w: c.width, h: c.height});
-            for (const k of c.children)
-                at.set(k.id, {x: c.x + k.x, y: c.y + k.y});
-        }
-    }
+    // 3. place the boxes; keep the anchor box where it was on screen
+    const at = placed.at;          // box / group id -> {x, y}, drawing coordinates
     const camera_to = camera_target(anchor, at, pad,
-                                    {w: laid.width + 2 * pad, h: laid.height + 2 * pad});
+                                    {w: placed.size.w + 2 * pad, h: placed.size.h + 2 * pad});
     for (const d of nodes) {
         const c = at.get(d.id);
         d.x = c.x + pad;
@@ -1796,24 +1827,29 @@ async function draw_aux(event) {
     else if (camera_to)
         svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
             .call(zoom.transform, camera_to.t);
-    drawing_size = {w: laid.width + 2 * pad, h: laid.height + 2 * pad};
+    drawing_size = {w: placed.size.w + 2 * pad, h: placed.size.h + 2 * pad};
 
-    draw_groups(camera, groups);
+    draw_groups(camera, placed.groups.map(g => ({...g, x: g.x + pad, y: g.y + pad})));
     draw_extent(camera, drawing_size, camera_to && camera_to.instant);
 
-    // 4. the edges, as ELK routed them -- in the frame of their `container`
-    // (an edge inside one group comes back relative to that group)
-    const laid_edge = new Map(laid.edges.map(le => [le.id, le]));
-    const routed = edges.map((e, i) => {
-        const le = laid_edge.get(`e${i}`);
-        const off = (le.container && le.container !== "root" && at.get(le.container)) || {x: 0, y: 0};
-        const pts = [];
-        for (const sec of (le.sections || [])) {
-            pts.push(sec.startPoint, ...(sec.bendPoints || []), sec.endPoint);
-        }
-        for (const i in pts)
-            pts[i] = {x: pts[i].x + off.x, y: pts[i].y + off.y};
-        return {...e, key: `${e.kind}:${e.source}>${e.target}`, pts};
+    // 4. the edges.  A member edge: routed around the boxes, now placed --
+    // leaving its box's bottom edge where out_ports() puts it, entering its
+    // target's top edge at in_port_x.  A drawn ownership edge: as ELK routed it
+    const out_x = new Map();       // a member edge's port -> x on its source box
+    for (const d of nodes)
+        for (const p of out_ports(d, drawn_members.filter(e => e.source === d.id)))
+            out_x.set(p.id, p.x);
+    const member_routes = route_edges(
+        avoid,
+        new Map(nodes.map(d => [d.id, {x: d.x - pad, y: d.y - pad, w: d.w, h: d.h}])),
+        edges.filter(e => e.kind === "member")
+             .map(e => ({key: e.source, from: e.from, out_x: out_x.get(e.source), to: e.target})),
+        in_port_x);
+    const routed = edges.map(e => {
+        const key = `${e.kind}:${e.source}>${e.target}`;
+        const pts = e.kind === "member" ? member_routes.get(e.source)
+              : (placed.own_routes.get(key) || []);
+        return {...e, key, pts};
     });
 
     // ownership edges (link, owns) only order the layers: not drawn, but

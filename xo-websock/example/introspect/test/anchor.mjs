@@ -35,7 +35,10 @@ const SUB = "session:1:sub:0";
 const page = async () => ev(`({sx: window.scrollX, sy: window.scrollY, btn: Math.round(document.getElementById("refresh").getBoundingClientRect().left)})`);
 const page0 = await page();
 
-// 1. open the sub box by clicking its label: it stays put
+// 1. open the sub box by clicking its label: it stays put.  Fit first: after
+// Show all the sub box can sit past the viewport's right edge, where a real
+// click would land on the page's scrollbar
+await ev(`document.getElementById("fit").click()`); await sleep(700);
 let before = await at(SUB), other_before = await at("server");
 await click_at(await center(`${G(SUB)}.querySelector(":scope > text.label")`)); await sleep(1000);
 let after = await at(SUB);

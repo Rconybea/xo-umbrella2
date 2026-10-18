@@ -33,7 +33,7 @@ shift
 all_tests=(rows visibility noticker anchor transitions sink receiver nested
            sender_expand endpoint_expand sesstable_expand urlrouter_expand
            sub_expand router_expand session_expand cdp_menu expand edge_kinds
-           header refs_resolve members_only hysteresis routes route_edges)
+           header refs_resolve members_only hysteresis routes route_edges avoid_load)
 
 if [[ $# -gt 0 ]]; then
     tests=("$@")
