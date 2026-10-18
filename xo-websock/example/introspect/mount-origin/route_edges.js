@@ -38,8 +38,8 @@ async function load_router() {
  *  @p boxes   Map id -> {x, y, w, h}, one coordinate frame
  *  @p edges   [{key, from, out_x, to}]: from box @p from's bottom edge,
  *             @p out_x from its left, to box @p to's top edge
- *  @p in_x    where an edge enters its target, from the target's left: one
- *             entry point per box, shared by every edge into it
+ *  @p in_x    where an edge enters target box b, from its left: in_x(b).
+ *             One entry point per box, shared by every edge into it
  *
  *  @return Map key -> [{x, y}], in the frame of @p boxes
  *
@@ -82,7 +82,7 @@ function route_edges(avoid, boxes, edges, in_x) {
                                          false, 0, avoid_dir_down);
             if (!in_pin.has(e.to)) {
                 const in_class = next_class++;
-                const pin = new avoid.ShapeConnectionPin(dst, in_class, in_x, 0,
+                const pin = new avoid.ShapeConnectionPin(dst, in_class, in_x(boxes.get(e.to)), 0,
                                                          false, 0, avoid_dir_up);
                 pin.setExclusive(false);
                 in_pin.set(e.to, in_class);

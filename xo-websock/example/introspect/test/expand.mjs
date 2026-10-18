@@ -77,7 +77,7 @@ const geo = await ev(`(() => { const p = ${FE}[0].getAttribute("d");
    const sh = +srv.querySelector("rect").getAttribute("height");
    return {start_at_bottom_edge: Math.abs(sy - (st.f + sh)) < 2, start_near_middle: Math.abs(sx - (st.e + sw / 2)) <= 10 * 8 / 2,
            end_on_endpoint: ex >= et.e - 2 && ex <= et.e + ew + 2 && ey >= et.f - 2 && ey <= et.f + eh + 2,
-           end_top_left: Math.abs(ey - et.f) < 3 && Math.abs(ex - (et.e + 24)) < 3}; })()`);
+           end_top_mid: Math.abs(ey - et.f) < 3 && Math.abs(ex - (et.e + ew / 2)) < 3}; })()`);
 // exits are centred on the bottom edge's midpoint, 10px apart
 check(geo.start_at_bottom_edge && geo.start_near_middle, `member edge leaves the box's bottom edge, near its middle: ${JSON.stringify(geo)}`);
 // hovering the row lights its edge; leaving restores it
@@ -95,7 +95,7 @@ await ev(`${FE}[0].dispatchEvent(new MouseEvent("mouseenter"))`); await sleep(10
 check(await ev(`[...document.querySelectorAll("text.row.hot")].length === 1`), "edge hover: its row lit");
 await ev(`${FE}[0].dispatchEvent(new MouseEvent("mouseleave"))`); await sleep(100);
 check(geo.end_on_endpoint, "member edge ends at the referenced box");
-check(geo.end_top_left, `... entering its top edge, 24px from its left: ${JSON.stringify(geo)}`);
+check(geo.end_top_mid, `... entering its top edge at its midpoint: ${JSON.stringify(geo)}`);
 check(await ev(`document.querySelectorAll("path.edge.link, path.edge.owns").length`) === 0
       && await ev(`document.querySelectorAll("g.node").length`) > 1, "ownership edges not drawn");
 // nested_ (a struct with members) gets its own box; its row a ref to it

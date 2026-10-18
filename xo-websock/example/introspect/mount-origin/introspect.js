@@ -746,8 +746,14 @@ const kbtn_gap = 4;        // between it and the label
 const tri_button = 16;     // the square behind a row's triangle
 const row_indent = 14;     // a nested member row, further right per level
 const row_sep = ": ";      // between a row's name and its value
-const in_port_x = 24;      // a member edge enters a box this far from its left
 const out_port_gap = 10;   // between member edges leaving one box
+
+/** where member edges enter box @p b ({x, y, w, h}), from its left: the
+ *  midpoint of its top edge.  Every edge into a box shares this point
+ **/
+function in_port_x(b) {
+    return b.w / 2;
+}
 
 /** where member edges @p out leave box @p d: on its bottom edge,
  *  out_port_gap apart in row order, the group centred on the edge's
@@ -1834,7 +1840,8 @@ async function draw_aux(event) {
 
     // 4. the edges.  A member edge: routed around the boxes, now placed --
     // leaving its box's bottom edge where out_ports() puts it, entering its
-    // target's top edge at in_port_x.  A drawn ownership edge: as ELK routed it
+    // target's top edge where in_port_x() puts it.  A drawn ownership edge: as
+    // ELK routed it
     const out_x = new Map();       // a member edge's port -> x on its source box
     for (const d of nodes)
         for (const p of out_ports(d, drawn_members.filter(e => e.source === d.id)))

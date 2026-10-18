@@ -1,5 +1,5 @@
 // every member edge: orthogonal, from its source box's bottom edge to its
-// target's top edge at in_port_x, through no other box
+// target's top edge at its midpoint, through no other box
 // (.xo-backlog/introspect-layout/spec.md)
 import fs from "node:fs";
 const [,, cdp_port, port, out] = process.argv;
@@ -17,7 +17,6 @@ await sleep(500);
 await ev(`document.getElementById("show-all").click(); 1`); await ev(`settled()`);
 const box = new Map(await ev(`[...drawn_at]`));
 const P = 20;   // draw_aux's pad, local there (introspect.js:1380): drawn_at includes it, pts do not
-const IN = await ev(`in_port_x`);
 const edges = await ev(`[...document.querySelectorAll("path.edge.member")].map(p => ({from: p.__data__.from, to: p.__data__.target, pts: p.__data__.pts.map(q => ({x: q.x + ${P}, y: q.y + ${P}}))}))`);
 // problems with one route; [] if it keeps the contract
 const problems = (e) => {
@@ -26,7 +25,7 @@ const problems = (e) => {
   for (let i = 1; i < pts.length; i++)
     if (Math.abs(pts[i].x - pts[i - 1].x) > 0.5 && Math.abs(pts[i].y - pts[i - 1].y) > 0.5) out.push(`diagonal segment ${i}`);
   if (Math.abs(a.y - (s.y + s.h)) > 1.5 || a.x < s.x || a.x > s.x + s.w) out.push(`starts off its source's bottom edge: ${JSON.stringify(a)}`);
-  if (Math.abs(z.y - t.y) > 1.5 || Math.abs(z.x - (t.x + IN)) > 1.5) out.push(`ends off its target's entry point: ${JSON.stringify(z)}`);
+  if (Math.abs(z.y - t.y) > 1.5 || Math.abs(z.x - (t.x + t.w / 2)) > 1.5) out.push(`ends off its target's entry point: ${JSON.stringify(z)}`);
   for (const [id, b] of box) {
     if (id === e.from || id === e.to) continue;
     for (let i = 1; i < pts.length; i++) {   // a segment strictly inside the box, 1px in from its border
