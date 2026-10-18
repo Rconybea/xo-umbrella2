@@ -4,7 +4,7 @@
  *
  *  A webserver that shows its own state in the browser.
  *
- *  Serves ./mount-origin (index.html + introspect.js) and a websocket stream,
+ *  Serves ./mount-origin (index.html, route_edges.js, introspect.js) and a websocket stream,
  *  "/introspect".  The page subscribes, and on {"cmd": "send", "msg":
  *  "refresh"} this program replies with a snapshot of its own state, which
  *  the page draws with d3.
