@@ -8,8 +8,10 @@
 const avoid_module_url = "https://cdn.jsdelivr.net/npm/libavoid-js@0.4.5/dist/index.js";
 const avoid_wasm_url = "https://cdn.jsdelivr.net/npm/libavoid-js@0.4.5/dist/libavoid.wasm";
 
-const avoid_shape_buffer = 8;   // an edge keeps this far from any box it passes
-const avoid_nudge = 6;          // between parallel stretches of different edges
+const avoid_shape_buffer = 8;   // an edge keeps this far from any box it passes.  12 is
+                                // too much: two boxes in one group sit closer than twice
+                                // that, leaving no path between them
+const avoid_nudge = 10;         // between parallel stretches of different edges
 
 // libavoid's ConnDirFlags: the way an edge leaves / enters a pin
 const avoid_dir_up = 1;

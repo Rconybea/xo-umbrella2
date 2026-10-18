@@ -1364,7 +1364,7 @@ async function place_boxes(nodes, edges) {
             "elk.direction": "DOWN",
             "elk.edgeRouting": "ORTHOGONAL",
             "elk.spacing.nodeNode": "40",
-            "elk.layered.spacing.nodeNodeBetweenLayers": "50",
+            "elk.layered.spacing.nodeNodeBetweenLayers": "70",
             "elk.spacing.edgeNode": "20",
             // network simplex, not Brandes-Koepf: BK keeps the narrowest of
             // four candidate placements, and a near-tie between them can flip
