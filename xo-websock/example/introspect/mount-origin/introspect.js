@@ -1520,13 +1520,12 @@ async function draw_aux(event) {
             g.append("rect");
             g.append("text").attr("class", "label").attr("x", 12).attr("y", 25);
             g.append("text").attr("class", "sub").attr("x", 12);   // its title, below the type
-            // menu button, just after the label: left-click opens the box menu
+            // menu button, top-right: hover or left-click opens the box menu
             const mb = g.append("g").attr("class", "mbtn");
             mb.append("rect").attr("width", mbtn_w).attr("height", mbtn_h).attr("rx", 3);
             // three dots, drawn: the "⋯" glyph is tiny in the monospace font
             for (const dx of [-5, 0, 5])
                 mb.append("circle").attr("cx", mbtn_w / 2 + dx).attr("cy", mbtn_h / 2).attr("r", 1.6);
-            mb.append("title").text("menu");
             g.append("g").attr("class", "rows");
             // children toggle: first on the type's line (only where it owns
             // any); a button like the menu button -- its square shows on hover
@@ -1567,13 +1566,23 @@ async function draw_aux(event) {
     node.select(":scope > text.label").text(d => box_type_label(d));
     node.select(":scope > text.sub").text(d => box_subtitle(d) ?? "");
 
-    // the menu button: opens the box menu below it; not a click on the box
-    node.select(":scope > g.mbtn").on("click", function (ev, d) {
-        ev.stopPropagation();
-        const r = this.getBoundingClientRect();
+    // the menu button: opens the box menu below it -- on hover, after a
+    // moment and without taking focus; on a click, at once and pinned.  Not
+    // a click on the box
+    const open_below = (btn, d, focus) => {
+        const r = btn.getBoundingClientRect();
         show_menu(r.left + window.scrollX, r.bottom + window.scrollY + 2,
-                  d.type || d.label, menu_items(d), this.parentNode);
-    });
+                  d.type || d.label, menu_items(d), btn.parentNode, focus);
+    };
+    node.select(":scope > g.mbtn")
+        .on("click", function (ev, d) {
+            ev.stopPropagation();
+            open_below(this, d, true);
+        })
+        .on("mouseenter", function (ev, d) {
+            menu_hover_enter(() => open_below(this, d, false), this.parentNode);
+        })
+        .on("mouseleave", menu_hover_leave);
 
     node.select(":scope > g.kbtn > text.kids")
         .text(d => d.kids_open ? "▾" : `▸${d.n_hidden}`);
@@ -2284,11 +2293,16 @@ function row_menu_items(r) {
 }
 
 /** open the context menu at page position @p x, @p y: heading @p head,
- *  items @p items ([label, action, reason-if-disabled]); focus returns to
- *  @p owner on close
+ *  items @p items ([label, action, reason-if-disabled]).  With @p focus
+ *  (a click, a key): its first item focused, focus returning to @p owner on
+ *  close, and pinned -- open until a click outside, Escape or an item.
+ *  Without (a hover): focus stays put, and it closes once the pointer
+ *  leaves the button and the menu
  **/
-function show_menu(x, y, head_text, items, owner) {
+function show_menu(x, y, head_text, items, owner, focus = true) {
+    menu_hover_clear();
     menu_owner = owner;
+    menu_pinned = focus;
     menu_el.replaceChildren();
 
     const head = document.createElement("div");
@@ -2317,20 +2331,69 @@ function show_menu(x, y, head_text, items, owner) {
     menu_el.hidden = false;
 
     const first = menu_el.querySelector("button:not(:disabled)");
-    if (first)
+    if (focus && first)
         first.focus();
 }
 
 function hide_menu() {
+    menu_hover_clear();
     if (menu_el.hidden)
         return;
 
+    // focus back to the box only if the menu had it: a hover never moved it
+    const had_focus = menu_el.contains(document.activeElement);
     menu_el.hidden = true;
 
-    if (menu_owner)
+    if (menu_owner && had_focus)
         menu_owner.focus();
     menu_owner = null;
 }
+
+// ----- opening the box menu by hovering its button --------------------------
+
+const menu_hover_open_ms = 250;    // on the button this long: the menu opens
+const menu_hover_close_ms = 300;   // off button and menu this long: it closes
+
+/** the menu stays until a click outside, Escape or an item (a click or key
+ *  opened it); else it follows the pointer (a hover did) **/
+let menu_pinned = false;
+let menu_hover_timer = null;
+
+function menu_hover_clear() {
+    clearTimeout(menu_hover_timer);
+    menu_hover_timer = null;
+}
+
+/** the drawing is still: no draw pending, its transitions done.  While it
+ *  moves, boxes slide under a resting pointer -- e.g. after a menu item
+ *  chosen with the pointer still on the button -- and the browser reports
+ *  that as the pointer entering whatever arrives: not a hover **/
+function drawing_still() {
+    return pending_draws === 0 && performance.now() >= settled_at;
+}
+
+/** the pointer reached box @p owner's menu button: @p open its menu soon --
+ *  unless that menu is open already, which then stays; a pinned menu is
+ *  open, which a hover does not replace; or the drawing is moving **/
+function menu_hover_enter(open, owner) {
+    menu_hover_clear();
+    if (!menu_el.hidden && (menu_owner === owner || menu_pinned))
+        return;
+    if (!drawing_still())
+        return;
+    menu_hover_timer = setTimeout(() => { if (drawing_still()) open(); }, menu_hover_open_ms);
+}
+
+/** the pointer left the button or the menu: a hover-opened menu closes
+ *  soon, unless the pointer arrives at the other first **/
+function menu_hover_leave() {
+    menu_hover_clear();
+    if (!menu_el.hidden && !menu_pinned)
+        menu_hover_timer = setTimeout(hide_menu, menu_hover_close_ms);
+}
+
+menu_el.addEventListener("mouseenter", menu_hover_clear);
+menu_el.addEventListener("mouseleave", menu_hover_leave);
 
 // arrows move between items; Escape closes
 menu_el.addEventListener("keydown", (ev) => {
