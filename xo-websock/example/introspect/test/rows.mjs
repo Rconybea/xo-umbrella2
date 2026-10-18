@@ -61,7 +61,7 @@ await ev(`${ROW(U, "http_map")}.dispatchEvent(new MouseEvent("click", {bubbles: 
 // 1c. a ref row: ↴; what it refers to is the arrow's tooltip, after what clicking does
 r = await rows(U);
 check(r.some(t => t.trim() === '["/introspect"]: ↴'), "ref row reads ↴");
-const rtip = await ev(`[...${ROW(U, '["/introspect"]')}.querySelectorAll(":scope > tspan.rtoggle")].map(ts => ts.querySelector("title")).filter(x => x).map(x => x.textContent)[0]`);
+const rtip = await ev(`[...${ROW(U, '["/introspect"]')}.querySelectorAll(":scope > tspan.rtoggle")].map(ts => ts.getAttribute("data-tip")).filter(x => x)[0]`);
 check(/^Hide target \["\/introspect"\] :: DynamicEndpoint\nrefers to \/introspect\n[0-9]+$/.test(rtip), "its arrow's tooltip: Hide target <member> :: <type> (an element row: its target's type), then the target and its id: " + JSON.stringify(rtip));
 
 // 1d. row triangles: 25% larger, each with a square behind -- plain until
@@ -104,7 +104,7 @@ check(cfg_rows.some(t => t.trim() === "port: " + port) && cfg_rows.some(t => t.t
 await ev(`${G("server/ws_config")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
 
 // 2. tooltip on the name
-const tip = await ev(`${ROW("server", "url_router")}.querySelector("tspan.mname > title").textContent`);
+const tip = await ev(`${ROW("server", "url_router")}.querySelector("tspan.mname").getAttribute("data-tip")`);
 console.log("   tooltip:", JSON.stringify(tip));
 check(tip.startsWith("url_router: UrlRouter  [struct]\nxo::web::UrlRouter\n") && /UrlRouter\.hpp:\d+/.test(tip) && tip.endsWith("ctrl-click: open source"),
       "name tooltip: short type, metatype, canonical type, source, ctrl-click hint");
@@ -119,7 +119,7 @@ check((await ev(`window.__opened`)).length === 2, "cmd-click too");
 
 // 4. row menu: right-click a row -- not the box's menu
 const menu = async () => ev(`({hidden: document.getElementById("ctxmenu").hidden, head: document.querySelector("#ctxmenu .ctxhead").textContent,
-  items: [...document.querySelectorAll("#ctxmenu button")].map(b => b.textContent + (b.disabled ? " (disabled: " + b.title + ")" : ""))})`);
+  items: [...document.querySelectorAll("#ctxmenu button")].map(b => b.textContent + (b.disabled ? " (disabled: " + b.dataset.tip + ")" : ""))})`);
 await ev(`${ROW("server", "url_router")}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
 let m = await menu();
 console.log("   url_router menu:", JSON.stringify(m));
@@ -161,7 +161,7 @@ await types_menu("Show types");
 r = await rows("server");
 check(r.some(t => t === "listen_port: atomic<int> [atomic]") && r.some(t => t.startsWith("url_router: ") && t.endsWith(" UrlRouter [struct]")),
       "types on: name: Type [metatype], the value dropped (a ref keeps its arrow): " + JSON.stringify(r.slice(0, 3)));
-const value_tip = await ev(`[...${G("server")}.querySelectorAll("text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "listen_port").querySelector("title").textContent`);
+const value_tip = await ev(`[...${G("server")}.querySelectorAll("text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "listen_port").getAttribute("data-tip")`);
 check(/^= \d+\n/.test(value_tip), "the value moves to the name's tooltip: " + JSON.stringify(value_tip.split("\n")[0]));
 const w_types = await width("server");
 check(w_types > w_compact * 1.5, `Webserver box ${Math.round(w_compact)}px compact, ${Math.round(w_types)}px with types`);

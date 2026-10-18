@@ -25,7 +25,7 @@ const focus_in_menu = () => ev(`document.getElementById("ctxmenu").contains(docu
 const away = {x: 1400, y: 950};   // the svg's empty corner, far from the server box
 const b = await center(BTN);
 check(await ev(`!!document.elementFromPoint(${b.x}, ${b.y}).closest("g.node.server > g.mbtn")`), "the button is under the pointer's spot: " + JSON.stringify(b));
-check(!(await ev(`!!document.querySelector("g.node.server > g.mbtn > title")`)), "no \"menu\" tooltip");
+check(!(await ev(`!!document.querySelector("g.node.server > g.mbtn > title") || document.querySelector("g.node.server > g.mbtn").hasAttribute("data-tip")`)), "no \"menu\" tooltip");
 // 1. hover: not at once, then open, without taking focus
 await mouse("mouseMoved", away); await sleep(100);
 await mouse("mouseMoved", b); await sleep(80);

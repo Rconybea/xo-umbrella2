@@ -19,8 +19,8 @@ const G = (id) => `[...document.querySelectorAll("g.node")].find(g => g.__data__
 // the glyph after a row's "name: ": its text, classes, tooltip, colour
 const glyph = (box, name) => ev(`(() => { const t = [...${G(box)}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === ${JSON.stringify(name)});
   if (!t) return null; const g = t.querySelectorAll(":scope > tspan")[2];
-  return {text: g.textContent.replace(g.querySelector("title")?.textContent || "", ""), cls: g.getAttribute("class"),
-          tip: g.querySelector("title")?.textContent || "", fill: getComputedStyle(g).fill,
+  return {text: g.textContent, cls: g.getAttribute("class"),
+          tip: g.getAttribute("data-tip") || "", fill: getComputedStyle(g).fill,
           row: [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join("")}; })()`);
 // 1. a box that can be shown, not drawn: →, a toggle
 await ev(`expanded.add("server"); redraw(); 1`); await ev(`settled()`);

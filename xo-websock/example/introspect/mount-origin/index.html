@@ -105,6 +105,12 @@
                       padding: 5px 12px; font: inherit; cursor: pointer; }
     #ctxmenu button:hover:enabled, #ctxmenu button:focus { background: #e8f0fe; outline: none; }
     #ctxmenu button:disabled { color: #aaa; cursor: default; }
+    /* tooltips: the page's own, coloured like the menu above (the
+       browser's own cannot be styled) */
+    #tip { position: absolute; z-index: 20; pointer-events: none; max-width: 40em;
+           background: #fff; color: #222; border: 1px solid #bbb; border-radius: 6px;
+           box-shadow: 0 4px 14px rgba(0,0,0,0.18); padding: 4px 8px;
+           font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-line; }
     pre { background: #f4f4f4; padding: 0.8em; max-width: 60em; overflow-x: auto; }
   </style>
 </head>
@@ -112,12 +118,12 @@
   <h1>xo-websock introspect</h1>
   <div>
     <button id="refresh" disabled>Refresh</button>
-    <button id="show-all" title="show every box's children">Show all</button>
-    <button id="hide-all" title="hide every box's children: only the Webserver">Hide all</button>
-    <button id="fit" title="the whole graph in view">Fit</button>
-    <button id="center" title="the graph's centre at the viewport's centre, at the current zoom">Center</button>
-    <span id="zoom-level" title="the graph's magnification: Shift + wheel zooms the graph, Shift + drag its background pans">zoom 100%</span>
-    <label title="draw the legend: box colours and edge kinds"><input type="checkbox" id="show-legend" checked> legend</label>
+    <button id="show-all" data-tip="show every box's children" aria-description="show every box's children">Show all</button>
+    <button id="hide-all" data-tip="hide every box's children: only the Webserver" aria-description="hide every box's children: only the Webserver">Hide all</button>
+    <button id="fit" data-tip="the whole graph in view" aria-description="the whole graph in view">Fit</button>
+    <button id="center" data-tip="the graph's centre at the viewport's centre, at the current zoom" aria-description="the graph's centre at the viewport's centre, at the current zoom">Center</button>
+    <span id="zoom-level" data-tip="the graph's magnification: Shift + wheel zooms the graph, Shift + drag its background pans" aria-description="the graph's magnification: Shift + wheel zooms the graph, Shift + drag its background pans">zoom 100%</span>
+    <label data-tip="draw the legend: box colours and edge kinds" aria-description="draw the legend: box colours and edge kinds"><input type="checkbox" id="show-legend" checked> legend</label>
     <span id="status">connecting...</span>
   </div>
   <div id="srcinfo">source links: (loading)</div>
@@ -125,6 +131,7 @@
   <svg id="graph"></svg>
 
   <div id="ctxmenu" role="menu" hidden></div>
+  <div id="tip" role="tooltip" hidden></div>
 
   <h3 id="detail-h" hidden></h3>
   <pre id="detail" hidden></pre>

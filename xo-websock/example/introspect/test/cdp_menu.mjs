@@ -28,7 +28,7 @@ await ev(`document.getElementById("fit").click()`); await sleep(800);
 const box = async (sel) => ev(`(() => { const r = document.querySelector(${JSON.stringify(sel)} + " > rect").getBoundingClientRect(); return {x: r.left + 20, y: r.top + r.height / 2}; })()`);
 const menu = async () => ev(`({hidden: document.getElementById("ctxmenu").hidden,
     head: document.querySelector("#ctxmenu .ctxhead")?.textContent,
-    items: [...document.querySelectorAll("#ctxmenu button")].map(b => b.textContent + (b.disabled ? " (disabled: " + b.title + ")" : "")),
+    items: [...document.querySelectorAll("#ctxmenu button")].map(b => b.textContent + (b.disabled ? " (disabled: " + b.dataset.tip + ")" : "")),
     focus: document.activeElement?.textContent})`);
 
 // 1. right-click the server box

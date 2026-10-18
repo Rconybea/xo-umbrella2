@@ -69,7 +69,7 @@ check(await ev(`document.querySelector("g.edges").lastElementChild === window.__
 await ev(`highlight_ref(window.__p.__data__.row_keys, false)`);
 check(JSON.stringify(await order()) === JSON.stringify(o), "left: back in rank order");
 // tooltip names the kind
-check(await ev(`document.querySelector("path.edge.member.from-owns > title").textContent.endsWith("(owns)")`), "tooltip ends with the kind");
+check(await ev(`document.querySelector("path.edge.member.from-owns").getAttribute("data-tip").endsWith("(owns)")`), "tooltip ends with the kind");
 await ev(`d3.select("#graph").call(zoom.transform, d3.zoomIdentity.translate(-500, -450).scale(1.6)); 1`); await sleep(300);
 fs.writeFileSync(out, Buffer.from((await call("Page.captureScreenshot", {format: "png"})).result.data, "base64"));
 console.log(ok ? "ALL OK" : "SOME FAILED");

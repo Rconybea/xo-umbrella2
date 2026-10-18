@@ -56,7 +56,7 @@ console.log("   legend:", JSON.stringify(leg.map(x => x[0])));
 check(leg.some(([t, f]) => t === "IntrospectReceiver" && f === fill) && fill === "rgb(226, 244, 243)", "pale teal, and in the legend: " + fill);
 // its source: the menu's Open source has a link
 await ev(`${G(R)}.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true, clientX: 300, clientY: 300}))`); await sleep(200);
-const items = await ev(`[...document.querySelectorAll("#ctxmenu button")].map(b => b.textContent + (b.disabled ? " (disabled: " + b.title + ")" : ""))`);
+const items = await ev(`[...document.querySelectorAll("#ctxmenu button")].map(b => b.textContent + (b.disabled ? " (disabled: " + b.dataset.tip + ")" : ""))`);
 console.log("   menu:", JSON.stringify(items));
 check(items.includes("Open source"), "Open source enabled: its exact type is in the source map");
 fs.writeFileSync(out, Buffer.from((await call("Page.captureScreenshot", {format: "png"})).result.data, "base64"));

@@ -978,12 +978,12 @@ function append_ref_glyph(t, r) {
                 ev.stopPropagation();
                 toggle_ref(r);
             })
-            .append("title").text(`${on ? "Hide" : "Show"} target ${r.m._name_} :: ${type}\n${r.ref_tip}`);
+            .call(set_tip, `${on ? "Hide" : "Show"} target ${r.m._name_} :: ${type}\n${r.ref_tip}`);
     } else {
         const drawn = box_of_id.has(r.ref);
 
         t.append("tspan").attr("class", "rarrow" + (drawn ? "" : " dim")).text(drawn ? "↴" : "→")
-            .append("title").text(r.ref_tip);
+            .call(set_tip, r.ref_tip);
     }
 }
 
@@ -1237,13 +1237,12 @@ function draw_legend(all) {
           .data(entries, x => x.key)
           .join(enter => {
               const g = enter.append("g").attr("class", "entry");
-              g.append("title");
               g.append("g").append("rect").attr("width", swatch_w).attr("height", swatch_h);
               g.append("text").attr("x", swatch_w + swatch_gap).attr("y", swatch_h - 2);
               return g;
           });
     e.attr("transform", (x, i) => `translate(${legend_pad},${legend_pad + i * legend_row})`);
-    e.select(":scope > title").text(x => x.canonical);
+    e.each(function (x) { set_tip(d3.select(this), x.canonical); });
     e.select(":scope > g").attr("class", x => `swatch ${x.cls}`);
     e.select(":scope > g > rect")
         .style("fill", x => x.colour ? x.colour.fill : null)
@@ -1516,7 +1515,6 @@ async function draw_aux(event) {
             // invisible until placed, then faded in (see 3.).  Marked by a
             // property, not a class: the class attribute is rewritten below
             const g = enter.append("g").property("__arriving", true).style("opacity", 0);
-            g.append("title");   // the type and its source; see below
             g.append("rect");
             g.append("text").attr("class", "label").attr("x", 12).attr("y", 25);
             g.append("text").attr("class", "sub").attr("x", 12);   // its title, below the type
@@ -1592,9 +1590,10 @@ async function draw_aux(event) {
             ev.stopPropagation();
             toggle_children(d.id);
         })
-        .selectAll("title").data(d => [d]).join("title")
-        .text(d => d.kids_open ? "hide its children"
-              : `show its children (${d.n_hidden} of ${d.n_children} hidden)`);
+        .each(function (d) {
+            set_tip(d3.select(this), d.kids_open ? "hide its children"
+                    : `show its children (${d.n_hidden} of ${d.n_children} hidden)`);
+        });
 
     // the member rows: name = value; with types shown, name: Type [metatype] = value
     node.select(":scope > g.rows").each(function (d) {
@@ -1642,7 +1641,7 @@ async function draw_aux(event) {
                         window.open(s.href, "_blank");
                     }
                 })
-                .append("title").text(tip);
+                .call(set_tip, tip);
 
             // the separator before the value (or type), its x the row's
             // alignment column
@@ -1660,14 +1659,14 @@ async function draw_aux(event) {
                         if (s && s.href)
                             window.open(s.href, "_blank");
                     })
-                    .append("title").text(tip);
+                    .call(set_tip, tip);
                 t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             }
             const val = as_type ? "" : r.val;
             if (val !== "") {   // a struct that opens: its triangle is all
                 const mv = t.append("tspan").attr("class", "mval").text(val);
                 if (r.ref_tip)
-                    mv.append("title").text(r.ref_tip);
+                    set_tip(mv, r.ref_tip);
             }
         });
 
@@ -1690,10 +1689,9 @@ async function draw_aux(event) {
         const s = source_of(d.type);
         const g = d3.select(this);
 
-        g.select(":scope > title").text(
-            !d.type ? "(no _canonical_type_ reported)"
-            : !s ? `${d.type}\n(no source location)`
-            : `${d.type}\n${s.file}:${s.line}` + (s.href ? "" : "\n(no link provider)"));
+        set_tip(g, !d.type ? "(no _canonical_type_ reported)"
+                : !s ? `${d.type}\n(no source location)`
+                : `${d.type}\n${s.file}:${s.line}` + (s.href ? "" : "\n(no link provider)"));
         // left-click / Enter: open or close its members.  Its source is in
         // the context menu
         g.on("click", d.expandable ? () => toggle(d.id) : null)
@@ -1922,9 +1920,8 @@ async function draw_aux(event) {
         .on("mouseleave", (ev, d) => d.kind === "member" && highlight_ref(d.row_keys, false))
         // a member edge says which members it stands for: their rows may not be open
         .each(function (d) {
-            d3.select(this).selectAll("title").data(d.kind === "member" ? [d] : [])
-                .join("title").text(e => `${box_label.get(e.from) || e.from} · ${e.labels.join(", ")}`
-                                    + ` (${e.ref_kind})`);
+            set_tip(d3.select(this), d.kind !== "member" ? null
+                    : `${box_label.get(d.from) || d.from} · ${d.labels.join(", ")} (${d.ref_kind})`);
         });
     order_edges(edge_gs);
 }
@@ -2301,6 +2298,7 @@ function row_menu_items(r) {
  **/
 function show_menu(x, y, head_text, items, owner, focus = true) {
     menu_hover_clear();
+    hide_tip();
     menu_owner = owner;
     menu_pinned = focus;
     menu_el.replaceChildren();
@@ -2314,8 +2312,10 @@ function show_menu(x, y, head_text, items, owner, focus = true) {
         const b = document.createElement("button");
         b.textContent = label;
         b.disabled = !!disabled;
-        if (disabled)
-            b.title = disabled;
+        if (disabled) {
+            b.dataset.tip = disabled;
+            b.setAttribute("aria-description", disabled);
+        }
         b.onclick = () => {
             // a box's menu item: that box is the redraw's anchor
             const g = menu_owner && menu_owner.closest && menu_owner.closest("g.node");
@@ -2394,6 +2394,76 @@ function menu_hover_leave() {
 
 menu_el.addEventListener("mouseenter", menu_hover_clear);
 menu_el.addEventListener("mouseleave", menu_hover_leave);
+
+// ----- tooltips: the page's own --------------------------------------------
+//
+// The browser's tooltips (<title>, title=) take no stylesheet; ours are
+// coloured like the context menu.  An element's text is its data-tip, read
+// when it shows; the nearest such element under the pointer is the one
+
+const tip_el = document.getElementById("tip");
+const tip_delay_ms = 400;   // the pointer rests this long: the tooltip shows
+
+let tip_timer = null;
+let tip_target = null;      // the element whose tooltip is pending or shown
+
+/** tooltip @p text on d3 selection @p sel (none if empty): what its
+ *  <title> was, accessible name included **/
+function set_tip(sel, text) {
+    sel.attr("data-tip", text || null).attr("aria-label", text || null);
+}
+
+function hide_tip() {
+    clearTimeout(tip_timer);
+    tip_timer = null;
+    tip_target = null;
+    tip_el.hidden = true;
+}
+
+/** show @p el's tooltip just below and right of page point @p x, @p y, kept
+ *  inside the window **/
+function show_tip(el, x, y) {
+    const text = el.getAttribute("data-tip");
+    if (!text || !el.isConnected)
+        return;   // gone meanwhile: a redraw replaced it
+
+    tip_el.textContent = text;
+    tip_el.hidden = false;
+
+    const w = tip_el.offsetWidth;
+    const h = tip_el.offsetHeight;
+    const right = window.scrollX + document.documentElement.clientWidth - 4;
+    const bottom = window.scrollY + document.documentElement.clientHeight - 4;
+    let left = x + 12;
+    let top = y + 18;
+    if (left + w > right)
+        left = Math.max(window.scrollX + 4, right - w);
+    if (top + h > bottom)
+        top = Math.max(window.scrollY + 4, y - h - 8);   // above the pointer
+    tip_el.style.left = `${left}px`;
+    tip_el.style.top = `${top}px`;
+}
+
+// by the point, not the event's target: a disabled button (a menu item's
+// reason) takes no mouse events of its own
+document.addEventListener("pointermove", (ev) => {
+    const at = document.elementFromPoint(ev.clientX, ev.clientY);
+    const el = at && at.closest ? at.closest("[data-tip]") : null;
+    if (el === tip_target)
+        return;   // still on it: shown, or about to be
+
+    hide_tip();
+    if (el) {
+        tip_target = el;
+        const x = ev.pageX, y = ev.pageY;
+        tip_timer = setTimeout(() => show_tip(el, x, y), tip_delay_ms);
+    }
+}, true);
+document.addEventListener("pointerdown", hide_tip, true);
+document.addEventListener("keydown", hide_tip, true);
+document.addEventListener("mouseleave", hide_tip);
+window.addEventListener("scroll", hide_tip, true);
+window.addEventListener("blur", hide_tip);
 
 // arrows move between items; Escape closes
 menu_el.addEventListener("keydown", (ev) => {
