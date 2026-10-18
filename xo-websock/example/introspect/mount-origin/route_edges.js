@@ -106,8 +106,14 @@ function route_edges(avoid, boxes, edges, in_x) {
         }
         return routes;
     } finally {
-        avoid.destroy(router);
-        for (const obj of temps)
-            avoid.destroy(obj);
+        // after a wasm abort, destroy() throws too: that must not replace
+        // the error that brought us here.  Nothing is left to free then
+        try {
+            avoid.destroy(router);
+            for (const obj of temps)
+                avoid.destroy(obj);
+        } catch (e) {
+            console.error("route_edges: freeing the router failed:", e);
+        }
     }
 }

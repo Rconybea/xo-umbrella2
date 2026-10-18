@@ -1839,12 +1839,20 @@ async function draw_aux(event) {
     for (const d of nodes)
         for (const p of out_ports(d, drawn_members.filter(e => e.source === d.id)))
             out_x.set(p.id, p.x);
-    const member_routes = route_edges(
-        avoid,
-        new Map(nodes.map(d => [d.id, {x: d.x - pad, y: d.y - pad, w: d.w, h: d.h}])),
-        edges.filter(e => e.kind === "member")
-             .map(e => ({key: e.source, from: e.from, out_x: out_x.get(e.source), to: e.target})),
-        in_port_x);
+    // a failure here (a bug, a wasm abort) shows, as a failed load does:
+    // otherwise the boxes would sit there without their edges, unexplained
+    let member_routes;
+    try {
+        member_routes = route_edges(
+            avoid,
+            new Map(nodes.map(d => [d.id, {x: d.x - pad, y: d.y - pad, w: d.w, h: d.h}])),
+            edges.filter(e => e.kind === "member")
+                 .map(e => ({key: e.source, from: e.from, out_x: out_x.get(e.source), to: e.target})),
+            in_port_x);
+    } catch (e) {
+        status_el.textContent = `error: edge routing failed: ${e.message}`;
+        return;
+    }
     const routed = edges.map(e => {
         const key = `${e.kind}:${e.source}>${e.target}`;
         const pts = e.kind === "member" ? member_routes.get(e.source)
