@@ -37,7 +37,7 @@ check(r.some(t => t.trimStart().startsWith("http_map:") && t.endsWith("▸ {2}")
 await click_row(U, "stream_map:"); await sleep(700);
 r = await rows_of(U);
 console.log(" =  url router rows:", JSON.stringify(r));
-check(r.some(t => t.trim() === '["/demo/"]: ▾ (→)') && r.some(t => t.trim() === '["/introspect"]: ▾ (→)'), "a row per stem, each a drawn ref");
+check(r.some(t => t.trim() === '["/demo/"]: ↴') && r.some(t => t.trim() === '["/introspect"]: ↴'), "a row per stem, each a drawn ref");
 let ends = await ends_from(U);
 check(JSON.stringify(ends) === JSON.stringify(["stream:/demo/", "stream:/introspect"]), "map edges end at the stream endpoint boxes: " + JSON.stringify(ends));
 
@@ -46,7 +46,7 @@ check(JSON.stringify(ends) === JSON.stringify(["stream:/demo/", "stream:/introsp
 // not on the whole Webserver
 await ev(`${box(R)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 r = await rows_of(R);
-check(r.some(t => t.trimStart().startsWith("url_router:") && t.endsWith("▾ (→)")), "the router's url_router: a drawn ref, ▾ (→)");
+check(r.some(t => t.trimStart().startsWith("url_router:") && t.endsWith("↴")), "the router's url_router: a drawn ref, ↴");
 ends = await ends_from(R);
 // the router's one edge into the server is pjson -- the server's PrintJson,
 // shared (printed in full in the server, a ref elsewhere: xo-printjson#02)

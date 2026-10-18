@@ -29,8 +29,8 @@ console.log(" =  rows:", JSON.stringify(r));
 check(r.length === 5 && r[0] === "sub_id: 0" && r[1] === 'stream_name: "/demo/1"', "sub_id, stream_name");
 // from reflection (generic printer, xo-websock#16); callback_id a transparent wrapper -- its number (xo-reflect#04)
 check(/^callback_id: [0-9]+$/.test(r[2]), "callback_id its number: " + r[2]);
-check(r[3] === "endpoint: ▾ (→)", "endpoint a drawn ref");
-check(r[4] === "sink: ▾ (→)", "sink: a drawn ref -- the sink has its own box");
+check(r[3] === "endpoint: ↴", "endpoint a drawn ref");
+check(r[4] === "sink: ↴", "sink: a drawn ref -- the sink has its own box");
 const ends = await ev(`(() => { const boxes = [...document.querySelectorAll("g.node")].map(g => { const t = g.transform.baseVal[0].matrix, x = g.querySelector("rect"); return {id: g.__data__.id, x: t.e, y: t.f, w: +x.getAttribute("width"), h: +x.getAttribute("height")}; });
   return ${VIS}.map(p => { const n = p.getAttribute("d").match(/-?[0-9.]+/g).map(Number); const ex = n[n.length-2], ey = n[n.length-1];
     const b = boxes.find(b => ex >= b.x - 2 && ex <= b.x + b.w + 2 && ey >= b.y - 2 && ey <= b.y + b.h + 2); return b ? b.id : null; }); })()`);

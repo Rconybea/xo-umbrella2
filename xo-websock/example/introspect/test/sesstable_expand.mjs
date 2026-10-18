@@ -32,7 +32,7 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
 const T = "server/session_table";
 await ev(`${box("server")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 let r = await rows_of("server");
-check(r.some(t => t.trimStart().startsWith("session_table:") && t.endsWith("▾ (→)")), "server's session_table row: a ref to its own box");
+check(r.some(t => t.trimStart().startsWith("session_table:") && t.endsWith("↴")), "server's session_table row: a ref to its own box");
 check(await ev(`!!${box(T)} && ${box(T)}.parentNode !== null`), "the table's own box is drawn");
 await ev(`${box(T)}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 r = await rows_of(T);
@@ -44,7 +44,7 @@ check(r.some(t => t.trimStart().startsWith("session_map:") && t.endsWith("▸ {2
 await click_row(T, "session_map:"); await sleep(700);
 r = await rows_of(T);
 console.log(" =  table rows:", JSON.stringify(r));
-check(r.some(t => t.trim() === '["1"]: ▾ (→)') && r.some(t => t.trim() === '["2"]: ▾ (→)'), "a row per session id");
+check(r.some(t => t.trim() === '["1"]: ↴') && r.some(t => t.trim() === '["2"]: ↴'), "a row per session id");
 const ends = await ends_from(T);
 check(JSON.stringify(ends) === JSON.stringify(["session:1", "session:2"]), "edges from the table's box to the session boxes: " + JSON.stringify(ends));
 // ownership still decides the layering: the server above its sessions

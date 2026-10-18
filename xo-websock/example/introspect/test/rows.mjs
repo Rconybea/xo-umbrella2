@@ -37,7 +37,7 @@ await ev(`${ROW(U, "stream_map")}.dispatchEvent(new MouseEvent("click", {bubbles
 // 1. compact rows
 let r = await rows("server");
 console.log("   rows:", JSON.stringify(r.slice(0, 6)));
-check(r.includes("listen_port: " + port) && r.some(t => t.trim() === "url_router: ▾ (→)"), "rows read name: value; url_router a ref to its own box");
+check(r.includes("listen_port: " + port) && r.some(t => t.trim() === "url_router: ↴"), "rows read name: value; url_router a ref to its own box");
 check(!r.some(t => t.includes("[atomic]") || t.includes("[struct]") || t.includes("atomic<int>")), "no type or metatype inline");
 check(await ev(`${G("server")}.querySelectorAll("tspan.mtype, tspan.mtag").length`) === 0, "no type tspans");
 
@@ -58,11 +58,11 @@ check(starts.every(s => s.x >= 12 + 14 * s.d - 1), "no name starts left of its d
 check(starts.some(s => Math.abs(s.x - (12 + 14 * s.d)) < 1), "the widest name sits at its indent (x0 the least that fits)");
 await ev(`${ROW(U, "http_map")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
 
-// 1c. a ref row: ▾ (→); what it refers to is the value's tooltip
+// 1c. a ref row: ↴; what it refers to is the arrow's tooltip, after what clicking does
 r = await rows(U);
-check(r.some(t => t.trim() === '["/introspect"]: ▾ (→)'), "ref row reads ▾ (→)");
-const rtip = await ev(`[...${ROW(U, '["/introspect"]')}.querySelectorAll(":scope > tspan.mval")].map(ts => ts.querySelector("title")).filter(x => x).map(x => x.textContent)[0]`);
-check(/^refers to \/introspect\n[0-9]+$/.test(rtip), "its value's tooltip names the target and its id: " + JSON.stringify(rtip));
+check(r.some(t => t.trim() === '["/introspect"]: ↴'), "ref row reads ↴");
+const rtip = await ev(`[...${ROW(U, '["/introspect"]')}.querySelectorAll(":scope > tspan.rtoggle")].map(ts => ts.querySelector("title")).filter(x => x).map(x => x.textContent)[0]`);
+check(/^Hide target \["\/introspect"\] :: DynamicEndpoint\nrefers to \/introspect\n[0-9]+$/.test(rtip), "its arrow's tooltip: Hide target <member> :: <type> (an element row: its target's type), then the target and its id: " + JSON.stringify(rtip));
 
 // 1d. row triangles: 25% larger, each with a square behind -- plain until
 // hovered; clicking the square does what clicking the triangle does
@@ -95,7 +95,7 @@ check(await ev(`getComputedStyle(document.querySelector("g.node.server > g.kbtn 
 check(await ev(`document.querySelectorAll("g.node > rect.tbtn, svg > rect.tbtn").length`) === 0, "... with no square: only triangles inside boxes get one");
 
 // 1e. ws_config: a struct with members -- its own box, the row a ref to it
-check((await rows("server")).some(t => t.trim() === "ws_config: ▾ (→)"), "ws_config row: a ref to its own box");
+check((await rows("server")).some(t => t.trim() === "ws_config: ↴"), "ws_config row: a ref to its own box");
 await ev(`${G("server/ws_config")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
 const cfg_rows = await rows("server/ws_config");
 console.log("   ws_config:", JSON.stringify(cfg_rows));
@@ -159,7 +159,7 @@ const types_menu = async (label) => {
 const w_compact = await width("server");
 await types_menu("Show types");
 r = await rows("server");
-check(r.some(t => t === "listen_port: atomic<int> [atomic]") && r.some(t => t.startsWith("url_router: ") && t.endsWith(" UrlRouter [struct] (→)")),
+check(r.some(t => t === "listen_port: atomic<int> [atomic]") && r.some(t => t.startsWith("url_router: ") && t.endsWith(" UrlRouter [struct]")),
       "types on: name: Type [metatype], the value dropped (a ref keeps its arrow): " + JSON.stringify(r.slice(0, 3)));
 const value_tip = await ev(`[...${G("server")}.querySelectorAll("text.row > tspan.mname")].find(ts => ts.firstChild.nodeValue === "listen_port").querySelector("title").textContent`);
 check(/^= \d+\n/.test(value_tip), "the value moves to the name's tooltip: " + JSON.stringify(value_tip.split("\n")[0]));

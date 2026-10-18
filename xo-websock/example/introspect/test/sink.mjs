@@ -39,13 +39,13 @@ check(await ev(`!!${G(K)}`) && await ev(`${G(K)}.querySelector("text.label").tex
 // the subscription's sink row: no longer "not drawn"
 await ev(`expanded.add(${JSON.stringify(SUB)}); redraw(); 1`); await ev(`settled()`);
 const r = await rowtext(SUB, "sink");
-check(r && r.trim().endsWith("▾ (→)"), "sink row: ▾ (→): " + JSON.stringify(r));
+check(r && r.trim().endsWith("↴"), "sink row: ↴: " + JSON.stringify(r));
 check(await ev(`[...document.querySelectorAll("path.edge.member")].some(p => p.__data__.target === ${JSON.stringify(K)})`), "an edge from the subscription to it");
 // the sink box opens: its members; sender refers to the session's sender
 check(await ev(`${G(K)}.classList.contains("expandable")`), "the sink box opens");
 await ev(`expanded.add(${JSON.stringify(K)}); show_box("session:1:sender"); redraw(); 1`); await ev(`settled()`);
 const s1 = await rowtext(K, "sender"), s2 = await rowtext(K, "stream_name");
-check(s1 && s1.trim().endsWith("▾ (→)") && s2 && s2.includes('"/demo/1"'), "its rows: sender ▾ (→), stream_name /demo/1: " + JSON.stringify([s1, s2]));
+check(s1 && s1.trim().endsWith("↴") && s2 && s2.includes('"/demo/1"'), "its rows: sender ↴, stream_name /demo/1: " + JSON.stringify([s1, s2]));
 check(await ev(`[...document.querySelectorAll("path.edge.member")].some(p => p.__data__.from === ${JSON.stringify(K)} && p.__data__.target === "session:1:sender")`), "an edge from the sink to its session's sender");
 // colour + legend
 const fill = await ev(`getComputedStyle(${G(K)}.querySelector(":scope > rect")).fill`);

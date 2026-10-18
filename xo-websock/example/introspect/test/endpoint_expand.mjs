@@ -30,7 +30,7 @@ const ends_from = async (from) => ev(`(() => { const boxes = [...document.queryS
 for (const [id, expect] of [["stream:/introspect", ['kind: stream', 'uri_pattern: "/introspect"',
                                                      'var_v: []',
                                                      'http_handler: empty',
-                                                     'receiver: ▾ (→)']],
+                                                     'receiver: ↴']],
                             ["http:/hello/", ['var_v: ["name"]', 'http_handler: set',
                                               'receiver: null']]]) {
     check(await ev(`${box(id)}.classList.contains("expandable")`), id + " expandable");

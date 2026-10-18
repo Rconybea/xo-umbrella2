@@ -41,7 +41,7 @@ check(/^last_msg_seq: [0-9]+$/.test(rows[3]), "last_msg_seq a number: " + rows[3
 // (xo-reflect#04) -- none, settled.  sender: shared, placed here; a ref
 // row to its own box
 check(rows[4] === "outbound_q: []", "outbound_q its messages: " + rows[4]);
-check(rows[1] === "sender: ▾ (→)", "sender a ref to its box: " + rows[1]);
+check(rows[1] === "sender: ↴", "sender a ref to its box: " + rows[1]);
 check(await ev(`${VIS}.length`) === 2, "two member edges: sender, and router -- its own (nested) box");
 const geo = await ev(`(() => { const p = ${VIS}.find(p => p.__data__.row_keys.includes("session:1/sender")).getAttribute("d"); const n = p.match(/-?[0-9.]+/g).map(Number);
    const ex = n[n.length-2], ey = n[n.length-1];

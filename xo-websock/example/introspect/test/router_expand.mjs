@@ -29,17 +29,17 @@ const rows_of = async (sel) => ev(`[...${sel}.querySelectorAll("text.row")].map(
 const click_in = async (sel, prefix) => ev(`[...${sel}.querySelectorAll("text.row")].find(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join("").trimStart().startsWith(${JSON.stringify(prefix)})).dispatchEvent(new MouseEvent("click", {bubbles: true}))`);
 await ev(`${S1}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 let r = await rows_of(S1);
-check(r.some(t => t.trimStart().startsWith("router:") && t.endsWith("▾ (→)")), "session's router row: a ref to its own box");
+check(r.some(t => t.trimStart().startsWith("router:") && t.endsWith("↴")), "session's router row: a ref to its own box");
 await ev(`${RB}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
 r = await rows_of(RB);
 console.log(" =  router rows:", JSON.stringify(r));
-check(r.some(t => t.trimStart().startsWith("url_router:") && t.endsWith("▾ (→)")), "url_router_: a drawn ref (to the UrlRouter box)");
+check(r.some(t => t.trimStart().startsWith("url_router:") && t.endsWith("↴")), "url_router_: a drawn ref (to the UrlRouter box)");
 // a unique_ptr to a reflected struct with no members: its name shows presence (xo-reflect#04)
 check(r.some(t => t === "readjson: CharReader"), "readjson presence");
 check(r.some(t => t.startsWith("subscription_v:") && t.endsWith("▸ [1]")), "subscription_v_ closed, 1 slot");
 await click_in(RB, "subscription_v:"); await sleep(700);
 r = await rows_of(RB);
-check(r.some(t => t === "[0]: ▾ (→)"), "slot [0] a ref row");
+check(r.some(t => t === "[0]: ↴"), "slot [0] a ref row");
 // edges from the router's box, by where they end
 const ends = await ev(`(() => { const boxes = [...document.querySelectorAll("g.node")].map(g => { const t = g.transform.baseVal[0].matrix, x = g.querySelector("rect"); return {id: g.__data__.id, x: t.e, y: t.f, w: +x.getAttribute("width"), h: +x.getAttribute("height")}; });
   return ${VIS}.filter(p => p.__data__.from === "session:1/router").map(p => { const n = p.getAttribute("d").match(/-?[0-9.]+/g).map(Number); const ex = n[n.length-2], ey = n[n.length-1];

@@ -358,8 +358,10 @@ const expanded = new Set();
 // its row is open; so is a visible ref row's edge to a box drawn anyway.
 // Ownership edges order the layers, and are otherwise not drawn.
 //
-//   ▸ / ▾ on a ref row    ▾ while its target is drawn: hide the target (as
-//                         menu "Hide ▸"); ▸: want this row's edge
+//   → / ↴ on a ref row    ↴ while its target is drawn: hide the target (as
+//                         menu "Hide ▸"); →: want this row's edge.  The
+//                         Webserver's ↴ and a dimmed → (no box draws the
+//                         target) do nothing
 //   ▸n / ▾ beside a box   want its edges to all its children (n undrawn) /
 //                         hide those children; ArrowRight / ArrowLeft too
 //   menu "Show children (+k)"  want its edges to its k children not drawn
@@ -389,7 +391,7 @@ let tree = {kids: new Map(), parent: new Map()};
 // A declared member whose value is a struct with members of its own -- the
 // Webserver's url_router, session_table, ws_config; a session's router
 // -- is drawn as a box of its own, not opened in place: its row is a ref
-// row (▸ / ▾ (→)) to that box, which is the holder's child (a "nests"
+// row (→ / ↴) to that box, which is the holder's child (a "nests"
 // edge).  The holder and its drawn nested boxes sit inside a group outline
 // (an ELK compound node), so they stay together; an edge from elsewhere to
 // the nested object arrives at its own box.  A nested box's id is the
@@ -782,6 +784,10 @@ let shown_box_ids = new Set();
 /** box id -> its label, every box this draw (for menu entries) **/
 let box_label = new Map();
 
+/** box id -> its object's short type, every box this draw (for a ref
+ *  arrow's tooltip, where its row has no declared type) **/
+let box_type = new Map();
+
 /** a json object that is a ref: exactly {"_ref_": id} **/
 function is_ref(v) {
     return !!v && typeof v === "object" && !Array.isArray(v)
@@ -872,10 +878,10 @@ function member_rows(members, depth, path, out) {
                 // a box it refers to, which can be shown / hidden from here
                 const tb = box_of_id.get(v._ref_);
                 row.ref_box = (tb !== undefined && tb !== "server") ? tb : null;
-                // "(→)" after its ▸ / ▾: this triangle shows another box,
-                // not rows in place.  What it refers to is in the tooltip
-                val = !box_of_id.has(v._ref_) ? "(→ not drawn)"
-                    : row.ref_box ? " (→)" : "(→)";
+                // an arrow, not a triangle: it shows another box, not
+                // rows in place (append_ref_glyph).  What it refers to is
+                // in the arrow's tooltip
+                val = "";
                 row.ref_tip = ref_tooltip(v._ref_);
             } else if (is_ref_map(v)) {
                 // a map to objects printed elsewhere: a row per key
@@ -888,7 +894,7 @@ function member_rows(members, depth, path, out) {
                 row.cls = "ref";
                 row.ref_box = key;
                 row.ref_tip = `its own box, nested: ${short_type_of(v)}`;
-                val = " (→)";
+                val = "";
             } else if (typeof v === "object") {
                 row.expandable = has_members(v);
                 row.open = row.expandable && expanded.has(key);
@@ -950,22 +956,35 @@ function toggle_ref(r) {
     redraw();
 }
 
-/** on a ref row whose target is a box (not the Webserver): a ▸ / ▾ before
- *  the arrow -- ▾ while the target is drawn -- showing / hiding it
+/** on ref row @p r, an arrow saying where its target is: ↴ drawn (the
+ *  edge leaves this box's bottom edge), → not drawn.  On a box that can be
+ *  shown / hidden, a toggle (with a button: see tri_buttons); the
+ *  Webserver's, always drawn, inert; an object no box draws, a dimmed,
+ *  inert →
  **/
-function append_ref_toggle(t, r) {
-    if (!r.ref_box)
+function append_ref_glyph(t, r) {
+    if (r.cls !== "ref")
         return;
 
-    const on = shown_box_ids.has(r.ref_box);
+    if (r.ref_box) {
+        const on = shown_box_ids.has(r.ref_box);
 
-    t.append("tspan").attr("class", "tri rtoggle").text(on ? "▾" : "▸")
-        .on("click", (ev) => {
-            ev.stopPropagation();
-            toggle_ref(r);
-        })
-        .append("title").text(on ? "hide the box it refers to"
-                              : "show the box it refers to");
+        // what clicking does, to which member and type -- an element row has
+        // no declared type: its target's -- then what it refers to
+        const type = r.m._short_type_ || box_type.get(r.ref_box);
+
+        t.append("tspan").attr("class", "tri rtoggle").text(on ? "↴" : "→")
+            .on("click", (ev) => {
+                ev.stopPropagation();
+                toggle_ref(r);
+            })
+            .append("title").text(`${on ? "Hide" : "Show"} target ${r.m._name_} :: ${type}\n${r.ref_tip}`);
+    } else {
+        const drawn = box_of_id.has(r.ref);
+
+        t.append("tspan").attr("class", "rarrow" + (drawn ? "" : " dim")).text(drawn ? "↴" : "→")
+            .append("title").text(r.ref_tip);
+    }
 }
 
 /** the member edges to draw, of drawn boxes @p nodes: each wanted edge
@@ -1469,6 +1488,7 @@ async function draw_aux(event) {
     shown_box_ids = drawn_ids();
 
     box_label = new Map(all.nodes.map(d => [d.id, d.label]));
+    box_type = new Map(all.nodes.map(d => [d.id, d.obj ? short_type_of(d.obj) : d.label]));
     const nodes = all.nodes.filter(d => shown_box_ids.has(d.id));
     const edges = all.edges.filter(e => shown_box_ids.has(e.source) && shown_box_ids.has(e.target));
     for (const d of nodes) {
@@ -1621,11 +1641,11 @@ async function draw_aux(event) {
             // opens in place: its triangle, a button of its own (see tri_buttons)
             if (r.tri)
                 t.append("tspan").attr("class", "tri xtoggle").text(r.tri);
-            append_ref_toggle(t, r);
+            append_ref_glyph(t, r);
             if (as_type) {
                 t.append("tspan")
                     .attr("class", "mtype" + (s && s.href ? " linked" : ""))
-                    .text((r.tri || r.ref_box ? " " : "") + (r.m._short_type_ || r.m._canonical_type_))
+                    .text((r.tri || r.cls === "ref" ? " " : "") + (r.m._short_type_ || r.m._canonical_type_))
                     .on("click", (ev) => {
                         ev.stopPropagation();
                         if (s && s.href)
@@ -1634,8 +1654,7 @@ async function draw_aux(event) {
                     .append("title").text(tip);
                 t.append("tspan").attr("class", "mtag").text(` [${r.m._metatype_ || "?"}]`);
             }
-            const val = !as_type ? r.val
-                  : r.cls === "ref" ? " " + r.val.trimStart() : "";
+            const val = as_type ? "" : r.val;
             if (val !== "") {   // a struct that opens: its triangle is all
                 const mv = t.append("tspan").attr("class", "mval").text(val);
                 if (r.ref_tip)
@@ -2211,7 +2230,7 @@ function camera_target(anchor, at, pad, size) {
 function ref_tooltip(id) {
     const b = box_of_id.get(id);
     if (b === undefined)
-        return `refers to ${id}: no box draws it`;
+        return `refers to ${id}: not drawn -- no box draws it`;
 
     const where = own_box_ids.has(id) ? `refers to ${box_label.get(b) || b}`
           : `refers to an object printed inside ${box_label.get(b) || b}`;

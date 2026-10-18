@@ -33,7 +33,7 @@ const r = await rows_of("session:1:sender");
 console.log(" =  rows:", JSON.stringify(r));
 // from reflection (xo-websock#16): session_id, open (a std::atomic,
 // xo-reflect#04), target (a raw pointer: borrowed, a ref)
-check(JSON.stringify(r) === JSON.stringify(["session_id: 1", "open: true", "target: (→)"]), "three rows");
+check(JSON.stringify(r) === JSON.stringify(["session_id: 1", "open: true", "target: ↴"]), "three rows");
 const ends = await ends_from("session:1:sender");
 check(JSON.stringify(ends) === JSON.stringify(["server"]), "target -> the server box: " + JSON.stringify(ends));
 // ownership still decides the layering: the server above its sessions

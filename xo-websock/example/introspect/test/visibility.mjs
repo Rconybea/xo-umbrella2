@@ -44,9 +44,9 @@ check(sm.some(t => /^Hide Webserver :\d+ \(running\)$/.test(t)), "Hide <its labe
 check(await ev(`[...document.querySelectorAll("#ctxmenu button")].find(b => b.textContent.startsWith("Hide Webserver")).disabled`) === true, "... disabled on the Webserver");
 await esc();
 
-// the server's url_router row: ▸ (→); its ▸ draws the UrlRouter box
+// the server's url_router row: →; its ▸ draws the UrlRouter box
 await ev(`${G("server")}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(700);
-check((await rows("server")).some(t => t.startsWith("url_router:") && t.endsWith(": ▸ (→)")), "url_router row: ▸ (→), its box hidden");
+check((await rows("server")).some(t => t.startsWith("url_router:") && t.endsWith(": →")), "url_router row: →, its box hidden");
 await click_at(await center(`${row_sel("server", "url_router:")}.querySelector("tspan.rtoggle")`)); await sleep(900);
 check(JSON.stringify(await ids()) === JSON.stringify(["server", U]), "its ▸ draws the UrlRouter box: " + JSON.stringify(await ids()));
 check(await kids_text(U) === "▸4", "UrlRouter's toggle: its 4 endpoints hidden: " + await kids_text(U));
@@ -56,7 +56,7 @@ await click_row(U, "stream_map:"); await sleep(700);
 let r = await rows(U);
 console.log(" =  rows:", JSON.stringify(r.filter(t => t.includes("→"))));
 const intro = r.find(t => t.includes('"/introspect"'));
-check(intro && intro.trim().endsWith(": ▸ (→)"), "stream_map /introspect: ▸ (→), its box hidden: " + intro);
+check(intro && intro.trim().endsWith(": →"), "stream_map /introspect: →, its box hidden: " + intro);
 
 // a real click on that ▸: shows that endpoint alone, edge drawn
 const pre = intro.trim().slice(0, 8);
@@ -64,7 +64,7 @@ await click_at(await center(`${row_sel(U, pre)}.querySelector("tspan.rtoggle")`)
 let v = await ids();
 check(v.length === 3 && v.some(x => x.startsWith("stream:/introspect")), "▸ shows just that endpoint: " + JSON.stringify(v));
 const intro2 = (await rows(U)).find(t => t.trim().startsWith(pre));
-check(intro2 && intro2.trim().endsWith(": ▾ (→)"), "now ▾ (→): " + intro2);
+check(intro2 && intro2.trim().endsWith(": ↴"), "now ↴: " + intro2);
 check(await ev(`document.querySelectorAll("path.edge.member").length`) === 2, "two member edges: server -> UrlRouter -> /introspect");
 check(await kids_text(U) === "▸3", "UrlRouter toggle: 3 still hidden: " + await kids_text(U));
 // ▾ hides it again
@@ -195,12 +195,12 @@ check(overl === 0, "no overlaps");
 // 1's sender, its router's sender and its sink's sender (all wanted)
 await set_open("session:1", true);
 const sender_row = async () => ev(`[...${G("session:1")}.querySelectorAll("text.row")].filter(t => t.__data__.m._name_ === "sender").map(${rowtext})[0]`);
-check((await sender_row()).endsWith(": ▾ (→)"), "sender reads ▾: its target drawn");
+check((await sender_row()).endsWith(": ↴"), "sender reads ▾: its target drawn");
 await ev(`[...${G("session:1")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "sender").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(900);
-check(!(await ids()).includes("session:1:sender") && (await sender_row()).endsWith(": ▸ (→)"),
+check(!(await ids()).includes("session:1:sender") && (await sender_row()).endsWith(": →"),
       "clicking it hides the sender despite the router's and sink's edges, and it reads ▸: " + await sender_row());
 await ev(`[...${G("session:1")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "sender").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(900);
-check((await ids()).includes("session:1:sender") && (await sender_row()).endsWith(": ▾ (→)"), "clicking ▸ shows it again, ▾");
+check((await ids()).includes("session:1:sender") && (await sender_row()).endsWith(": ↴"), "clicking ▸ shows it again, ▾");
 await set_open("session:1", false);
 fs.writeFileSync(out, Buffer.from((await call("Page.captureScreenshot", {format: "png", captureBeyondViewport: true, clip: {x: 0, y: 0, width: 1800, height: 1100, scale: 1}})).result.data, "base64"));
 await ev(`document.getElementById("hide-all").click()`); await sleep(800);

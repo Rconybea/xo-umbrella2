@@ -41,13 +41,13 @@ check(await ev(`${G(R)}.querySelector("text.label").textContent`) === "Introspec
 // expanded: its websrv row, a ref into the server box
 await ev(`expanded.add(${JSON.stringify(R)}); redraw(); 1`); await ev(`settled()`);
 const rrows = await ev(`[...${G(R)}.querySelectorAll("text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join(""))`);
-check(rrows.length === 1 && rrows[0].startsWith("websrv:") && rrows[0].endsWith("(→)"), "receiver row: websrv (→): " + JSON.stringify(rrows));
+check(rrows.length === 1 && rrows[0].startsWith("websrv:") && rrows[0].endsWith("↴"), "receiver row: websrv ↴ (the server: always drawn): " + JSON.stringify(rrows));
 await ev(`expanded.delete(${JSON.stringify(R)}); redraw(); 1`); await ev(`settled()`);
-// the endpoint's receiver row: a ▾ (→) and the edge
+// the endpoint's receiver row: a ↴ and the edge
 await ev(`expanded.add("stream:/introspect"); redraw(); 1`); await ev(`settled()`);
 const row = await ev(`(() => { const t = [...${G("stream:/introspect")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "receiver");
   return [...t.querySelectorAll(":scope > tspan")].map(x => x.firstChild ? x.firstChild.nodeValue : "").join(""); })()`);
-check(row.trim().endsWith("▾ (→)"), "receiver row: ▾ (→): " + JSON.stringify(row));
+check(row.trim().endsWith("↴"), "receiver row: ↴: " + JSON.stringify(row));
 check(await ev(`[...document.querySelectorAll("path.edge.member")].some(p => p.__data__.target === ${JSON.stringify(R)})`), "an edge from the endpoint to it");
 // colour + legend
 const fill = await ev(`getComputedStyle(${G(R)}.querySelector(":scope > rect")).fill`);

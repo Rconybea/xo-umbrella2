@@ -45,7 +45,7 @@ check(await ev(`document.querySelectorAll("path.edge.link, path.edge.owns, path.
 // the holder's row is a ref row; its ▾ hides the nested box
 await ev(`expanded.add("server"); redraw(); 1`); await ev(`settled()`);
 const r = await rowtext("server", "url_router");
-check(r && r.trim().endsWith("▾ (→)"), "server's url_router row: ▾ (→): " + JSON.stringify(r));
+check(r && r.trim().endsWith("↴"), "server's url_router row: ↴: " + JSON.stringify(r));
 await ev(`${G("server")}.querySelector("text.row:nth-of-type(1)") && 1`);
 await ev(`[...${G("server")}.querySelectorAll("text.row")].find(t => t.__data__.m._name_ === "url_router").querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await ev(`settled()`);
 check(!(await ids()).includes("server/url_router"), "its ▾ hides the UrlRouter box");

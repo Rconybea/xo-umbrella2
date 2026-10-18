@@ -153,7 +153,7 @@ const after_kids = (items) => items[items.findLastIndex(t => / children/.test(t)
 check(after_kids(m.items) === "Show types", "expanded: Show types enabled, just under the children items: " + JSON.stringify(m.items.slice(0, 4)));
 await choose("Show types");
 rr = await srv_rows();
-check(rr.includes("listen_port: atomic<int> [atomic]") && rr.includes("ws_config: ▾ WebserverConfig [struct] (→)"), "Show types: name: Type [metatype], a ref keeping its arrow: " + JSON.stringify(rr.slice(0, 2)));
+check(rr.includes("listen_port: atomic<int> [atomic]") && rr.includes("ws_config: ↴ WebserverConfig [struct]"), "Show types: name: Type [metatype], a ref keeping its arrow before its type: " + JSON.stringify(rr.slice(0, 2)));
 const others = await ev(`[...document.querySelectorAll("g.node:not(.server) text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 check(others.every(t => !/ \[[a-z]+\]/.test(t)), `only the server shows types (${others.length} rows elsewhere)`);
 m = await srv_menu();

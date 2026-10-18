@@ -47,7 +47,7 @@ await click(b.x, b.y);
 await sleep(800);
 const rows = await ev(`[...document.querySelectorAll("g.node.server text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`);
 console.log(" =  rows:", JSON.stringify(rows));
-check(rows.length === 6 && rows[0] === "ws_config: ▾ (→)", "left-click opens: 6 member rows");
+check(rows.length === 6 && rows[0] === "ws_config: ↴", "left-click opens: 6 member rows");
 // by name: member order follows reflection (xo-printjson#06, xo-reflect#06)
 check(rows.includes(`listen_port: ${port}`), "scalar row: " + JSON.stringify(rows));
 check(rows.includes("state: running"), "an enum row, by name: " + JSON.stringify(rows));
@@ -101,11 +101,11 @@ check(await ev(`document.querySelectorAll("path.edge.link, path.edge.owns").leng
 // nested_ (a struct with members) gets its own box; its row a ref to it
 const srv_rows = `[...document.querySelectorAll("g.node.server text.row")].map(t => [...t.querySelectorAll(":scope > tspan")].map(ts => ts.firstChild.nodeValue).join(""))`;
 let r2 = await ev(srv_rows);
-check(r2.some(t => t.startsWith("nested_: ▸ (→)")) && !r2.some(t => t.includes("inner_")), "nested member: a ref row, its box not drawn yet: " + r2.find(t => t.startsWith("nested_")));
+check(r2.some(t => t.startsWith("nested_: →")) && !r2.some(t => t.includes("inner_")), "nested member: a ref row, its box not drawn yet: " + r2.find(t => t.startsWith("nested_")));
 await ev(`[...document.querySelectorAll("g.node.server text.row")].find(t => t.querySelector("tspan").firstChild.nodeValue.startsWith("nested_")).querySelector("tspan.rtoggle").dispatchEvent(new MouseEvent("click", {bubbles: true}))`);
 await sleep(800);
 r2 = await ev(srv_rows);
-check(r2.some(t => t.startsWith("nested_: ▾ (→)")) && !r2.some(t => t.includes("inner_")), "its ▸ draws its box; nothing opens in place");
+check(r2.some(t => t.startsWith("nested_: ↴")) && !r2.some(t => t.includes("inner_")), "its ▸ draws its box; nothing opens in place");
 const NB = `[...document.querySelectorAll("g.node")].find(g => g.__data__.id === "server/nested_")`;
 check(await ev(`!!${NB} && ${NB}.classList.contains("nested") && ${NB}.__data__.group === "server"`), "box server/nested_: kind nested, grouped with the server");
 await ev(`${NB}.dispatchEvent(new MouseEvent("click", {bubbles: true}))`); await sleep(800);
