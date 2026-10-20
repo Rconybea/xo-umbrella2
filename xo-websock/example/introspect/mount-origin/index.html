@@ -105,6 +105,10 @@
                       padding: 5px 12px; font: inherit; cursor: pointer; }
     #ctxmenu button:hover:enabled, #ctxmenu button:focus { background: #e8f0fe; outline: none; }
     #ctxmenu button:disabled { color: #aaa; cursor: default; }
+    /* 🔒 beside Fit / Center: faint while off, highlighted while on */
+    button.lock { margin-left: 1px; padding: 1px 3px; }
+    button.lock[aria-pressed="false"] { opacity: 0.45; }
+    button.lock[aria-pressed="true"] { background: #e8f0fe; border-color: #7a9cc6; }
     /* tooltips: the page's own, coloured like the menu above (the
        browser's own cannot be styled) */
     #tip { position: absolute; z-index: 20; pointer-events: none; max-width: 40em;
@@ -120,8 +124,8 @@
     <button id="refresh" disabled>Refresh</button>
     <button id="show-all" data-tip="show every box's children" aria-description="show every box's children">Show all</button>
     <button id="hide-all" data-tip="hide every box's children: only the Webserver" aria-description="hide every box's children: only the Webserver">Hide all</button>
-    <button id="fit" data-tip="the whole graph in view" aria-description="the whole graph in view">Fit</button>
-    <button id="center" data-tip="the graph's centre at the viewport's centre, at the current zoom" aria-description="the graph's centre at the viewport's centre, at the current zoom">Center</button>
+    <button id="fit" data-tip="the whole graph in view" aria-description="the whole graph in view">Fit</button><button id="fit-lock" class="lock" aria-pressed="false" data-tip="lock Fit: every redraw ends as Fit would; a pan or zoom releases it" aria-description="lock Fit: every redraw ends as Fit would; a pan or zoom releases it">🔒</button>
+    <button id="center" data-tip="the graph's centre at the viewport's centre, at the current zoom" aria-description="the graph's centre at the viewport's centre, at the current zoom">Center</button><button id="center-lock" class="lock" aria-pressed="false" data-tip="lock Center: every redraw ends as Center would; a pan or zoom releases it" aria-description="lock Center: every redraw ends as Center would; a pan or zoom releases it">🔒</button>
     <span id="zoom-level" data-tip="the graph's magnification: Shift + wheel zooms the graph, Shift + drag its background pans" aria-description="the graph's magnification: Shift + wheel zooms the graph, Shift + drag its background pans">zoom 100%</span>
     <label data-tip="draw the legend: box colours and edge kinds" aria-description="draw the legend: box colours and edge kinds"><input type="checkbox" id="show-legend" checked> legend</label>
     <span id="status">connecting...</span>

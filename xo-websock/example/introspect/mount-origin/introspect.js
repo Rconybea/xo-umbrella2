@@ -1080,6 +1080,10 @@ const zoom = d3.zoom()
       // deltaX, not deltaY -- take whichever moved
       .wheelDelta((ev) => -(ev.deltaY || ev.deltaX) * (ev.deltaMode === 1 ? 0.05 : ev.deltaMode ? 1 : 0.002))
       .on("zoom", (ev) => {
+          // a gesture (not the page's own camera moves): the camera is the
+          // user's again
+          if (ev.sourceEvent && camera_lock)
+              set_camera_lock(null);
           graph_svg.select(":scope > g.camera").attr("transform", ev.transform);
           show_zoom_level(ev.transform.k);
       });
@@ -1316,11 +1320,16 @@ function centred(size, k) {
     return d3.zoomIdentity.translate(r.width / 2 - k * size.w / 2, r.height / 2 - k * size.h / 2).scale(k);
 }
 
+/** the camera to transform @p t, animated **/
+function move_camera(t) {
+    graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
+        .call(zoom.transform, t);
+}
+
 /** "Center": the drawing centred, at the current zoom **/
 const center_btn = document.getElementById("center");
 if (center_btn) center_btn.onclick = () => {
-    graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
-        .call(zoom.transform, centred(drawing_size, d3.zoomTransform(graph_svg.node()).k));
+    move_camera(centred(drawing_size, d3.zoomTransform(graph_svg.node()).k));
 };
 
 /** the camera for "Fit": drawing @p size as large as fits in the viewport
@@ -1356,9 +1365,44 @@ function fit_camera(size) {
 /** "Fit": the whole drawing as large as fits; see fit_camera() **/
 const fit_btn = document.getElementById("fit");
 if (fit_btn) fit_btn.onclick = () => {
-    graph_svg.transition("move").duration(t_move).ease(d3.easeCubicInOut)
-        .call(zoom.transform, fit_camera(drawing_size));
+    move_camera(fit_camera(drawing_size));
 };
+
+// ----- camera locks: 🔒 beside Fit / Center ---------------------------------
+//
+// While one is on, every redraw ends as pressing its button would -- in
+// place of anchoring and of Show all's reset (camera_target) -- and so does a
+// resize.  Locking one releases the other; a pan or zoom gesture releases it
+
+/** null, "fit" or "center" **/
+let camera_lock = null;
+
+const lock_btns = {fit: document.getElementById("fit-lock"),
+                   center: document.getElementById("center-lock")};
+
+function set_camera_lock(kind) {
+    camera_lock = kind;
+    for (const [k, b] of Object.entries(lock_btns))
+        b.setAttribute("aria-pressed", String(k === kind));
+}
+
+/** where the lock puts the camera, for a drawing of size @p size **/
+function locked_camera(size) {
+    return camera_lock === "fit" ? fit_camera(size)
+        : centred(size, d3.zoomTransform(graph_svg.node()).k);
+}
+
+for (const [kind, b] of Object.entries(lock_btns))
+    b.onclick = () => {
+        set_camera_lock(camera_lock === kind ? null : kind);
+        if (camera_lock)
+            move_camera(locked_camera(drawing_size));
+    };
+
+window.addEventListener("resize", () => {
+    if (camera_lock)
+        move_camera(locked_camera(drawing_size));
+});
 
 for (const type of ["click", "keydown"])   // keydown: Enter / arrows on a focused box
     document.getElementById("graph").addEventListener(type, (ev) => {
@@ -2207,13 +2251,18 @@ function eq_x(text) {
  *  1, at once; after a reset (Show all / Hide all), the same, animated; for
  *  anchor box @p anchor, laid out at
  *  @p at (ELK positions), moved by as much as the box moved, scaled -- so
- *  on screen (k * x + t) the box stays put; else null, the camera stays
+ *  on screen (k * x + t) the box stays put; else null, the camera stays.
+ *  A camera lock (🔒) beats a reset and the anchor: as Fit / Center would
  **/
 function camera_target(anchor, at, pad, size) {
     if (first_draw) {
         first_draw = false;
         camera_reset = false;
         return {t: centred(size, 1), instant: true};
+    }
+    if (camera_lock) {
+        camera_reset = false;
+        return {t: locked_camera(size)};
     }
     if (camera_reset) {
         camera_reset = false;
